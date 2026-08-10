@@ -1,0 +1,119 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-variant-numeric: lining-nums tabular-nums;
+    font-feature-settings: "lnum" 1, "tnum" 1;
+    background-color: #F8F1E4;
+    color: #2B2420;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  h1, h2, h3, .font-brand {
+    font-family: 'Fredoka', 'Plus Jakarta Sans', sans-serif;
+  }
+}
+
+.font-groovy {
+  font-family: 'Boogaloo', cursive, sans-serif;
+}
+
+.font-editorial {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.font-editorial-bold {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-weight: 700;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.font-numbers {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-feature-settings: "lnum" 1, "tnum" 1;
+}
+
+/* Custom Soft Bakery Palette Classes */
+.bg-pastry-hero {
+  background: linear-gradient(135deg, #F5C6CE 0%, #F0D2B8 50%, #F3E3B8 100%);
+}
+
+.bg-pastry-cream {
+  background-color: #F8F1E4;
+}
+
+.bg-pastry-pink {
+  background-color: #F5C6CE;
+}
+
+.bg-pastry-yellow {
+  background-color: #F3E3B8;
+}
+
+.bg-pastry-lavender {
+  background-color: #D8CDEB;
+}
+
+.bg-pastry-sage {
+  background-color: #D6E4CC;
+}
+
+.bg-pastry-chocolate {
+  background-color: #2B2420;
+}
+
+.text-pastry-chocolate {
+  color: #2B2420;
+}
+
+.border-pastry-pink {
+  border-color: #E8A0B0;
+}
+
+/* Groovy Logo Title Effect for Carula Confeitaria */
+.carula-logo-title {
+  font-family: 'Playfair Display', 'Fredoka', sans-serif;
+  letter-spacing: 0.02em;
+  color: #2B2420;
+}
+
+.carula-logo-title-dark {
+  font-family: 'Playfair Display', 'Fredoka', sans-serif;
+  letter-spacing: 0.02em;
+  color: #2B2420;
+}
+
+/* Custom Gradient Headers */
+.bg-carula-gradient {
+  background: linear-gradient(135deg, #F5C6CE 0%, #E8A0B0 100%);
+}
+
+.bg-carula-gradient-coral {
+  background: linear-gradient(135deg, #E8A0B0 0%, #D8CDEB 100%);
+}
+
+/* Safe area insets for iOS devices */
+.pt-safe-header {
+  padding-top: max(3.25rem, calc(0.75rem + env(safe-area-inset-top, 0px)));
+}
+
+.pb-safe {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+}
+
+.bottom-nav-safe {
+  padding-bottom: max(4.5rem, calc(3.5rem + env(safe-area-inset-bottom)));
+}
+
+/* Hide scrollbars for horizontal tab scrolling */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
