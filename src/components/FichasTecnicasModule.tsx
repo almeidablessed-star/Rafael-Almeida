@@ -878,11 +878,11 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 
                       {/* Custos Operacionais */}
                       <div className="bg-[#B8D4E8]/20 border border-[#B8D4E8]/50 rounded-lg p-2.5 flex flex-col min-h-[86px] shadow-xs">
-                        <span className="text-[7px] font-bold uppercase text-[#3A4A5A] h-[14px] leading-[14px]">⚙️ Custos Op.</span>
+                        <span className="text-[7px] font-bold uppercase text-[#3A4A5A] h-[14px] leading-[14px] whitespace-nowrap">⚙️ Custos</span>
                         <strong className="text-[12px] font-black text-[#3A4A5A] flex-1 flex items-center">
                           {formatCurrency((ficha.custoCost || 0) + (ficha.investimentoCost || 0))}
                         </strong>
-                        <span className="text-[7px] text-[#3A4A5A]/70 font-normal h-[14px] leading-[14px]">Overhead</span>
+                        <span className="text-[7px] text-[#3A4A5A]/70 font-normal h-[14px] leading-[14px] whitespace-nowrap">Operacional</span>
                       </div>
 
                       {/* Sugestão de Preço */}
