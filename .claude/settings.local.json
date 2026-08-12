@@ -32,7 +32,8 @@
       "Bash(git commit -m 'Fix: Alinhamento perfeito do ícone e texto Reposição no badge *)",
       "Bash(git commit -m 'Fix: Centralizar badge Reposição no card *)",
       "Bash(git commit -m 'Fix: Download de imagem não funcionava *)",
-      "Bash(git commit -m 'Fix: PDF branco - melhorias na geração de PDF *)"
+      "Bash(git commit -m 'Fix: PDF branco - melhorias na geração de PDF *)",
+      "Bash(git commit -m 'Fix: Download de imagem com melhorias de robustez *)"
     ]
   },
   "hooks": {

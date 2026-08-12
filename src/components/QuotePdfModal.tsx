@@ -196,25 +196,56 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
   // Download card image as PNG using html2canvas
   const handleDownloadImage = async () => {
     const docElem = document.getElementById('quote-pdf-document');
-    if (!docElem) return;
+    if (!docElem) {
+      console.error('Image document element not found');
+      alert('Elemento de documento não encontrado.');
+      return;
+    }
 
     try {
       setIsGeneratingImage(true);
+
+      // Ensure content is visible
+      const originalDisplay = docElem.style.display;
+      docElem.style.display = 'block';
+
       const canvas = await html2canvas(docElem, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
         logging: false,
         backgroundColor: '#FFFDF8',
+        windowHeight: docElem.scrollHeight,
+        windowWidth: docElem.scrollWidth,
+        proxy: undefined,
       });
 
-      const dataUrl = canvas.toDataURL('image/png');
+      // Restore original display
+      docElem.style.display = originalDisplay;
+
+      if (!canvas || canvas.width === 0 || canvas.height === 0) {
+        console.error('Canvas is empty');
+        alert('Não foi possível gerar a imagem. Tente novamente!');
+        return;
+      }
+
+      const dataUrl = canvas.toDataURL('image/png', 0.98);
+      if (!dataUrl || dataUrl.length < 100) {
+        console.error('DataURL is empty or too small');
+        alert('Erro ao converter imagem. Tente novamente!');
+        return;
+      }
+
       const link = document.createElement('a');
       link.download = `Pedido_${(transaction.customerName || 'Cliente').replace(/\s+/g, '_')}_CarulaCake.png`;
       link.href = dataUrl;
       document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+
+      // Usar setTimeout para garantir que o link foi adicionado
+      setTimeout(() => {
+        link.click();
+        setTimeout(() => document.body.removeChild(link), 100);
+      }, 10);
     } catch (err) {
       console.error('Error generating image:', err);
       alert('Não foi possível gerar a imagem automaticamente. Você também pode tirar um print da tela!');
