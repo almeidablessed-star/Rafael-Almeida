@@ -51,7 +51,9 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* CENTERED LOGO */}
           <div className="flex-1 flex justify-center text-center px-1">
-            <CarulaLogo size="md" />
+            <span className="text-2xl sm:text-3xl font-black text-[#3E3430] tracking-tight" style={{ fontFamily: "'Manrope', sans-serif", letterSpacing: '-0.5px' }}>
+              Carula APP
+            </span>
           </div>
 
           {/* ACTION BUTTONS (MOBILE RIGHT & DESKTOP) */}
