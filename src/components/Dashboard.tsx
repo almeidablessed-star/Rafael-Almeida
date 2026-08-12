@@ -136,7 +136,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   ? 'bg-[#C85A54]/30 text-[#C85A54] border border-[#C85A54]'
                   : 'bg-[#3A5A4A]/15 text-[#3A5A4A] border border-[#3A5A4A]/40'
               }`}>
-                <ShoppingBag className="w-3.5 h-3.5" />
+                <ShoppingBag className="w-3.5 h-3.5 shrink-0" />
                 Reposição
               </span>
               {balances.reposicao.isNegative && (
@@ -186,23 +186,23 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </span>
 
             {/* Circular progress indicator (50% filled) */}
-            <div className="mb-3 flex justify-center">
-              <svg width="80" height="80" viewBox="0 0 80 80" className="transform -rotate-90">
-                <circle cx="40" cy="40" r="35" fill="none" stroke="#D4C5E2" strokeWidth="3" />
-                <circle
-                  cx="40"
-                  cy="40"
-                  r="35"
-                  fill="none"
-                  stroke="#5A4B6B"
-                  strokeWidth="3"
-                  strokeDasharray="109.96 219.91"
-                  strokeLinecap="round"
-                />
-                <text x="40" y="45" textAnchor="middle" className="text-xs font-bold fill-[#5A4B6B]" fontSize="16" transform="rotate(90 40 40)">
-                  50%
-                </text>
-              </svg>
+            <div className="mb-3 flex justify-center items-center">
+              <div className="relative w-20 h-20 flex items-center justify-center">
+                <svg width="80" height="80" viewBox="0 0 80 80" className="absolute" style={{transform: 'rotate(-90deg)'}}>
+                  <circle cx="40" cy="40" r="35" fill="none" stroke="#D4C5E2" strokeWidth="3" />
+                  <circle
+                    cx="40"
+                    cy="40"
+                    r="35"
+                    fill="none"
+                    stroke="#5A4B6B"
+                    strokeWidth="3"
+                    strokeDasharray="109.96 219.91"
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <span className="relative font-numbers font-black text-2xl text-[#5A4B6B]">50%</span>
+              </div>
             </div>
 
             <div className="text-[11px] text-[#5A4B6B]/70 font-medium text-center">
