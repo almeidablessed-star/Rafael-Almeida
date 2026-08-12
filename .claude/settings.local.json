@@ -19,7 +19,8 @@
       "Bash(git commit -m 'Fix: Alinhamento perfeito dos cards de custos nas Fichas *)",
       "Bash(git commit -m 'Fix: Label '\\\\''Custos'\\\\'' quebrado - adicionar whitespace-nowrap *)",
       "Bash(git commit -m 'Update: Logo removido - adicionar '\\\\''Carula APP'\\\\'' em texto premium *)",
-      "Bash(git commit -m 'Logo: '\\\\''Carula APP'\\\\'' premium redesign *)"
+      "Bash(git commit -m 'Logo: '\\\\''Carula APP'\\\\'' premium redesign *)",
+      "Bash(git commit -m 'Fix: '\\\\''50%'\\\\'' vertical no indicador circular *)"
     ]
   },
   "hooks": {

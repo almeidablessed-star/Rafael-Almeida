@@ -199,7 +199,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   strokeDasharray="109.96 219.91"
                   strokeLinecap="round"
                 />
-                <text x="40" y="45" textAnchor="middle" className="text-xs font-bold fill-[#5A4B6B]" fontSize="16">
+                <text x="40" y="45" textAnchor="middle" className="text-xs font-bold fill-[#5A4B6B]" fontSize="16" transform="rotate(90 40 40)">
                   50%
                 </text>
               </svg>
