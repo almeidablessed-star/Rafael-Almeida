@@ -1,0 +1,317 @@
+import React, { useState, useEffect } from 'react';
+import {
+  Transaction,
+  TabType,
+  TimePeriod,
+  TransactionType,
+} from './types';
+import {
+  getStoredTransactions,
+  addTransaction,
+  updateTransaction,
+  deleteTransaction,
+  resetToSampleData,
+  clearAllTransactions,
+  saveTransactions,
+  filterTransactionsByPeriod,
+  calculateSummary,
+} from './utils/storage';
+import { getTodayIso } from './utils/formatters';
+
+import { Header } from './components/Header';
+import { BottomNav } from './components/BottomNav';
+import { PeriodSelector } from './components/PeriodSelector';
+import { Dashboard } from './components/Dashboard';
+import { OrdersModule } from './components/OrdersModule';
+import { SalesModule } from './components/SalesModule';
+import { RestockModule } from './components/RestockModule';
+import { LaborModule } from './components/LaborModule';
+import { CostsModule } from './components/CostsModule';
+import { HistoryModule } from './components/HistoryModule';
+import { CatalogModule } from './components/CatalogModule';
+import { WeeklyClosingModule } from './components/WeeklyClosingModule';
+import { BalancesAndExpensesModule } from './components/BalancesAndExpensesModule';
+import { EstoqueModule } from './components/EstoqueModule';
+import { FichasTecnicasModule } from './components/FichasTecnicasModule';
+import { CustomersModule } from './components/CustomersModule';
+import { TransactionFormModal } from './components/TransactionFormModal';
+import { DeleteConfirmModal } from './components/DeleteConfirmModal';
+import { PwaInstallModal } from './components/PwaInstallModal';
+import { BackupModal } from './components/BackupModal';
+
+export default function App() {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [activeTab, setActiveTab] = useState<TabType>('dashboard');
+  
+  // Period filter state
+  const [period, setPeriod] = useState<TimePeriod>('mes'); // Default to 'Este Mês'
+  const [customStartDate, setCustomStartDate] = useState<string>(getTodayIso());
+  const [customEndDate, setCustomEndDate] = useState<string>(getTodayIso());
+
+  // Modal states
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [formInitialType, setFormInitialType] = useState<TransactionType>('venda');
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+  const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null);
+  const [isPwaModalOpen, setIsPwaModalOpen] = useState(false);
+  const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
+
+  // Load transactions on mount
+  useEffect(() => {
+    const data = getStoredTransactions();
+    setTransactions(data);
+  }, []);
+
+  // Filtered transactions & financial metrics
+  const filteredTransactions = filterTransactionsByPeriod(
+    transactions,
+    period,
+    customStartDate,
+    customEndDate
+  );
+
+  const summary = calculateSummary(filteredTransactions);
+
+  // Handlers
+  const handleOpenAddModal = (type: TransactionType = 'venda') => {
+    setFormInitialType(type);
+    setEditingTransaction(null);
+    setIsFormModalOpen(true);
+  };
+
+  const handleOpenEditModal = (tx: Transaction) => {
+    setEditingTransaction(tx);
+    setFormInitialType(tx.type);
+    setIsFormModalOpen(true);
+  };
+
+  const handleSaveTransaction = (
+    txData: Omit<Transaction, 'id' | 'createdAt'>,
+    editingId?: string
+  ) => {
+    if (editingId) {
+      const existing = transactions.find((t) => t.id === editingId);
+      if (existing) {
+        const updated: Transaction = {
+          ...existing,
+          ...txData,
+        };
+        updateTransaction(updated);
+        setTransactions(getStoredTransactions());
+      }
+    } else {
+      addTransaction(txData);
+      setTransactions(getStoredTransactions());
+    }
+  };
+
+  const handleRequestDelete = (tx: Transaction) => {
+    setDeletingTransaction(tx);
+  };
+
+  const handleTogglePaymentStatus = (tx: Transaction) => {
+    const newStatus = tx.paymentStatus === 'pendente' ? 'pago' : 'pendente';
+    const updated: Transaction = {
+      ...tx,
+      paymentStatus: newStatus,
+    };
+    updateTransaction(updated);
+    setTransactions(getStoredTransactions());
+  };
+
+  const handleConfirmDelete = (id: string) => {
+    deleteTransaction(id);
+    setTransactions(getStoredTransactions());
+    setDeletingTransaction(null);
+  };
+
+  const handleRestoreTransactions = (txs: Transaction[]) => {
+    saveTransactions(txs);
+    setTransactions(txs);
+  };
+
+  const handleResetSampleData = () => {
+    const samples = resetToSampleData();
+    setTransactions(samples);
+  };
+
+  const handleClearAll = () => {
+    const cleared = clearAllTransactions();
+    setTransactions(cleared);
+  };
+
+  return (
+    <div className="min-h-screen bg-neutral-hero text-neutral-charcoal flex flex-col font-sans">
+      
+      {/* Top Header */}
+      <Header
+        onOpenPwaModal={() => setIsPwaModalOpen(true)}
+        onOpenBackupModal={() => setIsBackupModalOpen(true)}
+      />
+
+      {/* Main Screen Container */}
+      <main className="flex-1 max-w-lg w-full mx-auto px-4 pt-4 bottom-nav-safe">
+
+        {/* Tab Content Router */}
+        {activeTab === 'dashboard' && (
+          <Dashboard
+            summary={summary}
+            period={period}
+            recentTransactions={filteredTransactions}
+            allTransactions={transactions}
+            onOpenAddModal={handleOpenAddModal}
+            onNavigateToTab={(tab) => setActiveTab(tab)}
+            onEditTransaction={handleOpenEditModal}
+            onDeleteTransaction={handleRequestDelete}
+            onTogglePaymentStatus={handleTogglePaymentStatus}
+          />
+        )}
+
+        {activeTab === 'pedidos' && (
+          <OrdersModule
+            transactions={filteredTransactions}
+            onOpenAddModal={(type) => handleOpenAddModal(type || 'venda')}
+            onEditTransaction={handleOpenEditModal}
+            onDeleteTransaction={handleRequestDelete}
+            onTogglePaymentStatus={handleTogglePaymentStatus}
+          />
+        )}
+
+        {activeTab === 'semana' && (
+          <WeeklyClosingModule
+            transactions={transactions}
+            onOpenAddModal={() => handleOpenAddModal('venda')}
+            onEditTransaction={handleOpenEditModal}
+            onDeleteTransaction={handleRequestDelete}
+            onTogglePaymentStatus={handleTogglePaymentStatus}
+          />
+        )}
+
+        {activeTab === 'saldos' && (
+          <BalancesAndExpensesModule
+            transactions={transactions}
+            onAddTransaction={(txData) => {
+              addTransaction(txData);
+              setTransactions(getStoredTransactions());
+            }}
+            onEditTransaction={handleOpenEditModal}
+            onDeleteTransaction={handleRequestDelete}
+          />
+        )}
+
+        {activeTab === 'estoque' && (
+          <EstoqueModule />
+        )}
+
+        {activeTab === 'fichas' && (
+          <FichasTecnicasModule
+            onAddTransaction={(txData) => {
+              addTransaction(txData);
+              setTransactions(getStoredTransactions());
+            }}
+            onNavigateToTab={(tab) => setActiveTab(tab)}
+          />
+        )}
+
+        {activeTab === 'clientes' && (
+          <CustomersModule />
+        )}
+
+        {activeTab === 'catalogo' && (
+          <CatalogModule
+            onAddTransaction={(txData) => {
+              addTransaction(txData);
+              setTransactions(getStoredTransactions());
+            }}
+            onNavigateToTab={(tab) => setActiveTab(tab)}
+          />
+        )}
+
+        {activeTab === 'vendas' && (
+          <SalesModule
+            transactions={filteredTransactions}
+            onOpenAddModal={() => handleOpenAddModal('venda')}
+            onEditTransaction={handleOpenEditModal}
+            onDeleteTransaction={handleRequestDelete}
+            onTogglePaymentStatus={handleTogglePaymentStatus}
+          />
+        )}
+
+        {activeTab === 'reposicao' && (
+          <RestockModule
+            transactions={filteredTransactions}
+            onOpenAddModal={() => handleOpenAddModal('reposicao')}
+            onEditTransaction={handleOpenEditModal}
+            onDeleteTransaction={handleRequestDelete}
+          />
+        )}
+
+        {activeTab === 'maodeobra' && (
+          <LaborModule
+            transactions={filteredTransactions}
+            onOpenAddModal={() => handleOpenAddModal('maodeobra')}
+            onEditTransaction={handleOpenEditModal}
+            onDeleteTransaction={handleRequestDelete}
+          />
+        )}
+
+        {activeTab === 'custos' && (
+          <CostsModule
+            transactions={filteredTransactions}
+            onOpenAddModal={(type) => handleOpenAddModal(type || 'custo')}
+            onEditTransaction={handleOpenEditModal}
+            onDeleteTransaction={handleRequestDelete}
+          />
+        )}
+
+        {activeTab === 'historico' && (
+          <HistoryModule
+            transactions={filteredTransactions}
+            onOpenAddModal={() => handleOpenAddModal('venda')}
+            onEditTransaction={handleOpenEditModal}
+            onDeleteTransaction={handleRequestDelete}
+            onTogglePaymentStatus={handleTogglePaymentStatus}
+          />
+        )}
+
+      </main>
+
+      {/* Fixed Bottom Navigation Bar */}
+      <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+
+      {/* Transaction Form Modal */}
+      <TransactionFormModal
+        isOpen={isFormModalOpen}
+        initialType={formInitialType}
+        editingTransaction={editingTransaction}
+        onClose={() => setIsFormModalOpen(false)}
+        onSave={handleSaveTransaction}
+      />
+
+      {/* Custom Delete Confirmation Modal */}
+      <DeleteConfirmModal
+        isOpen={!!deletingTransaction}
+        transaction={deletingTransaction}
+        onClose={() => setDeletingTransaction(null)}
+        onConfirmDelete={handleConfirmDelete}
+      />
+
+      {/* iPhone / Mobile PWA Installation Guide Modal */}
+      <PwaInstallModal
+        isOpen={isPwaModalOpen}
+        onClose={() => setIsPwaModalOpen(false)}
+      />
+
+      {/* Backup and Data Management Modal */}
+      <BackupModal
+        isOpen={isBackupModalOpen}
+        transactions={transactions}
+        onClose={() => setIsBackupModalOpen(false)}
+        onRestoreTransactions={handleRestoreTransactions}
+        onResetSampleData={handleResetSampleData}
+        onClearAll={handleClearAll}
+      />
+
+    </div>
+  );
+}
