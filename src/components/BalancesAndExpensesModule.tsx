@@ -196,23 +196,23 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
             </div>
 
             {/* Circular progress indicator (50% filled) */}
-            <div className="mb-4 flex justify-center">
-              <svg width="90" height="90" viewBox="0 0 90 90" className="transform -rotate-90 drop-shadow-sm">
-                <circle cx="45" cy="45" r="38" fill="none" stroke="#D4C5E2" strokeWidth="4" />
-                <circle
-                  cx="45"
-                  cy="45"
-                  r="38"
-                  fill="none"
-                  stroke="#5A4B6B"
-                  strokeWidth="4"
-                  strokeDasharray="119.38 238.76"
-                  strokeLinecap="round"
-                />
-                <text x="45" y="50" textAnchor="middle" className="text-xs font-black fill-[#5A4B6B]" fontSize="18">
-                  50%
-                </text>
-              </svg>
+            <div className="mb-4 flex justify-center items-center">
+              <div className="relative w-[90px] h-[90px] flex items-center justify-center">
+                <svg width="90" height="90" viewBox="0 0 90 90" className="-rotate-90 drop-shadow-sm">
+                  <circle cx="45" cy="45" r="38" fill="none" stroke="#D4C5E2" strokeWidth="4" />
+                  <circle
+                    cx="45"
+                    cy="45"
+                    r="38"
+                    fill="none"
+                    stroke="#5A4B6B"
+                    strokeWidth="4"
+                    strokeDasharray="119.38 238.76"
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <span className="relative font-bold text-xl text-[#5A4B6B]">50%</span>
+              </div>
             </div>
 
             <div className="pt-3 border-t border-[#E6E1DB] space-y-1.5 text-[11px] font-semibold">
