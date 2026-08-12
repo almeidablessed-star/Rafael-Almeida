@@ -863,53 +863,33 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                     {/* Breakdown Cost Metrics - Premium Design */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3">
                       {/* Reposição */}
-                      <div className="bg-[#C8E6D7]/20 border border-[#C8E6D7]/50 rounded-lg p-2 flex flex-col gap-1 shadow-xs">
-                        <div className="flex items-center gap-1">
-                          <span className="text-sm">🧂</span>
-                          <span className="text-[7px] font-bold uppercase text-[#3A5A4A]">Reposição</span>
-                        </div>
-                        <div className="flex flex-col">
-                          <strong className="text-[11px] font-black text-[#3A5A4A]">{formatCurrency(repoTotal)}</strong>
-                          <span className="text-[7px] text-[#3A5A4A]/70 font-normal">Ingredientes</span>
-                        </div>
+                      <div className="bg-[#C8E6D7]/20 border border-[#C8E6D7]/50 rounded-lg p-2.5 flex flex-col min-h-[86px] shadow-xs">
+                        <span className="text-[7px] font-bold uppercase text-[#3A5A4A] h-[14px] leading-[14px]">🧂 Reposição</span>
+                        <strong className="text-[12px] font-black text-[#3A5A4A] flex-1 flex items-center">{formatCurrency(repoTotal)}</strong>
+                        <span className="text-[7px] text-[#3A5A4A]/70 font-normal h-[14px] leading-[14px]">Ingredientes</span>
                       </div>
 
                       {/* Mão de Obra */}
-                      <div className="bg-[#E8B4B8]/20 border border-[#E8B4B8]/50 rounded-lg p-2 flex flex-col gap-1 shadow-xs">
-                        <div className="flex items-center gap-1">
-                          <span className="text-sm">👷</span>
-                          <span className="text-[7px] font-bold uppercase text-[#6B3E42]">Mão de Obra</span>
-                        </div>
-                        <div className="flex flex-col">
-                          <strong className="text-[11px] font-black text-[#6B3E42]">{formatCurrency(ficha.maoDeObraCost)}</strong>
-                          <span className="text-[7px] text-[#6B3E42]/70 font-normal">Produção</span>
-                        </div>
+                      <div className="bg-[#E8B4B8]/20 border border-[#E8B4B8]/50 rounded-lg p-2.5 flex flex-col min-h-[86px] shadow-xs">
+                        <span className="text-[7px] font-bold uppercase text-[#6B3E42] h-[14px] leading-[14px]">👷 Mão de Obra</span>
+                        <strong className="text-[12px] font-black text-[#6B3E42] flex-1 flex items-center">{formatCurrency(ficha.maoDeObraCost)}</strong>
+                        <span className="text-[7px] text-[#6B3E42]/70 font-normal h-[14px] leading-[14px]">Produção</span>
                       </div>
 
                       {/* Custos Operacionais */}
-                      <div className="bg-[#B8D4E8]/20 border border-[#B8D4E8]/50 rounded-lg p-2 flex flex-col gap-1 shadow-xs">
-                        <div className="flex items-center gap-1">
-                          <span className="text-sm">⚙️</span>
-                          <span className="text-[7px] font-bold uppercase text-[#3A4A5A]">Custos</span>
-                        </div>
-                        <div className="flex flex-col">
-                          <strong className="text-[11px] font-black text-[#3A4A5A]">
-                            {formatCurrency((ficha.custoCost || 0) + (ficha.investimentoCost || 0))}
-                          </strong>
-                          <span className="text-[7px] text-[#3A4A5A]/70 font-normal">Operacional</span>
-                        </div>
+                      <div className="bg-[#B8D4E8]/20 border border-[#B8D4E8]/50 rounded-lg p-2.5 flex flex-col min-h-[86px] shadow-xs">
+                        <span className="text-[7px] font-bold uppercase text-[#3A4A5A] h-[14px] leading-[14px]">⚙️ Custos Op.</span>
+                        <strong className="text-[12px] font-black text-[#3A4A5A] flex-1 flex items-center">
+                          {formatCurrency((ficha.custoCost || 0) + (ficha.investimentoCost || 0))}
+                        </strong>
+                        <span className="text-[7px] text-[#3A4A5A]/70 font-normal h-[14px] leading-[14px]">Overhead</span>
                       </div>
 
                       {/* Sugestão de Preço */}
-                      <div className="bg-[#3E3430] border border-[#3E3430]/80 rounded-lg p-2 flex flex-col gap-1 shadow-xs">
-                        <div className="flex items-center gap-1">
-                          <span className="text-sm">💰</span>
-                          <span className="text-[7px] font-bold uppercase text-[#C9A878]">Sugestão</span>
-                        </div>
-                        <div className="flex flex-col">
-                          <strong className="text-[11px] font-black text-white">{formatCurrency(ficha.sugestaoVenda)}</strong>
-                          <span className="text-[7px] text-[#C9A878]/80 font-normal">Venda</span>
-                        </div>
+                      <div className="bg-[#3E3430] border border-[#3E3430]/80 rounded-lg p-2.5 flex flex-col min-h-[86px] shadow-xs">
+                        <span className="text-[7px] font-bold uppercase text-[#C9A878] h-[14px] leading-[14px]">💰 Sugestão</span>
+                        <strong className="text-[12px] font-black text-white flex-1 flex items-center">{formatCurrency(ficha.sugestaoVenda)}</strong>
+                        <span className="text-[7px] text-[#C9A878]/80 font-normal h-[14px] leading-[14px]">Venda</span>
                       </div>
                     </div>
 
