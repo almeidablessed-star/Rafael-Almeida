@@ -50,10 +50,29 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
 
           {/* CENTERED LOGO */}
-          <div className="flex-1 flex justify-center text-center px-1">
-            <span className="text-2xl sm:text-3xl font-black text-[#3E3430] tracking-tight" style={{ fontFamily: "'Manrope', sans-serif", letterSpacing: '-0.5px' }}>
-              Carula APP
-            </span>
+          <div className="flex-1 flex justify-center items-center text-center px-1">
+            <div className="flex flex-col items-center gap-0.5">
+              <span
+                className="text-3xl sm:text-4xl font-black bg-gradient-to-r from-[#3E3430] via-[#6B3E42] to-[#3E3430] bg-clip-text text-transparent"
+                style={{
+                  fontFamily: "'Manrope', sans-serif",
+                  letterSpacing: '-1.2px',
+                  fontWeight: 900,
+                  textShadow: 'none'
+                }}
+              >
+                Carula
+              </span>
+              <span
+                className="text-xs sm:text-sm font-extrabold tracking-widest text-[#C9A878]"
+                style={{
+                  fontFamily: "'Manrope', sans-serif",
+                  letterSpacing: '0.8px'
+                }}
+              >
+                A P P
+              </span>
+            </div>
           </div>
 
           {/* ACTION BUTTONS (MOBILE RIGHT & DESKTOP) */}
