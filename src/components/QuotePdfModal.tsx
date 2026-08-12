@@ -184,6 +184,7 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
       const canvas = await html2canvas(docElem, {
         scale: 2,
         useCORS: true,
+        allowTaint: true,
         logging: false,
         backgroundColor: '#FFFDF8',
       });
@@ -192,7 +193,9 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
       const link = document.createElement('a');
       link.download = `Pedido_${(transaction.customerName || 'Cliente').replace(/\s+/g, '_')}_CarulaCake.png`;
       link.href = dataUrl;
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
     } catch (err) {
       console.error('Error generating image:', err);
       alert('Não foi possível gerar a imagem automaticamente. Você também pode tirar um print da tela!');
