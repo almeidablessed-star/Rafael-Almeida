@@ -110,17 +110,36 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
   // Download PDF document directly using jsPDF + html2canvas
   const handleDownloadPdf = async () => {
     const docElem = document.getElementById('quote-pdf-document');
-    if (!docElem) return;
+    if (!docElem) {
+      console.error('PDF document element not found');
+      return;
+    }
 
     try {
       setIsGeneratingPdf(true);
+
+      // Ensure content is visible for html2canvas
+      const originalDisplay = docElem.style.display;
+      docElem.style.display = 'block';
+
       const canvas = await html2canvas(docElem, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
         logging: false,
         backgroundColor: '#FFFFFF',
+        windowHeight: docElem.scrollHeight,
+        windowWidth: docElem.scrollWidth,
       });
+
+      // Restore original display
+      docElem.style.display = originalDisplay;
+
+      if (!canvas || canvas.width === 0 || canvas.height === 0) {
+        console.error('Canvas generation failed - empty canvas');
+        window.print();
+        return;
+      }
 
       const imgData = canvas.toDataURL('image/jpeg', 0.98);
       const pdf = new jsPDF({
