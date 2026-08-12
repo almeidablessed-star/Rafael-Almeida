@@ -860,27 +860,48 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                       <span className="bg-white/60 px-2.5 py-0.5 font-bold rounded-full">{ficha.yieldInfo}</span>
                     </p>
 
-                    {/* Breakdown Cost Metrics */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-center text-[10px] font-semibold pt-1">
-                      <div className="bg-white/80 px-2 py-1.5 rounded-xl border border-black/5 flex flex-col justify-center items-center">
-                        <span className="text-[var(--color-pastry-chocolate)]/70 text-[9px] font-bold leading-tight uppercase tracking-wider">Reposição</span>
-                        <strong className="text-[var(--color-pastry-chocolate)] text-[11px] font-extrabold mt-0.5">{formatCurrency(repoTotal)}</strong>
+                    {/* Breakdown Cost Metrics - Premium Design */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-3">
+                      {/* Reposição */}
+                      <div className="bg-[#C8E6D7]/15 border border-[#C8E6D7]/40 rounded-xl px-3 py-2.5 flex flex-col shadow-xs hover:shadow-sm transition-all">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <span className="text-lg">🧂</span>
+                          <span className="text-[9px] font-extrabold uppercase text-[#3A5A4A] tracking-wide">Reposição</span>
+                        </div>
+                        <strong className="text-[12px] font-black text-[#3A5A4A]">{formatCurrency(repoTotal)}</strong>
+                        <span className="text-[9px] text-[#3A5A4A]/60 font-normal mt-1">Ingredientes</span>
                       </div>
-                      <div className="bg-white/80 px-2 py-1.5 rounded-xl border border-black/5 flex flex-col justify-center items-center">
-                        <span className="text-[var(--color-pastry-chocolate)]/70 text-[9px] font-bold leading-tight uppercase tracking-wider">Mão de Obra</span>
-                        <strong className="text-[var(--color-pastry-chocolate)] text-[11px] font-extrabold mt-0.5">{formatCurrency(ficha.maoDeObraCost)}</strong>
+
+                      {/* Mão de Obra */}
+                      <div className="bg-[#E8B4B8]/15 border border-[#E8B4B8]/40 rounded-xl px-3 py-2.5 flex flex-col shadow-xs hover:shadow-sm transition-all">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <span className="text-lg">👷</span>
+                          <span className="text-[9px] font-extrabold uppercase text-[#6B3E42] tracking-wide">Mão de Obra</span>
+                        </div>
+                        <strong className="text-[12px] font-black text-[#6B3E42]">{formatCurrency(ficha.maoDeObraCost)}</strong>
+                        <span className="text-[9px] text-[#6B3E42]/60 font-normal mt-1">Produção</span>
                       </div>
-                      <div className="bg-white/80 px-2 py-1.5 rounded-xl border border-black/5 flex flex-col justify-center items-center">
-                        <span className="text-[var(--color-pastry-chocolate)]/70 text-[9px] font-bold leading-tight uppercase tracking-wider">Custos Op.</span>
-                        <strong className="text-[var(--color-pastry-chocolate)] text-[11px] font-extrabold mt-0.5">
+
+                      {/* Custos Operacionais */}
+                      <div className="bg-[#B8D4E8]/15 border border-[#B8D4E8]/40 rounded-xl px-3 py-2.5 flex flex-col shadow-xs hover:shadow-sm transition-all">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <span className="text-lg">⚙️</span>
+                          <span className="text-[9px] font-extrabold uppercase text-[#3A4A5A] tracking-wide">Custos Op.</span>
+                        </div>
+                        <strong className="text-[12px] font-black text-[#3A4A5A]">
                           {formatCurrency((ficha.custoCost || 0) + (ficha.investimentoCost || 0))}
                         </strong>
+                        <span className="text-[9px] text-[#3A4A5A]/60 font-normal mt-1">Overhead</span>
                       </div>
-                      <div className="bg-[var(--color-pastry-chocolate)] px-2 py-1.5 rounded-xl text-white flex flex-col justify-center items-center">
-                        <span className="text-[var(--color-pastry-pink)] text-[9px] font-extrabold leading-tight uppercase tracking-wider">Sugestão</span>
-                        <strong className="text-[var(--color-pastry-cream)] text-[11px] font-black mt-0.5">
-                          {formatCurrency(ficha.sugestaoVenda)}
-                        </strong>
+
+                      {/* Sugestão de Preço */}
+                      <div className="bg-[#3E3430] rounded-xl px-3 py-2.5 flex flex-col shadow-md hover:shadow-lg transition-all">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <span className="text-lg">💰</span>
+                          <span className="text-[9px] font-extrabold uppercase text-[#C9A878] tracking-wide">Sugestão</span>
+                        </div>
+                        <strong className="text-[12px] font-black text-white">{formatCurrency(ficha.sugestaoVenda)}</strong>
+                        <span className="text-[9px] text-[#C9A878]/80 font-normal mt-1">Venda</span>
                       </div>
                     </div>
 

@@ -65,11 +65,11 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
   return (
     <div className="space-y-4 animate-fadeIn pb-8">
       {/* Module Header Banner */}
-      <div className="bg-[var(--color-semantic-warning)] rounded-xl p-5 text-[var(--color-neutral-charcoal)] border border-[var(--color-semantic-warning)]/40 shadow-xs relative overflow-hidden flex items-center justify-between">
-        <h2 className="font-bold text-2xl sm:text-3xl text-[var(--color-neutral-charcoal)] tracking-tight">
+      <div className="bg-[#F5D4A8] rounded-2xl p-5 text-[#0D0B08] border border-[#F5D4A8]/40 shadow-xs relative overflow-hidden flex items-center justify-between">
+        <h2 className="font-bold text-2xl sm:text-3xl text-[#0D0B08] tracking-tight">
           Pedidos & Encomendas
         </h2>
-        <span className="bg-[var(--color-neutral-charcoal)] text-[var(--color-accent-gold)] font-medium text-[10px] px-3.5 py-1.5 rounded-full uppercase shrink-0">
+        <span className="bg-[#0D0B08] text-[#C9A878] font-medium text-[10px] px-3.5 py-1.5 rounded-full uppercase shrink-0">
           {sales.length} {sales.length === 1 ? 'Pedido' : 'Pedidos'}
         </span>
       </div>
