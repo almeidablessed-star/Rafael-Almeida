@@ -863,45 +863,45 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                     {/* Breakdown Cost Metrics - Premium Design */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-3">
                       {/* Reposição */}
-                      <div className="bg-[#C8E6D7]/15 border border-[#C8E6D7]/40 rounded-xl px-3 py-2.5 flex flex-col shadow-xs hover:shadow-sm transition-all">
-                        <div className="flex items-center gap-1.5 mb-1">
-                          <span className="text-lg">🧂</span>
-                          <span className="text-[9px] font-extrabold uppercase text-[#3A5A4A] tracking-wide">Reposição</span>
+                      <div className="bg-[#C8E6D7]/20 border border-[#C8E6D7]/50 rounded-xl px-3 py-3 flex flex-col justify-start h-full shadow-xs hover:shadow-sm transition-all">
+                        <div className="flex items-center gap-1.5 mb-2">
+                          <span className="text-base">🧂</span>
+                          <span className="text-[8px] font-extrabold uppercase text-[#3A5A4A] tracking-wide leading-tight">Reposição</span>
                         </div>
-                        <strong className="text-[12px] font-black text-[#3A5A4A]">{formatCurrency(repoTotal)}</strong>
-                        <span className="text-[9px] text-[#3A5A4A]/60 font-normal mt-1">Ingredientes</span>
+                        <strong className="text-[13px] font-black text-[#3A5A4A] mb-1">{formatCurrency(repoTotal)}</strong>
+                        <span className="text-[8px] text-[#3A5A4A]/60 font-normal">Ingredientes</span>
                       </div>
 
                       {/* Mão de Obra */}
-                      <div className="bg-[#E8B4B8]/15 border border-[#E8B4B8]/40 rounded-xl px-3 py-2.5 flex flex-col shadow-xs hover:shadow-sm transition-all">
-                        <div className="flex items-center gap-1.5 mb-1">
-                          <span className="text-lg">👷</span>
-                          <span className="text-[9px] font-extrabold uppercase text-[#6B3E42] tracking-wide">Mão de Obra</span>
+                      <div className="bg-[#E8B4B8]/20 border border-[#E8B4B8]/50 rounded-xl px-3 py-3 flex flex-col justify-start h-full shadow-xs hover:shadow-sm transition-all">
+                        <div className="flex items-center gap-1.5 mb-2">
+                          <span className="text-base">👷</span>
+                          <span className="text-[8px] font-extrabold uppercase text-[#6B3E42] tracking-wide leading-tight">Mão de Obra</span>
                         </div>
-                        <strong className="text-[12px] font-black text-[#6B3E42]">{formatCurrency(ficha.maoDeObraCost)}</strong>
-                        <span className="text-[9px] text-[#6B3E42]/60 font-normal mt-1">Produção</span>
+                        <strong className="text-[13px] font-black text-[#6B3E42] mb-1">{formatCurrency(ficha.maoDeObraCost)}</strong>
+                        <span className="text-[8px] text-[#6B3E42]/60 font-normal">Produção</span>
                       </div>
 
                       {/* Custos Operacionais */}
-                      <div className="bg-[#B8D4E8]/15 border border-[#B8D4E8]/40 rounded-xl px-3 py-2.5 flex flex-col shadow-xs hover:shadow-sm transition-all">
-                        <div className="flex items-center gap-1.5 mb-1">
-                          <span className="text-lg">⚙️</span>
-                          <span className="text-[9px] font-extrabold uppercase text-[#3A4A5A] tracking-wide">Custos Op.</span>
+                      <div className="bg-[#B8D4E8]/20 border border-[#B8D4E8]/50 rounded-xl px-3 py-3 flex flex-col justify-start h-full shadow-xs hover:shadow-sm transition-all">
+                        <div className="flex items-center gap-1.5 mb-2">
+                          <span className="text-base">⚙️</span>
+                          <span className="text-[8px] font-extrabold uppercase text-[#3A4A5A] tracking-wide leading-tight">Custos Op.</span>
                         </div>
-                        <strong className="text-[12px] font-black text-[#3A4A5A]">
+                        <strong className="text-[13px] font-black text-[#3A4A5A] mb-1">
                           {formatCurrency((ficha.custoCost || 0) + (ficha.investimentoCost || 0))}
                         </strong>
-                        <span className="text-[9px] text-[#3A4A5A]/60 font-normal mt-1">Overhead</span>
+                        <span className="text-[8px] text-[#3A4A5A]/60 font-normal">Overhead</span>
                       </div>
 
                       {/* Sugestão de Preço */}
-                      <div className="bg-[#3E3430] rounded-xl px-3 py-2.5 flex flex-col shadow-md hover:shadow-lg transition-all">
-                        <div className="flex items-center gap-1.5 mb-1">
-                          <span className="text-lg">💰</span>
-                          <span className="text-[9px] font-extrabold uppercase text-[#C9A878] tracking-wide">Sugestão</span>
+                      <div className="bg-[#3E3430] border border-[#3E3430]/80 rounded-xl px-3 py-3 flex flex-col justify-start h-full shadow-md hover:shadow-lg transition-all">
+                        <div className="flex items-center gap-1.5 mb-2">
+                          <span className="text-base">💰</span>
+                          <span className="text-[8px] font-extrabold uppercase text-[#C9A878] tracking-wide leading-tight">Sugestão</span>
                         </div>
-                        <strong className="text-[12px] font-black text-white">{formatCurrency(ficha.sugestaoVenda)}</strong>
-                        <span className="text-[9px] text-[#C9A878]/80 font-normal mt-1">Venda</span>
+                        <strong className="text-[13px] font-black text-white mb-1">{formatCurrency(ficha.sugestaoVenda)}</strong>
+                        <span className="text-[8px] text-[#C9A878]/80 font-normal">Venda</span>
                       </div>
                     </div>
 

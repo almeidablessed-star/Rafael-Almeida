@@ -8,7 +8,13 @@
       "Skill(impeccable:*)",
       "mcp__visualize__read_me",
       "PowerShell(Get-Process node -ErrorAction SilentlyContinue)",
-      "PowerShell(Stop-Process -Force)"
+      "PowerShell(Stop-Process -Force)",
+      "Bash(node -c src/components/EstoqueModule.tsx)",
+      "Bash(git checkout *)",
+      "Bash(git add *)",
+      "Bash(git commit -m 'Melhorias visuais - Fichas Técnicas redesign *)",
+      "Bash(git reset *)",
+      "Bash(git commit -m 'Correções visuais - Estoque + Fichas Técnicas *)"
     ]
   },
   "hooks": {

@@ -289,12 +289,10 @@ export const EstoqueModule: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {lowStockItems.map((item) => {
-                  const stockPercentage = Math.min(100, (item.quantity / item.minThreshold) * 100);
-                  return (
+                {lowStockItems.map((item) => (
                   <div
                     key={item.id}
-                    className="bg-white border-2 border-[var(--color-semantic-coral)] rounded-2xl p-4 hover:shadow-xs hover:border-opacity-80 transition-all shadow-xs"
+                    className="bg-[#FBE8D6] border-2 border-[#F5D4A8] rounded-2xl p-4 hover:shadow-xs transition-all shadow-xs"
                   >
                     {/* Item Header */}
                     <div className="flex items-start justify-between mb-3 pb-2 border-b border-[var(--color-semantic-coral)] border-opacity-30">
@@ -304,20 +302,6 @@ export const EstoqueModule: React.FC = () => {
                       <span className="bg-[var(--color-semantic-coral)] text-white text-[9px] font-semibold px-1.5 py-0.5 rounded-md uppercase shrink-0 animate-pulse">
                         Baixo
                       </span>
-                    </div>
-
-                    {/* Progress Bar */}
-                    <div className="mb-3 space-y-2">
-                      <div className="w-full h-2 bg-[var(--color-neutral-light)] rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-[var(--color-semantic-coral)] transition-all duration-300"
-                          style={{ width: `${stockPercentage}%` }}
-                        />
-                      </div>
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-[var(--color-text-secondary)]">{stockPercentage.toFixed(0)}% do mínimo</span>
-                        <span className="font-bold text-[var(--color-semantic-coral)]">⚠️ Crítico</span>
-                      </div>
                     </div>
 
                     {/* Quantity Display (Hero) */}
@@ -375,8 +359,7 @@ export const EstoqueModule: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  );
-                })}
+                ))}
               </div>
             </div>
           )}
@@ -392,36 +375,16 @@ export const EstoqueModule: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {healthyStockItems.map((item) => {
-                  const stockPercentage = Math.min(100, (item.quantity / item.minThreshold) * 100);
-                  const stockHealth = stockPercentage >= 70 ? 'alto' : stockPercentage >= 40 ? 'médio' : 'baixo';
-                  const barColor = stockPercentage >= 70 ? 'bg-[#C8E6D7]' : stockPercentage >= 40 ? 'bg-[#F5D4A8]' : 'bg-[#E8B4B8]';
-                  return (
+                {healthyStockItems.map((item) => (
                   <div
                     key={item.id}
-                    className="bg-white border border-[var(--color-neutral-light)] rounded-2xl p-4 hover:border-[var(--color-primary)] hover:shadow-xs transition-all shadow-xs"
+                    className="bg-white border border-[var(--color-neutral-light)] rounded-2xl p-4 hover:border-[var(--color-primary)] hover:shadow-xs transition-all"
                   >
                     {/* Item Header */}
                     <div className="pb-2 border-b border-[var(--color-neutral-light)] mb-3">
                       <span className="font-brand font-semibold text-sm text-[var(--color-neutral-charcoal)]">
                         {item.name}
                       </span>
-                    </div>
-
-                    {/* Progress Bar */}
-                    <div className="mb-3 space-y-2">
-                      <div className="w-full h-2 bg-[var(--color-neutral-light)] rounded-full overflow-hidden">
-                        <div
-                          className={`h-full ${barColor} transition-all duration-300`}
-                          style={{ width: `${stockPercentage}%` }}
-                        />
-                      </div>
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-[var(--color-text-secondary)]">{stockPercentage.toFixed(0)}% cheio</span>
-                        <span className={`font-bold ${stockHealth === 'alto' ? 'text-[#C8E6D7]' : stockHealth === 'médio' ? 'text-[#F5D4A8]' : 'text-[#E8B4B8]'}`}>
-                          {stockHealth === 'alto' ? '✅' : stockHealth === 'médio' ? '⚡' : '⚠️'} {stockHealth}
-                        </span>
-                      </div>
                     </div>
 
                     {/* Quantity Display (Hero) */}
@@ -479,8 +442,7 @@ export const EstoqueModule: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  );
-                })}
+                ))}
               </div>
             </div>
           )}
