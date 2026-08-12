@@ -21,7 +21,8 @@
       "Bash(git commit -m 'Update: Logo removido - adicionar '\\\\''Carula APP'\\\\'' em texto premium *)",
       "Bash(git commit -m 'Logo: '\\\\''Carula APP'\\\\'' premium redesign *)",
       "Bash(git commit -m 'Fix: '\\\\''50%'\\\\'' vertical no indicador circular *)",
-      "Bash(git commit -m 'Refactor: Aba Pedidos - aplicar padrão premium Dashboard *)"
+      "Bash(git commit -m 'Refactor: Aba Pedidos - aplicar padrão premium Dashboard *)",
+      "Bash(git commit -m 'Fix: Ícones saindo do card - alinhar dentro dos limites *)"
     ]
   },
   "hooks": {

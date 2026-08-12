@@ -77,45 +77,45 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
       {/* Summary Cards Row - Premium Style */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {/* Total Vendas */}
-        <div className="bg-gradient-to-br from-[#F5D4A8]/30 to-[#F5D4A8]/10 rounded-2xl p-5 border border-[#F5D4A8]/40 shadow-md hover:shadow-lg transition-all">
-          <div className="flex items-start justify-between mb-3">
-            <div>
-              <span className="text-[10px] font-bold uppercase text-[#6B5A42] block mb-1">Total em Vendas</span>
-              <span className="font-numbers font-black text-3xl text-[#3E3430] block">{formatCurrency(totalVendas)}</span>
+        <div className="bg-gradient-to-br from-[#F5D4A8]/30 to-[#F5D4A8]/10 rounded-2xl p-4 border border-[#F5D4A8]/40 shadow-md hover:shadow-lg transition-all relative overflow-hidden">
+          <div className="flex gap-3 items-start">
+            <div className="flex-1 min-w-0">
+              <span className="text-[9px] font-bold uppercase text-[#6B5A42] block mb-1">Total em Vendas</span>
+              <span className="font-numbers font-black text-2xl text-[#3E3430] block">{formatCurrency(totalVendas)}</span>
+              <span className="text-[10px] text-[#6B5A42]/70 font-medium mt-2">{sales.length} encomendas registradas</span>
             </div>
-            <div className="w-12 h-12 rounded-full bg-[#F5D4A8] flex items-center justify-center shrink-0 shadow-sm">
-              <ShoppingBag className="w-6 h-6 text-[#3E3430]" />
+            <div className="w-10 h-10 rounded-full bg-[#F5D4A8] flex items-center justify-center shrink-0 shadow-sm">
+              <ShoppingBag className="w-5 h-5 text-[#3E3430]" />
             </div>
           </div>
-          <span className="text-[11px] text-[#6B5A42]/70 font-medium">{sales.length} encomendas registradas</span>
         </div>
 
         {/* Vendas Pagas */}
-        <div className="bg-gradient-to-br from-[#C8E6D7]/30 to-[#C8E6D7]/10 rounded-2xl p-5 border border-[#C8E6D7]/40 shadow-md hover:shadow-lg transition-all">
-          <div className="flex items-start justify-between mb-3">
-            <div>
-              <span className="text-[10px] font-bold uppercase text-[#3A5A4A] block mb-1">Vendas Pagas</span>
-              <span className="font-numbers font-black text-3xl text-[#3A5A4A] block">{formatCurrency(totalPagas)}</span>
+        <div className="bg-gradient-to-br from-[#C8E6D7]/30 to-[#C8E6D7]/10 rounded-2xl p-4 border border-[#C8E6D7]/40 shadow-md hover:shadow-lg transition-all relative overflow-hidden">
+          <div className="flex gap-3 items-start">
+            <div className="flex-1 min-w-0">
+              <span className="text-[9px] font-bold uppercase text-[#3A5A4A] block mb-1">Vendas Pagas</span>
+              <span className="font-numbers font-black text-2xl text-[#3A5A4A] block">{formatCurrency(totalPagas)}</span>
+              <span className="text-[10px] text-[#3A5A4A]/70 font-medium mt-2">{paidCount} {paidCount === 1 ? 'pedido pago' : 'pedidos pagos'}</span>
             </div>
-            <div className="w-12 h-12 rounded-full bg-[#C8E6D7] flex items-center justify-center shrink-0 shadow-sm">
-              <CheckCircle2 className="w-6 h-6 text-[#3A5A4A]" />
+            <div className="w-10 h-10 rounded-full bg-[#C8E6D7] flex items-center justify-center shrink-0 shadow-sm">
+              <CheckCircle2 className="w-5 h-5 text-[#3A5A4A]" />
             </div>
           </div>
-          <span className="text-[11px] text-[#3A5A4A]/70 font-medium">{paidCount} {paidCount === 1 ? 'pedido pago' : 'pedidos pagos'}</span>
         </div>
 
         {/* A Receber */}
-        <div className="bg-gradient-to-br from-[#B8D4E8]/30 to-[#B8D4E8]/10 rounded-2xl p-5 border border-[#B8D4E8]/40 shadow-md hover:shadow-lg transition-all">
-          <div className="flex items-start justify-between mb-3">
-            <div>
-              <span className="text-[10px] font-bold uppercase text-[#3A4A5A] block mb-1">A Receber</span>
-              <span className="font-numbers font-black text-3xl text-[#3A4A5A] block">{formatCurrency(totalPendentes)}</span>
+        <div className="bg-gradient-to-br from-[#B8D4E8]/30 to-[#B8D4E8]/10 rounded-2xl p-4 border border-[#B8D4E8]/40 shadow-md hover:shadow-lg transition-all relative overflow-hidden">
+          <div className="flex gap-3 items-start">
+            <div className="flex-1 min-w-0">
+              <span className="text-[9px] font-bold uppercase text-[#3A4A5A] block mb-1">A Receber</span>
+              <span className="font-numbers font-black text-2xl text-[#3A4A5A] block">{formatCurrency(totalPendentes)}</span>
+              <span className="text-[10px] text-[#3A4A5A]/70 font-medium mt-2">{pendingCount} {pendingCount === 1 ? 'pedido pendente' : 'pedidos pendentes'}</span>
             </div>
-            <div className="w-12 h-12 rounded-full bg-[#B8D4E8] flex items-center justify-center shrink-0 shadow-sm">
-              <Clock className="w-6 h-6 text-[#3A4A5A]" />
+            <div className="w-10 h-10 rounded-full bg-[#B8D4E8] flex items-center justify-center shrink-0 shadow-sm">
+              <Clock className="w-5 h-5 text-[#3A4A5A]" />
             </div>
           </div>
-          <span className="text-[11px] text-[#3A4A5A]/70 font-medium">{pendingCount} {pendingCount === 1 ? 'pedido pendente' : 'pedidos pendentes'}</span>
         </div>
       </div>
 
