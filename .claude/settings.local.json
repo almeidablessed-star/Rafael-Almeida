@@ -25,7 +25,8 @@
       "Bash(git commit -m 'Fix: Ícones saindo do card - alinhar dentro dos limites *)",
       "Bash(git commit -m 'Refactor: Aplicar padrão premium em todas as abas restantes *)",
       "Bash(git commit -m 'Refactor: Aplicar padrão premium na aba Saldos *)",
-      "Bash(git commit -m 'Fix: Alinhamento do ícone Reposição e porcentagem em Mão de Obra *)"
+      "Bash(git commit -m 'Fix: Alinhamento do ícone Reposição e porcentagem em Mão de Obra *)",
+      "Bash(git commit -m 'Fix: Porcentagem em Mão de Obra alinhada horizontalmente *)"
     ]
   },
   "hooks": {

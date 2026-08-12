@@ -188,7 +188,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             {/* Circular progress indicator (50% filled) */}
             <div className="mb-3 flex justify-center items-center">
               <div className="relative w-20 h-20 flex items-center justify-center">
-                <svg width="80" height="80" viewBox="0 0 80 80" className="absolute" style={{transform: 'rotate(-90deg)'}}>
+                <svg width="80" height="80" viewBox="0 0 80 80" className="absolute -rotate-90">
                   <circle cx="40" cy="40" r="35" fill="none" stroke="#D4C5E2" strokeWidth="3" />
                   <circle
                     cx="40"
@@ -201,7 +201,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     strokeLinecap="round"
                   />
                 </svg>
-                <span className="relative font-numbers font-black text-2xl text-[#5A4B6B]">50%</span>
+                <span className="relative font-bold text-2xl text-[#5A4B6B]">50%</span>
               </div>
             </div>
 
