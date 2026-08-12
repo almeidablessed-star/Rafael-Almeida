@@ -120,7 +120,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#3A5A4A] to-[#5A8A6F]" />
 
           <div>
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex flex-col items-center gap-2 mb-3">
               <span
                 className={`text-[11px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full flex items-center justify-center gap-1.5 leading-none ${
                   balances.reposicao.isNegative

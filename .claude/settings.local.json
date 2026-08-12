@@ -29,7 +29,8 @@
       "Bash(git commit -m 'Fix: Porcentagem em Mão de Obra alinhada horizontalmente *)",
       "Bash(git commit -m 'Fix: Porcentagem 50% em BalancesAndExpensesModule alinhada horizontalmente *)",
       "Bash(git commit -m 'Fix: Alinhamento do ícone Reposição no badge *)",
-      "Bash(git commit -m 'Fix: Alinhamento perfeito do ícone e texto Reposição no badge *)"
+      "Bash(git commit -m 'Fix: Alinhamento perfeito do ícone e texto Reposição no badge *)",
+      "Bash(git commit -m 'Fix: Centralizar badge Reposição no card *)"
     ]
   },
   "hooks": {
