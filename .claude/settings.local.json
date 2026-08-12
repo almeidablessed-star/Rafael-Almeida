@@ -23,7 +23,8 @@
       "Bash(git commit -m 'Fix: '\\\\''50%'\\\\'' vertical no indicador circular *)",
       "Bash(git commit -m 'Refactor: Aba Pedidos - aplicar padrão premium Dashboard *)",
       "Bash(git commit -m 'Fix: Ícones saindo do card - alinhar dentro dos limites *)",
-      "Bash(git commit -m 'Refactor: Aplicar padrão premium em todas as abas restantes *)"
+      "Bash(git commit -m 'Refactor: Aplicar padrão premium em todas as abas restantes *)",
+      "Bash(git commit -m 'Refactor: Aplicar padrão premium na aba Saldos *)"
     ]
   },
   "hooks": {

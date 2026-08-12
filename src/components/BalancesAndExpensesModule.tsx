@@ -85,8 +85,8 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
 
   return (
     <div className="space-y-5 pb-12 animate-fadeIn">
-      {/* Header Banner */}
-      <div className="bg-[var(--color-neutral-cream)] rounded-xl p-5 text-[var(--color-neutral-charcoal)] shadow-sm border border-[var(--color-neutral-medium)]">
+      {/* Header Banner - Premium Style */}
+      <div className="bg-gradient-to-br from-[#B8D4E8]/20 to-[#B8D4E8]/5 rounded-2xl p-5 text-[#3A4A5A] shadow-md border border-[#B8D4E8]/40">
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs font-black uppercase tracking-wider text-[var(--color-semantic-gold)] flex items-center gap-1.5">
             <Wallet className="w-4 h-4 text-[var(--color-semantic-gold)]" />
