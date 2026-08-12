@@ -466,8 +466,8 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 
   return (
     <div className="space-y-5 pb-12 animate-fadeIn">
-      {/* Banner Header - Pastel Soft Palette */}
-      <div className="bg-[var(--color-pastry-lavender)] rounded-[32px] p-5 sm:p-6 text-[var(--color-pastry-chocolate)] shadow-xs border border-[var(--color-pastry-light-pink)]/40 relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      {/* Banner Header - Premium Style */}
+      <div className="bg-gradient-to-br from-[#D4C5E2]/25 to-[#D4C5E2]/5 rounded-3xl p-6 border border-[#D4C5E2]/40 shadow-md relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h2 className="font-bold text-2xl sm:text-3xl text-[var(--color-pastry-chocolate)] tracking-tight">
             Fichas Técnicas

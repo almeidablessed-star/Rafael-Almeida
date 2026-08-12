@@ -486,17 +486,17 @@ export const CustomersModule: React.FC = () => {
 
   return (
     <div className="space-y-5 pb-12 animate-fadeIn">
-      {/* Top Title Header */}
-      <div className="flex items-center justify-between gap-2 border-b border-[var(--color-accent-gold)]/40 pb-3">
-        <div className="flex items-center gap-2.5">
-          <div className="p-2.5 bg-[var(--color-accent-gold)] text-[var(--color-neutral-charcoal)] rounded-lg shadow-xs">
-            <Users className="w-5 h-5 text-[var(--color-neutral-charcoal)]" />
+      {/* Top Title Header - Premium Style */}
+      <div className="bg-gradient-to-br from-[#D4C5E2]/20 to-[#D4C5E2]/5 rounded-2xl p-5 border border-[#D4C5E2]/30 shadow-md flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-[#D4C5E2] text-[#5A4B6B] rounded-full flex items-center justify-center shadow-sm">
+            <Users className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="font-bold text-xl sm:text-2xl text-[var(--color-neutral-charcoal)]">
+            <h2 className="font-bold text-xl sm:text-2xl text-[#5A4B6B]">
               Clientes
             </h2>
-            <p className="text-xs text-[var(--color-neutral-charcoal)]/70 font-medium">
+            <p className="text-xs text-[#5A4B6B]/70 font-medium">
               {customers.length} {customers.length === 1 ? 'cliente cadastrada' : 'clientes cadastradas'}
             </p>
           </div>

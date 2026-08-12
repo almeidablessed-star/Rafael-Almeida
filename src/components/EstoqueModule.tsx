@@ -138,8 +138,8 @@ export const EstoqueModule: React.FC = () => {
 
   return (
     <div className="pb-12 animate-fadeIn">
-      {/* Header Section */}
-      <div className="bg-[var(--color-neutral-cream)] rounded-3xl p-5 mb-6">
+      {/* Header Section - Premium Style */}
+      <div className="bg-gradient-to-br from-[#C8E6D7]/20 to-[#C8E6D7]/5 rounded-3xl p-6 mb-6 border border-[#C8E6D7]/30 shadow-md">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
           <div>
             <h2 className="font-brand font-semibold text-xl sm:text-2xl text-[var(--color-neutral-charcoal)] tracking-tight flex items-center gap-2">
