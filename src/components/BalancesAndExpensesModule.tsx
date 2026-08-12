@@ -122,14 +122,14 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
           <div>
             <div className="flex items-center justify-between mb-3">
               <span
-                className={`text-[11px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full flex items-center gap-1.5 ${
+                className={`text-[11px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full flex items-center justify-center gap-1.5 leading-none ${
                   balances.reposicao.isNegative
                     ? 'bg-[#C85A54]/35 text-[#C85A54] border border-[#C85A54]/60'
                     : 'bg-[#3A5A4A]/15 text-[#3A5A4A] border border-[#3A5A4A]/40'
                 }`}
               >
-                <ShoppingBag className="w-4 h-4 shrink-0" />
-                Reposição
+                <ShoppingBag className="w-4 h-4 shrink-0 flex-shrink-0" />
+                <span>Reposição</span>
               </span>
 
               {balances.reposicao.isNegative && (
