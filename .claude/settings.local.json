@@ -14,7 +14,8 @@
       "Bash(git add *)",
       "Bash(git commit -m 'Melhorias visuais - Fichas Técnicas redesign *)",
       "Bash(git reset *)",
-      "Bash(git commit -m 'Correções visuais - Estoque + Fichas Técnicas *)"
+      "Bash(git commit -m 'Correções visuais - Estoque + Fichas Técnicas *)",
+      "Bash(git commit -m 'Fix: Cards de custos nas Fichas Técnicas alinhados corretamente *)"
     ]
   },
   "hooks": {

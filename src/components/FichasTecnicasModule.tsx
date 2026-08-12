@@ -861,47 +861,55 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                     </p>
 
                     {/* Breakdown Cost Metrics - Premium Design */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3">
                       {/* Reposição */}
-                      <div className="bg-[#C8E6D7]/20 border border-[#C8E6D7]/50 rounded-xl px-3 py-3 flex flex-col justify-start h-full shadow-xs hover:shadow-sm transition-all">
-                        <div className="flex items-center gap-1.5 mb-2">
-                          <span className="text-base">🧂</span>
-                          <span className="text-[8px] font-extrabold uppercase text-[#3A5A4A] tracking-wide leading-tight">Reposição</span>
+                      <div className="bg-[#C8E6D7]/20 border border-[#C8E6D7]/50 rounded-lg p-2 flex flex-col gap-1 shadow-xs">
+                        <div className="flex items-center gap-1">
+                          <span className="text-sm">🧂</span>
+                          <span className="text-[7px] font-bold uppercase text-[#3A5A4A]">Reposição</span>
                         </div>
-                        <strong className="text-[13px] font-black text-[#3A5A4A] mb-1">{formatCurrency(repoTotal)}</strong>
-                        <span className="text-[8px] text-[#3A5A4A]/60 font-normal">Ingredientes</span>
+                        <div className="flex flex-col">
+                          <strong className="text-[11px] font-black text-[#3A5A4A]">{formatCurrency(repoTotal)}</strong>
+                          <span className="text-[7px] text-[#3A5A4A]/70 font-normal">Ingredientes</span>
+                        </div>
                       </div>
 
                       {/* Mão de Obra */}
-                      <div className="bg-[#E8B4B8]/20 border border-[#E8B4B8]/50 rounded-xl px-3 py-3 flex flex-col justify-start h-full shadow-xs hover:shadow-sm transition-all">
-                        <div className="flex items-center gap-1.5 mb-2">
-                          <span className="text-base">👷</span>
-                          <span className="text-[8px] font-extrabold uppercase text-[#6B3E42] tracking-wide leading-tight">Mão de Obra</span>
+                      <div className="bg-[#E8B4B8]/20 border border-[#E8B4B8]/50 rounded-lg p-2 flex flex-col gap-1 shadow-xs">
+                        <div className="flex items-center gap-1">
+                          <span className="text-sm">👷</span>
+                          <span className="text-[7px] font-bold uppercase text-[#6B3E42]">Mão de Obra</span>
                         </div>
-                        <strong className="text-[13px] font-black text-[#6B3E42] mb-1">{formatCurrency(ficha.maoDeObraCost)}</strong>
-                        <span className="text-[8px] text-[#6B3E42]/60 font-normal">Produção</span>
+                        <div className="flex flex-col">
+                          <strong className="text-[11px] font-black text-[#6B3E42]">{formatCurrency(ficha.maoDeObraCost)}</strong>
+                          <span className="text-[7px] text-[#6B3E42]/70 font-normal">Produção</span>
+                        </div>
                       </div>
 
                       {/* Custos Operacionais */}
-                      <div className="bg-[#B8D4E8]/20 border border-[#B8D4E8]/50 rounded-xl px-3 py-3 flex flex-col justify-start h-full shadow-xs hover:shadow-sm transition-all">
-                        <div className="flex items-center gap-1.5 mb-2">
-                          <span className="text-base">⚙️</span>
-                          <span className="text-[8px] font-extrabold uppercase text-[#3A4A5A] tracking-wide leading-tight">Custos Op.</span>
+                      <div className="bg-[#B8D4E8]/20 border border-[#B8D4E8]/50 rounded-lg p-2 flex flex-col gap-1 shadow-xs">
+                        <div className="flex items-center gap-1">
+                          <span className="text-sm">⚙️</span>
+                          <span className="text-[7px] font-bold uppercase text-[#3A4A5A]">Custos</span>
                         </div>
-                        <strong className="text-[13px] font-black text-[#3A4A5A] mb-1">
-                          {formatCurrency((ficha.custoCost || 0) + (ficha.investimentoCost || 0))}
-                        </strong>
-                        <span className="text-[8px] text-[#3A4A5A]/60 font-normal">Overhead</span>
+                        <div className="flex flex-col">
+                          <strong className="text-[11px] font-black text-[#3A4A5A]">
+                            {formatCurrency((ficha.custoCost || 0) + (ficha.investimentoCost || 0))}
+                          </strong>
+                          <span className="text-[7px] text-[#3A4A5A]/70 font-normal">Operacional</span>
+                        </div>
                       </div>
 
                       {/* Sugestão de Preço */}
-                      <div className="bg-[#3E3430] border border-[#3E3430]/80 rounded-xl px-3 py-3 flex flex-col justify-start h-full shadow-md hover:shadow-lg transition-all">
-                        <div className="flex items-center gap-1.5 mb-2">
-                          <span className="text-base">💰</span>
-                          <span className="text-[8px] font-extrabold uppercase text-[#C9A878] tracking-wide leading-tight">Sugestão</span>
+                      <div className="bg-[#3E3430] border border-[#3E3430]/80 rounded-lg p-2 flex flex-col gap-1 shadow-xs">
+                        <div className="flex items-center gap-1">
+                          <span className="text-sm">💰</span>
+                          <span className="text-[7px] font-bold uppercase text-[#C9A878]">Sugestão</span>
                         </div>
-                        <strong className="text-[13px] font-black text-white mb-1">{formatCurrency(ficha.sugestaoVenda)}</strong>
-                        <span className="text-[8px] text-[#C9A878]/80 font-normal">Venda</span>
+                        <div className="flex flex-col">
+                          <strong className="text-[11px] font-black text-white">{formatCurrency(ficha.sugestaoVenda)}</strong>
+                          <span className="text-[7px] text-[#C9A878]/80 font-normal">Venda</span>
+                        </div>
                       </div>
                     </div>
 
