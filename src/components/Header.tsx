@@ -28,7 +28,7 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Avatar (36px with gradient ring) */}
         <button
           onClick={() => setIsProfileModalOpen(true)}
-          className="flex-shrink-0 w-9 h-9 rounded-full transition-transform hover:scale-110 focus:outline-none"
+          className="flex-shrink-0 w-[36px] h-[36px] rounded-full transition-transform focus:outline-none"
           style={{
             background: 'linear-gradient(140deg, var(--color-rose-200), var(--color-rose-600))',
             padding: '2px',
@@ -46,12 +46,12 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Brand (Centered) */}
         <div className="flex-1 text-center">
-          <div className="font-marca text-3xl text-white" style={{ lineHeight: 1 }}>
+          <div className="font-marca text-[26px] text-white" style={{ lineHeight: 1, fontWeight: 400 }}>
             Carula
           </div>
           <div
             className="text-[8px] font-black text-white uppercase"
-            style={{ letterSpacing: '0.44em', marginTop: '2px' }}
+            style={{ letterSpacing: '0.44em', marginTop: '3px' }}
           >
             CONFEITARIA
           </div>

@@ -77,7 +77,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
       {/* Summary Cards Row - Premium Style */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {/* Total Vendas */}
-        <div className="bg-gradient-to-br from-[#F5D4A8]/30 to-[#F5D4A8]/10 rounded-2xl p-4 border border-[#F5D4A8]/40 shadow-card-hover hover:shadow-highlight transition-all relative overflow-hidden">
+        <div className="bg-gradient-to-br from-[#F5D4A8]/30 to-[#F5D4A8]/10 rounded-2xl p-4 border border-[#F5D4A8]/40 shadow-card hover:shadow-card-hover transition-all relative overflow-hidden">
           <div className="flex gap-3 items-start">
             <div className="flex-1 min-w-0">
               <span className="label-sm text-[#6B5A42] block mb-1">Total em Vendas</span>
@@ -231,7 +231,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                 </div>
 
                 <div className="text-right flex items-center sm:flex-col sm:items-end justify-between w-full sm:w-auto shrink-0 border-t sm:border-t-0 pt-2 sm:pt-0 border-[#E6E1DB]">
-                  <span className="font-numbers font-black text-lg sm:text-xl text-[var(--color-ink)]">
+                  <span className="font-numbers font-black text-sm text-[var(--color-ink)]">
                     {formatCurrency(tx.totalValue)}
                   </span>
 

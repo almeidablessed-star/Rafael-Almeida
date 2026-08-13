@@ -130,9 +130,7 @@
   }
 }
 
-/* Carula Design System Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fredoka:wght@500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;600;700;800&display=swap');
 
 @layer base {
   body {
@@ -355,15 +353,15 @@
 @layer utilities {
   /* Carula Redesign Animations */
   .animate-carSweep {
-    animation: carSweep 5s ease-in-out infinite;
+    animation: carSweep 5s infinite;
   }
 
   .animate-carGlow {
-    animation: carGlow 6s ease-in-out infinite;
+    animation: carGlow 6s infinite;
   }
 
   .animate-carFloat {
-    animation: carFloat 4.5s ease-in-out infinite;
+    animation: carFloat 4.5s infinite;
   }
 
   /* Modal Animations */
@@ -508,18 +506,16 @@
   border-radius: 14px;
   border: none;
   box-shadow: 0 10px 20px rgba(58, 35, 80, 0.3);
-  transition: transform 220ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 220ms cubic-bezier(0.23, 1, 0.32, 1), background-color 220ms ease;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
 }
-@media (hover: hover) and (pointer: fine) {
-  .btn-primary:hover {
-    background-color: #2D1B3F;
-    box-shadow: 0 14px 28px rgba(58, 35, 80, 0.4);
-    transform: translateY(-3px);
-  }
+.btn-primary:hover {
+  background-color: #2D1B3F;
+  box-shadow: 0 14px 28px rgba(58, 35, 80, 0.4);
+  transform: translateY(-3px);
 }
 .btn-primary:active {
-  transform: scale(0.97) translateY(-3px);
+  transform: scale(0.98) translateY(-3px);
 }
 
 .btn-secondary {
@@ -530,18 +526,13 @@
   font-weight: 600;
   font-size: 14px;
   border-radius: 14px;
-  transition: transform 220ms cubic-bezier(0.23, 1, 0.32, 1), border-color 220ms ease, background-color 220ms ease;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
 }
-@media (hover: hover) and (pointer: fine) {
-  .btn-secondary:hover {
-    background-color: var(--color-surface);
-    border-color: var(--color-brand-700);
-    transform: translateY(-2px);
-  }
-}
-.btn-secondary:active {
-  transform: scale(0.97) translateY(-2px);
+.btn-secondary:hover {
+  background-color: var(--color-surface);
+  border-color: var(--color-brand-700);
+  transform: translateY(-2px);
 }
 
 .btn-tertiary {
@@ -551,19 +542,14 @@
   font-weight: 600;
   font-size: 14px;
   border-radius: 10px;
-  transition: transform 220ms cubic-bezier(0.23, 1, 0.32, 1), color 220ms ease, background-color 220ms ease;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   border: none;
 }
-@media (hover: hover) and (pointer: fine) {
-  .btn-tertiary:hover {
-    color: var(--color-brand-900);
-    background-color: rgba(58, 35, 80, 0.08);
-    transform: translateY(-2px);
-  }
-}
-.btn-tertiary:active {
-  transform: scale(0.97) translateY(-2px);
+.btn-tertiary:hover {
+  color: var(--color-brand-900);
+  background-color: rgba(58, 35, 80, 0.08);
+  transform: translateY(-2px);
 }
 
 .btn-danger {
@@ -575,116 +561,14 @@
   border-radius: 14px;
   border: none;
   box-shadow: 0 10px 20px rgba(196, 98, 111, 0.3);
-  transition: transform 220ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 220ms cubic-bezier(0.23, 1, 0.32, 1), background-color 220ms ease;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
 }
-@media (hover: hover) and (pointer: fine) {
-  .btn-danger:hover {
-    background-color: #B8483E;
-    box-shadow: 0 14px 28px rgba(196, 98, 111, 0.4);
-    transform: translateY(-3px);
-  }
+.btn-danger:hover {
+  background-color: #B8483E;
+  box-shadow: 0 14px 28px rgba(196, 98, 111, 0.4);
+  transform: translateY(-3px);
 }
 .btn-danger:active {
-  transform: scale(0.97) translateY(-3px);
-}
-
-/* Popover origin-awareness (Emil's principle) */
-.popover {
-  transform-origin: var(--transform-origin, center);
-}
-
-/* List item stagger animation (30-80ms cascade) */
-.list-item {
-  animation: slideUpFade 300ms ease-out forwards;
-}
-.list-item:nth-child(1) { animation-delay: 0ms; }
-.list-item:nth-child(2) { animation-delay: 50ms; }
-.list-item:nth-child(3) { animation-delay: 100ms; }
-.list-item:nth-child(4) { animation-delay: 150ms; }
-.list-item:nth-child(5) { animation-delay: 200ms; }
-
-@keyframes slideUpFade {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* ====== Seal / Pill Styles ====== */
-.seal {
-  display: inline-block;
-  padding: 5px 10px;
-  border-radius: 999px;
-  font-size: 10px;
-  font-weight: 800;
-  white-space: nowrap;
-  letter-spacing: 0.04em;
-  font-family: 'Manrope', sans-serif;
-  text-transform: uppercase;
-}
-
-.seal-positive {
-  background-color: var(--color-mint-300);
-  color: #2B2420;
-}
-
-.seal-pending {
-  background-color: var(--color-sand-200);
-  color: #5A4E46;
-}
-
-.seal-alert {
-  background-color: var(--color-rose-200);
-  color: var(--color-brand-900);
-}
-
-.seal-category {
-  background-color: var(--color-lavender);
-  color: var(--color-brand-700);
-}
-
-/* ====== Card Elevations ====== */
-.card-elevated {
-  background-color: var(--color-card);
-  border-radius: 20px;
-  border: 1px solid rgba(58, 35, 80, 0.06);
-  box-shadow: 0 8px 20px rgba(58, 35, 80, 0.09);
-  transition: all 0.28s cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-.card-elevated:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 20px 36px rgba(58, 35, 80, 0.18);
-}
-
-/* ====== BottomNav Hover States (Touch-Aware) ====== */
-@media (hover: hover) and (pointer: fine) {
-  .bottom-nav button:not([aria-current="page"]):hover {
-    transform: translateY(-4px);
-    background-color: rgba(58, 35, 80, 0.06);
-  }
-}
-
-/* ====== Responsive Utilities ====== */
-@media (min-width: 1024px) {
-  .sidebar-responsive {
-    width: 236px;
-    flex-shrink: 0;
-  }
-
-  .content-main {
-    flex: 1;
-    overflow-y: auto;
-  }
-
-  .nav-vertical {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
+  transform: scale(0.98) translateY(-3px);
 }

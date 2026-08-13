@@ -66,7 +66,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <div className="text-xs font-black uppercase tracking-widest text-white/80 mb-2">
                 Lucro Líquido do Mês
               </div>
-              <div className="font-marca text-4xl font-bold text-white" style={{ lineHeight: 1.1 }}>
+              <div className="font-marca text-4xl font-bold" style={{ lineHeight: 1.1, color: 'var(--color-rose-200)' }}>
                 {formatCurrency(summary.totalValue || 0)}
               </div>
               <div className="text-xs text-white/70 mt-1">
@@ -179,52 +179,52 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
         {/* 3 Circular Gauges */}
         <div className="grid grid-cols-3 gap-4">
-          {/* Reposição - 72% */}
-          <div className="bg-white rounded-2xl p-4 shadow-card text-center">
+          {/* Reposição - 72% - Mint Green */}
+          <div className="bg-white rounded-2xl p-4 shadow-card text-center hover:shadow-card-hover transition-all duration-300">
             <svg width="90" height="90" viewBox="0 0 100 100" className="mx-auto">
-              <circle cx="50" cy="50" r="38" fill="none" stroke="#f1ecf2" strokeWidth="6" />
+              <circle cx="50" cy="50" r="38" fill="none" stroke="var(--color-meter-track)" strokeWidth="6" />
               <circle
-                cx="50" cy="50" r="38" fill="none" stroke="var(--color-brand-900)" strokeWidth="6"
+                cx="50" cy="50" r="38" fill="none" stroke="var(--color-mint-300)" strokeWidth="6"
                 strokeDasharray={`${Math.PI * 76 * 0.72} ${Math.PI * 76}`}
                 transform="rotate(-90 50 50)"
                 strokeLinecap="round"
               />
-              <text x="50" y="58" textAnchor="middle" fontSize="16" fontWeight="bold" fill="var(--color-brand-900)">72%</text>
+              <text x="50" y="58" textAnchor="middle" fontSize="16" fontWeight="bold" fill="var(--color-mint-300)">72%</text>
             </svg>
-            <div className="text-xs font-black uppercase tracking-wide mt-2" style={{ color: 'var(--color-brand-900)' }}>Reposição</div>
-            <div className="font-marca text-lg font-bold mt-1">R$ 1.240</div>
+            <div className="label-sm mt-3 text-[var(--color-mint-300)]">REPOSIÇÃO</div>
+            <div className="value-md text-[var(--color-mint-300)] mt-1">R$ 1.240</div>
           </div>
 
-          {/* Mão de Obra - 34% */}
-          <div className="bg-white rounded-2xl p-4 shadow-card text-center">
+          {/* Mão de Obra - 48% - Purple/Rose */}
+          <div className="bg-white rounded-2xl p-4 shadow-card text-center hover:shadow-card-hover transition-all duration-300">
             <svg width="90" height="90" viewBox="0 0 100 100" className="mx-auto">
-              <circle cx="50" cy="50" r="38" fill="none" stroke="#f1ecf2" strokeWidth="6" />
+              <circle cx="50" cy="50" r="38" fill="none" stroke="var(--color-meter-track)" strokeWidth="6" />
               <circle
-                cx="50" cy="50" r="38" fill="none" stroke="var(--color-brand-900)" strokeWidth="6"
-                strokeDasharray={`${Math.PI * 76 * 0.34} ${Math.PI * 76}`}
+                cx="50" cy="50" r="38" fill="none" stroke="var(--color-brand-700)" strokeWidth="6"
+                strokeDasharray={`${Math.PI * 76 * 0.48} ${Math.PI * 76}`}
                 transform="rotate(-90 50 50)"
                 strokeLinecap="round"
               />
-              <text x="50" y="58" textAnchor="middle" fontSize="16" fontWeight="bold" fill="var(--color-brand-900)">34%</text>
+              <text x="50" y="58" textAnchor="middle" fontSize="16" fontWeight="bold" fill="var(--color-brand-700)">48%</text>
             </svg>
-            <div className="text-xs font-black uppercase tracking-wide mt-2" style={{ color: 'var(--color-brand-900)' }}>Mão de Obra</div>
-            <div className="font-marca text-lg font-bold mt-1">R$ 860</div>
+            <div className="label-sm mt-3 text-[var(--color-brand-700)]">MÃO DE OBRA</div>
+            <div className="value-md text-[var(--color-brand-700)] mt-1">R$ 860</div>
           </div>
 
-          {/* Custo + Investimento - 23% */}
-          <div className="bg-white rounded-2xl p-4 shadow-card text-center">
+          {/* Custo + Investimento - 35% - Sand/Gold */}
+          <div className="bg-white rounded-2xl p-4 shadow-card text-center hover:shadow-card-hover transition-all duration-300">
             <svg width="90" height="90" viewBox="0 0 100 100" className="mx-auto">
-              <circle cx="50" cy="50" r="38" fill="none" stroke="#f1ecf2" strokeWidth="6" />
+              <circle cx="50" cy="50" r="38" fill="none" stroke="var(--color-meter-track)" strokeWidth="6" />
               <circle
-                cx="50" cy="50" r="38" fill="none" stroke="var(--color-brand-900)" strokeWidth="6"
-                strokeDasharray={`${Math.PI * 76 * 0.23} ${Math.PI * 76}`}
+                cx="50" cy="50" r="38" fill="none" stroke="var(--color-sand-200)" strokeWidth="6"
+                strokeDasharray={`${Math.PI * 76 * 0.35} ${Math.PI * 76}`}
                 transform="rotate(-90 50 50)"
                 strokeLinecap="round"
               />
-              <text x="50" y="58" textAnchor="middle" fontSize="16" fontWeight="bold" fill="var(--color-brand-900)">23%</text>
+              <text x="50" y="58" textAnchor="middle" fontSize="16" fontWeight="bold" fill="var(--color-sand-200)">35%</text>
             </svg>
-            <div className="text-xs font-black uppercase tracking-wide mt-2" style={{ color: 'var(--color-brand-900)' }}>Custo + Invest.</div>
-            <div className="font-marca text-lg font-bold mt-1">R$ 620</div>
+            <div className="label-sm mt-3" style={{ color: '#6B5A42' }}>CUSTO + INVEST</div>
+            <div className="value-md mt-1" style={{ color: '#6B5A42' }}>R$ 620</div>
           </div>
         </div>
       </div>

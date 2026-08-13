@@ -141,16 +141,43 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-hero text-neutral-charcoal flex flex-col font-sans">
-      
-      {/* Top Header */}
+    <div className="min-h-screen bg-neutral-hero text-neutral-charcoal flex flex-col font-sans lg:flex-row">
+
+      {/* Top Header - Mobile Only */}
       <Header
         onOpenPwaModal={() => setIsPwaModalOpen(true)}
         onOpenBackupModal={() => setIsBackupModalOpen(true)}
       />
 
+      {/* Sidebar Navigation - Desktop Only (≥1024px) */}
+      <nav className="hidden lg:flex lg:flex-col lg:fixed lg:left-0 lg:top-0 lg:h-screen lg:w-[236px] lg:bg-brand-gradient lg:shadow-highlight lg:overflow-y-auto">
+        <div className="p-6 flex flex-col gap-2">
+          {[
+            { id: 'dashboard', label: 'Início' },
+            { id: 'pedidos', label: 'Pedidos' },
+            { id: 'fichas', label: 'Fichas' },
+            { id: 'clientes', label: 'Clientes' },
+            { id: 'estoque', label: 'Estoque' },
+            { id: 'saldos', label: 'Saldos' },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as TabType)}
+              className={`px-4 py-2 rounded-[14px] text-sm font-black uppercase tracking-[0.14em] transition-all ${
+                activeTab === tab.id
+                  ? 'bg-gradient-to-r from-[var(--color-rose-200)] to-[var(--color-rose-600)] text-[var(--color-brand-900)]'
+                  : 'text-white/70 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </nav>
+
       {/* Main Screen Container */}
-      <main className="flex-1 max-w-lg w-full mx-auto px-4 pt-4 bottom-nav-safe">
+      <main className="flex-1 w-full lg:ml-[236px] flex flex-col">
+        <div className="flex-1 max-w-lg lg:max-w-none w-full mx-auto px-4 pt-4 lg:pt-6 bottom-nav-safe lg:bottom-nav-safe lg:px-8">
 
         {/* Tab Content Router */}
         {activeTab === 'dashboard' && (
@@ -274,10 +301,13 @@ export default function App() {
           />
         )}
 
+        </div>
       </main>
 
-      {/* Fixed Bottom Navigation Bar */}
-      <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+      {/* Fixed Bottom Navigation Bar - Mobile Only (< 1024px) */}
+      <div className="lg:hidden">
+        <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+      </div>
 
       {/* Transaction Form Modal */}
       <TransactionFormModal

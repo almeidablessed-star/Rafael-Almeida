@@ -60,14 +60,14 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) 
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
               aria-current={isActive ? 'page' : undefined}
-              className={`flex flex-col items-center justify-center flex-1 px-1 transition-all duration-250 active:scale-95 ${
+              className={`flex flex-col items-center justify-center flex-1 px-2 py-1 rounded-[14px] transition-all duration-250 ${
                 isActive
-                  ? 'text-[var(--color-rose-200)] bg-[var(--color-brand-900)] rounded-[16px] py-1 font-bold -translate-y-1'
-                  : 'text-[#A096A6] hover:text-[var(--color-brand-900)] hover:-translate-y-1'
+                  ? 'bg-gradient-to-r from-[var(--color-rose-200)] to-[var(--color-rose-600)] text-[var(--color-brand-900)] -translate-y-1 font-black'
+                  : 'text-[var(--color-ink-soft)]'
               }`}
             >
               <Icon className="w-5 h-5 transition-transform" />
-              <span className="text-[9px] mt-0.5 font-black uppercase tracking-wide mt-1">
+              <span className="text-[9px] font-black uppercase tracking-[0.14em] mt-0.5">
                 {tab.label}
               </span>
             </button>

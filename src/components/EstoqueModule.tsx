@@ -292,7 +292,7 @@ export const EstoqueModule: React.FC = () => {
                 {lowStockItems.map((item) => (
                   <div
                     key={item.id}
-                    className="bg-[#FBE8D6] border-2 border-[#F5D4A8] rounded-2xl p-4 hover:shadow-card transition-all shadow-card"
+                    className="bg-[#FBE8D6] border-2 border-[#F5D4A8] rounded-2xl p-4 hover:shadow-card transition-all shadow-card list-item"
                   >
                     {/* Item Header */}
                     <div className="flex items-start justify-between mb-3 pb-2 border-b border-[var(--color-semantic-coral)] border-opacity-30">
@@ -378,7 +378,7 @@ export const EstoqueModule: React.FC = () => {
                 {healthyStockItems.map((item) => (
                   <div
                     key={item.id}
-                    className="bg-white border border-[var(--color-neutral-light)] rounded-2xl p-4 hover:border-[var(--color-primary)] hover:shadow-card transition-all"
+                    className="bg-white border border-[var(--color-neutral-light)] rounded-2xl p-4 hover:border-[var(--color-primary)] hover:shadow-card transition-all list-item"
                   >
                     {/* Item Header */}
                     <div className="pb-2 border-b border-[var(--color-neutral-light)] mb-3">

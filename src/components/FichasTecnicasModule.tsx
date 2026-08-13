@@ -844,7 +844,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
             return (
               <div
                 key={ficha.id}
-                className={`${bgClass} rounded-[32px] p-5 sm:p-6 shadow-card transition-all hover:shadow-sm relative overflow-hidden`}
+                className={`${bgClass} rounded-[32px] p-5 sm:p-6 shadow-card transition-all hover:shadow-sm relative overflow-hidden list-item`}
               >
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
                   

@@ -743,7 +743,7 @@ export const CustomersModule: React.FC = () => {
             return (
               <div
                 key={c.id}
-                className="p-4 rounded-xl border border-[var(--color-accent-gold)]/40 bg-white shadow-card hover:border-[var(--color-accent-gold)] transition-all space-y-2.5"
+                className="p-4 rounded-xl border border-[var(--color-accent-gold)]/40 bg-white shadow-card hover:border-[var(--color-accent-gold)] transition-all space-y-2.5 list-item"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-1 min-w-0 flex-1">

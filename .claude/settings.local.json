@@ -35,7 +35,22 @@
       "Bash(git commit -m 'Fix: PDF branco - melhorias na geração de PDF *)",
       "Bash(git commit -m 'Fix: Download de imagem com melhorias de robustez *)",
       "Bash(python -m pip list)",
-      "PowerShell(python3 -c \"import PyPDF2; print\\('PyPDF2 available'\\)\" 2>&1)"
+      "PowerShell(python3 -c \"import PyPDF2; print\\('PyPDF2 available'\\)\" 2>&1)",
+      "Bash(git reflog *)",
+      "Bash(npm install *)",
+      "Bash(node convert-pdf.js)",
+      "Bash(ls -lh \"C:\\\\Users\\\\Rafael\\\\Downloads\\\\Carula Redesign.pdf\")",
+      "Bash(pacman -S poppler --noconfirm)",
+      "Bash(timeout 30 node read-pdf.js)",
+      "PowerShell(choco install poppler -y 2>&1)",
+      "PowerShell(tail -20)",
+      "Bash(node pdf-to-html.js)",
+      "Bash(node pdf2html.js)",
+      "Bash(find \"C:\\\\Users\\\\Rafael\" -name \"*ESPECIFICACAO*\" -o -name \"*carula*md\" 2>/dev/null | head -20)",
+      "Bash(node analyze-html.js)",
+      "Bash(node serve.js)",
+      "Bash(node extract-design.js)",
+      "Bash(git config *)"
     ]
   },
   "hooks": {
