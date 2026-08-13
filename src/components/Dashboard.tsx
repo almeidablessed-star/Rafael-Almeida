@@ -66,27 +66,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
         {/* Content */}
         <div className="relative z-10 space-y-4">
-          {/* Top: Gauge (92px) + Label */}
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1">
-              <div className="text-xs font-black uppercase tracking-widest text-white/80 mb-3">
-                Lucro Líquido do Mês (Rendimento)
-              </div>
-              <div className="font-black text-white" style={{ fontSize: '32px', lineHeight: 1.1 }}>
-                {formatCurrency(profit)}
-              </div>
-              <div className="flex items-center gap-2 mt-2">
-                {profit > 0 ? (
-                  <span className="inline-flex items-center px-2.5 py-1 text-xs font-black rounded-full whitespace-nowrap" style={{ background: 'var(--color-mint-300)', color: 'var(--color-ink)' }}>
-                    ✓ Positivo
-                  </span>
-                ) : (
-                  <span className="text-xs text-white/70">⚠ Resultado</span>
-                )}
-              </div>
-            </div>
-
-            {/* Circular Gauge (92px, 59%) */}
+          {/* Top: Gauge (92px) à esquerda + Label/Valor à direita */}
+          <div className="flex items-center justify-between gap-6">
+            {/* Circular Gauge (92px) - À ESQUERDA */}
             <svg width="92" height="92" viewBox="0 0 100 100" className="flex-shrink-0">
               <circle cx="50" cy="50" r="38" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="10" />
               <circle
@@ -97,6 +79,21 @@ export const Dashboard: React.FC<DashboardProps> = ({
               />
               <text x="50" y="58" textAnchor="middle" fontSize="20" fontWeight="bold" fill="white">{marginPercent}%</text>
             </svg>
+
+            {/* Texto e valor - À DIREITA */}
+            <div className="flex-1">
+              <div className="text-xs font-black uppercase tracking-widest text-white/80 mb-2">
+                Lucro Líquido do Mês (Rendimento)
+              </div>
+              <div className="font-black text-white" style={{ fontSize: '38px', lineHeight: 1.1, letterSpacing: '-0.02em' }}>
+                {formatCurrency(profit)}
+              </div>
+              <div className="flex items-center gap-2 mt-3">
+                <span className="inline-flex items-center px-3 py-1.5 text-xs font-black rounded-full whitespace-nowrap" style={{ background: 'var(--color-mint-300)', color: 'var(--color-ink)' }}>
+                  ✓ Positivo
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* Success Message */}
@@ -105,22 +102,22 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
 
           {/* Bottom: 3 Small Boxes */}
-          <div className="grid grid-cols-3 gap-3 pt-2">
-            <div className="bg-white/20 rounded-xl p-3 text-center backdrop-blur" style={{ background: 'rgba(255,255,255,0.12)' }}>
-              <div className="text-xs text-white/80 font-semibold">Vendas Pagas</div>
-              <div className="font-black text-sm text-white mt-1" style={{ fontSize: '13px' }}>
+          <div className="grid grid-cols-3 gap-3 pt-3">
+            <div className="rounded-xl p-4 text-center backdrop-blur" style={{ background: 'rgba(255,255,255,0.12)' }}>
+              <div className="text-xs text-white/80 font-bold uppercase tracking-wide">Vendas Pagas</div>
+              <div className="font-black text-white mt-2" style={{ fontSize: '18px', lineHeight: 1 }}>
                 {formatCurrency(balances.paidSales || 0)}
               </div>
             </div>
-            <div className="bg-white/20 rounded-xl p-3 text-center backdrop-blur" style={{ background: 'rgba(255,255,255,0.12)' }}>
-              <div className="text-xs text-white/80 font-semibold">Saídas</div>
-              <div className="font-black text-sm text-white mt-1" style={{ fontSize: '13px' }}>
+            <div className="rounded-xl p-4 text-center backdrop-blur" style={{ background: 'rgba(255,255,255,0.12)' }}>
+              <div className="text-xs text-white/80 font-bold uppercase tracking-wide">Saídas</div>
+              <div className="font-black text-white mt-2" style={{ fontSize: '18px', lineHeight: 1 }}>
                 {formatCurrency(balances.totalExpenses || 0)}
               </div>
             </div>
-            <div className="bg-white/20 rounded-xl p-3 text-center backdrop-blur" style={{ background: 'rgba(228,217,195,0.28)' }}>
-              <div className="text-xs text-white/80 font-semibold">⏳ A Receber</div>
-              <div className="font-black text-sm text-white mt-1" style={{ fontSize: '13px' }}>
+            <div className="rounded-xl p-4 text-center backdrop-blur" style={{ background: 'rgba(228,217,195,0.28)' }}>
+              <div className="text-xs text-white/80 font-bold uppercase tracking-wide">⏳ A Receber</div>
+              <div className="font-black text-white mt-2" style={{ fontSize: '18px', lineHeight: 1 }}>
                 {formatCurrency(balances.pendingSales || 0)}
               </div>
             </div>
@@ -174,20 +171,20 @@ export const Dashboard: React.FC<DashboardProps> = ({
             right: '-11px', top: '50%', transform: 'translateY(-50%)',
           }} />
 
-          <div className="relative flex items-center justify-between gap-4">
+          <div className="relative flex items-center gap-4">
             <div className="flex-1">
               <div className="text-xs font-black uppercase tracking-wider text-white/80 mb-1">NOVA COMANDA</div>
-              <div className="font-marca text-white" style={{ fontSize: '29px', lineHeight: 1 }}>+ Lançar Pedido</div>
+              <div className="font-marca text-white" style={{ fontSize: '28px', lineHeight: 1 }}>+ Lançar Pedido</div>
             </div>
             <div
               className="animate-carFloat flex-shrink-0 w-11 h-11 rounded-[14px] flex items-center justify-center font-black text-2xl"
               style={{
                 background: 'var(--color-rose-200)',
                 color: 'var(--color-brand-900)',
-            }}
-          >
-            +
-          </div>
+              }}
+            >
+              +
+            </div>
           </div>
 
           {/* Sweep animation */}
@@ -224,8 +221,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 />
                 <text x="50" y="58" textAnchor="middle" fontSize="18" fontWeight="bold" fill="var(--color-brand-900)">{Math.round(balances.reposicaoPercent || 72)}%</text>
               </svg>
-              <div className="text-xs font-black uppercase tracking-wide mt-3" style={{ color: 'var(--color-brand-900)' }}>Reposição</div>
-              <div className="font-marca text-lg font-bold mt-1" style={{ color: 'var(--color-ink)' }}>{formatCurrency(balances.reposicao || 1240)}</div>
+              <div className="text-sm font-black uppercase tracking-wider mt-3" style={{ color: 'var(--color-brand-900)' }}>Reposição</div>
+              <div className="font-marca text-lg font-black mt-2" style={{ color: 'var(--color-ink)', fontSize: '20px' }}>{formatCurrency(balances.reposicao || 1240)}</div>
             </div>
 
             {/* Mão de Obra */}
@@ -240,8 +237,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 />
                 <text x="50" y="58" textAnchor="middle" fontSize="18" fontWeight="bold" fill="#7E4F9E">{Math.round(balances.laborPercent || 48)}%</text>
               </svg>
-              <div className="text-xs font-black uppercase tracking-wide mt-3" style={{ color: '#7E4F9E' }}>Mão de Obra</div>
-              <div className="font-marca text-lg font-bold mt-1" style={{ color: 'var(--color-ink)' }}>{formatCurrency(balances.labor || 860)}</div>
+              <div className="text-sm font-black uppercase tracking-wider mt-3" style={{ color: '#7E4F9E' }}>Mão de Obra</div>
+              <div className="font-marca text-lg font-black mt-2" style={{ color: 'var(--color-ink)', fontSize: '20px' }}>{formatCurrency(balances.labor || 860)}</div>
             </div>
 
             {/* Custo + Investimento */}
@@ -256,14 +253,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 />
                 <text x="50" y="58" textAnchor="middle" fontSize="18" fontWeight="bold" fill="#B08D57">{Math.round(balances.costsPercent || 35)}%</text>
               </svg>
-              <div className="text-xs font-black uppercase tracking-wide mt-3" style={{ color: '#B08D57' }}>Custo + Invest.</div>
-              <div className="font-marca text-lg font-bold mt-1" style={{ color: 'var(--color-ink)' }}>{formatCurrency(balances.costs || 620)}</div>
+              <div className="text-sm font-black uppercase tracking-wider mt-3" style={{ color: '#B08D57' }}>Custo + Invest.</div>
+              <div className="font-marca text-lg font-black mt-2" style={{ color: 'var(--color-ink)', fontSize: '20px' }}>{formatCurrency(balances.costs || 620)}</div>
             </div>
           </div>
 
           {/* Note about cost division */}
           <p className="text-xs text-center" style={{ color: 'var(--color-ink-soft)', marginTop: '8px' }}>
-            50% Custo (R$ {formatCurrency((balances.costs || 620) / 2)}) / 50% Invest.
+            50% Custo ({formatCurrency((balances.costs || 620) / 2)}) / 50% Invest.
           </p>
         </div>
 
