@@ -64,9 +64,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="text-xs font-black uppercase tracking-widest text-white/80 mb-2">
-                Lucro Líquido do Mês
+                Lucro Líquido do Mês (Rendimento)
               </div>
-              <div className="font-marca text-4xl font-bold" style={{ lineHeight: 1.1, color: 'var(--color-rose-200)' }}>
+              <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: '42px', fontWeight: 'bold', lineHeight: 1.1, color: '#F5B9C6' }}>
                 {formatCurrency(summary.totalValue || 0)}
               </div>
               <div className="text-xs text-white/70 mt-1">
@@ -94,7 +94,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <div className="font-black text-base text-white mt-1">R$ 8.400</div>
             </div>
             <div className="bg-white/20 rounded-xl p-3 text-center backdrop-blur">
-              <div className="text-xs text-white/80">Saídas</div>
+              <div className="text-xs text-white/80">Saldos</div>
               <div className="font-black text-base text-white mt-1">R$ 5.440</div>
             </div>
             <div className="bg-white/20 rounded-xl p-3 text-center backdrop-blur">
@@ -108,7 +108,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             onClick={() => onNavigateToTab('saldos')}
             className="w-full bg-white/20 hover:bg-white/30 text-white font-bold py-2 rounded-xl text-xs uppercase tracking-wide transition-all"
           >
-            Ver Detalhamento dos Saldos
+            Ver Detalhamento das Vendas
           </button>
         </div>
       </div>
