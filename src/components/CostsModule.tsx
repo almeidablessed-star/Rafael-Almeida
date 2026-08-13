@@ -55,7 +55,7 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
       {/* HERO ACTION CARD - Premium Styled */}
       <button
         onClick={() => onOpenAddModal('custo')}
-        className="w-full group relative overflow-hidden rounded-2xl transition-all active:scale-95 hover:shadow-lg"
+        className="w-full group relative overflow-hidden rounded-2xl transition-all active:scale-95 hover:shadow-highlight"
       >
         {/* Background with gradient */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#B8D4E8] to-[#A8C4D8] opacity-100 group-hover:opacity-105 transition-opacity" />
@@ -71,14 +71,14 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
               <p className="text-xs md:text-sm font-bold uppercase tracking-wider text-[#3A4A5A]/70 mb-1">
                 Registrar Despesa
               </p>
-              <p className="text-lg md:text-2xl font-brand font-black text-[#3E3430]">
+              <p className="text-lg md:text-2xl font-brand font-black text-[var(--color-brand-900)]">
                 + Novo Custo / Investimento
               </p>
             </div>
           </div>
 
           {/* Right: Arrow */}
-          <div className="flex-shrink-0 text-3xl md:text-4xl text-[#3E3430]/60 group-hover:translate-x-1 transition-transform">
+          <div className="flex-shrink-0 text-3xl md:text-4xl text-[var(--color-brand-900)]/60 group-hover:translate-x-1 transition-transform">
             →
           </div>
         </div>
@@ -90,7 +90,7 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
       {/* Module Header Cards Grid - Premium Styled */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-7">
         {/* Custos Operacionais Card */}
-        <div className="bg-gradient-to-r from-[#B8D4E8] via-[#DDE9F5] to-[#B8D4E8] rounded-2xl p-5 md:p-6 text-[#3E3430] shadow-sm border border-[#B8D4E8]/50 relative overflow-hidden">
+        <div className="bg-gradient-to-r from-[#B8D4E8] via-[#DDE9F5] to-[#B8D4E8] rounded-2xl p-5 md:p-6 text-[var(--color-brand-900)] shadow-sm border border-[#B8D4E8]/50 relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#3A4A5A] to-[#5A7A9E]" />
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] md:text-xs font-bold uppercase tracking-wider text-[#3A4A5A] flex items-center gap-1.5">
@@ -109,7 +109,7 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
         </div>
 
         {/* Investimentos Card */}
-        <div className="bg-gradient-to-r from-[#C8E6D7] via-[#E5F4F0] to-[#C8E6D7] rounded-2xl p-5 md:p-6 text-[#3E3430] shadow-sm border border-[#C8E6D7]/50 relative overflow-hidden">
+        <div className="bg-gradient-to-r from-[#C8E6D7] via-[#E5F4F0] to-[#C8E6D7] rounded-2xl p-5 md:p-6 text-[var(--color-brand-900)] shadow-sm border border-[#C8E6D7]/50 relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#3A5A4A] to-[#5A8A6F]" />
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] md:text-xs font-bold uppercase tracking-wider text-[#3A5A4A] flex items-center gap-1.5">
@@ -140,8 +140,8 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
             onClick={() => setActiveTab(tab.id as any)}
             className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
               activeTab === tab.id
-                ? 'bg-white text-[#3E3430] shadow-xs'
-                : 'text-[#5C5550] hover:text-[#3E3430]'
+                ? 'bg-white text-[var(--color-brand-900)] shadow-card'
+                : 'text-[var(--color-brand-700)] hover:text-[var(--color-brand-900)]'
             }`}
           >
             {tab.label}
@@ -151,27 +151,27 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
 
       {/* Search Bar */}
       <div className="relative">
-        <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#5C5550]" />
+        <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-brand-700)]" />
         <input
           type="text"
           placeholder="Buscar por gás, energia, batedeira, curso..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E6E1DB] rounded-lg text-xs font-medium text-[#3E3430] focus:outline-none focus:ring-2 focus:ring-[#B8D4E8]/40 shadow-xs"
+          className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E6E1DB] rounded-lg text-xs font-medium text-[var(--color-brand-900)] focus:outline-none focus:ring-2 focus:ring-[#B8D4E8]/40 shadow-card"
         />
       </div>
 
       {/* Costs & Investments List */}
       <div className="space-y-2.5">
-        <h3 className="text-xs font-bold text-[#5C5550] uppercase tracking-wider px-1">
+        <h3 className="text-xs font-bold text-[var(--color-brand-700)] uppercase tracking-wider px-1">
           Lista de Lançamentos:
         </h3>
 
         {filteredItems.length === 0 ? (
-          <div className="bg-white rounded-xl p-8 text-center border border-[#E6E1DB] shadow-xs">
+          <div className="bg-white rounded-xl p-8 text-center border border-[#E6E1DB] shadow-card">
             <Receipt className="w-10 h-10 text-[#B8D4E8]/40 mx-auto mb-2" />
-            <p className="text-sm font-bold text-[#3E3430]">Nenhum registro encontrado</p>
-            <p className="text-xs text-[#5C5550] mt-1">
+            <p className="text-sm font-bold text-[var(--color-brand-900)]">Nenhum registro encontrado</p>
+            <p className="text-xs text-[var(--color-brand-700)] mt-1">
               Cadastre aqui suas contas de energia, gás, anúncios e compras de novos equipamentos.
             </p>
           </div>
@@ -183,16 +183,16 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
             return (
               <div
                 key={item.id}
-                className="bg-white p-4 rounded-lg border border-[#E6E1DB] shadow-xs hover:border-[#B8D4E8]/40 transition-all flex items-center justify-between gap-3"
+                className="bg-white p-4 rounded-lg border border-[#E6E1DB] shadow-card hover:border-[#B8D4E8]/40 transition-all flex items-center justify-between gap-3"
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="font-brand font-bold text-[#3E3430] text-sm truncate">
+                    <span className="font-brand font-bold text-[var(--color-brand-900)] text-sm truncate">
                       {item.description}
                     </span>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-2 text-[11px] text-[#5C5550]">
+                  <div className="flex flex-wrap items-center gap-2 text-[11px] text-[var(--color-brand-700)]">
                     <span
                       className={`font-bold px-2 py-0.5 rounded-md flex items-center gap-1 ${
                         isInvestimento
@@ -203,7 +203,7 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
                       <Tag className="w-3 h-3" />
                       {getCostCategoryLabel(item.category)}
                     </span>
-                    <span className="flex items-center gap-1 text-[#5C5550]">
+                    <span className="flex items-center gap-1 text-[var(--color-brand-700)]">
                       <Calendar className="w-3 h-3" />
                       {formatDateBr(item.date)}
                     </span>
@@ -222,14 +222,14 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
                   <div className="flex items-center gap-1 mt-1">
                     <button
                       onClick={() => onEditTransaction(item)}
-                      className="p-1.5 rounded-lg text-[#5C5550] hover:text-[#3E3430] hover:bg-[#E6E1DB] transition-colors"
+                      className="p-1.5 rounded-lg text-[var(--color-brand-700)] hover:text-[var(--color-brand-900)] hover:bg-[#E6E1DB] transition-colors"
                       title="Editar"
                     >
                       <Edit3 className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => onDeleteTransaction(item)}
-                      className="p-1.5 rounded-lg text-[#5C5550] hover:text-[#C85A54] hover:bg-[#C85A54]/10 transition-colors"
+                      className="p-1.5 rounded-lg text-[var(--color-brand-700)] hover:text-[#C85A54] hover:bg-[#C85A54]/10 transition-colors"
                       title="Excluir Custo/Investimento"
                     >
                       <Trash2 className="w-3.5 h-3.5" />

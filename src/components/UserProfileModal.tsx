@@ -71,7 +71,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
   return createPortal(
     <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-neutral-900/80 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto" role="dialog" aria-modal="true">
-      <div className="bg-white rounded-xl max-w-lg w-full shadow-lg overflow-hidden animate-fadeIn border-2 border-pink-200 my-auto max-h-[90vh] flex flex-col my-auto" aria-labelledby="profileModalTitle">
+      <div className="bg-white rounded-xl max-w-lg w-full shadow-highlight overflow-hidden animate-fadeIn border-2 border-pink-200 my-auto max-h-[90vh] flex flex-col my-auto" aria-labelledby="profileModalTitle">
         {/* Header */}
         <div className="p-4 bg-gradient-to-r from-[#FF5935] via-[#E5613C] to-[#8E5CF0] text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2">
@@ -118,7 +118,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
             </div>
 
             <div className="flex items-center gap-2">
-              <label className="px-3 py-1 bg-pink-600 hover:bg-pink-700 text-white rounded-xl text-[11px] font-bold cursor-pointer shadow-xs">
+              <label className="px-3 py-1 bg-pink-600 hover:bg-pink-700 text-white rounded-xl text-[11px] font-bold cursor-pointer shadow-card">
                 Escolher Foto/Logo
                 <input
                   type="file"

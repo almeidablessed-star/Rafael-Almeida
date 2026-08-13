@@ -586,7 +586,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
 
   return createPortal(
     <div className="fixed inset-0 z-[99999] flex items-end sm:items-center justify-center bg-neutral-900/80 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto" role="dialog" aria-modal="true">
-      <div className="w-full max-w-xl bg-white rounded-t-xl sm:rounded-xl shadow-lg overflow-hidden max-h-[92vh] flex flex-col animate-slideUp" aria-labelledby="transactionModalTitle">
+      <div className="w-full max-w-xl bg-white rounded-t-xl sm:rounded-xl shadow-highlight overflow-hidden max-h-[92vh] flex flex-col animate-slideUp" aria-labelledby="transactionModalTitle">
         {/* Modal Header */}
         <div className={`px-5 py-4 flex items-center justify-between ${typeDetails.badgeBg}`}>
           <div className="flex items-center gap-2">
@@ -632,7 +632,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                     }}
                     className={`py-2 rounded-xl text-xs font-bold transition-all ${
                       type === item.id || (type === 'investimento' && item.id === 'custo')
-                        ? 'bg-white text-neutral-800 shadow-xs'
+                        ? 'bg-white text-neutral-800 shadow-card'
                         : 'text-neutral-500 hover:text-neutral-800'
                     }`}
                   >
@@ -649,7 +649,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
           {type === 'venda' && (
             <div className="space-y-4">
               {/* CUSTOMER & QUOTE DETAILS CARD */}
-              <div className="bg-pink-50/90 p-4 rounded-xl border border-pink-200 shadow-xs space-y-3">
+              <div className="bg-pink-50/90 p-4 rounded-xl border border-pink-200 shadow-card space-y-3">
                 <div className="flex items-center justify-between border-b border-pink-200/80 pb-2">
                   <label className="text-xs font-black uppercase tracking-wider text-pink-950 flex items-center gap-1.5">
                     👤 Dados da Cliente & Orçamento
@@ -657,7 +657,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                   <button
                     type="button"
                     onClick={() => setShowPdfQuoteModal(true)}
-                    className="px-3 py-1 bg-pink-600 hover:bg-pink-700 text-white rounded-xl text-xs font-bold shadow-xs flex items-center gap-1 transition-all active:scale-95"
+                    className="px-3 py-1 bg-pink-600 hover:bg-pink-700 text-white rounded-xl text-xs font-bold shadow-card flex items-center gap-1 transition-all active:scale-95"
                     title="Gerar e imprimir folha fofa de orçamento em PDF"
                   >
                     <Printer className="w-3.5 h-3.5" />
@@ -857,7 +857,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                   return (
                     <div
                       key={item.id}
-                      className="bg-pink-50/50 p-3.5 rounded-lg border border-pink-200/90 shadow-xs space-y-3 relative"
+                      className="bg-pink-50/50 p-3.5 rounded-lg border border-pink-200/90 shadow-card space-y-3 relative"
                     >
                       {/* Item Header & Delete */}
                       <div className="flex items-center justify-between">
@@ -979,7 +979,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                                   onClick={() => handleUpdateItemSlices(item.id, opt.slices)}
                                   className={`py-1.5 px-3 rounded-xl text-xs font-bold transition-all border ${
                                     isSelected
-                                      ? 'bg-pink-600 text-white border-pink-600 shadow-xs'
+                                      ? 'bg-pink-600 text-white border-pink-600 shadow-card'
                                       : 'bg-white text-neutral-700 border-neutral-200 hover:bg-pink-50'
                                   }`}
                                 >
@@ -1063,7 +1063,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                 <button
                   type="button"
                   onClick={handleAddItem}
-                  className="w-full py-2.5 px-4 bg-pink-50 hover:bg-pink-100 text-pink-800 font-brand font-bold text-xs rounded-lg border-2 border-dashed border-pink-300 transition-all flex items-center justify-center gap-2 active:scale-98 shadow-xs"
+                  className="w-full py-2.5 px-4 bg-pink-50 hover:bg-pink-100 text-pink-800 font-brand font-bold text-xs rounded-lg border-2 border-dashed border-pink-300 transition-all flex items-center justify-center gap-2 active:scale-98 shadow-card"
                 >
                   <PlusCircle className="w-4 h-4 text-pink-600 stroke-[2.5]" />
                   + Adicionar outro item ao mesmo pedido
@@ -1086,7 +1086,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       }}
                       className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
                         !hasDelivery
-                          ? 'bg-neutral-700 text-white shadow-xs'
+                          ? 'bg-neutral-700 text-white shadow-card'
                           : 'text-neutral-600 hover:text-neutral-900'
                       }`}
                     >
@@ -1097,7 +1097,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       onClick={() => setHasDelivery(true)}
                       className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
                         hasDelivery
-                          ? 'bg-pink-600 text-white shadow-xs'
+                          ? 'bg-pink-600 text-white shadow-card'
                           : 'text-neutral-600 hover:text-neutral-900'
                       }`}
                     >
@@ -1155,7 +1155,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       onClick={() => handleToggleAddons(false)}
                       className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
                         !hasAddons
-                          ? 'bg-neutral-700 text-white shadow-xs'
+                          ? 'bg-neutral-700 text-white shadow-card'
                           : 'text-neutral-600 hover:text-neutral-900'
                       }`}
                     >
@@ -1166,7 +1166,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       onClick={() => handleToggleAddons(true)}
                       className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
                         hasAddons
-                          ? 'bg-semantic-info-600 text-white shadow-xs'
+                          ? 'bg-semantic-info-600 text-white shadow-card'
                           : 'text-neutral-600 hover:text-neutral-900'
                       }`}
                     >
@@ -1180,7 +1180,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                     {addons.map((addon, index) => (
                       <div
                         key={addon.id}
-                        className="bg-white p-2.5 rounded-xl border border-semantic-info-200/80 shadow-xs space-y-2"
+                        className="bg-white p-2.5 rounded-xl border border-semantic-info-200/80 shadow-card space-y-2"
                       >
                         <div className="flex items-center justify-between">
                           <span className="text-[11px] font-extrabold text-semantic-info-900">
@@ -1258,7 +1258,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       onClick={() => setPaymentStatus('pendente')}
                       className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition-all text-left flex items-center justify-between ${
                         paymentStatus === 'pendente'
-                          ? 'bg-semantic-warning-500 text-white border-amber-500 shadow-xs'
+                          ? 'bg-semantic-warning-500 text-white border-amber-500 shadow-card'
                           : 'bg-semantic-warning-50 text-semantic-warning-900 border-semantic-warning-200 hover:bg-semantic-warning-100'
                       }`}
                     >
@@ -1270,7 +1270,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       onClick={() => setPaymentStatus('pago')}
                       className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition-all text-left flex items-center justify-between ${
                         paymentStatus === 'pago'
-                          ? 'bg-semantic-success-600 text-white border-emerald-600 shadow-xs'
+                          ? 'bg-semantic-success-600 text-white border-emerald-600 shadow-card'
                           : 'bg-semantic-success-50 text-semantic-success-900 border-semantic-success-200 hover:bg-emerald-100'
                       }`}
                     >
@@ -1296,7 +1296,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                         onClick={() => setPaymentMethod(item.id as PaymentMethod)}
                         className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all text-left flex items-center justify-between ${
                           paymentMethod === item.id
-                            ? 'bg-semantic-success-500 text-white border-emerald-500 shadow-xs'
+                            ? 'bg-semantic-success-500 text-white border-emerald-500 shadow-card'
                             : 'bg-neutral-50 text-neutral-700 border-neutral-200 hover:bg-neutral-100'
                         }`}
                       >
@@ -1343,7 +1343,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                     <span className="text-[10px] text-semantic-info-300 font-bold uppercase tracking-wider block">
                       Total Consolidado do Pedido
                     </span>
-                    <span className="text-2xl font-black text-emerald-400">
+                    <span className="font-marca text-3xl font-black text-emerald-400">
                       {formatCurrency(grandTotalSalePrice)}
                     </span>
                   </div>
@@ -1546,7 +1546,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                         onClick={() => setLaborPeriod(item.id as LaborPeriod)}
                         className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all ${
                           laborPeriod === item.id
-                            ? 'bg-semantic-info-600 text-white border-purple-600 shadow-xs'
+                            ? 'bg-semantic-info-600 text-white border-purple-600 shadow-card'
                             : 'bg-neutral-50 text-neutral-700 border-neutral-200 hover:bg-neutral-100'
                         }`}
                       >
@@ -1579,7 +1579,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                         }}
                         className={`py-2 px-2 rounded-xl text-[11px] font-bold border transition-all text-center ${
                           costCategory === item.id
-                            ? 'bg-rose-500 text-white border-rose-500 shadow-xs'
+                            ? 'bg-rose-500 text-white border-rose-500 shadow-card'
                             : 'bg-neutral-50 text-neutral-700 border-neutral-200 hover:bg-neutral-100'
                         }`}
                       >
@@ -1596,7 +1596,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
           <div className="pt-2">
             <button
               type="submit"
-              className="w-full py-4 rounded-lg bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-brand text-base font-bold shadow-lg shadow-pink-200 active:scale-98 transition-all flex items-center justify-center gap-2"
+              className="w-full py-4 rounded-lg bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-brand text-base font-bold shadow-highlight shadow-pink-200 active:scale-98 transition-all flex items-center justify-center gap-2"
             >
               <Check className="w-5 h-5 stroke-[2.5]" />
               {editingTransaction ? 'Salvar Alterações' : 'Confirmar e Gravar'}

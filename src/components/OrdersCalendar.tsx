@@ -91,11 +91,11 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
     : monthSales;
 
   return (
-    <div className="bg-[var(--color-neutral-hero)] rounded-xl p-5 sm:p-6 border border-[var(--color-text-muted)] shadow-xs space-y-4">
+    <div className="bg-[var(--color-neutral-hero)] rounded-xl p-5 sm:p-6 border border-[var(--color-text-muted)] shadow-card space-y-4">
       {/* Header Month Control */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="p-2.5 bg-[var(--color-neutral-charcoal)] text-[var(--color-accent-gold)] rounded-full shadow-xs">
+          <div className="p-2.5 bg-[var(--color-neutral-charcoal)] text-[var(--color-accent-gold)] rounded-full shadow-card">
             <CalendarIcon className="w-4.5 h-4.5" />
           </div>
           <div>
@@ -111,20 +111,20 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
         <div className="flex items-center gap-1.5">
           <button
             onClick={handleToday}
-            className="px-3 py-1 text-xs font-bold text-[var(--color-neutral-charcoal)] bg-[var(--color-accent-gold)] hover:bg-[var(--color-pastry-pink-hover)] rounded-full transition-all border border-[var(--color-accent-gold)]/60 mr-1 shadow-xs cursor-pointer"
+            className="px-3 py-1 text-xs font-bold text-[var(--color-neutral-charcoal)] bg-[var(--color-accent-gold)] hover:bg-[var(--color-pastry-pink-hover)] rounded-full transition-all border border-[var(--color-accent-gold)]/60 mr-1 shadow-card cursor-pointer"
           >
             Hoje
           </button>
           <button
             onClick={handlePrevMonth}
-            className="p-1.5 rounded-full bg-white/80 hover:bg-white text-[var(--color-neutral-charcoal)] border border-white/80 transition-colors cursor-pointer shadow-xs"
+            className="p-1.5 rounded-full bg-white/80 hover:bg-white text-[var(--color-neutral-charcoal)] border border-white/80 transition-colors cursor-pointer shadow-card"
             title="MÃªs anterior"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           <button
             onClick={handleNextMonth}
-            className="p-1.5 rounded-full bg-white/80 hover:bg-white text-[var(--color-neutral-charcoal)] border border-white/80 transition-colors cursor-pointer shadow-xs"
+            className="p-1.5 rounded-full bg-white/80 hover:bg-white text-[var(--color-neutral-charcoal)] border border-white/80 transition-colors cursor-pointer shadow-card"
             title="PrÃ³ximo mÃªs"
           >
             <ChevronRight className="w-4 h-4" />
@@ -216,7 +216,7 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
 
             <button
               onClick={() => setSelectedDateStr(null)}
-              className="text-[11px] font-bold text-[var(--color-neutral-charcoal)]/70 hover:text-[var(--color-neutral-charcoal)] bg-white px-2.5 py-1 rounded-full flex items-center gap-1 border border-white shadow-xs cursor-pointer"
+              className="text-[11px] font-bold text-[var(--color-neutral-charcoal)]/70 hover:text-[var(--color-neutral-charcoal)] bg-white px-2.5 py-1 rounded-full flex items-center gap-1 border border-white shadow-card cursor-pointer"
             >
               <X className="w-3 h-3" /> Fechar
             </button>
@@ -279,7 +279,7 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
                         {onTogglePaymentStatus && (
                           <button
                             onClick={() => onTogglePaymentStatus(tx)}
-                            className={`px-3 py-1 rounded-full text-[10px] font-bold shadow-xs transition-all flex items-center gap-1 cursor-pointer ${
+                            className={`px-3 py-1 rounded-full text-[10px] font-bold shadow-card transition-all flex items-center gap-1 cursor-pointer ${
                               isPending
                                 ? 'bg-[var(--color-neutral-charcoal)] text-[var(--color-accent-gold)]'
                                 : 'bg-white text-[var(--color-neutral-charcoal)] border border-white'

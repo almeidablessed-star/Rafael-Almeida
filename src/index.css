@@ -1,75 +1,102 @@
 @import "tailwindcss";
 
-/* ====== Design Token System — Pastel Harmonic Palette ====== */
+/* ====== Design Token System — Carula Redesign ====== */
 :root {
-  /* Primary Identity — Charcoal (neutral base) */
-  --color-primary: #3E3430;
-  --color-primary-dark: #2A2520;
-  --color-primary-light: #8B8276;
+  /* Brand Colors */
+  --color-brand-900: #3A2350;
+  --color-brand-700: #6E3F72;
+  --color-brand-500: #A85E86;
+
+  /* Rose & Alerts */
+  --color-rose-200: #F5B9C6;
+  --color-rose-600: #C4626F;
+
+  /* Neutrals */
+  --color-sand-200: #E4D9C3;
+  --color-mint-300: #A9D8B8;
+  --color-surface: #F6F2F5;
+  --color-card: #FFFFFF;
+  --color-ink: #241B2B;
+  --color-ink-soft: #7A6E80;
+
+  /* Auxiliary Colors */
+  --color-purple-light: #8F5A9C;
+  --color-labor: #7E4F9E;
+  --color-costs: #B08D57;
+  --color-paid: #4C7358;
+  --color-lavender: #F3E9F3;
+  --color-bg-block: #FAF7FA;
+  --color-date-bg: #F0E2C8;
+  --color-meter-track: #F1ECF2;
+
+  /* Legacy mapping for compatibility */
+  --color-primary: #3A2350;
+  --color-primary-dark: #2D1B3F;
+  --color-primary-light: #6E3F72;
 
   /* Neutrals */
   --color-neutral-white: #FFFFFF;
-  --color-neutral-hero: #FAFAF7;
+  --color-neutral-hero: #F6F2F5;
   --color-neutral-light: #F5F3F0;
   --color-neutral-medium: #E6E1DB;
-  --color-neutral-warm-gray: #8B8276;
+  --color-neutral-warm-gray: #E4D9C3;
   --color-neutral-dark-gray: #5C5550;
-  --color-neutral-charcoal: #0D0B08;
+  --color-neutral-charcoal: #241B2B;
 
-  /* Section-Specific Colors (Pastel Harmonic) */
-  --color-vendas: #E8B4B8;
-  --color-vendas-light: #F5E5E7;
-  --color-vendas-dark: #6B3E42;
+  /* Section-Specific Colors (Vitrine Moderna) */
+  --color-vendas: #A85E86;
+  --color-vendas-light: #F5B9C6;
+  --color-vendas-dark: #3A2350;
 
-  --color-labor: #D4C5E2;
-  --color-labor-light: #EDE5F5;
-  --color-labor-dark: #5A4B6B;
+  --color-labor: #A85E86;
+  --color-labor-light: #F5B9C6;
+  --color-labor-dark: #3A2350;
 
-  --color-reposicao: #C8E6D7;
-  --color-reposicao-light: #E5F4F0;
-  --color-reposicao-dark: #3A5A4A;
+  --color-reposicao: #A9D8B8;
+  --color-reposicao-light: #A9D8B8;
+  --color-reposicao-dark: #3A2350;
 
-  --color-destaque: #F5D4A8;
-  --color-destaque-light: #FBE8D6;
-  --color-destaque-dark: #6B5A42;
+  --color-destaque: #E4D9C3;
+  --color-destaque-light: #F5F3F0;
+  --color-destaque-dark: #3A2350;
 
-  --color-dados: #B8D4E8;
-  --color-dados-light: #DDE9F5;
-  --color-dados-dark: #3A4A5A;
+  --color-dados: #A9D8B8;
+  --color-dados-light: #A9D8B8;
+  --color-dados-dark: #3A2350;
 
-  /* Accent Gold (for CTAs) */
-  --color-accent-gold: #C9A878;
-  --color-accent-gold-dark: #B8945C;
-  --color-accent-gold-light: #F5EFED;
+  /* Accent Rose (for CTAs) */
+  --color-accent-gold: #F5B9C6;
+  --color-accent-gold-dark: #A85E86;
+  --color-accent-gold-light: #F5B9C6;
 
   /* Semantic Colors */
-  --color-semantic-success: #6B8070;
-  --color-semantic-warning: #D4AF7E;
+  --color-semantic-success: #A9D8B8;
+  --color-semantic-warning: #E4D9C3;
   --color-semantic-error: #C85A54;
-  --color-semantic-info: #7A8A94;
+  --color-semantic-info: #6E3F72;
 
   /* Component States */
-  --color-focus-ring: #3E3430;
+  --color-focus-ring: #3A2350;
   --color-border: #E6E1DB;
-  --color-border-subtle: rgba(13, 11, 8, 0.08);
-  --color-text-primary: #0D0B08;
-  --color-text-secondary: #5C5550;
-  --color-text-muted: rgba(13, 11, 8, 0.6);
+  --color-border-subtle: rgba(58, 35, 80, 0.08);
+  --color-text-primary: #241B2B;
+  --color-text-secondary: #6E3F72;
+  --color-text-muted: rgba(36, 27, 43, 0.6);
 
   /* Hover States */
-  --color-primary-hover: #2A2520;
-  --color-accent-hover: #B8945C;
+  --color-primary-hover: #2D1B3F;
+  --color-accent-hover: #A85E86;
   --color-neutral-hover: #F5F3F0;
 
   /* Legacy Bridge Mapping */
-  --color-pastry-pink: #E8B4B8;
-  --color-pastry-cream: #FAFAF7;
-  --color-pastry-yellow: #F5D4A8;
-  --color-pastry-lavender: #D4C5E2;
-  --color-pastry-sage: #C8E6D7;
-  --color-pastry-chocolate: #0D0B08;
-  --color-pastry-light-pink: #F5E5E7;
-  --color-pastry-pink-hover: #C85A54;
+  --color-pastry-pink: #F5B9C6;
+  --color-pastry-cream: #F6F2F5;
+  --color-pastry-yellow: #E4D9C3;
+  --color-pastry-lavender: #6E3F72;
+  --color-pastry-sage: #A9D8B8;
+  --color-pastry-chocolate: #241B2B;
+  --color-pastry-light-pink: #F5B9C6;
+  --color-pastry-pink-hover: #A85E86;
 }
 
 /* Dark Mode Variables (defined but not activated) */
@@ -103,16 +130,18 @@
   }
 }
 
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;600;700;800&display=swap');
+
 @layer base {
   body {
     font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-variant-numeric: lining-nums tabular-nums;
     font-feature-settings: "lnum" 1, "tnum" 1;
-    background-color: var(--color-neutral-hero);
-    color: var(--color-text-primary);
+    background-color: var(--color-surface);
+    color: var(--color-ink);
     -webkit-tap-highlight-color: transparent;
     line-height: 1.6;
-    letter-spacing: 0.3px;
+    letter-spacing: -0.02em;
   }
 
   /* Display — Editorial Premium Headlines */
@@ -259,6 +288,36 @@
   scrollbar-width: none;
 }
 
+/* Carula Redesign Animations */
+@keyframes carSweep {
+  0% {
+    transform: translateX(-120%);
+  }
+  60%, 100% {
+    transform: translateX(220%);
+  }
+}
+
+@keyframes carGlow {
+  0%, 100% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.06);
+  }
+}
+
+@keyframes carFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
 /* Modal Entry Animations */
 @keyframes fadeIn {
   from {
@@ -292,6 +351,20 @@
 }
 
 @layer utilities {
+  /* Carula Redesign Animations */
+  .animate-carSweep {
+    animation: carSweep 5s infinite;
+  }
+
+  .animate-carGlow {
+    animation: carGlow 6s infinite;
+  }
+
+  .animate-carFloat {
+    animation: carFloat 4.5s infinite;
+  }
+
+  /* Modal Animations */
   .animate-fadeIn {
     animation: fadeIn 200ms ease-out forwards;
   }
@@ -302,6 +375,81 @@
 
   .animate-slideUp {
     animation: slideUp 400ms ease-out forwards;
+  }
+
+  /* Brand Gradient */
+  .bg-brand-gradient {
+    background: linear-gradient(155deg, var(--color-brand-900) 0%, var(--color-brand-700) 60%, var(--color-brand-500) 100%);
+  }
+
+  /* Marca (Instrument Serif) */
+  .font-marca {
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400;
+  }
+
+  /* Heading Styles */
+  .heading-lg {
+    font-family: 'Instrument Serif', serif;
+    font-size: 28px;
+    font-weight: 400;
+    line-height: 1.1;
+  }
+
+  .heading-md {
+    font-family: 'Instrument Serif', serif;
+    font-size: 21px;
+    font-weight: 400;
+    line-height: 1.15;
+  }
+
+  /* Value Styles */
+  .value-lg {
+    font-family: 'Manrope', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+
+  .value-md {
+    font-family: 'Manrope', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+
+  /* Label Styles */
+  .label-sm {
+    font-family: 'Manrope', sans-serif;
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+  }
+
+  /* Card Shadow Styles */
+  .shadow-card {
+    box-shadow: 0 8px 20px rgba(58, 35, 80, 0.09);
+  }
+
+  .shadow-card-hover {
+    box-shadow: 0 20px 36px rgba(58, 35, 80, 0.18);
+  }
+
+  .shadow-btn {
+    box-shadow: 0 10px 20px rgba(58, 35, 80, 0.3);
+  }
+
+  .shadow-highlight {
+    box-shadow: 0 14px 30px rgba(58, 35, 80, 0.3);
+  }
+
+  .shadow-nav-bottom {
+    box-shadow: 0 -8px 24px rgba(58, 35, 80, 0.07);
+  }
+
+  .shadow-modal {
+    box-shadow: 0 30px 70px rgba(58, 35, 80, 0.26);
   }
 }
 
@@ -314,107 +462,113 @@
   }
 }
 
-/* ====== Card Hierarchy — Visual Foundation (Premium) ====== */
+/* ====== Card Hierarchy — Carula Redesign ====== */
 .card-metric {
-  background-color: white;
-  border-radius: 10px;
-  border: 1px solid var(--color-neutral-medium);
-  box-shadow: 0 2px 4px rgba(13, 11, 8, 0.06), inset -1px 0 0 var(--color-accent-gold);
-  transition: box-shadow 150ms ease-out;
+  background-color: var(--color-card);
+  border-radius: 22px;
+  border: none;
+  box-shadow: 0 8px 20px rgba(58, 35, 80, 0.09);
+  transition: transform 0.28s ease, box-shadow 0.28s ease;
 }
 
 .card-metric:hover {
-  box-shadow: 0 4px 8px rgba(13, 11, 8, 0.08);
+  transform: translateY(-5px);
+  box-shadow: 0 20px 36px rgba(58, 35, 80, 0.18);
 }
 
 .card-feature {
-  background-color: white;
-  border-radius: 10px;
-  border: 1px solid var(--color-neutral-medium);
-  box-shadow: 0 2px 4px rgba(13, 11, 8, 0.06);
-  transition: box-shadow 150ms ease-out;
+  background-color: var(--color-card);
+  border-radius: 22px;
+  border: none;
+  box-shadow: 0 8px 20px rgba(58, 35, 80, 0.09);
+  transition: transform 0.28s ease, box-shadow 0.28s ease;
 }
 
 .card-feature:hover {
-  box-shadow: 0 4px 8px rgba(13, 11, 8, 0.08);
+  transform: translateY(-5px);
+  box-shadow: 0 20px 36px rgba(58, 35, 80, 0.18);
 }
 
 .card-support {
-  background-color: var(--color-neutral-hero);
-  border-radius: 10px;
-  border: 1px solid var(--color-neutral-medium);
-  box-shadow: none;
+  background-color: var(--color-surface);
+  border-radius: 22px;
+  border: none;
+  box-shadow: 0 8px 20px rgba(58, 35, 80, 0.09);
 }
 
-/* ====== Button Hierarchy — Premium Edition ====== */
+/* ====== Button Hierarchy — Carula Redesign ====== */
 .btn-primary {
   padding: 12px 20px;
-  background-color: var(--color-primary);
-  color: white;
-  font-weight: 600;
+  background-color: var(--color-brand-900);
+  color: var(--color-rose-200);
+  font-weight: 800;
   font-size: 14px;
-  border-radius: 8px;
+  border-radius: 14px;
   border: none;
-  box-shadow: 0 2px 4px rgba(13, 11, 8, 0.06);
-  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 10px 20px rgba(58, 35, 80, 0.3);
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
 }
 .btn-primary:hover {
-  background-color: var(--color-primary-dark);
-  box-shadow: 0 4px 8px rgba(13, 11, 8, 0.08);
+  background-color: #2D1B3F;
+  box-shadow: 0 14px 28px rgba(58, 35, 80, 0.4);
+  transform: translateY(-3px);
 }
 .btn-primary:active {
-  transform: scale(0.98);
+  transform: scale(0.98) translateY(-3px);
 }
 
 .btn-secondary {
   padding: 10px 16px;
-  background-color: white;
-  border: 1px solid var(--color-neutral-medium);
-  color: var(--color-neutral-charcoal);
-  font-weight: 500;
+  background-color: var(--color-card);
+  border: 1px solid rgba(58, 35, 80, 0.1);
+  color: var(--color-ink);
+  font-weight: 600;
   font-size: 14px;
-  border-radius: 8px;
-  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 14px;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
 }
 .btn-secondary:hover {
-  background-color: var(--color-neutral-hero);
-  border-color: var(--color-neutral-dark-gray);
+  background-color: var(--color-surface);
+  border-color: var(--color-brand-700);
+  transform: translateY(-2px);
 }
 
 .btn-tertiary {
   padding: 8px 12px;
   background-color: transparent;
-  color: var(--color-neutral-dark-gray);
-  font-weight: 500;
+  color: var(--color-brand-700);
+  font-weight: 600;
   font-size: 14px;
-  border-radius: 6px;
-  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 10px;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   border: none;
 }
 .btn-tertiary:hover {
-  color: var(--color-neutral-charcoal);
-  background-color: var(--color-neutral-medium);
+  color: var(--color-brand-900);
+  background-color: rgba(58, 35, 80, 0.08);
+  transform: translateY(-2px);
 }
 
 .btn-danger {
   padding: 12px 20px;
-  background-color: var(--color-semantic-error);
+  background-color: var(--color-rose-600);
   color: white;
-  font-weight: 600;
+  font-weight: 800;
   font-size: 14px;
-  border-radius: 8px;
+  border-radius: 14px;
   border: none;
-  box-shadow: 0 2px 4px rgba(13, 11, 8, 0.06);
-  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 10px 20px rgba(196, 98, 111, 0.3);
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
 }
 .btn-danger:hover {
   background-color: #B8483E;
-  box-shadow: 0 4px 8px rgba(13, 11, 8, 0.08);
+  box-shadow: 0 14px 28px rgba(196, 98, 111, 0.4);
+  transform: translateY(-3px);
 }
 .btn-danger:active {
-  transform: scale(0.98);
+  transform: scale(0.98) translateY(-3px);
 }

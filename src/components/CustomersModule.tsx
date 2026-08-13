@@ -487,7 +487,7 @@ export const CustomersModule: React.FC = () => {
   return (
     <div className="space-y-5 pb-12 animate-fadeIn">
       {/* Top Title Header - Premium Style */}
-      <div className="bg-gradient-to-br from-[#D4C5E2]/20 to-[#D4C5E2]/5 rounded-2xl p-5 border border-[#D4C5E2]/30 shadow-md flex items-center justify-between gap-3">
+      <div className="bg-gradient-to-br from-[#D4C5E2]/20 to-[#D4C5E2]/5 rounded-2xl p-5 border border-[#D4C5E2]/30 shadow-card-hover flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-[#D4C5E2] text-[#5A4B6B] rounded-full flex items-center justify-center shadow-sm">
             <Users className="w-6 h-6" />
@@ -520,13 +520,13 @@ export const CustomersModule: React.FC = () => {
             placeholder="Buscar cliente por nome, telefone ou cidade..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-[var(--color-accent-gold)]/50 rounded-lg text-xs font-bold text-[var(--color-neutral-charcoal)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)] shadow-xs"
+            className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-[var(--color-accent-gold)]/50 rounded-lg text-xs font-bold text-[var(--color-neutral-charcoal)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)] shadow-card"
           />
         </div>
 
         <button
           onClick={handleOpenAdd}
-          className="py-2.5 px-4 bg-[var(--color-neutral-charcoal)] hover:bg-black text-[var(--color-accent-gold)] font-bold text-xs rounded-lg shadow-xs active:scale-95 transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
+          className="py-2.5 px-4 bg-[var(--color-neutral-charcoal)] hover:bg-black text-[var(--color-accent-gold)] font-bold text-xs rounded-lg shadow-card active:scale-95 transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
         >
           <Plus className="w-4 h-4 stroke-[3]" />
           <span>Cadastrar Nova Cliente</span>
@@ -555,7 +555,7 @@ export const CustomersModule: React.FC = () => {
 
           {/* CUSTOMER PHOTO UPLOAD */}
           <div className="flex items-center gap-4 bg-[var(--color-neutral-hero)] p-3 rounded-lg border border-[var(--color-accent-gold)]/40">
-            <div className="w-16 h-16 rounded-full border-2 border-[var(--color-accent-gold)] bg-white text-[var(--color-neutral-charcoal)] flex items-center justify-center overflow-hidden shrink-0 shadow-xs relative">
+            <div className="w-16 h-16 rounded-full border-2 border-[var(--color-accent-gold)] bg-white text-[var(--color-neutral-charcoal)] flex items-center justify-center overflow-hidden shrink-0 shadow-card relative">
               {photoUrl ? (
                 <img src={photoUrl} alt="Preview" className="w-full h-full object-cover" />
               ) : (
@@ -568,7 +568,7 @@ export const CustomersModule: React.FC = () => {
               </label>
               <label
                 htmlFor="photo-upload"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--color-neutral-charcoal)] text-[var(--color-accent-gold)] hover:bg-black rounded-xl text-xs font-bold cursor-pointer transition-colors shadow-xs"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--color-neutral-charcoal)] text-[var(--color-accent-gold)] hover:bg-black rounded-xl text-xs font-bold cursor-pointer transition-colors shadow-card"
               >
                 <Camera className="w-3.5 h-3.5" />
                 <span>{photoUrl ? 'Alterar Foto' : 'Escolher Foto'}</span>
@@ -743,13 +743,13 @@ export const CustomersModule: React.FC = () => {
             return (
               <div
                 key={c.id}
-                className="p-4 rounded-xl border border-[var(--color-accent-gold)]/40 bg-white shadow-xs hover:border-[var(--color-accent-gold)] transition-all space-y-2.5"
+                className="p-4 rounded-xl border border-[var(--color-accent-gold)]/40 bg-white shadow-card hover:border-[var(--color-accent-gold)] transition-all space-y-2.5"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-1 min-w-0 flex-1">
                     <div className="flex items-center gap-2.5 flex-wrap">
                       {/* Customer Photo Avatar */}
-                      <div className="w-9 h-9 rounded-full border-2 border-[var(--color-accent-gold)] bg-[var(--color-accent-gold)] text-[var(--color-neutral-charcoal)] flex items-center justify-center overflow-hidden shrink-0 shadow-xs">
+                      <div className="w-9 h-9 rounded-full border-2 border-[var(--color-accent-gold)] bg-[var(--color-accent-gold)] text-[var(--color-neutral-charcoal)] flex items-center justify-center overflow-hidden shrink-0 shadow-card">
                         {c.photoUrl ? (
                           <img src={c.photoUrl} alt={c.name} className="w-full h-full object-cover" />
                         ) : (
@@ -816,7 +816,7 @@ export const CustomersModule: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setExpandedDatesCustomerId(expandedDatesCustomerId === c.id ? null : c.id)}
-                    className="w-full py-2 px-3 rounded-lg bg-[var(--color-neutral-hero)] hover:bg-[var(--color-accent-gold)]/30 text-[var(--color-neutral-charcoal)] text-xs font-bold flex items-center justify-between transition-all cursor-pointer border border-[var(--color-accent-gold)]/40 shadow-xs"
+                    className="w-full py-2 px-3 rounded-lg bg-[var(--color-neutral-hero)] hover:bg-[var(--color-accent-gold)]/30 text-[var(--color-neutral-charcoal)] text-xs font-bold flex items-center justify-between transition-all cursor-pointer border border-[var(--color-accent-gold)]/40 shadow-card"
                   >
                     <span className="flex items-center gap-2">
                       <span className="text-sm">🗓️</span>
@@ -848,7 +848,7 @@ export const CustomersModule: React.FC = () => {
                             className={`p-2.5 rounded-xl border flex items-center justify-between gap-2 text-xs ${
                               ev.isHoliday
                                 ? 'bg-[var(--color-pastry-lavender)]/30 border-[var(--color-pastry-lavender)]'
-                                : 'bg-white border-[var(--color-accent-gold)]/50 shadow-xs'
+                                : 'bg-white border-[var(--color-accent-gold)]/50 shadow-card'
                             }`}
                           >
                             <div className="min-w-0 flex-1">
@@ -885,7 +885,7 @@ export const CustomersModule: React.FC = () => {
       </div>
 
       {/* WHATSAPP BUSINESS CONFIG AT THE BOTTOM OF THE TAB */}
-      <div className="pt-4 border-t border-[var(--color-accent-gold)]/40 flex items-center justify-between flex-wrap gap-3 bg-white p-4 rounded-xl border border-[var(--color-accent-gold)]/40 shadow-xs">
+      <div className="pt-4 border-t border-[var(--color-accent-gold)]/40 flex items-center justify-between flex-wrap gap-3 bg-white p-4 rounded-xl border border-[var(--color-accent-gold)]/40 shadow-card">
         <div className="flex items-center gap-2.5">
           <div className="p-2 bg-semantic-success/20 text-semantic-success rounded-xl">
             <MessageCircle className="w-5 h-5 text-semantic-success" />
@@ -906,7 +906,7 @@ export const CustomersModule: React.FC = () => {
               handleSendReminder(customers[0], undefined, undefined, undefined, true);
             }
           }}
-          className="px-4 py-2 rounded-lg bg-semantic-success hover:bg-semantic-success/90 text-white font-bold text-xs flex items-center gap-2 shadow-xs transition-all active:scale-95 cursor-pointer"
+          className="px-4 py-2 rounded-lg bg-semantic-success hover:bg-semantic-success/90 text-white font-bold text-xs flex items-center gap-2 shadow-card transition-all active:scale-95 cursor-pointer"
           title="Configurar aplicativo do WhatsApp"
         >
           <MessageCircle className="w-4 h-4 text-white" />
@@ -916,7 +916,7 @@ export const CustomersModule: React.FC = () => {
 
       {/* WHATSAPP SELECTOR & SEND MODAL */}
       {waModalData && createPortal(
-        <div className="fixed inset-0 z-[99999] bg-[#0D0B08]/80 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[99999] bg-[var(--color-ink)]/80 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-xl max-w-md w-full shadow-2xl border-2 border-[var(--color-accent-gold)] overflow-hidden animate-fadeIn p-5 space-y-4 my-auto">
             <div className="flex items-center justify-between border-b border-[var(--color-neutral-hero)] pb-2">
               <div className="flex items-center gap-2">

@@ -467,7 +467,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   return (
     <div className="space-y-5 pb-12 animate-fadeIn">
       {/* Banner Header - Premium Style */}
-      <div className="bg-gradient-to-br from-[#D4C5E2]/25 to-[#D4C5E2]/5 rounded-3xl p-6 border border-[#D4C5E2]/40 shadow-md relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="bg-gradient-to-br from-[#D4C5E2]/25 to-[#D4C5E2]/5 rounded-3xl p-6 border border-[#D4C5E2]/40 shadow-card-hover relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h2 className="font-bold text-2xl sm:text-3xl text-[var(--color-pastry-chocolate)] tracking-tight">
             Fichas Técnicas
@@ -484,14 +484,14 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
       </div>
 
       {launchSuccessMsg && (
-        <div className="bg-[var(--color-primary)]/10 border border-[var(--color-primary)] text-[var(--color-primary)] text-xs p-3.5 rounded-lg flex items-center gap-2.5 animate-fadeIn shadow-xs">
+        <div className="bg-[var(--color-primary)]/10 border border-[var(--color-primary)] text-[var(--color-primary)] text-xs p-3.5 rounded-lg flex items-center gap-2.5 animate-fadeIn shadow-card">
           <Check className="w-5 h-5 text-[var(--color-primary)] shrink-0" />
           <span className="font-bold">{launchSuccessMsg}</span>
         </div>
       )}
 
       {/* Category Tabs Bar - Retaining all 5 tabs with colorful emoji icons */}
-      <div className="flex items-center gap-1.5 bg-[var(--color-pastry-cream)] p-1.5 rounded-[24px] border border-[var(--color-pastry-light-pink)]/40 overflow-x-auto no-scrollbar shadow-xs">
+      <div className="flex items-center gap-1.5 bg-[var(--color-pastry-cream)] p-1.5 rounded-[24px] border border-[var(--color-pastry-light-pink)]/40 overflow-x-auto no-scrollbar shadow-card">
         <button
           onClick={() => setSelectedCategory('bolos')}
           className={`px-3.5 py-2.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
@@ -630,7 +630,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
               </label>
               <div className="flex items-center gap-2.5">
                 {imageUrl ? (
-                  <div className="relative w-11 h-11 rounded-xl border-2 border-[var(--color-pastry-light-pink)] overflow-hidden shrink-0 shadow-xs group">
+                  <div className="relative w-11 h-11 rounded-xl border-2 border-[var(--color-pastry-light-pink)] overflow-hidden shrink-0 shadow-card group">
                     <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
                     <button
                       type="button"
@@ -647,7 +647,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   </div>
                 )}
 
-                <label className="flex-1 px-4 py-2.5 bg-[var(--color-pastry-chocolate)] hover:bg-black text-[var(--color-pastry-pink)] rounded-xl text-xs font-bold cursor-pointer text-center shadow-xs transition-all active:scale-95 flex items-center justify-center gap-2">
+                <label className="flex-1 px-4 py-2.5 bg-[var(--color-pastry-chocolate)] hover:bg-black text-[var(--color-pastry-pink)] rounded-xl text-xs font-bold cursor-pointer text-center shadow-card transition-all active:scale-95 flex items-center justify-center gap-2">
                   <Upload className="w-4 h-4 text-[var(--color-pastry-pink)]" />
                   <span>Escolher Foto</span>
                   <input
@@ -787,10 +787,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
           {/* TOTAL SUGGESTED SELLING PRICE */}
           <div className="bg-[var(--color-pastry-chocolate)] p-4 rounded-lg text-white flex items-center justify-between">
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-pastry-pink)] block">
+              <span className="label-sm tracking-wider text-[var(--color-pastry-pink)] block">
                 Sugestão de Preço de Venda
               </span>
-              <span className="text-2xl font-black text-[var(--color-pastry-cream)]">
+              <span className="font-marca text-3xl font-black text-[var(--color-pastry-cream)]">
                 {formatCurrency(calculatedSuggestedPrice)}
               </span>
             </div>
@@ -844,7 +844,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
             return (
               <div
                 key={ficha.id}
-                className={`${bgClass} rounded-[32px] p-5 sm:p-6 shadow-xs transition-all hover:shadow-sm relative overflow-hidden`}
+                className={`${bgClass} rounded-[32px] p-5 sm:p-6 shadow-card transition-all hover:shadow-sm relative overflow-hidden`}
               >
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
                   
@@ -863,21 +863,21 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                     {/* Breakdown Cost Metrics - Premium Design */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3">
                       {/* Reposição */}
-                      <div className="bg-[#C8E6D7]/20 border border-[#C8E6D7]/50 rounded-lg p-2.5 flex flex-col min-h-[86px] shadow-xs">
+                      <div className="bg-[#C8E6D7]/20 border border-[#C8E6D7]/50 rounded-lg p-2.5 flex flex-col min-h-[86px] shadow-card">
                         <span className="text-[7px] font-bold uppercase text-[#3A5A4A] h-[14px] leading-[14px]">🧂 Reposição</span>
                         <strong className="text-[12px] font-black text-[#3A5A4A] flex-1 flex items-center">{formatCurrency(repoTotal)}</strong>
                         <span className="text-[7px] text-[#3A5A4A]/70 font-normal h-[14px] leading-[14px]">Ingredientes</span>
                       </div>
 
                       {/* Mão de Obra */}
-                      <div className="bg-[#E8B4B8]/20 border border-[#E8B4B8]/50 rounded-lg p-2.5 flex flex-col min-h-[86px] shadow-xs">
+                      <div className="bg-[#E8B4B8]/20 border border-[#E8B4B8]/50 rounded-lg p-2.5 flex flex-col min-h-[86px] shadow-card">
                         <span className="text-[7px] font-bold uppercase text-[#6B3E42] h-[14px] leading-[14px]">👷 Mão de Obra</span>
                         <strong className="text-[12px] font-black text-[#6B3E42] flex-1 flex items-center">{formatCurrency(ficha.maoDeObraCost)}</strong>
                         <span className="text-[7px] text-[#6B3E42]/70 font-normal h-[14px] leading-[14px]">Produção</span>
                       </div>
 
                       {/* Custos Operacionais */}
-                      <div className="bg-[#B8D4E8]/20 border border-[#B8D4E8]/50 rounded-lg p-2.5 flex flex-col min-h-[86px] shadow-xs">
+                      <div className="bg-[#B8D4E8]/20 border border-[#B8D4E8]/50 rounded-lg p-2.5 flex flex-col min-h-[86px] shadow-card">
                         <span className="text-[7px] font-bold uppercase text-[#3A4A5A] h-[14px] leading-[14px] whitespace-nowrap">⚙️ Custos</span>
                         <strong className="text-[12px] font-black text-[#3A4A5A] flex-1 flex items-center">
                           {formatCurrency((ficha.custoCost || 0) + (ficha.investimentoCost || 0))}
@@ -886,10 +886,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                       </div>
 
                       {/* Sugestão de Preço */}
-                      <div className="bg-[#3E3430] border border-[#3E3430]/80 rounded-lg p-2.5 flex flex-col min-h-[86px] shadow-xs">
-                        <span className="text-[7px] font-bold uppercase text-[#C9A878] h-[14px] leading-[14px]">💰 Sugestão</span>
+                      <div className="bg-[var(--color-brand-900)] border border-[var(--color-brand-900)]/80 rounded-lg p-2.5 flex flex-col min-h-[86px] shadow-card">
+                        <span className="text-[7px] font-bold uppercase text-[var(--color-rose-200)] h-[14px] leading-[14px]">💰 Sugestão</span>
                         <strong className="text-[12px] font-black text-white flex-1 flex items-center">{formatCurrency(ficha.sugestaoVenda)}</strong>
-                        <span className="text-[7px] text-[#C9A878]/80 font-normal h-[14px] leading-[14px]">Venda</span>
+                        <span className="text-[7px] text-[var(--color-rose-200)]/80 font-normal h-[14px] leading-[14px]">Venda</span>
                       </div>
                     </div>
 
@@ -897,7 +897,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                     <div className="flex items-center gap-2 pt-1 flex-wrap">
                       <button
                         onClick={() => setExpandedFichaId(isExpanded ? null : ficha.id)}
-                        className="px-3.5 py-1.5 rounded-full bg-white/80 hover:bg-white text-[var(--color-pastry-chocolate)] font-bold text-xs transition flex items-center gap-1 cursor-pointer shadow-xs"
+                        className="px-3.5 py-1.5 rounded-full bg-white/80 hover:bg-white text-[var(--color-pastry-chocolate)] font-bold text-xs transition flex items-center gap-1 cursor-pointer shadow-card"
                       >
                         <span>{isExpanded ? 'Ocultar Insumos' : `Ver ${ingList.length} Insumos`}</span>
                         {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
@@ -928,7 +928,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 
                   {/* Right Column (Reference Image & Management Buttons) */}
                   <div className="md:col-span-5 flex flex-col gap-2.5">
-                    <div className="relative h-48 sm:h-52 rounded-[28px] overflow-hidden border-2 border-white shadow-xs group">
+                    <div className="relative h-48 sm:h-52 rounded-[28px] overflow-hidden border-2 border-white shadow-card group">
                       <img
                         src={ficha.imageUrl}
                         alt={ficha.name}
@@ -941,7 +941,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                     <div className="flex items-center justify-center sm:justify-end gap-1.5 pt-0.5 flex-wrap">
                       <button
                         onClick={() => handleOpenEdit(ficha)}
-                        className="px-3 py-1.5 rounded-xl bg-white/80 hover:bg-white text-[var(--color-pastry-chocolate)] text-xs font-bold transition shadow-xs flex items-center gap-1 cursor-pointer"
+                        className="px-3 py-1.5 rounded-xl bg-white/80 hover:bg-white text-[var(--color-pastry-chocolate)] text-xs font-bold transition shadow-card flex items-center gap-1 cursor-pointer"
                         title="Editar Ficha"
                       >
                         <Edit3 className="w-3.5 h-3.5 text-[var(--color-pastry-chocolate)]" />
@@ -950,7 +950,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 
                       <button
                         onClick={() => handleDuplicate(ficha)}
-                        className="px-3 py-1.5 rounded-xl bg-white/80 hover:bg-white text-[var(--color-pastry-chocolate)] text-xs font-bold transition shadow-xs flex items-center gap-1 cursor-pointer"
+                        className="px-3 py-1.5 rounded-xl bg-white/80 hover:bg-white text-[var(--color-pastry-chocolate)] text-xs font-bold transition shadow-card flex items-center gap-1 cursor-pointer"
                         title="Duplicar Ficha"
                       >
                         <Copy className="w-3.5 h-3.5 text-[var(--color-pastry-chocolate)]" />
@@ -959,7 +959,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 
                       <button
                         onClick={() => handleDelete(ficha.id)}
-                        className="px-3 py-1.5 rounded-xl bg-white/80 hover:bg-semantic-error-100 text-semantic-error-700 text-xs font-bold transition shadow-xs flex items-center gap-1 cursor-pointer"
+                        className="px-3 py-1.5 rounded-xl bg-white/80 hover:bg-semantic-error-100 text-semantic-error-700 text-xs font-bold transition shadow-card flex items-center gap-1 cursor-pointer"
                         title="Excluir Ficha"
                       >
                         <Trash2 className="w-3.5 h-3.5" />

@@ -93,9 +93,9 @@ export const HistoryModule: React.FC<HistoryModuleProps> = ({
     <div className="space-y-4 animate-fadeIn pb-6">
       
       {/* Module Title Banner */}
-      <div className="bg-white rounded-xl p-4 border border-[var(--color-accent-gold)]/30 shadow-xs flex items-center justify-between">
+      <div className="bg-white rounded-xl p-4 border border-[var(--color-accent-gold)]/30 shadow-card flex items-center justify-between">
         <div>
-          <h2 className="font-brand font-bold text-lg text-[#0D0B08] flex items-center gap-2">
+          <h2 className="font-brand font-bold text-lg text-[var(--color-ink)] flex items-center gap-2">
             <History className="w-5 h-5 text-[var(--color-accent-gold)]" />
             Histórico de Lançamentos
           </h2>
@@ -106,7 +106,7 @@ export const HistoryModule: React.FC<HistoryModuleProps> = ({
 
         <button
           onClick={exportCsv}
-          className="px-3 py-2 bg-[#E6E1DB] hover:bg-[#E6E1DB] text-[#0D0B08] rounded-lg text-xs font-bold flex items-center gap-1.5 active:scale-95 transition-all"
+          className="px-3 py-2 bg-[#E6E1DB] hover:bg-[#E6E1DB] text-[var(--color-ink)] rounded-lg text-xs font-bold flex items-center gap-1.5 active:scale-95 transition-all"
           title="Exportar Tabela Excel / CSV"
         >
           <FileText className="w-3.5 h-3.5 text-[#E6E1DB]" />
@@ -129,8 +129,8 @@ export const HistoryModule: React.FC<HistoryModuleProps> = ({
             onClick={() => setSelectedType(item.id)}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all active:scale-95 ${
               selectedType === item.id
-                ? 'bg-[#0D0B08] text-white shadow-xs'
-                : 'bg-white text-[#0D0B08] hover:bg-[#E6E1DB] border border-[#E6E1DB]'
+                ? 'bg-[var(--color-ink)] text-white shadow-card'
+                : 'bg-white text-[var(--color-ink)] hover:bg-[#E6E1DB] border border-[#E6E1DB]'
             }`}
           >
             {item.label}
@@ -146,16 +146,16 @@ export const HistoryModule: React.FC<HistoryModuleProps> = ({
           placeholder="Filtrar por nome, fornecedor ou observação..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E6E1DB] rounded-lg text-xs font-medium text-[#0D0B08] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-gold)] shadow-xs"
+          className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E6E1DB] rounded-lg text-xs font-medium text-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-gold)] shadow-card"
         />
       </div>
 
       {/* Chronological List */}
       <div className="space-y-2.5">
         {filteredTransactions.length === 0 ? (
-          <div className="bg-white rounded-xl p-8 text-center border border-[#E6E1DB] shadow-xs">
+          <div className="bg-white rounded-xl p-8 text-center border border-[#E6E1DB] shadow-card">
             <History className="w-10 h-10 text-[#E6E1DB] mx-auto mb-2" />
-            <p className="text-sm font-bold text-[#0D0B08]">Nenhum lançamento encontrado</p>
+            <p className="text-sm font-bold text-[var(--color-ink)]">Nenhum lançamento encontrado</p>
             <p className="text-xs text-[#E6E1DB] mt-1">
               Tente alterar os filtros acima ou cadastre um novo movimento!
             </p>
@@ -172,8 +172,8 @@ export const HistoryModule: React.FC<HistoryModuleProps> = ({
                 key={tx.id}
                 className={`p-3.5 rounded-lg border transition-all flex items-center justify-between gap-3 ${
                   isPending
-                    ? 'bg-semantic-warning/20 border-semantic-warning/30 shadow-xs'
-                    : 'bg-white border-[#E6E1DB] shadow-xs hover:border-[#E6E1DB]'
+                    ? 'bg-semantic-warning/20 border-semantic-warning/30 shadow-card'
+                    : 'bg-white border-[#E6E1DB] shadow-card hover:border-[#E6E1DB]'
                 }`}
               >
                 <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -201,7 +201,7 @@ export const HistoryModule: React.FC<HistoryModuleProps> = ({
                           </span>
                         )
                       )}
-                      <span className="font-brand font-bold text-[#0D0B08] text-sm truncate">
+                      <span className="font-brand font-bold text-[var(--color-ink)] text-sm truncate">
                         {tx.description}
                       </span>
                     </div>
@@ -228,7 +228,7 @@ export const HistoryModule: React.FC<HistoryModuleProps> = ({
                 <div className="text-right flex flex-col items-end shrink-0">
                   <span
                     className={`font-brand font-extrabold text-sm sm:text-base ${
-                      isPositive ? (isPending ? 'text-semantic-warning' : 'text-semantic-success') : 'text-[#0D0B08]'
+                      isPositive ? (isPending ? 'text-semantic-warning' : 'text-semantic-success') : 'text-[var(--color-ink)]'
                     }`}
                   >
                     {isPositive ? (isPending ? '' : '+') : '-'}{formatCurrency(tx.totalValue)}
@@ -239,7 +239,7 @@ export const HistoryModule: React.FC<HistoryModuleProps> = ({
                       isPending ? (
                         <button
                           onClick={() => onTogglePaymentStatus(tx)}
-                          className="px-2 py-0.5 rounded-lg bg-semantic-success hover:bg-semantic-success/90 text-white font-bold text-[10px] shadow-xs transition-all"
+                          className="px-2 py-0.5 rounded-lg bg-semantic-success hover:bg-semantic-success/90 text-white font-bold text-[10px] shadow-card transition-all"
                           title="Marcar como Pago"
                         >
                           ✓ Pago
@@ -247,7 +247,7 @@ export const HistoryModule: React.FC<HistoryModuleProps> = ({
                       ) : (
                         <button
                           onClick={() => onTogglePaymentStatus(tx)}
-                          className="px-1.5 py-0.5 rounded-lg bg-[#E6E1DB] hover:bg-semantic-warning/20 text-[#0D0B08] hover:text-semantic-warning border border-[#E6E1DB] text-[10px] transition-all"
+                          className="px-1.5 py-0.5 rounded-lg bg-[#E6E1DB] hover:bg-semantic-warning/20 text-[var(--color-ink)] hover:text-semantic-warning border border-[#E6E1DB] text-[10px] transition-all"
                           title="Desmarcar (Voltar a Pendente)"
                         >
                           ↩ Pendente
@@ -256,7 +256,7 @@ export const HistoryModule: React.FC<HistoryModuleProps> = ({
                     )}
                     <button
                       onClick={() => onEditTransaction(tx)}
-                      className="p-1.5 rounded-lg text-[#E6E1DB] hover:text-[#0D0B08] hover:bg-[#E6E1DB] transition-colors"
+                      className="p-1.5 rounded-lg text-[#E6E1DB] hover:text-[var(--color-ink)] hover:bg-[#E6E1DB] transition-colors"
                       title="Editar"
                     >
                       <Edit3 className="w-3.5 h-3.5" />

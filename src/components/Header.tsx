@@ -22,78 +22,57 @@ export const Header: React.FC<HeaderProps> = ({
   }, [isProfileModalOpen]);
 
   return (
-    <header className="sticky top-0 z-30 bg-[#FAFAF7]/98 backdrop-blur-md border-b border-[#E6E1DB]/40 shadow-xs px-3 pt-safe-header sm:pt-3 pb-2.5">
-      <div className="max-w-lg mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-        {/* TOP BRAND HEADER - RESPONSIVE & CENTERED ON MOBILE SO NOTHING CUTS OFF */}
-        <div className="flex items-center justify-between w-full sm:w-auto gap-2">
-          {/* PROFILE BUTTON AT TOP LEFT/CENTER */}
-          <button
-            onClick={() => setIsProfileModalOpen(true)}
-            className="flex items-center gap-1.5 p-1.5 pr-2.5 bg-white hover:bg-[#E6E1DB]/10 border border-[#E6E1DB] rounded-lg shadow-xs transition-all active:scale-95 shrink-0"
-            title="Meu Perfil de Confeiteira (Sair no PDF)"
+    <header className="sticky top-0 z-30 bg-brand-gradient px-5 pt-safe-header sm:pt-4 pb-0 shadow-modal">
+      <div className="max-w-lg mx-auto flex items-center justify-between py-4 gap-4">
+
+        {/* Avatar (36px with gradient ring) */}
+        <button
+          onClick={() => setIsProfileModalOpen(true)}
+          className="flex-shrink-0 w-9 h-9 rounded-full transition-transform hover:scale-110 focus:outline-none"
+          style={{
+            background: 'linear-gradient(140deg, var(--color-rose-200), var(--color-rose-600))',
+            padding: '2px',
+          }}
+          title="Meu Perfil"
+        >
+          <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
+            {profile.photoUrl ? (
+              <img src={profile.photoUrl} alt="Avatar" className="w-full h-full object-cover" />
+            ) : (
+              <span className="font-marca text-base text-[var(--color-brand-700)]">C</span>
+            )}
+          </div>
+        </button>
+
+        {/* Brand (Centered) */}
+        <div className="flex-1 text-center">
+          <div className="font-marca text-3xl text-white" style={{ lineHeight: 1 }}>
+            Carula
+          </div>
+          <div
+            className="text-[8px] font-black text-white uppercase"
+            style={{ letterSpacing: '0.44em', marginTop: '2px' }}
           >
-            <div className="w-8 h-8 rounded-lg bg-[#3E3430] text-white flex items-center justify-center overflow-hidden font-black text-xs shadow-xs shrink-0">
-              {profile.photoUrl ? (
-                <img src={profile.photoUrl} alt="Logo" className="w-full h-full object-cover" />
-              ) : (
-                <User className="w-4 h-4 text-[#C9A878]" />
-              )}
-            </div>
-            <div className="text-left hidden sm:block">
-              <span className="block text-[10px] font-extrabold uppercase text-[#C9A878] leading-tight">
-                Meu Perfil
-              </span>
-              <span className="block text-[11px] font-black text-[#0D0B08] truncate max-w-[100px]">
-                {profile.name || 'Carula Cake'}
-              </span>
-            </div>
+            CONFEITARIA
+          </div>
+        </div>
+
+        {/* Action Icons (32px, radius 11px) */}
+        <div className="flex-shrink-0 flex items-center gap-2">
+          <button
+            onClick={onOpenPwaModal}
+            className="w-8 h-8 rounded-[11px] bg-white/16 text-white hover:bg-white/24 transition-colors flex items-center justify-center"
+            title="Versão Mobile"
+          >
+            <Smartphone className="w-4 h-4" />
           </button>
-
-          {/* CENTERED LOGO */}
-          <div className="flex-1 flex justify-center items-center text-center px-1">
-            <div className="flex flex-col items-center gap-0.5">
-              <span
-                className="text-3xl sm:text-4xl font-black bg-gradient-to-r from-[#3E3430] via-[#6B3E42] to-[#3E3430] bg-clip-text text-transparent"
-                style={{
-                  fontFamily: "'Manrope', sans-serif",
-                  letterSpacing: '-1.2px',
-                  fontWeight: 900,
-                  textShadow: 'none'
-                }}
-              >
-                Carula
-              </span>
-              <span
-                className="text-xs sm:text-sm font-extrabold tracking-widest text-[#C9A878]"
-                style={{
-                  fontFamily: "'Manrope', sans-serif",
-                  letterSpacing: '0.8px'
-                }}
-              >
-                A P P
-              </span>
-            </div>
-          </div>
-
-          {/* ACTION BUTTONS (MOBILE RIGHT & DESKTOP) */}
-          <div className="flex items-center gap-1 shrink-0">
-            <button
-              onClick={onOpenPwaModal}
-              className="p-1.5 sm:px-2.5 sm:py-1 rounded-lg bg-[#3E3430] hover:bg-[#2A2520] text-[#C9A878] text-[11px] font-bold transition-all active:scale-95 flex items-center gap-1 shadow-xs"
-              title="Instalar no Celular"
-            >
-              <Smartphone className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
-              <span className="hidden sm:inline">App</span>
-            </button>
-
-            <button
-              onClick={onOpenBackupModal}
-              className="p-1.5 rounded-lg bg-white hover:bg-[#FAFAF7] text-[#0D0B08] border border-[#E6E1DB] text-xs font-bold transition-all active:scale-95"
-              title="Backup e Dados"
-            >
-              <Download className="w-4 h-4" />
-            </button>
-          </div>
+          <button
+            onClick={onOpenBackupModal}
+            className="w-8 h-8 rounded-[11px] bg-white/16 text-white hover:bg-white/24 transition-colors flex items-center justify-center"
+            title="Baixar Dados"
+          >
+            <Download className="w-4 h-4" />
+          </button>
         </div>
       </div>
 

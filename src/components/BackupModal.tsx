@@ -58,7 +58,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
 
   return createPortal(
     <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-neutral-900/80 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-lg overflow-hidden p-6 space-y-4 my-auto">
+      <div className="w-full max-w-md bg-white rounded-xl shadow-highlight overflow-hidden p-6 space-y-4 my-auto">
         
         {/* Header */}
         <div className="flex items-center justify-between pb-2 border-b border-neutral-100">

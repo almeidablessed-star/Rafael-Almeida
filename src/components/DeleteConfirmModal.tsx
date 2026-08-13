@@ -20,7 +20,7 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/60 backdrop-blur-xs p-4 animate-fadeIn" role="dialog" aria-modal="true">
-      <div className="w-full max-w-sm bg-white rounded-xl shadow-lg overflow-hidden border border-semantic-error-400/40 animate-scaleUp" aria-labelledby="deleteTitle">
+      <div className="w-full max-w-sm bg-white rounded-xl shadow-highlight overflow-hidden border border-semantic-error-400/40 animate-scaleUp" aria-labelledby="deleteTitle">
         <div className="p-5 text-center">
           <div className="w-12 h-12 rounded-lg bg-semantic-error-400/40 text-semantic-error-600 flex items-center justify-center mx-auto mb-3">
             <AlertTriangle className="w-6 h-6" />

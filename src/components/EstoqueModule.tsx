@@ -139,7 +139,7 @@ export const EstoqueModule: React.FC = () => {
   return (
     <div className="pb-12 animate-fadeIn">
       {/* Header Section - Premium Style */}
-      <div className="bg-gradient-to-br from-[#C8E6D7]/20 to-[#C8E6D7]/5 rounded-3xl p-6 mb-6 border border-[#C8E6D7]/30 shadow-md">
+      <div className="bg-gradient-to-br from-[#C8E6D7]/20 to-[#C8E6D7]/5 rounded-3xl p-6 mb-6 border border-[#C8E6D7]/30 shadow-card-hover">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
           <div>
             <h2 className="font-brand font-semibold text-xl sm:text-2xl text-[var(--color-neutral-charcoal)] tracking-tight flex items-center gap-2">
@@ -153,7 +153,7 @@ export const EstoqueModule: React.FC = () => {
 
           <button
             onClick={handleOpenAdd}
-            className="py-2.5 px-4 bg-[var(--color-primary)] hover:brightness-110 text-white font-brand font-semibold text-xs rounded-2xl shadow-xs active:scale-95 transition-all flex items-center gap-1.5 whitespace-nowrap"
+            className="py-2.5 px-4 bg-[var(--color-primary)] hover:brightness-110 text-white font-brand font-semibold text-xs rounded-2xl shadow-card active:scale-95 transition-all flex items-center gap-1.5 whitespace-nowrap"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
             Adicionar Item
@@ -175,7 +175,7 @@ export const EstoqueModule: React.FC = () => {
 
       {/* Form Modal / Inline Box */}
       {isAdding && (
-        <form onSubmit={handleSave} className="bg-white rounded-3xl p-5 border border-[var(--color-neutral-medium)] shadow-xs space-y-4 animate-slideUp">
+        <form onSubmit={handleSave} className="bg-white rounded-3xl p-5 border border-[var(--color-neutral-medium)] shadow-card space-y-4 animate-slideUp">
           <div className="flex items-center justify-between pb-3 border-b border-[var(--color-neutral-light)]">
             <h3 className="font-brand font-semibold text-sm text-[var(--color-neutral-charcoal)] flex items-center gap-1.5">
               <Sparkles className="w-4 h-4 text-[var(--color-primary)]" />
@@ -259,7 +259,7 @@ export const EstoqueModule: React.FC = () => {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded-xl bg-[var(--color-primary)] hover:brightness-110 text-white font-brand font-semibold text-xs shadow-xs flex items-center gap-1 transition-all active:scale-95"
+              className="px-4 py-2 rounded-xl bg-[var(--color-primary)] hover:brightness-110 text-white font-brand font-semibold text-xs shadow-card flex items-center gap-1 transition-all active:scale-95"
             >
               <Check className="w-4 h-4 stroke-[2.5]" />
               Salvar
@@ -292,7 +292,7 @@ export const EstoqueModule: React.FC = () => {
                 {lowStockItems.map((item) => (
                   <div
                     key={item.id}
-                    className="bg-[#FBE8D6] border-2 border-[#F5D4A8] rounded-2xl p-4 hover:shadow-xs transition-all shadow-xs"
+                    className="bg-[#FBE8D6] border-2 border-[#F5D4A8] rounded-2xl p-4 hover:shadow-card transition-all shadow-card"
                   >
                     {/* Item Header */}
                     <div className="flex items-start justify-between mb-3 pb-2 border-b border-[var(--color-semantic-coral)] border-opacity-30">
@@ -378,7 +378,7 @@ export const EstoqueModule: React.FC = () => {
                 {healthyStockItems.map((item) => (
                   <div
                     key={item.id}
-                    className="bg-white border border-[var(--color-neutral-light)] rounded-2xl p-4 hover:border-[var(--color-primary)] hover:shadow-xs transition-all"
+                    className="bg-white border border-[var(--color-neutral-light)] rounded-2xl p-4 hover:border-[var(--color-primary)] hover:shadow-card transition-all"
                   >
                     {/* Item Header */}
                     <div className="pb-2 border-b border-[var(--color-neutral-light)] mb-3">

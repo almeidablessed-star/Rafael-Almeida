@@ -78,7 +78,7 @@ export const WeeklyClosingModule: React.FC<WeeklyClosingModuleProps> = ({
             Fechamento Semanal
           </span>
           {summary.isCurrentWeek ? (
-            <span className="bg-semantic-success-400 text-emerald-950 font-black text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wide shadow-xs">
+            <span className="bg-semantic-success-400 text-emerald-950 font-black text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wide shadow-card">
               Semana Atual
             </span>
           ) : (
@@ -133,7 +133,7 @@ export const WeeklyClosingModule: React.FC<WeeklyClosingModuleProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
         
         {/* CARD 1: 💰 Pagamento da Semana (Seu, pessoal) */}
-        <div className="bg-white rounded-xl p-4 sm:p-5 border-2 border-semantic-success-500/80 shadow-xs relative overflow-hidden flex flex-col justify-between">
+        <div className="bg-white rounded-xl p-4 sm:p-5 border-2 border-semantic-success-500/80 shadow-card relative overflow-hidden flex flex-col justify-between">
           <div className="absolute -top-6 -right-6 w-24 h-24 bg-semantic-success-100/50 rounded-full blur-xl pointer-events-none" />
 
           <div>
@@ -145,7 +145,7 @@ export const WeeklyClosingModule: React.FC<WeeklyClosingModuleProps> = ({
             </div>
 
             <div className="my-2">
-              <span className="font-brand font-black text-3xl sm:text-4xl text-emerald-600 block">
+              <span className="font-brand font-marca value-lg sm:text-4xl text-emerald-600 block">
                 {formatCurrency(summary.pagamentoPessoalTotal)}
               </span>
               <p className="text-xs text-slate-500 font-medium mt-1">
@@ -194,7 +194,7 @@ export const WeeklyClosingModule: React.FC<WeeklyClosingModuleProps> = ({
         </div>
 
         {/* CARD 2: 🏪 Caixa da Confeitaria (Restante) */}
-        <div className="bg-white rounded-xl p-4 sm:p-5 border-2 border-semantic-info-200/90 shadow-xs relative overflow-hidden flex flex-col justify-between">
+        <div className="bg-white rounded-xl p-4 sm:p-5 border-2 border-semantic-info-200/90 shadow-card relative overflow-hidden flex flex-col justify-between">
           <div className="absolute -top-6 -right-6 w-24 h-24 bg-semantic-info-100/50 rounded-full blur-xl pointer-events-none" />
 
           <div>
@@ -206,7 +206,7 @@ export const WeeklyClosingModule: React.FC<WeeklyClosingModuleProps> = ({
             </div>
 
             <div className="my-2">
-              <span className="font-brand font-black text-3xl sm:text-4xl text-indigo-700 block">
+              <span className="font-brand font-marca value-lg sm:text-4xl text-indigo-700 block">
                 {formatCurrency(summary.caixaConfeitariaTotal)}
               </span>
               <p className="text-xs text-slate-500 font-medium mt-1">
@@ -263,7 +263,7 @@ export const WeeklyClosingModule: React.FC<WeeklyClosingModuleProps> = ({
             </div>
           </div>
 
-          <span className="font-brand font-black text-2xl sm:text-3xl text-emerald-400">
+          <span className="font-brand font-marca value-md sm:text-3xl text-emerald-400">
             {formatCurrency(summary.faturamentoTotalPago)}
           </span>
         </div>
@@ -287,7 +287,7 @@ export const WeeklyClosingModule: React.FC<WeeklyClosingModuleProps> = ({
 
       {/* Alert for Pending Orders in Week */}
       {summary.pendingCount > 0 && (
-        <div className="bg-semantic-warning-50 rounded-lg p-4 border-2 border-semantic-warning-300 text-amber-950 shadow-xs space-y-2">
+        <div className="bg-semantic-warning-50 rounded-lg p-4 border-2 border-semantic-warning-300 text-amber-950 shadow-card space-y-2">
           <div className="flex items-center gap-2">
             <Clock className="w-5 h-5 text-semantic-warning-600 shrink-0" />
             <div>
@@ -303,7 +303,7 @@ export const WeeklyClosingModule: React.FC<WeeklyClosingModuleProps> = ({
       )}
 
       {/* Orders List for the Selected Week */}
-      <div className="bg-white rounded-xl p-4 border border-neutral-200/80 shadow-xs space-y-3">
+      <div className="bg-white rounded-xl p-4 border border-neutral-200/80 shadow-card space-y-3">
         <div className="flex items-center justify-between border-b border-neutral-100 pb-3">
           <div className="flex items-center gap-2">
             <Receipt className="w-4 h-4 text-purple-600" />
@@ -331,7 +331,7 @@ export const WeeklyClosingModule: React.FC<WeeklyClosingModuleProps> = ({
             </p>
             <button
               onClick={onOpenAddModal}
-              className="mt-3 px-3 py-1.5 bg-semantic-info-600 hover:bg-semantic-info-700 text-white font-bold text-xs rounded-xl shadow-xs transition-all inline-flex items-center gap-1"
+              className="mt-3 px-3 py-1.5 bg-semantic-info-600 hover:bg-semantic-info-700 text-white font-bold text-xs rounded-xl shadow-card transition-all inline-flex items-center gap-1"
             >
               <Plus className="w-3.5 h-3.5" />
               Lançar Pedido
@@ -348,8 +348,8 @@ export const WeeklyClosingModule: React.FC<WeeklyClosingModuleProps> = ({
                   key={sale.id}
                   className={`rounded-lg border transition-all ${
                     detail.isPaid
-                      ? 'bg-white border-neutral-200/90 shadow-xs'
-                      : 'bg-semantic-warning-50/40 border-semantic-warning-200 shadow-xs'
+                      ? 'bg-white border-neutral-200/90 shadow-card'
+                      : 'bg-semantic-warning-50/40 border-semantic-warning-200 shadow-card'
                   }`}
                 >
                   <div className="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -398,7 +398,7 @@ export const WeeklyClosingModule: React.FC<WeeklyClosingModuleProps> = ({
                         {!detail.isPaid ? (
                           <button
                             onClick={() => onTogglePaymentStatus(sale)}
-                            className="px-3 py-1.5 rounded-xl bg-semantic-success-600 hover:bg-semantic-success-700 text-white font-bold text-xs shadow-xs active:scale-95 transition-all flex items-center gap-1.5"
+                            className="px-3 py-1.5 rounded-xl bg-semantic-success-600 hover:bg-semantic-success-700 text-white font-bold text-xs shadow-card active:scale-95 transition-all flex items-center gap-1.5"
                           >
                             <Check className="w-3.5 h-3.5 stroke-[3]" />
                             Marcar como Pago

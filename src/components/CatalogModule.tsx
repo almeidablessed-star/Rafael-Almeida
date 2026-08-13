@@ -228,7 +228,7 @@ export const CatalogModule: React.FC<CatalogModuleProps> = ({
           <Sparkles className="w-4 h-4 text-[var(--color-semantic-gold)]" />
           Carula Confeitaria • Tabela Oficial
         </div>
-        <h2 className="text-xl font-black tracking-tight">
+        <h2 className="font-marca text-3xl font-black tracking-tight">
           Relatório Consolidado de Precificação
         </h2>
         <p className="text-xs text-white/95 mt-1 opacity-90 leading-relaxed font-medium">
@@ -243,7 +243,7 @@ export const CatalogModule: React.FC<CatalogModuleProps> = ({
           className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
             activeSubTab === 'catalogo'
               ? 'bg-white text-[var(--color-semantic-coral)] shadow-sm'
-              : 'text-[#0D0B08] hover:text-[#0D0B08]'
+              : 'text-[var(--color-ink)] hover:text-[var(--color-ink)]'
           }`}
         >
           <Cake className="w-4 h-4 text-[var(--color-semantic-coral)]" />
@@ -254,7 +254,7 @@ export const CatalogModule: React.FC<CatalogModuleProps> = ({
           className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
             activeSubTab === 'fechamento'
               ? 'bg-white text-[var(--color-semantic-purple)] shadow-sm'
-              : 'text-[#0D0B08] hover:text-[#0D0B08]'
+              : 'text-[var(--color-ink)] hover:text-[var(--color-ink)]'
           }`}
         >
           <PieChart className="w-4 h-4 text-[var(--color-semantic-purple)]" />
@@ -265,7 +265,7 @@ export const CatalogModule: React.FC<CatalogModuleProps> = ({
           className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
             activeSubTab === 'duvidas'
               ? 'bg-white text-[var(--color-semantic-dark-purple)] shadow-sm'
-              : 'text-[#0D0B08] hover:text-[#0D0B08]'
+              : 'text-[var(--color-ink)] hover:text-[var(--color-ink)]'
           }`}
         >
           <HelpCircle className="w-4 h-4 text-[var(--color-semantic-dark-purple)]" />
@@ -285,7 +285,7 @@ export const CatalogModule: React.FC<CatalogModuleProps> = ({
         <div className="space-y-4">
           {/* Cake Selection */}
           <div className="bg-white p-4 rounded-lg border border-[#E6E1DB]/80 shadow-sm space-y-3">
-            <label className="block text-xs font-bold text-[#0D0B08] uppercase tracking-wide">
+            <label className="block text-xs font-bold text-[var(--color-ink)] uppercase tracking-wide">
               1. Selecione o Bolo ou Doce do Relatório
             </label>
             <select
@@ -298,7 +298,7 @@ export const CatalogModule: React.FC<CatalogModuleProps> = ({
                   setSelectedSlices(opts[0].slices);
                 }
               }}
-              className="w-full bg-neutral-hero border border-[#E6E1DB] rounded-xl p-2.5 text-sm font-semibold text-[#0D0B08] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-gold)]"
+              className="w-full bg-neutral-hero border border-[#E6E1DB] rounded-xl p-2.5 text-sm font-semibold text-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-gold)]"
             >
               {UNIQUE_CAKE_NAMES.map((name) => (
                 <option key={name} value={name}>
@@ -309,7 +309,7 @@ export const CatalogModule: React.FC<CatalogModuleProps> = ({
 
             {/* Sizes / Slices options */}
             <div className="space-y-1">
-              <label className="block text-xs font-bold text-[#0D0B08] uppercase tracking-wide">
+              <label className="block text-xs font-bold text-[var(--color-ink)] uppercase tracking-wide">
                 2. Tamanho / Medida (cm)
               </label>
               <div className="grid grid-cols-5 gap-1.5">
@@ -321,7 +321,7 @@ export const CatalogModule: React.FC<CatalogModuleProps> = ({
                     className={`py-2 px-1 rounded-xl text-xs font-bold transition-all text-center ${
                       selectedSlices === opt.slices
                         ? 'bg-[var(--color-accent-gold)] text-white shadow-sm ring-2 ring-pink-300'
-                        : 'bg-[#E6E1DB] text-[#0D0B08] hover:bg-[#E6E1DB]'
+                        : 'bg-[#E6E1DB] text-[var(--color-ink)] hover:bg-[#E6E1DB]'
                     }`}
                   >
                     {opt.slices} {opt.cakeName.includes('Brigadeiro') || opt.cakeName.includes('Cupcake') ? 'un' : 'cm'}
@@ -333,7 +333,7 @@ export const CatalogModule: React.FC<CatalogModuleProps> = ({
             {/* Delivery Option */}
             <div className="pt-2.5 border-t border-[#E6E1DB]/80 space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-bold text-[#0D0B08] uppercase tracking-wide flex items-center gap-1.5">
+                <label className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wide flex items-center gap-1.5">
                   <Truck className="w-4 h-4 text-[var(--color-accent-gold)]" />
                   3. Vai ter entrega?
                 </label>
@@ -346,8 +346,8 @@ export const CatalogModule: React.FC<CatalogModuleProps> = ({
                     }}
                     className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
                       !hasDelivery
-                        ? 'bg-[#0D0B08] text-white shadow-xs'
-                        : 'text-[#0D0B08] hover:text-[#0D0B08]'
+                        ? 'bg-[var(--color-ink)] text-white shadow-card'
+                        : 'text-[var(--color-ink)] hover:text-[var(--color-ink)]'
                     }`}
                   >
                     Não
@@ -357,8 +357,8 @@ export const CatalogModule: React.FC<CatalogModuleProps> = ({
                     onClick={() => setHasDelivery(true)}
                     className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
                       hasDelivery
-                        ? 'bg-[var(--color-accent-gold)] text-white shadow-xs'
-                        : 'text-[#0D0B08] hover:text-[#0D0B08]'
+                        ? 'bg-[var(--color-accent-gold)] text-white shadow-card'
+                        : 'text-[var(--color-ink)] hover:text-[var(--color-ink)]'
                     }`}
                   >
                     Sim
@@ -370,7 +370,7 @@ export const CatalogModule: React.FC<CatalogModuleProps> = ({
                 <div className="bg-[var(--color-accent-gold)]/20/70 p-3 rounded-xl border border-[var(--color-accent-gold)]/30 space-y-2 animate-fadeIn">
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex-1">
-                      <label className="block text-[11px] font-bold text-[#0D0B08] mb-1">
+                      <label className="block text-[11px] font-bold text-[var(--color-ink)] mb-1">
                         Quantidade de Milhas da Entrega
                       </label>
                       <div className="relative">
@@ -381,7 +381,7 @@ export const CatalogModule: React.FC<CatalogModuleProps> = ({
                           value={deliveryMiles}
                           onChange={(e) => setDeliveryMiles(e.target.value)}
                           placeholder="Ex: 5"
-                          className="w-full pl-3 pr-16 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold text-[#0D0B08] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-gold)]"
+                          className="w-full pl-3 pr-16 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold text-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-gold)]"
                         />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-[#E6E1DB] font-bold">
                           milhas
@@ -403,7 +403,7 @@ export const CatalogModule: React.FC<CatalogModuleProps> = ({
             {/* Adicionais Option */}
             <div className="pt-2.5 border-t border-[#E6E1DB]/80 space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-bold text-[#0D0B08] uppercase tracking-wide flex items-center gap-1.5">
+                <label className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wide flex items-center gap-1.5">
                   <PackagePlus className="w-4 h-4 text-[#B8D4E8]" />
                   4. Vai ter adicional?
                 </label>
@@ -415,8 +415,8 @@ export const CatalogModule: React.FC<CatalogModuleProps> = ({
                     }}
                     className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
                       !hasAddons
-                        ? 'bg-[#0D0B08] text-white shadow-xs'
-                        : 'text-[#0D0B08] hover:text-[#0D0B08]'
+                        ? 'bg-[var(--color-ink)] text-white shadow-card'
+                        : 'text-[var(--color-ink)] hover:text-[var(--color-ink)]'
                     }`}
                   >
                     Não
@@ -426,8 +426,8 @@ export const CatalogModule: React.FC<CatalogModuleProps> = ({
                     onClick={() => handleToggleAddons(true)}
                     className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
                       hasAddons
-                        ? 'bg-[#B8D4E8] text-white shadow-xs'
-                        : 'text-[#0D0B08] hover:text-[#0D0B08]'
+                        ? 'bg-[#B8D4E8] text-white shadow-card'
+                        : 'text-[var(--color-ink)] hover:text-[var(--color-ink)]'
                     }`}
                   >
                     Sim
@@ -439,7 +439,7 @@ export const CatalogModule: React.FC<CatalogModuleProps> = ({
                 <button
                   type="button"
                   onClick={() => handleToggleAddons(true)}
-                  className="w-full py-2.5 px-3 bg-[#B8D4E8]/20 hover:bg-[#B8D4E8]/20/80 text-[#B8D4E8] font-bold text-xs rounded-xl border border-dashed border-[#B8D4E8] transition-all flex items-center justify-center gap-1.5 shadow-xs mt-2"
+                  className="w-full py-2.5 px-3 bg-[#B8D4E8]/20 hover:bg-[#B8D4E8]/20/80 text-[#B8D4E8] font-bold text-xs rounded-xl border border-dashed border-[#B8D4E8] transition-all flex items-center justify-center gap-1.5 shadow-card mt-2"
                 >
                   <PlusCircle className="w-4 h-4 text-[#B8D4E8]" />
                   + Adicionar outro item ao mesmo pedido
@@ -450,7 +450,7 @@ export const CatalogModule: React.FC<CatalogModuleProps> = ({
                 <div className="bg-[#B8D4E8]/20/70 p-3 rounded-xl border border-[#B8D4E8]/30 space-y-3 animate-fadeIn">
                   {addons.map((addon, index) => {
                     return (
-                      <div key={addon.id} className="bg-white p-3 rounded-xl border border-[#B8D4E8]/30/80 shadow-xs space-y-2.5">
+                      <div key={addon.id} className="bg-white p-3 rounded-xl border border-[#B8D4E8]/30/80 shadow-card space-y-2.5">
                         <div className="flex items-center justify-between">
                           <span className="text-[11px] font-extrabold text-[#B8D4E8] flex items-center gap-1">
                             <span>🌸</span> Item Adicional #{index + 1}
@@ -470,7 +470,7 @@ export const CatalogModule: React.FC<CatalogModuleProps> = ({
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           {/* Description field */}
                           <div>
-                            <label className="block text-[11px] font-bold text-[#0D0B08] mb-1">
+                            <label className="block text-[11px] font-bold text-[var(--color-ink)] mb-1">
                               Descrição do item / produto
                             </label>
                             <input
@@ -478,13 +478,13 @@ export const CatalogModule: React.FC<CatalogModuleProps> = ({
                               value={addon.description}
                               onChange={(e) => handleUpdateAddon(addon.id, 'description', e.target.value)}
                               placeholder="Ex: Flores, Topo de bolo, 50 docinhos..."
-                              className="w-full px-3 py-2 bg-neutral-hero border border-[#E6E1DB] rounded-lg text-xs font-medium text-[#0D0B08] focus:outline-none focus:ring-2 focus:ring-semantic-info focus:bg-white"
+                              className="w-full px-3 py-2 bg-neutral-hero border border-[#E6E1DB] rounded-lg text-xs font-medium text-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-semantic-info focus:bg-white"
                             />
                           </div>
 
                           {/* Value field */}
                           <div>
-                            <label className="block text-[11px] font-bold text-[#0D0B08] mb-1">
+                            <label className="block text-[11px] font-bold text-[var(--color-ink)] mb-1">
                               Valor do item ($)
                             </label>
                             <div className="relative">
@@ -498,7 +498,7 @@ export const CatalogModule: React.FC<CatalogModuleProps> = ({
                                 value={addon.value}
                                 onChange={(e) => handleUpdateAddon(addon.id, 'value', e.target.value)}
                                 placeholder="0.00"
-                                className="w-full pl-6 pr-3 py-2 bg-neutral-hero border border-[#E6E1DB] rounded-lg text-xs font-bold text-[#0D0B08] focus:outline-none focus:ring-2 focus:ring-semantic-info focus:bg-white"
+                                className="w-full pl-6 pr-3 py-2 bg-neutral-hero border border-[#E6E1DB] rounded-lg text-xs font-bold text-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-semantic-info focus:bg-white"
                               />
                             </div>
                           </div>
@@ -506,7 +506,7 @@ export const CatalogModule: React.FC<CatalogModuleProps> = ({
 
                         {/* Cost toggle */}
                         <div className="pt-1 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-[11px]">
-                          <label className="flex items-center gap-1.5 cursor-pointer text-[#0D0B08] hover:text-[#0D0B08] font-medium select-none">
+                          <label className="flex items-center gap-1.5 cursor-pointer text-[var(--color-ink)] hover:text-[var(--color-ink)] font-medium select-none">
                             <input
                               type="checkbox"
                               checked={!!addon.hasCost}
@@ -539,7 +539,7 @@ export const CatalogModule: React.FC<CatalogModuleProps> = ({
                   <button
                     type="button"
                     onClick={handleAddAddonItem}
-                    className="w-full py-2.5 px-3 bg-white hover:bg-[#B8D4E8]/20/50 text-[#B8D4E8] font-bold text-xs rounded-xl border border-dashed border-[#B8D4E8] transition-all flex items-center justify-center gap-1.5 shadow-xs"
+                    className="w-full py-2.5 px-3 bg-white hover:bg-[#B8D4E8]/20/50 text-[#B8D4E8] font-bold text-xs rounded-xl border border-dashed border-[#B8D4E8] transition-all flex items-center justify-center gap-1.5 shadow-card"
                   >
                     <PlusCircle className="w-4 h-4 text-[#B8D4E8]" />
                     + Adicionar outro item ao mesmo pedido
@@ -560,10 +560,10 @@ export const CatalogModule: React.FC<CatalogModuleProps> = ({
           <div className="bg-white rounded-lg border border-[var(--color-accent-gold)]/30 shadow-sm p-4 space-y-4 relative overflow-hidden">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-accent-gold)] bg-[var(--color-accent-gold)]/20 px-2 py-0.5 rounded-full">
+                <span className="label-sm tracking-wider text-[var(--color-accent-gold)] bg-[var(--color-accent-gold)]/20 px-2 py-0.5 rounded-full">
                   Ficha do Relatório
                 </span>
-                <h3 className="text-base font-extrabold text-[#0D0B08] mt-1">
+                <h3 className="text-base font-extrabold text-[var(--color-ink)] mt-1">
                   {currentRecipe.cakeName} ({currentRecipe.slices} {currentRecipe.cakeName.includes('Brigadeiro') || currentRecipe.cakeName.includes('Cupcake') ? 'unidades' : 'cm'})
                 </h3>
               </div>
@@ -697,7 +697,7 @@ export const CatalogModule: React.FC<CatalogModuleProps> = ({
       {activeSubTab === 'fechamento' && (
         <div className="space-y-4">
           <div className="bg-white p-4 rounded-lg border border-[#E6E1DB]/80 shadow-sm space-y-3">
-            <label className="block text-xs font-bold text-[#0D0B08] uppercase tracking-wide">
+            <label className="block text-xs font-bold text-[var(--color-ink)] uppercase tracking-wide">
               Digite o Faturamento Bruto do Mês ($)
             </label>
             <div className="relative">
@@ -709,7 +709,7 @@ export const CatalogModule: React.FC<CatalogModuleProps> = ({
                 value={monthlyRevenueInput}
                 onChange={(e) => setMonthlyRevenueInput(e.target.value)}
                 placeholder="Ex: 6000"
-                className="w-full pl-8 pr-4 py-2.5 bg-neutral-hero border border-[#E6E1DB] rounded-xl font-extrabold text-lg text-[#0D0B08] focus:outline-none focus:ring-2 focus:ring-rose-500"
+                className="w-full pl-8 pr-4 py-2.5 bg-neutral-hero border border-[#E6E1DB] rounded-xl font-extrabold text-lg text-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-rose-500"
               />
             </div>
 
@@ -720,7 +720,7 @@ export const CatalogModule: React.FC<CatalogModuleProps> = ({
                   key={preset}
                   type="button"
                   onClick={() => setMonthlyRevenueInput(preset.toString())}
-                  className="px-2.5 py-1 bg-[#E6E1DB] hover:bg-[#E6E1DB] text-[#0D0B08] text-xs font-bold rounded-lg transition"
+                  className="px-2.5 py-1 bg-[#E6E1DB] hover:bg-[#E6E1DB] text-[var(--color-ink)] text-xs font-bold rounded-lg transition"
                 >
                   $ {preset}
                 </button>
@@ -730,7 +730,7 @@ export const CatalogModule: React.FC<CatalogModuleProps> = ({
 
           {/* Breakdown Results */}
           <div className="bg-white rounded-lg border border-[#E6E1DB]/80 shadow-sm p-4 space-y-3">
-            <h3 className="text-sm font-black text-[#0D0B08] flex items-center gap-2">
+            <h3 className="text-sm font-black text-[var(--color-ink)] flex items-center gap-2">
               <PieChart className="w-4 h-4 text-[#C85A54]" />
               Divisão Proporcional do Mês ({formatCurrency(numericMonthlyRev)})
             </h3>
@@ -781,11 +781,11 @@ export const CatalogModule: React.FC<CatalogModuleProps> = ({
               </div>
             </div>
 
-            <div className="bg-neutral-hero p-3 rounded-xl text-xs text-[#0D0B08] space-y-1.5 border border-[#E6E1DB]/60 mt-2">
-              <span className="font-bold text-[#0D0B08] flex items-center gap-1">
+            <div className="bg-neutral-hero p-3 rounded-xl text-xs text-[var(--color-ink)] space-y-1.5 border border-[#E6E1DB]/60 mt-2">
+              <span className="font-bold text-[var(--color-ink)] flex items-center gap-1">
                 <Info className="w-3.5 h-3.5 text-[var(--color-accent-gold)]" /> Resumo do Fechamento:
               </span>
-              <p className="leading-relaxed text-[11px] text-[#0D0B08]">
+              <p className="leading-relaxed text-[11px] text-[var(--color-ink)]">
                 No fim do mês, de <strong>{formatCurrency(numericMonthlyRev)}</strong> faturados: você transfere <strong>{formatCurrency(monthlyBreakdown.maodeobra)}</strong> para sua conta pessoal como seu salário real, guarda <strong>{formatCurrency(monthlyBreakdown.reposicao)}</strong> na conta do estoque e <strong>{formatCurrency(monthlyBreakdown.investimento)}</strong> para melhorias da sua confeitaria!
               </p>
             </div>
@@ -797,7 +797,7 @@ export const CatalogModule: React.FC<CatalogModuleProps> = ({
       {activeSubTab === 'duvidas' && (
         <div className="space-y-4">
           <div className="bg-white p-4 rounded-lg border border-[#E6E1DB]/80 shadow-sm space-y-3">
-            <h3 className="text-xs font-bold text-[#0D0B08] uppercase tracking-wide flex items-center gap-1.5">
+            <h3 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wide flex items-center gap-1.5">
               <Sparkles className="w-4 h-4 text-[#B8D4E8]" />
               Perguntas Rápidas ao Assistente de Precificação
             </h3>
@@ -840,7 +840,7 @@ export const CatalogModule: React.FC<CatalogModuleProps> = ({
                 />
                 <button
                   onClick={() => handleQuickQuestion(customQuestion)}
-                  className="px-4 py-2 bg-[#B8D4E8] text-white font-bold text-xs rounded-xl shadow-xs hover:bg-[#B8D4E8]/90 transition"
+                  className="px-4 py-2 bg-[#B8D4E8] text-white font-bold text-xs rounded-xl shadow-card hover:bg-[#B8D4E8]/90 transition"
                 >
                   Calcular
                 </button>

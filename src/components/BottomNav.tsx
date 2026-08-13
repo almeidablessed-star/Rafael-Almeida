@@ -49,8 +49,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) 
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[#FAFAF7]/95 backdrop-blur-md border-t border-[#E6E1DB]/40 shadow-md pb-safe">
-      <div className="max-w-lg mx-auto flex items-center justify-around px-1 py-1.5">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-black/8 shadow-nav-bottom pb-safe">
+      <div className="max-w-lg mx-auto flex items-center justify-around px-1" style={{ padding: '12px 8px 22px' }}>
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -60,19 +60,14 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) 
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
               aria-current={isActive ? 'page' : undefined}
-              className={`flex flex-col items-center justify-center flex-1 py-1 px-0.5 rounded-lg transition-all duration-150 active:scale-95 ${
+              className={`flex flex-col items-center justify-center flex-1 px-1 transition-all duration-250 active:scale-95 ${
                 isActive
-                  ? 'text-[#C9A878] bg-[#3E3430]/5 font-bold shadow-xs'
-                  : 'text-[#5C5550] hover:text-[#0D0B08]'
+                  ? 'text-[var(--color-rose-200)] bg-[var(--color-brand-900)] rounded-[16px] py-1 font-bold -translate-y-1'
+                  : 'text-[#A096A6] hover:text-[var(--color-brand-900)] hover:-translate-y-1'
               }`}
             >
-              <div className="relative">
-                <Icon className={`w-5 h-5 transition-transform ${isActive ? 'scale-110' : ''}`} />
-                {isActive && (
-                  <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-current" />
-                )}
-              </div>
-              <span className={`text-[10px] mt-0.5 tracking-tight ${isActive ? 'font-bold' : 'font-medium'}`}>
+              <Icon className="w-5 h-5 transition-transform" />
+              <span className="text-[9px] mt-0.5 font-black uppercase tracking-wide mt-1">
                 {tab.label}
               </span>
             </button>

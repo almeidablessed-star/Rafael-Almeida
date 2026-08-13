@@ -79,8 +79,8 @@ export const CarulaLogo: React.FC<CarulaLogoProps> = ({
                C 270 15, 235 25, 215 30 
                C 190 20, 145 15, 110 20 
                C 85 20, 60 28, 50 40 Z"
-            fill="#FFFFFF"
-            stroke="#FFFFFF"
+            fill="var(--color-card)"
+            stroke="var(--color-card)"
             strokeWidth="16"
             strokeLinejoin="round"
           />
@@ -129,7 +129,7 @@ export const CarulaLogo: React.FC<CarulaLogoProps> = ({
             width="100"
             height="20"
             rx="10"
-            fill="#FFFFFF"
+            fill="var(--color-card)"
             stroke="#2B2420"
             strokeWidth="1.5"
           />

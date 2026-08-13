@@ -27,7 +27,7 @@ export const PeriodSelector: React.FC<PeriodSelectorProps> = ({
   ];
 
   return (
-    <div className="bg-white rounded-lg p-3 border border-pink-100/70 shadow-xs mb-4">
+    <div className="bg-white rounded-lg p-3 border border-pink-100/70 shadow-card mb-4">
       <div className="flex items-center justify-between gap-2 mb-2">
         <span className="text-xs font-bold text-neutral-600 uppercase tracking-wider flex items-center gap-1.5">
           <Calendar className="w-3.5 h-3.5 text-pink-500" />
@@ -45,7 +45,7 @@ export const PeriodSelector: React.FC<PeriodSelectorProps> = ({
               onClick={() => onPeriodChange(p.id)}
               className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all active:scale-95 ${
                 isActive
-                  ? 'bg-pink-500 text-white shadow-xs shadow-pink-200'
+                  ? 'bg-pink-500 text-white shadow-card shadow-pink-200'
                   : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
               }`}
             >

@@ -65,10 +65,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {/* 1. PRIMARY ACTION: HERO CARD - LANÇAR PEDIDO */}
       <button
         onClick={() => onOpenAddModal('venda')}
-        className="w-full group relative overflow-hidden rounded-2xl transition-all active:scale-95 hover:shadow-lg"
+        className="w-full group relative overflow-hidden rounded-2xl transition-all active:scale-95 hover:shadow-highlight"
       >
         {/* Background with gradient */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#F5D4A8] to-[#F0C494] opacity-100 group-hover:opacity-105 transition-opacity" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-rose-200)] to-[var(--color-brand-500)] opacity-100 group-hover:opacity-105 transition-opacity" />
 
         {/* Content */}
         <div className="relative px-6 md:px-8 py-6 md:py-8 flex items-center justify-between gap-6">
@@ -78,17 +78,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
               📦
             </div>
             <div className="text-left">
-              <p className="text-xs md:text-sm font-bold uppercase tracking-wider text-[#3E3430]/70 mb-1">
+              <p className="text-xs md:text-sm font-bold uppercase tracking-wider text-[var(--color-brand-900)]/70 mb-1">
                 Adicionar Novo Pedido
               </p>
-              <p className="text-lg md:text-2xl font-brand font-black text-[#3E3430]">
+              <p className="text-lg md:text-2xl font-brand font-black text-[var(--color-brand-900)]">
                 + Lançar Pedido
               </p>
             </div>
           </div>
 
           {/* Right: Arrow */}
-          <div className="flex-shrink-0 text-3xl md:text-4xl text-[#3E3430]/60 group-hover:translate-x-1 transition-transform">
+          <div className="flex-shrink-0 text-3xl md:text-4xl text-[var(--color-brand-900)]/60 group-hover:translate-x-1 transition-transform">
             →
           </div>
         </div>
@@ -102,14 +102,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
       <div className="space-y-3">
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-2">
-            <div className="p-2 bg-[#3E3430]/10 text-[#3E3430] rounded-lg shadow-xs">
+            <div className="p-2 bg-[var(--color-brand-900)]/10 text-[var(--color-brand-900)] rounded-lg shadow-card">
               <Wallet className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="font-semibold text-base text-[#0D0B08]">
+              <h3 className="font-semibold text-base text-[var(--color-ink)]">
                 Saldos & Divisão dos Pedidos
               </h3>
-              <p className="text-[11px] text-[#5C5550]/70 font-medium">
+              <p className="text-[11px] text-[var(--color-brand-700)]/70 font-medium">
                 Entradas das vendas pagas − Compras registradas
               </p>
             </div>
@@ -121,17 +121,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
           {/* Card Saldo Reposição - with mini bar chart */}
           <div
             onClick={() => onNavigateToTab('saldos')}
-            className={`rounded-2xl p-5 border-2 cursor-pointer transition-all hover:shadow-md overflow-hidden relative ${
+            className={`rounded-2xl p-5 border-2 cursor-pointer transition-all hover:shadow-card-hover overflow-hidden relative ${
               balances.reposicao.isNegative
                 ? 'bg-[#C85A54]/8 border-[#C85A54]/60'
-                : 'bg-[#C8E6D7]/12 border-[#C8E6D7]/70 shadow-xs'
+                : 'bg-[#C8E6D7]/12 border-[#C8E6D7]/70 shadow-card'
             }`}
           >
             {/* Top color strip */}
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#3A5A4A] to-[#5A8A6F]" />
 
             <div className="flex items-start justify-between mb-3">
-              <span className={`text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full flex items-center gap-1.5 ${
+              <span className={`label-sm tracking-wider px-2.5 py-1 rounded-full flex items-center gap-1.5 ${
                 balances.reposicao.isNegative
                   ? 'bg-[#C85A54]/30 text-[#C85A54] border border-[#C85A54]'
                   : 'bg-[#3A5A4A]/15 text-[#3A5A4A] border border-[#3A5A4A]/40'
@@ -147,7 +147,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
 
             <span
-              className={`font-numbers font-black text-3xl md:text-4xl block mb-2 ${
+              className={`font-numbers font-marca value-lg md:text-4xl block mb-2 ${
                 balances.reposicao.isNegative ? 'text-[#C85A54]' : 'text-[#3A5A4A]'
               }`}
             >
@@ -169,19 +169,19 @@ export const Dashboard: React.FC<DashboardProps> = ({
           {/* Card Saldo Mão de Obra - with circular progress */}
           <div
             onClick={() => onNavigateToTab('saldos')}
-            className="rounded-2xl p-5 border-2 cursor-pointer transition-all hover:shadow-md bg-[#D4C5E2]/12 border-[#D4C5E2]/70 shadow-xs relative overflow-hidden"
+            className="rounded-2xl p-5 border-2 cursor-pointer transition-all hover:shadow-card-hover bg-[#D4C5E2]/12 border-[#D4C5E2]/70 shadow-card relative overflow-hidden"
           >
             {/* Top color strip */}
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#5A4B6B] to-[#7A6B8B]" />
 
             <div className="flex items-start justify-between mb-3">
-              <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full flex items-center gap-1.5 bg-[#5A4B6B]/15 text-[#5A4B6B] border border-[#5A4B6B]/40">
+              <span className="label-sm tracking-wider px-2.5 py-1 rounded-full flex items-center gap-1.5 bg-[#5A4B6B]/15 text-[#5A4B6B] border border-[#5A4B6B]/40">
                 <Users className="w-3.5 h-3.5" />
                 Mão de Obra
               </span>
             </div>
 
-            <span className="font-numbers font-black text-3xl md:text-4xl block mb-3 text-[#5A4B6B]">
+            <span className="font-numbers font-marca value-lg md:text-4xl block mb-3 text-[#5A4B6B]">
               {formatCurrency(balances.maodeobra?.currentBalance || 0)}
             </span>
 
@@ -213,10 +213,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
           {/* Card Custo + Investimento - with horizontal status bar */}
           <div
             onClick={() => onNavigateToTab('saldos')}
-            className={`rounded-2xl p-5 border-2 cursor-pointer transition-all hover:shadow-md relative overflow-hidden ${
+            className={`rounded-2xl p-5 border-2 cursor-pointer transition-all hover:shadow-card-hover relative overflow-hidden ${
               balances.custoEInvestimento.isNegative
                 ? 'bg-[#C85A54]/8 border-[#C85A54]/60'
-                : 'bg-[#B8D4E8]/12 border-[#B8D4E8]/70 shadow-xs'
+                : 'bg-[#B8D4E8]/12 border-[#B8D4E8]/70 shadow-card'
             }`}
           >
             {/* Top color strip */}
@@ -224,7 +224,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
             <div className="flex items-start justify-between mb-3">
               <span
-                className={`text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full flex items-center gap-1.5 ${
+                className={`label-sm tracking-wider px-2.5 py-1 rounded-full flex items-center gap-1.5 ${
                   balances.custoEInvestimento.isNegative
                     ? 'bg-[#C85A54]/30 text-[#C85A54] border border-[#C85A54]'
                     : 'bg-[#3A4A5A]/15 text-[#3A4A5A] border border-[#3A4A5A]/40'
@@ -241,7 +241,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
 
             <span
-              className={`font-numbers font-black text-3xl md:text-4xl block mb-3 ${
+              className={`font-numbers font-marca value-lg md:text-4xl block mb-3 ${
                 balances.custoEInvestimento.isNegative ? 'text-[#C85A54]' : 'text-[#3A4A5A]'
               }`}
             >
@@ -267,7 +267,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       </div>
 
       {/* 4. LUCRO LÍQUIDO DO MÊS - FULL-WIDTH HIGHLIGHT CARD */}
-      <div className="bg-gradient-to-br from-[var(--color-neutral-cream)] via-[#F5E8DB] to-[var(--color-neutral-cream)] rounded-3xl p-6 md:p-8 border-2 border-[var(--color-neutral-medium)] shadow-lg relative overflow-hidden text-[var(--color-pastry-chocolate)] space-y-5">
+      <div className="bg-gradient-to-br from-[var(--color-neutral-cream)] via-[#F5E8DB] to-[var(--color-neutral-cream)] rounded-3xl p-6 md:p-8 border-2 border-[var(--color-neutral-medium)] shadow-highlight relative overflow-hidden text-[var(--color-pastry-chocolate)] space-y-5">
 
         {/* Decorative background circle */}
         <div className="absolute -top-20 -right-20 w-64 h-64 bg-[var(--color-primary)]/5 rounded-full blur-3xl pointer-events-none" />
@@ -275,7 +275,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <div className="relative z-10">
           <div className="flex items-center justify-between flex-wrap gap-4 mb-4">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[#D4A574] flex items-center justify-center shadow-lg">
+              <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[#D4A574] flex items-center justify-center shadow-highlight">
                 <TrendingUp className="w-6 h-6 md:w-7 md:h-7 text-white" />
               </div>
               <div>
@@ -288,7 +288,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </div>
             </div>
 
-            <div className="px-4 py-1.5 rounded-full text-xs font-bold bg-[var(--color-primary)]/15 text-[var(--color-primary)] border border-[var(--color-primary)]/50 flex items-center gap-1.5 shadow-md">
+            <div className="px-4 py-1.5 rounded-full text-xs font-bold bg-[var(--color-primary)]/15 text-[var(--color-primary)] border border-[var(--color-primary)]/50 flex items-center gap-1.5 shadow-card-hover">
               {summary.isPositive ? (
                 <>
                   <CheckCircle2 className="w-4 h-4 text-[var(--color-primary)]" /> Positivo
@@ -331,7 +331,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               {/* Detail Button */}
               <button
                 onClick={() => setShowSalesModal(true)}
-                className="w-full md:w-auto px-6 py-3 bg-[var(--color-pastry-chocolate)] hover:bg-[#2A2520] text-white rounded-xl text-xs font-bold shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95"
+                className="w-full md:w-auto px-6 py-3 bg-[var(--color-pastry-chocolate)] hover:bg-[#2D1B3F] text-white rounded-xl text-xs font-bold shadow-highlight flex items-center justify-center gap-2 transition-all active:scale-95"
               >
                 <TrendingUp className="w-4 h-4" />
                 <span>Detalhamento das Vendas</span>
@@ -354,7 +354,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </span>
             </div>
             {summary.totalAReceber > 0 && (
-              <div className="bg-[#F5D4A8]/40 backdrop-blur-xs rounded-xl p-3">
+              <div className="bg-[var(--color-rose-200)]/40 backdrop-blur-xs rounded-xl p-3">
                 <span className="text-[10px] font-semibold text-[var(--color-pastry-chocolate)]/70 flex items-center gap-1 mb-1">
                   <Clock className="w-3 h-3" /> A Receber
                 </span>
@@ -420,7 +420,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   <span className="text-[11px] font-bold text-[var(--color-primary)] uppercase block">
                     Total de Encomendas / Vendas
                   </span>
-                  <span className="font-brand font-black text-2xl text-[var(--color-primary)]">
+                  <span className="font-brand font-marca value-md text-[var(--color-primary)]">
                     {formatCurrency(summary.totalVendas)}
                   </span>
                 </div>

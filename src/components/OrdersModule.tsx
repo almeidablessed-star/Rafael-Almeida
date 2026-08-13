@@ -65,11 +65,11 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
   return (
     <div className="space-y-4 animate-fadeIn pb-8">
       {/* Module Header Banner */}
-      <div className="bg-[#F5D4A8] rounded-2xl p-5 text-[#0D0B08] border border-[#F5D4A8]/40 shadow-xs relative overflow-hidden flex items-center justify-between">
-        <h2 className="font-bold text-2xl sm:text-3xl text-[#0D0B08] tracking-tight">
+      <div className="bg-[#F5D4A8] rounded-2xl p-5 text-[var(--color-ink)] border border-[#F5D4A8]/40 shadow-card relative overflow-hidden flex items-center justify-between">
+        <h2 className="font-bold text-2xl sm:text-3xl text-[var(--color-ink)] tracking-tight">
           Pedidos & Encomendas
         </h2>
-        <span className="bg-[#0D0B08] text-[#C9A878] font-medium text-[10px] px-3.5 py-1.5 rounded-full uppercase shrink-0">
+        <span className="bg-[var(--color-ink)] text-[var(--color-rose-200)] font-medium text-[10px] px-3.5 py-1.5 rounded-full uppercase shrink-0">
           {sales.length} {sales.length === 1 ? 'Pedido' : 'Pedidos'}
         </span>
       </div>
@@ -77,25 +77,25 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
       {/* Summary Cards Row - Premium Style */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {/* Total Vendas */}
-        <div className="bg-gradient-to-br from-[#F5D4A8]/30 to-[#F5D4A8]/10 rounded-2xl p-4 border border-[#F5D4A8]/40 shadow-md hover:shadow-lg transition-all relative overflow-hidden">
+        <div className="bg-gradient-to-br from-[#F5D4A8]/30 to-[#F5D4A8]/10 rounded-2xl p-4 border border-[#F5D4A8]/40 shadow-card-hover hover:shadow-highlight transition-all relative overflow-hidden">
           <div className="flex gap-3 items-start">
             <div className="flex-1 min-w-0">
-              <span className="text-[9px] font-bold uppercase text-[#6B5A42] block mb-1">Total em Vendas</span>
-              <span className="font-numbers font-black text-2xl text-[#3E3430] block">{formatCurrency(totalVendas)}</span>
+              <span className="label-sm text-[#6B5A42] block mb-1">Total em Vendas</span>
+              <span className="font-numbers font-marca value-md text-[var(--color-brand-900)] block">{formatCurrency(totalVendas)}</span>
               <span className="text-[10px] text-[#6B5A42]/70 font-medium mt-2">{sales.length} encomendas registradas</span>
             </div>
             <div className="w-10 h-10 rounded-full bg-[#F5D4A8] flex items-center justify-center shrink-0 shadow-sm">
-              <ShoppingBag className="w-5 h-5 text-[#3E3430]" />
+              <ShoppingBag className="w-5 h-5 text-[var(--color-brand-900)]" />
             </div>
           </div>
         </div>
 
         {/* Vendas Pagas */}
-        <div className="bg-gradient-to-br from-[#C8E6D7]/30 to-[#C8E6D7]/10 rounded-2xl p-4 border border-[#C8E6D7]/40 shadow-md hover:shadow-lg transition-all relative overflow-hidden">
+        <div className="bg-gradient-to-br from-[#C8E6D7]/30 to-[#C8E6D7]/10 rounded-2xl p-4 border border-[#C8E6D7]/40 shadow-card-hover hover:shadow-highlight transition-all relative overflow-hidden">
           <div className="flex gap-3 items-start">
             <div className="flex-1 min-w-0">
-              <span className="text-[9px] font-bold uppercase text-[#3A5A4A] block mb-1">Vendas Pagas</span>
-              <span className="font-numbers font-black text-2xl text-[#3A5A4A] block">{formatCurrency(totalPagas)}</span>
+              <span className="label-sm text-[#3A5A4A] block mb-1">Vendas Pagas</span>
+              <span className="font-numbers font-marca value-md text-[#3A5A4A] block">{formatCurrency(totalPagas)}</span>
               <span className="text-[10px] text-[#3A5A4A]/70 font-medium mt-2">{paidCount} {paidCount === 1 ? 'pedido pago' : 'pedidos pagos'}</span>
             </div>
             <div className="w-10 h-10 rounded-full bg-[#C8E6D7] flex items-center justify-center shrink-0 shadow-sm">
@@ -105,11 +105,11 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
         </div>
 
         {/* A Receber */}
-        <div className="bg-gradient-to-br from-[#B8D4E8]/30 to-[#B8D4E8]/10 rounded-2xl p-4 border border-[#B8D4E8]/40 shadow-md hover:shadow-lg transition-all relative overflow-hidden">
+        <div className="bg-gradient-to-br from-[#B8D4E8]/30 to-[#B8D4E8]/10 rounded-2xl p-4 border border-[#B8D4E8]/40 shadow-card-hover hover:shadow-highlight transition-all relative overflow-hidden">
           <div className="flex gap-3 items-start">
             <div className="flex-1 min-w-0">
-              <span className="text-[9px] font-bold uppercase text-[#3A4A5A] block mb-1">A Receber</span>
-              <span className="font-numbers font-black text-2xl text-[#3A4A5A] block">{formatCurrency(totalPendentes)}</span>
+              <span className="label-sm text-[#3A4A5A] block mb-1">A Receber</span>
+              <span className="font-numbers font-marca value-md text-[#3A4A5A] block">{formatCurrency(totalPendentes)}</span>
               <span className="text-[10px] text-[#3A4A5A]/70 font-medium mt-2">{pendingCount} {pendingCount === 1 ? 'pedido pendente' : 'pedidos pendentes'}</span>
             </div>
             <div className="w-10 h-10 rounded-full bg-[#B8D4E8] flex items-center justify-center shrink-0 shadow-sm">
@@ -120,20 +120,20 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
       </div>
 
       {/* Search & Filters */}
-      <div className="bg-[#FAFAF7] p-3.5 rounded-lg border border-[#E6E1DB] shadow-xs space-y-3">
+      <div className="bg-[var(--color-surface)] p-3.5 rounded-lg border border-[#E6E1DB] shadow-card space-y-3">
         <div className="relative">
-          <Search className="w-4 h-4 text-[#0D0B08]/50 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-[var(--color-ink)]/50 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Buscar por nome da cliente ou descrição do produto..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-[#E6E1DB] rounded-full text-xs font-medium text-[#0D0B08] focus:outline-none focus:ring-2 focus:ring-neutral-charcoal/20"
+            className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-[#E6E1DB] rounded-full text-xs font-medium text-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-neutral-charcoal/20"
           />
         </div>
 
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-0.5">
-          <span className="text-[11px] font-bold text-[#0D0B08]/70 uppercase mr-1 flex items-center gap-1">
+          <span className="text-[11px] font-bold text-[var(--color-ink)]/70 uppercase mr-1 flex items-center gap-1">
             <Filter className="w-3 h-3" /> Status:
           </span>
 
@@ -141,8 +141,8 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
             onClick={() => setStatusFilter('todos')}
             className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
               statusFilter === 'todos'
-                ? 'bg-[#0D0B08] text-[var(--color-accent-gold)] shadow-xs'
-                : 'bg-white text-[#0D0B08] border border-[#E6E1DB] hover:bg-white/80'
+                ? 'bg-[var(--color-ink)] text-[var(--color-accent-gold)] shadow-card'
+                : 'bg-white text-[var(--color-ink)] border border-[#E6E1DB] hover:bg-white/80'
             }`}
           >
             Todos ({sales.length})
@@ -152,8 +152,8 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
             onClick={() => setStatusFilter('pago')}
             className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
               statusFilter === 'pago'
-                ? 'bg-[#C8E6D7] text-[#3A5A4A] shadow-xs'
-                : 'bg-white text-[#3E3430] border border-[#E6E1DB] hover:bg-white/80'
+                ? 'bg-[#C8E6D7] text-[#3A5A4A] shadow-card'
+                : 'bg-white text-[var(--color-brand-900)] border border-[#E6E1DB] hover:bg-white/80'
             }`}
           >
             <CheckCircle2 className="w-3 h-3 text-[#5A8A6F]" />
@@ -164,8 +164,8 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
             onClick={() => setStatusFilter('pendente')}
             className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
               statusFilter === 'pendente'
-                ? 'bg-[#0D0B08] text-[var(--color-accent-gold)] shadow-xs'
-                : 'bg-white text-[#0D0B08] border border-[#E6E1DB] hover:bg-white/80'
+                ? 'bg-[var(--color-ink)] text-[var(--color-accent-gold)] shadow-card'
+                : 'bg-white text-[var(--color-ink)] border border-[#E6E1DB] hover:bg-white/80'
             }`}
           >
             <Clock className="w-3 h-3 text-semantic-warning" />
@@ -178,13 +178,13 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
       <div className="space-y-2.5">
         {filteredSales.length === 0 ? (
           <div className="p-8 rounded-xl bg-white text-center border border-[#E6E1DB] space-y-2">
-            <ShoppingBag className="w-8 h-8 text-[#0D0B08]/30 mx-auto" />
-            <p className="text-xs text-[#0D0B08]/70 font-medium">
+            <ShoppingBag className="w-8 h-8 text-[var(--color-ink)]/30 mx-auto" />
+            <p className="text-xs text-[var(--color-ink)]/70 font-medium">
               Nenhum pedido encontrado.
             </p>
             <button
               onClick={() => onOpenAddModal('venda')}
-              className="px-4 py-2 bg-[#0D0B08] text-[var(--color-accent-gold)] text-xs font-medium rounded-full inline-flex items-center gap-1.5 cursor-pointer"
+              className="px-4 py-2 bg-[var(--color-ink)] text-[var(--color-accent-gold)] text-xs font-medium rounded-full inline-flex items-center gap-1.5 cursor-pointer"
             >
               <PlusCircle className="w-3.5 h-3.5" />
               Lançar Novo Pedido
@@ -197,7 +197,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
             return (
               <div
                 key={tx.id}
-                className={`p-4 rounded-xl border shadow-xs transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
+                className={`p-4 rounded-xl border shadow-card transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
                   isPending
                     ? 'bg-semantic-warning/20 border-semantic-warning/30'
                     : 'bg-white border-[#E6E1DB] hover:border-semantic-warning/30'
@@ -206,13 +206,13 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                 <div className="min-w-0 flex-1 space-y-1">
                   {/* CLIENT CHIP & STATUS */}
                   <div className="flex items-center gap-2 flex-wrap mb-1.5">
-                    <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[var(--color-accent-gold)]/70 border border-[var(--color-accent-gold)]/30 text-[#0D0B08] font-black text-xs uppercase shadow-xs">
+                    <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[var(--color-accent-gold)]/70 border border-[var(--color-accent-gold)]/30 text-[var(--color-ink)] font-black text-xs uppercase shadow-card">
                       <Users className="w-3.5 h-3.5 shrink-0" />
                       CLIENTE: {tx.customerName ? tx.customerName.toUpperCase() : 'CLIENTE CADASTRADO'}
                     </span>
 
                     {isPending ? (
-                      <span className="bg-[#F5D4A8] text-[#3E3430] px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center gap-1">
+                      <span className="bg-[#F5D4A8] text-[var(--color-brand-900)] px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center gap-1">
                         <Clock className="w-3 h-3" /> Pendente
                       </span>
                     ) : (
@@ -222,23 +222,23 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                     )}
                   </div>
 
-                  <div className="flex items-center gap-2 text-[11px] text-[#0D0B08]/70 font-medium pt-0.5">
-                    <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5 shrink-0" /> Data: <strong className="text-[#0D0B08]">{formatDateBr(tx.date)}</strong></span>
+                  <div className="flex items-center gap-2 text-[11px] text-[var(--color-ink)]/70 font-medium pt-0.5">
+                    <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5 shrink-0" /> Data: <strong className="text-[var(--color-ink)]">{formatDateBr(tx.date)}</strong></span>
                     {tx.paymentMethod && (
-                      <span>• Pgto: <strong className="text-[#0D0B08] uppercase">{tx.paymentMethod}</strong></span>
+                      <span>• Pgto: <strong className="text-[var(--color-ink)] uppercase">{tx.paymentMethod}</strong></span>
                     )}
                   </div>
                 </div>
 
                 <div className="text-right flex items-center sm:flex-col sm:items-end justify-between w-full sm:w-auto shrink-0 border-t sm:border-t-0 pt-2 sm:pt-0 border-[#E6E1DB]">
-                  <span className="font-numbers font-black text-lg sm:text-xl text-[#0D0B08]">
+                  <span className="font-numbers font-black text-lg sm:text-xl text-[var(--color-ink)]">
                     {formatCurrency(tx.totalValue)}
                   </span>
 
                   <div className="flex items-center gap-1.5 mt-1.5">
                     <button
                       onClick={() => setQuoteTx(tx)}
-                      className="px-3 py-1.5 rounded-full bg-[#0D0B08] hover:bg-black text-[var(--color-accent-gold)] font-medium text-[11px] shadow-xs transition-all flex items-center gap-1 cursor-pointer active:scale-95"
+                      className="px-3 py-1.5 rounded-full bg-[var(--color-ink)] hover:bg-black text-[var(--color-accent-gold)] font-medium text-[11px] shadow-card transition-all flex items-center gap-1 cursor-pointer active:scale-95"
                       title="Gerar e Visualizar Orçamento em PDF"
                     >
                       <Printer className="w-3.5 h-3.5 text-[var(--color-accent-gold)]" />
@@ -249,7 +249,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                       isPending ? (
                         <button
                           onClick={() => onTogglePaymentStatus(tx)}
-                          className="px-3 py-1.5 rounded-full bg-[#C8E6D7] hover:bg-[#5A8A6F] text-[#3A5A4A] hover:text-white font-bold text-[11px] shadow-xs transition-all flex items-center gap-1 cursor-pointer active:scale-95"
+                          className="px-3 py-1.5 rounded-full bg-[#C8E6D7] hover:bg-[#5A8A6F] text-[#3A5A4A] hover:text-white font-bold text-[11px] shadow-card transition-all flex items-center gap-1 cursor-pointer active:scale-95"
                           title="Clique para marcar este pedido como PAGO"
                         >
                           <CheckCircle2 className="w-3.5 h-3.5" />
@@ -270,7 +270,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                     {onEditTransaction && (
                       <button
                         onClick={() => onEditTransaction(tx)}
-                        className="p-1.5 rounded-full text-[#0D0B08]/70 hover:text-[#0D0B08] hover:bg-white/80 transition-colors cursor-pointer"
+                        className="p-1.5 rounded-full text-[var(--color-ink)]/70 hover:text-[var(--color-ink)] hover:bg-white/80 transition-colors cursor-pointer"
                         title="Editar"
                       >
                         <Edit3 className="w-4 h-4" />
@@ -279,7 +279,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                     {onDeleteTransaction && (
                       <button
                         onClick={() => onDeleteTransaction(tx)}
-                        className="p-1.5 rounded-full text-[#0D0B08]/70 hover:text-semantic-error hover:bg-semantic-error/10 transition-colors cursor-pointer"
+                        className="p-1.5 rounded-full text-[var(--color-ink)]/70 hover:text-semantic-error hover:bg-semantic-error/10 transition-colors cursor-pointer"
                         title="Excluir"
                       >
                         <Trash2 className="w-4 h-4" />

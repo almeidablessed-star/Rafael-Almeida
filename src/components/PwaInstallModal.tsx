@@ -12,7 +12,7 @@ export const PwaInstallModal: React.FC<PwaInstallModalProps> = ({ isOpen, onClos
 
   return createPortal(
     <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-neutral-900/80 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto" role="dialog" aria-modal="true">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-lg overflow-hidden p-6 space-y-4 my-auto" aria-labelledby="pwaModalTitle">
+      <div className="w-full max-w-md bg-white rounded-xl shadow-highlight overflow-hidden p-6 space-y-4 my-auto" aria-labelledby="pwaModalTitle">
         
         {/* Modal Header */}
         <div className="flex items-center justify-between pb-2 border-b border-neutral-100">
