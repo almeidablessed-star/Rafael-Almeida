@@ -552,7 +552,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
       {isCreating && (
         <form onSubmit={handleSaveFicha} className="bg-white rounded-[32px] p-5 sm:p-6 border-2 border-[var(--color-pastry-light-pink)] shadow-xl space-y-4 animate-slideUp">
           <div className="flex items-center justify-between border-b border-neutral-100 pb-3">
-            <h3 className="font-brand font-black text-lg text-[var(--color-pastry-chocolate)] flex items-center gap-2">
+            <h3 className="heading-card-sm text-[var(--color-pastry-chocolate)] flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-[var(--color-pastry-light-pink)]" />
               {editingId ? 'Editar Ficha Técnica' : 'Criar Nova Ficha Técnica'}
             </h3>

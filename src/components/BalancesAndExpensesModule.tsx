@@ -97,7 +97,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
           </span>
         </div>
 
-        <h2 className="font-brand font-black text-xl sm:text-2xl text-[var(--color-neutral-charcoal)] tracking-tight">
+        <h2 className="heading-lg text-[var(--color-neutral-charcoal)] tracking-tight">
           Saldo & Compras
         </h2>
         <p className="text-xs text-[var(--color-text-secondary)] font-medium mt-1">

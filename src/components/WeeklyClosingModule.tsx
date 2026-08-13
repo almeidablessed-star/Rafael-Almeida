@@ -102,7 +102,7 @@ export const WeeklyClosingModule: React.FC<WeeklyClosingModuleProps> = ({
           </button>
 
           <div className="text-center px-2">
-            <h2 className="font-brand font-black text-lg sm:text-xl text-white tracking-tight">
+            <h2 className="heading-card-sm text-white tracking-tight">
               {summary.formattedRange}
             </h2>
             <p className="text-[11px] text-purple-200 font-medium">

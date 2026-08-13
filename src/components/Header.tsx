@@ -25,12 +25,12 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="sticky top-0 z-30 bg-brand-gradient px-5 pt-safe-header sm:pt-4 pb-0 shadow-modal">
       <div className="max-w-lg mx-auto flex items-center justify-between py-4 gap-4">
 
-        {/* Avatar (36px with gradient ring) */}
+        {/* Avatar (36px with gradient ring) — 11A */}
         <button
           onClick={() => setIsProfileModalOpen(true)}
           className="flex-shrink-0 w-[36px] h-[36px] rounded-full transition-transform focus:outline-none"
           style={{
-            background: 'linear-gradient(140deg, var(--color-rose-200), var(--color-rose-600))',
+            background: 'linear-gradient(140deg, #F5B9C6, #C4626F)',
             padding: '2px',
           }}
           title="Meu Perfil"
@@ -39,19 +39,19 @@ export const Header: React.FC<HeaderProps> = ({
             {profile.photoUrl ? (
               <img src={profile.photoUrl} alt="Avatar" className="w-full h-full object-cover" />
             ) : (
-              <span className="font-marca text-base text-[var(--color-brand-700)]">C</span>
+              <span className="font-marca text-[16px] text-[#6E3F72]">C</span>
             )}
           </div>
         </button>
 
-        {/* Brand (Centered) */}
+        {/* Brand (Centered) — 11A Marca Centrada */}
         <div className="flex-1 text-center">
-          <div className="font-marca text-[26px] text-white" style={{ lineHeight: 1, fontWeight: 400 }}>
+          <div className="font-marca text-[32px] text-white" style={{ lineHeight: 1, fontWeight: 400, fontFamily: "'Instrument Serif', serif" }}>
             Carula
           </div>
           <div
-            className="text-[8px] font-black text-white uppercase"
-            style={{ letterSpacing: '0.44em', marginTop: '3px' }}
+            className="text-[8px] text-white uppercase"
+            style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 700, letterSpacing: '0.44em', marginTop: '2px' }}
           >
             CONFEITARIA
           </div>

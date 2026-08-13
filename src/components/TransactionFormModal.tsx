@@ -590,7 +590,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
         {/* Modal Header */}
         <div className={`px-5 py-4 flex items-center justify-between ${typeDetails.badgeBg}`}>
           <div className="flex items-center gap-2">
-            <span id="transactionModalTitle" className="font-brand font-bold text-lg text-neutral-800">
+            <span id="transactionModalTitle" className="heading-card-sm text-neutral-800">
               {editingTransaction
                 ? 'Editar Lançamento'
                 : type === 'venda'

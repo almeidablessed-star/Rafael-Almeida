@@ -384,25 +384,42 @@
     background: linear-gradient(155deg, var(--color-brand-900) 0%, var(--color-brand-700) 60%, var(--color-brand-500) 100%);
   }
 
-  /* Marca (Instrument Serif) */
+  /* Marca (Instrument Serif) — 32px mobile */
   .font-marca {
     font-family: 'Instrument Serif', serif;
     font-weight: 400;
+    font-size: 32px;
+    line-height: 1;
   }
 
-  /* Heading Styles */
+  /* Heading Styles — Screen Titles 28–30px (mobile) */
   .heading-lg {
     font-family: 'Instrument Serif', serif;
-    font-size: 28px;
+    font-size: 30px;
     font-weight: 400;
     line-height: 1.1;
   }
 
   .heading-md {
     font-family: 'Instrument Serif', serif;
-    font-size: 21px;
+    font-size: 28px;
     font-weight: 400;
     line-height: 1.15;
+  }
+
+  /* Card Titles 19–24px (mobile) */
+  .heading-card {
+    font-family: 'Instrument Serif', serif;
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 1.2;
+  }
+
+  .heading-card-sm {
+    font-family: 'Instrument Serif', serif;
+    font-size: 19px;
+    font-weight: 400;
+    line-height: 1.25;
   }
 
   /* Value Styles */

@@ -95,7 +95,7 @@ export const HistoryModule: React.FC<HistoryModuleProps> = ({
       {/* Module Title Banner */}
       <div className="bg-white rounded-xl p-4 border border-[var(--color-accent-gold)]/30 shadow-card flex items-center justify-between">
         <div>
-          <h2 className="font-brand font-bold text-lg text-[var(--color-ink)] flex items-center gap-2">
+          <h2 className="heading-card-sm text-[var(--color-ink)] flex items-center gap-2">
             <History className="w-5 h-5 text-[var(--color-accent-gold)]" />
             Histórico de Lançamentos
           </h2>
