@@ -1,0 +1,7 @@
+{
+  "changes": [
+    "Add gradient header with totals",
+    "Implement segmented filters",
+    "Update comanda card styling"
+  ]
+}

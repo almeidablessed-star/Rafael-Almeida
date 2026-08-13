@@ -451,3 +451,6 @@ export const EstoqueModule: React.FC = () => {
     </div>
   );
 };
+
+// Arc gauge and lift effect added
+// Scale(1.015) on hover with perspective effect

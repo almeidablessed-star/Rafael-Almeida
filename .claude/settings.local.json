@@ -33,7 +33,9 @@
       "Bash(git commit -m 'Fix: Centralizar badge Reposição no card *)",
       "Bash(git commit -m 'Fix: Download de imagem não funcionava *)",
       "Bash(git commit -m 'Fix: PDF branco - melhorias na geração de PDF *)",
-      "Bash(git commit -m 'Fix: Download de imagem com melhorias de robustez *)"
+      "Bash(git commit -m 'Fix: Download de imagem com melhorias de robustez *)",
+      "Bash(python -m pip list)",
+      "PowerShell(python3 -c \"import PyPDF2; print\\('PyPDF2 available'\\)\" 2>&1)"
     ]
   },
   "hooks": {

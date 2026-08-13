@@ -62,39 +62,44 @@ export const Dashboard: React.FC<DashboardProps> = ({
   return (
     <div className="space-y-6 md:space-y-8 animate-fadeIn pb-6">
 
-      {/* 1. PRIMARY ACTION: HERO CARD - LANÇAR PEDIDO */}
+      {/* COMANDA TICKET BUTTON - "LANÇAR PEDIDO" (4C) */}
       <button
         onClick={() => onOpenAddModal('venda')}
-        className="w-full group relative overflow-hidden rounded-2xl transition-all active:scale-95 hover:shadow-highlight"
+        className="w-full group relative overflow-hidden transition-all active:scale-95 hover:-translate-y-1 hover:rotate-[-0.6deg]"
+        style={{
+          background: 'linear-gradient(155deg, var(--color-brand-900) 0%, var(--color-brand-700) 60%, var(--color-brand-500) 100%)',
+          borderRadius: '20px',
+          padding: '18px 20px',
+          border: '2px dashed rgba(245, 185, 198, 0.5)',
+        }}
       >
-        {/* Background with gradient */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-rose-200)] to-[var(--color-brand-500)] opacity-100 group-hover:opacity-105 transition-opacity" />
+        {/* Left and Right cutout circles */}
+        <div style={{
+          position: 'absolute',
+          width: '22px', height: '22px', borderRadius: '50%',
+          background: 'var(--color-surface)',
+          left: '-11px', top: '50%', transform: 'translateY(-50%)',
+        }} />
+        <div style={{
+          position: 'absolute',
+          width: '22px', height: '22px', borderRadius: '50%',
+          background: 'var(--color-surface)',
+          right: '-11px', top: '50%', transform: 'translateY(-50%)',
+        }} />
 
-        {/* Content */}
-        <div className="relative px-6 md:px-8 py-6 md:py-8 flex items-center justify-between gap-6">
-          {/* Left: Icon and Text */}
-          <div className="flex items-center gap-4 md:gap-6 flex-1">
-            <div className="flex-shrink-0 text-4xl md:text-5xl">
-              📦
-            </div>
-            <div className="text-left">
-              <p className="text-xs md:text-sm font-bold uppercase tracking-wider text-[var(--color-brand-900)]/70 mb-1">
-                Adicionar Novo Pedido
-              </p>
-              <p className="text-lg md:text-2xl font-brand font-black text-[var(--color-brand-900)]">
-                + Lançar Pedido
-              </p>
-            </div>
+        <div className="relative flex items-center justify-between gap-4">
+          <div className="flex-1">
+            <div className="label-sm text-white/80 mb-1">NOVA COMANDA</div>
+            <div className="font-marca text-white" style={{ fontSize: '29px', lineHeight: 1 }}>+ Lançar Pedido</div>
           </div>
-
-          {/* Right: Arrow */}
-          <div className="flex-shrink-0 text-3xl md:text-4xl text-[var(--color-brand-900)]/60 group-hover:translate-x-1 transition-transform">
-            →
-          </div>
+          <div className="animate-carFloat flex-shrink-0 w-11 h-11 rounded-[14px] bg-[var(--color-rose-200)] flex items-center justify-center font-black text-[var(--color-brand-900)] text-2xl">+</div>
         </div>
 
-        {/* Subtle shadow inside */}
-        <div className="absolute inset-0 pointer-events-none rounded-2xl shadow-inset opacity-0 group-hover:opacity-10 transition-opacity" />
+        {/* Sweep shine animation */}
+        <div className="animate-carSweep absolute inset-0 pointer-events-none" style={{
+          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+          borderRadius: '20px',
+        }} />
       </button>
 
 
