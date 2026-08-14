@@ -22,13 +22,16 @@ export const Header: React.FC<HeaderProps> = ({
   }, [isProfileModalOpen]);
 
   return (
-    <header className="sticky top-0 z-30 bg-brand-gradient px-5 pt-safe-header sm:pt-4 pb-0 shadow-modal">
+    <header
+      className="sticky top-0 z-30 px-5 pt-safe-header sm:pt-4 pb-0 shadow-modal"
+      style={{ background: 'var(--brand-gradient)' }}
+    >
       <div className="max-w-lg mx-auto flex items-center justify-between py-4 gap-4">
 
         {/* Avatar (36px with gradient ring) */}
         <button
           onClick={() => setIsProfileModalOpen(true)}
-          className="flex-shrink-0 w-9 h-9 rounded-full transition-transform hover:scale-110 focus:outline-none"
+          className="flex-shrink-0 w-9 h-9 rounded-full transition-all duration-250 hover:scale-110 focus:outline-none"
           style={{
             background: 'linear-gradient(140deg, var(--color-rose-200), var(--color-rose-600))',
             padding: '2px',

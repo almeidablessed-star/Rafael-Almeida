@@ -234,6 +234,21 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.02); }
+}
+
+@keyframes metricEntrance {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes titleEntrance {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 @layer utilities {
   .animate-carSweep { animation: carSweep 5s infinite; }
   .animate-carGlow { animation: carGlow 6s infinite; }
@@ -242,6 +257,9 @@
   .animate-fadeIn { animation: fadeIn 200ms ease-out forwards; }
   .animate-scaleUp { animation: scaleUp 300ms ease-out forwards; }
   .animate-slideUp { animation: slideUp 400ms ease-out forwards; }
+  .animate-pulse { animation: pulse 3s ease-in-out infinite; }
+  .animate-metricEntrance { animation: metricEntrance 350ms cubic-bezier(0.23, 1, 0.32, 1) forwards; }
+  .animate-titleEntrance { animation: titleEntrance 300ms cubic-bezier(0.23, 1, 0.32, 1) forwards; }
 
   .bg-brand-gradient { background: var(--brand-gradient); }
 
@@ -288,12 +306,18 @@
 
   /* Button Press Feedback — Emil's Philosophy */
   .btn-press {
-    transition: transform 100ms cubic-bezier(0.23, 1, 0.32, 1), filter 100ms ease-out;
+    transition: transform 100ms cubic-bezier(0.23, 1, 0.32, 1), filter 100ms ease-out, box-shadow 100ms ease-out;
   }
 
   .btn-press:active {
     transform: scale(0.97);
     filter: brightness(0.98);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .btn-press:hover {
+      transform: translateY(-2px);
+    }
   }
 
   /* Stagger animations for lists/modals */
@@ -312,12 +336,17 @@
 
   /* Color transition blur mask — Emil's technique */
   .color-transition {
-    transition: background-color 200ms ease, color 200ms ease, filter 200ms ease;
+    transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease;
   }
 
-  .color-transition:active,
-  .color-transition:focus {
-    filter: blur(1px);
+  @media (hover: hover) and (pointer: fine) {
+    .color-transition:hover {
+      filter: brightness(1.04);
+    }
+  }
+
+  .color-transition:active {
+    filter: brightness(0.98);
   }
 
   .shadow-card { box-shadow: var(--shadow-card); }
@@ -342,24 +371,38 @@
   border-radius: 22px;
   border: none;
   box-shadow: var(--shadow-card);
-  transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 180ms ease-in-out;
+  transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 180ms ease;
 }
 
-.card-interactive:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-card-hover);
+@media (hover: hover) and (pointer: fine) {
+  .card-interactive:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-card-hover);
+  }
+}
+
+.card-interactive:active {
+  transform: scale(0.98);
+  transition: transform 100ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .card-stock-3d {
   background-color: var(--color-card);
   border-radius: 22px;
   box-shadow: var(--shadow-card);
-  transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.3, 1), box-shadow 0.28s cubic-bezier(0.2, 0.8, 0.3, 1);
+  transition: transform 240ms cubic-bezier(0.2, 0.8, 0.3, 1), box-shadow 240ms cubic-bezier(0.2, 0.8, 0.3, 1);
 }
 
-.card-stock-3d:hover {
-  transform: translateY(-6px) scale(1.015);
-  box-shadow: var(--shadow-stock-hover);
+@media (hover: hover) and (pointer: fine) {
+  .card-stock-3d:hover {
+    transform: translateY(-6px) scale(1.015);
+    box-shadow: var(--shadow-stock-hover);
+  }
+}
+
+.card-stock-3d:active {
+  transform: scale(0.96);
+  transition: transform 100ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .btn-primary {
@@ -371,14 +414,18 @@
   border-radius: 14px;
   border: none;
   box-shadow: var(--shadow-btn);
-  transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 180ms ease, background-color 200ms ease;
+  transition: transform 180ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 160ms ease, background-color 180ms ease;
   cursor: pointer;
 }
-.btn-primary:hover {
-  background-color: #2D1B3F;
-  box-shadow: 0 14px 28px rgba(58, 35, 80, 0.4);
-  transform: translateY(-3px);
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-primary:hover {
+    background-color: #2D1B3F;
+    box-shadow: 0 14px 28px rgba(58, 35, 80, 0.4);
+    transform: translateY(-3px);
+  }
 }
+
 .btn-primary:active {
   transform: scale(0.97);
   transition: transform 100ms cubic-bezier(0.23, 1, 0.32, 1);
@@ -392,51 +439,84 @@
   font-weight: 600;
   font-size: 14px;
   border-radius: 14px;
-  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), background-color 180ms ease, border-color 180ms ease;
   cursor: pointer;
 }
-.btn-secondary:hover {
-  background-color: var(--color-surface);
-  border-color: var(--color-brand-700);
-  transform: translateY(-2px);
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-secondary:hover {
+    background-color: var(--color-surface);
+    border-color: var(--color-brand-700);
+    transform: translateY(-2px);
+  }
+}
+
+.btn-secondary:active {
+  transform: scale(0.96);
+  transition: transform 100ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .btn-chip-lift {
-  transition: transform 0.22s ease, box-shadow 0.22s ease;
+  transition: transform 180ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 160ms ease;
 }
-.btn-chip-lift:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 20px rgba(58, 35, 80, 0.16);
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-chip-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 20px rgba(58, 35, 80, 0.16);
+  }
+}
+
+.btn-chip-lift:active {
+  transform: scale(0.96);
+  transition: transform 100ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .comanda-btn {
-  transition: transform 0.22s ease;
+  transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
 }
-.comanda-btn:hover {
-  transform: translateY(-3px) rotate(-0.6deg);
+
+@media (hover: hover) and (pointer: fine) {
+  .comanda-btn:hover {
+    transform: translateY(-3px) rotate(-0.6deg);
+  }
+}
+
+.comanda-btn:active {
+  transform: scale(0.97);
+  transition: transform 100ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .list-row-hover {
-  transition: transform 0.25s ease, background 0.25s ease;
+  transition: transform 200ms ease, background-color 200ms ease;
 }
-.list-row-hover:hover {
-  transform: translateX(3px);
-  background-color: var(--color-lavender);
+
+@media (hover: hover) and (pointer: fine) {
+  .list-row-hover:hover {
+    transform: translateX(3px);
+    background-color: var(--color-lavender);
+  }
 }
 
 .nav-item-lift {
-  transition: transform 0.25s ease, background 0.25s ease, color 0.25s ease;
+  transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1), background-color 200ms ease, color 200ms ease;
 }
-.nav-item-lift:hover {
-  transform: translateY(-4px);
+
+@media (hover: hover) and (pointer: fine) {
+  .nav-item-lift:hover {
+    transform: translateY(-4px);
+  }
 }
 
 .sidebar-item {
-  transition: transform 0.25s ease, background 0.25s ease;
+  transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1), background-color 200ms ease;
 }
-.sidebar-item:hover {
-  transform: translateX(4px);
-  background: rgba(255, 255, 255, 0.12);
+
+@media (hover: hover) and (pointer: fine) {
+  .sidebar-item:hover {
+    transform: translateX(4px);
+    background: rgba(255, 255, 255, 0.12);
+  }
 }
 
 .badge-pill {

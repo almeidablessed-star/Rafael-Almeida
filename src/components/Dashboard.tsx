@@ -149,12 +149,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
         {/* 2. COMANDA TICKET BUTTON - "LANÇAR PEDIDO" */}
         <button
           onClick={() => onOpenAddModal('venda')}
-          className="w-full group relative overflow-hidden transition-all active:scale-95 hover:-translate-y-1 hover:rotate-1"
+          className="comanda-btn w-full group relative overflow-hidden active:scale-[0.98]"
           style={{
-            background: 'linear-gradient(150deg, #8F5A9C, #C4626F)',
+            background: 'var(--comanda-gradient)',
             borderRadius: '20px',
             padding: '18px 20px',
-            border: '2px dashed rgba(245, 185, 198, 0.5)',
           }}
         >
           {/* Cutout circles */}
@@ -171,10 +170,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
             right: '-11px', top: '50%', transform: 'translateY(-50%)',
           }} />
 
-          <div className="relative flex items-center gap-4">
+          <div className="relative flex items-center gap-4" style={{ borderLeft: '2px dashed rgba(245,185,198,.5)', paddingLeft: '16px' }}>
             <div className="flex-1">
-              <div className="text-xs font-black uppercase tracking-wider text-white/80 mb-1">NOVA COMANDA</div>
-              <div className="font-marca text-white" style={{ fontSize: '28px', lineHeight: 1 }}>+ Lançar Pedido</div>
+              <div className="label-sm text-white/80 mb-1" style={{ letterSpacing: '0.24em' }}>NOVA COMANDA</div>
+              <div className="font-marca text-white" style={{ fontSize: '29px', lineHeight: 1 }}>+ Lançar Pedido</div>
             </div>
             <div
               className="animate-carFloat flex-shrink-0 w-11 h-11 rounded-[14px] flex items-center justify-center font-black text-2xl"
@@ -208,9 +207,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
 
           {/* 3 Circular Gauges */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-4 stagger-children">
             {/* Reposição */}
-            <div className="bg-white rounded-2xl p-4 shadow-card text-center">
+            <div className="card-interactive bg-white rounded-2xl p-4 text-center">
               <svg width="84" height="84" viewBox="0 0 100 100" className="mx-auto">
                 <circle cx="50" cy="50" r="38" fill="none" stroke="var(--color-meter-track)" strokeWidth="9" />
                 <circle
@@ -226,7 +225,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
 
             {/* Mão de Obra */}
-            <div className="bg-white rounded-2xl p-4 shadow-card text-center">
+            <div className="card-interactive bg-white rounded-2xl p-4 text-center">
               <svg width="84" height="84" viewBox="0 0 100 100" className="mx-auto">
                 <circle cx="50" cy="50" r="38" fill="none" stroke="var(--color-meter-track)" strokeWidth="9" />
                 <circle
@@ -242,7 +241,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
 
             {/* Custo + Investimento */}
-            <div className="bg-white rounded-2xl p-4 shadow-card text-center">
+            <div className="card-interactive bg-white rounded-2xl p-4 text-center">
               <svg width="84" height="84" viewBox="0 0 100 100" className="mx-auto">
                 <circle cx="50" cy="50" r="38" fill="none" stroke="var(--color-meter-track)" strokeWidth="9" />
                 <circle

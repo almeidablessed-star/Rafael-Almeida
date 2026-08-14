@@ -138,37 +138,45 @@ export const EstoqueModule: React.FC = () => {
 
   return (
     <div className="pb-12 animate-fadeIn">
-      {/* Header Section - Premium Style */}
-      <div className="bg-gradient-to-br from-[#C8E6D7]/20 to-[#C8E6D7]/5 rounded-3xl p-6 mb-6 border border-[#C8E6D7]/30 shadow-card-hover">
+      {/* Header Section - Roxo Gradiente */}
+      <div
+        className="rounded-2xl p-6 mb-6 text-white shadow-highlight"
+        style={{
+          background: 'linear-gradient(155deg, var(--color-brand-900) 0%, var(--color-brand-700) 60%, var(--color-brand-500) 100%)',
+        }}
+      >
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
           <div>
-            <h2 className="font-brand font-semibold text-xl sm:text-2xl text-[var(--color-neutral-charcoal)] tracking-tight flex items-center gap-2">
-              <Package className="w-6 h-6 text-[var(--color-primary)]" />
+            <h2 className="font-marca text-3xl text-white tracking-tight" style={{ lineHeight: 1 }}>
               Controle de Estoque
             </h2>
-            <p className="text-xs text-[var(--color-text-secondary)] font-normal mt-2">
+            <p className="text-xs text-white/80 font-semibold mt-2">
               {items.length} insumos · {lowStockCount} com alerta
             </p>
           </div>
 
           <button
             onClick={handleOpenAdd}
-            className="py-2.5 px-4 bg-[var(--color-primary)] hover:brightness-110 text-white font-brand font-semibold text-xs rounded-2xl shadow-card active:scale-95 transition-all flex items-center gap-1.5 whitespace-nowrap"
+            className="py-2.5 px-4 text-xs font-black uppercase rounded-full active:scale-95 transition-all flex items-center gap-1.5 whitespace-nowrap"
+            style={{
+              background: 'var(--color-rose-200)',
+              color: 'var(--color-brand-900)',
+            }}
           >
-            <Plus className="w-4 h-4 stroke-[2.5]" />
+            <Plus className="w-4 h-4" />
             Adicionar Item
           </button>
         </div>
 
         {/* Search Utility */}
         <div className="relative">
-          <Search className="w-4 h-4 text-[var(--color-neutral-dark-gray)] absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'rgba(255,255,255,0.6)' }} />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Filtrar por nome..."
-            className="w-full sm:w-80 pl-9 pr-3 py-2 rounded-xl border border-[var(--color-neutral-light)] text-xs text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-primary)] bg-white transition-colors"
+            className="w-full sm:w-80 pl-9 pr-3 py-2 rounded-full text-xs placeholder:text-white/50 focus:outline-none bg-white/20 text-white transition-colors"
           />
         </div>
       </div>

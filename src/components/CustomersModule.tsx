@@ -486,17 +486,22 @@ export const CustomersModule: React.FC = () => {
 
   return (
     <div className="space-y-5 pb-12 animate-fadeIn">
-      {/* Top Title Header - Premium Style */}
-      <div className="bg-gradient-to-br from-[#D4C5E2]/20 to-[#D4C5E2]/5 rounded-2xl p-5 border border-[#D4C5E2]/30 shadow-card-hover flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-[#D4C5E2] text-[#5A4B6B] rounded-full flex items-center justify-center shadow-sm">
-            <Users className="w-6 h-6" />
+      {/* Top Title Header - Roxo Gradiente */}
+      <div
+        className="rounded-2xl p-6 text-white shadow-highlight"
+        style={{
+          background: 'linear-gradient(155deg, var(--color-brand-900) 0%, var(--color-brand-700) 60%, var(--color-brand-500) 100%)',
+        }}
+      >
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: 'var(--color-rose-200)' }}>
+            <Users className="w-7 h-7" style={{ color: 'var(--color-brand-900)' }} />
           </div>
           <div>
-            <h2 className="font-bold text-xl sm:text-2xl text-[#5A4B6B]">
+            <h2 className="font-marca text-3xl text-white" style={{ lineHeight: 1 }}>
               Clientes
             </h2>
-            <p className="text-xs text-[#5A4B6B]/70 font-medium">
+            <p className="text-xs text-white/80 font-semibold mt-2">
               {customers.length} {customers.length === 1 ? 'cliente cadastrada' : 'clientes cadastradas'}
             </p>
           </div>

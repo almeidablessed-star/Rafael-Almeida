@@ -466,19 +466,29 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 
   return (
     <div className="space-y-5 pb-12 animate-fadeIn">
-      {/* Banner Header - Premium Style */}
-      <div className="bg-gradient-to-br from-[#D4C5E2]/25 to-[#D4C5E2]/5 rounded-3xl p-6 border border-[#D4C5E2]/40 shadow-card-hover relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      {/* Banner Header - Roxo Gradiente */}
+      <div
+        className="rounded-2xl p-6 text-white shadow-highlight relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+        style={{
+          background: 'linear-gradient(155deg, var(--color-brand-900) 0%, var(--color-brand-700) 60%, var(--color-brand-500) 100%)',
+        }}
+      >
         <div>
-          <h2 className="font-bold text-2xl sm:text-3xl text-[var(--color-pastry-chocolate)] tracking-tight">
+          <h2 className="font-marca text-3xl text-white tracking-tight" style={{ lineHeight: 1 }}>
             Fichas Técnicas
           </h2>
+          <p className="text-xs text-white/80 font-semibold mt-2">Gestão de receitas e cálculo de custos</p>
         </div>
 
         <button
           onClick={handleOpenAdd}
-          className="px-5 py-3 rounded-lg bg-[var(--color-pastry-chocolate)] hover:bg-black text-[var(--color-pastry-pink)] font-bold text-xs shadow-sm active:scale-95 transition-all flex items-center gap-2 cursor-pointer shrink-0"
+          className="px-4 py-2.5 rounded-full text-xs font-black uppercase transition-all active:scale-95 flex items-center gap-2 cursor-pointer shrink-0"
+          style={{
+            background: 'var(--color-rose-200)',
+            color: 'var(--color-brand-900)',
+          }}
         >
-          <Plus className="w-4 h-4 stroke-[3]" />
+          <Plus className="w-4 h-4" />
           <span>Nova Ficha</span>
         </button>
       </div>

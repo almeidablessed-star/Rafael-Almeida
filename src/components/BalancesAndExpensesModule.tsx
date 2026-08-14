@@ -85,28 +85,33 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
 
   return (
     <div className="space-y-5 pb-12 animate-fadeIn">
-      {/* Header Banner - Premium Style */}
-      <div className="bg-gradient-to-br from-[#B8D4E8]/20 to-[#B8D4E8]/5 rounded-2xl p-5 text-[#3A4A5A] shadow-card-hover border border-[#B8D4E8]/40">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-black uppercase tracking-wider text-[var(--color-semantic-gold)] flex items-center gap-1.5">
-            <Wallet className="w-4 h-4 text-[var(--color-semantic-gold)]" />
-            Saldo
+      {/* Header Banner - Roxo Gradiente */}
+      <div
+        className="rounded-2xl p-6 text-white shadow-highlight"
+        style={{
+          background: 'linear-gradient(155deg, var(--color-brand-900) 0%, var(--color-brand-700) 60%, var(--color-brand-500) 100%)',
+        }}
+      >
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-xs font-black uppercase tracking-wider text-[var(--color-rose-200)] flex items-center gap-1.5">
+            <Wallet className="w-4 h-4" />
+            Relatório Financeiro
           </span>
-          <span className="bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-bold text-[10px] px-2.5 py-0.5 rounded-full uppercase">
+          <span className="bg-[var(--color-rose-200)] text-[var(--color-brand-900)] font-black text-xs px-3 py-1.5 rounded-full uppercase">
             Gestão Real
           </span>
         </div>
 
-        <h2 className="font-brand font-black text-xl sm:text-2xl text-[var(--color-neutral-charcoal)] tracking-tight">
+        <h2 className="font-marca text-3xl text-white" style={{ lineHeight: 1 }}>
           Saldo & Compras
         </h2>
-        <p className="text-xs text-[var(--color-text-secondary)] font-medium mt-1">
+        <p className="text-xs text-white/80 font-semibold mt-3">
           O dinheiro das vendas é acumulado automaticamente aqui no Saldo. Quando você faz uma compra, registre a despesa para descontar da categoria correta.
         </p>
       </div>
 
       {/* 1. BALANCE CARDS (Reposição, Mão de Obra, Custo + Investimento Juntos) - PREMIUM STYLED */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-7">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-7 stagger-children">
 
         {/* CARD REPOSIÇÃO - with mini bar chart */}
         <div

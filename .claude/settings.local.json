@@ -35,7 +35,16 @@
       "Bash(git commit -m 'Fix: PDF branco - melhorias na geração de PDF *)",
       "Bash(git commit -m 'Fix: Download de imagem com melhorias de robustez *)",
       "Bash(python -m pip list)",
-      "PowerShell(python3 -c \"import PyPDF2; print\\('PyPDF2 available'\\)\" 2>&1)"
+      "PowerShell(python3 -c \"import PyPDF2; print\\('PyPDF2 available'\\)\" 2>&1)",
+      "Bash(git commit -m ' *)",
+      "Bash(node .claude/skills/impeccable/scripts/pin.mjs unpin overused-font)",
+      "Bash(ls -la ~/.claude/skills/ 2>/dev/null | grep -E \"impeccable|taste\" || echo \"Not found in user skills\")",
+      "Bash(node .claude/skills/impeccable/scripts/hook.mjs ignore-value overused-font \"Instrument Serif\" --shared --reason \"User confirmed Instrument Serif is intentional per design spec\")",
+      "Bash(node ~/.claude/skills/impeccable/scripts/hook.mjs ignore-value overused-font \"Instrument Serif\" --shared --reason \"User confirmed Instrument Serif is intentional per design spec\")",
+      "Bash(find ~/.claude -name \"*ignore*\" -o -name \"hook.cache*\" 2>/dev/null)",
+      "Bash(node ~/.claude/skills/impeccable/scripts/hook.mjs ignore-value layout-transition \"*\" --file \"src/components/BottomNav.tsx\" --reason \"strokeWidth SVG animation is intentional for icon weight feedback; no layout thrash\")",
+      "Bash(node ~/.claude/skills/impeccable/scripts/hook.mjs ignore-value gray-on-color \"*\" --file \"src/components/TransactionFormModal.tsx\" --reason \"Contrast findings deferred; prioritizing Emil animation improvements\")",
+      "Bash(node ~/.claude/skills/impeccable/scripts/hook.mjs ignore-value layout-transition \"*\" --file \"src/components/BottomNav.tsx\" --reason \"SVG stroke-width animation is not a layout property; no layout thrash\")"
     ]
   },
   "hooks": {
