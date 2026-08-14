@@ -209,7 +209,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           {/* 3 Circular Gauges */}
           <div className="grid grid-cols-3 gap-4 stagger-children">
             {/* Reposição */}
-            <div className="card-interactive bg-white rounded-2xl p-4 text-center">
+            <div className="card-interactive bg-white rounded-3xl p-4 text-center">
               <svg width="84" height="84" viewBox="0 0 100 100" className="mx-auto">
                 <circle cx="50" cy="50" r="38" fill="none" stroke="var(--color-meter-track)" strokeWidth="9" />
                 <circle
@@ -220,12 +220,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 />
                 <text x="50" y="58" textAnchor="middle" fontSize="18" fontWeight="bold" fill="var(--color-brand-900)">{Math.round(balances.reposicaoPercent || 72)}%</text>
               </svg>
-              <div className="text-sm font-black uppercase tracking-wider mt-3" style={{ color: 'var(--color-brand-900)' }}>Reposição</div>
+              <div className="text-sm font-black uppercase tracking-wider mt-3" style={{ color: 'var(--color-brand-900)' }}>🔄 REPOSIÇÃO</div>
               <div className="font-marca text-lg font-black mt-2" style={{ color: 'var(--color-ink)', fontSize: '20px' }}>{formatCurrency(balances.reposicao || 1240)}</div>
             </div>
 
             {/* Mão de Obra */}
-            <div className="card-interactive bg-white rounded-2xl p-4 text-center">
+            <div className="card-interactive bg-white rounded-3xl p-4 text-center">
               <svg width="84" height="84" viewBox="0 0 100 100" className="mx-auto">
                 <circle cx="50" cy="50" r="38" fill="none" stroke="var(--color-meter-track)" strokeWidth="9" />
                 <circle
@@ -236,12 +236,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 />
                 <text x="50" y="58" textAnchor="middle" fontSize="18" fontWeight="bold" fill="#7E4F9E">{Math.round(balances.laborPercent || 48)}%</text>
               </svg>
-              <div className="text-sm font-black uppercase tracking-wider mt-3" style={{ color: '#7E4F9E' }}>Mão de Obra</div>
+              <div className="text-sm font-black uppercase tracking-wider mt-3" style={{ color: '#7E4F9E' }}>🟣 MÃO DE OBRA</div>
               <div className="font-marca text-lg font-black mt-2" style={{ color: 'var(--color-ink)', fontSize: '20px' }}>{formatCurrency(balances.labor || 860)}</div>
             </div>
 
             {/* Custo + Investimento */}
-            <div className="card-interactive bg-white rounded-2xl p-4 text-center">
+            <div className="card-interactive bg-white rounded-3xl p-4 text-center">
               <svg width="84" height="84" viewBox="0 0 100 100" className="mx-auto">
                 <circle cx="50" cy="50" r="38" fill="none" stroke="var(--color-meter-track)" strokeWidth="9" />
                 <circle
@@ -252,7 +252,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 />
                 <text x="50" y="58" textAnchor="middle" fontSize="18" fontWeight="bold" fill="#B08D57">{Math.round(balances.costsPercent || 35)}%</text>
               </svg>
-              <div className="text-sm font-black uppercase tracking-wider mt-3" style={{ color: '#B08D57' }}>Custo + Invest.</div>
+              <div className="text-sm font-black uppercase tracking-wider mt-3" style={{ color: '#B08D57' }}>📊 CUSTO + INVEST.</div>
               <div className="font-marca text-lg font-black mt-2" style={{ color: 'var(--color-ink)', fontSize: '20px' }}>{formatCurrency(balances.costs || 620)}</div>
             </div>
           </div>
