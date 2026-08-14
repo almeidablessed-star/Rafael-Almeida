@@ -87,7 +87,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
     <div className="space-y-5 pb-12 animate-fadeIn">
       {/* Header Banner - Roxo Gradiente */}
       <div
-        className="rounded-2xl p-6 text-white shadow-highlight"
+        className="rounded-3xl p-6 text-white shadow-highlight"
         style={{
           background: 'linear-gradient(155deg, var(--color-brand-900) 0%, var(--color-brand-700) 60%, var(--color-brand-500) 100%)',
         }}
@@ -115,7 +115,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
 
         {/* CARD REPOSIÇÃO - with mini bar chart */}
         <div
-          className={`rounded-2xl p-6 border-2 transition-all shadow-sm relative overflow-hidden flex flex-col justify-between ${
+          className={`rounded-3xl p-6 border-2 transition-all shadow-sm relative overflow-hidden flex flex-col justify-between ${
             balances.reposicao.isNegative
               ? 'bg-[#C85A54]/8 border-[#C85A54]/70'
               : 'bg-[#C8E6D7]/10 border-[#C8E6D7]/80'
@@ -179,7 +179,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
         </div>
 
         {/* CARD MÃO DE OBRA - with circular progress */}
-        <div className="rounded-2xl p-6 border-2 transition-all shadow-sm bg-[#D4C5E2]/10 border-[#D4C5E2]/80 relative overflow-hidden flex flex-col justify-between">
+        <div className="rounded-3xl p-6 border-2 transition-all shadow-sm bg-[#D4C5E2]/10 border-[#D4C5E2]/80 relative overflow-hidden flex flex-col justify-between">
           {/* Top color strip */}
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#5A4B6B] to-[#7A6B8B]" />
 
@@ -231,7 +231,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
 
         {/* CARD CUSTO + INVESTIMENTO JUNTOS - with horizontal status bar */}
         <div
-          className={`rounded-2xl p-6 border-2 transition-all shadow-sm relative overflow-hidden flex flex-col justify-between ${
+          className={`rounded-3xl p-6 border-2 transition-all shadow-sm relative overflow-hidden flex flex-col justify-between ${
             balances.custoEInvestimento.isNegative
               ? 'bg-[#C85A54]/8 border-[#C85A54]/70'
               : 'bg-[#B8D4E8]/10 border-[#B8D4E8]/80'

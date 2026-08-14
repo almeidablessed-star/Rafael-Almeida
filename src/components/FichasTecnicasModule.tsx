@@ -468,7 +468,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     <div className="space-y-5 pb-12 animate-fadeIn">
       {/* Banner Header - Roxo Gradiente */}
       <div
-        className="rounded-2xl p-6 text-white shadow-highlight relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+        className="rounded-3xl p-6 text-white shadow-highlight relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
         style={{
           background: 'linear-gradient(155deg, var(--color-brand-900) 0%, var(--color-brand-700) 60%, var(--color-brand-500) 100%)',
         }}

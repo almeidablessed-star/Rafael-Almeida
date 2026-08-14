@@ -141,8 +141,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
           background: 'var(--color-surface)',
           position: 'relative',
           zIndex: 1,
-          marginTop: '-80px',
-          paddingTop: '60px',
+          marginTop: '-40px',
+          paddingTop: '20px',
         }}
       >
 

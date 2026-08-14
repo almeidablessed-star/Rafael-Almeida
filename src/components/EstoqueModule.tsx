@@ -140,7 +140,7 @@ export const EstoqueModule: React.FC = () => {
     <div className="pb-12 animate-fadeIn">
       {/* Header Section - Roxo Gradiente */}
       <div
-        className="rounded-2xl p-6 mb-6 text-white shadow-highlight"
+        className="rounded-3xl p-6 mb-6 text-white shadow-highlight"
         style={{
           background: 'linear-gradient(155deg, var(--color-brand-900) 0%, var(--color-brand-700) 60%, var(--color-brand-500) 100%)',
         }}
@@ -300,7 +300,7 @@ export const EstoqueModule: React.FC = () => {
                 {lowStockItems.map((item) => (
                   <div
                     key={item.id}
-                    className="bg-[#FBE8D6] border-2 border-[#F5D4A8] rounded-2xl p-4 hover:shadow-card transition-all shadow-card"
+                    className="bg-[#FBE8D6] border-2 border-[#F5D4A8] rounded-3xl p-4 hover:shadow-card transition-all shadow-card"
                   >
                     {/* Item Header */}
                     <div className="flex items-start justify-between mb-3 pb-2 border-b border-[var(--color-semantic-coral)] border-opacity-30">
@@ -386,7 +386,7 @@ export const EstoqueModule: React.FC = () => {
                 {healthyStockItems.map((item) => (
                   <div
                     key={item.id}
-                    className="bg-white border border-[var(--color-neutral-light)] rounded-2xl p-4 hover:border-[var(--color-primary)] hover:shadow-card transition-all"
+                    className="bg-white border border-[var(--color-neutral-light)] rounded-3xl p-4 hover:border-[var(--color-primary)] hover:shadow-card transition-all"
                   >
                     {/* Item Header */}
                     <div className="pb-2 border-b border-[var(--color-neutral-light)] mb-3">

@@ -66,7 +66,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
     <div className="space-y-4 animate-fadeIn pb-8">
       {/* Module Header Banner — Roxo Gradiente */}
       <div
-        className="rounded-2xl p-6 text-white shadow-highlight relative overflow-hidden flex items-center justify-between"
+        className="rounded-3xl p-6 text-white shadow-highlight relative overflow-hidden flex items-center justify-between"
         style={{
           background: 'linear-gradient(155deg, var(--color-brand-900) 0%, var(--color-brand-700) 60%, var(--color-brand-500) 100%)',
         }}
@@ -85,7 +85,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
       {/* Summary Cards Row - Premium Style */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Total Vendas */}
-        <div className="bg-white rounded-2xl p-5 shadow-card transition-none hover:shadow-lg hover:-translate-y-1" style={{ transition: 'transform 200ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 180ms ease-in-out' }}>
+        <div className="bg-white rounded-3xl p-5 shadow-card transition-none hover:shadow-lg hover:-translate-y-1" style={{ transition: 'transform 200ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 180ms ease-in-out' }}>
           <div className="flex gap-4 items-start">
             <div className="flex-1 min-w-0">
               <span className="text-xs font-black uppercase tracking-wider text-[var(--color-ink-soft)] block mb-2">Total em Vendas</span>
@@ -99,7 +99,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
         </div>
 
         {/* Vendas Pagas */}
-        <div className="bg-white rounded-2xl p-5 shadow-card transition-none hover:shadow-lg hover:-translate-y-1" style={{ transition: 'transform 200ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 180ms ease-in-out' }}>
+        <div className="bg-white rounded-3xl p-5 shadow-card transition-none hover:shadow-lg hover:-translate-y-1" style={{ transition: 'transform 200ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 180ms ease-in-out' }}>
           <div className="flex gap-4 items-start">
             <div className="flex-1 min-w-0">
               <span className="text-xs font-black uppercase tracking-wider text-[var(--color-ink-soft)] block mb-2">Vendas Pagas</span>
@@ -113,7 +113,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
         </div>
 
         {/* A Receber */}
-        <div className="bg-white rounded-2xl p-5 shadow-card transition-none hover:shadow-lg hover:-translate-y-1" style={{ transition: 'transform 200ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 180ms ease-in-out' }}>
+        <div className="bg-white rounded-3xl p-5 shadow-card transition-none hover:shadow-lg hover:-translate-y-1" style={{ transition: 'transform 200ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 180ms ease-in-out' }}>
           <div className="flex gap-4 items-start">
             <div className="flex-1 min-w-0">
               <span className="text-xs font-black uppercase tracking-wider text-[var(--color-ink-soft)] block mb-2">A Receber</span>
@@ -205,7 +205,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
             return (
               <div
                 key={tx.id}
-                className="bg-white rounded-2xl shadow-card transition-none hover:shadow-lg relative overflow-hidden"
+                className="bg-white rounded-3xl shadow-card transition-none hover:shadow-lg relative overflow-hidden"
               >
                 {/* Stripe lateral */}
                 <div

@@ -35,7 +35,7 @@ export const RestockModule: React.FC<RestockModuleProps> = ({
       {/* HERO ACTION CARD - Premium Styled */}
       <button
         onClick={onOpenAddModal}
-        className="w-full group relative overflow-hidden rounded-2xl transition-all active:scale-95 hover:shadow-highlight"
+        className="w-full group relative overflow-hidden rounded-3xl transition-all active:scale-95 hover:shadow-highlight"
       >
         {/* Background with gradient */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#C8E6D7] to-[#B8D6C7] opacity-100 group-hover:opacity-105 transition-opacity" />
@@ -64,11 +64,11 @@ export const RestockModule: React.FC<RestockModuleProps> = ({
         </div>
 
         {/* Subtle shadow inside */}
-        <div className="absolute inset-0 pointer-events-none rounded-2xl shadow-inset opacity-0 group-hover:opacity-10 transition-opacity" />
+        <div className="absolute inset-0 pointer-events-none rounded-3xl shadow-inset opacity-0 group-hover:opacity-10 transition-opacity" />
       </button>
 
       {/* Module Summary Card */}
-      <div className="bg-gradient-to-r from-[#C8E6D7] via-[#E5F4F0] to-[#C8E6D7] rounded-2xl p-5 md:p-6 text-[var(--color-brand-900)] shadow-sm border border-[#C8E6D7]/50">
+      <div className="bg-gradient-to-r from-[#C8E6D7] via-[#E5F4F0] to-[#C8E6D7] rounded-3xl p-5 md:p-6 text-[var(--color-brand-900)] shadow-sm border border-[#C8E6D7]/50">
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs md:text-sm font-bold uppercase tracking-wider text-[#3A5A4A] flex items-center gap-1.5">
             <div className="p-2 bg-[#3A5A4A]/15 rounded-lg">

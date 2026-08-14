@@ -488,7 +488,7 @@ export const CustomersModule: React.FC = () => {
     <div className="space-y-5 pb-12 animate-fadeIn">
       {/* Top Title Header - Roxo Gradiente */}
       <div
-        className="rounded-2xl p-6 text-white shadow-highlight"
+        className="rounded-3xl p-6 text-white shadow-highlight"
         style={{
           background: 'linear-gradient(155deg, var(--color-brand-900) 0%, var(--color-brand-700) 60%, var(--color-brand-500) 100%)',
         }}
