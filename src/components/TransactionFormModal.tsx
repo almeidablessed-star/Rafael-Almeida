@@ -607,7 +607,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
         </div>
 
         {/* Modal Body */}
-        <form onSubmit={handleSubmit} className="p-5 overflow-y-auto space-y-4 flex-1">
+        <form onSubmit={handleSubmit} className="p-5 overflow-y-auto space-y-4 flex-1 stagger-children">
           {/* Type Selector (if adding new) */}
           {!editingTransaction && (
             <div>

@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* ====== Design Token System — Carula Redesign ====== */
+/* ======== CARULA REDESIGN — DESIGN TOKEN SYSTEM ======== */
 :root {
   /* Brand Colors */
   --color-brand-900: #3A2350;
@@ -18,119 +18,71 @@
   --color-card: #FFFFFF;
   --color-ink: #241B2B;
   --color-ink-soft: #7A6E80;
+  --color-lavender: #F3E9F3;
 
-  /* Auxiliary Colors */
+  /* Auxiliares (referência Carula final) */
   --color-purple-light: #8F5A9C;
   --color-labor: #7E4F9E;
-  --color-costs: #B08D57;
-  --color-paid: #4C7358;
-  --color-lavender: #F3E9F3;
-  --color-bg-block: #FAF7FA;
-  --color-date-bg: #F0E2C8;
+  --color-cost: #B08D57;
+  --color-paid-text: #4C7358;
+  --color-inner-bg: #FAF7FA;
+  --color-date-highlight: #F0E2C8;
+  --color-nav-inactive: #A096A6;
+  --color-sidebar-mid: #4A2C5C;
+  --color-segment-bg: #EDE6EF;
+
+  /* Gradiente da marca */
+  --brand-gradient: linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%);
+  --sidebar-gradient: linear-gradient(180deg, #3A2350, #4A2C5C);
+  --comanda-gradient: linear-gradient(150deg, #8F5A9C, #C4626F);
+  --active-nav-gradient: linear-gradient(120deg, #F5B9C6, #C4626F);
+
+  /* Trilho do medidor */
   --color-meter-track: #F1ECF2;
 
-  /* Legacy mapping for compatibility */
-  --color-primary: #3A2350;
-  --color-primary-dark: #2D1B3F;
-  --color-primary-light: #6E3F72;
-
-  /* Neutrals */
-  --color-neutral-white: #FFFFFF;
-  --color-neutral-hero: #F6F2F5;
-  --color-neutral-light: #F5F3F0;
-  --color-neutral-medium: #E6E1DB;
-  --color-neutral-warm-gray: #E4D9C3;
-  --color-neutral-dark-gray: #5C5550;
-  --color-neutral-charcoal: #241B2B;
-
-  /* Section-Specific Colors (Vitrine Moderna) */
-  --color-vendas: #A85E86;
-  --color-vendas-light: #F5B9C6;
-  --color-vendas-dark: #3A2350;
-
-  --color-labor: #A85E86;
-  --color-labor-light: #F5B9C6;
-  --color-labor-dark: #3A2350;
-
-  --color-reposicao: #A9D8B8;
-  --color-reposicao-light: #A9D8B8;
-  --color-reposicao-dark: #3A2350;
-
-  --color-destaque: #E4D9C3;
-  --color-destaque-light: #F5F3F0;
-  --color-destaque-dark: #3A2350;
-
-  --color-dados: #A9D8B8;
-  --color-dados-light: #A9D8B8;
-  --color-dados-dark: #3A2350;
-
-  /* Accent Rose (for CTAs) */
-  --color-accent-gold: #F5B9C6;
-  --color-accent-gold-dark: #A85E86;
-  --color-accent-gold-light: #F5B9C6;
-
-  /* Semantic Colors */
-  --color-semantic-success: #A9D8B8;
-  --color-semantic-warning: #E4D9C3;
-  --color-semantic-error: #C85A54;
-  --color-semantic-info: #6E3F72;
-
-  /* Component States */
+  /* States */
   --color-focus-ring: #3A2350;
-  --color-border: #E6E1DB;
   --color-border-subtle: rgba(58, 35, 80, 0.08);
-  --color-text-primary: #241B2B;
-  --color-text-secondary: #6E3F72;
-  --color-text-muted: rgba(36, 27, 43, 0.6);
+  --color-border-nav: rgba(36, 27, 43, 0.08);
 
-  /* Hover States */
-  --color-primary-hover: #2D1B3F;
-  --color-accent-hover: #A85E86;
-  --color-neutral-hover: #F5F3F0;
+  /* Sombras — valores exatos da referência */
+  --shadow-card: 0 8px 20px rgba(58, 35, 80, 0.09);
+  --shadow-card-hover: 0 20px 36px rgba(58, 35, 80, 0.18);
+  --shadow-btn: 0 10px 20px rgba(58, 35, 80, 0.3);
+  --shadow-highlight: 0 14px 30px rgba(58, 35, 80, 0.3);
+  --shadow-nav-bottom: 0 -8px 24px rgba(58, 35, 80, 0.07);
+  --shadow-modal: 0 30px 70px rgba(58, 35, 80, 0.26);
+  --shadow-search: 0 6px 14px rgba(58, 35, 80, 0.07);
+  --shadow-chip: 0 8px 16px rgba(58, 35, 80, 0.3);
+  --shadow-stock-hover: 0 24px 40px rgba(58, 35, 80, 0.22);
 
-  /* Legacy Bridge Mapping */
-  --color-pastry-pink: #F5B9C6;
-  --color-pastry-cream: #F6F2F5;
-  --color-pastry-yellow: #E4D9C3;
-  --color-pastry-lavender: #6E3F72;
-  --color-pastry-sage: #A9D8B8;
-  --color-pastry-chocolate: #241B2B;
-  --color-pastry-light-pink: #F5B9C6;
-  --color-pastry-pink-hover: #A85E86;
+  /* Aliases legados → nova paleta */
+  --color-primary: var(--color-brand-900);
+  --color-primary-light: var(--color-brand-700);
+  --color-neutral-charcoal: var(--color-ink);
+  --color-accent-gold: var(--color-rose-200);
+  --color-neutral-hero: var(--color-surface);
+  --color-pastry-cream: var(--color-surface);
+  --color-pastry-chocolate: var(--color-ink);
+  --color-pastry-pink: var(--color-rose-200);
+  --color-pastry-lavender: var(--color-lavender);
+  --color-pastry-light-pink: var(--color-rose-200);
+  --color-pastry-yellow: var(--color-date-highlight);
+  --color-neutral-medium: var(--color-segment-bg);
+  --color-neutral-light: rgba(58, 35, 80, 0.1);
+  --color-neutral-cream: var(--color-inner-bg);
+  --color-neutral-dark-gray: var(--color-ink-soft);
+  --color-neutral-warm-gray: var(--color-ink-soft);
+  --color-text-primary: var(--color-ink);
+  --color-text-secondary: var(--color-ink-soft);
+  --color-text-muted: var(--color-ink-soft);
+  --color-semantic-success: var(--color-mint-300);
+  --color-semantic-warning: var(--color-sand-200);
+  --color-semantic-coral: var(--color-rose-600);
+  --color-semantic-error: var(--color-rose-600);
+  --color-semantic-info: var(--color-lavender);
+  --color-semantic-gold: var(--color-cost);
 }
-
-/* Dark Mode Variables (defined but not activated) */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-pastry-pink-dark: #E8A0B0;
-    --color-pastry-cream-dark: #1a1512;
-    --color-pastry-yellow-dark: #D4A85C;
-    --color-pastry-lavender-dark: #B299D9;
-    --color-pastry-sage-dark: #A8BC86;
-    --color-pastry-chocolate-dark: #F5F1E8;
-    --color-pastry-light-pink-dark: #F5C6CE;
-
-    --color-semantic-coral-dark: #F5A878;
-    --color-semantic-gold-dark: #F5D76E;
-    --color-semantic-orange-dark: #FF7B5C;
-    --color-semantic-purple-dark: #C9A3FF;
-    --color-semantic-dark-purple-dark: #E8C5FF;
-
-    --color-neutral-white-dark: #0f0d0a;
-    --color-neutral-off-white-dark: #1a1512;
-    --color-neutral-light-dark: #2B2420;
-    --color-neutral-dark-dark: #F5F1E8;
-
-    --color-focus-ring-dark: #E8A0B0;
-    --color-border-light-dark: #E8A0B0;
-    --color-border-muted-dark: rgba(232, 160, 176, 0.2);
-    --color-text-primary-dark: #F5F1E8;
-    --color-text-secondary-dark: rgba(245, 241, 232, 0.7);
-    --color-text-muted-dark: rgba(245, 241, 232, 0.4);
-  }
-}
-
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;600;700;800&display=swap');
 
 @layer base {
   body {
@@ -144,65 +96,63 @@
     letter-spacing: -0.02em;
   }
 
-  /* Display — Editorial Premium Headlines */
+  h1, h2, h3, .title-lg, .title-md, .title-sm {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-weight: 400;
+    line-height: 1.2;
+  }
+
   h1 {
     font-size: 36px;
-    font-weight: 700;
     line-height: 1.15;
     letter-spacing: -1px;
-    color: var(--color-neutral-charcoal);
+    color: var(--color-ink);
     margin-bottom: 0.5em;
   }
 
-  /* Section Heading */
   h2 {
     font-size: 28px;
-    font-weight: 700;
     line-height: 1.2;
     letter-spacing: -0.5px;
-    color: var(--color-neutral-charcoal);
+    color: var(--color-ink);
     margin-bottom: 0.75em;
   }
 
-  /* Card/Section Title */
   h3 {
     font-size: 20px;
-    font-weight: 600;
     line-height: 1.3;
-    color: var(--color-neutral-charcoal);
+    color: var(--color-ink);
     margin-bottom: 0.5em;
   }
 
-  /* Subheading */
   h4 {
+    font-family: 'Manrope', -apple-system, sans-serif;
     font-size: 16px;
     font-weight: 600;
     line-height: 1.4;
-    color: var(--color-neutral-charcoal);
+    color: var(--color-ink);
     margin-bottom: 0.5em;
   }
 
-  /* Body Large — Important descriptions */
   .text-large {
     font-size: 15px;
     font-weight: 500;
     line-height: 1.5;
-    color: var(--color-text-primary);
+    color: var(--color-ink);
   }
 
-  /* Caption — Small labels */
   small, .text-small {
     font-size: 12px;
     font-weight: 500;
     line-height: 1.4;
-    color: var(--color-text-secondary);
+    color: var(--color-ink-soft);
     letter-spacing: 0.5px;
   }
 
   .font-brand {
     font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
     font-weight: 600;
-    color: var(--color-neutral-charcoal);
+    color: var(--color-ink);
   }
 
   .font-display {
@@ -220,53 +170,14 @@
   font-feature-settings: "lnum" 1, "tnum" 1;
 }
 
-/* Global Surface Classes — Premium Editorial Palette */
-.bg-pastry-hero {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
-}
-
-.bg-pastry-cream {
-  background-color: var(--color-neutral-hero);
-}
-
-.bg-pastry-pink {
-  background-color: var(--color-accent-gold);
-}
-
-.bg-pastry-yellow {
-  background-color: var(--color-semantic-warning);
-}
-
-.bg-pastry-lavender {
-  background-color: var(--color-semantic-info);
-}
-
-.bg-pastry-sage {
-  background-color: var(--color-semantic-success);
-}
-
-.bg-pastry-chocolate {
-  background-color: var(--color-neutral-charcoal);
-}
-
-.text-pastry-chocolate {
-  color: var(--color-text-primary);
-}
-
-.border-pastry-pink {
-  border-color: var(--color-accent-gold);
-}
-
-/* Primary Identity Gradients — Subtle, Premium */
 .bg-carula-gradient {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  background: var(--brand-gradient);
 }
 
 .bg-carula-gradient-accent {
-  background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-accent-gold-light) 100%);
+  background: linear-gradient(135deg, var(--color-brand-700) 0%, var(--color-brand-500) 100%);
 }
 
-/* Safe area insets for iOS devices */
 .pt-safe-header {
   padding-top: max(3.25rem, calc(0.75rem + env(safe-area-inset-top, 0px)));
 }
@@ -279,7 +190,6 @@
   padding-bottom: max(4.5rem, calc(3.5rem + env(safe-area-inset-bottom)));
 }
 
-/* Hide scrollbars for horizontal tab scrolling */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -288,107 +198,58 @@
   scrollbar-width: none;
 }
 
-/* Carula Redesign Animations */
+/* ======== Animações — referência Carula final ======== */
 @keyframes carSweep {
-  0% {
-    transform: translateX(-120%);
-  }
-  60%, 100% {
-    transform: translateX(220%);
-  }
+  0% { transform: translateX(-120%); }
+  60%, 100% { transform: translateX(220%); }
 }
 
 @keyframes carGlow {
-  0%, 100% {
-    opacity: 0.45;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.8;
-    transform: scale(1.06);
-  }
+  0%, 100% { opacity: 0.45; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.06); }
 }
 
 @keyframes carFloat {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-6px);
-  }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
 }
 
-/* Modal Entry Animations */
+@keyframes carRise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes scaleUp {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 @keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(100%);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(100%); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @layer utilities {
-  /* Carula Redesign Animations */
-  .animate-carSweep {
-    animation: carSweep 5s infinite;
-  }
+  .animate-carSweep { animation: carSweep 5s infinite; }
+  .animate-carGlow { animation: carGlow 6s infinite; }
+  .animate-carFloat { animation: carFloat 4.5s infinite; }
+  .animate-carRise { animation: carRise 0.4s ease-out forwards; }
+  .animate-fadeIn { animation: fadeIn 200ms ease-out forwards; }
+  .animate-scaleUp { animation: scaleUp 300ms ease-out forwards; }
+  .animate-slideUp { animation: slideUp 400ms ease-out forwards; }
 
-  .animate-carGlow {
-    animation: carGlow 6s infinite;
-  }
+  .bg-brand-gradient { background: var(--brand-gradient); }
 
-  .animate-carFloat {
-    animation: carFloat 4.5s infinite;
-  }
-
-  /* Modal Animations */
-  .animate-fadeIn {
-    animation: fadeIn 200ms ease-out forwards;
-  }
-
-  .animate-scaleUp {
-    animation: scaleUp 300ms ease-out forwards;
-  }
-
-  .animate-slideUp {
-    animation: slideUp 400ms ease-out forwards;
-  }
-
-  /* Brand Gradient */
-  .bg-brand-gradient {
-    background: linear-gradient(155deg, var(--color-brand-900) 0%, var(--color-brand-700) 60%, var(--color-brand-500) 100%);
-  }
-
-  /* Marca (Instrument Serif) */
   .font-marca {
     font-family: 'Instrument Serif', serif;
     font-weight: 400;
   }
 
-  /* Heading Styles */
   .heading-lg {
     font-family: 'Instrument Serif', serif;
     font-size: 28px;
@@ -403,7 +264,6 @@
     line-height: 1.15;
   }
 
-  /* Value Styles */
   .value-lg {
     font-family: 'Manrope', sans-serif;
     font-size: 32px;
@@ -418,7 +278,6 @@
     letter-spacing: -0.03em;
   }
 
-  /* Label Styles */
   .label-sm {
     font-family: 'Manrope', sans-serif;
     font-size: 9px;
@@ -427,33 +286,48 @@
     letter-spacing: 0.14em;
   }
 
-  /* Card Shadow Styles */
-  .shadow-card {
-    box-shadow: 0 8px 20px rgba(58, 35, 80, 0.09);
+  /* Button Press Feedback — Emil's Philosophy */
+  .btn-press {
+    transition: transform 100ms cubic-bezier(0.23, 1, 0.32, 1), filter 100ms ease-out;
   }
 
-  .shadow-card-hover {
-    box-shadow: 0 20px 36px rgba(58, 35, 80, 0.18);
+  .btn-press:active {
+    transform: scale(0.97);
+    filter: brightness(0.98);
   }
 
-  .shadow-btn {
-    box-shadow: 0 10px 20px rgba(58, 35, 80, 0.3);
+  /* Stagger animations for lists/modals */
+  .stagger-children > * {
+    animation: slideUp 400ms ease-out backwards;
   }
 
-  .shadow-highlight {
-    box-shadow: 0 14px 30px rgba(58, 35, 80, 0.3);
+  .stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+  .stagger-children > *:nth-child(2) { animation-delay: 50ms; }
+  .stagger-children > *:nth-child(3) { animation-delay: 100ms; }
+  .stagger-children > *:nth-child(4) { animation-delay: 150ms; }
+  .stagger-children > *:nth-child(5) { animation-delay: 200ms; }
+  .stagger-children > *:nth-child(6) { animation-delay: 250ms; }
+  .stagger-children > *:nth-child(7) { animation-delay: 300ms; }
+  .stagger-children > *:nth-child(8) { animation-delay: 350ms; }
+
+  /* Color transition blur mask — Emil's technique */
+  .color-transition {
+    transition: background-color 200ms ease, color 200ms ease, filter 200ms ease;
   }
 
-  .shadow-nav-bottom {
-    box-shadow: 0 -8px 24px rgba(58, 35, 80, 0.07);
+  .color-transition:active,
+  .color-transition:focus {
+    filter: blur(1px);
   }
 
-  .shadow-modal {
-    box-shadow: 0 30px 70px rgba(58, 35, 80, 0.26);
-  }
+  .shadow-card { box-shadow: var(--shadow-card); }
+  .shadow-card-hover { box-shadow: var(--shadow-card-hover); }
+  .shadow-btn { box-shadow: var(--shadow-btn); }
+  .shadow-highlight { box-shadow: var(--shadow-highlight); }
+  .shadow-nav-bottom { box-shadow: var(--shadow-nav-bottom); }
+  .shadow-modal { box-shadow: var(--shadow-modal); }
 }
 
-/* Accessibility: Respect prefers-reduced-motion */
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;
@@ -462,41 +336,32 @@
   }
 }
 
-/* ====== Card Hierarchy — Carula Redesign ====== */
-.card-metric {
+/* ======== Interações — cards, botões, listas ======== */
+.card-interactive {
   background-color: var(--color-card);
   border-radius: 22px;
   border: none;
-  box-shadow: 0 8px 20px rgba(58, 35, 80, 0.09);
-  transition: transform 0.28s ease, box-shadow 0.28s ease;
+  box-shadow: var(--shadow-card);
+  transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 180ms ease-in-out;
 }
 
-.card-metric:hover {
+.card-interactive:hover {
   transform: translateY(-5px);
-  box-shadow: 0 20px 36px rgba(58, 35, 80, 0.18);
+  box-shadow: var(--shadow-card-hover);
 }
 
-.card-feature {
+.card-stock-3d {
   background-color: var(--color-card);
   border-radius: 22px;
-  border: none;
-  box-shadow: 0 8px 20px rgba(58, 35, 80, 0.09);
-  transition: transform 0.28s ease, box-shadow 0.28s ease;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.3, 1), box-shadow 0.28s cubic-bezier(0.2, 0.8, 0.3, 1);
 }
 
-.card-feature:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 20px 36px rgba(58, 35, 80, 0.18);
+.card-stock-3d:hover {
+  transform: translateY(-6px) scale(1.015);
+  box-shadow: var(--shadow-stock-hover);
 }
 
-.card-support {
-  background-color: var(--color-surface);
-  border-radius: 22px;
-  border: none;
-  box-shadow: 0 8px 20px rgba(58, 35, 80, 0.09);
-}
-
-/* ====== Button Hierarchy — Carula Redesign ====== */
 .btn-primary {
   padding: 12px 20px;
   background-color: var(--color-brand-900);
@@ -505,8 +370,8 @@
   font-size: 14px;
   border-radius: 14px;
   border: none;
-  box-shadow: 0 10px 20px rgba(58, 35, 80, 0.3);
-  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-btn);
+  transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 180ms ease, background-color 200ms ease;
   cursor: pointer;
 }
 .btn-primary:hover {
@@ -515,7 +380,8 @@
   transform: translateY(-3px);
 }
 .btn-primary:active {
-  transform: scale(0.98) translateY(-3px);
+  transform: scale(0.97);
+  transition: transform 100ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .btn-secondary {
@@ -535,40 +401,90 @@
   transform: translateY(-2px);
 }
 
-.btn-tertiary {
-  padding: 8px 12px;
-  background-color: transparent;
-  color: var(--color-brand-700);
-  font-weight: 600;
-  font-size: 14px;
-  border-radius: 10px;
-  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-  border: none;
+.btn-chip-lift {
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
 }
-.btn-tertiary:hover {
-  color: var(--color-brand-900);
-  background-color: rgba(58, 35, 80, 0.08);
-  transform: translateY(-2px);
+.btn-chip-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 20px rgba(58, 35, 80, 0.16);
 }
 
-.btn-danger {
-  padding: 12px 20px;
-  background-color: var(--color-rose-600);
-  color: white;
+.comanda-btn {
+  transition: transform 0.22s ease;
+}
+.comanda-btn:hover {
+  transform: translateY(-3px) rotate(-0.6deg);
+}
+
+.list-row-hover {
+  transition: transform 0.25s ease, background 0.25s ease;
+}
+.list-row-hover:hover {
+  transform: translateX(3px);
+  background-color: var(--color-lavender);
+}
+
+.nav-item-lift {
+  transition: transform 0.25s ease, background 0.25s ease, color 0.25s ease;
+}
+.nav-item-lift:hover {
+  transform: translateY(-4px);
+}
+
+.sidebar-item {
+  transition: transform 0.25s ease, background 0.25s ease;
+}
+.sidebar-item:hover {
+  transform: translateX(4px);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.badge-pill {
+  padding: 5px 10px;
+  font-size: 9px;
   font-weight: 800;
-  font-size: 14px;
-  border-radius: 14px;
-  border: none;
-  box-shadow: 0 10px 20px rgba(196, 98, 111, 0.3);
-  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
+  border-radius: 999px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
-.btn-danger:hover {
-  background-color: #B8483E;
-  box-shadow: 0 14px 28px rgba(196, 98, 111, 0.4);
-  transform: translateY(-3px);
+
+.badge-paid {
+  background: var(--color-mint-300);
+  color: #26402F;
 }
-.btn-danger:active {
-  transform: scale(0.98) translateY(-3px);
+
+.badge-pending {
+  background: var(--color-sand-200);
+  color: #5B4A2E;
+}
+
+.badge-alert {
+  background: var(--color-rose-600);
+  color: #FFF8F6;
+}
+
+.badge-category {
+  background: var(--color-lavender);
+  color: var(--color-brand-900);
+}
+
+.badge-city {
+  background: var(--color-date-highlight);
+  color: var(--color-brand-900);
+}
+
+.stock-list-perspective {
+  perspective: 900px;
+}
+
+.segment-control {
+  background: var(--color-segment-bg);
+  border-radius: 12px;
+  padding: 3px;
+}
+
+.segment-active {
+  background: var(--color-brand-900);
+  color: white;
+  border-radius: 9px;
 }

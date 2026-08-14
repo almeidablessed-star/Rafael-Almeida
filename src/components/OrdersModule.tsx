@@ -64,56 +64,64 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
 
   return (
     <div className="space-y-4 animate-fadeIn pb-8">
-      {/* Module Header Banner */}
-      <div className="bg-[#F5D4A8] rounded-2xl p-5 text-[var(--color-ink)] border border-[#F5D4A8]/40 shadow-card relative overflow-hidden flex items-center justify-between">
-        <h2 className="font-bold text-2xl sm:text-3xl text-[var(--color-ink)] tracking-tight">
-          Pedidos & Encomendas
-        </h2>
-        <span className="bg-[var(--color-ink)] text-[var(--color-rose-200)] font-medium text-[10px] px-3.5 py-1.5 rounded-full uppercase shrink-0">
+      {/* Module Header Banner — Roxo Gradiente */}
+      <div
+        className="rounded-2xl p-6 text-white shadow-highlight relative overflow-hidden flex items-center justify-between"
+        style={{
+          background: 'linear-gradient(155deg, var(--color-brand-900) 0%, var(--color-brand-700) 60%, var(--color-brand-500) 100%)',
+        }}
+      >
+        <div>
+          <h2 className="font-marca text-3xl text-white tracking-tight" style={{ lineHeight: 1 }}>
+            Pedidos & Encomendas
+          </h2>
+          <p className="text-xs text-white/80 font-semibold mt-2">Gestão completa de encomendas</p>
+        </div>
+        <span className="bg-[var(--color-rose-200)] text-[var(--color-brand-900)] font-black text-sm px-4 py-2.5 rounded-full uppercase shrink-0 shadow-card">
           {sales.length} {sales.length === 1 ? 'Pedido' : 'Pedidos'}
         </span>
       </div>
 
       {/* Summary Cards Row - Premium Style */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Total Vendas */}
-        <div className="bg-gradient-to-br from-[#F5D4A8]/30 to-[#F5D4A8]/10 rounded-2xl p-4 border border-[#F5D4A8]/40 shadow-card-hover hover:shadow-highlight transition-all relative overflow-hidden">
-          <div className="flex gap-3 items-start">
+        <div className="bg-white rounded-2xl p-5 shadow-card transition-none hover:shadow-lg hover:-translate-y-1" style={{ transition: 'transform 200ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 180ms ease-in-out' }}>
+          <div className="flex gap-4 items-start">
             <div className="flex-1 min-w-0">
-              <span className="label-sm text-[#6B5A42] block mb-1">Total em Vendas</span>
-              <span className="font-numbers font-marca value-md text-[var(--color-brand-900)] block">{formatCurrency(totalVendas)}</span>
-              <span className="text-[10px] text-[#6B5A42]/70 font-medium mt-2">{sales.length} encomendas registradas</span>
+              <span className="text-xs font-black uppercase tracking-wider text-[var(--color-ink-soft)] block mb-2">Total em Vendas</span>
+              <span className="font-marca text-2xl font-black text-[var(--color-brand-900)] block" style={{ fontSize: '24px' }}>{formatCurrency(totalVendas)}</span>
+              <span className="text-xs text-[var(--color-ink-soft)] font-medium mt-3">{sales.length} encomendas</span>
             </div>
-            <div className="w-10 h-10 rounded-full bg-[#F5D4A8] flex items-center justify-center shrink-0 shadow-sm">
-              <ShoppingBag className="w-5 h-5 text-[var(--color-brand-900)]" />
+            <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0" style={{ background: 'var(--color-brand-500)', color: 'white' }}>
+              <ShoppingBag className="w-6 h-6" />
             </div>
           </div>
         </div>
 
         {/* Vendas Pagas */}
-        <div className="bg-gradient-to-br from-[#C8E6D7]/30 to-[#C8E6D7]/10 rounded-2xl p-4 border border-[#C8E6D7]/40 shadow-card-hover hover:shadow-highlight transition-all relative overflow-hidden">
-          <div className="flex gap-3 items-start">
+        <div className="bg-white rounded-2xl p-5 shadow-card transition-none hover:shadow-lg hover:-translate-y-1" style={{ transition: 'transform 200ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 180ms ease-in-out' }}>
+          <div className="flex gap-4 items-start">
             <div className="flex-1 min-w-0">
-              <span className="label-sm text-[#3A5A4A] block mb-1">Vendas Pagas</span>
-              <span className="font-numbers font-marca value-md text-[#3A5A4A] block">{formatCurrency(totalPagas)}</span>
-              <span className="text-[10px] text-[#3A5A4A]/70 font-medium mt-2">{paidCount} {paidCount === 1 ? 'pedido pago' : 'pedidos pagos'}</span>
+              <span className="text-xs font-black uppercase tracking-wider text-[var(--color-ink-soft)] block mb-2">Vendas Pagas</span>
+              <span className="font-marca text-2xl font-black" style={{ fontSize: '24px', color: 'var(--color-mint-300)' }}>{formatCurrency(totalPagas)}</span>
+              <span className="text-xs text-[var(--color-ink-soft)] font-medium mt-3">{paidCount} {paidCount === 1 ? 'pago' : 'pagos'}</span>
             </div>
-            <div className="w-10 h-10 rounded-full bg-[#C8E6D7] flex items-center justify-center shrink-0 shadow-sm">
-              <CheckCircle2 className="w-5 h-5 text-[#3A5A4A]" />
+            <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0" style={{ background: 'var(--color-mint-300)' }}>
+              <CheckCircle2 className="w-6 h-6" style={{ color: 'var(--color-brand-900)' }} />
             </div>
           </div>
         </div>
 
         {/* A Receber */}
-        <div className="bg-gradient-to-br from-[#B8D4E8]/30 to-[#B8D4E8]/10 rounded-2xl p-4 border border-[#B8D4E8]/40 shadow-card-hover hover:shadow-highlight transition-all relative overflow-hidden">
-          <div className="flex gap-3 items-start">
+        <div className="bg-white rounded-2xl p-5 shadow-card transition-none hover:shadow-lg hover:-translate-y-1" style={{ transition: 'transform 200ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 180ms ease-in-out' }}>
+          <div className="flex gap-4 items-start">
             <div className="flex-1 min-w-0">
-              <span className="label-sm text-[#3A4A5A] block mb-1">A Receber</span>
-              <span className="font-numbers font-marca value-md text-[#3A4A5A] block">{formatCurrency(totalPendentes)}</span>
-              <span className="text-[10px] text-[#3A4A5A]/70 font-medium mt-2">{pendingCount} {pendingCount === 1 ? 'pedido pendente' : 'pedidos pendentes'}</span>
+              <span className="text-xs font-black uppercase tracking-wider text-[var(--color-ink-soft)] block mb-2">A Receber</span>
+              <span className="font-marca text-2xl font-black" style={{ fontSize: '24px', color: 'var(--color-sand-200)' }}>{formatCurrency(totalPendentes)}</span>
+              <span className="text-xs text-[var(--color-ink-soft)] font-medium mt-3">{pendingCount} {pendingCount === 1 ? 'pendente' : 'pendentes'}</span>
             </div>
-            <div className="w-10 h-10 rounded-full bg-[#B8D4E8] flex items-center justify-center shrink-0 shadow-sm">
-              <Clock className="w-5 h-5 text-[#3A4A5A]" />
+            <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0" style={{ background: 'var(--color-sand-200)' }}>
+              <Clock className="w-6 h-6" style={{ color: 'var(--color-brand-900)' }} />
             </div>
           </div>
         </div>
@@ -197,45 +205,72 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
             return (
               <div
                 key={tx.id}
-                className={`p-4 rounded-xl border shadow-card transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
-                  isPending
-                    ? 'bg-semantic-warning/20 border-semantic-warning/30'
-                    : 'bg-white border-[#E6E1DB] hover:border-semantic-warning/30'
-                }`}
+                className="bg-white rounded-2xl shadow-card transition-none hover:shadow-lg relative overflow-hidden"
               >
-                <div className="min-w-0 flex-1 space-y-1">
-                  {/* CLIENT CHIP & STATUS */}
-                  <div className="flex items-center gap-2 flex-wrap mb-1.5">
-                    <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[var(--color-accent-gold)]/70 border border-[var(--color-accent-gold)]/30 text-[var(--color-ink)] font-black text-xs uppercase shadow-card">
-                      <Users className="w-3.5 h-3.5 shrink-0" />
-                      CLIENTE: {tx.customerName ? tx.customerName.toUpperCase() : 'CLIENTE CADASTRADO'}
-                    </span>
+                {/* Stripe lateral */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    width: '6px',
+                    background: isPending ? 'var(--color-sand-200)' : 'var(--color-brand-900)',
+                  }}
+                />
 
-                    {isPending ? (
-                      <span className="bg-[#F5D4A8] text-[var(--color-brand-900)] px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center gap-1">
-                        <Clock className="w-3 h-3" /> Pendente
+                {/* Notches circulares laterais */}
+                <div style={{
+                  position: 'absolute',
+                  width: '18px', height: '18px', borderRadius: '50%',
+                  background: 'var(--color-surface)',
+                  left: '-9px', top: '50%', transform: 'translateY(-50%)',
+                }} />
+                <div style={{
+                  position: 'absolute',
+                  width: '18px', height: '18px', borderRadius: '50%',
+                  background: 'var(--color-surface)',
+                  right: '-9px', top: '50%', transform: 'translateY(-50%)',
+                }} />
+
+                {/* Content */}
+                <div className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pl-8">
+
+                  <div className="flex-1 min-w-0 space-y-2">
+                    {/* CLIENT CHIP & STATUS */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black uppercase" style={{ background: 'var(--color-lavender)', color: 'var(--color-brand-900)' }}>
+                        <Users className="w-3.5 h-3.5 shrink-0" />
+                        {tx.customerName ? tx.customerName.toUpperCase() : 'CLIENTE'}
                       </span>
-                    ) : (
-                      <span className="bg-[#C8E6D7] text-[#3A5A4A] px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3" /> Pago
-                      </span>
-                    )}
+
+                      {isPending ? (
+                        <span className="px-3 py-1 rounded-full text-xs font-black flex items-center gap-1" style={{ background: 'var(--color-sand-200)', color: 'var(--color-brand-900)' }}>
+                          <Clock className="w-3 h-3" /> Pendente
+                        </span>
+                      ) : (
+                        <span className="px-3 py-1 rounded-full text-xs font-black flex items-center gap-1" style={{ background: 'var(--color-mint-300)', color: 'var(--color-brand-900)' }}>
+                          <CheckCircle2 className="w-3 h-3" /> Pago
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-3 text-xs text-[var(--color-ink-soft)] font-medium">
+                      <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5 shrink-0" /> {formatDateBr(tx.date)}</span>
+                      {tx.paymentMethod && (
+                        <span>Pgto: <strong className="text-[var(--color-ink)]">{tx.paymentMethod}</strong></span>
+                      )}
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-2 text-[11px] text-[var(--color-ink)]/70 font-medium pt-0.5">
-                    <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5 shrink-0" /> Data: <strong className="text-[var(--color-ink)]">{formatDateBr(tx.date)}</strong></span>
-                    {tx.paymentMethod && (
-                      <span>• Pgto: <strong className="text-[var(--color-ink)] uppercase">{tx.paymentMethod}</strong></span>
-                    )}
-                  </div>
-                </div>
+                  <div className="flex flex-col sm:flex-row sm:items-end items-start justify-between w-full sm:w-auto shrink-0 gap-3">
+                    <div className="text-right">
+                      <span className="font-marca font-black text-xl text-[var(--color-ink)]" style={{ fontSize: '20px' }}>
+                        {formatCurrency(tx.totalValue)}
+                      </span>
+                    </div>
 
-                <div className="text-right flex items-center sm:flex-col sm:items-end justify-between w-full sm:w-auto shrink-0 border-t sm:border-t-0 pt-2 sm:pt-0 border-[#E6E1DB]">
-                  <span className="font-numbers font-black text-lg sm:text-xl text-[var(--color-ink)]">
-                    {formatCurrency(tx.totalValue)}
-                  </span>
-
-                  <div className="flex items-center gap-1.5 mt-1.5">
+                    <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => setQuoteTx(tx)}
                       className="px-3 py-1.5 rounded-full bg-[var(--color-ink)] hover:bg-black text-[var(--color-accent-gold)] font-medium text-[11px] shadow-card transition-all flex items-center gap-1 cursor-pointer active:scale-95"
@@ -285,6 +320,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                         <Trash2 className="w-4 h-4" />
                       </button>
                     )}
+                    </div>
                   </div>
                 </div>
               </div>
