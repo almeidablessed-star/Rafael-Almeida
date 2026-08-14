@@ -56,7 +56,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
       {/* 1. PROFIT CARD - Roxo Gradiente (Cabeçalho da Página) */}
       <div
-        className="rounded-b-3xl pt-6 pb-8 px-5 text-white relative overflow-hidden shadow-highlight"
+        className="rounded-b-3xl pt-6 pb-8 text-white relative overflow-hidden shadow-highlight"
         style={{
           background: 'linear-gradient(155deg, var(--color-brand-900) 0%, var(--color-brand-700) 60%, var(--color-brand-500) 100%)',
         }}
@@ -65,7 +65,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <div className="animate-carGlow absolute -top-20 -right-20 w-80 h-80 bg-white/10 rounded-full blur-3xl pointer-events-none" />
 
         {/* Content */}
-        <div className="relative z-10 space-y-4">
+        <div className="relative z-10 space-y-4 px-5">
           {/* Top: Gauge (92px) à esquerda + Label/Valor à direita */}
           <div className="flex items-center justify-between gap-6">
             {/* Circular Gauge (92px) - À ESQUERDA */}
@@ -141,8 +141,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
           background: 'var(--color-surface)',
           position: 'relative',
           zIndex: 1,
-          marginTop: '-28px',
-          paddingTop: '32px',
+          marginTop: '-80px',
+          paddingTop: '60px',
         }}
       >
 
