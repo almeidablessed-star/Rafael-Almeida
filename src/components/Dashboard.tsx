@@ -83,7 +83,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             {/* Texto e valor - À DIREITA */}
             <div className="flex-1">
               <div className="text-xs font-black uppercase tracking-widest text-white/80 mb-2">
-                Lucro Líquido do Mês (Rendimento)
+                LUCRO LÍQUIDO DO MÊS (RENDIMENTO)
               </div>
               <div className="font-black text-white" style={{ fontSize: '38px', lineHeight: 1.1, letterSpacing: '-0.02em' }}>
                 {formatCurrency(profit)}
@@ -104,19 +104,19 @@ export const Dashboard: React.FC<DashboardProps> = ({
           {/* Bottom: 3 Small Boxes */}
           <div className="grid grid-cols-3 gap-3 pt-3">
             <div className="rounded-xl p-4 text-center backdrop-blur" style={{ background: 'rgba(255,255,255,0.12)' }}>
-              <div className="text-xs text-white/80 font-bold uppercase tracking-wide">Vendas Pagas</div>
+              <div className="text-xs text-white/80 font-bold uppercase tracking-wide">VENDAS PAGAS</div>
               <div className="font-black text-white mt-2" style={{ fontSize: '18px', lineHeight: 1 }}>
                 {formatCurrency(balances.paidSales || 0)}
               </div>
             </div>
             <div className="rounded-xl p-4 text-center backdrop-blur" style={{ background: 'rgba(255,255,255,0.12)' }}>
-              <div className="text-xs text-white/80 font-bold uppercase tracking-wide">Saídas</div>
+              <div className="text-xs text-white/80 font-bold uppercase tracking-wide">SAÍDAS</div>
               <div className="font-black text-white mt-2" style={{ fontSize: '18px', lineHeight: 1 }}>
                 {formatCurrency(balances.totalExpenses || 0)}
               </div>
             </div>
             <div className="rounded-xl p-4 text-center backdrop-blur" style={{ background: 'rgba(228,217,195,0.28)' }}>
-              <div className="text-xs text-white/80 font-bold uppercase tracking-wide">⏳ A Receber</div>
+              <div className="text-xs text-white/80 font-bold uppercase tracking-wide">⏳ A RECEBER</div>
               <div className="font-black text-white mt-2" style={{ fontSize: '18px', lineHeight: 1 }}>
                 {formatCurrency(balances.pendingSales || 0)}
               </div>
