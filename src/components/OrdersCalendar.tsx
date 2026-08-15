@@ -172,13 +172,29 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
             return (
               <button
                 key={dayStr}
-                className="aspect-square rounded-[22px] flex items-center justify-center transition-all hover:-translate-y-0.5 cursor-pointer"
+                className="aspect-square rounded-[13px] flex items-center justify-center cursor-pointer"
                 style={{
-                  background: bgColor,
-                  color: textColor,
-                  border: borderStyle,
+                  background: hasOrders ? 'linear-gradient(150deg, #8F5A9C, #C4626F)' : '#F6F2F5',
+                  color: hasOrders ? '#FFFFFF' : (isToday ? '#6E3F72' : '#241B2B'),
+                  border: isToday ? '1.5px solid #6E3F72' : 'none',
                   fontSize: '12px',
                   fontWeight: isToday || hasOrders ? 800 : 400,
+                  boxShadow: hasOrders ? '0 6px 14px rgba(143,90,156,0.34)' : 'none',
+                  transition: hasOrders ? 'transform 0.2s ease' : 'all 0.2s ease',
+                }}
+                onMouseEnter={(e) => {
+                  if (hasOrders) {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                  } else {
+                    e.currentTarget.style.background = '#EFE6F0';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  if (!hasOrders) {
+                    e.currentTarget.style.background = '#F6F2F5';
+                  }
                 }}
                 title={`${dayNum} de ${monthNames[month].toLowerCase()}`}
               >
