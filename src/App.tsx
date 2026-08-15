@@ -153,13 +153,6 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[var(--color-surface)] text-[var(--color-ink)] flex flex-col lg:flex-row font-sans">
 
-      {/* Top Header - Mobile & Tablet */}
-      <div className="lg:hidden">
-        <Header
-          onOpenPwaModal={() => setIsPwaModalOpen(true)}
-          onOpenBackupModal={() => setIsBackupModalOpen(true)}
-        />
-      </div>
 
       {/* Desktop Sidebar — 236px, degradê roxo (referência 13a) */}
       <aside
