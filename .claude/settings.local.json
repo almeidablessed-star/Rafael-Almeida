@@ -61,7 +61,8 @@
       "Bash(/impeccable hooks *)",
       "Read(//c/Users/Rafael/Downloads/**)",
       "Bash(unzip -q \"HTML NOVO.zip\")",
-      "PowerShell(Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory\\(\"C:\\\\Users\\\\Rafael\\\\Downloads\\\\HTML NOVO.zip\", \"C:\\\\Users\\\\Rafael\\\\Downloads\\\\html-novo\", $true\\); Get-ChildItem \"C:\\\\Users\\\\Rafael\\\\Downloads\\\\html-novo\" -Recurse -File | Select-Object FullName)"
+      "PowerShell(Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory\\(\"C:\\\\Users\\\\Rafael\\\\Downloads\\\\HTML NOVO.zip\", \"C:\\\\Users\\\\Rafael\\\\Downloads\\\\html-novo\", $true\\); Get-ChildItem \"C:\\\\Users\\\\Rafael\\\\Downloads\\\\html-novo\" -Recurse -File | Select-Object FullName)",
+      "Bash(git commit -m 'feat: Add arc gauge visualizations to stock cards in EstoqueModule *)"
     ]
   },
   "hooks": {

@@ -312,9 +312,26 @@ export const EstoqueModule: React.FC = () => {
                       </span>
                     </div>
 
-                    {/* Quantity Display (Hero) */}
-                    <div className="mb-3 pb-3 border-b border-[var(--color-neutral-light)]">
-                      <div className="text-right">
+                    {/* Arc Gauge + Quantity Display */}
+                    <div className="mb-3 pb-3 border-b border-[var(--color-neutral-light)] flex items-center justify-between gap-3">
+                      <svg width="48" height="48" viewBox="0 0 48 48" className="flex-shrink-0">
+                        <circle cx="24" cy="24" r="20" fill="none" stroke="#E8D4C4" strokeWidth="3" />
+                        <circle
+                          cx="24"
+                          cy="24"
+                          r="20"
+                          fill="none"
+                          stroke="#D9532D"
+                          strokeWidth="3"
+                          strokeDasharray={`${Math.min(item.quantity / item.minThreshold, 1) * 125.6} 125.6`}
+                          strokeLinecap="round"
+                          style={{ transform: 'rotate(-90deg)', transformOrigin: '24px 24px' }}
+                        />
+                        <text x="24" y="26" textAnchor="middle" fontSize="12" fontWeight="bold" fill="#D9532D">
+                          {Math.round((item.quantity / item.minThreshold) * 100)}%
+                        </text>
+                      </svg>
+                      <div className="text-right flex-1">
                         <span className="font-numbers font-brand font-semibold text-2xl text-[var(--color-neutral-charcoal)]">
                           {item.quantity}
                         </span>
@@ -395,9 +412,26 @@ export const EstoqueModule: React.FC = () => {
                       </span>
                     </div>
 
-                    {/* Quantity Display (Hero) */}
-                    <div className="mb-3 pb-3 border-b border-[var(--color-neutral-light)]">
-                      <div className="text-right">
+                    {/* Arc Gauge + Quantity Display */}
+                    <div className="mb-3 pb-3 border-b border-[var(--color-neutral-light)] flex items-center justify-between gap-3">
+                      <svg width="48" height="48" viewBox="0 0 48 48" className="flex-shrink-0">
+                        <circle cx="24" cy="24" r="20" fill="none" stroke="#D4E8D7" strokeWidth="3" />
+                        <circle
+                          cx="24"
+                          cy="24"
+                          r="20"
+                          fill="none"
+                          stroke="#4CAF7D"
+                          strokeWidth="3"
+                          strokeDasharray={`${Math.min(item.quantity / item.minThreshold, 1) * 125.6} 125.6`}
+                          strokeLinecap="round"
+                          style={{ transform: 'rotate(-90deg)', transformOrigin: '24px 24px' }}
+                        />
+                        <text x="24" y="26" textAnchor="middle" fontSize="12" fontWeight="bold" fill="#4CAF7D">
+                          {Math.round((item.quantity / item.minThreshold) * 100)}%
+                        </text>
+                      </svg>
+                      <div className="text-right flex-1">
                         <span className="font-numbers font-brand font-semibold text-2xl text-[var(--color-neutral-charcoal)]">
                           {item.quantity}
                         </span>
