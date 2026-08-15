@@ -41,7 +41,7 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
     'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'
   ];
 
-  const daysOfWeek = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
+  const daysOfWeek = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
 
   // Calculate calendar grid days
   const firstDayOfMonth = new Date(year, month, 1);
@@ -92,14 +92,15 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
 
   return (
     <div className="bg-white rounded-[22px] p-6 shadow-card space-y-4">
+      {/* Title */}
+      <div>
+        <h2 className="font-serif-display text-[23px]" style={{ color: '#241B2B' }}>
+          Agenda de Pedidos
+        </h2>
+      </div>
+
       {/* Header Month Control */}
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-base uppercase tracking-wider" style={{ color: 'var(--color-ink)', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
-            {monthNames[month]}
-          </h2>
-        </div>
-
         <div className="flex items-center gap-2">
           <button
             onClick={handlePrevMonth}
@@ -109,6 +110,13 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
+        </div>
+
+        <h3 className="text-base uppercase tracking-widest" style={{ color: 'var(--color-ink)', fontFamily: "'Manrope', sans-serif", fontWeight: 800, flex: 1, textAlign: 'center' }}>
+          {monthNames[month]}
+        </h3>
+
+        <div className="flex items-center gap-2">
           <button
             onClick={handleNextMonth}
             className="p-1.5 rounded-full transition-all hover:translate-x-0.5"
@@ -170,7 +178,7 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
                   color: textColor,
                   border: borderStyle,
                   fontFamily: "'Manrope', sans-serif",
-                  fontWeight: 800,
+                  fontWeight: 600,
                 }}
                 title={`${dayNum} de ${monthNames[month].toLowerCase()}`}
               >

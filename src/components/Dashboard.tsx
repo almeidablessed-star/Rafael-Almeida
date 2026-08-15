@@ -375,14 +375,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
         {/* 4. AGENDA DE PEDIDOS - CALENDAR */}
         <div className="mt-6">
-          <div className="mb-4">
-            <h3 className="font-serif-display text-[23px]" style={{ color: '#241B2B' }}>
-              Agenda de Pedidos
-            </h3>
-            <p className="text-[11px]" style={{ color: '#7A6E80', marginTop: '2px' }}>
-              Visualize seus pedidos por data
-            </p>
-          </div>
           <OrdersCalendar transactions={transactionsList} />
         </div>
       </div>
