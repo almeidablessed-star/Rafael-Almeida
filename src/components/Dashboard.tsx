@@ -98,7 +98,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <div className="font-serif-display text-[32px] text-white leading-[1] tracking-[0.01em]">
                 Carula
               </div>
-              <div className="text-[8px] font-black text-white uppercase" style={{ letterSpacing: '0.44em', marginTop: '3px', paddingLeft: '0.44em' }}>
+              <div style={{ fontSize: '8px', fontWeight: 700, letterSpacing: '0.44em', color: 'rgba(247,220,225,0.78)', marginTop: '3px', paddingLeft: '0.44em', textTransform: 'uppercase' }}>
                 CONFEITARIA
               </div>
             </div>
