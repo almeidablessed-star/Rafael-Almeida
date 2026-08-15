@@ -1,0 +1,17 @@
+/* CARULA — COPIE TUDO ISSO NO SEU index.css */
+
+/* === GOOGLE FONTS === */
+
+
+/* === GLOBAL STYLES === */
+body { 
+  margin: 0; 
+  background: #EDE7DC; 
+  font-family: 'Plus Jakarta Sans', sans-serif; 
+  font-variant-numeric: lining-nums tabular-nums; 
+}
+a { color: #E82C1B; text-decoration: none; }
+a:hover { color: #2B2420; }
+
+/* === KEYFRAMES === */
+

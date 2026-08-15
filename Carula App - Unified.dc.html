@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+@keyframes carFloat { 0%,100% { transform:translateY(0) } 50% { transform:translateY(-6px) } }
+@keyframes carSweep { 0% { transform:translateX(-120%) } 60%,100% { transform:translateX(220%) } }
+body { margin:0; background:#EDE7DC; font-family:'Manrope',sans-serif; font-variant-numeric: lining-nums tabular-nums; }
+</style>
+</helmet>
+
+<div style="width:390px; background:#F6F2F5; border-radius:40px; overflow:hidden; box-shadow:0 30px 70px rgba(58,35,80,.26); display:flex; flex-direction:column; font-family:'Manrope',sans-serif; height:844px">
+
+  <div style="flex:1; overflow-y:auto; background:#F6F2F5; display:flex; flex-direction:column">
+    
+    <!-- INÍCIO SCREEN -->
+    <sc-if value="{{ currentScreen === 'inicio' }}" hint-placeholder-val="{{ true }}">
+      <div style="padding:20px; background:linear-gradient(155deg,#3A2350 0%,#6E3F72 55%,#A85E86 100%); display:flex; flex-direction:column; gap:16px">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px">
+          <div style="width:34px; height:34px; border-radius:12px; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.24); color:#F7DCE1; display:flex; align-items:center; justify-content:center; font-family:'Instrument Serif',serif; font-size:16px; cursor:pointer">C</div>
+          <div style="display:flex; flex-direction:column; align-items:center; line-height:1">
+            <span style="font-family:'Instrument Serif',serif; font-size:32px; color:#FFFFFF">Carula</span>
+            <span style="font-size:8px; font-weight:700; letter-spacing:.44em; color:rgba(247,220,225,.78); margin-top:3px">CONFEITARIA</span>
+          </div>
+          <div style="display:flex; gap:7px">
+            <div style="width:32px; height:32px; border-radius:11px; background:rgba(255,255,255,.16); display:flex; align-items:center; justify-content:center; cursor:pointer"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F7DCE1" stroke-width="1.8" stroke-linecap="round"><rect x="6.5" y="2" width="11" height="20" rx="3"></rect><path d="M10.5 5.5h3"></path><path d="M12 18.2h.01"></path></svg></div>
+            <div style="width:32px; height:32px; border-radius:11px; background:rgba(255,255,255,.16); display:flex; align-items:center; justify-content:center; cursor:pointer"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F7DCE1" stroke-width="1.8" stroke-linecap="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 19h16"></path></svg></div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:16px">
+          <div style="position:relative; width:92px; height:92px; flex-shrink:0"><svg width="92" height="92" viewBox="0 0 92 92" style="transform:rotate(-90deg)"><circle cx="46" cy="46" r="38" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="9"></circle><circle cx="46" cy="46" r="38" fill="none" stroke="#F5B9C6" stroke-width="9" stroke-linecap="round" stroke-dasharray="239" stroke-dashoffset="98" style="filter:drop-shadow(0 0 8px rgba(245,185,198,.6))"></circle></svg><div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1"><span style="font-size:19px; font-weight:800; color:#FFFFFF">59%</span><span style="font-size:8px; color:rgba(247,220,225,.75); margin-top:3px">margem</span></div></div>
+          <div style="display:flex; flex-direction:column; gap:6px"><span style="font-size:9px; font-weight:800; letter-spacing:.14em; color:rgba(247,220,225,.8)">LUCRO LÍQUIDO DO MÊS</span><span style="font-size:32px; font-weight:800; color:#FFFFFF">R$ 4.980,00</span><span style="align-self:flex-start; font-size:10px; font-weight:800; color:#26402F; background:#A9D8B8; padding:4px 11px; border-radius:999px">Positivo</span></div>
+        </div>
+        <div style="font-size:12px; line-height:1.6; color:rgba(247,220,225,.84)">🎉 <strong style="color:#FFFFFF">Resultado excelente!</strong> Suas vendas superaram todas as despesas e custos por <strong style="color:#FFFFFF">R$ 4.980,00</strong> no período.</div>
+        <div style="display:flex; gap:8px">
+          <div style="flex:1; background:rgba(255,255,255,.12); border-radius:16px; padding:11px 12px"><div style="font-size:9px; color:rgba(247,220,225,.75); font-weight:700">VENDAS PAGAS</div><div style="font-size:15px; font-weight:800; color:#FFFFFF; margin-top:3px">R$ 8.420</div></div>
+          <div style="flex:1; background:rgba(255,255,255,.12); border-radius:16px; padding:11px 12px"><div style="font-size:9px; color:rgba(247,220,225,.75); font-weight:700">SAÍDAS</div><div style="font-size:15px; font-weight:800; color:#FFFFFF; margin-top:3px">R$ 3.440</div></div>
+          <div style="flex:1; background:rgba(228,217,195,.28); border-radius:16px; padding:11px 12px"><div style="font-size:9px; color:#F0E2C8; font-weight:700">⏳ A RECEBER</div><div style="font-size:15px; font-weight:800; color:#FFFFFF; margin-top:3px">R$ 1.150</div></div>
+        </div>
+        <button style="width:100%; padding:12px; border:1px solid rgba(255,255,255,.32); border-radius:14px; background:rgba(255,255,255,.12); color:#FFFFFF; font-size:12px; font-weight:700; cursor:pointer">Ver Detalhamento das Vendas</button>
+      </div>
+      <div style="padding:18px; display:flex; flex-direction:column; gap:16px; margin-top:-14px; background:#F6F2F5; border-radius:28px 28px 0 0; position:relative; flex:1; overflow-y:auto">
+        <button onClick="{{ navTo }}" data-screen="lancarPedido" style="position:relative; overflow:hidden; width:100%; border:none; border-radius:20px; background:linear-gradient(150deg,#3A2350,#6E3F72 55%,#A85E86); padding:18px 20px; display:flex; align-items:center; gap:16px; cursor:pointer; box-shadow:0 14px 30px rgba(58,35,80,.36)">
+          <span style="position:absolute; left:-11px; top:50%; width:22px; height:22px; border-radius:50%; background:#F6F2F5; transform:translateY(-50%)"></span>
+          <span style="position:absolute; right:-11px; top:50%; width:22px; height:22px; border-radius:50%; background:#F6F2F5; transform:translateY(-50%)"></span>
+          <span style="display:flex; flex-direction:column; align-items:flex-start; gap:4px; padding-left:6px; border-left:2px dashed rgba(245,185,198,.5)"><span style="font-size:9px; font-weight:800; letter-spacing:.24em; color:rgba(247,220,225,.8)">NOVA COMANDA</span><span style="font-family:'Instrument Serif',serif; font-size:29px; color:#FFFFFF; line-height:1">+ Lançar Pedido</span></span>
+          <span style="margin-left:auto; width:44px; height:44px; border-radius:14px; background:#F5B9C6; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 8px 16px rgba(0,0,0,.18); animation:carFloat 4.5s ease-in-out infinite"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#3A2350" stroke-width="2.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg></span>
+        </button>
+        <div style="display:flex; flex-direction:column; gap:11px"><div><div style="font-family:'Instrument Serif',serif; font-size:23px; color:#241B2B">Saldos & Divisão dos Pedidos</div><div style="font-size:11px; color:#7A6E80; margin-top:2px">Entradas das vendas pagas − Compras registradas</div></div><div style="display:flex; gap:9px">
+          <div style="flex:1; background:#FFFFFF; border-radius:22px; padding:15px; display:flex; flex-direction:column; align-items:center; gap:9px; box-shadow:0 8px 20px rgba(58,35,80,.08); cursor:pointer"><div style="position:relative; width:56px; height:56px"><svg width="56" height="56" viewBox="0 0 56 56" style="transform:rotate(-90deg)"><circle cx="28" cy="28" r="23" fill="none" stroke="#F0E9EE" stroke-width="6"></circle><circle cx="28" cy="28" r="23" fill="none" stroke="#C4626F" stroke-width="6" stroke-linecap="round" stroke-dasharray="145" stroke-dashoffset="41"></circle></svg><div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:#241B2B">72%</div></div><span style="font-size:9px; font-weight:800; color:#7A6E80">🔄 REPOSIÇÃO</span><span style="font-size:15px; font-weight:800; color:#241B2B">R$ 1.240</span></div>
+          <div style="flex:1; background:#FFFFFF; border-radius:22px; padding:15px; display:flex; flex-direction:column; align-items:center; gap:9px; box-shadow:0 8px 20px rgba(58,35,80,.08); cursor:pointer"><div style="position:relative; width:56px; height:56px"><svg width="56" height="56" viewBox="0 0 56 56" style="transform:rotate(-90deg)"><circle cx="28" cy="28" r="23" fill="none" stroke="#F0E9EE" stroke-width="6"></circle><circle cx="28" cy="28" r="23" fill="none" stroke="#7E4F9E" stroke-width="6" stroke-linecap="round" stroke-dasharray="145" stroke-dashoffset="75"></circle></svg><div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:#241B2B">48%</div></div><span style="font-size:9px; font-weight:800; color:#7A6E80">🟣 MÃO DE OBRA</span><span style="font-size:15px; font-weight:800; color:#241B2B">R$ 860</span></div>
+          <div style="flex:1; background:#FFFFFF; border-radius:22px; padding:15px; display:flex; flex-direction:column; align-items:center; gap:9px; box-shadow:0 8px 20px rgba(58,35,80,.08); cursor:pointer"><div style="position:relative; width:56px; height:56px"><svg width="56" height="56" viewBox="0 0 56 56" style="transform:rotate(-90deg)"><circle cx="28" cy="28" r="23" fill="none" stroke="#F0E9EE" stroke-width="6"></circle><circle cx="28" cy="28" r="23" fill="none" stroke="#B08D57" stroke-width="6" stroke-linecap="round" stroke-dasharray="145" stroke-dashoffset="94"></circle></svg><div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:#241B2B">35%</div></div><span style="font-size:9px; font-weight:800; color:#7A6E80">✨ CUSTO + INVEST</span><span style="font-size:15px; font-weight:800; color:#241B2B">R$ 980</span></div>
+        </div></div>
+      </div>
+    </sc-if>
+
+    <!-- PEDIDOS SCREEN -->
+    <sc-if value="{{ currentScreen === 'pedidos' }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:20px; background:linear-gradient(155deg,#3A2350 0%,#6E3F72 60%,#A85E86 100%); display:flex; flex-direction:column; gap:16px">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px">
+          <span style="font-family:'Instrument Serif',serif; font-size:29px; color:#FFFFFF">Pedidos & Encomendas</span>
+          <span style="background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.28); color:#FFFFFF; font-weight:800; font-size:10px; padding:6px 12px; border-radius:999px">{{ totalPedidos }} Pedidos</span>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:4px"><span style="font-size:9px; font-weight:800; color:rgba(247,220,225,.8)">TOTAL EM VENDAS</span><span style="font-size:32px; font-weight:800; color:#FFFFFF">R$ 12.500</span><span style="font-size:10px; color:rgba(247,220,225,.72)">{{ totalPedidos }} encomendas registradas</span></div>
+        <div style="display:flex; gap:8px">
+          <div style="flex:1; background:rgba(169,216,184,.22); border-radius:16px; padding:11px 12px"><div style="font-size:9px; color:#CDEBD8; font-weight:800">✓ VENDAS PAGAS</div><div style="font-size:15px; font-weight:800; color:#FFFFFF; margin-top:3px">R$ 10.200</div><div style="font-size:9px; color:rgba(247,220,225,.7); margin-top:2px">6 pedidos pagos</div></div>
+          <div style="flex:1; background:rgba(228,217,195,.26); border-radius:16px; padding:11px 12px"><div style="font-size:9px; color:#F0E2C8; font-weight:800">⏳ A RECEBER</div><div style="font-size:15px; font-weight:800; color:#FFFFFF; margin-top:3px">R$ 2.300</div><div style="font-size:9px; color:rgba(247,220,225,.7); margin-top:2px">2 pendentes</div></div>
+        </div>
+      </div>
+      <div style="padding:18px; display:flex; flex-direction:column; gap:14px; margin-top:-14px; background:#F6F2F5; border-radius:28px 28px 0 0; overflow-y:auto; flex:1">
+        <div style="position:relative"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A096A6" stroke-width="2" style="position:absolute; left:14px; top:50%; transform:translateY(-50%)"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg><div style="padding:12px 14px 12px 36px; background:#FFFFFF; border-radius:14px; font-size:11px; color:#A096A6; box-shadow:0 6px 14px rgba(58,35,80,.07)">Buscar por nome da cliente ou descrição...</div></div>
+        <div style="display:flex; align-items:center; gap:8px"><span style="font-size:10px; font-weight:800; color:#9A8FA0">STATUS:</span><div style="flex:1; display:flex; background:#EDE6EF; border-radius:12px; padding:3px"><span style="flex:1; text-align:center; font-size:11px; font-weight:800; color:#FFFFFF; background:#3A2350; border-radius:9px; padding:7px 0">Todos (8)</span><span style="flex:1; text-align:center; font-size:11px; font-weight:600; color:#6B5F71; padding:7px 0; cursor:pointer">Pagos (6)</span><span style="flex:1; text-align:center; font-size:11px; font-weight:600; color:#6B5F71; padding:7px 0; cursor:pointer">Pendentes (2)</span></div></div>
+        <sc-for list="{{ pedidos }}" as="ped" hint-placeholder-count="2">
+          <div style="position:relative; overflow:hidden; background:#FFFFFF; border-radius:22px; padding:16px 18px; box-shadow:0 8px 20px rgba(58,35,80,.09); cursor:pointer">
+            <span style="position:absolute; left:0; top:0; bottom:0; width:6px; background:#C4626F"></span>
+            <div style="display:flex; flex-direction:column; gap:9px">
+              <div style="display:flex; align-items:center; gap:7px; flex-wrap:wrap"><span style="font-size:10px; font-weight:800; color:#3A2350; background:#F3E9F3; padding:5px 11px; border-radius:999px">👤 CLIENTE: Maria Silva</span><span style="font-size:9px; font-weight:800; color:#3A2350; background:#E8F5E9; padding:5px 10px; border-radius:999px">✓ Pago</span></div>
+              <div style="font-size:10px; color:#7A6E80">📅 Data: <strong style="color:#241B2B">15 de Ago</strong> • Pgto: <strong style="color:#241B2B">PIX</strong></div>
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; border-top:1px dashed rgba(36,27,43,.14); padding-top:11px"><span style="font-size:17px; font-weight:800; color:#241B2B">R$ 450,00</span><div style="display:flex; align-items:center; gap:6px"><span style="box-sizing:border-box; white-space:nowrap; flex-shrink:0; font-size:9px; font-weight:800; color:#F5B9C6; background:#3A2350; padding:5px 10px; border-radius:999px">PDF</span></div></div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <!-- FICHAS SCREEN -->
+    <sc-if value="{{ currentScreen === 'fichas' }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:20px; background:linear-gradient(155deg,#3A2350 0%,#6E3F72 60%,#A85E86 100%); display:flex; align-items:center; justify-content:space-between; gap:12px">
+        <span style="font-family:'Instrument Serif',serif; font-size:29px; color:#FFFFFF">Fichas Técnicas</span>
+        <span style="display:flex; align-items:center; gap:7px; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.3); color:#FFFFFF; font-weight:800; font-size:11px; padding:9px 14px; border-radius:14px; cursor:pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>Nova Ficha</span>
+      </div>
+      <div style="padding:16px 18px 18px; display:flex; flex-direction:column; gap:14px; margin-top:-14px; background:#F6F2F5; border-radius:28px 28px 0 0; overflow-y:auto; flex:1">
+        <div style="display:flex; flex-wrap:wrap; gap:7px; background:#FFFFFF; border-radius:20px; padding:10px; box-shadow:0 6px 16px rgba(58,35,80,.07)">
+          <span style="flex-shrink:0; font-size:10.5px; font-weight:800; color:#FFFFFF; background:linear-gradient(140deg,#6E3F72,#A85E86); padding:8px 12px; border-radius:12px 12px 4px 4px; cursor:pointer">Bolos</span>
+          <span style="flex-shrink:0; font-size:10.5px; font-weight:700; color:#5B4A6B; background:#FFFFFF; padding:8px 12px; border-radius:12px; cursor:pointer">Doces</span>
+          <span style="flex-shrink:0; font-size:10.5px; font-weight:700; color:#5B4A6B; background:#FFFFFF; padding:8px 12px; border-radius:12px; cursor:pointer">Salgados</span>
+        </div>
+        <sc-for list="{{ fichas }}" as="ficha" hint-placeholder-count="1">
+          <div style="background:#FFFFFF; border-radius:26px; padding:16px; display:flex; flex-direction:column; gap:12px; box-shadow:0 8px 20px rgba(58,35,80,.09); cursor:pointer">
+            <div style="display:flex; gap:12px; align-items:flex-start"><div style="flex:1; display:flex; flex-direction:column; gap:7px"><span style="font-family:'Instrument Serif',serif; font-size:21px; color:#241B2B">Bolo Chocolate</span><span style="align-self:flex-start; font-size:10px; font-weight:700; color:#5B4A6B; background:#F3E9F3; padding:4px 10px; border-radius:999px">P (2kg)</span></div></div>
+            <div style="display:flex; align-items:center; gap:14px; background:#FAF7FA; border-radius:18px; padding:14px"><div style="position:relative; width:82px; height:82px; flex-shrink:0"><svg width="82" height="82" viewBox="0 0 82 82" style="transform:rotate(-90deg)"><circle cx="41" cy="41" r="35" fill="none" stroke="#F1ECF2" stroke-width="10"></circle><circle cx="41" cy="41" r="35" fill="none" stroke="#6E3F72" stroke-width="10" stroke-dasharray="50" stroke-dashoffset="0"></circle></svg><div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center"><span style="font-size:8px; font-weight:800; color:#8A7E90">SUGESTÃO</span><span style="font-size:13px; font-weight:800; color:#241B2B; margin-top:3px">R$ 45</span></div></div><div style="flex:1; display:flex; flex-direction:column; gap:6px"><span style="display:flex; align-items:center; gap:7px; font-size:10px; color:#5B4A6B"><span style="width:9px; height:9px; border-radius:3px; background:#6E3F72"></span>Reposição<strong style="color:#241B2B; margin-left:auto">R$ 12</strong></span><span style="display:flex; align-items:center; gap:7px; font-size:10px; color:#5B4A6B"><span style="width:9px; height:9px; border-radius:3px; background:#C4626F"></span>Mão de Obra<strong style="color:#241B2B; margin-left:auto">R$ 18</strong></span><span style="display:flex; align-items:center; gap:7px; font-size:10px; color:#5B4A6B"><span style="width:9px; height:9px; border-radius:3px; background:#B08D57"></span>Custos Op.<strong style="color:#241B2B; margin-left:auto">R$ 15</strong></span></div></div>
+            <div style="display:flex; gap:7px"><span style="flex:1; display:flex; align-items:center; justify-content:center; gap:6px; height:36px; font-size:11px; font-weight:800; cursor:pointer; border-radius:18px 18px 6px 18px; background:#3A2350; color:#F5B9C6"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F5B9C6" stroke-width="2" stroke-linecap="round"><path d="M4 20h4l10-10-4-4L4 16z"></path></svg>Editar</span><span style="flex:1; display:flex; align-items:center; justify-content:center; gap:6px; height:36px; font-size:11px; font-weight:800; cursor:pointer; border-radius:18px 18px 18px 6px; background:#F3E9F3; color:#6E3F72"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6E3F72" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="11" height="11" rx="2.5"></rect><path d="M5 15V6a2 2 0 0 1 2-2h9"></path></svg>Duplicar</span></div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <!-- CLIENTES SCREEN -->
+    <sc-if value="{{ currentScreen === 'clientes' }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:20px; background:linear-gradient(155deg,#3A2350 0%,#6E3F72 60%,#A85E86 100%); display:flex; align-items:center; justify-content:space-between; gap:12px">
+        <span style="font-family:'Instrument Serif',serif; font-size:29px; color:#FFFFFF">Clientes</span>
+        <span style="display:flex; align-items:center; gap:7px; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.3); color:#FFFFFF; font-weight:800; font-size:11px; padding:9px 14px; border-radius:14px; cursor:pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>Novo Cliente</span>
+      </div>
+      <div style="padding:18px; display:flex; flex-direction:column; gap:14px; margin-top:-14px; background:#F6F2F5; border-radius:28px 28px 0 0; overflow-y:auto; flex:1">
+        <div style="position:relative"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A096A6" stroke-width="2" style="position:absolute; left:14px; top:50%; transform:translateY(-50%)"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg><div style="padding:12px 14px 12px 36px; background:#FFFFFF; border-radius:14px; font-size:11px; color:#A096A6; box-shadow:0 6px 14px rgba(58,35,80,.07)">Buscar cliente por nome ou cidade...</div></div>
+        <sc-for list="{{ clientes }}" as="client" hint-placeholder-count="2">
+          <div style="background:linear-gradient(135deg, #3A2350 0%, #6E3F72 55%, #A85E86 100%); border-radius:22px; padding:20px; color:white; box-shadow:0 8px 20px rgba(58,35,80,.12); cursor:pointer">
+            <div style="display:flex; flex-direction:column; gap:12px"><div><h3 style="margin:0 0 8px 0; font-size:18px; font-weight:800; color:#FFFFFF">Marina Duarte</h3><div style="font-size:12px; background:rgba(255,255,255,.2); padding:4px 10px; border-radius:6px; display:inline-block">São Paulo, SP</div></div><div style="display:flex; flex-direction:column; gap:8px; margin-top:4px"><div style="font-size:13px">📱 (11) 99999-8888</div><div style="font-size:13px">📧 marina@email.com</div><div style="font-size:12px; opacity:0.85; margin-top:4px">💰 Total gasto: <strong>R$ 2.450,00</strong></div><div style="font-size:12px; opacity:0.85">🎂 5 pedidos</div></div></div>
+            <div style="display:flex; gap:8px; margin-top:16px; padding-top:12px; border-top:1px solid rgba(255,255,255,.2)"><span style="flex:1; display:flex; align-items:center; justify-content:center; gap:6px; height:32px; font-size:10px; font-weight:800; cursor:pointer; border-radius:12px; background:rgba(255,255,255,.15); color:#FFFFFF"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"><path d="M4 20h4l10-10-4-4L4 16z"></path></svg>Editar</span><span style="flex:1; display:flex; align-items:center; justify-content:center; gap:6px; height:32px; font-size:10px; font-weight:800; cursor:pointer; border-radius:12px; background:rgba(255,255,255,.15); color:#FFFFFF"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"></path></svg>Deletar</span></div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <!-- ESTOQUE SCREEN -->
+    <sc-if value="{{ currentScreen === 'estoque' }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:20px; background:linear-gradient(155deg,#3A2350 0%,#6E3F72 60%,#A85E86 100%); display:flex; align-items:center; justify-content:space-between; gap:12px">
+        <span style="font-family:'Instrument Serif',serif; font-size:29px; color:#FFFFFF">Estoque</span>
+        <span style="display:flex; align-items:center; gap:7px; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.3); color:#FFFFFF; font-weight:800; font-size:11px; padding:9px 14px; border-radius:14px; cursor:pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>Novo Item</span>
+      </div>
+      <div style="padding:18px; display:flex; flex-direction:column; gap:14px; margin-top:-14px; background:#F6F2F5; border-radius:28px 28px 0 0; overflow-y:auto; flex:1">
+        <div style="position:relative"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A096A6" stroke-width="2" style="position:absolute; left:14px; top:50%; transform:translateY(-50%)"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg><div style="padding:12px 14px 12px 36px; background:#FFFFFF; border-radius:14px; font-size:11px; color:#A096A6; box-shadow:0 6px 14px rgba(58,35,80,.07)">Buscar item no estoque...</div></div>
+        <sc-for list="{{ estoque }}" as="item" hint-placeholder-count="2">
+          <div style="background:#FFFFFF; border-radius:18px; padding:16px; box-shadow:0 4px 12px rgba(58,35,80,.08); cursor:pointer">
+            <div style="display:flex; align-items:flex-start; gap:14px; margin-bottom:12px"><div style="width:64px; height:64px; background:linear-gradient(135deg,#3A2350,#A85E86); border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:28px">🥄</div><div style="flex:1"><h3 style="margin:0 0 4px 0; font-size:16px; font-weight:800; color:#2B2420">Farinha de Trigo</h3><p style="margin:0; font-size:12px; color:#A096A6">SKU: FAR-001</p></div></div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; padding:12px; background:#F6F2F5; border-radius:12px"><div><div style="font-size:11px; color:#A096A6; margin-bottom:4px">Quantidade</div><div style="font-size:20px; font-weight:800; color:#3A2350">25kg</div></div><div><div style="font-size:11px; color:#A096A6; margin-bottom:4px">Preço Unit.</div><div style="font-size:20px; font-weight:800; color:#3A2350">R$ 8,50</div></div></div>
+            <div style="display:flex; gap:8px; margin-bottom:12px"><div style="flex:1; padding:8px 12px; background:#E8F5E9; border-radius:10px; font-size:12px; font-weight:700; color:#0D8659; text-align:center">Local: Prateleira A</div><div style="flex:1; padding:8px 12px; background:#E8F5E9; border-radius:10px; font-size:12px; font-weight:700; color:#0D8659; text-align:center">✓ Em Estoque</div></div>
+            <div style="display:flex; gap:8px"><span style="flex:1; display:flex; align-items:center; justify-content:center; gap:6px; height:32px; font-size:10px; font-weight:800; cursor:pointer; border-radius:12px; background:rgba(58,35,80,.1); color:#3A2350"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20h4l10-10-4-4L4 16z"></path></svg>Editar</span><span style="flex:1; display:flex; align-items:center; justify-content:center; gap:6px; height:32px; font-size:10px; font-weight:800; cursor:pointer; border-radius:12px; background:rgba(232,44,27,.08); color:#E82C1B"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"></path></svg>Deletar</span></div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <!-- SALDOS SCREEN -->
+    <sc-if value="{{ currentScreen === 'saldos' }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:20px; background:linear-gradient(155deg,#3A2350 0%,#6E3F72 60%,#A85E86 100%); display:flex; align-items:center; justify-content:space-between; gap:12px">
+        <span style="font-family:'Instrument Serif',serif; font-size:29px; color:#FFFFFF">Saldos</span>
+        <span style="display:flex; align-items:center; gap:7px; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.3); color:#FFFFFF; font-weight:800; font-size:11px; padding:9px 14px; border-radius:14px; cursor:pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>Novo Saldo</span>
+      </div>
+      <div style="padding:18px; display:flex; flex-direction:column; gap:14px; margin-top:-14px; background:#F6F2F5; border-radius:28px 28px 0 0; overflow-y:auto; flex:1">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px"><div style="background:linear-gradient(135deg,#0D8659 0%,#15a869 100%); border-radius:18px; padding:16px; color:#FFFFFF"><div style="font-size:11px; opacity:0.9; margin-bottom:8px">Receita Total</div><div style="font-size:24px; font-weight:800">R$ 18.420</div><div style="font-size:10px; opacity:0.8; margin-top:8px">+12% este mês</div></div><div style="background:linear-gradient(135deg,#E82C1B 0%,#ff4941 100%); border-radius:18px; padding:16px; color:#FFFFFF"><div style="font-size:11px; opacity:0.9; margin-bottom:8px">Despesas</div><div style="font-size:24px; font-weight:800">R$ 3.850</div><div style="font-size:10px; opacity:0.8; margin-top:8px">Estoque + Fornecedores</div></div></div>
+        <div style="background:linear-gradient(135deg,#3A2350 0%,#6E3F72 55%,#A85E86 100%); border-radius:18px; padding:20px; color:#FFFFFF; text-align:center"><div style="font-size:12px; opacity:0.95; margin-bottom:10px">Saldo Líquido</div><div style="font-size:36px; font-weight:800; margin-bottom:6px">R$ 14.570</div><div style="font-size:11px; opacity:0.85">Período: Este Mês</div></div>
+        <div style="margin-top:8px"><h3 style="margin:0 0 12px 0; font-size:14px; font-weight:800; color:#2B2420">Movimentação Recente</h3><div style="display:flex; flex-direction:column; gap:10px">
+          <div style="display:flex; align-items:center; gap:12px; padding:12px; background:#FFFFFF; border-radius:14px; box-shadow:0 2px 6px rgba(58,35,80,.06)"><div style="width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:18px; background:#E8F5E9">💰</div><div style="flex:1"><div style="font-size:13px; font-weight:700; color:#2B2420; margin-bottom:2px">Venda - Marina Duarte</div><div style="font-size:11px; color:#A096A6">Hoje às 14:30</div></div><div style="text-align:right"><div style="font-size:13px; font-weight:800; color:#0D8659">+R$ 450,00</div><div style="font-size:10px; color:#A096A6">Venda</div></div></div>
+          <div style="display:flex; align-items:center; gap:12px; padding:12px; background:#FFFFFF; border-radius:14px; box-shadow:0 2px 6px rgba(58,35,80,.06)"><div style="width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:18px; background:#FFEBEE">🛒</div><div style="flex:1"><div style="font-size:13px; font-weight:700; color:#2B2420; margin-bottom:2px">Compra - Fornecedor</div><div style="font-size:11px; color:#A096A6">Ontem às 10:15</div></div><div style="text-align:right"><div style="font-size:13px; font-weight:800; color:#E82C1B">-R$ 125,00</div><div style="font-size:10px; color:#A096A6">Despesa</div></div></div>
+        </div></div>
+      </div>
+    </sc-if>
+
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav style="background:#FFFFFF; border-top:1px solid rgba(36,27,43,.08); padding:12px 8px 22px; display:flex; justify-content:space-around; box-shadow:0 -8px 24px rgba(58,35,80,.07)">
+    <button onClick="{{ switchScreen }}" data-screen="inicio" style="display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px 11px; border-radius:16px; border:none; cursor:pointer; background:{{ currentScreen === 'inicio' ? '#3A2350' : 'transparent' }}; box-shadow:{{ currentScreen === 'inicio' ? '0 8px 18px rgba(58,35,80,.3)' : 'none' }}; transition:transform .25s"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="{{ currentScreen === 'inicio' ? '#F5B9C6' : '#A096A6' }}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg><span style="font-size:9px; font-weight:{{ currentScreen === 'inicio' ? '800' : '600' }}; color:{{ currentScreen === 'inicio' ? '#F5B9C6' : '#A096A6' }}">Início</span></button>
+    <button onClick="{{ switchScreen }}" data-screen="pedidos" style="display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px 11px; border-radius:16px; border:none; cursor:pointer; background:{{ currentScreen === 'pedidos' ? '#3A2350' : 'transparent' }}; box-shadow:{{ currentScreen === 'pedidos' ? '0 8px 18px rgba(58,35,80,.3)' : 'none' }}; transition:transform .25s"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="{{ currentScreen === 'pedidos' ? '#F5B9C6' : '#A096A6' }}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16l-1.2 13H5.2z"></path><path d="M9 7a3 3 0 0 1 6 0"></path></svg><span style="font-size:9px; font-weight:{{ currentScreen === 'pedidos' ? '800' : '600' }}; color:{{ currentScreen === 'pedidos' ? '#F5B9C6' : '#A096A6' }}">Pedidos</span></button>
+    <button onClick="{{ switchScreen }}" data-screen="fichas" style="display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px 11px; border-radius:16px; border:none; cursor:pointer; background:{{ currentScreen === 'fichas' ? '#3A2350' : 'transparent' }}; box-shadow:{{ currentScreen === 'fichas' ? '0 8px 18px rgba(58,35,80,.3)' : 'none' }}; transition:transform .25s"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="{{ currentScreen === 'fichas' ? '#F5B9C6' : '#A096A6' }}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h9a3 3 0 0 1 3 3v13H6a2 2 0 0 1-2-2z"></path><path d="M20 5v15"></path></svg><span style="font-size:9px; font-weight:{{ currentScreen === 'fichas' ? '800' : '600' }}; color:{{ currentScreen === 'fichas' ? '#F5B9C6' : '#A096A6' }}">Fichas</span></button>
+    <button onClick="{{ switchScreen }}" data-screen="clientes" style="display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px 11px; border-radius:16px; border:none; cursor:pointer; background:{{ currentScreen === 'clientes' ? '#3A2350' : 'transparent' }}; box-shadow:{{ currentScreen === 'clientes' ? '0 8px 18px rgba(58,35,80,.3)' : 'none' }}; transition:transform .25s"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="{{ currentScreen === 'clientes' ? '#F5B9C6' : '#A096A6' }}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3.2"></circle><path d="M3.5 20a5.5 5.5 0 0 1 11 0"></path><circle cx="17.5" cy="10" r="2.2"></circle></svg><span style="font-size:9px; font-weight:{{ currentScreen === 'clientes' ? '800' : '600' }}; color:{{ currentScreen === 'clientes' ? '#F5B9C6' : '#A096A6' }}">Clientes</span></button>
+    <button onClick="{{ switchScreen }}" data-screen="estoque" style="display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px 11px; border-radius:16px; border:none; cursor:pointer; background:{{ currentScreen === 'estoque' ? '#3A2350' : 'transparent' }}; box-shadow:{{ currentScreen === 'estoque' ? '0 8px 18px rgba(58,35,80,.3)' : 'none' }}; transition:transform .25s"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="{{ currentScreen === 'estoque' ? '#F5B9C6' : '#A096A6' }}" stroke-width="1.9" stroke-linejoin="round"><rect x="3" y="10" width="8" height="7" rx="1.2"></rect><rect x="13" y="10" width="8" height="7" rx="1.2"></rect><rect x="8" y="3" width="8" height="6" rx="1.2"></rect></svg><span style="font-size:9px; font-weight:{{ currentScreen === 'estoque' ? '800' : '600' }}; color:{{ currentScreen === 'estoque' ? '#F5B9C6' : '#A096A6' }}">Estoque</span></button>
+    <button onClick="{{ switchScreen }}" data-screen="saldos" style="display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px 11px; border-radius:16px; border:none; cursor:pointer; background:{{ currentScreen === 'saldos' ? '#3A2350' : 'transparent' }}; box-shadow:{{ currentScreen === 'saldos' ? '0 8px 18px rgba(58,35,80,.3)' : 'none' }}; transition:transform .25s"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="{{ currentScreen === 'saldos' ? '#F5B9C6' : '#A096A6' }}" stroke-width="1.9" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="3"></rect><circle cx="17" cy="12.5" r="1.4" fill="{{ currentScreen === 'saldos' ? '#F5B9C6' : '#A096A6' }}" stroke="none"></circle></svg><span style="font-size:9px; font-weight:{{ currentScreen === 'saldos' ? '800' : '600' }}; color:{{ currentScreen === 'saldos' ? '#F5B9C6' : '#A096A6' }}">Saldos</span></button>
+  </nav>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;390px&quot;,&quot;height&quot;:&quot;844px&quot;}}">
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      currentScreen: 'inicio',
+      totalPedidos: 8,
+      pedidos: [
+        { id: 1, cliente: 'Maria Silva', data: '15 de Ago', status: 'Pago', valor: 'R$ 450,00' },
+        { id: 2, cliente: 'João Santos', data: '14 de Ago', status: 'Pago', valor: 'R$ 320,00' },
+      ],
+      fichas: [
+        { id: 1, nome: 'Bolo Chocolate', tamanho: 'P (2kg)' },
+        { id: 2, nome: 'Bolo de Cenoura', tamanho: 'M (3kg)' },
+      ],
+      clientes: [
+        { id: 1, nome: 'Marina Duarte', cidade: 'São Paulo, SP', pedidos: 5 },
+        { id: 2, nome: 'Júlia Prado', cidade: 'Guarulhos, SP', pedidos: 3 },
+      ],
+      estoque: [
+        { id: 1, nome: 'Farinha de Trigo', sku: 'FAR-001', qty: '25kg' },
+        { id: 2, nome: 'Açúcar', sku: 'AÇU-001', qty: '15kg' },
+      ],
+    };
+  }
+
+  switchScreen = (e) => {
+    const screen = e.currentTarget.getAttribute('data-screen');
+    this.setState({ currentScreen: screen });
+  };
+
+  navTo = (e) => {
+    const screen = e.currentTarget.getAttribute('data-screen');
+    if (screen === 'lancarPedido') {
+      this.setState({ currentScreen: 'pedidos' });
+    }
+  };
+
+  togglePaymentStatus = (id) => {
+    const updated = this.state.pedidos.map(p => 
+      p.id === id ? { ...p, status: p.status === 'Pago' ? 'Pendente' : 'Pago' } : p
+    );
+    this.setState({ pedidos: updated });
+  };
+
+  deletePedido = (id) => {
+    const updated = this.state.pedidos.filter(p => p.id !== id);
+    this.setState({ pedidos: updated, totalPedidos: this.state.totalPedidos - 1 });
+  };
+
+  deleteCliente = (id) => {
+    const updated = this.state.clientes.filter(c => c.id !== id);
+    this.setState({ clientes: updated });
+  };
+
+  deleteEstoque = (id) => {
+    const updated = this.state.estoque.filter(e => e.id !== id);
+    this.setState({ estoque: updated });
+  };
+
+  renderVals() {
+    return {
+      currentScreen: this.state.currentScreen,
+      switchScreen: this.switchScreen,
+      navTo: this.navTo,
+      totalPedidos: this.state.totalPedidos,
+      pedidos: this.state.pedidos.map(p => ({
+        ...p,
+        onTogglePay: () => this.togglePaymentStatus(p.id),
+        onDelete: () => this.deletePedido(p.id),
+      })),
+      fichas: this.state.fichas,
+      clientes: this.state.clientes.map(c => ({
+        ...c,
+        onDelete: () => this.deleteCliente(c.id),
+      })),
+      estoque: this.state.estoque.map(e => ({
+        ...e,
+        onDelete: () => this.deleteEstoque(e.id),
+      })),
+    };
+  }
+}
+</script>
+</body>
+</html>

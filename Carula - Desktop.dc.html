@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body { margin:0; background:#F5F3F0; font-family:'Plus Jakarta Sans',sans-serif; color:#2B2420; }
+a { color:#E82C1B; text-decoration:none; }
+a:hover { color:#2B2420; }
+</style>
+</helmet>
+
+<div style="display:flex; min-height:100vh">
+  <!-- Sidebar -->
+  <div style="width:180px; background:linear-gradient(180deg,#3A2350 0%,#2B1D35 100%); padding:24px 0; display:flex; flex-direction:column; gap:32px">
+    <!-- Logo -->
+    <div style="padding:0 20px; display:flex; align-items:center; gap:12px">
+      <div style="width:48px; height:48px; background:#F5B9C6; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:800; color:#3A2350; font-size:24px">C</div>
+      <span style="color:#FFFFFF; font-weight:800; font-size:13px">Carula</span>
+    </div>
+
+    <!-- Nav -->
+    <nav style="display:flex; flex-direction:column; gap:8px; padding:0 12px">
+      <a href="#inicio" style="padding:12px 16px; color:#E4C1D0; border-radius:10px; display:flex; align-items:center; gap:12px; font-size:13px; font-weight:500; text-decoration:none" style-hover="background:rgba(255,255,255,.1); color:#FFFFFF"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg>Início</a>
+      <a href="#pedidos" style="padding:12px 16px; color:#E4C1D0; border-radius:10px; display:flex; align-items:center; gap:12px; font-size:13px; font-weight:500; text-decoration:none" style-hover="background:rgba(255,255,255,.1); color:#FFFFFF"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16l-1.2 13H5.2z"></path><path d="M9 7a3 3 0 0 1 6 0"></path></svg>Pedidos</a>
+      <a href="#fichas" style="padding:12px 16px; color:#FFFFFF; background:rgba(255,255,255,.2); border-radius:10px; display:flex; align-items:center; gap:12px; font-size:13px; font-weight:600; text-decoration:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h9a3 3 0 0 1 3 3v13H6a2 2 0 0 1-2-2z"></path><path d="M20 5v15"></path></svg>Fichas</a>
+      <a href="#clientes" style="padding:12px 16px; color:#E4C1D0; border-radius:10px; display:flex; align-items:center; gap:12px; font-size:13px; font-weight:500; text-decoration:none" style-hover="background:rgba(255,255,255,.1); color:#FFFFFF"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"></circle><path d="M3 18a5 5 0 0 1 10 0"></path></svg>Clientes</a>
+      <a href="#estoque" style="padding:12px 16px; color:#E4C1D0; border-radius:10px; display:flex; align-items:center; gap:12px; font-size:13px; font-weight:500; text-decoration:none" style-hover="background:rgba(255,255,255,.1); color:#FFFFFF"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="3" y="10" width="8" height="7" rx="1"></rect><rect x="13" y="10" width="8" height="7" rx="1"></rect><rect x="8" y="3" width="8" height="6" rx="1"></rect></svg>Estoque</a>
+      <a href="#saldos" style="padding:12px 16px; color:#E4C1D0; border-radius:10px; display:flex; align-items:center; gap:12px; font-size:13px; font-weight:500; text-decoration:none" style-hover="background:rgba(255,255,255,.1); color:#FFFFFF"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"></rect><circle cx="17" cy="12" r="1" fill="currentColor"></circle></svg>Saldos</a>
+    </nav>
+  </div>
+
+  <!-- Content -->
+  <div style="flex:1; padding:40px">
+    <!-- Fichas Screen -->
+    <section id="fichas" style="max-width:1200px">
+      <div style="margin-bottom:32px">
+        <h1 style="margin:0 0 8px 0; font-size:32px; font-weight:800; color:#2B2420">Fichas Técnicas</h1>
+        <p style="margin:0; font-size:14px; color:#7A6F6A">Bolos 6 Massas · 3 fichas nesta categoria</p>
+      </div>
+
+      <!-- Category Filter -->
+      <div style="display:flex; gap:10px; margin-bottom:24px; overflow-x:auto; padding-bottom:8px">
+        <button style="padding:8px 16px; background:#3A2350; color:#FFFFFF; border:none; border-radius:8px; font-weight:600; font-size:12px; cursor:pointer; white-space:nowrap">Bolos</button>
+        <button style="padding:8px 16px; background:#F5F3F0; color:#7A6F6A; border:none; border-radius:8px; font-weight:500; font-size:12px; cursor:pointer; white-space:nowrap">Doces & Sobremesas</button>
+        <button style="padding:8px 16px; background:#F5F3F0; color:#7A6F6A; border:none; border-radius:8px; font-weight:500; font-size:12px; cursor:pointer; white-space:nowrap">Salgados</button>
+        <button style="padding:8px 16px; background:#F5F3F0; color:#7A6F6A; border:none; border-radius:8px; font-weight:500; font-size:12px; cursor:pointer; white-space:nowrap">Saudáveis & Fit</button>
+        <button style="padding:8px 16px; background:#F5F3F0; color:#7A6F6A; border:none; border-radius:8px; font-weight:500; font-size:12px; cursor:pointer; white-space:nowrap">Kids Friendly</button>
+      </div>
+
+      <!-- Search & New Button -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px">
+        <div style="position:relative; flex:1; max-width:300px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A096A6" stroke-width="2" stroke-linecap="round" style="position:absolute; left:12px; top:50%; transform:translateY(-50%)"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+          <input type="text" placeholder="Buscar ficha técnica" style="width:100%; padding:10px 12px 10px 36px; border:1px solid #E4D9D0; border-radius:8px; font-size:13px; font-family:inherit; background:#FFFFFF">
+        </div>
+        <button style="margin-left:16px; padding:10px 18px; background:#3A2350; color:#FFFFFF; border:none; border-radius:8px; font-weight:600; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>Nova Ficha</button>
+      </div>
+
+      <!-- Cards Grid -->
+      <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:20px">
+        <div style="background:#FFFFFF; border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(58,35,80,.08); transition:all .28s ease" style-hover="box-shadow:0 8px 24px rgba(58,35,80,.15); transform:translateY(-2px)">
+          <div style="height:160px; background:linear-gradient(135deg,#3A2350,#A85E86); display:flex; align-items:center; justify-content:center; font-size:48px; color:#FFFFFF">🍰</div>
+          <div style="padding:20px">
+            <h3 style="margin:0 0 4px 0; font-size:16px; font-weight:700; color:#2B2420">Bolo Vulcão Ninho com Nutella</h3>
+            <p style="margin:0 0 12px 0; font-size:12px; color:#A096A6">10 fatias (Aproximadamente 1.5kg)</p>
+            <div style="display:flex; gap:8px; margin-bottom:16px">
+              <div style="display:flex; align-items:center; justify-content:center; gap:6px; width:36px; height:36px; border-radius:8px; background:#F5E8EB">
+                <span style="font-size:11px; font-weight:700; color:#3A2350">Reposição</span>
+              </div>
+              <div style="display:flex; align-items:center; justify-content:center; gap:6px; width:36px; height:36px; border-radius:8px; background:#F5E8EB">
+                <span style="font-size:11px; font-weight:700; color:#3A2350">Mão de Obra</span>
+              </div>
+              <div style="display:flex; align-items:center; justify-content:center; gap:6px; width:36px; height:36px; border-radius:8px; background:#F5E8EB">
+                <span style="font-size:11px; font-weight:700; color:#3A2350">Custos Op</span>
+              </div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:12px; background:#F5F3F0; border-radius:8px; margin-bottom:16px">
+              <div style="text-align:center">
+                <div style="font-size:11px; color:#A096A6; margin-bottom:4px">Custo</div>
+                <div style="font-size:18px; font-weight:800; color:#3A2350">$ 65.93</div>
+              </div>
+              <div style="text-align:center">
+                <div style="font-size:11px; color:#A096A6; margin-bottom:4px">Preço Venda</div>
+                <div style="font-size:18px; font-weight:800; color:#3A2350">$ 35.93</div>
+              </div>
+            </div>
+            <div style="display:flex; gap:8px">
+              <button style="flex:1; padding:10px 12px; background:#3A2350; color:#FFFFFF; border:none; border-radius:8px; font-weight:600; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 20h4l10-10-4-4L4 16z"></path></svg>Editar</button>
+              <button style="flex:1; padding:10px 12px; background:#F5E8EB; color:#3A2350; border:none; border-radius:8px; font-weight:600; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5h20M6 5v14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V5"></path></svg>Deletar</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:#FFFFFF; border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(58,35,80,.08); transition:all .28s ease" style-hover="box-shadow:0 8px 24px rgba(58,35,80,.15); transform:translateY(-2px)">
+          <div style="height:160px; background:linear-gradient(135deg,#3A2350,#A85E86); display:flex; align-items:center; justify-content:center; font-size:48px; color:#FFFFFF">🎂</div>
+          <div style="padding:20px">
+            <h3 style="margin:0 0 4px 0; font-size:16px; font-weight:700; color:#2B2420">Bolo Red Velvet Especial Velvet</h3>
+            <p style="margin:0 0 12px 0; font-size:12px; color:#A096A6">15 fatias (Aproximadamente 2.0kg)</p>
+            <div style="display:flex; gap:8px; margin-bottom:16px">
+              <div style="display:flex; align-items:center; justify-content:center; gap:6px; width:36px; height:36px; border-radius:8px; background:#F5E8EB">
+                <span style="font-size:11px; font-weight:700; color:#3A2350">Reposição</span>
+              </div>
+              <div style="display:flex; align-items:center; justify-content:center; gap:6px; width:36px; height:36px; border-radius:8px; background:#F5E8EB">
+                <span style="font-size:11px; font-weight:700; color:#3A2350">Mão de Obra</span>
+              </div>
+              <div style="display:flex; align-items:center; justify-content:center; gap:6px; width:36px; height:36px; border-radius:8px; background:#F5E8EB">
+                <span style="font-size:11px; font-weight:700; color:#3A2350">Custos Op</span>
+              </div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:12px; background:#F5F3F0; border-radius:8px; margin-bottom:16px">
+              <div style="text-align:center">
+                <div style="font-size:11px; color:#A096A6; margin-bottom:4px">Custo</div>
+                <div style="font-size:18px; font-weight:800; color:#3A2350">$ 72.75</div>
+              </div>
+              <div style="text-align:center">
+                <div style="font-size:11px; color:#A096A6; margin-bottom:4px">Preço Venda</div>
+                <div style="font-size:18px; font-weight:800; color:#3A2350">$ 35.75</div>
+              </div>
+            </div>
+            <div style="display:flex; gap:8px">
+              <button style="flex:1; padding:10px 12px; background:#3A2350; color:#FFFFFF; border:none; border-radius:8px; font-weight:600; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 20h4l10-10-4-4L4 16z"></path></svg>Editar</button>
+              <button style="flex:1; padding:10px 12px; background:#F5E8EB; color:#3A2350; border:none; border-radius:8px; font-weight:600; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5h20M6 5v14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V5"></path></svg>Deletar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;1400px&quot;,&quot;height&quot;:&quot;800px&quot;}}">
+class Component extends DCLogic {
+  renderVals = () => {
+    return {};
+  };
+}
+
+</script>
+</body>
+</html>

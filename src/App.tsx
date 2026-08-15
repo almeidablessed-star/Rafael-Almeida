@@ -277,6 +277,8 @@ export default function App() {
             onEditTransaction={handleOpenEditModal}
             onDeleteTransaction={handleRequestDelete}
             onTogglePaymentStatus={handleTogglePaymentStatus}
+            onOpenPwaModal={() => setIsPwaModalOpen(true)}
+            onOpenBackupModal={() => setIsBackupModalOpen(true)}
           />
         )}
 

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+@keyframes carFloat { 0%,100% { transform:translateY(0) } 50% { transform:translateY(-6px) } }
+@keyframes carSweep { 0% { transform:translateX(-120%) } 60%,100% { transform:translateX(220%) } }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; background: #EDE7DC; }
+body { font-family: 'Plus Jakarta Sans', sans-serif; font-variant-numeric: lining-nums tabular-nums; }
+a { color: #E82C1B; text-decoration: none; }
+a:hover { color: #2B2420; }
+</style>
+</helmet>
+
+<div style="min-height: 100vh; background: #EDE7DC; padding: 0; display: flex; align-items: center; justify-content: center;">
+  <div style="width: 390px; display: flex; flex-direction: column; gap: 16px; padding: 16px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <span style="font-weight: 800; font-size: 12px; letter-spacing: 0.14em; background: #3A2350; color: #F5CFD4; padding: 6px 10px; border-radius: 999px;">3A</span>
+      <span style="font-family: 'Instrument Serif', serif; font-size: 28px; color: #2B2420;">{{ currentPage === 'inicio' ? 'Início' : currentPage === 'fichas' ? 'Fichas Técnicas' : 'Pedidos' }}</span>
+    </div>
+
+    <!-- INÍCIO PAGE -->
+    <sc-if value="{{ currentPageIsInicio }}" hint-placeholder-val="{{ true }}">
+      <div data-screen-label="inicio" style="width: 100%; background: #F6F2F5; border-radius: 40px; overflow: hidden; box-shadow: 0 30px 70px rgba(58,35,80,0.26); display: flex; flex-direction: column; font-family: 'Manrope', sans-serif;">
+        
+        <!-- Header with purple gradient -->
+        <div style="padding: 20px; background: linear-gradient(155deg, #3A2350 0%, #6E3F72 55%, #A85E86 100%); display: flex; flex-direction: column; gap: 16px;">
+          
+          <!-- Top bar with logo and icons -->
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+            <div style="width: 34px; height: 34px; border-radius: 12px; background: rgba(255,255,255,0.16); border: 1px solid rgba(255,255,255,0.24); color: #F7DCE1; display: flex; align-items: center; justify-content: center; font-family: 'Instrument Serif', serif; font-size: 16px; cursor: pointer; transition: all 0.25s ease;" style-hover="background: rgba(255,255,255,0.3);">C</div>
+            <div style="display: flex; flex-direction: column; align-items: center; line-height: 1;">
+              <span style="font-family: 'Instrument Serif', serif; font-size: 32px; color: #FFFFFF; letter-spacing: 0.01em;">Carula</span>
+              <span style="font-size: 8px; font-weight: 700; letter-spacing: 0.44em; color: rgba(247,220,225,0.78); margin-top: 3px; padding-left: 0.44em;">CONFEITARIA</span>
+            </div>
+            <div style="display: flex; gap: 7px;">
+              <div style="width: 32px; height: 32px; border-radius: 11px; background: rgba(255,255,255,0.16); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.25s ease;" style-hover="background: rgba(255,255,255,0.3);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F7DCE1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6.5" y="2" width="11" height="20" rx="3"/><path d="M10.5 5.5h3"/><path d="M12 18.2h.01"/></svg></div>
+              <div style="width: 32px; height: 32px; border-radius: 11px; background: rgba(255,255,255,0.16); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.25s ease;" style-hover="background: rgba(255,255,255,0.3);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F7DCE1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 19h16"/></svg></div>
+            </div>
+          </div>
+
+          <!-- Main KPI: Lucro Líquido -->
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="position: relative; width: 92px; height: 92px; flex-shrink: 0;">
+              <svg width="92" height="92" viewBox="0 0 92 92" style="transform: rotate(-90deg);">
+                <circle cx="46" cy="46" r="38" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="9"/>
+                <circle cx="46" cy="46" r="38" fill="none" stroke="#F5B9C6" stroke-width="9" stroke-linecap="round" stroke-dasharray="239" stroke-dashoffset="98" style="filter: drop-shadow(0 0 8px rgba(245,185,198,0.6));"/>
+              </svg>
+              <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1;">
+                <span style="font-size: 19px; font-weight: 800; color: #FFFFFF;">59%</span>
+                <span style="font-size: 8px; color: rgba(247,220,225,0.75); margin-top: 3px;">margem</span>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px; min-width: 0;">
+              <span style="font-size: 9px; font-weight: 800; letter-spacing: 0.14em; color: rgba(247,220,225,0.8);">LUCRO LÍQUIDO DO MÊS</span>
+              <span style="font-size: 32px; font-weight: 800; color: #FFFFFF; letter-spacing: -0.03em; line-height: 1;">R$ {{ lucroMensal }}</span>
+              <span style="align-self: flex-start; font-size: 10px; font-weight: 800; color: #26402F; background: #A9D8B8; padding: 4px 11px; border-radius: 999px;">{{ lucroStatus }}</span>
+            </div>
+          </div>
+
+          <!-- Success message -->
+          <div style="font-size: 12px; line-height: 1.6; color: rgba(247,220,225,0.84); text-wrap: pretty;">🎉 <strong style="color: #FFFFFF;">Resultado excelente!</strong> Suas vendas superaram todas as despesas e custos por <strong style="color: #FFFFFF;">R$ {{ lucroMensal }}</strong> no período.</div>
+
+          <!-- Three mini cards -->
+          <div style="display: flex; gap: 8px;">
+            <div style="flex: 1; background: rgba(255,255,255,0.12); border-radius: 16px; padding: 11px 12px;">
+              <div style="font-size: 9px; color: rgba(247,220,225,0.75); font-weight: 700; letter-spacing: 0.06em;">VENDAS PAGAS</div>
+              <div style="font-size: 15px; font-weight: 800; color: #FFFFFF; margin-top: 3px;">R$ {{ vendas }}</div>
+            </div>
+            <div style="flex: 1; background: rgba(255,255,255,0.12); border-radius: 16px; padding: 11px 12px;">
+              <div style="font-size: 9px; color: rgba(247,220,225,0.75); font-weight: 700; letter-spacing: 0.06em;">SAÍDAS</div>
+              <div style="font-size: 15px; font-weight: 800; color: #FFFFFF; margin-top: 3px;">R$ {{ saidas }}</div>
+            </div>
+            <div style="flex: 1; background: rgba(228,217,195,0.28); border-radius: 16px; padding: 11px 12px;">
+              <div style="font-size: 9px; color: #F0E2C8; font-weight: 700; letter-spacing: 0.06em;">⏳ A RECEBER</div>
+              <div style="font-size: 15px; font-weight: 800; color: #FFFFFF; margin-top: 3px;">R$ {{ aReceber }}</div>
+            </div>
+          </div>
+
+          <button style="width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,0.32); border-radius: 14px; background: rgba(255,255,255,0.12); color: #FFFFFF; font-family: 'Manrope', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.25s ease;" style-hover="background: #FFFFFF; color: #3A2350;">Ver Detalhamento das Vendas</button>
+        </div>
+
+        <!-- Bottom section -->
+        <div style="padding: 18px; display: flex; flex-direction: column; gap: 16px; margin-top: -14px; background: #F6F2F5; border-radius: 28px 28px 0 0; position: relative;">
+          
+          <!-- CTA Button -->
+          <button onClick="{{ goToPage }}" data-page="pedidos" style="position: relative; overflow: hidden; width: 100%; border: none; border-radius: 20px; background: linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86); padding: 18px 20px; display: flex; align-items: center; gap: 16px; cursor: pointer; box-shadow: 0 14px 30px rgba(58,35,80,0.36); transition: transform 0.25s ease, box-shadow 0.25s ease;" style-hover="transform: translateY(-3px) rotate(-0.6deg); box-shadow: 0 22px 42px rgba(58,35,80,0.48);">
+            <span style="position: absolute; left: -11px; top: 50%; width: 22px; height: 22px; border-radius: 50%; background: #F6F2F5; transform: translateY(-50%);"/>
+            <span style="position: absolute; right: -11px; top: 50%; width: 22px; height: 22px; border-radius: 50%; background: #F6F2F5; transform: translateY(-50%);"/>
+            <span style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding-left: 6px; border-left: 2px dashed rgba(245,185,198,0.5);">
+              <span style="font-size: 9px; font-weight: 800; letter-spacing: 0.24em; color: rgba(247,220,225,0.8);">NOVA COMANDA</span>
+              <span style="font-family: 'Instrument Serif', serif; font-size: 29px; color: #FFFFFF; line-height: 1;">+ Lançar Pedido</span>
+            </span>
+            <span style="margin-left: auto; width: 44px; height: 44px; border-radius: 14px; background: #F5B9C6; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 8px 16px rgba(0,0,0,0.18); animation: carFloat 4.5s ease-in-out infinite;"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#3A2350" stroke-width="2.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+            <span style="position: absolute; top: 0; left: 0; width: 70px; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent); animation: carSweep 5s ease-in-out infinite;"/>
+          </button>
+
+          <!-- Saldos cards -->
+          <div style="display: flex; flex-direction: column; gap: 11px;">
+            <div>
+              <div style="font-family: 'Instrument Serif', serif; font-size: 23px; color: #241B2B;">Saldos &amp; Divisão</div>
+              <div style="font-size: 11px; color: #7A6E80; margin-top: 2px;">Entradas das vendas pagas − Compras registradas</div>
+            </div>
+            <div style="display: flex; gap: 9px;">
+              <sc-for list="{{ saldos }}" as="saldo" hint-placeholder-count="3">
+                <div style="flex: 1; background: #FFFFFF; border-radius: 22px; padding: 15px; display: flex; flex-direction: column; align-items: center; gap: 9px; box-shadow: 0 8px 20px rgba(58,35,80,0.08); cursor: pointer; transition: transform 0.28s ease, box-shadow 0.28s ease;" style-hover="transform: translateY(-5px); box-shadow: 0 18px 32px rgba(58,35,80,0.18);">
+                  <div style="position: relative; width: 56px; height: 56px;">
+                    <svg width="56" height="56" viewBox="0 0 56 56" style="transform: rotate(-90deg);">
+                      <circle cx="28" cy="28" r="23" fill="none" stroke="#F0E9EE" stroke-width="6"/>
+                      <circle cx="28" cy="28" r="23" fill="none" stroke="{{ saldo.color }}" stroke-width="6" stroke-linecap="round" stroke-dasharray="{{ saldo.dasharray }}" stroke-dashoffset="{{ saldo.offset }}"/>
+                    </svg>
+                    <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: #241B2B;">{{ saldo.percent }}%</div>
+                  </div>
+                  <span style="font-size: 9px; font-weight: 800; letter-spacing: 0.05em; color: #7A6E80; text-align: center; min-height: 24px; display: flex; align-items: center; justify-content: center;">{{ saldo.label }}</span>
+                  <span style="font-size: 15px; font-weight: 800; color: #241B2B;">R$ {{ saldo.value }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- FICHAS TÉCNICAS PAGE -->
+    <sc-if value="{{ currentPageIsFichas }}" hint-placeholder-val="{{ true }}">
+      <div data-screen-label="fichas" style="width: 100%; background: #F6F2F5; border-radius: 40px; overflow: hidden; box-shadow: 0 30px 70px rgba(58,35,80,0.26); padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+        <h2 style="font-family: 'Instrument Serif', serif; font-size: 20px; color: #241B2B;">Fichas Técnicas</h2>
+        <sc-for list="{{ fichas }}" as="ficha" hint-placeholder-count="3">
+          <div style="background: #FFFFFF; padding: 16px; border-radius: 16px; box-shadow: 0 4px 12px rgba(58,35,80,0.08);">
+            <div style="font-weight: 700; color: #241B2B; margin-bottom: 8px;">{{ ficha.nome }}</div>
+            <div style="font-size: 12px; color: #7A6E80; margin-bottom: 12px;">{{ ficha.descricao }}</div>
+            <div style="display: flex; gap: 8px; justify-content: space-between;">
+              <span style="font-size: 11px; color: #999;">Ingredientes: {{ ficha.ingredientes }}</span>
+              <button onClick="{{ goToPage }}" data-page="fichas" style="padding: 6px 12px; background: linear-gradient(150deg, #3A2350, #6E3F72); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 600;">Editar</button>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <!-- PEDIDOS PAGE -->
+    <sc-if value="{{ currentPageIsPedidos }}" hint-placeholder-val="{{ true }}">
+      <div data-screen-label="pedidos" style="width: 100%; background: #F6F2F5; border-radius: 40px; overflow: hidden; box-shadow: 0 30px 70px rgba(58,35,80,0.26); padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+        <h2 style="font-family: 'Instrument Serif', serif; font-size: 20px; color: #241B2B;">Pedidos Recentes</h2>
+        <sc-for list="{{ pedidos }}" as="pedido" hint-placeholder-count="4">
+          <div style="background: #FFFFFF; padding: 16px; border-radius: 16px; box-shadow: 0 4px 12px rgba(58,35,80,0.08); display: flex; justify-content: space-between; align-items: center;">
+            <div style="flex: 1;">
+              <div style="font-weight: 700; color: #241B2B;">{{ pedido.id }}</div>
+              <div style="font-size: 12px; color: #7A6E80; margin-top: 4px;">{{ pedido.cliente }}</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-weight: 700; color: #241B2B;">{{ pedido.valor }}</div>
+              <span style="display: inline-block; font-size: 10px; font-weight: 700; color: {{ pedido.statusColor }}; background: {{ pedido.statusBg }}; padding: 4px 8px; border-radius: 6px; margin-top: 4px;">{{ pedido.status }}</span>
+            </div>
+          </div>
+        </sc-for>
+        <button onClick="{{ goToPage }}" data-page="inicio" style="padding: 12px; background: linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86); color: #fff; border: none; border-radius: 14px; cursor: pointer; font-weight: 700; margin-top: 8px;">← Voltar ao Início</button>
+      </div>
+    </sc-if>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:&quot;100%&quot;}}">
+class Component extends DCLogic {
+  state = {
+    currentPage: 'inicio',
+  };
+
+  renderVals() {
+    const cp = this.state.currentPage;
+    return {
+      currentPage: cp,
+      currentPageIsInicio: cp === 'inicio',
+      currentPageIsFichas: cp === 'fichas',
+      currentPageIsPedidos: cp === 'pedidos',
+      goToPage: (e) => {
+        const page = e.currentTarget.dataset.page;
+        this.setState({ currentPage: page });
+      },
+      lucroMensal: '4.980,00',
+      lucroStatus: 'Positivo',
+      vendas: '8.420',
+      saidas: '3.440',
+      aReceber: '1.150',
+      saldos: [
+        { label: '🔄 REPOSIÇÃO', value: '1.240', percent: 72, color: '#C4626F', dasharray: '145', offset: '41' },
+        { label: '💰 SOBRA', value: '2.150', percent: 61, color: '#8E7B85', dasharray: '128', offset: '50' },
+        { label: '📦 ESTOQUE', value: '980', percent: 55, color: '#D4A5A5', dasharray: '116', offset: '52' },
+      ],
+      fichas: [
+        { nome: 'Bolo de Chocolate', descricao: 'Bolo clássico de chocolate, úmido e delicioso', ingredientes: '8' },
+        { nome: 'Pão Francês', descricao: 'Pão crocante tradicional', ingredientes: '5' },
+        { nome: 'Doce de Leite', descricao: 'Doce de leite caseiro cremoso', ingredientes: '3' },
+      ],
+      pedidos: [
+        { id: '#PED-001', cliente: 'Confeitaria Silva', valor: 'R$ 580', status: 'Entregue', statusColor: '#26402F', statusBg: '#A9D8B8' },
+        { id: '#PED-002', cliente: 'Padaria Central', valor: 'R$ 920', status: 'Em Andamento', statusColor: '#856404', statusBg: '#fff3cd' },
+        { id: '#PED-003', cliente: 'Doces & Cia', valor: 'R$ 450', status: 'Pendente', statusColor: '#0c5460', statusBg: '#cce5ff' },
+        { id: '#PED-004', cliente: 'Panificadora Central', valor: 'R$ 1.200', status: 'Entregue', statusColor: '#26402F', statusBg: '#A9D8B8' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

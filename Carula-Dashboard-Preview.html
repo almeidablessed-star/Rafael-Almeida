@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body { margin:0; background:#EDE7DC; font-family:'Manrope',sans-serif; }
+* { box-sizing:border-box; }
+</style>
+</head>
+<body>
+<div style="display:flex; justify-content:center; padding:20px 10px">
+  <div style="width:390px; background:#F6F2F5; border-radius:40px; overflow:hidden; box-shadow:0 30px 70px rgba(58,35,80,.26)">
+    
+    <!-- Header Gradient -->
+    <div style="background:linear-gradient(155deg,#3A2350 0%,#6E3F72 55%,#A85E86 100%); padding:20px; display:flex; flex-direction:column; gap:16px; color:#FFFFFF">
+      <div style="display:flex; align-items:center; justify-content:space-between">
+        <div style="width:34px; height:34px; border-radius:12px; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.24); display:flex; align-items:center; justify-content:center; font-family:'Instrument Serif',serif; font-size:16px">C</div>
+        <div style="text-align:center; flex:1">
+          <div style="font-family:'Instrument Serif',serif; font-size:32px; font-weight:bold; letter-spacing:.01em">Carula</div>
+          <div style="font-size:8px; font-weight:700; letter-spacing:.44em; color:rgba(247,220,225,.78); margin-top:3px">CONFEITARIA</div>
+        </div>
+        <div style="display:flex; gap:7px">
+          <div style="width:32px; height:32px; border-radius:11px; background:rgba(255,255,255,.16); display:flex; align-items:center; justify-content:center; cursor:pointer"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F7DCE1" stroke-width="1.8"><rect x="6.5" y="2" width="11" height="20" rx="3"/><path d="M10.5 5.5h3"/><path d="M12 18.2h.01"/></svg></div>
+          <div style="width:32px; height:32px; border-radius:11px; background:rgba(255,255,255,.16); display:flex; align-items:center; justify-content:center; cursor:pointer"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F7DCE1" stroke-width="1.8"><path d="M12 3v12m0 0l4-4m-4 4l-4-4M4 19h16"/></svg></div>
+        </div>
+      </div>
+
+      <!-- Profit Section -->
+      <div style="display:flex; align-items:flex-start; gap:16px">
+        <div style="position:relative; width:92px; height:92px; flex-shrink:0">
+          <svg width="92" height="92" viewBox="0 0 92 92" style="transform:rotate(-90deg)">
+            <circle cx="46" cy="46" r="38" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="9"/>
+            <circle cx="46" cy="46" r="38" fill="none" stroke="#F5B9C6" stroke-width="9" stroke-linecap="round" stroke-dasharray="239" stroke-dashoffset="98" style="filter:drop-shadow(0 0 8px rgba(245,185,198,.6))"/>
+          </svg>
+          <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center">
+            <span style="font-size:19px; font-weight:800">59%</span>
+            <span style="font-size:8px; color:rgba(247,220,225,.75); margin-top:3px">margem</span>
+          </div>
+        </div>
+        <div style="flex:1; padding-top:4px">
+          <div style="font-size:9px; font-weight:800; letter-spacing:.14em; color:rgba(247,220,225,.8)">LUCRO LÍQUIDO (RENDIMENTO)</div>
+          <div style="font-size:32px; font-weight:800; margin-top:4px; letter-spacing:-.03em; line-height:1">R$ 4.980</div>
+          <div style="display:inline-block; font-size:10px; font-weight:800; color:#26402F; background:#A9D8B8; padding:4px 11px; border-radius:999px; margin-top:8px">Positivo</div>
+        </div>
+      </div>
+
+      <p style="font-size:12px; line-height:1.6; color:rgba(247,220,225,.84); margin:0">🎉 <strong>Resultado excelente!</strong> Suas vendas superaram todas as despesas por <strong>R$ 4.980</strong> no período.</p>
+
+      <div style="display:flex; gap:8px; font-size:12px">
+        <div style="flex:1; background:rgba(255,255,255,.12); border-radius:16px; padding:11px 12px">
+          <div style="font-size:9px; color:rgba(247,220,225,.75); font-weight:700">VENDAS PAGAS</div>
+          <div style="font-size:15px; font-weight:800; margin-top:3px">R$ 8.420</div>
+        </div>
+        <div style="flex:1; background:rgba(255,255,255,.12); border-radius:16px; padding:11px 12px">
+          <div style="font-size:9px; color:rgba(247,220,225,.75); font-weight:700">SAÍDAS</div>
+          <div style="font-size:15px; font-weight:800; margin-top:3px">R$ 3.440</div>
+        </div>
+        <div style="flex:1; background:rgba(228,217,195,.28); border-radius:16px; padding:11px 12px">
+          <div style="font-size:9px; color:#F0E2C8; font-weight:700">⏳ A RECEBER</div>
+          <div style="font-size:15px; font-weight:800; margin-top:3px">R$ 1.150</div>
+        </div>
+      </div>
+
+      <button style="width:100%; padding:12px; border:1px solid rgba(255,255,255,.32); border-radius:14px; background:rgba(255,255,255,.12); color:#FFFFFF; font-family:'Manrope',sans-serif; font-size:12px; font-weight:700; cursor:pointer; transition:all .25s">Ver Detalhamento das Vendas</button>
+    </div>
+
+    <!-- Content Area -->
+    <div style="padding:18px; display:flex; flex-direction:column; gap:16px; max-height:400px; overflow-y:auto">
+      
+      <!-- New Order Button -->
+      <button style="position:relative; width:100%; border:none; border-radius:0; background:linear-gradient(150deg,#3A2350,#6E3F72 55%,#A85E86); padding:18px 20px; display:flex; align-items:center; gap:16px; cursor:pointer; box-shadow:0 14px 30px rgba(58,35,80,.36); transition:transform .25s; background-image:linear-gradient(150deg,#3A2350,#6E3F72 55%,#A85E86),radial-gradient(circle 11px at 0 50%, #F6F2F5 99%, transparent 100%),radial-gradient(circle 11px at 100% 50%, #F6F2F5 99%, transparent 100%); background-size:100% 100%, 100% 100%, 100% 100%; background-position:0 0, 0 0, 0 0; background-repeat:no-repeat; border-radius:20px 0 0 20px; margin-left:11px; margin-right:0">
+        <span style="display:flex; flex-direction:column; align-items:flex-start; gap:4px; padding-left:6px; border-left:2px dashed rgba(245,185,198,.5)">
+          <span style="font-size:9px; font-weight:800; letter-spacing:.24em; color:rgba(247,220,225,.8)">NOVA COMANDA</span>
+          <span style="font-family:'Instrument Serif',serif; font-size:29px; color:#FFFFFF; line-height:1">+ Lançar Pedido</span>
+        </span>
+        <span style="margin-left:auto; width:44px; height:44px; border-radius:14px; background:#F5B9C6; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 8px 16px rgba(0,0,0,.18)"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#3A2350" stroke-width="2.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+      </button>
+
+      <!-- Saldos Cards -->
+      <div>
+        <div style="margin-bottom:11px">
+          <span style="font-family:'Instrument Serif',serif; font-size:23px; color:#241B2B; font-weight:bold">Saldos & Divisão</span>
+          <div style="font-size:11px; color:#7A6E80; margin-top:2px">Entradas das vendas pagas − Compras registradas</div>
+        </div>
+        <div style="display:flex; gap:9px">
+          <div style="flex:1; background:#FFFFFF; border-radius:22px; padding:15px; display:flex; flex-direction:column; align-items:center; gap:9px; box-shadow:0 8px 20px rgba(58,35,80,.08); text-align:center">
+            <div style="position:relative; width:56px; height:56px">
+              <svg width="56" height="56" viewBox="0 0 56 56" style="transform:rotate(-90deg)"><circle cx="28" cy="28" r="23" fill="none" stroke="#F0E9EE" stroke-width="6"/><circle cx="28" cy="28" r="23" fill="none" stroke="#C4626F" stroke-width="6" stroke-linecap="round" stroke-dasharray="145" stroke-dashoffset="41"/></svg>
+              <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:#241B2B">72%</div>
+            </div>
+            <span style="font-size:9px; font-weight:800; color:#7A6E80">🔄 REPOSIÇÃO</span>
+            <span style="font-size:15px; font-weight:800; color:#241B2B">R$ 1.240</span>
+          </div>
+          <div style="flex:1; background:#FFFFFF; border-radius:22px; padding:15px; display:flex; flex-direction:column; align-items:center; gap:9px; box-shadow:0 8px 20px rgba(58,35,80,.08); text-align:center">
+            <div style="position:relative; width:56px; height:56px">
+              <svg width="56" height="56" viewBox="0 0 56 56" style="transform:rotate(-90deg)"><circle cx="28" cy="28" r="23" fill="none" stroke="#F0E9EE" stroke-width="6"/><circle cx="28" cy="28" r="23" fill="none" stroke="#7E4F9E" stroke-width="6" stroke-linecap="round" stroke-dasharray="145" stroke-dashoffset="75"/></svg>
+              <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:#241B2B">48%</div>
+            </div>
+            <span style="font-size:9px; font-weight:800; color:#7A6E80">🟣 MÃO DE OBRA</span>
+            <span style="font-size:15px; font-weight:800; color:#241B2B">R$ 860</span>
+          </div>
+          <div style="flex:1; background:#FFFFFF; border-radius:22px; padding:15px; display:flex; flex-direction:column; align-items:center; gap:9px; box-shadow:0 8px 20px rgba(58,35,80,.08); text-align:center">
+            <div style="position:relative; width:56px; height:56px">
+              <svg width="56" height="56" viewBox="0 0 56 56" style="transform:rotate(-90deg)"><circle cx="28" cy="28" r="23" fill="none" stroke="#F0E9EE" stroke-width="6"/><circle cx="28" cy="28" r="23" fill="none" stroke="#B08D57" stroke-width="6" stroke-linecap="round" stroke-dasharray="145" stroke-dashoffset="94"/></svg>
+              <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:#241B2B">35%</div>
+            </div>
+            <span style="font-size:9px; font-weight:800; color:#7A6E80">📊 CUSTO + INVEST.</span>
+            <span style="font-size:15px; font-weight:800; color:#241B2B">R$ 620</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Calendar Preview -->
+      <div style="background:#FFFFFF; border-radius:26px; padding:20px; box-shadow:0 8px 20px rgba(58,35,80,.08)">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px">
+          <span style="font-family:'Instrument Serif',serif; font-size:23px; color:#241B2B; font-weight:bold">Agenda de Pedidos</span>
+          <div style="display:flex; align-items:center; gap:8px">
+            <div style="width:26px; height:26px; border-radius:9px; background:#F6F2F5; display:flex; align-items:center; justify-content:center; cursor:pointer"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7A6E80" stroke-width="2.4"><path d="M15 5l-7 7 7 7"/></svg></div>
+            <span style="font-size:11px; font-weight:800; letter-spacing:.14em; color:#6E3F72">AGOSTO</span>
+            <div style="width:26px; height:26px; border-radius:9px; background:#F6F2F5; display:flex; align-items:center; justify-content:center; cursor:pointer"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7A6E80" stroke-width="2.4"><path d="M9 5l7 7-7 7"/></svg></div>
+          </div>
+        </div>
+        
+        <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:6px; font-size:10px; font-weight:800; color:#B0A4B6; text-align:center; margin-bottom:12px">
+          <span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span>
+        </div>
+        
+        <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:6px; font-size:12px; margin-bottom:12px">
+          <div style="aspect-ratio:1; display:flex; align-items:center; justify-content:center; color:#D3C9D6">26</div>
+          <div style="aspect-ratio:1; display:flex; align-items:center; justify-content:center; color:#D3C9D6">27</div>
+          <div style="aspect-ratio:1; display:flex; align-items:center; justify-content:center; color:#D3C9D6">28</div>
+          <div style="aspect-ratio:1; display:flex; align-items:center; justify-content:center; color:#D3C9D6">29</div>
+          <div style="aspect-ratio:1; display:flex; align-items:center; justify-content:center; color:#D3C9D6">30</div>
+          <div style="aspect-ratio:1; display:flex; align-items:center; justify-content:center; color:#D3C9D6">31</div>
+          <div style="aspect-ratio:1; border-radius:13px; background:#F6F2F5; display:flex; align-items:center; justify-content:center; color:#241B2B; cursor:pointer">1</div>
+          <div style="aspect-ratio:1; border-radius:13px; background:#F6F2F5; display:flex; align-items:center; justify-content:center; color:#241B2B; cursor:pointer">2</div>
+          <div style="aspect-ratio:1; border-radius:13px; background:linear-gradient(150deg,#8F5A9C,#C4626F); color:#FFFFFF; font-weight:800; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 14px rgba(143,90,156,.34); cursor:pointer">3</div>
+          <div style="aspect-ratio:1; border-radius:13px; background:#F6F2F5; display:flex; align-items:center; justify-content:center; color:#241B2B; cursor:pointer">4</div>
+          <div style="aspect-ratio:1; border-radius:13px; background:#F6F2F5; display:flex; align-items:center; justify-content:center; color:#241B2B; cursor:pointer">5</div>
+          <div style="aspect-ratio:1; border-radius:13px; background:#F6F2F5; display:flex; align-items:center; justify-content:center; color:#241B2B; cursor:pointer">6</div>
+          <div style="aspect-ratio:1; border-radius:13px; background:#F6F2F5; border:1.5px solid #6E3F72; display:flex; align-items:center; justify-content:center; font-weight:800; color:#6E3F72; cursor:pointer">7</div>
+          <div style="aspect-ratio:1; border-radius:13px; background:#F6F2F5; display:flex; align-items:center; justify-content:center; color:#241B2B; cursor:pointer">8</div>
+          <div style="aspect-ratio:1; border-radius:13px; background:linear-gradient(150deg,#8F5A9C,#C4626F); color:#FFFFFF; font-weight:800; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 14px rgba(143,90,156,.34); cursor:pointer">9</div>
+          <div style="aspect-ratio:1; border-radius:13px; background:#F6F2F5; display:flex; align-items:center; justify-content:center; color:#241B2B; cursor:pointer">10</div>
+        </div>
+        
+        <div style="border-top:1px solid rgba(36,27,43,.08); padding-top:12px; display:flex; align-items:center; gap:16px; font-size:10px; font-weight:700; color:#7A6E80">
+          <div style="display:flex; align-items:center; gap:7px"><span style="width:11px; height:11px; border-radius:4px; background:linear-gradient(150deg,#8F5A9C,#C4626F)"/><span>Com pedido</span></div>
+          <div style="display:flex; align-items:center; gap:7px"><span style="width:11px; height:11px; border-radius:4px; background:#F6F2F5; border:1px solid rgba(36,27,43,.14)"/><span>Livre</span></div>
+          <div style="display:flex; align-items:center; gap:7px"><span style="width:11px; height:11px; border-radius:4px; border:1.5px solid #6E3F72"/><span>Hoje</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <div style="background:#FFFFFF; border-top:1px solid rgba(36,27,43,.08); padding:12px 8px 22px; display:flex; justify-content:space-around; box-shadow:0 -8px 24px rgba(58,35,80,.07)">
+      <div style="display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px 11px; border-radius:16px; background:#3A2350; box-shadow:0 8px 18px rgba(58,35,80,.3); cursor:pointer"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#F5B9C6" stroke-width="1.9"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span style="font-size:9px; font-weight:800; color:#F5B9C6">Início</span></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px 11px; border-radius:16px; cursor:pointer"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#A096A6" stroke-width="1.9"><path d="M4 7h16l-1.2 13H5.2z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg><span style="font-size:9px; font-weight:600; color:#A096A6">Pedidos</span></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px 11px; border-radius:16px; cursor:pointer"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#A096A6" stroke-width="1.9"><path d="M4 4h9a3 3 0 0 1 3 3v13H6a2 2 0 0 1-2-2z"/><path d="M20 5v15"/></svg><span style="font-size:9px; font-weight:600; color:#A096A6">Fichas</span></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px 11px; border-radius:16px; cursor:pointer"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#A096A6" stroke-width="1.9"><circle cx="9" cy="8.5" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><circle cx="17.5" cy="10" r="2.2"/></svg><span style="font-size:9px; font-weight:600; color:#A096A6">Clientes</span></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px 11px; border-radius:16px; cursor:pointer"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#A096A6" stroke-width="1.9"><rect x="3" y="10" width="8" height="7" rx="1.2"/><rect x="13" y="10" width="8" height="7" rx="1.2"/><rect x="8" y="3" width="8" height="6" rx="1.2"/></svg><span style="font-size:9px; font-weight:600; color:#A096A6">Estoque</span></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px 11px; border-radius:16px; cursor:pointer"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#A096A6" stroke-width="1.9"><rect x="3" y="6" width="18" height="13" rx="3"/><circle cx="17" cy="12.5" r="1.4" fill="#A096A6" stroke="none"/></svg><span style="font-size:9px; font-weight:600; color:#A096A6">Saldos</span></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

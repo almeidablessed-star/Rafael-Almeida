@@ -91,7 +91,7 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
     : monthSales;
 
   return (
-    <div className="bg-white rounded-3xl p-6 shadow-card space-y-4">
+    <div className="bg-white rounded-[22px] p-6 shadow-card space-y-4">
       {/* Header Month Control */}
       <div className="flex items-center justify-between">
         <div>
@@ -135,7 +135,7 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
         <div className="grid grid-cols-7 gap-1.5">
           {/* Leading empty cells */}
           {Array.from({ length: startingDayOfWeek }).map((_, i) => (
-            <div key={`empty-${i}`} className="aspect-square rounded-3xl flex items-center justify-center font-black text-sm" style={{ color: '#D3C9D6', background: 'transparent' }} />
+            <div key={`empty-${i}`} className="aspect-square rounded-[22px] flex items-center justify-center font-black text-sm" style={{ color: '#D3C9D6', background: 'transparent' }} />
           ))}
 
           {/* Month Days */}
@@ -164,7 +164,7 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
             return (
               <button
                 key={dayStr}
-                className="aspect-square rounded-3xl flex items-center justify-center font-black text-sm transition-all hover:-translate-y-0.5 cursor-pointer"
+                className="aspect-square rounded-[22px] flex items-center justify-center font-black text-sm transition-all hover:-translate-y-0.5 cursor-pointer"
                 style={{
                   background: bgColor,
                   color: textColor,
