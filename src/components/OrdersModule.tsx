@@ -205,7 +205,15 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
             return (
               <div
                 key={tx.id}
-                className="bg-white rounded-3xl shadow-card transition-none hover:shadow-lg relative overflow-hidden"
+                className="bg-white rounded-3xl shadow-card transition-all duration-300 cursor-pointer relative overflow-hidden"
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-6px)';
+                  e.currentTarget.style.boxShadow = '0 20px 40px rgba(58,35,80,0.2)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(58,35,80,0.08)';
+                }}
               >
                 {/* Stripe lateral */}
                 <div

@@ -115,11 +115,19 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
 
         {/* CARD REPOSIÇÃO - with mini bar chart */}
         <div
-          className={`rounded-[22px] p-6 border-2 transition-all shadow-sm relative overflow-hidden flex flex-col justify-between ${
+          className={`rounded-[22px] p-6 border-2 transition-all shadow-sm cursor-pointer relative overflow-hidden flex flex-col justify-between ${
             balances.reposicao.isNegative
               ? 'bg-[#C85A54]/8 border-[#C85A54]/70'
               : 'bg-[#C8E6D7]/10 border-[#C8E6D7]/80'
           }`}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-4px)';
+            e.currentTarget.style.boxShadow = '0 12px 24px rgba(58,35,80,0.14)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 2px 4px rgba(58,35,80,0.04)';
+          }}
         >
           {/* Top color strip */}
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#3A5A4A] to-[#5A8A6F]" />
@@ -179,7 +187,17 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
         </div>
 
         {/* CARD MÃO DE OBRA - with circular progress */}
-        <div className="rounded-[22px] p-6 border-2 transition-all shadow-sm bg-[#D4C5E2]/10 border-[#D4C5E2]/80 relative overflow-hidden flex flex-col justify-between">
+        <div
+          className="rounded-[22px] p-6 border-2 transition-all shadow-sm bg-[#D4C5E2]/10 border-[#D4C5E2]/80 cursor-pointer relative overflow-hidden flex flex-col justify-between"
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-4px)';
+            e.currentTarget.style.boxShadow = '0 12px 24px rgba(58,35,80,0.14)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 2px 4px rgba(58,35,80,0.04)';
+          }}
+        >
           {/* Top color strip */}
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#5A4B6B] to-[#7A6B8B]" />
 
@@ -231,11 +249,19 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
 
         {/* CARD CUSTO + INVESTIMENTO JUNTOS - with horizontal status bar */}
         <div
-          className={`rounded-[22px] p-6 border-2 transition-all shadow-sm relative overflow-hidden flex flex-col justify-between ${
+          className={`rounded-[22px] p-6 border-2 transition-all shadow-sm cursor-pointer relative overflow-hidden flex flex-col justify-between ${
             balances.custoEInvestimento.isNegative
               ? 'bg-[#C85A54]/8 border-[#C85A54]/70'
               : 'bg-[#B8D4E8]/10 border-[#B8D4E8]/80'
           }`}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-4px)';
+            e.currentTarget.style.boxShadow = '0 12px 24px rgba(58,35,80,0.14)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 2px 4px rgba(58,35,80,0.04)';
+          }}
         >
           {/* Top color strip */}
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#3A4A5A] to-[#5A7A9E]" />

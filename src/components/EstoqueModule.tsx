@@ -300,7 +300,17 @@ export const EstoqueModule: React.FC = () => {
                 {lowStockItems.map((item) => (
                   <div
                     key={item.id}
-                    className="bg-[#FBE8D6] border-2 border-[#F5D4A8] rounded-3xl p-4 hover:shadow-card transition-all shadow-card"
+                    className="bg-[#FBE8D6] border-2 border-[#F5D4A8] rounded-3xl p-4 transition-all shadow-card cursor-pointer"
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-4px)';
+                      e.currentTarget.style.boxShadow = '0 16px 32px rgba(58,35,80,0.16)';
+                      e.currentTarget.style.borderColor = '#F0B896';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 8px 16px rgba(58,35,80,0.08)';
+                      e.currentTarget.style.borderColor = '#F5D4A8';
+                    }}
                   >
                     {/* Item Header */}
                     <div className="flex items-start justify-between mb-3 pb-2 border-b border-[var(--color-semantic-coral)] border-opacity-30">
@@ -403,7 +413,17 @@ export const EstoqueModule: React.FC = () => {
                 {healthyStockItems.map((item) => (
                   <div
                     key={item.id}
-                    className="bg-white border border-[var(--color-neutral-light)] rounded-3xl p-4 hover:border-[var(--color-primary)] hover:shadow-card transition-all"
+                    className="bg-white border border-[var(--color-neutral-light)] rounded-3xl p-4 transition-all cursor-pointer"
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-4px)';
+                      e.currentTarget.style.boxShadow = '0 16px 32px rgba(58,35,80,0.16)';
+                      e.currentTarget.style.borderColor = 'var(--color-primary)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
+                      e.currentTarget.style.borderColor = 'var(--color-neutral-light)';
+                    }}
                   >
                     {/* Item Header */}
                     <div className="pb-2 border-b border-[var(--color-neutral-light)] mb-3">

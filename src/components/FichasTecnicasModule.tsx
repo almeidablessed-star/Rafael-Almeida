@@ -854,7 +854,15 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
             return (
               <div
                 key={ficha.id}
-                className={`${bgClass} rounded-[32px] p-5 sm:p-6 shadow-card transition-all hover:shadow-sm relative overflow-hidden`}
+                className={`${bgClass} rounded-[32px] p-5 sm:p-6 shadow-card transition-all cursor-pointer relative overflow-hidden`}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-6px) scale(1.01)';
+                  e.currentTarget.style.boxShadow = '0 20px 40px rgba(58,35,80,0.18)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(58,35,80,0.08)';
+                }}
               >
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
                   

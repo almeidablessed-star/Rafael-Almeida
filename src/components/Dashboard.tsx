@@ -277,7 +277,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
           {/* 3 Circular Gauges */}
           <div className="flex gap-3">
             {/* Reposição */}
-            <div className="flex-1 bg-white rounded-[22px] p-4 text-center transition-all duration-300 cursor-pointer" style={{ boxShadow: '0 8px 20px rgba(58,35,80,0.08)' }}>
+            <div
+              className="flex-1 bg-white rounded-[22px] p-4 text-center transition-all duration-300 cursor-pointer"
+              style={{ boxShadow: '0 8px 20px rgba(58,35,80,0.08)' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-4px)';
+                e.currentTarget.style.boxShadow = '0 16px 32px rgba(58,35,80,0.16)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 8px 20px rgba(58,35,80,0.08)';
+              }}>
               <div className="relative w-14 h-14 mx-auto">
                 <svg width="56" height="56" viewBox="0 0 56 56" style={{ transform: 'rotate(-90deg)' }}>
                   <circle cx="28" cy="28" r="23" fill="none" stroke="#F0E9EE" strokeWidth="6" />
@@ -296,7 +306,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
 
             {/* Mão de Obra */}
-            <div className="flex-1 bg-white rounded-[22px] p-4 text-center transition-all duration-300 cursor-pointer" style={{ boxShadow: '0 8px 20px rgba(58,35,80,0.08)' }}>
+            <div
+              className="flex-1 bg-white rounded-[22px] p-4 text-center transition-all duration-300 cursor-pointer"
+              style={{ boxShadow: '0 8px 20px rgba(58,35,80,0.08)' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-4px)';
+                e.currentTarget.style.boxShadow = '0 16px 32px rgba(58,35,80,0.16)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 8px 20px rgba(58,35,80,0.08)';
+              }}>
               <div className="relative w-14 h-14 mx-auto">
                 <svg width="56" height="56" viewBox="0 0 56 56" style={{ transform: 'rotate(-90deg)' }}>
                   <circle cx="28" cy="28" r="23" fill="none" stroke="#F0E9EE" strokeWidth="6" />
@@ -315,7 +335,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
 
             {/* Custo + Investimento */}
-            <div className="flex-1 bg-white rounded-[22px] p-4 text-center transition-all duration-300 cursor-pointer" style={{ boxShadow: '0 8px 20px rgba(58,35,80,0.08)' }}>
+            <div
+              className="flex-1 bg-white rounded-[22px] p-4 text-center transition-all duration-300 cursor-pointer"
+              style={{ boxShadow: '0 8px 20px rgba(58,35,80,0.08)' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-4px)';
+                e.currentTarget.style.boxShadow = '0 16px 32px rgba(58,35,80,0.16)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 8px 20px rgba(58,35,80,0.08)';
+              }}>
               <div className="relative w-14 h-14 mx-auto">
                 <svg width="56" height="56" viewBox="0 0 56 56" style={{ transform: 'rotate(-90deg)' }}>
                   <circle cx="28" cy="28" r="23" fill="none" stroke="#F0E9EE" strokeWidth="6" />
