@@ -95,7 +95,7 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
       {/* Header Month Control */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-black text-base uppercase tracking-wider" style={{ color: 'var(--color-ink)' }}>
+          <h2 className="text-base uppercase tracking-wider" style={{ color: 'var(--color-ink)', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
             {monthNames[month]}
           </h2>
         </div>
@@ -125,7 +125,7 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
         {/* Days of Week Header */}
         <div className="grid grid-cols-7 gap-1.5 text-center mb-2">
           {daysOfWeek.map((day) => (
-            <span key={day} className="text-xs font-black uppercase tracking-widest py-2" style={{ color: 'var(--color-ink-soft)' }}>
+            <span key={day} className="text-xs uppercase tracking-widest py-2" style={{ color: 'var(--color-ink-soft)', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
               {day}
             </span>
           ))}
@@ -164,11 +164,13 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
             return (
               <button
                 key={dayStr}
-                className="aspect-square rounded-[22px] flex items-center justify-center font-black text-sm transition-all hover:-translate-y-0.5 cursor-pointer"
+                className="aspect-square rounded-[22px] flex items-center justify-center text-sm transition-all hover:-translate-y-0.5 cursor-pointer"
                 style={{
                   background: bgColor,
                   color: textColor,
                   border: borderStyle,
+                  fontFamily: "'Manrope', sans-serif",
+                  fontWeight: 800,
                 }}
                 title={`${dayNum} de ${monthNames[month].toLowerCase()}`}
               >
@@ -180,18 +182,18 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
       </div>
 
       {/* Legend */}
-      <div className="pt-4 border-t flex items-center justify-center gap-6 text-xs font-black uppercase tracking-widest">
+      <div className="pt-4 border-t flex items-center justify-center gap-6 text-xs uppercase tracking-widest">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded" style={{ background: 'var(--color-surface)', border: '1.5px solid var(--color-brand-700)' }} />
-          <span style={{ color: 'var(--color-ink-soft)', fontSize: '10px' }}>Hoje</span>
+          <span style={{ color: 'var(--color-ink-soft)', fontSize: '10px', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>Hoje</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded" style={{ background: 'linear-gradient(150deg, #8F5A9C, #C4626F)' }} />
-          <span style={{ color: 'var(--color-ink-soft)', fontSize: '10px' }}>Com Pedido</span>
+          <span style={{ color: 'var(--color-ink-soft)', fontSize: '10px', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>Com Pedido</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-ink-soft)' }} />
-          <span style={{ color: 'var(--color-ink-soft)', fontSize: '10px' }}>Livre</span>
+          <span style={{ color: 'var(--color-ink-soft)', fontSize: '10px', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>Livre</span>
         </div>
       </div>
     </div>

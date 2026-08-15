@@ -297,13 +297,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     strokeLinecap="round"
                   />
                 </svg>
-                <div className="absolute inset-0 flex items-center justify-center text-[11px] font-black" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>
+                <div className="absolute inset-0 flex items-center justify-center text-[11px] font-black" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
                   {Math.round(balances.reposicaoPercent || 72)}%
                 </div>
               </div>
               <div className="text-[22px] mt-2" style={{ lineHeight: 1 }}>🔄</div>
-              <div className="text-[9px] font-black uppercase tracking-[0.05em] mt-1" style={{ color: '#7A6E80' }}>REPOSIÇÃO</div>
-              <div className="text-[15px] font-black mt-2" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>{formatCurrency(balances.reposicao || 1240)}</div>
+              <div className="text-[9px] uppercase tracking-[0.05em] mt-1" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>REPOSIÇÃO</div>
+              <div className="text-[15px] mt-2" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>{formatCurrency(balances.reposicao || 1240)}</div>
             </div>
 
             {/* Mão de Obra */}
@@ -327,13 +327,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     strokeLinecap="round"
                   />
                 </svg>
-                <div className="absolute inset-0 flex items-center justify-center text-[11px] font-black" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>
+                <div className="absolute inset-0 flex items-center justify-center text-[11px] font-black" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
                   {Math.round(balances.laborPercent || 48)}%
                 </div>
               </div>
               <div className="text-[22px] mt-2" style={{ lineHeight: 1 }}>👥</div>
-              <div className="text-[9px] font-black uppercase tracking-[0.05em] mt-1" style={{ color: '#7A6E80' }}>MÃO DE OBRA</div>
-              <div className="text-[15px] font-black mt-2" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>{formatCurrency(balances.labor || 860)}</div>
+              <div className="text-[9px] uppercase tracking-[0.05em] mt-1" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>MÃO DE OBRA</div>
+              <div className="text-[15px] mt-2" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>{formatCurrency(balances.labor || 860)}</div>
             </div>
 
             {/* Custo + Investimento */}
@@ -357,13 +357,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     strokeLinecap="round"
                   />
                 </svg>
-                <div className="absolute inset-0 flex items-center justify-center text-[11px] font-black" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>
+                <div className="absolute inset-0 flex items-center justify-center text-[11px] font-black" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
                   {Math.round(balances.costsPercent || 35)}%
                 </div>
               </div>
               <div className="text-[22px] mt-2" style={{ lineHeight: 1 }}>📊</div>
-              <div className="text-[9px] font-black uppercase tracking-[0.05em] mt-1" style={{ color: '#7A6E80' }}>CUSTO + INVEST.</div>
-              <div className="text-[15px] font-black mt-2" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>{formatCurrency(balances.costs || 620)}</div>
+              <div className="text-[9px] uppercase tracking-[0.05em] mt-1" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>CUSTO + INVEST.</div>
+              <div className="text-[15px] mt-2" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>{formatCurrency(balances.costs || 620)}</div>
             </div>
           </div>
 
