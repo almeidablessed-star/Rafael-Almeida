@@ -243,7 +243,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div className="relative flex items-center gap-4">
             <div className="flex-1" style={{ paddingLeft: '6px', borderLeft: '2px dashed rgba(245,185,198,0.5)' }}>
               <div className="text-[9px] font-black text-white/80 mb-1" style={{ letterSpacing: '0.24em' }}>NOVA COMANDA</div>
-              <div className="font-serif-display text-white" style={{ fontSize: '29px', lineHeight: 1 }}>+ Lançar Pedido</div>
+              <div className="font-serif-display text-white" style={{ fontSize: '29px', lineHeight: 1 }}>Lançar Pedido</div>
             </div>
             <div
               className="animate-carFloat flex-shrink-0 w-11 h-11 rounded-[14px] flex items-center justify-center text-2xl font-black"
