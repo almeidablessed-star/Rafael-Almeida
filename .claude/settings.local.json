@@ -68,7 +68,8 @@
       "Bash(grep -n \"className=\\\\`\\\\${bgClass} rounded-\\\\[32px\\\\]\" /c/Users/Rafael/Documents/projetos/carula/src/components/FichasTecnicasModule.tsx)",
       "Bash(grep -n \"rounded-\\\\\\\\\\\\[32px\\\\\\\\\\\\].*p-5\" /c/Users/Rafael/Documents/projetos/carula/src/components/FichasTecnicasModule.tsx)",
       "Bash(grep -n \"className.*rounded-\\\\\\\\\\\\[22px\\\\\\\\\\\\].*p-6.*border-2\" /c/Users/Rafael/Documents/projetos/carula/src/components/BalancesAndExpensesModule.tsx)",
-      "Bash(grep -n \"CARD CUSTO\\\\|className=\\\\`rounded-\\\\[22px\\\\].*p-6.*border-2.*transition-all.*shadow-sm.*relative.*overflow-hidden.*flex.*flex-col.*justify-between\" /c/Users/Rafael/Documents/projetos/carula/src/components/BalancesAndExpensesModule.tsx)"
+      "Bash(grep -n \"CARD CUSTO\\\\|className=\\\\`rounded-\\\\[22px\\\\].*p-6.*border-2.*transition-all.*shadow-sm.*relative.*overflow-hidden.*flex.*flex-col.*justify-between\" /c/Users/Rafael/Documents/projetos/carula/src/components/BalancesAndExpensesModule.tsx)",
+      "Bash(npm install *)"
     ]
   },
   "hooks": {

@@ -297,12 +297,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     strokeLinecap="round"
                   />
                 </svg>
-                <div className="absolute inset-0 flex items-center justify-center text-[11px] font-black" style={{ color: '#241B2B' }}>
+                <div className="absolute inset-0 flex items-center justify-center text-[11px] font-black" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>
                   {Math.round(balances.reposicaoPercent || 72)}%
                 </div>
               </div>
-              <div className="text-[9px] font-black uppercase tracking-[0.05em] mt-2" style={{ color: '#7A6E80' }}>🔄 REPOSIÇÃO</div>
-              <div className="text-[15px] font-black mt-2" style={{ color: '#241B2B' }}>{formatCurrency(balances.reposicao || 1240)}</div>
+              <div className="text-[22px] mt-2" style={{ lineHeight: 1 }}>🔄</div>
+              <div className="text-[9px] font-black uppercase tracking-[0.05em] mt-1" style={{ color: '#7A6E80' }}>REPOSIÇÃO</div>
+              <div className="text-[15px] font-black mt-2" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>{formatCurrency(balances.reposicao || 1240)}</div>
             </div>
 
             {/* Mão de Obra */}
@@ -326,12 +327,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     strokeLinecap="round"
                   />
                 </svg>
-                <div className="absolute inset-0 flex items-center justify-center text-[11px] font-black" style={{ color: '#241B2B' }}>
+                <div className="absolute inset-0 flex items-center justify-center text-[11px] font-black" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>
                   {Math.round(balances.laborPercent || 48)}%
                 </div>
               </div>
-              <div className="text-[9px] font-black uppercase tracking-[0.05em] mt-2" style={{ color: '#7A6E80' }}>🟣 MÃO DE OBRA</div>
-              <div className="text-[15px] font-black mt-2" style={{ color: '#241B2B' }}>{formatCurrency(balances.labor || 860)}</div>
+              <div className="text-[22px] mt-2" style={{ lineHeight: 1 }}>👥</div>
+              <div className="text-[9px] font-black uppercase tracking-[0.05em] mt-1" style={{ color: '#7A6E80' }}>MÃO DE OBRA</div>
+              <div className="text-[15px] font-black mt-2" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>{formatCurrency(balances.labor || 860)}</div>
             </div>
 
             {/* Custo + Investimento */}
@@ -355,12 +357,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     strokeLinecap="round"
                   />
                 </svg>
-                <div className="absolute inset-0 flex items-center justify-center text-[11px] font-black" style={{ color: '#241B2B' }}>
+                <div className="absolute inset-0 flex items-center justify-center text-[11px] font-black" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>
                   {Math.round(balances.costsPercent || 35)}%
                 </div>
               </div>
-              <div className="text-[9px] font-black uppercase tracking-[0.05em] mt-2" style={{ color: '#7A6E80' }}>📊 CUSTO + INVEST.</div>
-              <div className="text-[15px] font-black mt-2" style={{ color: '#241B2B' }}>{formatCurrency(balances.costs || 620)}</div>
+              <div className="text-[22px] mt-2" style={{ lineHeight: 1 }}>📊</div>
+              <div className="text-[9px] font-black uppercase tracking-[0.05em] mt-1" style={{ color: '#7A6E80' }}>CUSTO + INVEST.</div>
+              <div className="text-[15px] font-black mt-2" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>{formatCurrency(balances.costs || 620)}</div>
             </div>
           </div>
 
@@ -370,8 +373,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </p>
         </div>
 
-        {/* 4. CALENDAR */}
-        <div className="mt-4">
+        {/* 4. AGENDA DE PEDIDOS - CALENDAR */}
+        <div className="mt-6">
+          <div className="mb-4">
+            <h3 className="font-serif-display text-[23px]" style={{ color: '#241B2B' }}>
+              Agenda de Pedidos
+            </h3>
+            <p className="text-[11px]" style={{ color: '#7A6E80', marginTop: '2px' }}>
+              Visualize seus pedidos por data
+            </p>
+          </div>
           <OrdersCalendar transactions={transactionsList} />
         </div>
       </div>
