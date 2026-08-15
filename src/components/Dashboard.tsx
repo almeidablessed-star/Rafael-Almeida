@@ -182,8 +182,23 @@ export const Dashboard: React.FC<DashboardProps> = ({
           {/* Button */}
           <button
             onClick={() => onNavigateToTab('saldos')}
-            className="w-full text-white text-[12px] uppercase tracking-wide transition-all py-3 rounded-[14px]"
-            style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.32)', fontFamily: "'Manrope', sans-serif", fontWeight: 700 }}
+            className="w-full text-[12px] uppercase tracking-wide py-3 rounded-[14px]"
+            style={{
+              background: 'rgba(255,255,255,0.12)',
+              border: '1px solid rgba(255,255,255,0.32)',
+              fontFamily: "'Manrope', sans-serif",
+              fontWeight: 700,
+              color: '#FFFFFF',
+              transition: 'background-color 0.25s ease, color 0.25s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#FFFFFF';
+              e.currentTarget.style.color = '#3A2350';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(255,255,255,0.12)';
+              e.currentTarget.style.color = '#FFFFFF';
+            }}
           >
             Ver Detalhamento das Vendas
           </button>
