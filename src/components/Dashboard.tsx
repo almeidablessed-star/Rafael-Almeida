@@ -138,10 +138,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
             {/* Texto e valor - À DIREITA */}
             <div className="flex-1">
-              <div className="text-[9px] font-black uppercase tracking-[0.14em]" style={{ color: 'rgba(247,220,225,0.8)' }}>
+              <div className="text-[9px] font-black uppercase tracking-[0.14em]" style={{ color: 'rgba(247,220,225,0.8)', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
                 LUCRO LÍQUIDO DO MÊS (RENDIMENTO)
               </div>
-              <div className="font-black text-white" style={{ fontSize: '32px', lineHeight: 1, letterSpacing: '-0.03em', marginTop: '0px' }}>
+              <div className="text-white" style={{ fontSize: '32px', lineHeight: 1, letterSpacing: '-0.03em', marginTop: '0px', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
                 {formatCurrency(profit)}
               </div>
               <div className="flex items-center gap-2 mt-2">
@@ -160,20 +160,20 @@ export const Dashboard: React.FC<DashboardProps> = ({
           {/* Bottom: 3 Small Boxes */}
           <div className="flex gap-2">
             <div className="flex-1 rounded-[16px] p-3 text-center" style={{ background: 'rgba(255,255,255,0.12)' }}>
-              <div className="text-[9px] text-white/75 font-black uppercase tracking-[0.06em]">VENDAS PAGAS</div>
-              <div className="font-black text-white mt-1" style={{ fontSize: '15px', lineHeight: 1 }}>
+              <div className="text-[9px] text-white/75 uppercase tracking-[0.06em]" style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 700 }}>VENDAS PAGAS</div>
+              <div className="text-white mt-1" style={{ fontSize: '15px', lineHeight: 1, fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
                 {formatCurrency(balances.paidSales || 0)}
               </div>
             </div>
             <div className="flex-1 rounded-[16px] p-3 text-center" style={{ background: 'rgba(255,255,255,0.12)' }}>
-              <div className="text-[9px] text-white/75 font-black uppercase tracking-[0.06em]">SAÍDAS</div>
-              <div className="font-black text-white mt-1" style={{ fontSize: '15px', lineHeight: 1 }}>
+              <div className="text-[9px] text-white/75 uppercase tracking-[0.06em]" style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 700 }}>SAÍDAS</div>
+              <div className="text-white mt-1" style={{ fontSize: '15px', lineHeight: 1, fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
                 {formatCurrency(balances.totalExpenses || 0)}
               </div>
             </div>
             <div className="flex-1 rounded-[16px] p-3 text-center" style={{ background: 'rgba(228,217,195,0.28)' }}>
-              <div className="text-[9px] font-black uppercase tracking-[0.06em]" style={{ color: '#F0E2C8' }}>⏳ A RECEBER</div>
-              <div className="font-black text-white mt-1" style={{ fontSize: '15px', lineHeight: 1 }}>
+              <div className="text-[9px] uppercase tracking-[0.06em]" style={{ color: '#F0E2C8', fontFamily: "'Manrope', sans-serif", fontWeight: 700 }}>⏳ A RECEBER</div>
+              <div className="text-white mt-1" style={{ fontSize: '15px', lineHeight: 1, fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
                 {formatCurrency(balances.pendingSales || 0)}
               </div>
             </div>
@@ -182,8 +182,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
           {/* Button */}
           <button
             onClick={() => onNavigateToTab('saldos')}
-            className="w-full text-white font-bold text-[12px] uppercase tracking-wide transition-all py-3 rounded-[14px]"
-            style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.32)' }}
+            className="w-full text-white text-[12px] uppercase tracking-wide transition-all py-3 rounded-[14px]"
+            style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.32)', fontFamily: "'Manrope', sans-serif", fontWeight: 700 }}
           >
             Ver Detalhamento das Vendas
           </button>
