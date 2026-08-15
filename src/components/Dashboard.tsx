@@ -76,11 +76,18 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div className="flex items-center justify-between gap-3">
             {/* Logo "C" Badge - 34x34px */}
             <div
-              className="flex-shrink-0 w-[34px] h-[34px] rounded-[12px] flex items-center justify-center font-serif-display text-base cursor-pointer transition-all duration-250"
+              className="flex-shrink-0 w-[34px] h-[34px] rounded-[12px] flex items-center justify-center font-serif-display text-base cursor-pointer"
               style={{
                 background: 'rgba(255,255,255,.16)',
                 border: '1px solid rgba(255,255,255,.24)',
                 color: '#F7DCE1',
+                transition: 'background-color 0.25s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(255,255,255,.3)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(255,255,255,.16)';
               }}
             >
               C
@@ -100,16 +107,36 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="flex-shrink-0 flex items-center gap-2">
               <button
                 onClick={onOpenPwaModal}
-                className="w-8 h-8 rounded-[11px] text-white hover:transition-all duration-250 flex items-center justify-center"
-                style={{ background: 'rgba(255,255,255,.16)', cursor: 'pointer' }}
+                className="w-8 h-8 rounded-[11px] text-white flex items-center justify-center"
+                style={{
+                  background: 'rgba(255,255,255,.16)',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.25s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(255,255,255,.3)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(255,255,255,.16)';
+                }}
                 title="Versão Mobile"
               >
                 <Smartphone className="w-4 h-4" />
               </button>
               <button
                 onClick={onOpenBackupModal}
-                className="w-8 h-8 rounded-[11px] text-white hover:transition-all duration-250 flex items-center justify-center"
-                style={{ background: 'rgba(255,255,255,.16)', cursor: 'pointer' }}
+                className="w-8 h-8 rounded-[11px] text-white flex items-center justify-center"
+                style={{
+                  background: 'rgba(255,255,255,.16)',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.25s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(255,255,255,.3)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(255,255,255,.16)';
+                }}
                 title="Baixar Dados"
               >
                 <Download className="w-4 h-4" />
