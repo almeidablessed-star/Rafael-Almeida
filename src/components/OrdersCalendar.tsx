@@ -172,13 +172,13 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
             return (
               <button
                 key={dayStr}
-                className="aspect-square rounded-[22px] flex items-center justify-center text-sm transition-all hover:-translate-y-0.5 cursor-pointer"
+                className="aspect-square rounded-[22px] flex items-center justify-center transition-all hover:-translate-y-0.5 cursor-pointer"
                 style={{
                   background: bgColor,
                   color: textColor,
                   border: borderStyle,
-                  fontFamily: "'Manrope', sans-serif",
-                  fontWeight: 600,
+                  fontSize: '12px',
+                  fontWeight: isToday || hasOrders ? 800 : 400,
                 }}
                 title={`${dayNum} de ${monthNames[month].toLowerCase()}`}
               >
