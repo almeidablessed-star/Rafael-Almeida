@@ -42,7 +42,7 @@ import { CatalogModule } from './components/CatalogModule';
 import { WeeklyClosingModule } from './components/WeeklyClosingModule';
 import { BalancesAndExpensesModule } from './components/BalancesAndExpensesModule';
 import { EstoqueModule } from './components/EstoqueModule';
-import { FichasTecnicasModule } from './components/FichasTecnicasModule';
+import { TechnicalSheetsModule } from './components/TechnicalSheetsModule';
 import { CustomersModule } from './components/CustomersModule';
 import { TransactionFormModal } from './components/TransactionFormModal';
 import { DeleteConfirmModal } from './components/DeleteConfirmModal';
@@ -312,12 +312,10 @@ export default function App() {
         )}
 
         {activeTab === 'fichas' && (
-          <FichasTecnicasModule
-            onAddTransaction={(txData) => {
-              addTransaction(txData);
-              setTransactions(getStoredTransactions());
+          <TechnicalSheetsModule
+            onAddSheet={() => {
+              // TODO: Open form to add new sheet
             }}
-            onNavigateToTab={(tab) => setActiveTab(tab)}
           />
         )}
 
