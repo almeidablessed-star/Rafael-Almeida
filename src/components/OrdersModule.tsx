@@ -167,7 +167,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
           style={{
             padding: '13px',
             boxShadow: '0 8px 18px rgba(58,35,80,.08)',
-            borderTop: '3px solid #A9D8B8',
+            background: 'linear-gradient(to bottom, rgba(168, 94, 134, 0.15), rgba(110, 63, 114, 0.08) 3px, white 3px)',
             transition: 'transform 0.25s ease'
           }}
         >
@@ -203,7 +203,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
           style={{
             padding: '13px',
             boxShadow: '0 8px 18px rgba(58,35,80,.08)',
-            borderTop: '3px solid #E4D9C3',
+            background: 'linear-gradient(to bottom, rgba(168, 94, 134, 0.15), rgba(110, 63, 114, 0.08) 3px, white 3px)',
             transition: 'transform 0.25s ease'
           }}
         >
