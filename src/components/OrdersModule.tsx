@@ -77,82 +77,40 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
           boxShadow: '0 30px 70px rgba(58,35,80,.26)',
         }}
       >
-        {/* Logo & Branding Strip */}
+        {/* Header with Title only */}
         <div
-          className="px-5 py-5 flex flex-col gap-4 rounded-t-[40px]"
+          className="px-5 py-6 flex items-center justify-between gap-4 rounded-t-[40px]"
           style={{
             background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
           }}
         >
-          {/* Logo Section */}
-          <div className="flex items-center justify-between gap-3">
-            <div
-              className="w-[34px] h-[34px] rounded-[12px] flex items-center justify-center font-serif-display text-base shrink-0"
-              style={{
-                background: 'rgba(255,255,255,.16)',
-                border: '1px solid rgba(255,255,255,.24)',
-                color: '#F7DCE1',
-                fontFamily: "'Instrument Serif', serif",
-              }}
-            >
-              C
-            </div>
-            <div className="flex flex-col items-center gap-0.5">
-              <span
-                className="text-white"
-                style={{
-                  fontFamily: "'Instrument Serif', serif",
-                  fontSize: '32px',
-                  letterSpacing: '.01em',
-                  lineHeight: 1,
-                }}
-              >
-                Carula
-              </span>
-              <span
-                className="uppercase"
-                style={{
-                  fontSize: '8px',
-                  fontWeight: 700,
-                  letterSpacing: '.44em',
-                  color: 'rgba(247,220,225,.78)',
-                  paddingLeft: '.44em',
-                  fontFamily: "'Manrope', sans-serif",
-                }}
-              >
-                Confeitaria
-              </span>
-            </div>
-            <div className="w-[34px] h-[34px]" />
-          </div>
+          {/* Title */}
+          <span
+            className="text-white leading-tight flex-1"
+            style={{
+              fontFamily: "'Instrument Serif', serif",
+              fontSize: '31px',
+              lineHeight: '1.1',
+            }}
+          >
+            Pedidos & Encomendas
+          </span>
 
-          {/* Title & Badge */}
-          <div className="flex items-center justify-between gap-3">
-            <span
-              className="text-white leading-tight"
-              style={{
-                fontFamily: "'Instrument Serif', serif",
-                fontSize: '31px',
-                lineHeight: '1.1',
-              }}
-            >
-              Pedidos & Encomendas
-            </span>
-            <span
-              className="uppercase font-black shrink-0 whitespace-nowrap"
-              style={{
-                background: '#F5B9C6',
-                color: '#3A2350',
-                fontSize: '10px',
-                padding: '6px 12px',
-                borderRadius: '999px',
-                fontFamily: "'Manrope', sans-serif",
-                fontWeight: 800,
-              }}
-            >
-              {sales.length} {sales.length === 1 ? 'Pedido' : 'Pedidos'}
-            </span>
-          </div>
+          {/* Badge */}
+          <span
+            className="uppercase font-black shrink-0 whitespace-nowrap"
+            style={{
+              background: '#F5B9C6',
+              color: '#3A2350',
+              fontSize: '10px',
+              padding: '6px 12px',
+              borderRadius: '999px',
+              fontFamily: "'Manrope', sans-serif",
+              fontWeight: 800,
+            }}
+          >
+            {sales.length} {sales.length === 1 ? 'Pedido' : 'Pedidos'}
+          </span>
         </div>
 
         {/* Content Section */}
