@@ -419,44 +419,41 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                   <div className="flex-1 min-w-0 space-y-2">
                     {/* CLIENT CHIP & STATUS */}
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black uppercase" style={{ background: 'var(--color-lavender)', color: 'var(--color-brand-900)' }}>
-                        <Users className="w-3.5 h-3.5 shrink-0" />
-                        {tx.customerName ? tx.customerName.toUpperCase() : 'CLIENTE'}
+                      <span className="inline-flex items-center gap-1 rounded-full" style={{ fontSize: '10px', fontWeight: 800, color: '#3A2350', background: '#F3E9F3', padding: '5px 11px', fontFamily: "'Manrope', sans-serif" }}>
+                        👤 CLIENTE: {tx.customerName ? tx.customerName.toUpperCase() : 'CLIENTE'}
                       </span>
 
                       {isPending ? (
-                        <span className="px-3 py-1 rounded-full text-xs font-black flex items-center gap-1" style={{ background: 'var(--color-sand-200)', color: 'var(--color-brand-900)' }}>
-                          <Clock className="w-3 h-3" /> Pendente
+                        <span className="rounded-full flex items-center gap-1" style={{ fontSize: '9px', fontWeight: 800, color: '#5B4A2E', background: '#E4D9C3', padding: '5px 10px', fontFamily: "'Manrope', sans-serif" }}>
+                          ⏳ Pendente
                         </span>
                       ) : (
-                        <span className="px-3 py-1 rounded-full text-xs font-black flex items-center gap-1" style={{ background: 'var(--color-mint-300)', color: 'var(--color-brand-900)' }}>
-                          <CheckCircle2 className="w-3 h-3" /> Pago
+                        <span className="rounded-full flex items-center gap-1" style={{ fontSize: '9px', fontWeight: 800, color: '#26402F', background: '#A9D8B8', padding: '5px 10px', fontFamily: "'Manrope', sans-serif" }}>
+                          ✅ Pago
                         </span>
                       )}
                     </div>
 
-                    <div className="flex items-center gap-3 text-xs text-[var(--color-ink-soft)] font-medium">
-                      <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5 shrink-0" /> {formatDateBr(tx.date)}</span>
-                      {tx.paymentMethod && (
-                        <span>Pgto: <strong className="text-[var(--color-ink)]">{tx.paymentMethod}</strong></span>
-                      )}
+                    <div style={{ fontSize: '10px', color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
+                      📅 Data: <strong style={{ color: '#241B2B', fontWeight: 'normal' }}>{formatDateBr(tx.date)}</strong> • Pgto: <strong style={{ color: '#241B2B', fontWeight: 'normal' }}>{tx.paymentMethod || 'N/A'}</strong>
                     </div>
                   </div>
 
                   <div className="flex flex-col sm:flex-row sm:items-end items-start justify-between w-full sm:w-auto shrink-0 gap-3">
                     <div className="text-right">
-                      <span className=" font-black text-xl text-[var(--color-ink)]" style={{ fontSize: '20px' }}>
+                      <span className="font-black text-[var(--color-ink)]" style={{ fontSize: '22px', fontWeight: 800, color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>
                         {formatCurrency(tx.totalValue)}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-[6px]">
                     <button
                       onClick={() => setQuoteTx(tx)}
-                      className="px-3 py-1.5 rounded-full bg-[var(--color-ink)] hover:bg-black text-[var(--color-accent-gold)] font-medium text-[11px] shadow-card transition-all flex items-center gap-1 cursor-pointer active:scale-95"
+                      className="rounded-full transition-all flex items-center gap-1 cursor-pointer active:scale-95 hover:translate-y-[-2px]"
+                      style={{ fontSize: '10px', fontWeight: 700, color: '#F5B9C6', background: '#3A2350', padding: '7px 12px', fontFamily: "'Manrope', sans-serif" }}
                       title="Gerar e Visualizar Orçamento em PDF"
                     >
-                      <Printer className="w-3.5 h-3.5 text-[var(--color-accent-gold)]" />
+                      <Printer className="w-3 h-3" style={{ stroke: '#F5B9C6', strokeWidth: 2 }} />
                       <span>PDF</span>
                     </button>
 
@@ -464,20 +461,20 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                       isPending ? (
                         <button
                           onClick={() => onTogglePaymentStatus(tx)}
-                          className="px-3 py-1.5 rounded-full bg-[#C8E6D7] hover:bg-[#5A8A6F] text-[#3A5A4A] hover:text-white font-bold text-[11px] shadow-card transition-all flex items-center gap-1 cursor-pointer active:scale-95"
+                          className="rounded-full transition-all flex items-center gap-1 cursor-pointer active:scale-95 hover:translate-y-[-2px]"
+                          style={{ fontSize: '10px', fontWeight: 800, color: '#26402F', background: '#A9D8B8', padding: '7px 12px', fontFamily: "'Manrope', sans-serif" }}
                           title="Clique para marcar este pedido como PAGO"
                         >
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                          <span>Marcar PAGO</span>
+                          <span>✅ Marcar PAGO</span>
                         </button>
                       ) : (
                         <button
                           onClick={() => onTogglePaymentStatus(tx)}
-                          className="px-3 py-1.5 rounded-full bg-semantic-warning/20 hover:bg-semantic-warning/30 text-semantic-warning border border-semantic-warning font-bold text-[11px] transition-all flex items-center gap-1 cursor-pointer active:scale-95"
+                          className="rounded-full transition-all flex items-center gap-1 cursor-pointer active:scale-95 hover:translate-y-[-2px]"
+                          style={{ fontSize: '10px', fontWeight: 700, color: '#5B4A2E', background: '#F0E2C8', padding: '7px 12px', fontFamily: "'Manrope', sans-serif" }}
                           title="Clique para alterar este pedido para PENDENTE"
                         >
-                          <Clock className="w-3.5 h-3.5 text-semantic-warning" />
-                          <span>Mudar p/ Pendente</span>
+                          <span>Pendente</span>
                         </button>
                       )
                     )}
