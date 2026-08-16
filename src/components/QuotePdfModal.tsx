@@ -404,44 +404,13 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
               <span>{isGeneratingPdf ? 'Gerando PDF...' : 'Baixar PDF'}</span>
             </button>
 
-            {/* Download Image Button */}
-            <button
-              onClick={handleDownloadImage}
-              disabled={isGeneratingImage}
-              className="px-2.5 py-1.5 rounded-xl bg-[#A9D8B8] hover:bg-[#91CFA8] text-[#3A2350] text-[11px] sm:text-xs font-bold flex items-center gap-1 shadow-sm active:scale-95 transition-all cursor-pointer"
-              title="Baixar imagem PNG para enviar pelo WhatsApp"
-            >
-              <Download className="w-3 h-3" />
-              <span className="hidden sm:inline">{isGeneratingImage ? 'Gerando...' : 'Baixar Imagem'}</span>
-            </button>
-
-            {/* Print/PDF Button */}
-            <button
-              onClick={handlePrint}
-              className="px-2.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-white text-[11px] sm:text-xs font-bold flex items-center gap-1 transition-all cursor-pointer"
-              title="Imprimir ou Salvar pelo Navegador"
-            >
-              <Printer className="w-3 h-3" />
-              <span className="hidden md:inline">Imprimir</span>
-            </button>
-
-            {/* COPY TEXT */}
-            <button
-              onClick={handleCopyText}
-              className="p-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-[#F5B9C6] cursor-pointer"
-              title="Copiar texto do pedido"
-            >
-              {copied ? <Check className="w-3 h-3 text-[#A9D8B8]" /> : <Copy className="w-3 h-3" />}
-            </button>
-
-            {/* BIG CLEAR PROMINENT CLOSE BUTTON */}
+            {/* Close Button - Icon Only */}
             <button
               onClick={onClose}
-              className="px-2.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-[11px] sm:text-xs font-bold flex items-center gap-1 shadow-sm active:scale-95 transition-all shrink-0 ml-1 cursor-pointer"
+              className="w-8 h-8 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-sm active:scale-95 transition-all cursor-pointer"
               title="Fechar Janela"
             >
-              <X className="w-3.5 h-3.5 stroke-[3]" />
-              <span>FECHAR</span>
+              <X className="w-4 h-4 stroke-[2.5]" />
             </button>
           </div>
         </div>
