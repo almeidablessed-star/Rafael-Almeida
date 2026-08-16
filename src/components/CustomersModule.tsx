@@ -540,6 +540,7 @@ export const CustomersModule: React.FC = () => {
           gap: '9px',
           paddingLeft: '18px',
           paddingRight: '18px',
+          marginTop: '20px',
         }}
       >
         <div style={{ position: 'relative' }}>
