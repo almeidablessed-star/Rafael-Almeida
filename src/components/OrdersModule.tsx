@@ -79,7 +79,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
       >
         {/* Header with Title only */}
         <div
-          className="px-5 py-6 flex items-center justify-between gap-4 rounded-t-[40px]"
+          className="px-5 py-10 flex items-center justify-between gap-4 rounded-t-[40px]"
           style={{
             background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
           }}
@@ -114,17 +114,21 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
         </div>
 
         {/* Content Section */}
-        <div className="p-4.5 flex flex-col gap-4"
+        <div className="flex flex-col gap-4"
           style={{
             marginTop: '-14px',
             background: '#F6F2F5',
             borderRadius: '28px 28px 0 0',
             position: 'relative',
+            padding: '20px',
+            margin: '0 calc(-50vw + 50%)',
+            paddingLeft: 'calc(20px + max(0px, env(safe-area-inset-left)))',
+            paddingRight: 'calc(20px + max(0px, env(safe-area-inset-right)))',
           }}
         >
 
       {/* Total em Vendas Card with Chart - NOW AT TOP */}
-      <div className="bg-white rounded-[24px] p-5 shadow-card" style={{ boxShadow: '0 8px 18px rgba(58,35,80,.08)' }}>
+      <div className="rounded-[24px] p-5 shadow-card" style={{ background: 'linear-gradient(135deg, rgba(110,63,114,0.85) 0%, rgba(168,94,134,0.85) 100%)', boxShadow: '0 8px 18px rgba(58,35,80,.12)' }}>
         <div className="flex items-center gap-4">
           {/* Circular Chart */}
           <div className="flex-shrink-0 relative w-[92px] h-[92px]" style={{ filter: 'drop-shadow(0 0 12px rgba(245,185,198,0.7))', borderRadius: '50%' }}>
@@ -137,29 +141,29 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center leading-[1]">
-              <span className="text-[16px] font-black text-[#241B2B]" style={{ fontFamily: "'Manrope', sans-serif" }}>
+              <span className="text-[16px] font-black text-white" style={{ fontFamily: "'Manrope', sans-serif" }}>
                 {totalVendas > 0 ? Math.round((totalPagas / totalVendas) * 100) : 0}%
               </span>
-              <span className="text-[8px] mt-[2px]" style={{ color: '#A096A6', fontFamily: "'Manrope', sans-serif" }}>pago</span>
+              <span className="text-[8px] mt-[2px]" style={{ color: 'rgba(247,220,225,0.75)', fontFamily: "'Manrope', sans-serif" }}>pago</span>
             </div>
           </div>
 
           {/* Text and Values */}
           <div className="flex-1">
-            <div className="text-[9px] font-black uppercase tracking-[0.14em]" style={{ color: 'rgba(122,110,128,0.8)', fontFamily: "'Manrope', sans-serif", fontWeight: 800, marginBottom: '4px' }}>
+            <div className="text-[9px] font-black uppercase tracking-[0.14em]" style={{ color: 'rgba(247,220,225,0.8)', fontFamily: "'Manrope', sans-serif", fontWeight: 800, marginBottom: '4px' }}>
               TOTAL EM VENDAS
             </div>
-            <div className="text-[#241B2B]" style={{ fontSize: '28px', lineHeight: 1, letterSpacing: '-0.03em', marginBottom: '8px', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
+            <div className="text-white" style={{ fontSize: '28px', lineHeight: 1, letterSpacing: '-0.03em', marginBottom: '8px', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
               {formatCurrency(totalVendas)}
             </div>
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between text-[10px]" style={{ fontFamily: "'Manrope', sans-serif" }}>
-                <span style={{ color: '#7A6E80' }}>✓ Pagas:</span>
-                <span style={{ color: '#26402F', fontWeight: 700 }}>{formatCurrency(totalPagas)}</span>
+                <span style={{ color: 'rgba(247,220,225,0.75)' }}>✓ Pagas:</span>
+                <span style={{ color: '#A9D8B8', fontWeight: 700 }}>{formatCurrency(totalPagas)}</span>
               </div>
               <div className="flex items-center justify-between text-[10px]" style={{ fontFamily: "'Manrope', sans-serif" }}>
-                <span style={{ color: '#7A6E80' }}>⏳ Pendentes:</span>
-                <span style={{ color: '#8A7340', fontWeight: 700 }}>{formatCurrency(totalPendentes)}</span>
+                <span style={{ color: 'rgba(247,220,225,0.75)' }}>⏳ Pendentes:</span>
+                <span style={{ color: '#E4D9C3', fontWeight: 700 }}>{formatCurrency(totalPendentes)}</span>
               </div>
             </div>
           </div>
