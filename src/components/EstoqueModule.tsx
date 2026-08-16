@@ -170,89 +170,39 @@ export const EstoqueModule: React.FC = () => {
         className="text-white overflow-hidden"
         style={{
           background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
-          borderRadius: '40px',
-          padding: '20px',
-          boxShadow: '0 30px 70px rgba(58,35,80,0.26)',
+          padding: '40px 20px',
+          margin: '0 calc(-50vw + 50%)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '16px',
         }}
       >
-        {/* Top Label Row with Badge */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '10px',
-            marginBottom: '9px',
-          }}
-        >
-          {/* Label */}
-          <span
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '7px',
-              fontSize: '10px',
-              fontWeight: 800,
-              letterSpacing: '.06em',
-              color: 'rgba(247,220,225,.85)',
-              textTransform: 'uppercase',
-              fontFamily: "'Manrope', sans-serif",
-            }}
-          >
-            <Package className="w-3.5 h-3.5" style={{ color: '#F5B9C6' }} />
-            Estoque de Insumos &amp; Ingredientes
-          </span>
-
-          {/* Badge */}
-          {lowStockCount > 0 && (
-            <span
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px',
-                background: '#C4626F',
-                color: '#FFF8F6',
-                fontSize: '9px',
-                fontWeight: 800,
-                padding: '4px 9px',
-                borderRadius: '999px',
-                textTransform: 'uppercase',
-                whiteSpace: 'nowrap',
-                fontFamily: "'Manrope', sans-serif",
-              }}
-            >
-              <AlertTriangle className="w-2.5 h-2.5" />
-              {lowStockCount} Estoque Baixo
-            </span>
-          )}
-        </div>
-
         {/* Title */}
         <span
           style={{
             fontFamily: "'Instrument Serif',serif",
-            fontSize: '29px',
+            fontSize: '28px',
             color: '#FFFFFF',
-            lineHeight: 1.1,
-            display: 'block',
-            marginBottom: '6px',
+            lineHeight: 1,
           }}
         >
-          Controle de Estoque
+          Estoque
         </span>
 
-        {/* Subtitle */}
-        <span
+        {/* Button */}
+        <button
+          onClick={handleOpenAdd}
+          className="px-3 py-2 rounded-xl text-[10px] font-black cursor-pointer transition-all active:scale-95 shrink-0"
           style={{
-            fontSize: '11px',
-            lineHeight: 1.5,
-            color: 'rgba(247,220,225,.8)',
-            display: 'block',
+            background: '#F5B9C6',
+            color: '#3A2350',
             fontFamily: "'Manrope', sans-serif",
           }}
+          title="Adicionar novo insumo"
         >
-          Acompanhe suas quantidades em gramas, ml e unidades para nunca faltar ingredientes na produção.
-        </span>
+          Novo Insumo
+        </button>
       </div>
 
       {/* Search and Button Row - Below Header */}
@@ -264,7 +214,7 @@ export const EstoqueModule: React.FC = () => {
           paddingLeft: '18px',
           paddingRight: '18px',
           marginBottom: '13px',
-          marginTop: '13px',
+          marginTop: '20px',
         }}
       >
         {/* Search Input */}
@@ -297,33 +247,6 @@ export const EstoqueModule: React.FC = () => {
             }}
           />
         </div>
-
-        {/* Add Button */}
-        <button
-          onClick={handleOpenAdd}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            background: '#3A2350',
-            color: '#F5B9C6',
-            fontWeight: 800,
-            fontSize: '11px',
-            padding: '11px 13px',
-            borderRadius: '14px',
-            whiteSpace: 'nowrap',
-            cursor: 'pointer',
-            border: 'none',
-            boxShadow: '0 8px 16px rgba(58,35,80,.28)',
-            transition: 'transform .22s ease',
-            fontFamily: "'Manrope', sans-serif",
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-          onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-        >
-          <Plus className="w-3.5 h-3.5" />
-          Adicionar Insumo
-        </button>
       </div>
 
       {/* Form Modal / Inline Box */}
