@@ -477,11 +477,12 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
       >
         {/* Título */}
         <span
-          className="text-white font-bold tracking-tight"
+          className="text-white tracking-tight"
           style={{
             fontFamily: "'Instrument Serif', serif",
             fontSize: '29px',
             lineHeight: 1.1,
+            fontWeight: 'normal',
           }}
         >
           Fichas Técnicas
