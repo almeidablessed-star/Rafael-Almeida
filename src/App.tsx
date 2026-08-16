@@ -256,7 +256,7 @@ export default function App() {
         </div>
 
         {/* Main Screen Container */}
-        <main className="flex-1 max-w-4xl w-full mx-auto px-4 pt-4 pb-20 lg:pb-8 lg:pt-6 bottom-nav-safe">
+        <main className="flex-1 max-w-4xl w-full mx-auto px-0 lg:px-4 pt-0 lg:pt-6 pb-20 lg:pb-8 bottom-nav-safe">
 
         {/* Tab Content Router */}
         {activeTab === 'dashboard' && (

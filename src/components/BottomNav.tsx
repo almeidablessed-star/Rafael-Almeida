@@ -48,6 +48,16 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) 
                 transition: 'transform 150ms cubic-bezier(0.23, 1, 0.32, 1), background-color 200ms ease, color 200ms ease',
                 transform: isActive ? 'translateY(-4px) scale(1)' : 'translateY(0) scale(1)',
               }}
+              onMouseEnter={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.transform = 'translateY(-4px) scale(1)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                }
+              }}
             >
               <Icon className="w-5 h-5" strokeWidth={isActive ? 2.2 : 1.8} style={{ transition: 'stroke-width 150ms ease' }} />
               <span

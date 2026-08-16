@@ -64,66 +64,208 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
 
   return (
     <div className="space-y-4 animate-fadeIn pb-8">
-      {/* Module Header Banner — Roxo Gradiente */}
+      {/* Header Card — Flutuante com cabeçalho roxo */}
       <div
-        className="rounded-3xl p-6 text-white shadow-highlight relative overflow-hidden flex items-center justify-between"
+        className="overflow-hidden shadow-card"
         style={{
-          background: 'linear-gradient(155deg, var(--color-brand-900) 0%, var(--color-brand-700) 60%, var(--color-brand-500) 100%)',
+          boxShadow: '0 30px 70px rgba(58,35,80,.26)',
         }}
       >
-        <div>
-          <h2 className="font-marca text-3xl text-white tracking-tight" style={{ lineHeight: 1 }}>
-            Pedidos & Encomendas
-          </h2>
-          <p className="text-xs text-white/80 font-semibold mt-2">Gestão completa de encomendas</p>
-        </div>
-        <span className="bg-[var(--color-rose-200)] text-[var(--color-brand-900)] font-black text-sm px-4 py-2.5 rounded-full uppercase shrink-0 shadow-card">
-          {sales.length} {sales.length === 1 ? 'Pedido' : 'Pedidos'}
-        </span>
-      </div>
-
-      {/* Summary Cards Row - Premium Style */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {/* Total Vendas */}
-        <div className="bg-white rounded-3xl p-5 shadow-card transition-none hover:shadow-lg hover:-translate-y-1" style={{ transition: 'transform 200ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 180ms ease-in-out' }}>
-          <div className="flex gap-4 items-start">
-            <div className="flex-1 min-w-0">
-              <span className="text-xs font-black uppercase tracking-wider text-[var(--color-ink-soft)] block mb-2">Total em Vendas</span>
-              <span className="font-marca text-2xl font-black text-[var(--color-brand-900)] block" style={{ fontSize: '24px' }}>{formatCurrency(totalVendas)}</span>
-              <span className="text-xs text-[var(--color-ink-soft)] font-medium mt-3">{sales.length} encomendas</span>
+        {/* Logo & Branding Strip */}
+        <div
+          className="px-5 py-5 flex flex-col gap-4 rounded-t-[40px]"
+          style={{
+            background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
+          }}
+        >
+          {/* Logo Section */}
+          <div className="flex items-center justify-between gap-3">
+            <div
+              className="w-[34px] h-[34px] rounded-[12px] flex items-center justify-center font-serif-display text-base shrink-0"
+              style={{
+                background: 'rgba(255,255,255,.16)',
+                border: '1px solid rgba(255,255,255,.24)',
+                color: '#F7DCE1',
+                fontFamily: "'Instrument Serif', serif",
+              }}
+            >
+              C
             </div>
-            <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0" style={{ background: 'var(--color-brand-500)', color: 'white' }}>
-              <ShoppingBag className="w-6 h-6" />
+            <div className="flex flex-col items-center gap-0.5">
+              <span
+                className="text-white"
+                style={{
+                  fontFamily: "'Instrument Serif', serif",
+                  fontSize: '32px',
+                  letterSpacing: '.01em',
+                  lineHeight: 1,
+                }}
+              >
+                Carula
+              </span>
+              <span
+                className="uppercase"
+                style={{
+                  fontSize: '8px',
+                  fontWeight: 700,
+                  letterSpacing: '.44em',
+                  color: 'rgba(247,220,225,.78)',
+                  paddingLeft: '.44em',
+                  fontFamily: "'Manrope', sans-serif",
+                }}
+              >
+                Confeitaria
+              </span>
             </div>
+            <div className="w-[34px] h-[34px]" />
           </div>
+
+          {/* Title & Badge */}
+          <div className="flex items-center justify-between gap-3">
+            <span
+              className="text-white leading-tight"
+              style={{
+                fontFamily: "'Instrument Serif', serif",
+                fontSize: '31px',
+                lineHeight: '1.1',
+              }}
+            >
+              Pedidos & Encomendas
+            </span>
+            <span
+              className="uppercase font-black shrink-0 whitespace-nowrap"
+              style={{
+                background: '#F5B9C6',
+                color: '#3A2350',
+                fontSize: '10px',
+                padding: '6px 12px',
+                borderRadius: '999px',
+                fontFamily: "'Manrope', sans-serif",
+                fontWeight: 800,
+              }}
+            >
+              {sales.length} {sales.length === 1 ? 'Pedido' : 'Pedidos'}
+            </span>
+          </div>
+        </div>
+
+        {/* Content Section */}
+        <div className="p-4.5 flex flex-col gap-4"
+          style={{
+            marginTop: '-14px',
+            background: '#F6F2F5',
+            borderRadius: '28px 28px 0 0',
+            position: 'relative',
+          }}
+        >
+
+      {/* Summary Cards Row */}
+      <div className="flex gap-2" style={{ gap: '8px' }}>
+        {/* Total Vendas */}
+        <div
+          className="flex-1 bg-white rounded-[18px] shadow-card flex flex-col gap-[3px]"
+          style={{
+            padding: '13px',
+            boxShadow: '0 8px 18px rgba(58,35,80,.08)',
+            transition: 'transform 0.25s ease'
+          }}
+        >
+          <span
+            className="text-[8px] font-black uppercase"
+            style={{
+              color: '#7A6E80',
+              fontFamily: "'Manrope', sans-serif",
+              letterSpacing: '.06em',
+              minHeight: '20px'
+            }}
+          >
+            TOTAL EM VENDAS
+          </span>
+          <span
+            className="font-black"
+            style={{
+              fontSize: '16px',
+              color: '#241B2B',
+              fontFamily: "'Manrope', sans-serif"
+            }}
+          >
+            {formatCurrency(totalVendas)}
+          </span>
+          <span className="text-xs" style={{ color: '#9A8FA0', fontFamily: "'Manrope', sans-serif" }}>
+            {sales.length} encomendas
+          </span>
         </div>
 
         {/* Vendas Pagas */}
-        <div className="bg-white rounded-3xl p-5 shadow-card transition-none hover:shadow-lg hover:-translate-y-1" style={{ transition: 'transform 200ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 180ms ease-in-out' }}>
-          <div className="flex gap-4 items-start">
-            <div className="flex-1 min-w-0">
-              <span className="text-xs font-black uppercase tracking-wider text-[var(--color-ink-soft)] block mb-2">Vendas Pagas</span>
-              <span className="font-marca text-2xl font-black" style={{ fontSize: '24px', color: 'var(--color-mint-300)' }}>{formatCurrency(totalPagas)}</span>
-              <span className="text-xs text-[var(--color-ink-soft)] font-medium mt-3">{paidCount} {paidCount === 1 ? 'pago' : 'pagos'}</span>
-            </div>
-            <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0" style={{ background: 'var(--color-mint-300)' }}>
-              <CheckCircle2 className="w-6 h-6" style={{ color: 'var(--color-brand-900)' }} />
-            </div>
-          </div>
+        <div
+          className="flex-1 bg-white rounded-[18px] shadow-card flex flex-col gap-[3px]"
+          style={{
+            padding: '13px',
+            boxShadow: '0 8px 18px rgba(58,35,80,.08)',
+            borderTop: '3px solid #A9D8B8',
+            transition: 'transform 0.25s ease'
+          }}
+        >
+          <span
+            className="text-[8px] font-black uppercase"
+            style={{
+              color: '#4C7358',
+              fontFamily: "'Manrope', sans-serif",
+              letterSpacing: '.06em',
+              minHeight: '20px'
+            }}
+          >
+            ✓ VENDAS PAGAS
+          </span>
+          <span
+            className="font-black"
+            style={{
+              fontSize: '16px',
+              color: '#241B2B',
+              fontFamily: "'Manrope', sans-serif"
+            }}
+          >
+            {formatCurrency(totalPagas)}
+          </span>
+          <span className="text-xs" style={{ color: '#9A8FA0', fontFamily: "'Manrope', sans-serif" }}>
+            {paidCount} {paidCount === 1 ? 'pago' : 'pagos'}
+          </span>
         </div>
 
         {/* A Receber */}
-        <div className="bg-white rounded-3xl p-5 shadow-card transition-none hover:shadow-lg hover:-translate-y-1" style={{ transition: 'transform 200ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 180ms ease-in-out' }}>
-          <div className="flex gap-4 items-start">
-            <div className="flex-1 min-w-0">
-              <span className="text-xs font-black uppercase tracking-wider text-[var(--color-ink-soft)] block mb-2">A Receber</span>
-              <span className="font-marca text-2xl font-black" style={{ fontSize: '24px', color: 'var(--color-sand-200)' }}>{formatCurrency(totalPendentes)}</span>
-              <span className="text-xs text-[var(--color-ink-soft)] font-medium mt-3">{pendingCount} {pendingCount === 1 ? 'pendente' : 'pendentes'}</span>
-            </div>
-            <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0" style={{ background: 'var(--color-sand-200)' }}>
-              <Clock className="w-6 h-6" style={{ color: 'var(--color-brand-900)' }} />
-            </div>
-          </div>
+        <div
+          className="flex-1 bg-white rounded-[18px] shadow-card flex flex-col gap-[3px]"
+          style={{
+            padding: '13px',
+            boxShadow: '0 8px 18px rgba(58,35,80,.08)',
+            borderTop: '3px solid #E4D9C3',
+            transition: 'transform 0.25s ease'
+          }}
+        >
+          <span
+            className="text-[8px] font-black uppercase"
+            style={{
+              color: '#8A7340',
+              fontFamily: "'Manrope', sans-serif",
+              letterSpacing: '.06em',
+              minHeight: '20px'
+            }}
+          >
+            ⏳ A RECEBER (PENDENTES)
+          </span>
+          <span
+            className="font-black"
+            style={{
+              fontSize: '16px',
+              color: '#241B2B',
+              fontFamily: "'Manrope', sans-serif"
+            }}
+          >
+            {formatCurrency(totalPendentes)}
+          </span>
+          <span className="text-xs" style={{ color: '#9A8FA0', fontFamily: "'Manrope', sans-serif" }}>
+            {pendingCount} {pendingCount === 1 ? 'pendente' : 'pendentes'}
+          </span>
         </div>
       </div>
 
@@ -273,7 +415,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
 
                   <div className="flex flex-col sm:flex-row sm:items-end items-start justify-between w-full sm:w-auto shrink-0 gap-3">
                     <div className="text-right">
-                      <span className="font-marca font-black text-xl text-[var(--color-ink)]" style={{ fontSize: '20px' }}>
+                      <span className=" font-black text-xl text-[var(--color-ink)]" style={{ fontSize: '20px' }}>
                         {formatCurrency(tx.totalValue)}
                       </span>
                     </div>
@@ -344,6 +486,8 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
           onClose={() => setQuoteTx(null)}
         />
       )}
+        </div>
+      </div>
     </div>
   );
 };
