@@ -128,7 +128,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
         >
 
       {/* Total em Vendas Card with Chart - NOW AT TOP */}
-      <div className="rounded-[24px] p-5 shadow-card" style={{ background: 'linear-gradient(135deg, rgba(110,63,114,0.85) 0%, rgba(168,94,134,0.85) 100%)', boxShadow: '0 8px 18px rgba(58,35,80,.12)' }}>
+      <div className="rounded-[24px] p-5 shadow-card" style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)', boxShadow: '0 30px 70px rgba(58,35,80,.26)' }}>
         <div className="flex items-center gap-4">
           {/* Circular Chart */}
           <div className="flex-shrink-0 relative w-[92px] h-[92px]" style={{ filter: 'drop-shadow(0 0 12px rgba(169,216,184,0.7))', borderRadius: '50%' }}>
