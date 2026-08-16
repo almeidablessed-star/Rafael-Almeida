@@ -44,11 +44,11 @@ export function saveStoredStockItems(items: StockItem[]) {
 }
 
 const getArcColor = (percentage: number): { stroke: string; text: string; background: string } => {
-  if (percentage >= 75) {
-    return { stroke: '#6E3F72', text: '#6E3F72', background: '#F1ECF2' }; // Verde escuro (roxo)
-  } else if (percentage >= 50) {
-    return { stroke: '#4CAF7D', text: '#4CAF7D', background: '#E8F5E9' }; // Verde claro
-  } else if (percentage >= 25) {
+  if (percentage >= 76) {
+    return { stroke: '#4CAF7D', text: '#4CAF7D', background: '#E8F5E9' }; // Verde
+  } else if (percentage >= 51) {
+    return { stroke: '#81C784', text: '#81C784', background: '#F1F8E9' }; // Verde claro
+  } else if (percentage >= 26) {
     return { stroke: '#F5A623', text: '#F5A623', background: '#FFF3E0' }; // Laranja
   } else {
     return { stroke: '#C4626F', text: '#C4626F', background: '#FFEBEE' }; // Vermelho
@@ -418,7 +418,7 @@ export const EstoqueModule: React.FC = () => {
         <div className="space-y-8">
           {/* Low Stock Section */}
           {lowStockItems.length > 0 && (
-            <div className="space-y-4">
+            <div className="space-y-4 px-4 lg:px-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {lowStockItems.map((item) => {
                   const percentage = Math.min((item.quantity / item.minThreshold) * 100, 100);
@@ -427,92 +427,88 @@ export const EstoqueModule: React.FC = () => {
                   return (
                   <div
                     key={item.id}
-                    className="bg-white border border-[var(--color-neutral-light)] rounded-xl p-3.5 transition-all shadow-card cursor-pointer"
-                    style={{ backgroundColor: colors.background }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-4px)';
-                      e.currentTarget.style.boxShadow = '0 16px 32px rgba(58,35,80,0.16)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = '0 8px 20px rgba(58,35,80,.09)';
-                    }}
+                    className="bg-white rounded-xl p-2.5 transition-all cursor-pointer"
+                    style={{ backgroundColor: '#FFFFFF' }}
                   >
-                    {/* Item Header */}
-                    <div className="flex items-start justify-between mb-2.5 pb-2 border-b" style={{ borderColor: colors.stroke }}>
-                      <span className="font-brand font-semibold text-sm text-[var(--color-neutral-charcoal)] flex-1 pr-2">
-                        {item.name}
-                      </span>
-                      {item.quantity <= item.minThreshold && (
-                        <span style={{ background: colors.stroke, color: '#FFF8F6' }} className="text-white text-[8.5px] font-semibold px-1.5 py-0.5 rounded uppercase shrink-0">
-                          Alerta
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Arc Gauge + Quantity Display */}
-                    <div className="mb-2.5 pb-2.5 border-b border-[var(--color-neutral-light)] flex items-center justify-between gap-3">
-                      <svg width="56" height="48" viewBox="0 0 76 48" className="flex-shrink-0">
-                        <path d="M8 44a30 30 0 0 1 60 0" fill="none" stroke="#F1ECF2" strokeWidth="9" strokeLinecap="round"></path>
+                    {/* Top Section: Two Columns (Gauge Left, Name+Alert Right) */}
+                    <div className="flex gap-3 mb-3">
+                      {/* Gauge Left - Larger */}
+                      <svg width="76" height="64" viewBox="0 0 76 64" className="flex-shrink-0">
+                        <path d="M8 60a30 30 0 0 1 60 0" fill="none" stroke="#F1ECF2" strokeWidth="10" strokeLinecap="round"></path>
                         <path
-                          d="M8 44a30 30 0 0 1 60 0"
+                          d="M8 60a30 30 0 0 1 60 0"
                           fill="none"
                           stroke={colors.stroke}
-                          strokeWidth="9"
+                          strokeWidth="10"
                           strokeLinecap="round"
                           strokeDasharray={`${percentage * 1.26} 126`}
                         ></path>
-                      </svg>
-                      <div className="text-right flex-1">
-                        <span className="font-numbers font-brand font-semibold text-lg text-[var(--color-neutral-charcoal)]">
-                          {item.quantity} <span className="text-xs font-normal" style={{ color: colors.text }}>{item.unit}</span>
-                        </span>
-                        <span className="text-xs font-semibold" style={{ color: colors.text }}>
+                        <text x="38" y="58" textAnchor="middle" fontSize="12" fontWeight="900" fill={colors.stroke} fontFamily="'Manrope', sans-serif">
                           {Math.round(percentage)}%
-                        </span>
-                      </div>
-                    </div>
+                        </text>
+                      </svg>
 
-                    {/* Threshold Info */}
-                    <p className="text-[10.5px] text-[var(--color-text-secondary)] font-normal mb-3">
-                      Alerta quando menor que: <strong style={{ color: colors.text }}>{item.minThreshold} {item.unit}</strong>
-                    </p>
+                      {/* Right Column: Name + Alert */}
+                      <div className="flex-1 flex flex-col gap-2">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-brand font-semibold text-[14px] text-[var(--color-neutral-charcoal)]">
+                            {item.name}
+                          </h4>
+                          {item.quantity <= item.minThreshold && (
+                            <span style={{ background: '#C4626F', color: '#FFFFFF' }} className="text-white text-[7px] font-semibold px-1 py-0.5 rounded uppercase whitespace-nowrap">
+                              Estoque Baixo
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-[#999999] font-light">
+                          Alertar quando menor que:
+                        </p>
 
-                    {/* Quantity Controls */}
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-1 bg-white rounded-lg border border-[var(--color-neutral-light)] p-1">
-                        <button
-                          onClick={() => handleQuickAdjust(item.id, -100)}
-                          className="w-6 h-6 rounded text-[var(--color-text-primary)] hover:text-[var(--color-primary)] hover:bg-[var(--color-neutral-light)] font-semibold text-xs flex items-center justify-center transition-colors"
-                          title="Diminuir 100"
-                        >
-                          −
-                        </button>
-                        <button
-                          onClick={() => handleQuickAdjust(item.id, 100)}
-                          className="w-6 h-6 rounded text-[var(--color-text-primary)] hover:text-[var(--color-primary)] hover:bg-[var(--color-neutral-light)] font-semibold text-xs flex items-center justify-center transition-colors"
-                          title="Aumentar 100"
-                        >
-                          +
-                        </button>
-                      </div>
+                        {/* Quantity Stepper + Action Icons Row */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'space-between' }}>
+                          {/* Quantity Stepper */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#F5F5F5', borderRadius: '20px', padding: '4px 8px', width: 'fit-content' }}>
+                            <button
+                              onClick={() => handleQuickAdjust(item.id, -50)}
+                              style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#E8E8E8', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px', color: '#666', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}
+                              onMouseEnter={(e) => e.currentTarget.style.background = '#D0D0D0'}
+                              onMouseLeave={(e) => e.currentTarget.style.background = '#E8E8E8'}
+                              title="Diminuir 50"
+                            >
+                              −
+                            </button>
+                            <span style={{ fontSize: '12px', fontWeight: '600', color: '#333', minWidth: '70px', textAlign: 'center', fontFamily: "'Manrope', sans-serif" }}>
+                              {item.quantity} {item.unit}
+                            </span>
+                            <button
+                              onClick={() => handleQuickAdjust(item.id, 50)}
+                              style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#E8E8E8', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px', color: '#666', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}
+                              onMouseEnter={(e) => e.currentTarget.style.background = '#D0D0D0'}
+                              onMouseLeave={(e) => e.currentTarget.style.background = '#E8E8E8'}
+                              title="Aumentar 50"
+                            >
+                              +
+                            </button>
+                          </div>
 
-                      {/* Edit/Delete Actions */}
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => handleOpenEdit(item)}
-                          className="p-1.5 rounded text-[var(--color-neutral-dark-gray)] hover:text-[var(--color-primary)] hover:bg-[var(--color-neutral-light)] transition-colors"
-                          title="Editar"
-                        >
-                          <Edit3 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item.id)}
-                          className="p-1.5 rounded text-[var(--color-neutral-dark-gray)] hover:text-[var(--color-semantic-coral)] hover:bg-[var(--color-neutral-light)] transition-colors"
-                          title="Excluir"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                          {/* Edit/Delete Actions - Same Row */}
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => handleOpenEdit(item)}
+                              style={{ width: '20px', height: '20px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0' }}
+                              title="Editar"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" style={{ color: '#999', strokeWidth: 2 }} />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(item.id)}
+                              style={{ width: '20px', height: '20px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0' }}
+                              title="Excluir"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" style={{ color: '#999', strokeWidth: 2 }} />
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -524,14 +520,7 @@ export const EstoqueModule: React.FC = () => {
 
           {/* Healthy Stock Section */}
           {healthyStockItems.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-4 pb-3 border-b-2 border-[var(--color-primary)]">
-                <Check className="w-5 h-5 text-[var(--color-primary)]" />
-                <h3 className="font-brand font-semibold text-sm text-[var(--color-neutral-charcoal)]">
-                  Estoque Normal ({healthyStockItems.length})
-                </h3>
-              </div>
-
+            <div className="px-4 lg:px-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {healthyStockItems.map((item) => {
                   const percentage = Math.min((item.quantity / item.minThreshold) * 100, 100);
@@ -540,87 +529,88 @@ export const EstoqueModule: React.FC = () => {
                   return (
                   <div
                     key={item.id}
-                    className="bg-white border border-[var(--color-neutral-light)] rounded-xl p-3.5 transition-all cursor-pointer"
-                    style={{ backgroundColor: colors.background }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-4px)';
-                      e.currentTarget.style.boxShadow = '0 16px 32px rgba(58,35,80,0.16)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = '0 8px 20px rgba(58,35,80,.09)';
-                    }}
+                    className="bg-white rounded-xl p-2.5 transition-all cursor-pointer"
+                    style={{ backgroundColor: '#FFFFFF' }}
                   >
-                    {/* Item Header */}
-                    <div className="pb-2 border-b mb-2.5" style={{ borderColor: colors.stroke }}>
-                      <span className="font-brand font-semibold text-sm text-[var(--color-neutral-charcoal)]">
-                        {item.name}
-                      </span>
-                    </div>
-
-                    {/* Arc Gauge + Quantity Display */}
-                    <div className="mb-2.5 pb-2.5 border-b border-[var(--color-neutral-light)] flex items-center justify-between gap-3">
-                      <svg width="56" height="48" viewBox="0 0 76 48" className="flex-shrink-0">
-                        <path d="M8 44a30 30 0 0 1 60 0" fill="none" stroke="#F1ECF2" strokeWidth="9" strokeLinecap="round"></path>
+                    {/* Top Section: Two Columns (Gauge Left, Name+Alert Right) */}
+                    <div className="flex gap-3 mb-3">
+                      {/* Gauge Left - Larger */}
+                      <svg width="76" height="64" viewBox="0 0 76 64" className="flex-shrink-0">
+                        <path d="M8 60a30 30 0 0 1 60 0" fill="none" stroke="#F1ECF2" strokeWidth="10" strokeLinecap="round"></path>
                         <path
-                          d="M8 44a30 30 0 0 1 60 0"
+                          d="M8 60a30 30 0 0 1 60 0"
                           fill="none"
                           stroke={colors.stroke}
-                          strokeWidth="9"
+                          strokeWidth="10"
                           strokeLinecap="round"
                           strokeDasharray={`${percentage * 1.26} 126`}
                         ></path>
-                      </svg>
-                      <div className="text-right flex-1">
-                        <span className="font-numbers font-brand font-semibold text-lg text-[var(--color-neutral-charcoal)]">
-                          {item.quantity} <span className="text-xs font-normal" style={{ color: colors.text }}>{item.unit}</span>
-                        </span>
-                        <span className="text-xs font-semibold" style={{ color: colors.text }}>
+                        <text x="38" y="58" textAnchor="middle" fontSize="12" fontWeight="900" fill={colors.stroke} fontFamily="'Manrope', sans-serif">
                           {Math.round(percentage)}%
-                        </span>
-                      </div>
-                    </div>
+                        </text>
+                      </svg>
 
-                    {/* Threshold Info */}
-                    <p className="text-[10.5px] text-[var(--color-text-secondary)] font-normal mb-3">
-                      Alerta quando menor que: <strong style={{ color: colors.text }}>{item.minThreshold} {item.unit}</strong>
-                    </p>
+                      {/* Right Column: Name + Alert */}
+                      <div className="flex-1 flex flex-col gap-2">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-brand font-semibold text-[14px] text-[var(--color-neutral-charcoal)]">
+                            {item.name}
+                          </h4>
+                          {item.quantity <= item.minThreshold && (
+                            <span style={{ background: '#C4626F', color: '#FFFFFF' }} className="text-white text-[7px] font-semibold px-1 py-0.5 rounded uppercase whitespace-nowrap">
+                              Estoque Baixo
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-[#999999] font-light">
+                          Alertar quando menor que:
+                        </p>
 
-                    {/* Quantity Controls */}
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-1 bg-[var(--color-neutral-cream)] rounded-lg border border-[var(--color-neutral-light)] p-1">
-                        <button
-                          onClick={() => handleQuickAdjust(item.id, -100)}
-                          className="w-6 h-6 rounded text-[var(--color-text-primary)] hover:text-[var(--color-primary)] hover:bg-white font-semibold text-xs flex items-center justify-center transition-colors"
-                          title="Diminuir 100"
-                        >
-                          −
-                        </button>
-                        <button
-                          onClick={() => handleQuickAdjust(item.id, 100)}
-                          className="w-6 h-6 rounded text-[var(--color-text-primary)] hover:text-[var(--color-primary)] hover:bg-white font-semibold text-xs flex items-center justify-center transition-colors"
-                          title="Aumentar 100"
-                        >
-                          +
-                        </button>
-                      </div>
+                        {/* Quantity Stepper + Action Icons Row */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'space-between' }}>
+                          {/* Quantity Stepper */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#F5F5F5', borderRadius: '20px', padding: '4px 8px', width: 'fit-content' }}>
+                            <button
+                              onClick={() => handleQuickAdjust(item.id, -50)}
+                              style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#E8E8E8', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px', color: '#666', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}
+                              onMouseEnter={(e) => e.currentTarget.style.background = '#D0D0D0'}
+                              onMouseLeave={(e) => e.currentTarget.style.background = '#E8E8E8'}
+                              title="Diminuir 50"
+                            >
+                              −
+                            </button>
+                            <span style={{ fontSize: '12px', fontWeight: '600', color: '#333', minWidth: '70px', textAlign: 'center', fontFamily: "'Manrope', sans-serif" }}>
+                              {item.quantity} {item.unit}
+                            </span>
+                            <button
+                              onClick={() => handleQuickAdjust(item.id, 50)}
+                              style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#E8E8E8', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px', color: '#666', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}
+                              onMouseEnter={(e) => e.currentTarget.style.background = '#D0D0D0'}
+                              onMouseLeave={(e) => e.currentTarget.style.background = '#E8E8E8'}
+                              title="Aumentar 50"
+                            >
+                              +
+                            </button>
+                          </div>
 
-                      {/* Edit/Delete Actions */}
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => handleOpenEdit(item)}
-                          className="p-1.5 rounded text-[var(--color-neutral-dark-gray)] hover:text-[var(--color-primary)] hover:bg-[var(--color-neutral-light)] transition-colors"
-                          title="Editar"
-                        >
-                          <Edit3 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item.id)}
-                          className="p-1.5 rounded text-[var(--color-neutral-dark-gray)] hover:text-[var(--color-semantic-coral)] hover:bg-[var(--color-neutral-light)] transition-colors"
-                          title="Excluir"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                          {/* Edit/Delete Actions - Same Row */}
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => handleOpenEdit(item)}
+                              style={{ width: '20px', height: '20px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0' }}
+                              title="Editar"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" style={{ color: '#999', strokeWidth: 2 }} />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(item.id)}
+                              style={{ width: '20px', height: '20px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0' }}
+                              title="Excluir"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" style={{ color: '#999', strokeWidth: 2 }} />
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
