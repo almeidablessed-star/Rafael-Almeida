@@ -359,14 +359,14 @@ export const EstoqueModule: React.FC = () => {
 
       {/* Stock Sections - Ordered by Criticality */}
       {sortedItems.length === 0 ? (
-        <div className="p-8 rounded-3xl bg-[var(--color-neutral-cream)] border border-[var(--color-neutral-light)] text-center space-y-2">
+        <div className="p-8 rounded-3xl bg-[var(--color-neutral-cream)] border border-[var(--color-neutral-light)] text-center space-y-2 mt-5">
           <Package className="w-10 h-10 text-[var(--color-neutral-warm-gray)] mx-auto" />
           <p className="text-xs text-[var(--color-text-secondary)] font-normal">
             Nenhum insumo encontrado.
           </p>
         </div>
       ) : (
-        <div className="space-y-4 px-4 lg:px-6">
+        <div className="space-y-4 px-4 lg:px-6 mt-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {sortedItems.map((item) => {
                   const percentage = Math.min((item.quantity / item.minThreshold) * 100, 100);
