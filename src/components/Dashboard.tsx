@@ -172,7 +172,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             {/* Texto e valor - À DIREITA */}
             <div className="flex-1">
               <div className="text-[9px] font-black uppercase tracking-[0.14em]" style={{ color: 'rgba(247,220,225,0.8)', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
-                LUCRO LÍQUIDO DO MÊS (RENDIMENTO)
+                LUCRO LÍQUIDO DO MÊS
               </div>
               <div className="text-white" style={{ fontSize: '32px', lineHeight: 1, letterSpacing: '-0.03em', marginTop: '0px', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
                 {formatCurrency(profit)}
