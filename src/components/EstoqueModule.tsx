@@ -529,8 +529,8 @@ export const EstoqueModule: React.FC = () => {
               </div>
             </div>
       )}
-    </div>
   );
+};
 };
 
 // Arc gauge and lift effect added
