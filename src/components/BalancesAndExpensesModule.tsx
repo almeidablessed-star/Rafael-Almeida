@@ -97,7 +97,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
             <Wallet className="w-3 h-3" />
             Saldo
           </span>
-          <span style={{ background: '#D4C5E2', color: '#3A2350', fontWeight: 600, fontSize: '8px', padding: '5px 10px', borderRadius: '999px', textTransform: 'uppercase', fontFamily: "'Manrope', sans-serif", letterSpacing: '0.04em' }}>
+          <span style={{ background: '#D4C5E2', color: '#6E3F72', fontWeight: 600, fontSize: '8px', padding: '5px 10px', borderRadius: '999px', textTransform: 'uppercase', fontFamily: "'Manrope', sans-serif", letterSpacing: '0.04em' }}>
             Gestão Real
           </span>
         </div>
