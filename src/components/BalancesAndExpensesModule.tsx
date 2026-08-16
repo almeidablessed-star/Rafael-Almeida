@@ -93,11 +93,11 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
         }}
       >
         <div className="flex items-center justify-between mb-3">
-          <span className="text-xs font-black uppercase tracking-wider text-[var(--color-rose-200)] flex items-center gap-1.5">
-            <Wallet className="w-4 h-4" />
-            Relatório Financeiro
+          <span style={{ fontSize: '9px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'rgba(255, 255, 255, 0.7)', display: 'flex', alignItems: 'center', gap: '6px', fontFamily: "'Manrope', sans-serif" }}>
+            <Wallet className="w-3 h-3" />
+            Saldo
           </span>
-          <span className="bg-[var(--color-rose-200)] text-[var(--color-brand-900)] font-black text-xs px-3 py-1.5 rounded-full uppercase">
+          <span style={{ background: '#D4C5E2', color: '#3A2350', fontWeight: 600, fontSize: '8px', padding: '5px 10px', borderRadius: '999px', textTransform: 'uppercase', fontFamily: "'Manrope', sans-serif", letterSpacing: '0.04em' }}>
             Gestão Real
           </span>
         </div>
