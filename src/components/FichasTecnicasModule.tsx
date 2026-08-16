@@ -465,57 +465,61 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   const filteredFichas = fichas.filter((f) => f.category === selectedCategory);
 
   return (
-    <div className="space-y-5 pb-12 animate-fadeIn">
-      {/* Banner Header - Roxo Gradiente */}
+    <div className="space-y-0 pb-12 animate-fadeIn overflow-hidden">
+      {/* Header - Roxo Gradiente */}
       <div
-        className="text-white shadow-card relative overflow-hidden flex items-center justify-between gap-3 px-5 py-5"
+        className="overflow-hidden shadow-card"
         style={{
-          background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
-          borderRadius: '40px 40px 40px 40px',
           boxShadow: '0 30px 70px rgba(58,35,80,.26)',
         }}
       >
-        {/* Título */}
-        <span
-          className="text-white tracking-tight"
+        {/* Header with Title only */}
+        <div
+          className="px-5 py-10 flex items-center justify-between gap-4 rounded-t-[40px]"
           style={{
-            fontFamily: "'Instrument Serif', serif",
-            fontSize: '29px',
-            lineHeight: 1.1,
-            fontWeight: 'normal',
+            background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
           }}
         >
-          Fichas Técnicas
-        </span>
+          {/* Title */}
+          <span
+            className="text-white leading-tight flex-1"
+            style={{
+              fontFamily: "'Instrument Serif', serif",
+              fontSize: '31px',
+              lineHeight: '1.1',
+            }}
+          >
+            Fichas Técnicas
+          </span>
 
-        {/* Botão Nova Ficha */}
-        <button
-          onClick={handleOpenAdd}
-          className="flex items-center gap-2 cursor-pointer transition-all active:scale-95 shrink-0"
+          {/* Button */}
+          <button
+            onClick={handleOpenAdd}
+            className="px-3 py-2 rounded-xl text-[10px] font-black flex items-center gap-1.5 cursor-pointer transition-all active:scale-95 shrink-0"
+            style={{
+              background: '#F5B9C6',
+              color: '#3A2350',
+            }}
+            title="Adicionar nova ficha"
+          >
+            <Plus size={12} strokeWidth={2.5} />
+            <span>Nova Ficha</span>
+          </button>
+        </div>
+
+        {/* Content Section */}
+        <div className="flex flex-col gap-4"
           style={{
-            background: 'rgba(255,255,255,.18)',
-            border: '1px solid rgba(255,255,255,.3)',
-            color: '#FFFFFF',
-            fontWeight: 800,
-            fontSize: '11px',
-            padding: '9px 14px',
-            borderRadius: '14px',
-            whiteSpace: 'nowrap',
-            transition: 'all .22s ease',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = '#FFFFFF';
-            e.currentTarget.style.color = '#3A2350';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'rgba(255,255,255,.18)';
-            e.currentTarget.style.color = '#FFFFFF';
+            marginTop: '-14px',
+            background: '#F6F2F5',
+            borderRadius: '28px 28px 0 0',
+            position: 'relative',
+            padding: '20px',
+            margin: '0 calc(-50vw + 50%)',
+            paddingLeft: 'calc(20px + max(0px, env(safe-area-inset-left)))',
+            paddingRight: 'calc(20px + max(0px, env(safe-area-inset-right)))',
           }}
         >
-          <Plus size={14} strokeWidth={3} />
-          Nova Ficha
-        </button>
-      </div>
 
       {launchSuccessMsg && (
         <div className="bg-[var(--color-primary)]/10 border border-[var(--color-primary)] text-[var(--color-primary)] text-xs p-3.5 rounded-lg flex items-center gap-2.5 animate-fadeIn shadow-card">
@@ -1327,6 +1331,8 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
             );
           })
         )}
+      </div>
+        </div>
       </div>
     </div>
   );
