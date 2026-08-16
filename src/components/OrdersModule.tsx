@@ -165,43 +165,51 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
           }}
         >
 
-      {/* Summary Cards Row */}
-      <div className="flex gap-2" style={{ gap: '8px' }}>
-        {/* Total Vendas */}
-        <div
-          className="flex-1 bg-white rounded-[18px] shadow-card flex flex-col gap-[3px]"
-          style={{
-            padding: '13px',
-            boxShadow: '0 8px 18px rgba(58,35,80,.08)',
-            transition: 'transform 0.25s ease'
-          }}
-        >
-          <span
-            className="text-[8px] font-black uppercase"
-            style={{
-              color: '#7A6E80',
-              fontFamily: "'Manrope', sans-serif",
-              letterSpacing: '.06em',
-              minHeight: '20px'
-            }}
-          >
-            TOTAL EM VENDAS
-          </span>
-          <span
-            className="font-black"
-            style={{
-              fontSize: '16px',
-              color: '#241B2B',
-              fontFamily: "'Manrope', sans-serif"
-            }}
-          >
-            {formatCurrency(totalVendas)}
-          </span>
-          <span className="text-xs" style={{ color: '#9A8FA0', fontFamily: "'Manrope', sans-serif" }}>
-            {sales.length} encomendas
-          </span>
-        </div>
+      {/* Total em Vendas Card with Chart - NOW AT TOP */}
+      <div className="bg-white rounded-[24px] p-5 shadow-card" style={{ boxShadow: '0 8px 18px rgba(58,35,80,.08)' }}>
+        <div className="flex items-center gap-4">
+          {/* Circular Chart */}
+          <div className="flex-shrink-0 relative w-[92px] h-[92px]" style={{ filter: 'drop-shadow(0 0 12px rgba(245,185,198,0.7))', borderRadius: '50%' }}>
+            <svg width="92" height="92" viewBox="0 0 92 92" style={{ transform: 'rotate(-90deg)', borderRadius: '50%' }}>
+              <circle cx="46" cy="46" r="38" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="9" />
+              <circle
+                cx="46" cy="46" r="38" fill="none" stroke="#F5B9C6" strokeWidth="9"
+                strokeDasharray={totalVendas > 0 ? `${239 * (totalPagas / totalVendas)} ${239}` : '0 239'}
+                strokeLinecap="round"
+              />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center leading-[1]">
+              <span className="text-[16px] font-black text-[#241B2B]" style={{ fontFamily: "'Manrope', sans-serif" }}>
+                {totalVendas > 0 ? Math.round((totalPagas / totalVendas) * 100) : 0}%
+              </span>
+              <span className="text-[8px] mt-[2px]" style={{ color: '#A096A6', fontFamily: "'Manrope', sans-serif" }}>pago</span>
+            </div>
+          </div>
 
+          {/* Text and Values */}
+          <div className="flex-1">
+            <div className="text-[9px] font-black uppercase tracking-[0.14em]" style={{ color: 'rgba(122,110,128,0.8)', fontFamily: "'Manrope', sans-serif", fontWeight: 800, marginBottom: '4px' }}>
+              TOTAL EM VENDAS
+            </div>
+            <div className="text-[#241B2B]" style={{ fontSize: '28px', lineHeight: 1, letterSpacing: '-0.03em', marginBottom: '8px', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
+              {formatCurrency(totalVendas)}
+            </div>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between text-[10px]" style={{ fontFamily: "'Manrope', sans-serif" }}>
+                <span style={{ color: '#7A6E80' }}>✓ Pagas:</span>
+                <span style={{ color: '#26402F', fontWeight: 700 }}>{formatCurrency(totalPagas)}</span>
+              </div>
+              <div className="flex items-center justify-between text-[10px]" style={{ fontFamily: "'Manrope', sans-serif" }}>
+                <span style={{ color: '#7A6E80' }}>⏳ Pendentes:</span>
+                <span style={{ color: '#8A7340', fontWeight: 700 }}>{formatCurrency(totalPendentes)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Summary Cards Row - Reduced to 2 cards (Pagas + A Receber) */}
+      <div className="flex gap-2" style={{ gap: '8px' }}>
         {/* Vendas Pagas */}
         <div
           className="flex-1 bg-white rounded-[18px] shadow-card flex flex-col gap-[3px]"
@@ -272,49 +280,6 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
           <span className="text-xs" style={{ color: '#9A8FA0', fontFamily: "'Manrope', sans-serif" }}>
             {pendingCount} {pendingCount === 1 ? 'pendente' : 'pendentes'}
           </span>
-        </div>
-      </div>
-
-      {/* Total em Vendas Card with Chart */}
-      <div className="bg-white rounded-[24px] p-5 shadow-card" style={{ boxShadow: '0 8px 18px rgba(58,35,80,.08)' }}>
-        <div className="flex items-center gap-4">
-          {/* Circular Chart */}
-          <div className="flex-shrink-0 relative w-[92px] h-[92px]" style={{ filter: 'drop-shadow(0 0 12px rgba(245,185,198,0.7))', borderRadius: '50%' }}>
-            <svg width="92" height="92" viewBox="0 0 92 92" style={{ transform: 'rotate(-90deg)', borderRadius: '50%' }}>
-              <circle cx="46" cy="46" r="38" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="9" />
-              <circle
-                cx="46" cy="46" r="38" fill="none" stroke="#F5B9C6" strokeWidth="9"
-                strokeDasharray={totalVendas > 0 ? `${239 * (totalPagas / totalVendas)} ${239}` : '0 239'}
-                strokeLinecap="round"
-              />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center leading-[1]">
-              <span className="text-[16px] font-black text-[#241B2B]" style={{ fontFamily: "'Manrope', sans-serif" }}>
-                {totalVendas > 0 ? Math.round((totalPagas / totalVendas) * 100) : 0}%
-              </span>
-              <span className="text-[8px] mt-[2px]" style={{ color: '#A096A6', fontFamily: "'Manrope', sans-serif" }}>pago</span>
-            </div>
-          </div>
-
-          {/* Text and Values */}
-          <div className="flex-1">
-            <div className="text-[9px] font-black uppercase tracking-[0.14em]" style={{ color: 'rgba(122,110,128,0.8)', fontFamily: "'Manrope', sans-serif", fontWeight: 800, marginBottom: '4px' }}>
-              TOTAL EM VENDAS
-            </div>
-            <div className="text-[#241B2B]" style={{ fontSize: '28px', lineHeight: 1, letterSpacing: '-0.03em', marginBottom: '8px', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
-              {formatCurrency(totalVendas)}
-            </div>
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center justify-between text-[10px]" style={{ fontFamily: "'Manrope', sans-serif" }}>
-                <span style={{ color: '#7A6E80' }}>✓ Pagas:</span>
-                <span style={{ color: '#26402F', fontWeight: 700 }}>{formatCurrency(totalPagas)}</span>
-              </div>
-              <div className="flex items-center justify-between text-[10px]" style={{ fontFamily: "'Manrope', sans-serif" }}>
-                <span style={{ color: '#7A6E80' }}>⏳ Pendentes:</span>
-                <span style={{ color: '#8A7340', fontWeight: 700 }}>{formatCurrency(totalPendentes)}</span>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
