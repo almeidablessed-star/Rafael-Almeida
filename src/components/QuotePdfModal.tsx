@@ -367,28 +367,28 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
       <div className="bg-white rounded-xl max-w-2xl w-full shadow-highlight overflow-hidden flex flex-col max-h-[92vh] print:max-h-none print:shadow-none print:rounded-none border-2 border-pink-200 relative" aria-label="Orçamento PDF">
 
         {/* STICKY TOP CONTROL BAR - ALWAYS VISIBLE & CLEAR ON ALL DEVICES */}
-        <div className="p-2.5 sm:p-3 bg-gradient-to-r from-[#3A2350] to-[#A85E86] text-white flex items-center justify-between gap-2 no-print shrink-0 sticky top-0 z-50 border-b border-white/10">
+        <div className="p-2.5 sm:p-3 bg-gradient-to-r from-[#3A2350] to-[#A85E86] text-white flex items-center justify-between gap-2 no-print shrink-0 sticky top-0 z-50 border-b border-white/10 shadow-sm">
           {/* Mode Switcher */}
           <div className="flex items-center gap-1 bg-white/10 p-1 rounded-lg">
             <button
               onClick={() => setActiveTab('cliente')}
               className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeTab === 'cliente'
-                  ? 'bg-[#F5B9C6] text-[#3A2350] shadow-card font-extrabold'
+                  ? 'bg-[#F5B9C6] text-[#3A2350] shadow-sm font-extrabold'
                   : 'text-white/70 hover:text-white'
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5" /> Folha do Cliente
+              <Sparkles className="w-3 h-3" /> Folha do Cliente
             </button>
             <button
               onClick={() => setActiveTab('cozinha')}
               className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeTab === 'cozinha'
-                  ? 'bg-[#A9D8B8] text-[#3A2350] shadow-card font-extrabold'
+                  ? 'bg-[#A9D8B8] text-[#3A2350] shadow-sm font-extrabold'
                   : 'text-white/70 hover:text-white'
               }`}
             >
-              <ChefHat className="w-3.5 h-3.5" /> Cozinha
+              <ChefHat className="w-3 h-3" /> Cozinha
             </button>
           </div>
 
@@ -397,10 +397,10 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
             <button
               onClick={handleDownloadPdf}
               disabled={isGeneratingPdf}
-              className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-[#F5B9C6] hover:bg-[#E8A0B0] text-[#3A2350] text-[11px] sm:text-xs font-black flex items-center gap-1 shadow-card active:scale-95 transition-all cursor-pointer"
+              className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-[#F5B9C6] hover:bg-[#E8A0B0] text-[#3A2350] text-[11px] sm:text-xs font-black flex items-center gap-1 shadow-sm active:scale-95 transition-all cursor-pointer"
               title="Baixar arquivo PDF no seu celular ou computador"
             >
-              <FileText className="w-3.5 h-3.5" />
+              <FileText className="w-3 h-3" />
               <span>{isGeneratingPdf ? 'Gerando PDF...' : 'Baixar PDF'}</span>
             </button>
 
@@ -408,10 +408,10 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
             <button
               onClick={handleDownloadImage}
               disabled={isGeneratingImage}
-              className="px-2.5 py-1.5 rounded-xl bg-[#A9D8B8] hover:bg-[#91CFA8] text-[#3A2350] text-[11px] sm:text-xs font-bold flex items-center gap-1 shadow-card active:scale-95 transition-all cursor-pointer"
+              className="px-2.5 py-1.5 rounded-xl bg-[#A9D8B8] hover:bg-[#91CFA8] text-[#3A2350] text-[11px] sm:text-xs font-bold flex items-center gap-1 shadow-sm active:scale-95 transition-all cursor-pointer"
               title="Baixar imagem PNG para enviar pelo WhatsApp"
             >
-              <Download className="w-3.5 h-3.5" />
+              <Download className="w-3 h-3" />
               <span className="hidden sm:inline">{isGeneratingImage ? 'Gerando...' : 'Baixar Imagem'}</span>
             </button>
 
@@ -421,7 +421,7 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
               className="px-2.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-white text-[11px] sm:text-xs font-bold flex items-center gap-1 transition-all cursor-pointer"
               title="Imprimir ou Salvar pelo Navegador"
             >
-              <Printer className="w-3.5 h-3.5" />
+              <Printer className="w-3 h-3" />
               <span className="hidden md:inline">Imprimir</span>
             </button>
 
@@ -431,16 +431,16 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
               className="p-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-[#F5B9C6] cursor-pointer"
               title="Copiar texto do pedido"
             >
-              {copied ? <Check className="w-4 h-4 text-[#A9D8B8]" /> : <Copy className="w-4 h-4" />}
+              {copied ? <Check className="w-3 h-3 text-[#A9D8B8]" /> : <Copy className="w-3 h-3" />}
             </button>
 
             {/* BIG CLEAR PROMINENT CLOSE BUTTON */}
             <button
               onClick={onClose}
-              className="px-2.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-[11px] sm:text-xs font-bold flex items-center gap-1 shadow-card active:scale-95 transition-all shrink-0 ml-1 cursor-pointer"
+              className="px-2.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-[11px] sm:text-xs font-bold flex items-center gap-1 shadow-sm active:scale-95 transition-all shrink-0 ml-1 cursor-pointer"
               title="Fechar Janela"
             >
-              <X className="w-4 h-4 stroke-[3]" />
+              <X className="w-3.5 h-3.5 stroke-[3]" />
               <span>FECHAR</span>
             </button>
           </div>
@@ -509,8 +509,8 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
               {/* Grid 1: Client & Event Information */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 print-avoid-break">
                 {/* Customer Box */}
-                <div className="bg-white p-3 rounded-lg border border-[var(--color-text-muted)] shadow-card space-y-1.5">
-                  <h4 className="label-sm tracking-wider text-[var(--color-pastry-chocolate)] flex items-center gap-1 border-b border-[var(--color-text-muted)] pb-0.5">
+                <div className="bg-white p-3 rounded-[16px] border border-[#E6E1DB] shadow-sm space-y-1.5">
+                  <h4 className="text-[9px] font-black uppercase tracking-wider text-[#241B2B] flex items-center gap-1 border-b border-[#E6E1DB] pb-0.5" style={{ fontFamily: "'Manrope', sans-serif", letterSpacing: '.06em' }}>
                     👤 Dados da Cliente Especial
                   </h4>
                   <div className="flex items-center gap-2.5">
@@ -537,8 +537,8 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
                 </div>
 
                 {/* Event & Delivery Box */}
-                <div className="bg-white p-3 rounded-lg border border-[var(--color-text-muted)] shadow-card space-y-1">
-                  <h4 className="label-sm tracking-wider text-[var(--color-pastry-chocolate)] flex items-center gap-1 border-b border-[var(--color-text-muted)] pb-0.5">
+                <div className="bg-white p-3 rounded-[16px] border border-[#E6E1DB] shadow-sm space-y-1">
+                  <h4 className="text-[9px] font-black uppercase tracking-wider text-[#241B2B] flex items-center gap-1 border-b border-[#E6E1DB] pb-0.5" style={{ fontFamily: "'Manrope', sans-serif", letterSpacing: '.06em' }}>
                     📅 Evento & Horário de Entrega
                   </h4>
                   <div className="flex items-center justify-between text-xs font-bold text-[var(--color-pastry-chocolate)]">
@@ -562,10 +562,10 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
               </div>
 
               {/* Items Table & Summary */}
-              <div className="bg-white p-3.5 rounded-lg border border-[var(--color-text-muted)] shadow-card space-y-2 print-avoid-break">
-                <div className="flex items-center justify-between border-b border-[var(--color-text-muted)] pb-1">
-                  <h4 className="label-sm tracking-wider text-[var(--color-pastry-chocolate)] flex items-center gap-1">
-                    <ShoppingBag className="w-3.5 h-3.5 text-[var(--color-pastry-chocolate)]" />
+              <div className="bg-white p-3.5 rounded-[16px] border border-[#E6E1DB] shadow-sm space-y-2 print-avoid-break">
+                <div className="flex items-center justify-between border-b border-[#E6E1DB] pb-1">
+                  <h4 className="text-[9px] font-black uppercase tracking-wider text-[#241B2B] flex items-center gap-1" style={{ fontFamily: "'Manrope', sans-serif", letterSpacing: '.06em' }}>
+                    <ShoppingBag className="w-3 h-3 text-[#241B2B]" />
                     Itens Solicitados
                   </h4>
                   <span className="bg-[var(--color-pastry-pink)]/60 text-[var(--color-pastry-chocolate)] text-[10px] font-bold px-2 py-0.5 rounded-full border border-[var(--color-pastry-light-pink)]/60">
@@ -593,10 +593,10 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
 
               {/* INSPIRATION PHOTO - DISPLAYED IN FULL 100% UNCROPPED VISIBILITY */}
               {inspirationImage ? (
-                <div className="bg-white p-3 rounded-lg border-2 border-[var(--color-pastry-light-pink)] shadow-card space-y-2 print-avoid-break">
+                <div className="bg-white p-3 rounded-[16px] border-2 border-[#F5B9C6] shadow-sm space-y-2 print-avoid-break">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="label-sm tracking-wider text-[var(--color-pastry-chocolate)] flex items-center gap-1">
-                      <Camera className="w-4 h-4 text-[var(--color-pastry-chocolate)]" /> Foto de Referência do Cliente
+                    <span className="text-[9px] font-black uppercase tracking-wider text-[#241B2B] flex items-center gap-1" style={{ fontFamily: "'Manrope', sans-serif", letterSpacing: '.06em' }}>
+                      <Camera className="w-3 h-3 text-[#241B2B]" /> Foto de Referência do Cliente
                     </span>
                     <div className="flex items-center gap-1.5 no-print">
                       <label className="px-2.5 py-1 rounded-xl bg-[var(--color-pastry-pink)] hover:bg-[var(--color-pastry-pink-hover)] text-[var(--color-pastry-chocolate)] font-bold text-[10px] flex items-center gap-1 cursor-pointer transition-colors shadow-card">
@@ -652,21 +652,21 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
               )}
 
               {/* Total & Payment Badge */}
-              <div className="bg-[var(--color-pastry-yellow)] p-3.5 rounded-lg border-2 border-[var(--color-pastry-light-pink)] flex items-center justify-between gap-3 print-avoid-break">
+              <div className="bg-gradient-to-r from-[#3A2350] to-[#A85E86] p-3.5 rounded-[16px] border-2 border-white/20 flex items-center justify-between gap-3 print-avoid-break">
                 <div>
-                  <span className="label-sm text-[var(--color-pastry-chocolate)]/80 block">
+                  <span className="text-[9px] font-black uppercase text-white/80 block" style={{ fontFamily: "'Manrope', sans-serif" }}>
                     Forma de Pagamento:
                   </span>
-                  <span className="inline-block bg-[var(--color-pastry-chocolate)] text-[var(--color-pastry-pink)] font-bold text-[11px] px-3 py-0.5 rounded-full uppercase shadow-card">
+                  <span className="inline-block bg-[#F5B9C6] text-[#3A2350] font-black text-[11px] px-3 py-0.5 rounded-full uppercase shadow-sm">
                     ⚡ {transaction.paymentMethod === 'cash' ? 'DINHEIRO / ESPÉCIE' : (transaction.paymentMethod ? transaction.paymentMethod.toUpperCase() : 'A COMBINAR')}
                   </span>
                 </div>
 
                 <div className="text-right">
-                  <span className="label-sm text-[var(--color-pastry-chocolate)]/80 block">
+                  <span className="text-[9px] font-black uppercase text-white/80 block" style={{ fontFamily: "'Manrope', sans-serif" }}>
                     VALOR TOTAL DO PEDIDO:
                   </span>
-                  <span className="font-numbers font-marca value-md text-[var(--color-pastry-chocolate)]">
+                  <span className="font-black text-white" style={{ fontSize: '24px', fontFamily: "'Manrope', sans-serif" }}>
                     {formatCurrency(transaction.totalValue)}
                   </span>
                 </div>
