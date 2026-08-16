@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Transaction, TransactionType } from '../types';
 import { formatCurrency, formatDateBr } from '../utils/formatters';
+import { getCurrentWeekMonday, getCurrentWeekSunday, filterTransactionsByWeek } from '../utils/weeklyArchiveUtils';
 import { QuotePdfModal } from './QuotePdfModal';
 import {
   ShoppingBag,
@@ -38,7 +39,12 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
   // Filter sales/orders only
   const sales = transactions.filter((t) => t.type === 'venda');
 
-  const filteredSales = sales.filter((s) => {
+  // Filter by current week
+  const weekStart = getCurrentWeekMonday();
+  const weekEnd = getCurrentWeekSunday();
+  const weeklySales = filterTransactionsByWeek(sales, weekStart, weekEnd);
+
+  const filteredSales = weeklySales.filter((s) => {
     const matchesSearch =
       s.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (s.customerName && s.customerName.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -50,17 +56,17 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
     return matchesSearch && matchesStatus;
   });
 
-  // Financial calculations
-  const totalVendas = sales.reduce((acc, curr) => acc + (curr.totalValue || 0), 0);
-  const totalPagas = sales
+  // Financial calculations (weekly only)
+  const totalVendas = weeklySales.reduce((acc, curr) => acc + (curr.totalValue || 0), 0);
+  const totalPagas = weeklySales
     .filter((s) => (s.paymentStatus || 'pago') === 'pago')
     .reduce((acc, curr) => acc + (curr.totalValue || 0), 0);
-  const totalPendentes = sales
+  const totalPendentes = weeklySales
     .filter((s) => s.paymentStatus === 'pendente')
     .reduce((acc, curr) => acc + (curr.totalValue || 0), 0);
 
-  const pendingCount = sales.filter((s) => s.paymentStatus === 'pendente').length;
-  const paidCount = sales.filter((s) => (s.paymentStatus || 'pago') === 'pago').length;
+  const pendingCount = weeklySales.filter((s) => s.paymentStatus === 'pendente').length;
+  const paidCount = weeklySales.filter((s) => (s.paymentStatus || 'pago') === 'pago').length;
 
   return (
     <div className="space-y-4 animate-fadeIn pb-8">

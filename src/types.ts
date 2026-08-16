@@ -118,3 +118,18 @@ export interface SummaryTotals {
   isPositive: boolean;
   totalTransactionsCount: number;
 }
+
+export interface WeeklyArchive {
+  id: string;
+  year: number;
+  month: number;
+  weekNumber: number;
+  startDate: string; // YYYY-MM-DD (segunda-feira)
+  endDate: string; // YYYY-MM-DD (domingo)
+  archivedAt: string; // ISO string
+  lucroLiquido: number;
+  vendidas: number;
+  saldos: number;
+  aReceber: number;
+  transactionCount: number;
+}

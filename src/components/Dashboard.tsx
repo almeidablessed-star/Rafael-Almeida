@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Transaction, SummaryTotals, TransactionType, TimePeriod } from '../types';
 import { formatCurrency, formatDateBr } from '../utils/formatters';
-import { calculateBalances } from '../utils/balancesCalculator';
+import { calculateWeeklyBalances } from '../utils/balancesCalculator';
 import { OrdersCalendar } from './OrdersCalendar';
 import {
   Wallet,
@@ -33,6 +33,7 @@ interface DashboardProps {
   onTogglePaymentStatus?: (tx: Transaction) => void;
   onOpenPwaModal?: () => void;
   onOpenBackupModal?: () => void;
+  onOpenProfileModal?: () => void;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({
@@ -47,13 +48,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onTogglePaymentStatus,
   onOpenPwaModal,
   onOpenBackupModal,
+  onOpenProfileModal,
 }) => {
   const transactionsList = allTransactions.length > 0 ? allTransactions : (recentTransactions || []);
-  const balances = calculateBalances(transactionsList);
+  const balances = calculateWeeklyBalances(transactionsList);
 
   // Calculate profit margin percentage (simplified calculation)
-  const totalIn = balances.paidSales || 0;
-  const totalOut = balances.totalExpenses || 0;
+  const totalIn = balances.totalPaidSales || 0;
+  const totalOut = balances.totalExpensesAmount || 0;
   const profit = Math.max(0, totalIn - totalOut);
   const marginPercent = totalIn > 0 ? Math.round((profit / totalIn) * 100) : 0;
 
@@ -62,11 +64,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
       {/* 1. PROFIT CARD - Roxo Gradiente (Cabeçalho da Página) */}
       <div
-        className="rounded-b-3xl text-white relative overflow-hidden"
+        className="rounded-b-3xl text-white relative overflow-visible"
         style={{
           background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
           padding: '20px',
+          paddingBottom: '0px',
           boxShadow: '0 30px 70px rgba(58,35,80,0.26)',
+          marginLeft: 'calc(-50vw + 50%)',
+          marginRight: 'calc(-50vw + 50%)',
         }}
       >
 
@@ -75,13 +80,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
           {/* Header: Logo, Title, Icons */}
           <div className="flex items-center justify-between gap-3">
             {/* Logo "C" Badge - 34x34px */}
-            <div
+            <button
+              onClick={onOpenProfileModal}
               className="flex-shrink-0 w-[34px] h-[34px] rounded-[12px] flex items-center justify-center font-serif-display text-base cursor-pointer"
               style={{
                 background: 'rgba(255,255,255,.16)',
                 border: '1px solid rgba(255,255,255,.24)',
                 color: '#F7DCE1',
                 transition: 'background-color 0.25s ease',
+                padding: 0,
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = 'rgba(255,255,255,.3)';
@@ -91,7 +98,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               }}
             >
               C
-            </div>
+            </button>
 
             {/* "Carula Confeitaria" Title */}
             <div className="flex-1 text-center">
@@ -147,14 +154,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
           {/* Top: Gauge (92px) à esquerda + Label/Valor à direita */}
           <div className="flex items-center gap-4">
             {/* Circular Gauge (92px) - À ESQUERDA */}
-            <div className="flex-shrink-0 relative w-[92px] h-[92px]">
-              <svg width="92" height="92" viewBox="0 0 92 92" style={{ transform: 'rotate(-90deg)' }}>
+            <div className="flex-shrink-0 relative w-[92px] h-[92px]" style={{ filter: 'drop-shadow(0 0 12px rgba(245,185,198,0.7))', borderRadius: '50%' }}>
+              <svg width="92" height="92" viewBox="0 0 92 92" style={{ transform: 'rotate(-90deg)', borderRadius: '50%' }}>
                 <circle cx="46" cy="46" r="38" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="9" />
                 <circle
                   cx="46" cy="46" r="38" fill="none" stroke="#F5B9C6" strokeWidth="9"
                   strokeDasharray={`${239 * (marginPercent / 100)} ${239}`}
                   strokeLinecap="round"
-                  style={{ filter: 'drop-shadow(0 0 8px rgba(245,185,198,0.6))' }}
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center leading-[1]">
@@ -189,13 +195,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="flex-1 rounded-[16px] p-3 text-center" style={{ background: 'rgba(255,255,255,0.12)' }}>
               <div className="text-[9px] text-white/75 uppercase tracking-[0.06em]" style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 700 }}>VENDAS PAGAS</div>
               <div className="text-white mt-1" style={{ fontSize: '15px', lineHeight: 1, fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
-                {formatCurrency(balances.paidSales || 0)}
+                {formatCurrency(balances.totalPaidSales || 0)}
               </div>
             </div>
             <div className="flex-1 rounded-[16px] p-3 text-center" style={{ background: 'rgba(255,255,255,0.12)' }}>
               <div className="text-[9px] text-white/75 uppercase tracking-[0.06em]" style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 700 }}>SAÍDAS</div>
               <div className="text-white mt-1" style={{ fontSize: '15px', lineHeight: 1, fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
-                {formatCurrency(balances.totalExpenses || 0)}
+                {formatCurrency(balances.totalExpensesAmount || 0)}
               </div>
             </div>
             <div className="flex-1 rounded-[16px] p-3 text-center" style={{ background: 'rgba(228,217,195,0.28)' }}>
@@ -206,43 +212,24 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
           </div>
 
-          {/* Button */}
-          <button
-            onClick={() => onNavigateToTab('saldos')}
-            className="w-full text-[12px] uppercase tracking-wide py-3 rounded-[14px]"
-            style={{
-              background: 'rgba(255,255,255,0.12)',
-              border: '1px solid rgba(255,255,255,0.32)',
-              fontFamily: "'Manrope', sans-serif",
-              fontWeight: 700,
-              color: '#FFFFFF',
-              transition: 'background-color 0.25s ease, color 0.25s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#FFFFFF';
-              e.currentTarget.style.color = '#3A2350';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(255,255,255,0.12)';
-              e.currentTarget.style.color = '#FFFFFF';
-            }}
-          >
-            Ver Detalhamento das Vendas
-          </button>
+          {/* Spacer - maintains layout spacing */}
+          <div style={{ height: '44px' }} />
         </div>
       </div>
 
       {/* Panel Overlay - Sobreposição com border-radius */}
       <div
-        className="mx-0 pb-6 space-y-4"
+        className="pb-6 space-y-4"
         style={{
           background: '#F6F2F5',
           position: 'relative',
           zIndex: 1,
           marginTop: '-14px',
+          marginLeft: 'calc(-50vw + 50%)',
+          marginRight: 'calc(-50vw + 50%)',
           paddingTop: '18px',
-          paddingLeft: '18px',
-          paddingRight: '18px',
+          paddingLeft: 'calc(50vw - 50% + 18px)',
+          paddingRight: 'calc(50vw - 50% + 18px)',
           borderRadius: '28px 28px 0 0',
         }}
       >

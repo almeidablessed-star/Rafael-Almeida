@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
-import { Transaction, TransactionType } from '../types';
-import { calculateBalances } from '../utils/balancesCalculator';
+import React, { useState, useEffect } from 'react';
+import { Transaction, TransactionType, WeeklyArchive } from '../types';
+import { calculateWeeklyBalances } from '../utils/balancesCalculator';
+import { getWeeklyArchives, hasNewWeekStarted, archiveCurrentWeek } from '../utils/weeklyArchiveUtils';
+import { WeeklyHistoryCard } from './WeeklyHistoryCard';
 import { formatCurrency, formatDateBr, getTodayIso } from '../utils/formatters';
 import {
   Wallet,
@@ -33,7 +35,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
   onEditTransaction,
   onDeleteTransaction,
 }) => {
-  const balances = calculateBalances(transactions);
+  const balances = calculateWeeklyBalances(transactions);
 
   // Form state for quick expense logging
   const [description, setDescription] = useState('');
@@ -45,6 +47,21 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
   // History filtering
   const [selectedFilter, setSelectedFilter] = useState<'todos' | 'reposicao' | 'investimento'>('todos');
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Weekly archives
+  const [archives, setArchives] = useState<WeeklyArchive[]>(getWeeklyArchives());
+
+  // Auto-archive when new week starts
+  useEffect(() => {
+    const lastArchiveDate = localStorage.getItem('carula_last_archive_date');
+    if (hasNewWeekStarted(lastArchiveDate)) {
+      const archive = archiveCurrentWeek(transactions);
+      if (archive) {
+        setArchives(getWeeklyArchives());
+        localStorage.setItem('carula_last_archive_date', new Date().toISOString());
+      }
+    }
+  }, [transactions]);
 
   const handleSaveExpense = (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,7 +129,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
 
       {/* TOTAL BALANCE CARD - SALDO TOTAL DISPONÍVEL */}
       <div
-        className="rounded-[22px] p-6 text-white"
+        className="rounded-[22px] p-6 text-white mx-5"
         style={{
           background: 'linear-gradient(155deg, var(--color-brand-900) 0%, var(--color-brand-700) 60%, var(--color-brand-500) 100%)',
         }}
@@ -149,248 +166,129 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
       </div>
 
       {/* 1. BALANCE CARDS (Reposição, Mão de Obra, Custo + Investimento Juntos) - PREMIUM STYLED */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-7 stagger-children">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-7 stagger-children mx-5">
 
-        {/* CARD REPOSIÇÃO - with mini bar chart */}
+        {/* CARD REPOSIÇÃO */}
         <div
-          className={`rounded-[22px] p-6 border-2 transition-all shadow-sm cursor-pointer relative overflow-hidden flex flex-col justify-between ${
-            balances.reposicao.isNegative
-              ? 'bg-[#C85A54]/8 border-[#C85A54]/70'
-              : 'bg-[#C8E6D7]/10 border-[#C8E6D7]/80'
-          }`}
+          className="rounded-[22px] transition-all shadow-card cursor-pointer bg-white"
+          style={{
+            padding: '15px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            boxShadow: '0 8px 20px rgba(58,35,80,.09)',
+          }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-4px)';
-            e.currentTarget.style.boxShadow = '0 12px 24px rgba(58,35,80,0.14)';
+            e.currentTarget.style.transform = 'translateY(-5px)';
+            e.currentTarget.style.boxShadow = '0 20px 36px rgba(58,35,80,.18)';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 2px 4px rgba(58,35,80,0.04)';
+            e.currentTarget.style.boxShadow = '0 8px 20px rgba(58,35,80,.09)';
           }}
         >
-          {/* Top color strip */}
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#3A5A4A] to-[#5A8A6F]" />
-
-          <div>
-            <div className="flex flex-col items-center gap-2 mb-3">
-              <span
-                className={`rounded-full px-3 py-1.5 flex items-center justify-center gap-1.5 leading-none ${
-                  balances.reposicao.isNegative
-                    ? 'bg-[#C85A54]/35 text-[#C85A54] border border-[#C85A54]/60'
-                    : 'bg-[#3A5A4A]/15 text-[#3A5A4A] border border-[#3A5A4A]/40'
-                }`}
-                style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', fontFamily: "'Manrope', sans-serif" }}
-              >
-                <ShoppingBag className="w-4 h-4 shrink-0 flex-shrink-0" />
-                <span>Reposição</span>
-              </span>
-
-              {balances.reposicao.isNegative && (
-                <span className="bg-[#C85A54] text-white font-black text-[10px] px-2.5 py-1 rounded-full uppercase flex items-center gap-1 animate-pulse">
-                  <AlertTriangle className="w-3 h-3" />
-                  Neg
-                </span>
-              )}
-            </div>
-
-            <div className="my-3">
-              <span
-                style={{
-                  fontFamily: "'Manrope', sans-serif",
-                  fontSize: '32px',
-                  fontWeight: 700,
-                  display: 'block',
-                  letterSpacing: '-0.01em',
-                  color: balances.reposicao.isNegative ? '#C85A54' : '#3A5A4A'
-                }}
-              >
-                {formatCurrency(balances.reposicao.currentBalance)}
-              </span>
-              <p style={{ fontSize: '11px', color: 'rgba(58, 90, 74, 0.65)', fontFamily: "'Manrope', sans-serif", fontWeight: 400, marginTop: '8px' }}>
-                Reposição de ingredientes
-              </p>
-            </div>
-
-            {/* Mini bar chart - 3 bars showing trend */}
-            <div className="mb-4 flex items-end gap-1.5 h-14">
-              <div className={`flex-1 rounded-sm transition-all ${balances.reposicao.isNegative ? 'bg-[#C85A54]/60' : 'bg-[#3A5A4A]/60'}`} style={{ height: '40%' }} title="Jan" />
-              <div className={`flex-1 rounded-sm transition-all ${balances.reposicao.isNegative ? 'bg-[#C85A54]/80' : 'bg-[#3A5A4A]/80'}`} style={{ height: '70%' }} title="Feb" />
-              <div className={`flex-1 rounded-sm transition-all ${balances.reposicao.isNegative ? 'bg-[#C85A54]' : 'bg-[#3A5A4A]'}`} style={{ height: '100%' }} title="Mar" />
-            </div>
-
-            <div className="pt-3 border-t border-[#E6E1DB] space-y-1.5 text-[11px] font-semibold">
-              <div className="flex items-center justify-between text-[#3A5A4A]">
-                <span>Entrou:</span>
-                <span className="font-bold text-[#3A5A4A]">+{formatCurrency(balances.reposicao.accumulatedInflow)}</span>
-              </div>
-              <div className="flex items-center justify-between text-[var(--color-ink)]">
-                <span>Gasto:</span>
-                <span className="font-bold text-[#C85A54]">-{formatCurrency(balances.reposicao.totalSpent)}</span>
-              </div>
-            </div>
+          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <span style={{ alignSelf: 'flex-start', fontSize: '9.5px', fontWeight: 800, letterSpacing: '.05em', color: '#4A3556', background: '#F3E9F3', padding: '4px 9px', borderRadius: '999px', fontFamily: "'Manrope', sans-serif" }}>
+              🔄 REPOSIÇÃO
+            </span>
+            <span style={{ fontSize: '10px', color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
+              Para reposição de ingredientes e embalagens.
+            </span>
+            <span style={{ fontSize: '10px', color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
+              Entrou <strong style={{ color: '#4C7358' }}>+{formatCurrency(balances.reposicao.accumulatedInflow)}</strong> · Gasto <strong style={{ color: '#C4626F' }}>-{formatCurrency(balances.reposicao.totalSpent)}</strong>
+            </span>
           </div>
+          <span style={{ fontSize: '20px', fontWeight: 800, color: '#241B2B', whiteSpace: 'nowrap', fontFamily: "'Manrope', sans-serif" }}>
+            {formatCurrency(balances.reposicao.currentBalance)}
+          </span>
         </div>
 
-        {/* CARD MÃO DE OBRA - with circular progress */}
+        {/* CARD MÃO DE OBRA */}
         <div
-          className="rounded-[22px] p-6 border-2 transition-all shadow-sm bg-[#D4C5E2]/10 border-[#D4C5E2]/80 cursor-pointer relative overflow-hidden flex flex-col justify-between"
+          className="rounded-[22px] transition-all shadow-card cursor-pointer bg-white"
+          style={{
+            padding: '15px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            boxShadow: '0 8px 20px rgba(58,35,80,.09)',
+          }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-4px)';
-            e.currentTarget.style.boxShadow = '0 12px 24px rgba(58,35,80,0.14)';
+            e.currentTarget.style.transform = 'translateY(-5px)';
+            e.currentTarget.style.boxShadow = '0 20px 36px rgba(58,35,80,.18)';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 2px 4px rgba(58,35,80,0.04)';
+            e.currentTarget.style.boxShadow = '0 8px 20px rgba(58,35,80,.09)';
           }}
         >
-          {/* Top color strip */}
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#5A4B6B] to-[#7A6B8B]" />
-
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[11px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full flex items-center gap-1.5 bg-[#5A4B6B]/15 text-[#5A4B6B] border border-[#5A4B6B]/40">
-                <DollarSign className="w-4 h-4" />
-                Mão de Obra
-              </span>
-            </div>
-
-            <div className="my-3">
-              <span className="font-brand font-marca value-lg md:text-4xl block tracking-tight text-[#5A4B6B]">
-                {formatCurrency(balances.maodeobra?.currentBalance || 0)}
-              </span>
-              <p className="text-[11px] text-[#5A4B6B]/70 font-medium mt-2">
-                Salário acumulado
-              </p>
-            </div>
-
-            {/* Circular progress indicator (50% filled) */}
-            <div className="mb-4 flex justify-center items-center">
-              <div className="relative w-[90px] h-[90px] flex items-center justify-center">
-                <svg width="90" height="90" viewBox="0 0 90 90" className="-rotate-90 drop-shadow-sm">
-                  <circle cx="45" cy="45" r="38" fill="none" stroke="#D4C5E2" strokeWidth="4" />
-                  <circle
-                    cx="45"
-                    cy="45"
-                    r="38"
-                    fill="none"
-                    stroke="#5A4B6B"
-                    strokeWidth="4"
-                    strokeDasharray="119.38 238.76"
-                    strokeLinecap="round"
-                  />
-                </svg>
-                <span className="relative font-bold text-xl text-[#5A4B6B]">50%</span>
-              </div>
-            </div>
-
-            <div className="pt-3 border-t border-[#E6E1DB] space-y-1.5 text-[11px] font-semibold">
-              <div className="flex items-center justify-between text-[#5A4B6B]">
-                <span>Acumulado:</span>
-                <span className="font-bold text-[#5A4B6B]">+{formatCurrency(balances.maodeobra?.accumulatedInflow || 0)}</span>
-              </div>
-            </div>
+          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <span style={{ alignSelf: 'flex-start', fontSize: '9.5px', fontWeight: 800, letterSpacing: '.05em', color: '#4A3556', background: '#EDE4F3', padding: '4px 9px', borderRadius: '999px', fontFamily: "'Manrope', sans-serif" }}>
+              🟣 MÃO DE OBRA
+            </span>
+            <span style={{ fontSize: '10px', color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
+              Seu salário acumulado pelas produções.
+            </span>
+            <span style={{ fontSize: '10px', color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
+              Acumulado <strong style={{ color: '#4C7358' }}>+{formatCurrency(balances.maodeobra?.accumulatedInflow || 0)}</strong>
+            </span>
           </div>
+          <span style={{ fontSize: '20px', fontWeight: 800, color: '#241B2B', whiteSpace: 'nowrap', fontFamily: "'Manrope', sans-serif" }}>
+            {formatCurrency(balances.maodeobra?.currentBalance || 0)}
+          </span>
         </div>
 
-        {/* CARD CUSTO + INVESTIMENTO JUNTOS - with horizontal status bar */}
+        {/* CARD CUSTO + INVESTIMENTO */}
         <div
-          className={`rounded-[22px] p-6 border-2 transition-all shadow-sm cursor-pointer relative overflow-hidden flex flex-col justify-between ${
-            balances.custoEInvestimento.isNegative
-              ? 'bg-[#C85A54]/8 border-[#C85A54]/70'
-              : 'bg-[#B8D4E8]/10 border-[#B8D4E8]/80'
-          }`}
+          className="rounded-[22px] transition-all shadow-card cursor-pointer bg-white"
+          style={{
+            padding: '15px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            boxShadow: '0 8px 20px rgba(58,35,80,.09)',
+          }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-4px)';
-            e.currentTarget.style.boxShadow = '0 12px 24px rgba(58,35,80,0.14)';
+            e.currentTarget.style.transform = 'translateY(-5px)';
+            e.currentTarget.style.boxShadow = '0 20px 36px rgba(58,35,80,.18)';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 2px 4px rgba(58,35,80,0.04)';
+            e.currentTarget.style.boxShadow = '0 8px 20px rgba(58,35,80,.09)';
           }}
         >
-          {/* Top color strip */}
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#3A4A5A] to-[#5A7A9E]" />
-
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <span
-                className={`text-[11px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full flex items-center gap-1.5 ${
-                  balances.custoEInvestimento.isNegative
-                    ? 'bg-[#C85A54]/35 text-[#C85A54] border border-[#C85A54]/60'
-                    : 'bg-[#3A4A5A]/15 text-[#3A4A5A] border border-[#3A4A5A]/40'
-                }`}
-              >
-                <Sparkles className="w-4 h-4" />
-                Custo + Invest.
-              </span>
-
-              {balances.custoEInvestimento.isNegative && (
-                <span className="bg-[#C85A54] text-white font-black text-[10px] px-2.5 py-1 rounded-full uppercase flex items-center gap-1 animate-pulse">
-                  Neg
-                </span>
-              )}
-            </div>
-
-            <div className="my-3">
-              <span
-                className={`font-brand font-marca value-lg md:text-4xl block tracking-tight ${
-                  balances.custoEInvestimento.isNegative ? 'text-[#C85A54]' : 'text-[#3A4A5A]'
-                }`}
-              >
-                {formatCurrency(balances.custoEInvestimento.currentBalance)}
-              </span>
-              <p className="text-[11px] text-[#3A4A5A]/70 font-medium mt-2">
-                Custo & Investimento
-              </p>
-            </div>
-
-            {/* Horizontal status bar - showing usage % */}
-            <div className="mb-4 space-y-2">
-              <div className="text-[11px] font-bold text-[#3A4A5A]/70 flex justify-between">
-                <span>Utilização</span>
-                <span>75%</span>
-              </div>
-              <div className="w-full bg-[#B8D4E8]/40 rounded-full h-2.5 overflow-hidden">
-                <div className="bg-gradient-to-r from-[#3A4A5A] to-[#5A7A9E] h-full rounded-full transition-all" style={{ width: '75%' }} />
-              </div>
-            </div>
-
-            {/* Split breakdown */}
-            <div className="pt-3 border-t border-[#E6E1DB] space-y-1.5 text-[10px] font-semibold">
-              <div className="flex items-center justify-between text-[#3A4A5A] bg-[#B8D4E8]/10 p-2 rounded-lg">
-                <span className="font-bold">Custo:</span>
-                <span className="font-brand font-bold text-[#3A4A5A]">
-                  {formatCurrency(balances.custoEInvestimento.custoHalf)}
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-[#3A5A4A] bg-[#C8E6D7]/10 p-2 rounded-lg">
-                <span className="font-bold">Investimento:</span>
-                <span className="font-brand font-bold text-[#3A5A4A]">
-                  {formatCurrency(balances.custoEInvestimento.investimentoHalf)}
-                </span>
-              </div>
-            </div>
+          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <span style={{ alignSelf: 'flex-start', fontSize: '9.5px', fontWeight: 800, letterSpacing: '.05em', color: '#3D5245', background: '#E6F1EA', padding: '4px 9px', borderRadius: '999px', fontFamily: "'Manrope', sans-serif" }}>
+              📊 CUSTO + INVESTIMENTO
+            </span>
+            <span style={{ fontSize: '10px', color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
+              Dividido por 2 (50% Custo e 50% Investimento).
+            </span>
+            <span style={{ fontSize: '10px', color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
+              🔴 Custo <strong style={{ color: '#241B2B' }}>{formatCurrency(balances.custoEInvestimento.custoHalf)}</strong> · 📈 Invest. <strong style={{ color: '#241B2B' }}>{formatCurrency(balances.custoEInvestimento.investimentoHalf)}</strong>
+            </span>
           </div>
+          <span style={{ fontSize: '20px', fontWeight: 800, color: '#241B2B', whiteSpace: 'nowrap', fontFamily: "'Manrope', sans-serif" }}>
+            {formatCurrency(balances.custoEInvestimento.currentBalance)}
+          </span>
         </div>
 
       </div>
 
       {/* 2. REGISTRATION FORM FOR REAL PURCHASES / EXPENSES */}
-      <div className="bg-white rounded-xl p-5 border border-[#E6E1DB] shadow-card space-y-4">
-        <div className="flex items-center justify-between border-b border-[#E6E1DB] pb-3">
-          <div className="flex items-center gap-2">
-            <div className="p-2 bg-[var(--color-semantic-gold)]/20 text-[var(--color-semantic-gold)] rounded-xl">
-              <Plus className="w-4 h-4 stroke-[3]" />
-            </div>
-            <div>
-              <h3 className="font-brand font-bold text-sm text-[var(--color-ink)]">
-                Lançar Compra Real / Despesa
-              </h3>
-              <p className="text-[11px] text-[#E6E1DB] font-medium">
-                Desconta automaticamente do cofrinho selecionado
-              </p>
-            </div>
+      <div className="bg-white mx-5" style={{ borderRadius: '24px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '13px', boxShadow: '0 8px 20px rgba(58,35,80,.09)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '1px solid rgba(36,27,43,.07)', paddingBottom: '11px' }}>
+          <span style={{ width: '34px', height: '34px', borderRadius: '12px', background: '#6E3F72', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Plus className="w-4 h-4" style={{ stroke: '#FFFFFF', strokeWidth: 3 }} />
+          </span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <span style={{ fontSize: '13px', fontWeight: 800, color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>
+              Lançar Compra Real / Despesa
+            </span>
+            <span style={{ fontSize: '10px', color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
+              Desconta automaticamente do cofrinho selecionado
+            </span>
           </div>
-
           {showSuccessToast && (
             <span className="bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)] font-bold text-xs px-3 py-1 rounded-full flex items-center gap-1 animate-fadeIn">
               <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-primary)]" />
@@ -399,65 +297,82 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
           )}
         </div>
 
-        <form onSubmit={handleSaveExpense} className="space-y-3">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            
-            {/* Description */}
-            <div className="sm:col-span-2">
-              <label className="block text-xs font-bold text-[var(--color-ink)] mb-1">
-                O que você comprou? (Descrição)
-              </label>
-              <input
-                type="text"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Ex: 2 sacos de farinha, 2 formas e bicos"
-                className="w-full px-3.5 py-2.5 rounded-lg border border-[#E6E1DB] text-xs font-medium text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]/40 bg-[var(--color-surface)]/50"
-                required
-              />
+        <form onSubmit={handleSaveExpense} style={{ display: 'flex', flexDirection: 'column', gap: '13px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+            <label style={{ fontSize: '10.5px', fontWeight: 800, color: '#5B4A6B', fontFamily: "'Manrope', sans-serif" }}>
+              O que você comprou? (Descrição)
+            </label>
+            <input
+              type="text"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Ex: 2 sacos de farinha, 2 formas e bicos"
+              style={{ padding: '11px 13px', background: '#FAF7FA', border: '1px solid rgba(36,27,43,.08)', borderRadius: '14px', fontSize: '11px', color: '#A096A6', fontFamily: "'Manrope', sans-serif" }}
+              required
+            />
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+            <label style={{ fontSize: '10.5px', fontWeight: 800, color: '#5B4A6B', fontFamily: "'Manrope', sans-serif" }}>
+              Categoria da Compra
+            </label>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                type="button"
+                onClick={() => setCategory('reposicao')}
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  padding: '10px',
+                  borderRadius: '14px',
+                  background: category === 'reposicao' ? '#F3E9F3' : '#FAF7FA',
+                  border: category === 'reposicao' ? '1.5px solid #B892BE' : '1.5px solid rgba(36,27,43,.1)',
+                  color: category === 'reposicao' ? '#4A3556' : '#7A6E80',
+                  fontSize: '11px',
+                  fontWeight: category === 'reposicao' ? 800 : 700,
+                  cursor: 'pointer',
+                  transition: 'transform .2s ease',
+                  fontFamily: "'Manrope', sans-serif",
+                }}
+              >
+                🔄 Reposição
+              </button>
+              <button
+                type="button"
+                onClick={() => setCategory('investimento')}
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  padding: '10px',
+                  borderRadius: '14px',
+                  background: category === 'investimento' ? '#F3E9F3' : '#FAF7FA',
+                  border: category === 'investimento' ? '1.5px solid #B892BE' : '1.5px solid rgba(36,27,43,.1)',
+                  color: category === 'investimento' ? '#4A3556' : '#7A6E80',
+                  fontSize: '11px',
+                  fontWeight: category === 'investimento' ? 800 : 700,
+                  cursor: 'pointer',
+                  transition: 'transform .2s ease',
+                  fontFamily: "'Manrope', sans-serif",
+                }}
+              >
+                📈 Investimento
+              </button>
             </div>
+          </div>
 
-            {/* Category selection */}
-            <div>
-              <label className="block text-xs font-bold text-[var(--color-ink)] mb-1">
-                Categoria da Compra
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setCategory('reposicao')}
-                  className={`py-2 px-2.5 rounded-lg font-bold text-xs border transition-all flex items-center justify-center gap-1.5 ${
-                    category === 'reposicao'
-                      ? 'bg-[#C8E6D7]/60 text-[#3A5A4A] border-[#C8E6D7] shadow-card'
-                      : 'bg-[var(--color-surface)] text-[var(--color-brand-900)] border-[#E6E1DB] hover:bg-[#E6E1DB]'
-                  }`}
-                >
-                  <ShoppingBag className="w-3.5 h-3.5 text-[#5A8A6F]" />
-                  Reposição
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setCategory('investimento')}
-                  className={`py-2 px-2.5 rounded-lg font-bold text-xs border transition-all flex items-center justify-center gap-1.5 ${
-                    category === 'investimento'
-                      ? 'bg-[#B8D4E8]/15 text-[#3A4A5A] border-[#B8D4E8] shadow-card'
-                      : 'bg-[var(--color-surface)] text-[var(--color-brand-900)] border-[#E6E1DB] hover:bg-[#E6E1DB]'
-                  }`}
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-[#5A7A9E]" />
-                  Investimento
-                </button>
-              </div>
-            </div>
-
-            {/* Valor Gasto */}
-            <div>
-              <label className="block text-xs font-bold text-[var(--color-ink)] mb-1">
+          <div style={{ display: 'flex', gap: '9px' }}>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
+              <label style={{ fontSize: '10.5px', fontWeight: 800, color: '#5B4A6B', fontFamily: "'Manrope', sans-serif" }}>
                 Valor Gasto (R$)
               </label>
-              <div className="relative">
-                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-[#E6E1DB]">
+              <div style={{ position: 'relative' }}>
+                <span style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', fontSize: '11px', fontWeight: 800, color: '#5B4A6B', fontFamily: "'Manrope', sans-serif", pointerEvents: 'none' }}>
                   R$
                 </span>
                 <input
@@ -465,79 +380,128 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder="0,00"
-                  className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-[#E6E1DB] text-xs font-bold text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-primary)] bg-[var(--color-surface)]/50"
+                  style={{ paddingLeft: '32px', paddingRight: '13px', paddingTop: '11px', paddingBottom: '11px', background: '#FAF7FA', border: '1px solid rgba(36,27,43,.08)', borderRadius: '14px', fontSize: '11px', color: '#241B2B', fontFamily: "'Manrope', sans-serif", width: '100%', boxSizing: 'border-box' }}
                   required
                 />
               </div>
             </div>
-
-            {/* Data */}
-            <div className="sm:col-span-2">
-              <label className="block text-xs font-bold text-[var(--color-ink)] mb-1">
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
+              <label style={{ fontSize: '10.5px', fontWeight: 800, color: '#5B4A6B', fontFamily: "'Manrope', sans-serif" }}>
                 Data da Compra
               </label>
               <input
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-lg border border-[#E6E1DB] text-xs font-semibold text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-primary)] bg-[var(--color-surface)]/50"
+                style={{ padding: '11px 13px', background: '#FAF7FA', border: '1px solid rgba(36,27,43,.08)', borderRadius: '14px', fontSize: '11px', color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}
                 required
               />
             </div>
-
           </div>
 
           <button
             type="submit"
-            className="w-full py-3 bg-[var(--color-primary)] hover:brightness-110 text-white font-brand font-bold text-xs rounded-lg shadow-card active:scale-98 transition-all flex items-center justify-center gap-2"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              padding: '13px',
+              borderRadius: '16px',
+              background: '#3A2350',
+              color: '#F5B9C6',
+              fontSize: '11.5px',
+              fontWeight: 800,
+              cursor: 'pointer',
+              border: 'none',
+              boxShadow: '0 10px 20px rgba(58,35,80,.3)',
+              transition: 'transform .22s ease',
+              fontFamily: "'Manrope', sans-serif",
+              whiteSpace: 'nowrap',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-3px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+            }}
           >
-            <Plus className="w-4 h-4 stroke-[3]" />
+            <Plus className="w-4 h-4" style={{ stroke: '#F5B9C6', strokeWidth: 3, flexShrink: 0 }} />
             Registrar Compra e Descontar do Cofrinho
           </button>
         </form>
       </div>
 
       {/* 4. EXPENSES HISTORY */}
-      <div className="bg-white rounded-xl p-5 border border-[#E6E1DB] shadow-card space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E6E1DB] pb-3">
-          <div>
-            <h3 className="font-brand font-bold text-sm text-[var(--color-ink)]">
+      <div className="bg-white mx-5" style={{ borderRadius: '24px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px', boxShadow: '0 8px 20px rgba(58,35,80,.09)' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', borderBottom: '1px solid rgba(36,27,43,.07)', paddingBottom: '12px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <span style={{ fontFamily: "'Instrument Serif', serif", fontSize: '19px', color: '#241B2B', lineHeight: 1.15 }}>
               Histórico de Compras Realizadas ({expenseTransactions.length})
-            </h3>
-            <p className="text-[11px] text-[#E6E1DB] font-medium">
+            </span>
+            <span style={{ fontSize: '10px', color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
               Ajuste ou remova lançamentos se digitou algo errado
-            </p>
+            </span>
           </div>
 
-          {/* Filter Pills */}
-          <div className="flex items-center gap-1 bg-neutral-medium p-1 rounded-lg self-start sm:self-auto">
+          <div style={{ display: 'flex', background: '#EDE6EF', borderRadius: '12px', padding: '3px' }}>
             <button
               onClick={() => setSelectedFilter('todos')}
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
-                selectedFilter === 'todos'
-                  ? 'bg-white text-[var(--color-ink)] shadow-card'
-                  : 'text-[#E6E1DB] hover:text-[var(--color-ink)]'
-              }`}
+              style={{
+                flex: 1,
+                textAlign: 'center',
+                fontSize: '10.5px',
+                fontWeight: selectedFilter === 'todos' ? 800 : 600,
+                color: selectedFilter === 'todos' ? '#FFFFFF' : '#6B5F71',
+                background: selectedFilter === 'todos' ? '#3A2350' : 'transparent',
+                borderRadius: '9px',
+                padding: '7px 0',
+                border: 'none',
+                boxShadow: selectedFilter === 'todos' ? '0 4px 10px rgba(58,35,80,.28)' : 'none',
+                cursor: 'pointer',
+                transition: 'background .2s ease',
+                fontFamily: "'Manrope', sans-serif",
+              }}
             >
               Todos ({expenseTransactions.length})
             </button>
             <button
               onClick={() => setSelectedFilter('reposicao')}
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
-                selectedFilter === 'reposicao'
-                  ? 'bg-[var(--color-semantic-warning)]/60 text-[var(--color-neutral-charcoal)] shadow-card'
-                  : 'text-[#E6E1DB] hover:text-[var(--color-ink)]'
-              }`}
+              style={{
+                flex: 1,
+                textAlign: 'center',
+                fontSize: '10.5px',
+                fontWeight: selectedFilter === 'reposicao' ? 800 : 600,
+                color: selectedFilter === 'reposicao' ? '#FFFFFF' : '#6B5F71',
+                background: selectedFilter === 'reposicao' ? '#3A2350' : 'transparent',
+                borderRadius: '9px',
+                padding: '7px 0',
+                border: 'none',
+                boxShadow: selectedFilter === 'reposicao' ? '0 4px 10px rgba(58,35,80,.28)' : 'none',
+                cursor: 'pointer',
+                transition: 'background .2s ease',
+                fontFamily: "'Manrope', sans-serif",
+              }}
             >
               Reposição
             </button>
             <button
               onClick={() => setSelectedFilter('investimento')}
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
-                selectedFilter === 'investimento'
-                  ? 'bg-[var(--color-primary)]/15 text-[var(--color-primary)] shadow-card'
-                  : 'text-[#E6E1DB] hover:text-[var(--color-ink)]'
-              }`}
+              style={{
+                flex: 1,
+                textAlign: 'center',
+                fontSize: '10.5px',
+                fontWeight: selectedFilter === 'investimento' ? 800 : 600,
+                color: selectedFilter === 'investimento' ? '#FFFFFF' : '#6B5F71',
+                background: selectedFilter === 'investimento' ? '#3A2350' : 'transparent',
+                borderRadius: '9px',
+                padding: '7px 0',
+                border: 'none',
+                boxShadow: selectedFilter === 'investimento' ? '0 4px 10px rgba(58,35,80,.28)' : 'none',
+                cursor: 'pointer',
+                transition: 'background .2s ease',
+                fontFamily: "'Manrope', sans-serif",
+              }}
             >
               Investimento
             </button>
@@ -546,14 +510,17 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
 
         {/* Search Input */}
         {expenseTransactions.length > 0 && (
-          <div className="relative">
-            <Search className="w-4 h-4 text-[#E6E1DB] absolute left-3 top-1/2 -translate-y-1/2" />
+          <div style={{ position: 'relative' }}>
+            <Search className="w-4 h-4" style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: '#A096A6' }} />
+            <div style={{ padding: '11px 12px 11px 34px', background: '#FAF7FA', border: '1px solid rgba(36,27,43,.08)', borderRadius: '14px', fontSize: '11px', color: '#A096A6', fontFamily: "'Manrope', sans-serif" }}>
+              Buscar compra...
+            </div>
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Buscar compra..."
-              className="w-full pl-9 pr-3 py-2 rounded-lg border border-[#E6E1DB] text-xs text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-primary)] bg-[var(--color-surface)]/50"
+              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'transparent', border: 'none', paddingLeft: '34px', fontSize: '11px', color: '#241B2B', fontFamily: "'Manrope', sans-serif", borderRadius: '14px', outline: 'none' }}
             />
           </div>
         )}
@@ -566,55 +533,99 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
             </p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '9px' }}>
             {filteredExpenses.map((tx) => {
               const isReposicao = tx.type === 'reposicao';
 
               return (
                 <div
                   key={tx.id}
-                  className="p-3.5 rounded-lg border border-[#E6E1DB] bg-white hover:border-[#E6E1DB] shadow-card transition-all flex items-center justify-between gap-3"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '12px',
+                    borderRadius: '16px',
+                    background: '#FAF7FA',
+                    border: '1px solid rgba(36,27,43,.06)',
+                    cursor: 'pointer',
+                    transition: 'transform .25s ease, background .25s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateX(3px)';
+                    e.currentTarget.style.background = '#F3E9F3';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateX(0)';
+                    e.currentTarget.style.background = '#FAF7FA';
+                  }}
                 >
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 mb-1">
+                  <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                       <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
-                          isReposicao
-                            ? 'bg-[var(--color-semantic-warning)]/60 text-[var(--color-neutral-charcoal)] border border-[var(--color-semantic-warning)]'
-                            : 'bg-[var(--color-primary)]/15 text-[var(--color-primary)] border border-[var(--color-primary)]'
-                        }`}
+                        style={{
+                          fontSize: '9px',
+                          fontWeight: 800,
+                          color: isReposicao ? '#4A3556' : '#2F4A6B',
+                          background: isReposicao ? '#F3E9F3' : '#E9EFF7',
+                          padding: '3px 8px',
+                          borderRadius: '999px',
+                          textTransform: 'uppercase',
+                          fontFamily: "'Manrope', sans-serif",
+                        }}
                       >
-                        {isReposicao ? 'Reposição' : 'Investimento'}
+                        {isReposicao ? '🔄 Reposição' : '📈 Investimento'}
                       </span>
-                      <span className="font-brand font-bold text-[var(--color-ink)] text-sm truncate">
+                      <span style={{ fontSize: '12px', fontWeight: 800, color: '#241B2B', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: "'Manrope', sans-serif" }}>
                         {tx.description}
                       </span>
                     </div>
-
-                    <div className="flex items-center gap-2 text-[11px] text-[#E6E1DB]">
-                      <span>Data: {formatDateBr(tx.date)}</span>
-                    </div>
+                    <span style={{ fontSize: '10px', color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
+                      Data: {formatDateBr(tx.date)}
+                    </span>
                   </div>
 
-                  <div className="text-right flex flex-col items-end shrink-0">
-                    <span className="font-brand font-extrabold text-sm text-[#C85A54]">
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '5px', flexShrink: 0 }}>
+                    <span style={{ fontSize: '13px', fontWeight: 800, color: '#C4626F', fontFamily: "'Manrope', sans-serif" }}>
                       -{formatCurrency(tx.totalValue)}
                     </span>
 
-                    <div className="flex items-center gap-1 mt-1">
+                    <div style={{ display: 'flex', gap: '4px' }}>
                       <button
                         onClick={() => onEditTransaction(tx)}
-                        className="p-1.5 rounded-lg text-[#E6E1DB] hover:text-[var(--color-ink)] hover:bg-[#E6E1DB] transition-colors"
+                        style={{
+                          width: '26px',
+                          height: '26px',
+                          borderRadius: '9px',
+                          background: '#FFFFFF',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                          boxShadow: '0 2px 6px rgba(58,35,80,.1)',
+                          border: 'none',
+                        }}
                         title="Editar Compra"
                       >
-                        <Edit3 className="w-3.5 h-3.5" />
+                        <Edit3 className="w-3 h-3" style={{ color: '#7A6E80' }} />
                       </button>
                       <button
                         onClick={() => onDeleteTransaction(tx)}
-                        className="p-1.5 rounded-lg text-[#E6E1DB] hover:text-[#C85A54] hover:bg-[#C85A54]/10 transition-colors"
+                        style={{
+                          width: '26px',
+                          height: '26px',
+                          borderRadius: '9px',
+                          background: '#FFFFFF',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                          boxShadow: '0 2px 6px rgba(58,35,80,.1)',
+                          border: 'none',
+                        }}
                         title="Excluir Compra"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <Trash2 className="w-3 h-3" style={{ color: '#C4626F' }} />
                       </button>
                     </div>
                   </div>
@@ -624,6 +635,9 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
           </div>
         )}
       </div>
+
+      {/* Weekly History Card */}
+      <WeeklyHistoryCard archives={archives} />
     </div>
   );
 };

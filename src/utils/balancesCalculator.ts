@@ -1,5 +1,6 @@
 import { Transaction } from '../types';
 import { parseSaleDetail } from './weeklyCalculator';
+import { getCurrentWeekMonday, getCurrentWeekSunday, filterTransactionsByWeek } from './weeklyArchiveUtils';
 
 export interface CategoryBalance {
   accumulatedInflow: number; // Sum from paid sales
@@ -18,6 +19,8 @@ export interface SystemBalances {
   };
   paidSalesCount: number;
   totalExpensesCount: number;
+  totalPaidSales: number;
+  totalExpensesAmount: number;
 }
 
 /**
@@ -31,12 +34,14 @@ export function calculateBalances(transactions: Transaction[]): SystemBalances {
   let custoInflow = 0;
   let investimentoInflow = 0;
   let paidSalesCount = 0;
+  let totalPaidSalesAmount = 0;
 
   let reposicaoSpent = 0;
   let maodeobraSpent = 0;
   let custoSpent = 0;
   let investimentoSpent = 0;
   let totalExpensesCount = 0;
+  let totalExpensesAmount = 0;
 
   for (const tx of transactions) {
     const val = Number(tx.totalValue) || 0;
@@ -44,6 +49,7 @@ export function calculateBalances(transactions: Transaction[]): SystemBalances {
     if (tx.type === 'venda') {
       if (tx.paymentStatus !== 'pendente') {
         paidSalesCount += 1;
+        totalPaidSalesAmount += val;
         const detail = parseSaleDetail(tx);
         reposicaoInflow += detail.reposicao || 0;
         maodeobraInflow += (detail.maoDeObra || 0) + (detail.adicionais || 0) + (detail.delivery || 0);
@@ -52,15 +58,19 @@ export function calculateBalances(transactions: Transaction[]): SystemBalances {
       }
     } else if (tx.type === 'reposicao') {
       totalExpensesCount += 1;
+      totalExpensesAmount += val;
       reposicaoSpent += val;
     } else if (tx.type === 'maodeobra') {
       totalExpensesCount += 1;
+      totalExpensesAmount += val;
       maodeobraSpent += val;
     } else if (tx.type === 'custo') {
       totalExpensesCount += 1;
+      totalExpensesAmount += val;
       custoSpent += val;
     } else if (tx.type === 'investimento') {
       totalExpensesCount += 1;
+      totalExpensesAmount += val;
       investimentoSpent += val;
     }
   }
@@ -102,5 +112,104 @@ export function calculateBalances(transactions: Transaction[]): SystemBalances {
     },
     paidSalesCount,
     totalExpensesCount,
+    totalPaidSales: totalPaidSalesAmount,
+    totalExpensesAmount,
+  };
+}
+
+/**
+ * Calculate balances for the current week only (Monday to Sunday)
+ */
+export function calculateWeeklyBalances(transactions: Transaction[]): SystemBalances {
+  const startDate = getCurrentWeekMonday();
+  const endDate = getCurrentWeekSunday();
+  const weeklyTransactions = filterTransactionsByWeek(transactions, startDate, endDate);
+
+  // Inline balances calculation for current week
+  let reposicaoInflow = 0;
+  let maodeobraInflow = 0;
+  let custoInflow = 0;
+  let investimentoInflow = 0;
+  let paidSalesCount = 0;
+  let totalPaidSalesAmount = 0;
+
+  let reposicaoSpent = 0;
+  let maodeobraSpent = 0;
+  let custoSpent = 0;
+  let investimentoSpent = 0;
+  let totalExpensesCount = 0;
+  let totalExpensesAmount = 0;
+
+  for (const tx of weeklyTransactions) {
+    const val = Number(tx.totalValue) || 0;
+
+    if (tx.type === 'venda') {
+      if (tx.paymentStatus !== 'pendente') {
+        paidSalesCount += 1;
+        totalPaidSalesAmount += val;
+        const detail = parseSaleDetail(tx);
+        reposicaoInflow += detail.reposicao || 0;
+        maodeobraInflow += (detail.maoDeObra || 0) + (detail.adicionais || 0) + (detail.delivery || 0);
+        custoInflow += detail.custos || 0;
+        investimentoInflow += detail.investimento || 0;
+      }
+    } else if (tx.type === 'reposicao') {
+      totalExpensesCount += 1;
+      totalExpensesAmount += val;
+      reposicaoSpent += val;
+    } else if (tx.type === 'maodeobra') {
+      totalExpensesCount += 1;
+      totalExpensesAmount += val;
+      maodeobraSpent += val;
+    } else if (tx.type === 'custo') {
+      totalExpensesCount += 1;
+      totalExpensesAmount += val;
+      custoSpent += val;
+    } else if (tx.type === 'investimento') {
+      totalExpensesCount += 1;
+      totalExpensesAmount += val;
+      investimentoSpent += val;
+    }
+  }
+
+  const saldoReposicao = reposicaoInflow - reposicaoSpent;
+  const saldoMaodeobra = maodeobraInflow - maodeobraSpent;
+  const saldoInvestimento = investimentoInflow - investimentoSpent;
+
+  const combinedInflow = custoInflow + investimentoInflow;
+  const combinedSpent = custoSpent + investimentoSpent;
+  const saldoCombined = combinedInflow - combinedSpent;
+
+  return {
+    reposicao: {
+      accumulatedInflow: reposicaoInflow,
+      totalSpent: reposicaoSpent,
+      currentBalance: saldoReposicao,
+      isNegative: saldoReposicao < 0,
+    },
+    maodeobra: {
+      accumulatedInflow: maodeobraInflow,
+      totalSpent: maodeobraSpent,
+      currentBalance: saldoMaodeobra,
+      isNegative: saldoMaodeobra < 0,
+    },
+    investimento: {
+      accumulatedInflow: investimentoInflow,
+      totalSpent: investimentoSpent,
+      currentBalance: saldoInvestimento,
+      isNegative: saldoInvestimento < 0,
+    },
+    custoEInvestimento: {
+      accumulatedInflow: combinedInflow,
+      totalSpent: combinedSpent,
+      currentBalance: saldoCombined,
+      isNegative: saldoCombined < 0,
+      custoHalf: saldoCombined / 2,
+      investimentoHalf: saldoCombined / 2,
+    },
+    paidSalesCount,
+    totalExpensesCount,
+    totalPaidSales: totalPaidSalesAmount,
+    totalExpensesAmount,
   };
 }

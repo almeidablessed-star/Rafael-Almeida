@@ -1,13 +1,49 @@
 import React from 'react';
 import { TabType } from '../types';
-import {
-  Home,
-  ShoppingBag,
-  BookOpen,
-  Users,
-  Boxes,
-  Wallet,
-} from 'lucide-react';
+
+// SVG Icons matching the reference design exactly
+const IconInicio = (props: { stroke: string; strokeWidth: number }) => (
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" {...props} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>
+  </svg>
+);
+
+const IconPedidos = (props: { stroke: string; strokeWidth: number }) => (
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" {...props} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 7h16l-1.2 13H5.2z"/>
+    <path d="M9 7a3 3 0 0 1 6 0"/>
+  </svg>
+);
+
+const IconFichas = (props: { stroke: string; strokeWidth: number }) => (
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" {...props} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 4h9a3 3 0 0 1 3 3v13H6a2 2 0 0 1-2-2z"/>
+    <path d="M20 5v15"/>
+  </svg>
+);
+
+const IconClientes = (props: { stroke: string; strokeWidth: number }) => (
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" {...props} strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="9" cy="8.5" r="3.2"/>
+    <path d="M3.5 20a5.5 5.5 0 0 1 11 0"/>
+    <circle cx="17.5" cy="10" r="2.2"/>
+  </svg>
+);
+
+const IconEstoque = (props: { stroke: string; strokeWidth: number }) => (
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" {...props} strokeLinejoin="round">
+    <rect x="3" y="10" width="8" height="7" rx="1.2"/>
+    <rect x="13" y="10" width="8" height="7" rx="1.2"/>
+    <rect x="8" y="3" width="8" height="6" rx="1.2"/>
+  </svg>
+);
+
+const IconSaldos = (props: { stroke: string; strokeWidth: number }) => (
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" {...props} strokeLinejoin="round">
+    <rect x="3" y="6" width="18" height="13" rx="3"/>
+    <circle cx="17" cy="12.5" r="1.4" fill={props.stroke} stroke="none"/>
+  </svg>
+);
 
 interface BottomNavProps {
   activeTab: TabType;
@@ -16,12 +52,12 @@ interface BottomNavProps {
 
 export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
   const tabs = [
-    { id: 'dashboard' as TabType, label: 'Início', icon: Home },
-    { id: 'pedidos' as TabType, label: 'Pedidos', icon: ShoppingBag },
-    { id: 'fichas' as TabType, label: 'Fichas', icon: BookOpen },
-    { id: 'clientes' as TabType, label: 'Clientes', icon: Users },
-    { id: 'estoque' as TabType, label: 'Estoque', icon: Boxes },
-    { id: 'saldos' as TabType, label: 'Saldos', icon: Wallet },
+    { id: 'dashboard' as TabType, label: 'Início', icon: IconInicio },
+    { id: 'pedidos' as TabType, label: 'Pedidos', icon: IconPedidos },
+    { id: 'fichas' as TabType, label: 'Fichas', icon: IconFichas },
+    { id: 'clientes' as TabType, label: 'Clientes', icon: IconClientes },
+    { id: 'estoque' as TabType, label: 'Estoque', icon: IconEstoque },
+    { id: 'saldos' as TabType, label: 'Saldos', icon: IconSaldos },
   ];
 
   return (
@@ -39,31 +75,40 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) 
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
               aria-current={isActive ? 'page' : undefined}
-              className={`flex flex-col items-center justify-center flex-1 px-1 py-1 color-transition ${
-                isActive
-                  ? 'text-[var(--color-rose-200)] bg-[var(--color-brand-900)] rounded-[16px]'
-                  : 'text-[#A096A6]'
-              }`}
               style={{
-                transition: 'transform 150ms cubic-bezier(0.23, 1, 0.32, 1), background-color 200ms ease, color 200ms ease',
-                transform: isActive ? 'translateY(-4px) scale(1)' : 'translateY(0) scale(1)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '8px 11px',
+                borderRadius: '16px',
+                background: isActive ? '#3A2350' : 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'transform 0.25s ease',
+                boxShadow: isActive ? '0 8px 18px rgba(58, 35, 80, 0.3)' : 'none',
               }}
               onMouseEnter={(e) => {
-                if (!isActive) {
-                  e.currentTarget.style.transform = 'translateY(-4px) scale(1)';
-                }
+                e.currentTarget.style.transform = 'translateY(-4px)';
               }}
               onMouseLeave={(e) => {
-                if (!isActive) {
-                  e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                }
+                e.currentTarget.style.transform = 'translateY(0)';
               }}
             >
-              <Icon className="w-5 h-5" strokeWidth={isActive ? 2.2 : 1.8} style={{ transition: 'stroke-width 150ms ease' }} />
+              <Icon
+                stroke={isActive ? '#F5B9C6' : '#A096A6'}
+                strokeWidth={1.9}
+                style={{ transition: 'stroke 0.25s ease' }}
+              />
               <span
-                className={`text-[9px] mt-1 uppercase tracking-wide ${
-                  isActive ? 'font-extrabold' : 'font-semibold'
-                }`}
+                style={{
+                  fontSize: '9px',
+                  fontWeight: isActive ? 800 : 600,
+                  color: isActive ? '#F5B9C6' : '#A096A6',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.06em',
+                  transition: 'color 0.25s ease',
+                }}
               >
                 {tab.label}
               </span>

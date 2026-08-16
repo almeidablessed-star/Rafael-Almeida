@@ -48,6 +48,8 @@ import { TransactionFormModal } from './components/TransactionFormModal';
 import { DeleteConfirmModal } from './components/DeleteConfirmModal';
 import { PwaInstallModal } from './components/PwaInstallModal';
 import { BackupModal } from './components/BackupModal';
+import { ProfileModal } from './components/ProfileModal';
+import { LoginModal } from './components/LoginModal';
 
 export default function App() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -65,6 +67,11 @@ export default function App() {
   const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null);
   const [isPwaModalOpen, setIsPwaModalOpen] = useState(false);
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(() => {
+    return localStorage.getItem('carula_logged_in') === 'true';
+  });
 
   // Load transactions on mount
   useEffect(() => {
@@ -151,7 +158,10 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-surface)] text-[var(--color-ink)] flex flex-col lg:flex-row font-sans">
+    <div className="min-h-screen bg-[var(--color-surface)] text-[var(--color-ink)] flex flex-col lg:flex-row font-sans lg:rounded-none" style={{
+      borderRadius: 'clamp(0px, 3vw, 40px)',
+      overflow: 'hidden',
+    }}>
 
 
       {/* Desktop Sidebar — 236px, degradê roxo (referência 13a) */}
@@ -256,7 +266,11 @@ export default function App() {
         </div>
 
         {/* Main Screen Container */}
-        <main className="flex-1 max-w-4xl w-full mx-auto px-0 lg:px-4 pt-0 lg:pt-6 pb-20 lg:pb-8 bottom-nav-safe">
+        <main className="flex-1 max-w-4xl w-full mx-auto px-0 lg:px-4 pb-20 lg:pb-8 bottom-nav-safe" style={{
+          paddingTop: 'max(0px, env(safe-area-inset-top))',
+          paddingLeft: 'max(0px, env(safe-area-inset-left))',
+          paddingRight: 'max(0px, env(safe-area-inset-right))',
+        }}>
 
         {/* Tab Content Router */}
         {activeTab === 'dashboard' && (
@@ -272,6 +286,13 @@ export default function App() {
             onTogglePaymentStatus={handleTogglePaymentStatus}
             onOpenPwaModal={() => setIsPwaModalOpen(true)}
             onOpenBackupModal={() => setIsBackupModalOpen(true)}
+            onOpenProfileModal={() => {
+              if (isUserLoggedIn) {
+                setIsProfileModalOpen(true);
+              } else {
+                setIsLoginModalOpen(true);
+              }
+            }}
           />
         )}
 
@@ -421,6 +442,23 @@ export default function App() {
         onRestoreTransactions={handleRestoreTransactions}
         onResetSampleData={handleResetSampleData}
         onClearAll={handleClearAll}
+      />
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+        onLoginSuccess={(email) => {
+          setIsUserLoggedIn(true);
+          setIsLoginModalOpen(false);
+          setIsProfileModalOpen(true);
+        }}
+      />
+
+      {/* Profile Modal */}
+      <ProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
       />
 
     </div>

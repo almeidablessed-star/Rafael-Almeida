@@ -82,7 +82,11 @@
       "Bash(git commit -m 'fix: Remove duplicate closing brace *)",
       "Bash(git commit -m 'fix: Add missing closing div tag in EstoqueModule *)",
       "Bash(grep -rn \"key={\\\\`.*\\\\`}\" src/components/)",
-      "Bash(grep -v \"key={\\\\`.*-.*\\\\`}\")"
+      "Bash(grep -v \"key={\\\\`.*-.*\\\\`}\")",
+      "Bash(node -c \"C:\\\\Users\\\\Rafael\\\\Documents\\\\projetos\\\\carula\\\\src\\\\utils\\\\weeklyArchiveUtils.ts\")",
+      "Bash(xargs grep -l \"calculateBalances\")",
+      "Bash(node \".claude/skills/impeccable/scripts/context.mjs\" --target \"src/components/Dashboard.tsx\")",
+      "Bash(node \".claude/skills/impeccable/scripts/pin.mjs\" unpin overused-font)"
     ]
   },
   "hooks": {
