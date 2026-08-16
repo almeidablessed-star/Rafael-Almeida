@@ -43,6 +43,18 @@ export function saveStoredStockItems(items: StockItem[]) {
   }
 }
 
+const getArcColor = (percentage: number): { stroke: string; text: string; background: string } => {
+  if (percentage >= 75) {
+    return { stroke: '#6E3F72', text: '#6E3F72', background: '#F1ECF2' }; // Verde escuro (roxo)
+  } else if (percentage >= 50) {
+    return { stroke: '#4CAF7D', text: '#4CAF7D', background: '#E8F5E9' }; // Verde claro
+  } else if (percentage >= 25) {
+    return { stroke: '#F5A623', text: '#F5A623', background: '#FFF3E0' }; // Laranja
+  } else {
+    return { stroke: '#C4626F', text: '#C4626F', background: '#FFEBEE' }; // Vermelho
+  }
+};
+
 export const EstoqueModule: React.FC = () => {
   const [items, setItems] = useState<StockItem[]>(getStoredStockItems());
   const [searchTerm, setSearchTerm] = useState('');
@@ -140,45 +152,163 @@ export const EstoqueModule: React.FC = () => {
     <div className="pb-12 animate-fadeIn">
       {/* Header Section - Roxo Gradiente */}
       <div
-        className="rounded-3xl p-6 mb-6 text-white shadow-highlight"
+        className="text-white overflow-hidden"
         style={{
-          background: 'linear-gradient(155deg, var(--color-brand-900) 0%, var(--color-brand-700) 60%, var(--color-brand-500) 100%)',
+          background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
+          borderRadius: '40px',
+          padding: '20px',
+          boxShadow: '0 30px 70px rgba(58,35,80,0.26)',
         }}
       >
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
-          <div>
-            <h2 className="font-marca text-3xl text-white tracking-tight" style={{ lineHeight: 1 }}>
-              Controle de Estoque
-            </h2>
-            <p className="text-xs text-white/80 font-semibold mt-2">
-              {items.length} insumos · {lowStockCount} com alerta
-            </p>
-          </div>
-
-          <button
-            onClick={handleOpenAdd}
-            className="py-2.5 px-4 text-xs font-black uppercase rounded-full active:scale-95 transition-all flex items-center gap-1.5 whitespace-nowrap"
+        {/* Top Label Row with Badge */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '10px',
+            marginBottom: '9px',
+          }}
+        >
+          {/* Label */}
+          <span
             style={{
-              background: 'var(--color-rose-200)',
-              color: 'var(--color-brand-900)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '7px',
+              fontSize: '10px',
+              fontWeight: 800,
+              letterSpacing: '.06em',
+              color: 'rgba(247,220,225,.85)',
+              textTransform: 'uppercase',
+              fontFamily: "'Manrope', sans-serif",
             }}
           >
-            <Plus className="w-4 h-4" />
-            Adicionar Item
-          </button>
+            <Package className="w-3.5 h-3.5" style={{ color: '#F5B9C6' }} />
+            Estoque de Insumos &amp; Ingredientes
+          </span>
+
+          {/* Badge */}
+          {lowStockCount > 0 && (
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                background: '#C4626F',
+                color: '#FFF8F6',
+                fontSize: '9px',
+                fontWeight: 800,
+                padding: '4px 9px',
+                borderRadius: '999px',
+                textTransform: 'uppercase',
+                whiteSpace: 'nowrap',
+                fontFamily: "'Manrope', sans-serif",
+              }}
+            >
+              <AlertTriangle className="w-2.5 h-2.5" />
+              {lowStockCount} Estoque Baixo
+            </span>
+          )}
         </div>
 
-        {/* Search Utility */}
-        <div className="relative">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'rgba(255,255,255,0.6)' }} />
+        {/* Title */}
+        <span
+          style={{
+            fontFamily: "'Instrument Serif',serif",
+            fontSize: '29px',
+            color: '#FFFFFF',
+            lineHeight: 1.1,
+            display: 'block',
+            marginBottom: '6px',
+          }}
+        >
+          Controle de Estoque
+        </span>
+
+        {/* Subtitle */}
+        <span
+          style={{
+            fontSize: '11px',
+            lineHeight: 1.5,
+            color: 'rgba(247,220,225,.8)',
+            display: 'block',
+            fontFamily: "'Manrope', sans-serif",
+          }}
+        >
+          Acompanhe suas quantidades em gramas, ml e unidades para nunca faltar ingredientes na produção.
+        </span>
+      </div>
+
+      {/* Search and Button Row - Below Header */}
+      <div
+        style={{
+          display: 'flex',
+          gap: '8px',
+          alignItems: 'center',
+          paddingLeft: '18px',
+          paddingRight: '18px',
+          marginBottom: '13px',
+          marginTop: '13px',
+        }}
+      >
+        {/* Search Input */}
+        <div style={{ flex: 1, position: 'relative' }}>
+          <Search
+            className="w-3.75 h-3.75 absolute"
+            style={{
+              color: '#A096A6',
+              left: '13px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+            }}
+          />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Filtrar por nome..."
-            className="w-full sm:w-80 pl-9 pr-3 py-2 rounded-full text-xs placeholder:text-white/50 focus:outline-none bg-white/20 text-white transition-colors"
+            placeholder="Buscar insumo no estoque..."
+            style={{
+              width: '100%',
+              padding: '11px 12px 11px 34px',
+              background: '#FFFFFF',
+              borderRadius: '14px',
+              fontSize: '11px',
+              color: '#A096A6',
+              border: 'none',
+              boxShadow: '0 6px 14px rgba(58,35,80,.07)',
+              fontFamily: "'Manrope', sans-serif",
+              outline: 'none',
+            }}
           />
         </div>
+
+        {/* Add Button */}
+        <button
+          onClick={handleOpenAdd}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            background: '#3A2350',
+            color: '#F5B9C6',
+            fontWeight: 800,
+            fontSize: '11px',
+            padding: '11px 13px',
+            borderRadius: '14px',
+            whiteSpace: 'nowrap',
+            cursor: 'pointer',
+            border: 'none',
+            boxShadow: '0 8px 16px rgba(58,35,80,.28)',
+            transition: 'transform .22s ease',
+            fontFamily: "'Manrope', sans-serif",
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+          onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+        >
+          <Plus className="w-3.5 h-3.5" />
+          Adicionar Insumo
+        </button>
       </div>
 
       {/* Form Modal / Inline Box */}
@@ -288,72 +418,64 @@ export const EstoqueModule: React.FC = () => {
         <div className="space-y-8">
           {/* Low Stock Section */}
           {lowStockItems.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-4 pb-3 border-b-2 border-[var(--color-semantic-coral)]">
-                <AlertTriangle className="w-5 h-5 text-[var(--color-semantic-coral)]" />
-                <h3 className="font-brand font-semibold text-sm text-[var(--color-neutral-charcoal)]">
-                  Alerta Baixo ({lowStockItems.length})
-                </h3>
-              </div>
-
+            <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {lowStockItems.map((item) => (
+                {lowStockItems.map((item) => {
+                  const percentage = Math.min((item.quantity / item.minThreshold) * 100, 100);
+                  const colors = getArcColor(percentage);
+
+                  return (
                   <div
                     key={item.id}
-                    className="bg-[#FBE8D6] border-2 border-[#F5D4A8] rounded-3xl p-4 transition-all shadow-card cursor-pointer"
+                    className="bg-white border border-[var(--color-neutral-light)] rounded-xl p-3.5 transition-all shadow-card cursor-pointer"
+                    style={{ backgroundColor: colors.background }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.transform = 'translateY(-4px)';
                       e.currentTarget.style.boxShadow = '0 16px 32px rgba(58,35,80,0.16)';
-                      e.currentTarget.style.borderColor = '#F0B896';
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = '0 8px 16px rgba(58,35,80,0.08)';
-                      e.currentTarget.style.borderColor = '#F5D4A8';
+                      e.currentTarget.style.boxShadow = '0 8px 20px rgba(58,35,80,.09)';
                     }}
                   >
                     {/* Item Header */}
-                    <div className="flex items-start justify-between mb-3 pb-2 border-b border-[var(--color-semantic-coral)] border-opacity-30">
+                    <div className="flex items-start justify-between mb-2.5 pb-2 border-b" style={{ borderColor: colors.stroke }}>
                       <span className="font-brand font-semibold text-sm text-[var(--color-neutral-charcoal)] flex-1 pr-2">
                         {item.name}
                       </span>
-                      <span className="bg-[var(--color-semantic-coral)] text-white text-[9px] font-semibold px-1.5 py-0.5 rounded-md uppercase shrink-0 animate-pulse">
-                        Baixo
-                      </span>
+                      {item.quantity <= item.minThreshold && (
+                        <span style={{ background: colors.stroke, color: '#FFF8F6' }} className="text-white text-[8.5px] font-semibold px-1.5 py-0.5 rounded uppercase shrink-0">
+                          Alerta
+                        </span>
+                      )}
                     </div>
 
                     {/* Arc Gauge + Quantity Display */}
-                    <div className="mb-3 pb-3 border-b border-[var(--color-neutral-light)] flex items-center justify-between gap-3">
-                      <svg width="48" height="48" viewBox="0 0 48 48" className="flex-shrink-0">
-                        <circle cx="24" cy="24" r="20" fill="none" stroke="#E8D4C4" strokeWidth="3" />
-                        <circle
-                          cx="24"
-                          cy="24"
-                          r="20"
+                    <div className="mb-2.5 pb-2.5 border-b border-[var(--color-neutral-light)] flex items-center justify-between gap-3">
+                      <svg width="56" height="48" viewBox="0 0 76 48" className="flex-shrink-0">
+                        <path d="M8 44a30 30 0 0 1 60 0" fill="none" stroke="#F1ECF2" strokeWidth="9" strokeLinecap="round"></path>
+                        <path
+                          d="M8 44a30 30 0 0 1 60 0"
                           fill="none"
-                          stroke="#D9532D"
-                          strokeWidth="3"
-                          strokeDasharray={`${Math.min(item.quantity / item.minThreshold, 1) * 125.6} 125.6`}
+                          stroke={colors.stroke}
+                          strokeWidth="9"
                           strokeLinecap="round"
-                          style={{ transform: 'rotate(-90deg)', transformOrigin: '24px 24px' }}
-                        />
-                        <text x="24" y="26" textAnchor="middle" fontSize="12" fontWeight="bold" fill="#D9532D">
-                          {Math.round((item.quantity / item.minThreshold) * 100)}%
-                        </text>
+                          strokeDasharray={`${percentage * 1.26} 126`}
+                        ></path>
                       </svg>
                       <div className="text-right flex-1">
-                        <span className="font-numbers font-brand font-semibold text-2xl text-[var(--color-neutral-charcoal)]">
-                          {item.quantity}
+                        <span className="font-numbers font-brand font-semibold text-lg text-[var(--color-neutral-charcoal)]">
+                          {item.quantity} <span className="text-xs font-normal" style={{ color: colors.text }}>{item.unit}</span>
                         </span>
-                        <span className="text-xs text-[var(--color-text-secondary)] font-normal ml-1">
-                          {item.unit}
+                        <span className="text-xs font-semibold" style={{ color: colors.text }}>
+                          {Math.round(percentage)}%
                         </span>
                       </div>
                     </div>
 
                     {/* Threshold Info */}
-                    <p className="text-[11px] text-[var(--color-text-secondary)] font-normal mb-4">
-                      Mín: {item.minThreshold} {item.unit}
+                    <p className="text-[10.5px] text-[var(--color-text-secondary)] font-normal mb-3">
+                      Alerta quando menor que: <strong style={{ color: colors.text }}>{item.minThreshold} {item.unit}</strong>
                     </p>
 
                     {/* Quantity Controls */}
@@ -394,7 +516,8 @@ export const EstoqueModule: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                ))}
+                );
+                })}
               </div>
             </div>
           )}
@@ -410,60 +533,57 @@ export const EstoqueModule: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {healthyStockItems.map((item) => (
+                {healthyStockItems.map((item) => {
+                  const percentage = Math.min((item.quantity / item.minThreshold) * 100, 100);
+                  const colors = getArcColor(percentage);
+
+                  return (
                   <div
                     key={item.id}
-                    className="bg-white border border-[var(--color-neutral-light)] rounded-3xl p-4 transition-all cursor-pointer"
+                    className="bg-white border border-[var(--color-neutral-light)] rounded-xl p-3.5 transition-all cursor-pointer"
+                    style={{ backgroundColor: colors.background }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.transform = 'translateY(-4px)';
                       e.currentTarget.style.boxShadow = '0 16px 32px rgba(58,35,80,0.16)';
-                      e.currentTarget.style.borderColor = 'var(--color-primary)';
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
-                      e.currentTarget.style.borderColor = 'var(--color-neutral-light)';
+                      e.currentTarget.style.boxShadow = '0 8px 20px rgba(58,35,80,.09)';
                     }}
                   >
                     {/* Item Header */}
-                    <div className="pb-2 border-b border-[var(--color-neutral-light)] mb-3">
+                    <div className="pb-2 border-b mb-2.5" style={{ borderColor: colors.stroke }}>
                       <span className="font-brand font-semibold text-sm text-[var(--color-neutral-charcoal)]">
                         {item.name}
                       </span>
                     </div>
 
                     {/* Arc Gauge + Quantity Display */}
-                    <div className="mb-3 pb-3 border-b border-[var(--color-neutral-light)] flex items-center justify-between gap-3">
-                      <svg width="48" height="48" viewBox="0 0 48 48" className="flex-shrink-0">
-                        <circle cx="24" cy="24" r="20" fill="none" stroke="#D4E8D7" strokeWidth="3" />
-                        <circle
-                          cx="24"
-                          cy="24"
-                          r="20"
+                    <div className="mb-2.5 pb-2.5 border-b border-[var(--color-neutral-light)] flex items-center justify-between gap-3">
+                      <svg width="56" height="48" viewBox="0 0 76 48" className="flex-shrink-0">
+                        <path d="M8 44a30 30 0 0 1 60 0" fill="none" stroke="#F1ECF2" strokeWidth="9" strokeLinecap="round"></path>
+                        <path
+                          d="M8 44a30 30 0 0 1 60 0"
                           fill="none"
-                          stroke="#4CAF7D"
-                          strokeWidth="3"
-                          strokeDasharray={`${Math.min(item.quantity / item.minThreshold, 1) * 125.6} 125.6`}
+                          stroke={colors.stroke}
+                          strokeWidth="9"
                           strokeLinecap="round"
-                          style={{ transform: 'rotate(-90deg)', transformOrigin: '24px 24px' }}
-                        />
-                        <text x="24" y="26" textAnchor="middle" fontSize="12" fontWeight="bold" fill="#4CAF7D">
-                          {Math.round((item.quantity / item.minThreshold) * 100)}%
-                        </text>
+                          strokeDasharray={`${percentage * 1.26} 126`}
+                        ></path>
                       </svg>
                       <div className="text-right flex-1">
-                        <span className="font-numbers font-brand font-semibold text-2xl text-[var(--color-neutral-charcoal)]">
-                          {item.quantity}
+                        <span className="font-numbers font-brand font-semibold text-lg text-[var(--color-neutral-charcoal)]">
+                          {item.quantity} <span className="text-xs font-normal" style={{ color: colors.text }}>{item.unit}</span>
                         </span>
-                        <span className="text-xs text-[var(--color-text-secondary)] font-normal ml-1">
-                          {item.unit}
+                        <span className="text-xs font-semibold" style={{ color: colors.text }}>
+                          {Math.round(percentage)}%
                         </span>
                       </div>
                     </div>
 
                     {/* Threshold Info */}
-                    <p className="text-[11px] text-[var(--color-text-secondary)] font-normal mb-4">
-                      Mín: {item.minThreshold} {item.unit}
+                    <p className="text-[10.5px] text-[var(--color-text-secondary)] font-normal mb-3">
+                      Alerta quando menor que: <strong style={{ color: colors.text }}>{item.minThreshold} {item.unit}</strong>
                     </p>
 
                     {/* Quantity Controls */}
@@ -504,7 +624,8 @@ export const EstoqueModule: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                ))}
+                );
+                })}
               </div>
             </div>
           )}
