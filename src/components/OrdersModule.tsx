@@ -270,53 +270,83 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
       </div>
 
       {/* Search & Filters */}
-      <div className="bg-[var(--color-surface)] p-3.5 rounded-lg border border-[#E6E1DB] shadow-card space-y-3">
+      <div className="flex flex-col gap-[11px]">
         <div className="relative">
-          <Search className="w-4 h-4 text-[var(--color-ink)]/50 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-[#A096A6] absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Buscar por nome da cliente ou descrição do produto..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-[#E6E1DB] rounded-full text-xs font-medium text-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-neutral-charcoal/20"
+            className="w-full pl-10 pr-3.5 py-2.5 bg-white rounded-full text-[11px] text-[#A096A6] focus:outline-none focus:ring-2 focus:ring-neutral-charcoal/20"
+            style={{
+              fontFamily: "'Manrope', sans-serif",
+              boxShadow: '0 6px 14px rgba(58,35,80,.07)',
+            }}
           />
         </div>
 
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-0.5">
-          <span className="text-[11px] font-bold text-[var(--color-ink)]/70 uppercase mr-1 flex items-center gap-1">
-            <Filter className="w-3 h-3" /> Status:
+        <div className="flex items-center gap-[14px] overflow-x-auto no-scrollbar" style={{ paddingBottom: '0.25rem', borderBottom: '1px solid rgba(36,27,43,.1)' }}>
+          <span className="text-[10px] font-bold text-[#9A8FA0] uppercase flex items-center gap-1" style={{ fontFamily: "'Manrope', sans-serif", letterSpacing: '.06em' }}>
+            STATUS:
           </span>
 
           <button
             onClick={() => setStatusFilter('todos')}
-            className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+            className={`px-3 py-1 text-xs font-bold transition-all cursor-pointer ${
               statusFilter === 'todos'
-                ? 'bg-[var(--color-ink)] text-[var(--color-accent-gold)] shadow-card'
-                : 'bg-white text-[var(--color-ink)] border border-[#E6E1DB] hover:bg-white/80'
+                ? 'text-[#3A2350] border-b-2 border-[#3A2350]'
+                : 'text-[#7A6E80] hover:text-[#3A2350]'
             }`}
+            style={{
+              fontSize: '12px',
+              fontFamily: "'Manrope', sans-serif",
+              fontWeight: statusFilter === 'todos' ? 800 : 600,
+              background: 'none',
+              border: 'none',
+              padding: '8px 0',
+              marginBottom: statusFilter === 'todos' ? '-1px' : '0',
+            }}
           >
             Todos ({sales.length})
           </button>
 
           <button
             onClick={() => setStatusFilter('pago')}
-            className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+            className={`text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
               statusFilter === 'pago'
-                ? 'bg-[#C8E6D7] text-[#3A5A4A] shadow-card'
-                : 'bg-white text-[var(--color-brand-900)] border border-[#E6E1DB] hover:bg-white/80'
+                ? 'text-[#3A2350] border-b-2 border-[#3A2350]'
+                : 'text-[#7A6E80] hover:text-[#3A2350]'
             }`}
+            style={{
+              fontSize: '12px',
+              fontFamily: "'Manrope', sans-serif",
+              fontWeight: statusFilter === 'pago' ? 800 : 600,
+              background: 'none',
+              border: 'none',
+              padding: '8px 0',
+              marginBottom: statusFilter === 'pago' ? '-1px' : '0',
+            }}
           >
-            <CheckCircle2 className="w-3 h-3 text-[#5A8A6F]" />
             Pagos ({paidCount})
           </button>
 
           <button
             onClick={() => setStatusFilter('pendente')}
-            className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+            className={`text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
               statusFilter === 'pendente'
-                ? 'bg-[var(--color-ink)] text-[var(--color-accent-gold)] shadow-card'
-                : 'bg-white text-[var(--color-ink)] border border-[#E6E1DB] hover:bg-white/80'
+                ? 'text-[#3A2350] border-b-2 border-[#3A2350]'
+                : 'text-[#7A6E80] hover:text-[#3A2350]'
             }`}
+            style={{
+              fontSize: '12px',
+              fontFamily: "'Manrope', sans-serif",
+              fontWeight: statusFilter === 'pendente' ? 800 : 600,
+              background: 'none',
+              border: 'none',
+              padding: '8px 0',
+              marginBottom: statusFilter === 'pendente' ? '-1px' : '0',
+            }}
           >
             <Clock className="w-3 h-3 text-semantic-warning" />
             Pendentes ({pendingCount})
