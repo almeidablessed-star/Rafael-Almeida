@@ -568,8 +568,8 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
                       <Camera className="w-3 h-3 text-[#241B2B]" /> Foto de Referência do Cliente
                     </span>
                     <div className="flex items-center gap-1.5 no-print">
-                      <label className="px-2.5 py-1 rounded-xl bg-[var(--color-pastry-pink)] hover:bg-[var(--color-pastry-pink-hover)] text-[var(--color-pastry-chocolate)] font-bold text-[10px] flex items-center gap-1 cursor-pointer transition-colors shadow-card">
-                        <Camera className="w-3 h-3 text-[var(--color-pastry-chocolate)]" />
+                      <label className="px-2.5 py-1 rounded-xl bg-[#F5B9C6] hover:bg-[#E8A0B0] text-[#3A2350] font-bold text-[10px] flex items-center gap-1 cursor-pointer transition-colors shadow-sm" style={{ fontFamily: "'Manrope', sans-serif" }}>
+                        <Camera className="w-3 h-3 text-[#3A2350]" />
                         <span>Alterar Foto</span>
                         <input
                           type="file"
@@ -581,10 +581,10 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
                       <button
                         type="button"
                         onClick={handleRemoveImage}
-                        className="px-2 py-1 rounded-xl bg-semantic-error-100 hover:bg-semantic-error-200 text-semantic-error-800 font-bold text-[10px] flex items-center gap-1 transition-colors cursor-pointer"
+                        className="px-2 py-1 rounded-xl bg-red-100 hover:bg-red-200 text-red-700 font-bold text-[10px] flex items-center gap-1 transition-colors cursor-pointer"
                         title="Remover Foto de Referência"
                       >
-                        <Trash2 className="w-3 h-3 text-semantic-error-600" />
+                        <Trash2 className="w-3 h-3 text-red-600" />
                         <span>Remover</span>
                       </button>
                     </div>
@@ -657,20 +657,20 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
             /* ======================================================== */
             <div className="space-y-3.5">
               {/* Internal Banner Header */}
-              <div className="bg-[var(--color-pastry-chocolate)] rounded-lg p-4 text-[var(--color-pastry-cream)] shadow-card border border-[var(--color-pastry-chocolate)] print-avoid-break">
+              <div className="bg-gradient-to-r from-[#3A2350] to-[#A85E86] rounded-lg p-4 text-white shadow-sm border border-white/20 print-avoid-break">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <ChefHat className="w-6 h-6 text-[var(--color-pastry-yellow)]" />
+                    <ChefHat className="w-6 h-6 text-[#A9D8B8]" />
                     <div>
-                      <h2 className="font-bold text-lg text-white">
+                      <h2 className="font-bold text-lg text-white" style={{ fontFamily: "'Instrument Serif', serif" }}>
                         FICHA TÉCNICA DE PRODUÇÃO - COZINHA
                       </h2>
-                      <p className="text-[11px] text-[var(--color-pastry-cream)]/80 font-medium">
+                      <p className="text-[11px] text-white/70 font-medium" style={{ fontFamily: "'Manrope', sans-serif" }}>
                         Somente Insumos e Ingredientes da Receita
                       </p>
                     </div>
                   </div>
-                  <span className="bg-[var(--color-pastry-yellow)] text-[var(--color-pastry-chocolate)] font-bold text-xs px-2.5 py-1 rounded-full uppercase">
+                  <span className="bg-[#A9D8B8] text-[#3A2350] font-bold text-xs px-2.5 py-1 rounded-full uppercase" style={{ fontFamily: "'Manrope', sans-serif" }}>
                     Uso Interno
                   </span>
                 </div>
@@ -678,37 +678,37 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
 
               {/* Quick Summary Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 print-avoid-break">
-                <div className="bg-white p-3 rounded-lg border border-[var(--color-text-muted)] shadow-card">
-                  <span className="label-sm text-[var(--color-pastry-chocolate)]/70 block">Cliente</span>
-                  <p className="font-bold text-xs text-[var(--color-pastry-chocolate)]">{transaction.customerName || 'Cliente'}</p>
-                  <p className="text-[10px] text-[var(--color-pastry-chocolate)]/70">{transaction.customerPhone}</p>
+                <div className="bg-white p-3 rounded-[16px] border border-[#E6E1DB] shadow-sm">
+                  <span className="text-[9px] font-black uppercase tracking-wider text-[#241B2B] block" style={{ fontFamily: "'Manrope', sans-serif" }}>Cliente</span>
+                  <p className="font-bold text-xs text-[#241B2B]">{transaction.customerName || 'Cliente'}</p>
+                  <p className="text-[10px] text-[#7A6E80]">{transaction.customerPhone}</p>
                 </div>
 
-                <div className="bg-white p-3 rounded-lg border border-[var(--color-text-muted)] shadow-card">
-                  <span className="label-sm text-[var(--color-pastry-chocolate)]/70 block">Horário de Entrega</span>
-                  <p className="font-bold text-xs text-[var(--color-pastry-chocolate)] flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5 text-[var(--color-pastry-chocolate)]" />
+                <div className="bg-white p-3 rounded-[16px] border border-[#E6E1DB] shadow-sm">
+                  <span className="text-[9px] font-black uppercase tracking-wider text-[#241B2B] block" style={{ fontFamily: "'Manrope', sans-serif" }}>Horário de Entrega</span>
+                  <p className="font-bold text-xs text-[#241B2B] flex items-center gap-1">
+                    <Clock className="w-3 h-3 text-[#241B2B]" />
                     {transaction.deliveryTime || 'Horário a definir'} ({transaction.eventDate ? formatDateBr(transaction.eventDate) : formatDateBr(transaction.date)})
                   </p>
-                  <p className="text-[10px] text-[var(--color-pastry-chocolate)]/70 truncate">{transaction.deliveryAddress || 'Retirada'}</p>
+                  <p className="text-[10px] text-[#7A6E80] truncate">{transaction.deliveryAddress || 'Retirada'}</p>
                 </div>
 
-                <div className="bg-white p-3 rounded-lg border border-[var(--color-text-muted)] shadow-card">
-                  <span className="label-sm text-[var(--color-pastry-chocolate)]/70 block">Observações do Cliente</span>
-                  <p className="font-semibold text-xs text-[var(--color-pastry-chocolate)] italic">{transaction.observations || 'Nenhuma observação especial'}</p>
+                <div className="bg-white p-3 rounded-[16px] border border-[#E6E1DB] shadow-sm">
+                  <span className="text-[9px] font-black uppercase tracking-wider text-[#241B2B] block" style={{ fontFamily: "'Manrope', sans-serif" }}>Observações do Cliente</span>
+                  <p className="font-semibold text-xs text-[#241B2B] italic">{transaction.observations || 'Nenhuma observação especial'}</p>
                 </div>
               </div>
 
               {/* Inspiration Image for Decorators - WITH UPLOAD/CHANGE/REMOVE IN KITCHEN TAB */}
               {inspirationImage ? (
-                <div className="bg-white p-3 rounded-lg border-2 border-[var(--color-pastry-light-pink)] space-y-2 print-avoid-break shadow-card">
+                <div className="bg-white p-3 rounded-[16px] border-2 border-[#F5B9C6] space-y-2 print-avoid-break shadow-sm">
                   <div className="flex items-center justify-between gap-2">
-                    <h4 className="font-bold text-xs text-[var(--color-pastry-chocolate)] flex items-center gap-1">
-                      <Camera className="w-4 h-4 text-[var(--color-pastry-chocolate)]" /> Foto de Referência para Decoração na Cozinha
+                    <h4 className="text-[9px] font-black uppercase tracking-wider text-[#241B2B] flex items-center gap-1" style={{ fontFamily: "'Manrope', sans-serif" }}>
+                      <Camera className="w-3 h-3 text-[#241B2B]" /> Foto de Referência para Decoração na Cozinha
                     </h4>
                     <div className="flex items-center gap-1.5 no-print">
-                      <label className="px-2.5 py-1 rounded-xl bg-[var(--color-pastry-pink)] hover:bg-[var(--color-pastry-pink-hover)] text-[var(--color-pastry-chocolate)] font-bold text-[10px] flex items-center gap-1 cursor-pointer transition-colors shadow-card">
-                        <Camera className="w-3 h-3 text-[var(--color-pastry-chocolate)]" />
+                      <label className="px-2.5 py-1 rounded-xl bg-[#F5B9C6] hover:bg-[#E8A0B0] text-[#3A2350] font-bold text-[10px] flex items-center gap-1 cursor-pointer transition-colors shadow-sm" style={{ fontFamily: "'Manrope', sans-serif" }}>
+                        <Camera className="w-3 h-3 text-[#3A2350]" />
                         <span>Alterar Foto</span>
                         <input
                           type="file"
@@ -720,10 +720,10 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
                       <button
                         type="button"
                         onClick={handleRemoveImage}
-                        className="px-2 py-1 rounded-xl bg-semantic-error-100 hover:bg-semantic-error-200 text-semantic-error-800 font-bold text-[10px] flex items-center gap-1 transition-colors cursor-pointer"
+                        className="px-2 py-1 rounded-xl bg-red-100 hover:bg-red-200 text-red-700 font-bold text-[10px] flex items-center gap-1 transition-colors cursor-pointer"
                         title="Remover Foto de Referência"
                       >
-                        <Trash2 className="w-3 h-3 text-semantic-error-600" />
+                        <Trash2 className="w-3 h-3 text-red-600" />
                         <span>Remover</span>
                       </button>
                     </div>
@@ -738,15 +738,15 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
                   </div>
                 </div>
               ) : (
-                <div className="bg-white p-3.5 rounded-lg border-2 border-dashed border-[var(--color-pastry-light-pink)] shadow-card no-print hover:bg-[var(--color-pastry-pink)]/10 transition-colors">
+                <div className="bg-white p-3.5 rounded-[16px] border-2 border-dashed border-[#F5B9C6] shadow-sm no-print hover:bg-[#F5B9C6]/10 transition-colors">
                   <label className="flex flex-col items-center justify-center py-3 cursor-pointer text-center space-y-1.5">
-                    <div className="w-9 h-9 rounded-full bg-[var(--color-pastry-pink)]/60 text-[var(--color-pastry-chocolate)] flex items-center justify-center shadow-card">
-                      <Upload className="w-4.5 h-4.5" />
+                    <div className="w-9 h-9 rounded-full bg-[#F5B9C6]/60 text-[#3A2350] flex items-center justify-center shadow-sm">
+                      <Upload className="w-4 h-4" />
                     </div>
-                    <span className="font-bold text-xs text-[var(--color-pastry-chocolate)]">
+                    <span className="font-bold text-xs text-[#241B2B]" style={{ fontFamily: "'Manrope', sans-serif" }}>
                       + Adicionar Foto de Referência para Cozinha
                     </span>
-                    <span className="text-[10px] text-[var(--color-pastry-chocolate)]/70 max-w-sm">
+                    <span className="text-[10px] text-[#7A6E80] max-w-sm">
                       Clique aqui para enviar a foto do modelo/bolo para a equipe de produção e decoração.
                     </span>
                     <input
@@ -762,17 +762,17 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
               {/* Breakdown of Recipe Items with Clickable Expandable Accordion */}
               <div className="space-y-3 print-avoid-break">
                 <div className="flex items-center justify-between">
-                  <h4 className="font-bold text-xs text-[var(--color-pastry-chocolate)] uppercase tracking-wider flex items-center gap-1.5">
-                    <Layers className="w-4 h-4 text-[var(--color-pastry-chocolate)]" />
+                  <h4 className="font-bold text-xs text-[#241B2B] uppercase tracking-wider flex items-center gap-1.5" style={{ fontFamily: "'Manrope', sans-serif" }}>
+                    <Layers className="w-4 h-4 text-[#241B2B]" />
                     Insumos da Produção ({recipeItems.length} {recipeItems.length === 1 ? 'item de receita' : 'itens de receita'})
                   </h4>
-                  <span className="text-[10px] text-[var(--color-pastry-chocolate)]/70 font-bold">
+                  <span className="text-[10px] text-[#7A6E80] font-bold">
                     Clique no item para abrir/fechar ingredientes
                   </span>
                 </div>
 
                 {recipeItems.length === 0 ? (
-                  <div className="bg-white p-4 rounded-lg border border-[var(--color-text-muted)] text-center text-xs text-[var(--color-pastry-chocolate)]/70 font-medium">
+                  <div className="bg-white p-4 rounded-[16px] border border-[#E6E1DB] text-center text-xs text-[#7A6E80] font-medium shadow-sm">
                     Nenhum item de receita cadastrado nesta ordem.
                   </div>
                 ) : (
@@ -783,16 +783,16 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
                     return (
                       <div
                         key={`recipe-${idx}-${itemStr}`}
-                        className="bg-white rounded-lg border-2 border-[var(--color-text-muted)] shadow-card overflow-hidden transition-all"
+                        className="bg-white rounded-[16px] border-2 border-[#E6E1DB] shadow-sm overflow-hidden transition-all"
                       >
                         {/* CLICKABLE ITEM HEADER */}
                         <button
                           type="button"
                           onClick={() => toggleAccordion(idx)}
-                          className="w-full p-3 bg-[var(--color-pastry-cream)] hover:bg-[var(--color-pastry-yellow)]/50 flex items-center justify-between text-left border-b border-[var(--color-text-muted)] transition-colors cursor-pointer"
+                          className="w-full p-3 bg-[#F6F2F5] hover:bg-[#E8D5E8] flex items-center justify-between text-left border-b border-[#E6E1DB] transition-colors cursor-pointer"
                         >
-                          <span className="font-bold text-xs text-[var(--color-pastry-chocolate)] flex items-center gap-2">
-                            <span className="w-5 h-5 rounded-full bg-[var(--color-pastry-chocolate)] text-[var(--color-pastry-pink)] text-[10px] font-bold flex items-center justify-center shrink-0">
+                          <span className="font-bold text-xs text-[#241B2B] flex items-center gap-2" style={{ fontFamily: "'Manrope', sans-serif" }}>
+                            <span className="w-5 h-5 rounded-full bg-[#3A2350] text-[#F5B9C6] text-[10px] font-bold flex items-center justify-center shrink-0">
                               {idx + 1}
                             </span>
                             <span>{itemStr}</span>
@@ -800,14 +800,14 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
 
                           <div className="flex items-center gap-2 shrink-0">
                             {ficha && (
-                              <span className="text-[10px] font-bold bg-[var(--color-pastry-pink)] text-[var(--color-pastry-chocolate)] px-2 py-0.5 rounded-full border border-[var(--color-pastry-light-pink)]/60">
+                              <span className="text-[10px] font-bold bg-[#F5B9C6] text-[#3A2350] px-2 py-0.5 rounded-full border border-[#E8A0B0]/60" style={{ fontFamily: "'Manrope', sans-serif" }}>
                                 Rendimento: {ficha.yieldInfo}
                               </span>
                             )}
                             {isOpen ? (
-                              <ChevronUp className="w-4 h-4 text-[var(--color-pastry-chocolate)]/60" />
+                              <ChevronUp className="w-4 h-4 text-[#7A6E80]" />
                             ) : (
-                              <ChevronDown className="w-4 h-4 text-[var(--color-pastry-chocolate)]/60" />
+                              <ChevronDown className="w-4 h-4 text-[#7A6E80]" />
                             )}
                           </div>
                         </button>
@@ -817,17 +817,17 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
                           <div className="p-3.5 space-y-2 bg-white animate-fadeIn">
                             {ficha && ficha.ingredients.length > 0 ? (
                               <div className="space-y-1.5">
-                                <span className="label-sm text-[var(--color-pastry-chocolate)]/70 block">
+                                <span className="text-[9px] font-black uppercase tracking-wider text-[#7A6E80] block" style={{ fontFamily: "'Manrope', sans-serif" }}>
                                   Insumos e Quantidades (Ex: 300g Farinha, 300g Açúcar):
                                 </span>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 text-xs">
                                   {ficha.ingredients.map((ing) => (
                                     <div
                                       key={ing.id}
-                                      className="bg-[var(--color-pastry-cream)] p-2 rounded-xl border border-[var(--color-text-muted)] flex items-center justify-between"
+                                      className="bg-[#F6F2F5] p-2 rounded-xl border border-[#E6E1DB] flex items-center justify-between"
                                     >
-                                      <span className="font-bold text-[var(--color-pastry-chocolate)]">🥣 {ing.name}</span>
-                                      <strong className="font-bold text-[var(--color-pastry-chocolate)] bg-[var(--color-pastry-yellow)] px-2 py-0.5 rounded-lg text-[11px]">
+                                      <span className="font-bold text-[#241B2B]">🥣 {ing.name}</span>
+                                      <strong className="font-bold text-[#3A2350] bg-[#A9D8B8] px-2 py-0.5 rounded-lg text-[11px]">
                                         {ing.quantity} {ing.unit}
                                       </strong>
                                     </div>
@@ -835,7 +835,7 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
                                 </div>
                               </div>
                             ) : (
-                              <p className="text-[11px] text-[var(--color-pastry-chocolate)]/70 font-medium italic p-2 bg-[var(--color-pastry-cream)] rounded-xl border border-[var(--color-text-muted)]">
+                              <p className="text-[11px] text-[#7A6E80] font-medium italic p-2 bg-[#F6F2F5] rounded-xl border border-[#E6E1DB]">
                                 bolo/doce artesanal. Monte os insumos base da receita padrão para {itemStr}.
                               </p>
                             )}
