@@ -364,31 +364,31 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
         }
       `}</style>
 
-      <div className="bg-white rounded-xl max-w-2xl w-full shadow-highlight overflow-hidden flex flex-col max-h-[92vh] print:max-h-none print:shadow-none print:rounded-none border-2 border-pink-300 relative" aria-label="Orçamento PDF">
-        
+      <div className="bg-white rounded-xl max-w-2xl w-full shadow-highlight overflow-hidden flex flex-col max-h-[92vh] print:max-h-none print:shadow-none print:rounded-none border-2 border-pink-200 relative" aria-label="Orçamento PDF">
+
         {/* STICKY TOP CONTROL BAR - ALWAYS VISIBLE & CLEAR ON ALL DEVICES */}
-        <div className="p-2.5 sm:p-3 bg-[var(--color-pastry-chocolate)] text-[var(--color-pastry-cream)] flex items-center justify-between gap-2 no-print shrink-0 sticky top-0 z-50 border-b border-[var(--color-pastry-chocolate)]/20">
+        <div className="p-2.5 sm:p-3 bg-gradient-to-r from-[#3A2350] to-[#A85E86] text-white flex items-center justify-between gap-2 no-print shrink-0 sticky top-0 z-50 border-b border-white/10">
           {/* Mode Switcher */}
           <div className="flex items-center gap-1 bg-white/10 p-1 rounded-lg">
             <button
               onClick={() => setActiveTab('cliente')}
               className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeTab === 'cliente'
-                  ? 'bg-[var(--color-pastry-pink)] text-[var(--color-pastry-chocolate)] shadow-card font-extrabold'
-                  : 'text-[var(--color-pastry-cream)]/80 hover:text-white'
+                  ? 'bg-[#F5B9C6] text-[#3A2350] shadow-card font-extrabold'
+                  : 'text-white/70 hover:text-white'
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5 text-[var(--color-pastry-chocolate)]" /> Folha do Cliente
+              <Sparkles className="w-3.5 h-3.5" /> Folha do Cliente
             </button>
             <button
               onClick={() => setActiveTab('cozinha')}
               className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeTab === 'cozinha'
-                  ? 'bg-[var(--color-pastry-yellow)] text-[var(--color-pastry-chocolate)] shadow-card font-extrabold'
-                  : 'text-[var(--color-pastry-cream)]/80 hover:text-white'
+                  ? 'bg-[#A9D8B8] text-[#3A2350] shadow-card font-extrabold'
+                  : 'text-white/70 hover:text-white'
               }`}
             >
-              <ChefHat className="w-3.5 h-3.5 text-[var(--color-pastry-chocolate)]" /> Cozinha
+              <ChefHat className="w-3.5 h-3.5" /> Cozinha
             </button>
           </div>
 
@@ -397,10 +397,10 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
             <button
               onClick={handleDownloadPdf}
               disabled={isGeneratingPdf}
-              className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-[var(--color-pastry-pink)] hover:bg-[var(--color-pastry-pink-hover)] text-[var(--color-pastry-chocolate)] text-[11px] sm:text-xs font-black flex items-center gap-1 shadow-card active:scale-95 transition-all cursor-pointer"
+              className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-[#F5B9C6] hover:bg-[#E8A0B0] text-[#3A2350] text-[11px] sm:text-xs font-black flex items-center gap-1 shadow-card active:scale-95 transition-all cursor-pointer"
               title="Baixar arquivo PDF no seu celular ou computador"
             >
-              <FileText className="w-3.5 h-3.5 text-[var(--color-pastry-chocolate)]" />
+              <FileText className="w-3.5 h-3.5" />
               <span>{isGeneratingPdf ? 'Gerando PDF...' : 'Baixar PDF'}</span>
             </button>
 
@@ -408,7 +408,7 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
             <button
               onClick={handleDownloadImage}
               disabled={isGeneratingImage}
-              className="px-2.5 py-1.5 rounded-xl bg-semantic-success-800 hover:bg-semantic-success-900 text-white text-[11px] sm:text-xs font-bold flex items-center gap-1 shadow-card active:scale-95 transition-all cursor-pointer"
+              className="px-2.5 py-1.5 rounded-xl bg-[#A9D8B8] hover:bg-[#91CFA8] text-[#3A2350] text-[11px] sm:text-xs font-bold flex items-center gap-1 shadow-card active:scale-95 transition-all cursor-pointer"
               title="Baixar imagem PNG para enviar pelo WhatsApp"
             >
               <Download className="w-3.5 h-3.5" />
@@ -418,26 +418,26 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
             {/* Print/PDF Button */}
             <button
               onClick={handlePrint}
-              className="px-2.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-[var(--color-pastry-cream)] text-[11px] sm:text-xs font-bold flex items-center gap-1 transition-all cursor-pointer"
+              className="px-2.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-white text-[11px] sm:text-xs font-bold flex items-center gap-1 transition-all cursor-pointer"
               title="Imprimir ou Salvar pelo Navegador"
             >
-              <Printer className="w-3.5 h-3.5 text-[var(--color-pastry-pink)]" />
+              <Printer className="w-3.5 h-3.5" />
               <span className="hidden md:inline">Imprimir</span>
             </button>
 
             {/* COPY TEXT */}
             <button
               onClick={handleCopyText}
-              className="p-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-[var(--color-pastry-pink)] cursor-pointer"
+              className="p-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-[#F5B9C6] cursor-pointer"
               title="Copiar texto do pedido"
             >
-              {copied ? <Check className="w-4 h-4 text-semantic-success-400" /> : <Copy className="w-4 h-4" />}
+              {copied ? <Check className="w-4 h-4 text-[#A9D8B8]" /> : <Copy className="w-4 h-4" />}
             </button>
 
             {/* BIG CLEAR PROMINENT CLOSE BUTTON */}
             <button
               onClick={onClose}
-              className="px-2.5 py-1.5 rounded-xl bg-semantic-error-700 hover:bg-semantic-error-800 text-white text-[11px] sm:text-xs font-bold flex items-center gap-1 shadow-card active:scale-95 transition-all shrink-0 ml-1 cursor-pointer"
+              className="px-2.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-[11px] sm:text-xs font-bold flex items-center gap-1 shadow-card active:scale-95 transition-all shrink-0 ml-1 cursor-pointer"
               title="Fechar Janela"
             >
               <X className="w-4 h-4 stroke-[3]" />
@@ -449,7 +449,7 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
         {/* PRINTABLE DOCUMENT BODY */}
         <div
           id="quote-pdf-document"
-          className="p-4 sm:p-6 overflow-y-auto space-y-4 bg-[var(--color-pastry-cream)] text-[var(--color-pastry-chocolate)] print:p-2 print:bg-white"
+          className="p-4 sm:p-6 overflow-y-auto space-y-4 bg-[#F6F2F5] text-[#241B2B] print:p-2 print:bg-white"
         >
           {activeTab === 'cliente' ? (
             /* ======================================================== */
@@ -457,7 +457,7 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
             /* ======================================================== */
             <div className="space-y-3.5">
               {/* Header Banner - Groovy Brand Identity */}
-              <div className="bg-[var(--color-pastry-yellow)] rounded-lg p-3.5 text-[var(--color-pastry-chocolate)] shadow-card border border-[var(--color-pastry-light-pink)]/60 print:border-neutral-300 print:bg-none print:text-neutral-900 print-avoid-break">
+              <div className="bg-gradient-to-r from-[#3A2350] to-[#A85E86] rounded-lg p-3.5 text-white shadow-card border border-white/20 print:border-neutral-300 print:bg-white print:text-neutral-900 print-avoid-break">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-lg bg-white border-2 border-[var(--color-pastry-light-pink)] shadow-card flex items-center justify-center overflow-hidden shrink-0">
