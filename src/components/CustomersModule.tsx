@@ -488,23 +488,37 @@ export const CustomersModule: React.FC = () => {
     <div className="space-y-5 pb-12 animate-fadeIn">
       {/* Top Title Header - Roxo Gradiente */}
       <div
-        className="rounded-[22px] p-6 text-white shadow-highlight"
+        className="text-white overflow-hidden"
         style={{
-          background: 'linear-gradient(155deg, var(--color-brand-900) 0%, var(--color-brand-700) 60%, var(--color-brand-500) 100%)',
+          background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
+          borderRadius: '40px',
+          padding: '20px',
+          boxShadow: '0 30px 70px rgba(58,35,80,0.26)',
         }}
       >
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: 'var(--color-rose-200)' }}>
-            <Users className="w-7 h-7" style={{ color: 'var(--color-brand-900)' }} />
-          </div>
-          <div>
-            <h2 className="font-marca text-3xl text-white" style={{ lineHeight: 1 }}>
-              Clientes
-            </h2>
-            <p className="text-xs text-white/80 font-semibold mt-2">
-              {customers.length} {customers.length === 1 ? 'cliente cadastrada' : 'clientes cadastradas'}
-            </p>
-          </div>
+        <div className="flex flex-col items-center text-center">
+          {/* Title */}
+          <span
+            className="text-white font-serif-display"
+            style={{
+              fontSize: '28px',
+              lineHeight: 1,
+            }}
+          >
+            Clientes
+          </span>
+          {/* Subtitle */}
+          <span
+            style={{
+              fontSize: '10px',
+              color: 'rgba(255,255,255,0.7)',
+              fontFamily: "'Manrope', sans-serif",
+              fontWeight: 500,
+              marginTop: '8px',
+            }}
+          >
+            {customers.length} {customers.length === 1 ? 'cliente cadastrada' : 'clientes cadastradas'}
+          </span>
         </div>
       </div>
 
@@ -517,21 +531,66 @@ export const CustomersModule: React.FC = () => {
       )}
 
       {/* SEARCH BAR & ADD BUTTON */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
-        <div className="relative flex-1">
-          <Search className="w-4 h-4 text-[var(--color-neutral-charcoal)]/40 absolute left-3.5 top-1/2 -translate-y-1/2" />
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '9px',
+          paddingLeft: '18px',
+          paddingRight: '18px',
+        }}
+      >
+        <div style={{ position: 'relative' }}>
+          <Search
+            className="w-4 h-4 absolute top-1/2 -translate-y-1/2"
+            style={{
+              color: '#A096A6',
+              left: '13px',
+            }}
+          />
           <input
             type="text"
             placeholder="Buscar cliente por nome, telefone ou cidade..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-[var(--color-accent-gold)]/50 rounded-lg text-xs font-bold text-[var(--color-neutral-charcoal)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)] shadow-card"
+            style={{
+              width: '100%',
+              padding: '11px 12px 11px 34px',
+              background: '#FFFFFF',
+              borderRadius: '14px',
+              fontSize: '11px',
+              color: '#A096A6',
+              border: 'none',
+              boxShadow: '0 6px 14px rgba(58,35,80,.07)',
+              fontFamily: "'Manrope', sans-serif",
+              outline: 'none',
+            }}
+            onFocus={(e) => e.currentTarget.style.boxShadow = '0 6px 14px rgba(58,35,80,.07)'}
+            onBlur={(e) => e.currentTarget.style.boxShadow = '0 6px 14px rgba(58,35,80,.07)'}
           />
         </div>
 
         <button
           onClick={handleOpenAdd}
-          className="py-2.5 px-4 bg-[var(--color-neutral-charcoal)] hover:bg-black text-[var(--color-accent-gold)] font-bold text-xs rounded-lg shadow-card active:scale-95 transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '7px',
+            background: '#3A2350',
+            color: '#F5B9C6',
+            fontFamily: "'Manrope', sans-serif",
+            fontWeight: 800,
+            fontSize: '11.5px',
+            padding: '12px',
+            borderRadius: '14px',
+            cursor: 'pointer',
+            border: 'none',
+            boxShadow: '0 10px 20px rgba(58,35,80,.3)',
+            transition: 'transform .22s ease',
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+          onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
         >
           <Plus className="w-4 h-4 stroke-[3]" />
           <span>Cadastrar Nova Cliente</span>
@@ -732,7 +791,13 @@ export const CustomersModule: React.FC = () => {
       )}
 
       {/* CUSTOMERS LIST */}
-      <div className="space-y-3">
+      <div
+        className="space-y-3"
+        style={{
+          paddingLeft: '18px',
+          paddingRight: '18px',
+        }}
+      >
         {filteredCustomers.length === 0 ? (
           <div className="p-8 rounded-xl bg-white border border-dashed border-[var(--color-accent-gold)]/40 text-center space-y-2">
             <Users className="w-10 h-10 text-[var(--color-neutral-charcoal)]/30 mx-auto" />
@@ -748,101 +813,301 @@ export const CustomersModule: React.FC = () => {
             return (
               <div
                 key={c.id}
-                className="p-4 rounded-xl border border-[var(--color-accent-gold)]/40 bg-white shadow-card hover:border-[var(--color-accent-gold)] transition-all space-y-2.5"
+                className="bg-white shadow-card transition-all overflow-hidden"
+                style={{
+                  borderRadius: '24px',
+                }}
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-1 min-w-0 flex-1">
-                    <div className="flex items-center gap-2.5 flex-wrap">
-                      {/* Customer Photo Avatar */}
-                      <div className="w-9 h-9 rounded-full border-2 border-[var(--color-accent-gold)] bg-[var(--color-accent-gold)] text-[var(--color-neutral-charcoal)] flex items-center justify-center overflow-hidden shrink-0 shadow-card">
-                        {c.photoUrl ? (
-                          <img src={c.photoUrl} alt={c.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <User className="w-4 h-4 text-[var(--color-neutral-charcoal)]" />
-                        )}
-                      </div>
+                {/* GRADIENT HEADER */}
+                <div
+                  style={{
+                    background: 'linear-gradient(140deg,#3A2350,#6E3F72 60%,#A85E86)',
+                    padding: '14px 15px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                  }}
+                >
+                  {/* Avatar */}
+                  <div
+                    style={{
+                      width: '46px',
+                      height: '46px',
+                      borderRadius: '50%',
+                      background: 'rgba(255,255,255,.16)',
+                      border: '1px solid rgba(255,255,255,.3)',
+                      color: '#FFFFFF',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontFamily: "'Instrument Serif', serif",
+                      fontSize: '21px',
+                      flexShrink: 0,
+                    }}
+                  >
+                    {c.photoUrl ? (
+                      <img src={c.photoUrl} alt={c.name} className="w-full h-full object-cover" style={{ borderRadius: '50%' }} />
+                    ) : (
+                      c.name.charAt(0).toUpperCase()
+                    )}
+                  </div>
 
-                      <span className="font-bold text-base text-[var(--color-neutral-charcoal)]">
-                        {c.name}
+                  {/* Name and City */}
+                  <div
+                    style={{
+                      flex: 1,
+                      minWidth: 0,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '4px',
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontFamily: "'Instrument Serif', serif",
+                        fontSize: '21px',
+                        color: '#FFFFFF',
+                        lineHeight: 1.1,
+                      }}
+                    >
+                      {c.name}
+                    </span>
+                    {c.city && (
+                      <span
+                        style={{
+                          alignSelf: 'flex-start',
+                          fontSize: '9.5px',
+                          fontWeight: 800,
+                          color: '#3A2350',
+                          background: '#F0E2C8',
+                          padding: '3px 9px',
+                          borderRadius: '999px',
+                          fontFamily: "'Manrope', sans-serif",
+                        }}
+                      >
+                        📍 {c.city}
                       </span>
+                    )}
+                  </div>
 
-                      {c.city && (
-                        <span className="bg-[var(--color-pastry-lavender)] text-[var(--color-neutral-charcoal)] text-[10px] font-bold px-2 py-0.5 rounded-full">
-                          📍 {c.city}
-                        </span>
-                      )}
-                    </div>
+                  {/* WhatsApp Icon */}
+                  <button
+                    onClick={() => handleSendReminder(c)}
+                    style={{
+                      width: '34px',
+                      height: '34px',
+                      borderRadius: '12px',
+                      background: '#F5B9C6',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      flexShrink: 0,
+                      border: 'none',
+                      boxShadow: '0 6px 14px rgba(0,0,0,.2)',
+                      transition: 'transform .2s ease',
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+                    onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                    title="Enviar mensagem no WhatsApp"
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3A2350" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 11.5a8.4 8.4 0 0 1-12.3 7.4L3 21l2.2-5.5A8.4 8.4 0 1 1 21 11.5z"></path>
+                    </svg>
+                  </button>
+                </div>
 
-                    <div className="flex items-center gap-3 text-xs text-[var(--color-neutral-charcoal)]/80 flex-wrap">
-                      <span className="font-bold flex items-center gap-1 text-[var(--color-neutral-charcoal)]">
+                {/* CARD CONTENT */}
+                <div
+                  style={{
+                    padding: '14px 15px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '11px',
+                  }}
+                >
+                  <div className="flex items-center gap-3 flex-wrap justify-between">
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <span
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          fontSize: '10.5px',
+                          fontWeight: 700,
+                          color: '#241B2B',
+                          background: '#F6F2F5',
+                          padding: '4px 9px',
+                          borderRadius: '999px',
+                          fontFamily: "'Manrope', sans-serif",
+                        }}
+                      >
                         📞 {c.phone}
                       </span>
                       {c.address && (
-                        <span className="text-[var(--color-neutral-charcoal)]/60 truncate">
+                        <span
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            fontSize: '10.5px',
+                            fontWeight: 600,
+                            color: '#5B4A6B',
+                            background: '#F6F2F5',
+                            padding: '4px 9px',
+                            borderRadius: '999px',
+                            fontFamily: "'Manrope', sans-serif",
+                          }}
+                          title={c.address}
+                        >
                           🏠 {c.address}
                         </span>
                       )}
                     </div>
 
-                    {c.notes && (
-                      <p className="text-[11px] text-[var(--color-neutral-charcoal)]/70 italic bg-[var(--color-neutral-hero)] p-2 rounded-xl border border-[var(--color-accent-gold)]/30">
-                        📝 "{c.notes}"
-                      </p>
-                    )}
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        onClick={() => handleOpenEdit(c)}
+                        style={{
+                          width: '28px',
+                          height: '28px',
+                          background: '#F6F2F5',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: '50%',
+                          border: 'none',
+                          cursor: 'pointer',
+                          transition: 'background .2s ease',
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = '#EFE6F0'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = '#F6F2F5'}
+                        title="Editar Cliente"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" style={{ stroke: '#7A6E80', strokeWidth: 2 }} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(c.id)}
+                        style={{
+                          width: '28px',
+                          height: '28px',
+                          background: '#F6F2F5',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: '50%',
+                          border: 'none',
+                          cursor: 'pointer',
+                          transition: 'background .2s ease',
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = '#FBE9EC'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = '#F6F2F5'}
+                        title="Excluir Cliente"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" style={{ stroke: '#C4626F', strokeWidth: 2 }} />
+                      </button>
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-1 shrink-0">
-                    <button
-                      onClick={() => handleSendReminder(c)}
-                      className="p-2 rounded-xl bg-[var(--color-neutral-charcoal)] text-[var(--color-accent-gold)] hover:bg-black font-bold text-xs flex items-center gap-1 transition-colors cursor-pointer"
-                      title="Mandar mensagem no WhatsApp sem ano e sem link"
-                    >
-                      <MessageCircle className="w-4 h-4 text-[var(--color-accent-gold)]" />
-                    </button>
-                    <button
-                      onClick={() => handleOpenEdit(c)}
-                      className="p-2 rounded-xl text-[var(--color-neutral-charcoal)]/60 hover:text-[var(--color-neutral-charcoal)] hover:bg-[var(--color-neutral-hero)] transition-colors cursor-pointer"
-                      title="Editar Cliente"
-                    >
-                      <Edit3 className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(c.id)}
-                      className="p-2 rounded-xl text-[var(--color-neutral-charcoal)]/40 hover:text-semantic-error hover:bg-semantic-error/10 transition-colors cursor-pointer"
-                      title="Excluir Cliente"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
+                  {c.notes && (
+                    <p className="text-[11px] text-[var(--color-neutral-charcoal)]/70 italic bg-[var(--color-neutral-hero)] p-2 rounded-xl border border-[var(--color-accent-gold)]/30">
+                      📝 "{c.notes}"
+                    </p>
+                  )}
                 </div>
 
                 {/* EXPANDABLE COMMEMORATIVE DATES SECTION */}
-                <div className="pt-2 border-t border-[var(--color-accent-gold)]/30 mt-1">
+                <div
+                  style={{
+                    paddingTop: '8px',
+                    paddingBottom: '14px',
+                    paddingLeft: '15px',
+                    paddingRight: '15px',
+                  }}
+                >
                   <button
                     type="button"
                     onClick={() => setExpandedDatesCustomerId(expandedDatesCustomerId === c.id ? null : c.id)}
-                    className="w-full py-2 px-3 rounded-lg bg-[var(--color-neutral-hero)] hover:bg-[var(--color-accent-gold)]/30 text-[var(--color-neutral-charcoal)] text-xs font-bold flex items-center justify-between transition-all cursor-pointer border border-[var(--color-accent-gold)]/40 shadow-card"
+                    style={{
+                      background: '#F6F2F5',
+                      border: '1px solid rgba(36,27,43,.08)',
+                      borderRadius: '16px 16px 0 0',
+                      borderBottomWidth: '0px',
+                      padding: '7px 13px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '8px',
+                      cursor: 'pointer',
+                      transition: 'background .2s ease',
+                      width: '100%',
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = '#EFE6F0'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = '#F6F2F5'}
                   >
-                    <span className="flex items-center gap-2">
-                      <span className="text-sm">🗓️</span>
+                    <span
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        fontSize: '11.5px',
+                        fontWeight: 800,
+                        color: '#241B2B',
+                        fontFamily: "'Manrope', sans-serif",
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      <span>🗓️</span>
                       <span>Todas as Datas Comemorativas</span>
                     </span>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] font-black bg-[var(--color-neutral-charcoal)] text-[var(--color-accent-gold)] px-2.5 py-0.5 rounded-full">
+                      <span
+                        style={{
+                          fontSize: '9.5px',
+                          fontWeight: 600,
+                          background: '#3A2350',
+                          color: '#F5B9C6',
+                          padding: '2px 8px',
+                          borderRadius: '999px',
+                          fontFamily: "'Manrope', sans-serif",
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
                         {cEvents.length} {cEvents.length === 1 ? 'data' : 'datas'}
                       </span>
                       {expandedDatesCustomerId === c.id ? (
-                        <ChevronUp className="w-4 h-4 text-[var(--color-neutral-charcoal)]" />
+                        <ChevronUp className="w-4 h-4" style={{ color: '#3A2350' }} />
                       ) : (
-                        <ChevronDown className="w-4 h-4 text-[var(--color-neutral-charcoal)]" />
+                        <ChevronDown className="w-4 h-4" style={{ color: '#3A2350' }} />
                       )}
                     </div>
                   </button>
 
                   {/* Collapsible content: only visible when opened */}
                   {expandedDatesCustomerId === c.id && (
-                    <div className="mt-2.5 space-y-2 p-3 bg-[var(--color-neutral-hero)]/60 rounded-lg border border-[var(--color-accent-gold)]/40 animate-fadeIn">
-                      <p className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--color-neutral-charcoal)]/80">
+                    <div
+                      style={{
+                        background: '#FAF7FA',
+                        border: '1px solid rgba(36,27,43,.08)',
+                        borderTop: 'none',
+                        borderRadius: '0 0 16px 16px',
+                        padding: '12px',
+                        marginTop: '-11px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '8px',
+                      }}
+                    >
+                      <p
+                        style={{
+                          fontSize: '9.5px',
+                          fontWeight: 800,
+                          letterSpacing: '.06em',
+                          color: '#7A6E80',
+                          textTransform: 'uppercase',
+                          fontFamily: "'Manrope', sans-serif",
+                        }}
+                      >
                         🗓️ Datas e Lembretes de {c.name}:
                       </p>
 
@@ -850,21 +1115,42 @@ export const CustomersModule: React.FC = () => {
                         {cEvents.map((ev, idx) => (
                           <div
                             key={idx}
-                            className={`p-2.5 rounded-xl border flex items-center justify-between gap-2 text-xs ${
-                              ev.isHoliday
-                                ? 'bg-[var(--color-pastry-lavender)]/30 border-[var(--color-pastry-lavender)]'
-                                : 'bg-white border-[var(--color-accent-gold)]/50 shadow-card'
-                            }`}
+                            style={{
+                              padding: '9px 11px',
+                              borderRadius: '13px',
+                              border: '1px solid rgba(36,27,43,.06)',
+                              background: '#FFFFFF',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              gap: '9px',
+                            }}
                           >
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center gap-1">
+                            <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '1px' }}>
                                 {ev.isHoliday ? <Gift className="w-3.5 h-3.5 text-[var(--color-neutral-charcoal)] shrink-0" /> : <Cake className="w-3.5 h-3.5 text-[var(--color-neutral-charcoal)] shrink-0" />}
-                                <span className="font-bold text-[var(--color-neutral-charcoal)] truncate">
+                                <span
+                                  style={{
+                                    fontSize: '11px',
+                                    fontWeight: 700,
+                                    color: '#241B2B',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                    fontFamily: "'Manrope', sans-serif",
+                                  }}
+                                >
                                   {ev.title}
                                 </span>
                               </div>
-                              <p className="text-[11px] font-black text-[var(--color-neutral-charcoal)] mt-0.5">
-                                Data: <span className="bg-[var(--color-pastry-yellow)] px-1.5 py-0.2 rounded text-[var(--color-neutral-charcoal)]">{ev.dateShort}</span>
+                              <p
+                                style={{
+                                  fontSize: '10px',
+                                  color: '#7A6E80',
+                                  fontFamily: "'Manrope', sans-serif",
+                                }}
+                              >
+                                Data: <span style={{ color: '#241B2B', background: '#F0E2C8', padding: '1px 6px', borderRadius: '5px' }}>{ev.dateShort}</span>
                               </p>
                             </div>
 
@@ -890,18 +1176,84 @@ export const CustomersModule: React.FC = () => {
       </div>
 
       {/* WHATSAPP BUSINESS CONFIG AT THE BOTTOM OF THE TAB */}
-      <div className="pt-4 border-t border-[var(--color-accent-gold)]/40 flex items-center justify-between flex-wrap gap-3 bg-white p-4 rounded-xl border border-[var(--color-accent-gold)]/40 shadow-card">
-        <div className="flex items-center gap-2.5">
-          <div className="p-2 bg-semantic-success/20 text-semantic-success rounded-xl">
-            <MessageCircle className="w-5 h-5 text-semantic-success" />
-          </div>
-          <div>
-            <h4 className="font-bold text-sm text-[var(--color-neutral-charcoal)]">
+      <div
+        style={{
+          marginLeft: '18px',
+          marginRight: '18px',
+        }}
+      >
+        <div
+          style={{
+            background: '#FFFFFF',
+            borderRadius: '22px',
+            padding: '15px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '10px',
+            flexWrap: 'wrap',
+            boxShadow: '0 8px 20px rgba(58,35,80,.09)',
+          }}
+        >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            minWidth: 0,
+          }}
+        >
+          <span
+            style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '50%',
+              background: '#25D366',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+            </svg>
+          </span>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '2px',
+              minWidth: 0,
+            }}
+          >
+            <span
+              style={{
+                fontFamily: "'Instrument Serif',serif",
+                fontSize: '17px',
+                color: '#241B2B',
+                lineHeight: 1.15,
+              }}
+            >
               Envio via WhatsApp
-            </h4>
-            <p className="text-[11px] text-[var(--color-neutral-charcoal)]/70 font-medium">
-              Modo atual: <strong className="text-semantic-success font-extrabold">{waPreference === 'business' ? 'WhatsApp Business' : waPreference === 'standard' ? 'WhatsApp Comum' : 'Perguntar Sempre'}</strong>
-            </p>
+            </span>
+            <span
+              style={{
+                fontSize: '10.5px',
+                color: '#7A6E80',
+                fontFamily: "'Manrope', sans-serif",
+              }}
+            >
+              Modo atual:{' '}
+              <strong
+                style={{
+                  color: '#4C7358',
+                  fontWeight: 600,
+                }}
+              >
+                {waPreference === 'business' ? 'WhatsApp Business' : waPreference === 'standard' ? 'WhatsApp Comum' : 'Perguntar Sempre'}
+              </strong>
+            </span>
           </div>
         </div>
 
@@ -911,12 +1263,33 @@ export const CustomersModule: React.FC = () => {
               handleSendReminder(customers[0], undefined, undefined, undefined, true);
             }
           }}
-          className="px-4 py-2 rounded-lg bg-semantic-success hover:bg-semantic-success/90 text-white font-bold text-xs flex items-center gap-2 shadow-card transition-all active:scale-95 cursor-pointer"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            background: '#4C7358',
+            color: '#FFFFFF',
+            fontSize: '11px',
+            fontWeight: 800,
+            padding: '9px 13px',
+            borderRadius: '14px',
+            whiteSpace: 'nowrap',
+            cursor: 'pointer',
+            border: 'none',
+            boxShadow: '0 8px 16px rgba(76,115,88,.3)',
+            transition: 'transform .22s ease',
+            fontFamily: "'Manrope', sans-serif",
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+          onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
           title="Configurar aplicativo do WhatsApp"
         >
-          <MessageCircle className="w-4 h-4 text-white" />
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 11.5a8.4 8.4 0 0 1-12.3 7.4L3 21l2.2-5.5A8.4 8.4 0 1 1 21 11.5z"></path>
+          </svg>
           <span>Configurar WhatsApp</span>
         </button>
+        </div>
       </div>
 
       {/* WHATSAPP SELECTOR & SEND MODAL */}
