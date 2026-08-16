@@ -395,7 +395,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                     top: 0,
                     bottom: 0,
                     width: '6px',
-                    background: isPending ? 'var(--color-sand-200)' : 'var(--color-brand-900)',
+                    background: isPending ? 'linear-gradient(180deg, #E4D9C3, #B08D57)' : 'linear-gradient(180deg, #8F5A9C, #C4626F)',
                   }}
                 />
 
@@ -482,19 +482,25 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                     {onEditTransaction && (
                       <button
                         onClick={() => onEditTransaction(tx)}
-                        className="p-1.5 rounded-full text-[var(--color-ink)]/70 hover:text-[var(--color-ink)] hover:bg-white/80 transition-colors cursor-pointer"
+                        className="rounded-full transition-all cursor-pointer"
+                        style={{ width: '28px', height: '28px', background: '#F6F2F5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = '#EFE6F0'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = '#F6F2F5'}
                         title="Editar"
                       >
-                        <Edit3 className="w-4 h-4" />
+                        <Edit3 className="w-3.5 h-3.5" style={{ stroke: '#7A6E80', strokeWidth: 2 }} />
                       </button>
                     )}
                     {onDeleteTransaction && (
                       <button
                         onClick={() => onDeleteTransaction(tx)}
-                        className="p-1.5 rounded-full text-[var(--color-ink)]/70 hover:text-semantic-error hover:bg-semantic-error/10 transition-colors cursor-pointer"
+                        className="rounded-full transition-all cursor-pointer"
+                        style={{ width: '28px', height: '28px', background: '#F6F2F5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = '#FBE9EC'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = '#F6F2F5'}
                         title="Excluir"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3.5 h-3.5" style={{ stroke: '#C4626F', strokeWidth: 2 }} />
                       </button>
                     )}
                     </div>
