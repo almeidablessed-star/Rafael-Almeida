@@ -86,7 +86,8 @@
       "Bash(node -c \"C:\\\\Users\\\\Rafael\\\\Documents\\\\projetos\\\\carula\\\\src\\\\utils\\\\weeklyArchiveUtils.ts\")",
       "Bash(xargs grep -l \"calculateBalances\")",
       "Bash(node \".claude/skills/impeccable/scripts/context.mjs\" --target \"src/components/Dashboard.tsx\")",
-      "Bash(node \".claude/skills/impeccable/scripts/pin.mjs\" unpin overused-font)"
+      "Bash(node \".claude/skills/impeccable/scripts/pin.mjs\" unpin overused-font)",
+      "Bash(git commit *)"
     ]
   },
   "hooks": {

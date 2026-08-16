@@ -495,15 +495,15 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
           {/* Button */}
           <button
             onClick={handleOpenAdd}
-            className="px-3 py-2 rounded-xl text-[10px] font-black flex items-center gap-1.5 cursor-pointer transition-all active:scale-95 shrink-0"
+            className="px-3 py-2 rounded-xl text-[10px] font-black cursor-pointer transition-all active:scale-95 shrink-0"
             style={{
               background: '#F5B9C6',
               color: '#3A2350',
+              fontFamily: "'Manrope', sans-serif",
             }}
             title="Adicionar nova ficha"
           >
-            <Plus size={12} strokeWidth={2.5} />
-            <span>Nova Ficha</span>
+            Nova Ficha
           </button>
         </div>
 
