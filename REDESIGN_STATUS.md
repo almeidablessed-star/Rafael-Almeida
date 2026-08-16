@@ -87,10 +87,18 @@
 
 ---
 
+### 5. **Aba Saldos** ✅ ESTRUTURA COMPLETA
+- ✅ Cabeçalho roxo com badge "GESTÃO REAL"
+- ✅ Card "SALDO TOTAL DISPONÍVEL" com valor e barra de divisão
+- ✅ Cards de categoria (REPOSIÇÃO, MÃO DE OBRA, CUSTO + INVESTIMENTO)
+- ✅ Formulário para lançar compras/despesas
+- ✅ Histórico de compras com filtros
+
+---
+
 ## ⏳ PRÓXIMAS ABAS A IMPLEMENTAR
 
 - [ ] **Clientes** — Implementar conforme padrão
-- [ ] **Saldos** — Implementar conforme padrão
 
 ---
 
