@@ -485,44 +485,61 @@ export const CustomersModule: React.FC = () => {
   });
 
   return (
-    <div className="space-y-5 pb-12 animate-fadeIn">
-      {/* Top Title Header - Roxo Gradiente */}
+    <div className="space-y-4 animate-fadeIn pb-12">
+      {/* Header Card — Flutuante com cabeçalho roxo */}
       <div
-        className="text-white overflow-hidden"
+        className="overflow-hidden shadow-card"
         style={{
-          background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
-          padding: '40px 20px',
-          margin: '0 calc(-50vw + 50%)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '16px',
+          boxShadow: '0 30px 70px rgba(58,35,80,.26)',
         }}
       >
-        {/* Title */}
-        <span
-          className="text-white font-serif-display"
+        {/* Header with Title only */}
+        <div
+          className="px-5 py-10 flex items-center justify-between gap-4 rounded-t-[40px]"
           style={{
-            fontSize: '28px',
-            lineHeight: 1,
+            background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
           }}
         >
-          Clientes
-        </span>
-        {/* Button */}
-        <button
-          onClick={handleOpenAdd}
-          className="px-3 py-2 rounded-xl text-[10px] font-black cursor-pointer transition-all active:scale-95 shrink-0"
+          {/* Title */}
+          <span
+            className="text-white leading-tight flex-1"
+            style={{
+              fontFamily: "'Instrument Serif', serif",
+              fontSize: '31px',
+              lineHeight: '1.1',
+            }}
+          >
+            Clientes
+          </span>
+
+          {/* Button */}
+          <button
+            onClick={handleOpenAdd}
+            className="px-3 py-2 rounded-xl text-[10px] font-black cursor-pointer transition-all active:scale-95 shrink-0"
+            style={{
+              background: '#F5B9C6',
+              color: '#3A2350',
+              fontFamily: "'Manrope', sans-serif",
+            }}
+            title="Adicionar novo cliente"
+          >
+            Novo Cliente
+          </button>
+        </div>
+
+        {/* Content Section */}
+        <div className="flex flex-col gap-5"
           style={{
-            background: '#F5B9C6',
-            color: '#3A2350',
-            fontFamily: "'Manrope', sans-serif",
+            marginTop: '-14px',
+            background: '#F6F2F5',
+            borderRadius: '28px 28px 0 0',
+            position: 'relative',
+            padding: '20px',
+            margin: '0 calc(-50vw + 50%)',
+            paddingLeft: 'calc(20px + max(0px, env(safe-area-inset-left)))',
+            paddingRight: 'calc(20px + max(0px, env(safe-area-inset-right)))',
           }}
-          title="Adicionar novo cliente"
         >
-          Novo Cliente
-        </button>
-      </div>
 
       {/* Success Toast */}
       {showToast && (
@@ -598,6 +615,8 @@ export const CustomersModule: React.FC = () => {
           <Plus className="w-4 h-4 stroke-[3]" />
           <span>Cadastrar Nova Cliente</span>
         </button>
+      </div>
+        </div>
       </div>
 
       {/* CLIENT FORM MODAL */}
