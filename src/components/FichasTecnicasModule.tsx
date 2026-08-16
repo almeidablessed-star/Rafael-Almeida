@@ -524,62 +524,162 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         </div>
       )}
 
-      {/* Category Tabs Bar - Retaining all 5 tabs with colorful emoji icons */}
-      <div className="flex items-center gap-1.5 bg-[var(--color-pastry-cream)] p-1.5 rounded-[24px] overflow-x-auto no-scrollbar shadow-card">
-        <button
+      {/* Category Tabs Bar - Flex wrap with 2 lines */}
+      <div
+        className="flex flex-wrap gap-[7px] bg-white rounded-[20px] p-[10px]"
+        style={{
+          boxShadow: '0 6px 16px rgba(58,35,80,.07)',
+        }}
+      >
+        {/* Bolos (Selected) */}
+        <span
           onClick={() => setSelectedCategory('bolos')}
-          className={`px-3.5 py-2.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
-            selectedCategory === 'bolos'
-              ? 'bg-[var(--color-pastry-chocolate)] text-[var(--color-pastry-pink)] shadow-sm scale-102'
-              : 'bg-white/80 text-[var(--color-pastry-chocolate)] hover:bg-white'
-          }`}
+          className="flex-shrink-0 cursor-pointer transition-all"
+          style={{
+            fontSize: '10.5px',
+            fontWeight: selectedCategory === 'bolos' ? 800 : 700,
+            color: selectedCategory === 'bolos' ? '#FFFFFF' : '#5B4A6B',
+            background: selectedCategory === 'bolos' ? 'linear-gradient(140deg,#6E3F72,#A85E86)' : '#FFFFFF',
+            borderBottom: selectedCategory === 'bolos' ? '2px solid transparent' : '2px solid #E3D8E5',
+            padding: '8px 12px',
+            borderRadius: '12px 12px 4px 4px',
+            boxShadow: selectedCategory === 'bolos' ? '0 8px 16px rgba(110,63,114,.32)' : 'none',
+          }}
+          onMouseEnter={(e) => {
+            if (selectedCategory !== 'bolos') {
+              e.currentTarget.style.transform = 'translateY(-4px)';
+              e.currentTarget.style.boxShadow = '0 10px 18px rgba(58,35,80,.16)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            if (selectedCategory !== 'bolos') {
+              e.currentTarget.style.boxShadow = 'none';
+            }
+          }}
         >
-          <span>🎂 Bolos</span>
-        </button>
+          🎂 Bolos
+        </span>
 
-        <button
+        {/* Doces & Sobremesas */}
+        <span
           onClick={() => setSelectedCategory('doces')}
-          className={`px-3.5 py-2.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
-            selectedCategory === 'doces'
-              ? 'bg-[var(--color-pastry-chocolate)] text-[var(--color-pastry-pink)] shadow-sm scale-102'
-              : 'bg-white/80 text-[var(--color-pastry-chocolate)] hover:bg-white'
-          }`}
+          className="flex-shrink-0 cursor-pointer transition-all"
+          style={{
+            fontSize: '10.5px',
+            fontWeight: selectedCategory === 'doces' ? 800 : 700,
+            color: selectedCategory === 'doces' ? '#FFFFFF' : '#5B4A6B',
+            background: selectedCategory === 'doces' ? 'linear-gradient(140deg,#6E3F72,#A85E86)' : '#FFFFFF',
+            borderBottom: selectedCategory === 'doces' ? '2px solid transparent' : '2px solid #E3D8E5',
+            padding: '8px 12px',
+            borderRadius: '12px 12px 4px 4px',
+            boxShadow: selectedCategory === 'doces' ? '0 8px 16px rgba(110,63,114,.32)' : 'none',
+          }}
+          onMouseEnter={(e) => {
+            if (selectedCategory !== 'doces') {
+              e.currentTarget.style.transform = 'translateY(-4px)';
+              e.currentTarget.style.boxShadow = '0 10px 18px rgba(58,35,80,.16)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            if (selectedCategory !== 'doces') {
+              e.currentTarget.style.boxShadow = 'none';
+            }
+          }}
         >
-          <span>🧁 Doces & Sobremesas</span>
-        </button>
+          🧁 Doces & Sobremesas
+        </span>
 
-        <button
+        {/* Salgados */}
+        <span
           onClick={() => setSelectedCategory('salgados')}
-          className={`px-3.5 py-2.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
-            selectedCategory === 'salgados'
-              ? 'bg-[var(--color-pastry-chocolate)] text-[var(--color-pastry-pink)] shadow-sm scale-102'
-              : 'bg-white/80 text-[var(--color-pastry-chocolate)] hover:bg-white'
-          }`}
+          className="flex-shrink-0 cursor-pointer transition-all"
+          style={{
+            fontSize: '10.5px',
+            fontWeight: selectedCategory === 'salgados' ? 800 : 700,
+            color: selectedCategory === 'salgados' ? '#FFFFFF' : '#5B4A6B',
+            background: selectedCategory === 'salgados' ? 'linear-gradient(140deg,#6E3F72,#A85E86)' : '#FFFFFF',
+            borderBottom: selectedCategory === 'salgados' ? '2px solid transparent' : '2px solid #E3D8E5',
+            padding: '8px 12px',
+            borderRadius: '12px 12px 4px 4px',
+            boxShadow: selectedCategory === 'salgados' ? '0 8px 16px rgba(110,63,114,.32)' : 'none',
+          }}
+          onMouseEnter={(e) => {
+            if (selectedCategory !== 'salgados') {
+              e.currentTarget.style.transform = 'translateY(-4px)';
+              e.currentTarget.style.boxShadow = '0 10px 18px rgba(58,35,80,.16)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            if (selectedCategory !== 'salgados') {
+              e.currentTarget.style.boxShadow = 'none';
+            }
+          }}
         >
-          <span>🥟 Salgados</span>
-        </button>
+          🥟 Salgados
+        </span>
 
-        <button
+        {/* Saudáveis & Fit */}
+        <span
           onClick={() => setSelectedCategory('saudaveis')}
-          className={`px-3.5 py-2.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
-            selectedCategory === 'saudaveis'
-              ? 'bg-[var(--color-pastry-chocolate)] text-[var(--color-pastry-pink)] shadow-sm scale-102'
-              : 'bg-white/80 text-[var(--color-pastry-chocolate)] hover:bg-white'
-          }`}
+          className="flex-shrink-0 cursor-pointer transition-all"
+          style={{
+            fontSize: '10.5px',
+            fontWeight: selectedCategory === 'saudaveis' ? 800 : 700,
+            color: selectedCategory === 'saudaveis' ? '#FFFFFF' : '#5B4A6B',
+            background: selectedCategory === 'saudaveis' ? 'linear-gradient(140deg,#6E3F72,#A85E86)' : '#FFFFFF',
+            borderBottom: selectedCategory === 'saudaveis' ? '2px solid transparent' : '2px solid #E3D8E5',
+            padding: '8px 12px',
+            borderRadius: '12px 12px 4px 4px',
+            boxShadow: selectedCategory === 'saudaveis' ? '0 8px 16px rgba(110,63,114,.32)' : 'none',
+          }}
+          onMouseEnter={(e) => {
+            if (selectedCategory !== 'saudaveis') {
+              e.currentTarget.style.transform = 'translateY(-4px)';
+              e.currentTarget.style.boxShadow = '0 10px 18px rgba(58,35,80,.16)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            if (selectedCategory !== 'saudaveis') {
+              e.currentTarget.style.boxShadow = 'none';
+            }
+          }}
         >
-          <span>🥗 Saudáveis & Fit</span>
-        </button>
+          🥗 Saudáveis & Fit
+        </span>
 
-        <button
+        {/* Kids Friendly */}
+        <span
           onClick={() => setSelectedCategory('kids')}
-          className={`px-3.5 py-2.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
-            selectedCategory === 'kids'
-              ? 'bg-[var(--color-pastry-chocolate)] text-[var(--color-pastry-pink)] shadow-sm scale-102'
-              : 'bg-white/80 text-[var(--color-pastry-chocolate)] hover:bg-white'
-          }`}
+          className="flex-shrink-0 cursor-pointer transition-all"
+          style={{
+            fontSize: '10.5px',
+            fontWeight: selectedCategory === 'kids' ? 800 : 700,
+            color: selectedCategory === 'kids' ? '#FFFFFF' : '#5B4A6B',
+            background: selectedCategory === 'kids' ? 'linear-gradient(140deg,#6E3F72,#A85E86)' : '#FFFFFF',
+            borderBottom: selectedCategory === 'kids' ? '2px solid transparent' : '2px solid #E3D8E5',
+            padding: '8px 12px',
+            borderRadius: '12px 12px 4px 4px',
+            boxShadow: selectedCategory === 'kids' ? '0 8px 16px rgba(110,63,114,.32)' : 'none',
+          }}
+          onMouseEnter={(e) => {
+            if (selectedCategory !== 'kids') {
+              e.currentTarget.style.transform = 'translateY(-4px)';
+              e.currentTarget.style.boxShadow = '0 10px 18px rgba(58,35,80,.16)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            if (selectedCategory !== 'kids') {
+              e.currentTarget.style.boxShadow = 'none';
+            }
+          }}
         >
-          <span>🧸 Kids Friendly</span>
-        </button>
+          🧸 Kids Friendly
+        </span>
       </div>
 
       {/* Editor Modal / Form */}
