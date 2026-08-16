@@ -144,9 +144,24 @@ export const EstoqueModule: React.FC = () => {
     i.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Função para obter a faixa de criticidade (0=vermelho, 1=laranja, 2=verde claro, 3=verde)
+  const getCriticalityRank = (percentage: number): number => {
+    if (percentage <= 25) return 0; // Vermelho - crítico
+    if (percentage <= 50) return 1; // Laranja - aviso
+    if (percentage <= 75) return 2; // Verde claro - normal
+    return 3; // Verde - saudável
+  };
+
+  // Ordenar items por criticidade (vermelho primeiro, verde por último)
+  const sortedItems = [...filteredItems].sort((a, b) => {
+    const percentageA = Math.min((a.quantity / a.minThreshold) * 100, 100);
+    const percentageB = Math.min((b.quantity / b.minThreshold) * 100, 100);
+    const rankA = getCriticalityRank(percentageA);
+    const rankB = getCriticalityRank(percentageB);
+    return rankA - rankB; // Menor rank (vermelho) vem primeiro
+  });
+
   const lowStockCount = items.filter((i) => i.quantity <= i.minThreshold).length;
-  const lowStockItems = filteredItems.filter((i) => i.quantity <= i.minThreshold);
-  const healthyStockItems = filteredItems.filter((i) => i.quantity > i.minThreshold);
 
   return (
     <div className="pb-12 animate-fadeIn">
@@ -406,8 +421,8 @@ export const EstoqueModule: React.FC = () => {
         </form>
       )}
 
-      {/* Stock Sections */}
-      {filteredItems.length === 0 ? (
+      {/* Stock Sections - Ordered by Criticality */}
+      {sortedItems.length === 0 ? (
         <div className="p-8 rounded-3xl bg-[var(--color-neutral-cream)] border border-[var(--color-neutral-light)] text-center space-y-2">
           <Package className="w-10 h-10 text-[var(--color-neutral-warm-gray)] mx-auto" />
           <p className="text-xs text-[var(--color-text-secondary)] font-normal">
@@ -415,12 +430,9 @@ export const EstoqueModule: React.FC = () => {
           </p>
         </div>
       ) : (
-        <div className="space-y-8">
-          {/* Low Stock Section */}
-          {lowStockItems.length > 0 && (
-            <div className="space-y-4 px-4 lg:px-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {lowStockItems.map((item) => {
+        <div className="space-y-4 px-4 lg:px-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {sortedItems.map((item) => {
                   const percentage = Math.min((item.quantity / item.minThreshold) * 100, 100);
                   const colors = getArcColor(percentage);
 
@@ -516,110 +528,6 @@ export const EstoqueModule: React.FC = () => {
                 })}
               </div>
             </div>
-          )}
-
-          {/* Healthy Stock Section */}
-          {healthyStockItems.length > 0 && (
-            <div className="px-4 lg:px-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {healthyStockItems.map((item) => {
-                  const percentage = Math.min((item.quantity / item.minThreshold) * 100, 100);
-                  const colors = getArcColor(percentage);
-
-                  return (
-                  <div
-                    key={item.id}
-                    className="bg-white rounded-xl p-2.5 transition-all cursor-pointer"
-                    style={{ backgroundColor: '#FFFFFF' }}
-                  >
-                    {/* Top Section: Two Columns (Gauge Left, Name+Alert Right) */}
-                    <div className="flex gap-3 mb-3">
-                      {/* Gauge Left - Larger */}
-                      <svg width="76" height="64" viewBox="0 0 76 64" className="flex-shrink-0">
-                        <path d="M8 60a30 30 0 0 1 60 0" fill="none" stroke="#F1ECF2" strokeWidth="10" strokeLinecap="round"></path>
-                        <path
-                          d="M8 60a30 30 0 0 1 60 0"
-                          fill="none"
-                          stroke={colors.stroke}
-                          strokeWidth="10"
-                          strokeLinecap="round"
-                          strokeDasharray={`${percentage * 1.26} 126`}
-                        ></path>
-                        <text x="38" y="58" textAnchor="middle" fontSize="12" fontWeight="900" fill={colors.stroke} fontFamily="'Manrope', sans-serif">
-                          {Math.round(percentage)}%
-                        </text>
-                      </svg>
-
-                      {/* Right Column: Name + Alert */}
-                      <div className="flex-1 flex flex-col gap-2">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-brand font-semibold text-[14px] text-[var(--color-neutral-charcoal)]">
-                            {item.name}
-                          </h4>
-                          {item.quantity <= item.minThreshold && (
-                            <span style={{ background: '#C4626F', color: '#FFFFFF' }} className="text-white text-[7px] font-semibold px-1 py-0.5 rounded uppercase whitespace-nowrap">
-                              Estoque Baixo
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-[11px] text-[#999999] font-light">
-                          Alertar quando menor que:
-                        </p>
-
-                        {/* Quantity Stepper + Action Icons Row */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'space-between' }}>
-                          {/* Quantity Stepper */}
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#F5F5F5', borderRadius: '20px', padding: '4px 8px', width: 'fit-content' }}>
-                            <button
-                              onClick={() => handleQuickAdjust(item.id, -50)}
-                              style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#E8E8E8', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px', color: '#666', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}
-                              onMouseEnter={(e) => e.currentTarget.style.background = '#D0D0D0'}
-                              onMouseLeave={(e) => e.currentTarget.style.background = '#E8E8E8'}
-                              title="Diminuir 50"
-                            >
-                              −
-                            </button>
-                            <span style={{ fontSize: '12px', fontWeight: '600', color: '#333', minWidth: '70px', textAlign: 'center', fontFamily: "'Manrope', sans-serif" }}>
-                              {item.quantity} {item.unit}
-                            </span>
-                            <button
-                              onClick={() => handleQuickAdjust(item.id, 50)}
-                              style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#E8E8E8', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px', color: '#666', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}
-                              onMouseEnter={(e) => e.currentTarget.style.background = '#D0D0D0'}
-                              onMouseLeave={(e) => e.currentTarget.style.background = '#E8E8E8'}
-                              title="Aumentar 50"
-                            >
-                              +
-                            </button>
-                          </div>
-
-                          {/* Edit/Delete Actions - Same Row */}
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={() => handleOpenEdit(item)}
-                              style={{ width: '20px', height: '20px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0' }}
-                              title="Editar"
-                            >
-                              <Edit3 className="w-3.5 h-3.5" style={{ color: '#999', strokeWidth: 2 }} />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(item.id)}
-                              style={{ width: '20px', height: '20px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0' }}
-                              title="Excluir"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" style={{ color: '#999', strokeWidth: 2 }} />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
       )}
     </div>
   );
