@@ -110,6 +110,44 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
         </p>
       </div>
 
+      {/* TOTAL BALANCE CARD - SALDO TOTAL DISPONÍVEL */}
+      <div
+        className="rounded-[22px] p-6 text-white"
+        style={{
+          background: 'linear-gradient(155deg, var(--color-brand-900) 0%, var(--color-brand-700) 60%, var(--color-brand-500) 100%)',
+        }}
+      >
+        <span style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '0.14em', color: 'rgba(247, 220, 225, 0.8)', textTransform: 'uppercase', display: 'block', fontFamily: "'Manrope', sans-serif" }}>
+          Saldo Total Disponível
+        </span>
+        <span style={{ fontSize: '31px', fontWeight: 800, color: '#FFFFFF', letterSpacing: '-0.03em', lineHeight: 1, display: 'block', marginTop: '8px', fontFamily: "'Manrope', sans-serif" }}>
+          {formatCurrency(balances.reposicao.currentBalance + balances.maodeobra.currentBalance + balances.custoEInvestimento.currentBalance)}
+        </span>
+
+        {/* Progress bar with category divisions */}
+        <div style={{ display: 'flex', height: '10px', borderRadius: '999px', overflow: 'hidden', background: 'rgba(255, 255, 255, 0.18)', marginTop: '12px', marginBottom: '12px' }}>
+          <div style={{ width: '45.6%', background: '#F5B9C6' }} />
+          <div style={{ width: '31.6%', background: '#D6B8E0' }} />
+          <div style={{ width: '22.8%', background: '#A9D8B8' }} />
+        </div>
+
+        {/* Legend */}
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', fontSize: '9.5px', fontWeight: 700, color: 'rgba(247, 220, 225, 0.85)', fontFamily: "'Manrope', sans-serif" }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <span style={{ width: '8px', height: '8px', borderRadius: '3px', background: '#F5B9C6' }} />
+            Reposição
+          </span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <span style={{ width: '8px', height: '8px', borderRadius: '3px', background: '#D6B8E0' }} />
+            Mão de Obra
+          </span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <span style={{ width: '8px', height: '8px', borderRadius: '3px', background: '#A9D8B8' }} />
+            Custo + Invest.
+          </span>
+        </div>
+      </div>
+
       {/* 1. BALANCE CARDS (Reposição, Mão de Obra, Custo + Investimento Juntos) - PREMIUM STYLED */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-7 stagger-children">
 
