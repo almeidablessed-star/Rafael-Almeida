@@ -344,7 +344,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 </div>
               </div>
               <div className="text-[9px] uppercase tracking-[0.05em] mt-2" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', minHeight: '24px' }}>
-                <span className="text-[22px]" style={{ lineHeight: 1 }}>🔄</span>
                 REPOSIÇÃO
               </div>
               <div className="text-[15px] mt-2" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>{formatCurrency(balances.reposicao || 1240)}</div>
@@ -376,7 +375,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 </div>
               </div>
               <div className="text-[9px] uppercase tracking-[0.05em] mt-2" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', minHeight: '24px' }}>
-                <span className="text-[22px]" style={{ lineHeight: 1 }}>👥</span>
                 MÃO DE OBRA
               </div>
               <div className="text-[15px] mt-2" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>{formatCurrency(balances.labor || 860)}</div>
@@ -408,7 +406,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 </div>
               </div>
               <div className="text-[9px] uppercase tracking-[0.05em] mt-2" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', minHeight: '24px' }}>
-                <span className="text-[22px]" style={{ lineHeight: 1 }}>📊</span>
                 CUSTO + INVEST.
               </div>
               <div className="text-[15px] mt-2" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>{formatCurrency(balances.costs || 620)}</div>
