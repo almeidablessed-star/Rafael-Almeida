@@ -491,35 +491,37 @@ export const CustomersModule: React.FC = () => {
         className="text-white overflow-hidden"
         style={{
           background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
-          borderRadius: '40px',
-          padding: '20px',
-          boxShadow: '0 30px 70px rgba(58,35,80,0.26)',
+          padding: '40px 20px',
+          margin: '0 calc(-50vw + 50%)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '16px',
         }}
       >
-        <div className="flex flex-col items-center text-center">
-          {/* Title */}
-          <span
-            className="text-white font-serif-display"
-            style={{
-              fontSize: '28px',
-              lineHeight: 1,
-            }}
-          >
-            Clientes
-          </span>
-          {/* Subtitle */}
-          <span
-            style={{
-              fontSize: '10px',
-              color: 'rgba(255,255,255,0.7)',
-              fontFamily: "'Manrope', sans-serif",
-              fontWeight: 500,
-              marginTop: '8px',
-            }}
-          >
-            {customers.length} {customers.length === 1 ? 'cliente cadastrada' : 'clientes cadastradas'}
-          </span>
-        </div>
+        {/* Title */}
+        <span
+          className="text-white font-serif-display"
+          style={{
+            fontSize: '28px',
+            lineHeight: 1,
+          }}
+        >
+          Clientes
+        </span>
+        {/* Button */}
+        <button
+          onClick={handleOpenAdd}
+          className="px-3 py-2 rounded-xl text-[10px] font-black cursor-pointer transition-all active:scale-95 shrink-0"
+          style={{
+            background: '#F5B9C6',
+            color: '#3A2350',
+            fontFamily: "'Manrope', sans-serif",
+          }}
+          title="Adicionar novo cliente"
+        >
+          Novo Cliente
+        </button>
       </div>
 
       {/* Success Toast */}
