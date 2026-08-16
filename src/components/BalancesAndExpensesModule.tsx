@@ -102,10 +102,10 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
           </span>
         </div>
 
-        <h2 className="font-marca text-3xl text-white" style={{ lineHeight: 1 }}>
-          Saldo & Compras
+        <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: '29px', fontWeight: 400, lineHeight: 1, color: '#FFFFFF' }}>
+          Saldo &amp; Compras
         </h2>
-        <p className="text-xs text-white/80 font-semibold mt-3">
+        <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.75)', fontFamily: "'Manrope', sans-serif", fontWeight: 400, marginTop: '8px' }}>
           O dinheiro das vendas é acumulado automaticamente aqui no Saldo. Quando você faz uma compra, registre a despesa para descontar da categoria correta.
         </p>
       </div>
@@ -135,11 +135,12 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
           <div>
             <div className="flex flex-col items-center gap-2 mb-3">
               <span
-                className={`text-[11px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full flex items-center justify-center gap-1.5 leading-none ${
+                className={`rounded-full px-3 py-1.5 flex items-center justify-center gap-1.5 leading-none ${
                   balances.reposicao.isNegative
                     ? 'bg-[#C85A54]/35 text-[#C85A54] border border-[#C85A54]/60'
                     : 'bg-[#3A5A4A]/15 text-[#3A5A4A] border border-[#3A5A4A]/40'
                 }`}
+                style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', fontFamily: "'Manrope', sans-serif" }}
               >
                 <ShoppingBag className="w-4 h-4 shrink-0 flex-shrink-0" />
                 <span>Reposição</span>
@@ -155,13 +156,18 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
 
             <div className="my-3">
               <span
-                className={`font-brand font-marca value-lg md:text-4xl block tracking-tight ${
-                  balances.reposicao.isNegative ? 'text-[#C85A54]' : 'text-[#3A5A4A]'
-                }`}
+                style={{
+                  fontFamily: "'Manrope', sans-serif",
+                  fontSize: '32px',
+                  fontWeight: 700,
+                  display: 'block',
+                  letterSpacing: '-0.01em',
+                  color: balances.reposicao.isNegative ? '#C85A54' : '#3A5A4A'
+                }}
               >
                 {formatCurrency(balances.reposicao.currentBalance)}
               </span>
-              <p className="text-[11px] text-[#3A5A4A]/70 font-medium mt-2">
+              <p style={{ fontSize: '11px', color: 'rgba(58, 90, 74, 0.65)', fontFamily: "'Manrope', sans-serif", fontWeight: 400, marginTop: '8px' }}>
                 Reposição de ingredientes
               </p>
             </div>
