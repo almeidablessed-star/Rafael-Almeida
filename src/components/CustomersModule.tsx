@@ -1112,9 +1112,9 @@ export const CustomersModule: React.FC = () => {
                       </p>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {cEvents.map((ev, idx) => (
+                        {cEvents.map((ev) => (
                           <div
-                            key={idx}
+                            key={`${ev.date}-${ev.title}`}
                             style={{
                               padding: '9px 11px',
                               borderRadius: '13px',

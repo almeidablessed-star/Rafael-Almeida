@@ -132,8 +132,8 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
       <div>
         {/* Days of Week Header */}
         <div className="grid grid-cols-7 gap-1.5 text-center mb-2">
-          {daysOfWeek.map((day) => (
-            <span key={day} className="text-xs uppercase tracking-widest py-2" style={{ color: 'var(--color-ink-soft)', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
+          {daysOfWeek.map((day, idx) => (
+            <span key={`day-${idx}`} className="text-xs uppercase tracking-widest py-2" style={{ color: 'var(--color-ink-soft)', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
               {day}
             </span>
           ))}

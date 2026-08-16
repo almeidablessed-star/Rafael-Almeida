@@ -567,7 +567,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
           className="flex-shrink-0 cursor-pointer transition-all"
           style={{
             fontSize: '10.5px',
-            fontWeight: selectedCategory === 'doces' ? 800 : 700,
+            fontWeight: selectedCategory === 'doces' ? 700 : 600,
             color: selectedCategory === 'doces' ? '#FFFFFF' : '#5B4A6B',
             background: selectedCategory === 'doces' ? 'linear-gradient(140deg,#6E3F72,#A85E86)' : '#FFFFFF',
             borderBottom: selectedCategory === 'doces' ? '2px solid transparent' : '2px solid #E3D8E5',
@@ -597,7 +597,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
           className="flex-shrink-0 cursor-pointer transition-all"
           style={{
             fontSize: '10.5px',
-            fontWeight: selectedCategory === 'salgados' ? 800 : 700,
+            fontWeight: selectedCategory === 'salgados' ? 700 : 600,
             color: selectedCategory === 'salgados' ? '#FFFFFF' : '#5B4A6B',
             background: selectedCategory === 'salgados' ? 'linear-gradient(140deg,#6E3F72,#A85E86)' : '#FFFFFF',
             borderBottom: selectedCategory === 'salgados' ? '2px solid transparent' : '2px solid #E3D8E5',
@@ -627,7 +627,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
           className="flex-shrink-0 cursor-pointer transition-all"
           style={{
             fontSize: '10.5px',
-            fontWeight: selectedCategory === 'saudaveis' ? 800 : 700,
+            fontWeight: selectedCategory === 'saudaveis' ? 700 : 600,
             color: selectedCategory === 'saudaveis' ? '#FFFFFF' : '#5B4A6B',
             background: selectedCategory === 'saudaveis' ? 'linear-gradient(140deg,#6E3F72,#A85E86)' : '#FFFFFF',
             borderBottom: selectedCategory === 'saudaveis' ? '2px solid transparent' : '2px solid #E3D8E5',
@@ -657,7 +657,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
           className="flex-shrink-0 cursor-pointer transition-all"
           style={{
             fontSize: '10.5px',
-            fontWeight: selectedCategory === 'kids' ? 800 : 700,
+            fontWeight: selectedCategory === 'kids' ? 700 : 600,
             color: selectedCategory === 'kids' ? '#FFFFFF' : '#5B4A6B',
             background: selectedCategory === 'kids' ? 'linear-gradient(140deg,#6E3F72,#A85E86)' : '#FFFFFF',
             borderBottom: selectedCategory === 'kids' ? '2px solid transparent' : '2px solid #E3D8E5',
@@ -952,8 +952,8 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         </form>
       )}
 
-      {/* FICHAS CARDS LIST USING THE REFERENCE BLOCK LAYOUT ("Destaque de Vendas" Layout Structure) */}
-      <div className="space-y-4">
+      {/* FICHAS CARDS LIST - SEGUINDO FIELMENTE O DESIGN DE REFERÊNCIA */}
+      <div className="space-y-3">
         {filteredFichas.length === 0 ? (
           <div className="p-8 rounded-[32px] bg-white border border-dashed border-[var(--color-pastry-light-pink)]/50 text-center space-y-3">
             <BookOpen className="w-10 h-10 text-[var(--color-pastry-chocolate)]/40 mx-auto" />
@@ -968,148 +968,360 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
             </button>
           </div>
         ) : (
-          filteredFichas.map((ficha, index) => {
+          filteredFichas.map((ficha) => {
             const ingList = ficha.ingredients || [];
-            const repoTotal = ingList.reduce((acc, i) => acc + (i.totalCost || 0), 0);
             const isExpanded = expandedFichaId === ficha.id;
-            const bgClass = PALETTE_BG_CLASSES[index % PALETTE_BG_CLASSES.length];
-            const catInfo = CATEGORY_LABELS[ficha.category] || CATEGORY_LABELS.bolos;
+
+            // Calcula os segmentos do gauge com base nos custos
+            const circumference = 2 * Math.PI * 35;
+            const repoTotal = ingList.reduce((acc, i) => acc + (i.totalCost || 0), 0);
+            const maoDeObraTotal = ficha.maoDeObraCost || 0;
+            const custosTotal = (ficha.custoCost || 0) + (ficha.investimentoCost || 0);
+            const totalCosts = repoTotal + maoDeObraTotal + custosTotal;
+
+            // Calcular stroke-dasharray para cada segmento
+            const repoLength = (repoTotal / totalCosts) * circumference;
+            const maoLength = (maoDeObraTotal / totalCosts) * circumference;
+            const custosLength = (custosTotal / totalCosts) * circumference;
 
             return (
               <div
                 key={ficha.id}
-                className={`${bgClass} rounded-[32px] p-5 sm:p-6 shadow-card transition-all cursor-pointer relative overflow-hidden`}
+                style={{
+                  background: '#FFFFFF',
+                  borderRadius: '26px',
+                  padding: '16px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                  boxShadow: '0 8px 20px rgba(58,35,80,.09)',
+                  cursor: 'pointer',
+                  transition: 'transform .28s ease, box-shadow .28s ease',
+                }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-6px) scale(1.01)';
-                  e.currentTarget.style.boxShadow = '0 20px 40px rgba(58,35,80,0.18)';
+                  e.currentTarget.style.transform = 'translateY(-5px)';
+                  e.currentTarget.style.boxShadow = '0 20px 36px rgba(58,35,80,.18)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(58,35,80,0.08)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 8px 20px rgba(58,35,80,.09)';
                 }}
               >
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
-                  
-                  {/* Left Column (Content & Breakdowns) */}
-                  <div className="md:col-span-7 space-y-3.5">
-                    {/* Main Title: Exact Recipe Name */}
-                    <h3 className="font-bold text-2xl sm:text-3xl text-[var(--color-pastry-chocolate)] leading-snug">
+                {/* HEADER: TÍTULO + IMAGEM */}
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                  {/* ESQUERDA: TÍTULO E FATIAS */}
+                  <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '7px' }}>
+                    {/* TÍTULO */}
+                    <span
+                      style={{
+                        fontFamily: "'Instrument Serif', serif",
+                        fontSize: '21px',
+                        color: '#241B2B',
+                        lineHeight: 1.15,
+                      }}
+                    >
                       {ficha.name}
-                    </h3>
+                    </span>
+                    {/* BADGE DE FATIAS */}
+                    <span
+                      style={{
+                        alignSelf: 'flex-start',
+                        fontSize: '10px',
+                        fontWeight: 700,
+                        color: '#5B4A6B',
+                        background: '#F3E9F3',
+                        padding: '4px 10px',
+                        borderRadius: '999px',
+                      }}
+                    >
+                      {ficha.yieldInfo}
+                    </span>
+                  </div>
 
-                    {/* Yield Info */}
-                    <p className="text-xs text-[var(--color-pastry-chocolate)]/80 font-semibold flex items-center gap-1.5">
-                      <span className="bg-white/60 px-2.5 py-0.5 font-bold rounded-full">{ficha.yieldInfo}</span>
-                    </p>
+                  {/* DIREITA: IMAGEM */}
+                  <img
+                    src={ficha.imageUrl}
+                    alt={ficha.name}
+                    style={{
+                      width: '72px',
+                      height: '72px',
+                      objectFit: 'cover',
+                      borderRadius: '18px',
+                      border: '2px solid #FFFFFF',
+                      boxShadow: '0 8px 18px rgba(58,35,80,.18)',
+                      flexShrink: 0,
+                    }}
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
 
-                    {/* Breakdown Cost Metrics - Premium Design */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3">
-                      {/* Reposição */}
-                      <div className="bg-[#C8E6D7]/20 border border-[#C8E6D7]/50 rounded-lg p-2.5 flex flex-col min-h-[86px] shadow-card">
-                        <span className="text-[7px] font-bold uppercase text-[#3A5A4A] h-[14px] leading-[14px]">🧂 Reposição</span>
-                        <strong className="text-[12px] font-black text-[#3A5A4A] flex-1 flex items-center">{formatCurrency(repoTotal)}</strong>
-                        <span className="text-[7px] text-[#3A5A4A]/70 font-normal h-[14px] leading-[14px]">Ingredientes</span>
-                      </div>
-
-                      {/* Mão de Obra */}
-                      <div className="bg-[#E8B4B8]/20 border border-[#E8B4B8]/50 rounded-lg p-2.5 flex flex-col min-h-[86px] shadow-card">
-                        <span className="text-[7px] font-bold uppercase text-[#6B3E42] h-[14px] leading-[14px]">👷 Mão de Obra</span>
-                        <strong className="text-[12px] font-black text-[#6B3E42] flex-1 flex items-center">{formatCurrency(ficha.maoDeObraCost)}</strong>
-                        <span className="text-[7px] text-[#6B3E42]/70 font-normal h-[14px] leading-[14px]">Produção</span>
-                      </div>
-
-                      {/* Custos Operacionais */}
-                      <div className="bg-[#B8D4E8]/20 border border-[#B8D4E8]/50 rounded-lg p-2.5 flex flex-col min-h-[86px] shadow-card">
-                        <span className="text-[7px] font-bold uppercase text-[#3A4A5A] h-[14px] leading-[14px] whitespace-nowrap">⚙️ Custos</span>
-                        <strong className="text-[12px] font-black text-[#3A4A5A] flex-1 flex items-center">
-                          {formatCurrency((ficha.custoCost || 0) + (ficha.investimentoCost || 0))}
-                        </strong>
-                        <span className="text-[7px] text-[#3A4A5A]/70 font-normal h-[14px] leading-[14px] whitespace-nowrap">Operacional</span>
-                      </div>
-
-                      {/* Sugestão de Preço */}
-                      <div className="bg-[var(--color-brand-900)] border border-[var(--color-brand-900)]/80 rounded-lg p-2.5 flex flex-col min-h-[86px] shadow-card">
-                        <span className="text-[7px] font-bold uppercase text-[var(--color-rose-200)] h-[14px] leading-[14px]">💰 Sugestão</span>
-                        <strong className="text-[12px] font-black text-white flex-1 flex items-center">{formatCurrency(ficha.sugestaoVenda)}</strong>
-                        <span className="text-[7px] text-[var(--color-rose-200)]/80 font-normal h-[14px] leading-[14px]">Venda</span>
-                      </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex items-center gap-2 pt-1 flex-wrap">
-                      <button
-                        onClick={() => setExpandedFichaId(isExpanded ? null : ficha.id)}
-                        className="px-3.5 py-1.5 rounded-full bg-white/80 hover:bg-white text-[var(--color-pastry-chocolate)] font-bold text-xs transition flex items-center gap-1 cursor-pointer shadow-card"
+                {/* GAUGE E LEGENDA */}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '14px',
+                    background: '#FAF7FA',
+                    borderRadius: '18px',
+                    padding: '14px',
+                  }}
+                >
+                  {/* SVG GAUGE */}
+                  <div
+                    style={{
+                      position: 'relative',
+                      width: '82px',
+                      height: '82px',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <svg width="82" height="82" viewBox="0 0 82 82" style={{ transform: 'rotate(-90deg)' }}>
+                      {/* Background circle */}
+                      <circle cx="41" cy="41" r="35" fill="none" stroke="#F1ECF2" strokeWidth="10"></circle>
+                      {/* Reposição - roxo */}
+                      <circle
+                        cx="41"
+                        cy="41"
+                        r="35"
+                        fill="none"
+                        stroke="#6E3F72"
+                        strokeWidth="10"
+                        strokeDasharray={`${repoLength} ${circumference}`}
+                        strokeDashoffset="0"
+                      ></circle>
+                      {/* Mão de Obra - rosa */}
+                      <circle
+                        cx="41"
+                        cy="41"
+                        r="35"
+                        fill="none"
+                        stroke="#C4626F"
+                        strokeWidth="10"
+                        strokeDasharray={`${maoLength} ${circumference}`}
+                        strokeDashoffset={-repoLength}
+                      ></circle>
+                      {/* Custos Op. - marrom */}
+                      <circle
+                        cx="41"
+                        cy="41"
+                        r="35"
+                        fill="none"
+                        stroke="#B08D57"
+                        strokeWidth="10"
+                        strokeDasharray={`${custosLength} ${circumference}`}
+                        strokeDashoffset={-(repoLength + maoLength)}
+                      ></circle>
+                    </svg>
+                    {/* TEXTO NO CENTRO DO GAUGE */}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        inset: 0,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        lineHeight: 1,
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: '8px',
+                          fontWeight: 800,
+                          color: '#8A7E90',
+                          letterSpacing: '.03em',
+                          fontFamily: "'Manrope', sans-serif",
+                        }}
                       >
-                        <span>{isExpanded ? 'Ocultar Insumos' : `Ver ${ingList.length} Insumos`}</span>
-                        {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                      </button>
+                        SUGESTÃO
+                      </span>
+                      <span
+                        style={{
+                          fontSize: '13px',
+                          fontWeight: 800,
+                          color: '#241B2B',
+                          marginTop: '3px',
+                          fontFamily: "'Manrope', sans-serif",
+                        }}
+                      >
+                        {formatCurrency(ficha.sugestaoVenda)}
+                      </span>
                     </div>
+                  </div>
 
-                    {/* Expandable Ingredients Details */}
-                    {isExpanded && (
-                      <div className="bg-white/90 p-3.5 rounded-lg border border-black/5 text-xs space-y-2 animate-fadeIn mt-2">
-                        <span className="text-[10px] font-black uppercase text-[var(--color-pastry-chocolate)]/60 tracking-wider block">
-                          Ingredientes & Custos de Produção:
+                  {/* LEGENDA */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1, minWidth: 0 }}>
+                    {/* Reposição */}
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '10px', color: '#5B4A6B' }}>
+                      <span style={{ width: '9px', height: '9px', borderRadius: '3px', background: '#6E3F72', flexShrink: 0 }}></span>
+                      Reposição
+                      <span style={{ color: '#241B2B', marginLeft: 'auto', fontWeight: 400 }}>{formatCurrency(repoTotal)}</span>
+                    </span>
+                    {/* Mão de Obra */}
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '10px', color: '#5B4A6B' }}>
+                      <span style={{ width: '9px', height: '9px', borderRadius: '3px', background: '#C4626F', flexShrink: 0 }}></span>
+                      Mão de Obra
+                      <span style={{ color: '#241B2B', marginLeft: 'auto', fontWeight: 400 }}>{formatCurrency(ficha.maoDeObraCost)}</span>
+                    </span>
+                    {/* Custos */}
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '10px', color: '#5B4A6B' }}>
+                      <span style={{ width: '9px', height: '9px', borderRadius: '3px', background: '#B08D57', flexShrink: 0 }}></span>
+                      Custos Op.
+                      <span style={{ color: '#241B2B', marginLeft: 'auto', fontWeight: 400 }}>{formatCurrency((ficha.custoCost || 0) + (ficha.investimentoCost || 0))}</span>
+                    </span>
+                  </div>
+                </div>
+
+                {/* INSUMOS EXPANDÍVEL */}
+                <button
+                  onClick={() => setExpandedFichaId(isExpanded ? null : ficha.id)}
+                  style={{
+                    alignSelf: 'flex-start',
+                    background: '#F6F2F5',
+                    border: 'none',
+                    fontSize: '10.5px',
+                    fontWeight: 700,
+                    color: '#3A2350',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '7px 13px',
+                    borderRadius: '999px',
+                    transition: 'transform .2s ease, background .2s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.background = '#EFE6F0';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.background = '#F6F2F5';
+                  }}
+                >
+                  {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                  Ver {ingList.length} Insumos
+                </button>
+
+                {/* INSUMOS EXPANDIDOS */}
+                {isExpanded && (
+                  <div
+                    style={{
+                      background: '#FAF7FA',
+                      padding: '10px 12px',
+                      borderRadius: '12px',
+                      fontSize: '9px',
+                    }}
+                  >
+                    {ingList.map((ing) => (
+                      <div key={ing.id} style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '5px', marginBottom: '5px', borderBottom: '1px solid #E3D8E5' }}>
+                        <span style={{ color: '#5B4A6B' }}>
+                          {ing.quantity} {ing.unit} de {ing.name}
                         </span>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-[11px] font-medium text-[var(--color-pastry-chocolate)]">
-                          {ingList.map((ing) => (
-                            <div key={ing.id} className="flex items-center justify-between border-b border-black/5 pb-1">
-                              <span>
-                                {ing.quantity} {ing.unit} de {ing.name}
-                              </span>
-                              <strong className="text-[var(--color-pastry-chocolate)]">
-                                {formatCurrency(ing.totalCost)}
-                              </strong>
-                            </div>
-                          ))}
-                        </div>
+                        <span style={{ fontWeight: 700, color: '#241B2B' }}>{formatCurrency(ing.totalCost)}</span>
                       </div>
-                    )}
+                    ))}
                   </div>
+                )}
 
-                  {/* Right Column (Reference Image & Management Buttons) */}
-                  <div className="md:col-span-5 flex flex-col gap-2.5">
-                    <div className="relative h-48 sm:h-52 rounded-[28px] overflow-hidden border-2 border-white shadow-card group">
-                      <img
-                        src={ficha.imageUrl}
-                        alt={ficha.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        referrerPolicy="no-referrer"
-                      />
-                    </div>
-
-                    {/* Action buttons directly below the cake image */}
-                    <div className="flex items-center justify-center sm:justify-end gap-1.5 pt-0.5 flex-wrap">
-                      <button
-                        onClick={() => handleOpenEdit(ficha)}
-                        className="px-3 py-1.5 rounded-xl bg-white/80 hover:bg-white text-[var(--color-pastry-chocolate)] text-xs font-bold transition shadow-card flex items-center gap-1 cursor-pointer"
-                        title="Editar Ficha"
-                      >
-                        <Edit3 className="w-3.5 h-3.5 text-[var(--color-pastry-chocolate)]" />
-                        <span>Editar</span>
-                      </button>
-
-                      <button
-                        onClick={() => handleDuplicate(ficha)}
-                        className="px-3 py-1.5 rounded-xl bg-white/80 hover:bg-white text-[var(--color-pastry-chocolate)] text-xs font-bold transition shadow-card flex items-center gap-1 cursor-pointer"
-                        title="Duplicar Ficha"
-                      >
-                        <Copy className="w-3.5 h-3.5 text-[var(--color-pastry-chocolate)]" />
-                        <span>Duplicar</span>
-                      </button>
-
-                      <button
-                        onClick={() => handleDelete(ficha.id)}
-                        className="px-3 py-1.5 rounded-xl bg-white/80 hover:bg-semantic-error-100 text-semantic-error-700 text-xs font-bold transition shadow-card flex items-center gap-1 cursor-pointer"
-                        title="Excluir Ficha"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        <span>Excluir</span>
-                      </button>
-                    </div>
-                  </div>
-
+                {/* BOTÕES */}
+                <div style={{ display: 'flex', gap: '7px', paddingTop: '4px' }}>
+                  <button
+                    onClick={() => handleOpenEdit(ficha)}
+                    style={{
+                      flex: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      height: '36px',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      background: '#3A2350',
+                      border: 'none',
+                      borderRadius: '18px 18px 6px 18px',
+                      color: '#F5B9C6',
+                      cursor: 'pointer',
+                      boxShadow: '0 8px 16px rgba(58,35,80,.28)',
+                      transition: 'transform .22s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-3px)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                    }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F5B9C6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4 20h4l10-10-4-4L4 16z"></path>
+                    </svg>
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => handleDuplicate(ficha)}
+                    style={{
+                      flex: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      height: '36px',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      background: '#F3E9F3',
+                      border: 'none',
+                      borderRadius: '18px 18px 18px 6px',
+                      color: '#6E3F72',
+                      cursor: 'pointer',
+                      transition: 'transform .22s ease, background .22s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-3px)';
+                      e.currentTarget.style.background = '#E8DAEA';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.background = '#F3E9F3';
+                    }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6E3F72" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="9" y="9" width="11" height="11" rx="2.5"></rect>
+                      <path d="M5 15V6a2 2 0 0 1 2-2h9"></path>
+                    </svg>
+                    Duplicar
+                  </button>
+                  <button
+                    onClick={() => handleDelete(ficha.id)}
+                    style={{
+                      flex: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      height: '36px',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      background: '#FBECEE',
+                      border: 'none',
+                      borderRadius: '18px 18px 6px 18px',
+                      color: '#C4626F',
+                      cursor: 'pointer',
+                      transition: 'transform .22s ease, background .22s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-3px)';
+                      e.currentTarget.style.background = '#F7DCE1';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.background = '#FBECEE';
+                    }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C4626F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"></path>
+                    </svg>
+                    Excluir
+                  </button>
                 </div>
               </div>
             );

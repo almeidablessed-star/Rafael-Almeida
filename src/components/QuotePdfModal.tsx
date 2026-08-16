@@ -575,7 +575,7 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
 
                 <div className="space-y-1">
                   {itemLines.map((line, idx) => (
-                    <div key={idx} className="flex items-center gap-2 text-xs font-bold text-[var(--color-pastry-chocolate)] bg-[var(--color-pastry-cream)]/60 p-2 rounded-xl border border-[var(--color-text-muted)]">
+                    <div key={`item-${idx}-${line}`} className="flex items-center gap-2 text-xs font-bold text-[var(--color-pastry-chocolate)] bg-[var(--color-pastry-cream)]/60 p-2 rounded-xl border border-[var(--color-text-muted)]">
                       <span className="bg-[var(--color-pastry-chocolate)] text-[var(--color-pastry-pink)] text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center shrink-0">
                         {idx + 1}
                       </span>
@@ -813,7 +813,7 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
 
                     return (
                       <div
-                        key={idx}
+                        key={`recipe-${idx}-${itemStr}`}
                         className="bg-white rounded-lg border-2 border-[var(--color-text-muted)] shadow-card overflow-hidden transition-all"
                       >
                         {/* CLICKABLE ITEM HEADER */}
