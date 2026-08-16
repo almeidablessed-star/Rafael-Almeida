@@ -525,7 +525,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
       )}
 
       {/* Category Tabs Bar - Retaining all 5 tabs with colorful emoji icons */}
-      <div className="flex items-center gap-1.5 bg-[var(--color-pastry-cream)] p-1.5 rounded-[24px] border border-[var(--color-pastry-light-pink)]/40 overflow-x-auto no-scrollbar shadow-card">
+      <div className="flex items-center gap-1.5 bg-[var(--color-pastry-cream)] p-1.5 rounded-[24px] overflow-x-auto no-scrollbar shadow-card">
         <button
           onClick={() => setSelectedCategory('bolos')}
           className={`px-3.5 py-2.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
