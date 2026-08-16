@@ -146,7 +146,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
 
       {/* TOTAL BALANCE CARD - SALDO TOTAL DISPONÍVEL */}
       <div
-        className="rounded-[22px] p-6 text-white mx-5"
+        className="rounded-[22px] p-6 text-white mx-5 mt-5"
         style={{
           background: 'linear-gradient(155deg, var(--color-brand-900) 0%, var(--color-brand-700) 60%, var(--color-brand-500) 100%)',
         }}
@@ -183,7 +183,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
       </div>
 
       {/* 1. BALANCE CARDS (Reposição, Mão de Obra, Custo + Investimento Juntos) - PREMIUM STYLED */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-7 stagger-children mx-5">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-7 stagger-children mx-5 mt-5">
 
         {/* CARD REPOSIÇÃO */}
         <div
