@@ -529,6 +529,7 @@ export const EstoqueModule: React.FC = () => {
               </div>
             </div>
       )}
+    </div>
   );
 };
 
