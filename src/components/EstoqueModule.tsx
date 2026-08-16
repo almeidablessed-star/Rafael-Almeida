@@ -165,87 +165,100 @@ export const EstoqueModule: React.FC = () => {
 
   return (
     <div className="pb-12 animate-fadeIn">
-      {/* Header Section - Roxo Gradiente */}
+      {/* Header Card — Flutuante com cabeçalho roxo */}
       <div
-        className="text-white overflow-hidden"
+        className="overflow-hidden shadow-card"
         style={{
-          background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
-          padding: '40px 20px',
-          margin: '0 calc(-50vw + 50%)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '16px',
+          boxShadow: '0 30px 70px rgba(58,35,80,.26)',
         }}
       >
-        {/* Title */}
-        <span
+        {/* Header with Title only */}
+        <div
+          className="px-5 py-10 flex items-center justify-between gap-4 rounded-t-[40px]"
           style={{
-            fontFamily: "'Instrument Serif',serif",
-            fontSize: '28px',
-            color: '#FFFFFF',
-            lineHeight: 1,
+            background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
           }}
         >
-          Estoque
-        </span>
-
-        {/* Button */}
-        <button
-          onClick={handleOpenAdd}
-          className="px-3 py-2 rounded-xl text-[10px] font-black cursor-pointer transition-all active:scale-95 shrink-0"
-          style={{
-            background: '#F5B9C6',
-            color: '#3A2350',
-            fontFamily: "'Manrope', sans-serif",
-          }}
-          title="Adicionar novo insumo"
-        >
-          Novo Insumo
-        </button>
-      </div>
-
-      {/* Search and Button Row - Below Header */}
-      <div
-        style={{
-          display: 'flex',
-          gap: '8px',
-          alignItems: 'center',
-          paddingLeft: '18px',
-          paddingRight: '18px',
-          marginBottom: '13px',
-          marginTop: '20px',
-        }}
-      >
-        {/* Search Input */}
-        <div style={{ flex: 1, position: 'relative' }}>
-          <Search
-            className="w-3.75 h-3.75 absolute"
+          {/* Title */}
+          <span
+            className="text-white leading-tight flex-1"
             style={{
-              color: '#A096A6',
-              left: '13px',
-              top: '50%',
-              transform: 'translateY(-50%)',
+              fontFamily: "'Instrument Serif', serif",
+              fontSize: '31px',
+              lineHeight: '1.1',
             }}
-          />
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Buscar insumo no estoque..."
+          >
+            Estoque
+          </span>
+
+          {/* Button */}
+          <button
+            onClick={handleOpenAdd}
+            className="px-3 py-2 rounded-xl text-[10px] font-black cursor-pointer transition-all active:scale-95 shrink-0"
             style={{
-              width: '100%',
-              padding: '11px 12px 11px 34px',
-              background: '#FFFFFF',
-              borderRadius: '14px',
-              fontSize: '11px',
-              color: '#A096A6',
-              border: 'none',
-              boxShadow: '0 6px 14px rgba(58,35,80,.07)',
+              background: '#F5B9C6',
+              color: '#3A2350',
               fontFamily: "'Manrope', sans-serif",
-              outline: 'none',
             }}
-          />
+            title="Adicionar novo insumo"
+          >
+            Novo Insumo
+          </button>
+        </div>
+
+        {/* Content Section */}
+        <div className="flex flex-col gap-4"
+          style={{
+            marginTop: '-14px',
+            background: '#F6F2F5',
+            borderRadius: '28px 28px 0 0',
+            position: 'relative',
+            padding: '20px',
+            margin: '0 calc(-50vw + 50%)',
+            paddingLeft: 'calc(20px + max(0px, env(safe-area-inset-left)))',
+            paddingRight: 'calc(20px + max(0px, env(safe-area-inset-right)))',
+          }}
+        >
+
+        {/* Search and Button Row - Below Header */}
+        <div
+          style={{
+            display: 'flex',
+            gap: '8px',
+            alignItems: 'center',
+          }}
+        >
+          {/* Search Input */}
+          <div style={{ flex: 1, position: 'relative' }}>
+            <Search
+              className="w-3.75 h-3.75 absolute"
+              style={{
+                color: '#A096A6',
+                left: '13px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+              }}
+            />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Buscar insumo no estoque..."
+              style={{
+                width: '100%',
+                padding: '11px 12px 11px 34px',
+                background: '#FFFFFF',
+                borderRadius: '14px',
+                fontSize: '11px',
+                color: '#A096A6',
+                border: 'none',
+                boxShadow: '0 6px 14px rgba(58,35,80,.07)',
+                fontFamily: "'Manrope', sans-serif",
+                outline: 'none',
+              }}
+            />
+          </div>
+        </div>
         </div>
       </div>
 

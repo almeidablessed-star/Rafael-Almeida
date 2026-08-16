@@ -101,30 +101,47 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
   });
 
   return (
-    <div className="space-y-5 pb-12 animate-fadeIn">
-      {/* Header Banner - Roxo Gradiente */}
+    <div className="pb-12 animate-fadeIn">
+      {/* Header Card — Flutuante com cabeçalho roxo */}
       <div
-        className="rounded-[22px] p-6 text-white shadow-highlight"
+        className="overflow-hidden shadow-card"
         style={{
-          background: 'linear-gradient(155deg, var(--color-brand-900) 0%, var(--color-brand-700) 60%, var(--color-brand-500) 100%)',
+          boxShadow: '0 30px 70px rgba(58,35,80,.26)',
         }}
       >
-        <div className="flex items-center justify-between mb-3">
-          <span style={{ fontSize: '9px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'rgba(255, 255, 255, 0.7)', display: 'flex', alignItems: 'center', gap: '6px', fontFamily: "'Manrope', sans-serif" }}>
-            <Wallet className="w-3 h-3" />
-            Saldo
+        {/* Header with Title only */}
+        <div
+          className="px-5 py-10 flex items-center justify-between gap-4 rounded-t-[40px]"
+          style={{
+            background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
+          }}
+        >
+          {/* Title */}
+          <span
+            className="text-white leading-tight flex-1"
+            style={{
+              fontFamily: "'Instrument Serif', serif",
+              fontSize: '31px',
+              lineHeight: '1.1',
+            }}
+          >
+            Saldos
           </span>
-          <span style={{ background: '#D4C5E2', color: '#6E3F72', fontWeight: 600, fontSize: '8px', padding: '5px 10px', borderRadius: '999px', textTransform: 'uppercase', fontFamily: "'Manrope', sans-serif", letterSpacing: '0.04em' }}>
-            Gestão Real
-          </span>
-        </div>
 
-        <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: '29px', fontWeight: 400, lineHeight: 1, color: '#FFFFFF' }}>
-          Saldo &amp; Compras
-        </h2>
-        <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.75)', fontFamily: "'Manrope', sans-serif", fontWeight: 400, marginTop: '8px' }}>
-          O dinheiro das vendas é acumulado automaticamente aqui no Saldo. Quando você faz uma compra, registre a despesa para descontar da categoria correta.
-        </p>
+          {/* Button */}
+          <button
+            onClick={() => {}}
+            className="px-3 py-2 rounded-xl text-[10px] font-black cursor-pointer transition-all active:scale-95 shrink-0"
+            style={{
+              background: '#F5B9C6',
+              color: '#3A2350',
+              fontFamily: "'Manrope', sans-serif",
+            }}
+            title="Gestão de saldos"
+          >
+            Gestão
+          </button>
+        </div>
       </div>
 
       {/* TOTAL BALANCE CARD - SALDO TOTAL DISPONÍVEL */}
