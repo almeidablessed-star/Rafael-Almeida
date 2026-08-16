@@ -468,28 +468,51 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     <div className="space-y-5 pb-12 animate-fadeIn">
       {/* Banner Header - Roxo Gradiente */}
       <div
-        className="rounded-3xl p-6 text-white shadow-highlight relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+        className="text-white shadow-card relative overflow-hidden flex items-center justify-between gap-3 px-5 py-5"
         style={{
-          background: 'linear-gradient(155deg, var(--color-brand-900) 0%, var(--color-brand-700) 60%, var(--color-brand-500) 100%)',
+          background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
+          borderRadius: '40px 40px 40px 40px',
+          boxShadow: '0 30px 70px rgba(58,35,80,.26)',
         }}
       >
-        <div>
-          <h2 className="font-marca text-3xl text-white tracking-tight" style={{ lineHeight: 1 }}>
-            Fichas Técnicas
-          </h2>
-          <p className="text-xs text-white/80 font-semibold mt-2">Gestão de receitas e cálculo de custos</p>
-        </div>
-
-        <button
-          onClick={handleOpenAdd}
-          className="px-4 py-2.5 rounded-full text-xs font-black uppercase transition-all active:scale-95 flex items-center gap-2 cursor-pointer shrink-0"
+        {/* Título */}
+        <span
+          className="text-white font-bold tracking-tight"
           style={{
-            background: 'var(--color-rose-200)',
-            color: 'var(--color-brand-900)',
+            fontFamily: "'Instrument Serif', serif",
+            fontSize: '29px',
+            lineHeight: 1.1,
           }}
         >
-          <Plus className="w-4 h-4" />
-          <span>Nova Ficha</span>
+          Fichas Técnicas
+        </span>
+
+        {/* Botão Nova Ficha */}
+        <button
+          onClick={handleOpenAdd}
+          className="flex items-center gap-2 cursor-pointer transition-all active:scale-95 shrink-0"
+          style={{
+            background: 'rgba(255,255,255,.18)',
+            border: '1px solid rgba(255,255,255,.3)',
+            color: '#FFFFFF',
+            fontWeight: 800,
+            fontSize: '11px',
+            padding: '9px 14px',
+            borderRadius: '14px',
+            whiteSpace: 'nowrap',
+            transition: 'all .22s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = '#FFFFFF';
+            e.currentTarget.style.color = '#3A2350';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'rgba(255,255,255,.18)';
+            e.currentTarget.style.color = '#FFFFFF';
+          }}
+        >
+          <Plus size={14} strokeWidth={3} />
+          Nova Ficha
         </button>
       </div>
 
