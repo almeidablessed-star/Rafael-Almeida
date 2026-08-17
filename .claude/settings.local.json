@@ -58,7 +58,8 @@
       "Bash(git commit -m 'feat: Create FichaTecnicaSelector component for stock management *)",
       "Bash(git commit -m 'feat: Integrate FichaTecnicaSelector and stock movements into transaction flow *)",
       "Bash(git commit -m 'fix: Resolve TypeScript type errors in stockManager *)",
-      "Bash(git commit -m 'docs: Update project memory with Phase 4 stock management implementation *)"
+      "Bash(git commit -m 'docs: Update project memory with Phase 4 stock management implementation *)",
+      "Bash(git commit -m 'fix: Extend purple header behind iPhone notch *)"
     ]
   },
   "hooks": {

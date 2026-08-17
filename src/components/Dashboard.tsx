@@ -72,9 +72,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
           background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
           padding: '20px',
           paddingBottom: '0px',
+          paddingTop: 'calc(20px + max(0px, env(safe-area-inset-top)))',
           boxShadow: '0 30px 70px rgba(58,35,80,0.26)',
           marginLeft: 'calc(-50vw + 50%)',
           marginRight: 'calc(-50vw + 50%)',
+          marginTop: 'calc(-1 * max(0px, env(safe-area-inset-top)))',
         }}
       >
 
