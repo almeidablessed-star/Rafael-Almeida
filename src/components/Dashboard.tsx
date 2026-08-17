@@ -81,17 +81,20 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
       {/* 1. PROFIT CARD - Roxo Gradiente (Cabeçalho da Página) */}
       <div
-        className="rounded-[28px] text-white relative overflow-visible"
+        className="text-white relative overflow-hidden"
         style={{
           background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
           padding: '20px',
           paddingBottom: '28px',
           paddingTop: '28px',
           boxShadow: '0 30px 70px rgba(58,35,80,0.26)',
-          marginLeft: '18px',
-          marginRight: '18px',
+          marginLeft: 'calc(-50vw + 50%)',
+          marginRight: 'calc(-50vw + 50%)',
           marginTop: '0px',
-          zIndex: 50,
+          paddingLeft: 'calc(50vw - 50% + 18px)',
+          paddingRight: 'calc(50vw - 50% + 18px)',
+          borderRadius: '32px 0px 32px 32px',
+          zIndex: 1,
         }}
       >
 
@@ -242,8 +245,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
         style={{
           background: '#F6F2F5',
           position: 'relative',
-          zIndex: 1,
-          marginTop: '-12px',
+          zIndex: 50,
+          marginTop: '-44px',
           marginLeft: 'calc(-50vw + 50%)',
           marginRight: 'calc(-50vw + 50%)',
           paddingTop: '32px',

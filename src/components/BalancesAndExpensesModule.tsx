@@ -113,9 +113,12 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
       >
         {/* Header with Title only */}
         <div
-          className="px-5 py-10 flex items-center justify-between gap-4 rounded-t-[40px]"
+          className="px-5 flex items-center justify-between gap-4"
           style={{
             background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
+            borderRadius: '40px 0px 0px 0px',
+            paddingTop: '40px',
+            paddingBottom: '120px',
           }}
         >
           {/* Title */}
@@ -148,9 +151,12 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
 
       {/* TOTAL BALANCE CARD - SALDO TOTAL DISPONÍVEL */}
       <div
-        className="rounded-[22px] p-6 text-white mx-5 mt-5"
+        className="rounded-[22px] p-6 text-white mx-5"
         style={{
           background: 'linear-gradient(155deg, var(--color-brand-900) 0%, var(--color-brand-700) 60%, var(--color-brand-500) 100%)',
+          marginTop: '-70px',
+          position: 'relative',
+          zIndex: 50,
         }}
       >
         <span style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '0.14em', color: 'rgba(247, 220, 225, 0.8)', textTransform: 'uppercase', display: 'block', fontFamily: "'Manrope', sans-serif" }}>
@@ -211,9 +217,6 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
               🔄 REPOSIÇÃO
             </span>
             <span style={{ fontSize: '10px', color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
-              Para reposição de ingredientes e embalagens.
-            </span>
-            <span style={{ fontSize: '10px', color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
               Entrou <strong style={{ color: '#4C7358' }}>+{formatMoney(balances.reposicao.accumulatedInflow)}</strong> · Gasto <strong style={{ color: '#C4626F' }}>-{formatMoney(balances.reposicao.totalSpent)}</strong>
             </span>
           </div>
@@ -244,9 +247,6 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
           <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '6px' }}>
             <span style={{ alignSelf: 'flex-start', fontSize: '9.5px', fontWeight: 800, letterSpacing: '.05em', color: '#4A3556', background: '#EDE4F3', padding: '4px 9px', borderRadius: '999px', fontFamily: "'Manrope', sans-serif" }}>
               🟣 MÃO DE OBRA
-            </span>
-            <span style={{ fontSize: '10px', color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
-              Seu salário acumulado pelas produções.
             </span>
             <span style={{ fontSize: '10px', color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
               Acumulado <strong style={{ color: '#4C7358' }}>+{formatMoney(balances.maodeobra?.accumulatedInflow || 0)}</strong>
@@ -281,9 +281,6 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
               📊 CUSTO + INVESTIMENTO
             </span>
             <span style={{ fontSize: '10px', color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
-              Dividido por 2 (50% Custo e 50% Investimento).
-            </span>
-            <span style={{ fontSize: '10px', color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
               🔴 Custo <strong style={{ color: '#241B2B' }}>{formatMoney(balances.custoEInvestimento.custoHalf)}</strong> · 📈 Invest. <strong style={{ color: '#241B2B' }}>{formatMoney(balances.custoEInvestimento.investimentoHalf)}</strong>
             </span>
           </div>
@@ -295,7 +292,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
       </div>
 
       {/* 2. REGISTRATION FORM FOR REAL PURCHASES / EXPENSES */}
-      <div className="bg-white mx-5" style={{ borderRadius: '24px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '13px', boxShadow: '0 8px 20px rgba(58,35,80,.09)' }}>
+      <div className="bg-white mx-5" style={{ borderRadius: '24px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '13px', boxShadow: '0 8px 20px rgba(58,35,80,.09)', marginTop: '20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '1px solid rgba(36,27,43,.07)', paddingBottom: '11px' }}>
           <span style={{ width: '34px', height: '34px', borderRadius: '12px', background: '#6E3F72', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <Plus className="w-4 h-4" style={{ stroke: '#FFFFFF', strokeWidth: 3 }} />
@@ -452,7 +449,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
       </div>
 
       {/* 4. EXPENSES HISTORY */}
-      <div className="bg-white mx-5" style={{ borderRadius: '24px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px', boxShadow: '0 8px 20px rgba(58,35,80,.09)' }}>
+      <div className="bg-white mx-5" style={{ borderRadius: '24px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px', boxShadow: '0 8px 20px rgba(58,35,80,.09)', marginTop: '20px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', borderBottom: '1px solid rgba(36,27,43,.07)', paddingBottom: '12px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
             <span style={{ fontFamily: "'Instrument Serif', serif", fontSize: '19px', color: '#241B2B', lineHeight: 1.15 }}>
@@ -656,7 +653,9 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
       </div>
 
       {/* Weekly History Card */}
-      <WeeklyHistoryCard archives={archives} />
+      <div style={{ marginTop: '20px' }}>
+        <WeeklyHistoryCard archives={archives} />
+      </div>
     </div>
   );
 };

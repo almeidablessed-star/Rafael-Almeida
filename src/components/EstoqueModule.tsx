@@ -175,9 +175,12 @@ export const EstoqueModule: React.FC = () => {
       >
         {/* Header with Title only */}
         <div
-          className="px-5 py-10 flex items-center justify-between gap-4 rounded-t-[40px]"
+          className="px-5 flex items-center justify-between gap-4"
           style={{
             background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
+            borderRadius: '40px 0px 0px 0px',
+            paddingTop: '40px',
+            paddingBottom: '120px',
           }}
         >
           {/* Title */}
@@ -210,12 +213,13 @@ export const EstoqueModule: React.FC = () => {
         {/* Content Section */}
         <div className="flex flex-col gap-4"
           style={{
-            marginTop: '-14px',
+            marginTop: '-70px',
             background: '#F6F2F5',
             borderRadius: '28px 28px 0 0',
             position: 'relative',
             padding: '20px',
-            margin: '0 calc(-50vw + 50%)',
+            marginLeft: 'calc(-50vw + 50%)',
+            marginRight: 'calc(-50vw + 50%)',
             paddingLeft: 'calc(20px + max(0px, env(safe-area-inset-left)))',
             paddingRight: 'calc(20px + max(0px, env(safe-area-inset-right)))',
           }}

@@ -87,7 +87,7 @@
 
 body {
   margin: 0;
-  background: var(--car-sand-100);
+  background: linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%);
   font-family: 'Plus Jakarta Sans', 'Manrope', sans-serif;
   font-variant-numeric: lining-nums tabular-nums;
   color: var(--car-text-900);

@@ -62,8 +62,11 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) 
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 bg-white shadow-nav-bottom pb-safe"
-      style={{ borderTop: '1px solid var(--color-border-nav)' }}
+      className="fixed bottom-0 left-0 right-0 bg-white shadow-nav-bottom pb-safe"
+      style={{
+        borderTop: '1px solid var(--color-border-nav)',
+        zIndex: 9999,
+      }}
     >
       <div className="max-w-lg mx-auto flex items-center justify-around" style={{ padding: '12px 8px 22px' }}>
         {tabs.map((tab) => {

@@ -176,8 +176,7 @@ export default function App() {
 
   return (
     <CurrencyProvider>
-      <div className="min-h-screen bg-[var(--color-surface)] text-[var(--color-ink)] flex flex-col lg:flex-row font-sans lg:rounded-none" style={{
-        borderRadius: 'clamp(0px, 3vw, 40px)',
+      <div className="min-h-screen text-[var(--color-ink)] flex flex-col lg:flex-row font-sans lg:rounded-none" style={{
         overflow: 'hidden',
       }}>
 
