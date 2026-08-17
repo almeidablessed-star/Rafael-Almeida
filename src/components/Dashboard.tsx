@@ -65,6 +65,20 @@ export const Dashboard: React.FC<DashboardProps> = ({
   return (
     <div className="space-y-0 pb-8 animate-fadeIn">
 
+      {/* Status bar background filler (covers clock, signal, battery area) */}
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 'max(0px, env(safe-area-inset-top))',
+          background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
+          zIndex: 40,
+          pointerEvents: 'none',
+        }}
+      />
+
       {/* 1. PROFIT CARD - Roxo Gradiente (Cabeçalho da Página) */}
       <div
         className="rounded-b-[28px] text-white relative overflow-visible"
@@ -72,11 +86,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
           background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
           padding: '20px',
           paddingBottom: '0px',
-          paddingTop: 'calc(20px + max(0px, env(safe-area-inset-top)))',
+          paddingTop: '0px',
           boxShadow: '0 30px 70px rgba(58,35,80,0.26)',
           marginLeft: 'calc(-50vw + 50%)',
           marginRight: 'calc(-50vw + 50%)',
-          marginTop: 'calc(-1 * max(0px, env(safe-area-inset-top)))',
+          marginTop: '0px',
         }}
       >
 
