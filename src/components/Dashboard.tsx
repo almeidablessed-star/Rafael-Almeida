@@ -87,11 +87,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
           padding: '20px',
           paddingBottom: '0px',
           paddingTop: '0px',
-          paddingLeft: 'calc(50vw - 50% + 18px)',
-          paddingRight: 'calc(50vw - 50% + 18px)',
           boxShadow: '0 30px 70px rgba(58,35,80,0.26)',
-          marginLeft: 'calc(-50vw + 50%)',
-          marginRight: 'calc(-50vw + 50%)',
+          marginLeft: '18px',
+          marginRight: '18px',
           marginTop: '0px',
           zIndex: 50,
         }}
