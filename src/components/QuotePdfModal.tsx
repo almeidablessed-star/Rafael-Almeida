@@ -124,10 +124,9 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
 
       try {
         // Use html-to-image which has better CSS support than html2canvas
-        // Use pixelRatio: 1 to reduce image size so content fits in one A4 page
         const imgData = await toPng(docElem, {
           cacheBust: true,
-          pixelRatio: 1,
+          pixelRatio: 2,
         });
 
         console.log('✅ Image generated');
@@ -146,25 +145,12 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
           const imgWidth = img.width;
           const imgHeight = img.height;
 
-          // Calculate scale to fit content in one page with margin
-          const maxWidth = pdfWidth - 10; // 5mm margin on each side
-          const maxHeight = pdfHeight - 10; // 5mm margin top and bottom
-
-          const ratio = Math.min(maxWidth / imgWidth, maxHeight / imgHeight);
+          const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
           const scaledWidth = imgWidth * ratio;
           const scaledHeight = imgHeight * ratio;
           const x = (pdfWidth - scaledWidth) / 2;
-          const y = 5;
 
-          // Ensure everything fits in one page
-          if (scaledHeight + y > pdfHeight) {
-            const adjustedRatio = (pdfHeight - y - 5) / imgHeight;
-            const adjustedWidth = imgWidth * adjustedRatio;
-            const adjustedX = (pdfWidth - adjustedWidth) / 2;
-            pdf.addImage(imgData, 'PNG', adjustedX, y, adjustedWidth, pdfHeight - y - 5);
-          } else {
-            pdf.addImage(imgData, 'PNG', x, y, scaledWidth, scaledHeight);
-          }
+          pdf.addImage(imgData, 'PNG', x, 5, scaledWidth, scaledHeight);
 
           const isCozinha = activeTab === 'cozinha';
           const clientName = (transaction.customerName || 'Cliente').replace(/\s+/g, '_');
