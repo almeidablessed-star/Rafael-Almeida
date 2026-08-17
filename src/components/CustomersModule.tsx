@@ -621,23 +621,27 @@ export const CustomersModule: React.FC = () => {
 
       {/* CLIENT FORM MODAL */}
       {isFormOpen && (
-        <form
-          onSubmit={handleSave}
-          className="bg-white p-5 rounded-xl border-2 border-[var(--color-accent-gold)] shadow-sm space-y-4 animate-fadeIn"
-        >
-          <div className="flex items-center justify-between pb-3 border-b border-[var(--color-neutral-hero)]">
-            <h3 className="font-brand font-black text-base text-[var(--color-neutral-charcoal)] flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-[var(--color-accent-gold)]" />
+        <div style={{ paddingLeft: '18px', paddingRight: '18px' }} className="mb-4">
+          <div className="bg-white rounded-lg overflow-hidden shadow-lg border border-pink-200 animate-fadeIn">
+          {/* GRADIENT HEADER */}
+          <div className="bg-gradient-to-r from-[#3A2350] to-[#A85E86] px-4 sm:px-5 py-3 sm:py-4 flex items-center justify-between">
+            <h3 className="font-brand font-black text-sm sm:text-base text-white flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-[#F5B9C6]" />
               {editingId ? 'Editar Cadastro da Cliente' : 'Cadastrar Nova Cliente'}
             </h3>
             <button
               type="button"
               onClick={() => setIsFormOpen(false)}
-              className="text-xs text-[var(--color-neutral-charcoal)]/60 hover:text-[var(--color-neutral-charcoal)] font-bold px-2 py-1"
+              className="text-xs text-white/70 hover:text-white font-bold px-2 py-1 transition-colors"
             >
               Cancelar
             </button>
           </div>
+
+        <form
+          onSubmit={handleSave}
+          className="bg-white p-4 sm:p-5 space-y-4"
+        >
 
           {/* CUSTOMER PHOTO UPLOAD */}
           <div className="flex items-center gap-4 rounded-lg border-2 border-[var(--color-accent-gold)]/60 p-4" style={{background: 'linear-gradient(135deg, rgba(245,185,198,0.08) 0%, rgba(194,174,207,0.06) 100%)'}}>
@@ -813,6 +817,8 @@ export const CustomersModule: React.FC = () => {
             </button>
           </div>
         </form>
+          </div>
+        </div>
       )}
 
       {/* CUSTOMERS LIST */}
