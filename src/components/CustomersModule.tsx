@@ -644,7 +644,7 @@ export const CustomersModule: React.FC = () => {
         >
 
           {/* CUSTOMER PHOTO UPLOAD */}
-          <div className="flex items-center gap-4 rounded-lg border-2 border-[var(--color-accent-gold)]/60 p-4" style={{background: 'linear-gradient(135deg, rgba(194,130,155,0.40) 0%, rgba(245,185,198,0.08) 100%)'}}>
+          <div className="flex items-center gap-4 rounded-lg p-4" style={{background: 'linear-gradient(135deg, rgba(160,100,130,0.55) 0%, rgba(245,185,198,0.10) 100%)'}}>
             <div className="w-16 h-16 rounded-full border-2 border-[var(--color-accent-gold)] bg-white text-[var(--color-neutral-charcoal)] flex items-center justify-center overflow-hidden shrink-0 shadow-card relative">
               {photoUrl ? (
                 <img src={photoUrl} alt="Preview" className="w-full h-full object-cover" />
