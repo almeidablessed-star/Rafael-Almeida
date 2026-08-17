@@ -352,7 +352,7 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
         }
       `}</style>
 
-      <div className="bg-white rounded-xl max-w-2xl w-full shadow-highlight overflow-hidden flex flex-col max-h-[92vh] print:max-h-none print:shadow-none print:rounded-none border-2 border-pink-200 relative" aria-label="Orçamento PDF">
+      <div className="bg-white rounded-xl max-w-2xl w-full shadow-highlight overflow-hidden flex flex-col print:shadow-none print:rounded-none border-2 border-pink-200 relative" aria-label="Orçamento PDF">
 
         {/* STICKY TOP CONTROL BAR - ALWAYS VISIBLE & CLEAR ON ALL DEVICES */}
         <div className="p-2.5 sm:p-3 bg-gradient-to-r from-[#3A2350] to-[#A85E86] text-white flex items-center justify-between gap-2 no-print shrink-0 sticky top-0 z-50 border-b border-white/10 shadow-sm">
