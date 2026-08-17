@@ -61,7 +61,8 @@
       "Bash(git commit -m 'docs: Update project memory with Phase 4 stock management implementation *)",
       "Bash(git commit -m 'fix: Extend purple header behind iPhone notch *)",
       "Bash(git commit -m 'fix: Add purple background to iPhone status bar area *)",
-      "Bash(git commit -m 'fix: Restore rounded corners on Início tab header card *)"
+      "Bash(git commit -m 'fix: Restore rounded corners on Início tab header card *)",
+      "Bash(git commit -m 'fix: Restore lateral spacing and increase '\\\\''Lançar Pedido'\\\\'' gap *)"
     ]
   },
   "hooks": {
