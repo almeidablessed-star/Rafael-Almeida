@@ -1,0 +1,19 @@
+{
+  "detector": {
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "Plus Jakarta Sans",
+        "reason": "User confirmed Plus Jakarta Sans is intentional for Carula design system"
+      },
+      {
+        "rule": "overused-font",
+        "value": "Instrument Serif",
+        "reason": "User confirmed Instrument Serif is intentional for Carula design system"
+      }
+    ]
+  },
+  "hook": {
+    "enabled": true
+  }
+}
