@@ -107,7 +107,7 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
     window.print();
   };
 
-  // Download PDF document directly using jsPDF + html2canvas
+  // Download PDF document directly
   const handleDownloadPdf = async () => {
     const docElem = document.getElementById('quote-pdf-document');
     if (!docElem) {
@@ -116,84 +116,79 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
     }
 
     try {
-      console.log('🎯 NEW VERSION: Starting PDF generation with fixed stripProblematicColors');
+      console.log('🎯 Starting PDF generation with HTML2PDF...');
       setIsGeneratingPdf(true);
 
-      // Wait for all images and content to load
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // Wait for images to load
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Use original element directly - don't clone
-      // html2canvas should handle CSS parsing even with oklab warnings
-      console.log('📏 Element dimensions:', {
-        width: docElem.scrollWidth,
-        height: docElem.scrollHeight,
-        offsetWidth: docElem.offsetWidth,
-        offsetHeight: docElem.offsetHeight,
+      // Create a fresh copy of the element with computed styles as inline
+      const cloned = docElem.cloneNode(true) as HTMLElement;
+
+      // Create an off-screen container with pdf-render class to force RGB colors
+      const container = document.createElement('div');
+      container.className = 'pdf-render';
+      container.style.position = 'absolute';
+      container.style.left = '-10000px';
+      container.style.width = '800px';
+      container.appendChild(cloned);
+      document.body.appendChild(container);
+
+      // Wait for layout and CSS to be computed
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Remove all class attributes which might contain problematic oklab CSS
+      const allElements = cloned.querySelectorAll('*');
+      allElements.forEach(el => {
+        el.removeAttribute('class');
       });
 
-      const canvas = await html2canvas(docElem, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-        backgroundColor: '#ffffff',
-        windowHeight: docElem.scrollHeight,
-        windowWidth: docElem.scrollWidth,
-        imageTimeout: 15000,
-        ignoreElements: (el) => el.classList?.contains('no-print') || false,
-        onclone: (clonedDocument) => {
-          // Remove all class attributes from cloned element to prevent CSS parsing
-          const allElements = clonedDocument.querySelectorAll('*');
-          allElements.forEach((el) => {
-            el.removeAttribute('class');
-            // Also remove style tags that might contain oklab
-            if (el.tagName === 'STYLE' && el.textContent?.includes('oklab')) {
-              el.remove();
-            }
-          });
-          console.log('🧹 Cleaned classes and oklab styles in cloned document');
-        },
-      });
+      try {
+        const canvas = await html2canvas(cloned, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          logging: false,
+          backgroundColor: '#ffffff',
+          windowHeight: cloned.scrollHeight,
+          windowWidth: cloned.scrollWidth,
+          imageTimeout: 15000,
+        });
 
-      console.log('✅ Canvas generated:', { width: canvas.width, height: canvas.height });
+        console.log('✅ Canvas generated:', { width: canvas.width, height: canvas.height });
 
-      if (!canvas || canvas.width === 0 || canvas.height === 0) {
-        console.error('Canvas generation failed - empty canvas');
-        throw new Error('Canvas is empty');
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4',
+        });
+
+        const imgData = canvas.toDataURL('image/png');
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const imgWidth = canvas.width;
+        const imgHeight = canvas.height;
+
+        const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+        const scaledWidth = imgWidth * ratio;
+        const scaledHeight = imgHeight * ratio;
+        const x = (pdfWidth - scaledWidth) / 2;
+
+        pdf.addImage(imgData, 'PNG', x, 5, scaledWidth, scaledHeight);
+
+        const isCozinha = activeTab === 'cozinha';
+        const clientName = (transaction.customerName || 'Cliente').replace(/\s+/g, '_');
+        const timestamp = new Date().getTime();
+        const filename = isCozinha
+          ? `Ficha_Cozinha_${clientName}_${timestamp}.pdf`
+          : `Folha_Cliente_${clientName}_${timestamp}.pdf`;
+
+        pdf.save(filename);
+        console.log('✅ PDF saved:', filename);
+
+      } finally {
+        document.body.removeChild(container);
       }
-
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-        compress: true,
-      });
-
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
-
-      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-      const renderWidth = imgWidth * ratio;
-      const renderHeight = imgHeight * ratio;
-
-      const x = (pdfWidth - renderWidth) / 2;
-      const y = 5;
-
-      pdf.addImage(imgData, 'PNG', x, y, renderWidth, renderHeight);
-
-      const isCozinha = activeTab === 'cozinha';
-      const clientName = (transaction.customerName || 'Cliente').replace(/\s+/g, '_');
-      const timestamp = new Date().getTime();
-      const filename = isCozinha
-        ? `Ficha_Cozinha_${clientName}_${timestamp}.pdf`
-        : `Folha_Cliente_${clientName}_${timestamp}.pdf`;
-
-      // Use pdf.save() which triggers browser download
-      pdf.save(filename);
 
     } catch (err) {
       console.error('Error generating PDF:', err);
