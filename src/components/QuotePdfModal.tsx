@@ -335,9 +335,6 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
             visibility: visible !important;
           }
           #quote-pdf-document {
-            position: absolute !important;
-            left: 0 !important;
-            top: 0 !important;
             width: 100% !important;
             max-width: 100% !important;
             margin: 0 !important;
@@ -348,6 +345,13 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
             border-radius: 0 !important;
             page-break-after: avoid !important;
             break-after: avoid !important;
+            display: block !important;
+            position: static !important;
+          }
+          #quote-pdf-document * {
+            background-color: white !important;
+            color: black !important;
+            border-color: #dddddd !important;
           }
           .no-print {
             display: none !important;
