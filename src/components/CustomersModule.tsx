@@ -811,7 +811,7 @@ export const CustomersModule: React.FC = () => {
             </button>
             <button
               type="submit"
-              className="px-5 py-2 rounded-xl bg-[var(--color-neutral-charcoal)] hover:bg-[#2A2520] text-white font-brand font-bold text-xs shadow-sm active:scale-95 transition-all duration-normal"
+              className="px-5 py-2 rounded-xl bg-[var(--color-accent-gold)] hover:bg-[var(--color-accent-gold)]/90 text-[var(--color-neutral-charcoal)] font-brand font-bold text-xs shadow-sm active:scale-95 transition-all duration-normal"
             >
               Salvar Cadastro
             </button>
