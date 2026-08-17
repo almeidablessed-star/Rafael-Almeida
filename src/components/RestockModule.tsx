@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Transaction } from '../types';
 import { formatCurrency, formatDateBr } from '../utils/formatters';
+import { useCurrency } from '../context/CurrencyContext';
 import { ShoppingCart, Plus, Search, Calendar, Trash2, Edit3, Store } from 'lucide-react';
 
 interface RestockModuleProps {
@@ -16,6 +17,7 @@ export const RestockModule: React.FC<RestockModuleProps> = ({
   onEditTransaction,
   onDeleteTransaction,
 }) => {
+  const { formatCurrency: formatMoney } = useCurrency();
   const [searchTerm, setSearchTerm] = useState('');
 
   // Filter restock only
@@ -82,7 +84,7 @@ export const RestockModule: React.FC<RestockModuleProps> = ({
         </div>
 
         <span className="font-numbers text-3xl md:text-4xl font-black tracking-tight text-[var(--color-brand-900)] block mb-1">
-          {formatCurrency(totalSpent)}
+          {formatMoney(totalSpent)}
         </span>
         <p className="text-xs md:text-sm text-[#3A5A4A]/85 font-medium">
           Total gasto em reposição de ingredientes e embalagens no período
@@ -148,7 +150,7 @@ export const RestockModule: React.FC<RestockModuleProps> = ({
               {/* Amount & Actions */}
               <div className="text-right flex flex-col items-end shrink-0">
                 <span className="font-brand font-extrabold text-base text-[#3A5A4A]">
-                  -{formatCurrency(item.totalValue)}
+                  -{formatMoney(item.totalValue)}
                 </span>
                 <div className="flex items-center gap-1 mt-1">
                   <button

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FichaTecnica, IngredientUsage, Transaction } from '../types';
 import { formatCurrency } from '../utils/formatters';
+import { useCurrency } from '../context/CurrencyContext';
 import {
   BookOpen,
   Plus,
@@ -290,6 +291,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   onAddTransaction,
   onNavigateToTab,
 }) => {
+  const { formatCurrency: formatMoney } = useCurrency();
   const [fichas, setFichas] = useState<FichaTecnica[]>(getStoredFichas());
   const [selectedCategory, setSelectedCategory] = useState<'bolos' | 'doces' | 'salgados' | 'saudaveis' | 'kids'>('bolos');
   const [isCreating, setIsCreating] = useState(false);
@@ -455,10 +457,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
       totalValue: ficha.sugestaoVenda,
       date: today,
       paymentStatus: 'pago',
-      notes: `Lançado via Ficha Técnica. Reposição: ${formatCurrency(repoTotal)}, Mão de Obra: ${formatCurrency(ficha.maoDeObraCost)}, Custo/Invest: ${formatCurrency((ficha.custoCost || 0) + (ficha.investimentoCost || 0))}`,
+      notes: `Lançado via Ficha Técnica. Reposição: ${formatMoney(repoTotal)}, Mão de Obra: ${formatMoney(ficha.maoDeObraCost)}, Custo/Invest: ${formatMoney((ficha.custoCost || 0) + (ficha.investimentoCost || 0))}`,
     });
 
-    setLaunchSuccessMsg(`Venda de "${ficha.name}" no valor de ${formatCurrency(ficha.sugestaoVenda)} lançada com sucesso no Caixa!`);
+    setLaunchSuccessMsg(`Venda de "${ficha.name}" no valor de ${formatMoney(ficha.sugestaoVenda)} lançada com sucesso no Caixa!`);
     setTimeout(() => setLaunchSuccessMsg(null), 4000);
   };
 
@@ -858,7 +860,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   <div className="col-span-4 text-right">
                     <span className="text-[10px] text-neutral-500 block">Custo Gasto</span>
                     <span className="font-black text-xs text-[var(--color-pastry-chocolate)]">
-                      {formatCurrency(ing.totalCost || 0)}
+                      {formatMoney(ing.totalCost || 0)}
                     </span>
                   </div>
                   <div className="col-span-1 text-right">
@@ -877,7 +879,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
             <div className="pt-2 border-t border-[var(--color-pastry-light-pink)]/30 flex items-center justify-between text-xs font-bold text-[var(--color-pastry-chocolate)]">
               <span>Total Reposição (Ingredientes):</span>
               <span className="font-extrabold text-sm text-[var(--color-pastry-chocolate)]">
-                {formatCurrency(totalReposicao)}
+                {formatMoney(totalReposicao)}
               </span>
             </div>
           </div>
@@ -929,11 +931,11 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                 Sugestão de Preço de Venda
               </span>
               <span className="font-marca text-3xl font-black text-[var(--color-pastry-cream)]">
-                {formatCurrency(calculatedSuggestedPrice)}
+                {formatMoney(calculatedSuggestedPrice)}
               </span>
             </div>
             <div className="text-right text-[11px] text-[var(--color-pastry-cream)]/80 font-medium">
-              Insumos ({formatCurrency(totalReposicao)}) + Mão de Obra ({formatCurrency(mdoNum)}) + Custos ({formatCurrency(cusNum + invNum)})
+              Insumos ({formatMoney(totalReposicao)}) + Mão de Obra ({formatMoney(mdoNum)}) + Custos ({formatMoney(cusNum + invNum)})
             </div>
           </div>
 
@@ -1148,7 +1150,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                           fontFamily: "'Manrope', sans-serif",
                         }}
                       >
-                        {formatCurrency(ficha.sugestaoVenda)}
+                        {formatMoney(ficha.sugestaoVenda)}
                       </span>
                     </div>
                   </div>
@@ -1159,19 +1161,19 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                     <span style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '10px', color: '#5B4A6B' }}>
                       <span style={{ width: '9px', height: '9px', borderRadius: '3px', background: '#6E3F72', flexShrink: 0 }}></span>
                       Reposição
-                      <span style={{ color: '#241B2B', marginLeft: 'auto', fontWeight: 400 }}>{formatCurrency(repoTotal)}</span>
+                      <span style={{ color: '#241B2B', marginLeft: 'auto', fontWeight: 400 }}>{formatMoney(repoTotal)}</span>
                     </span>
                     {/* Mão de Obra */}
                     <span style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '10px', color: '#5B4A6B' }}>
                       <span style={{ width: '9px', height: '9px', borderRadius: '3px', background: '#C4626F', flexShrink: 0 }}></span>
                       Mão de Obra
-                      <span style={{ color: '#241B2B', marginLeft: 'auto', fontWeight: 400 }}>{formatCurrency(ficha.maoDeObraCost)}</span>
+                      <span style={{ color: '#241B2B', marginLeft: 'auto', fontWeight: 400 }}>{formatMoney(ficha.maoDeObraCost)}</span>
                     </span>
                     {/* Custos */}
                     <span style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '10px', color: '#5B4A6B' }}>
                       <span style={{ width: '9px', height: '9px', borderRadius: '3px', background: '#B08D57', flexShrink: 0 }}></span>
                       Custos Op.
-                      <span style={{ color: '#241B2B', marginLeft: 'auto', fontWeight: 400 }}>{formatCurrency((ficha.custoCost || 0) + (ficha.investimentoCost || 0))}</span>
+                      <span style={{ color: '#241B2B', marginLeft: 'auto', fontWeight: 400 }}>{formatMoney((ficha.custoCost || 0) + (ficha.investimentoCost || 0))}</span>
                     </span>
                   </div>
                 </div>
@@ -1222,7 +1224,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         <span style={{ color: '#5B4A6B' }}>
                           {ing.quantity} {ing.unit} de {ing.name}
                         </span>
-                        <span style={{ fontWeight: 700, color: '#241B2B' }}>{formatCurrency(ing.totalCost)}</span>
+                        <span style={{ fontWeight: 700, color: '#241B2B' }}>{formatMoney(ing.totalCost)}</span>
                       </div>
                     ))}
                   </div>

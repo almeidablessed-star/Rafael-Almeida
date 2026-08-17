@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Transaction } from '../types';
 import { formatCurrency, formatDateBr, getPaymentMethodLabel } from '../utils/formatters';
+import { useCurrency } from '../context/CurrencyContext';
 import { calculateSalesBreakdown } from '../utils/salesCalculator';
 import {
   TrendingUp,
@@ -36,6 +37,7 @@ export const SalesModule: React.FC<SalesModuleProps> = ({
   onDeleteTransaction,
   onTogglePaymentStatus,
 }) => {
+  const { formatCurrency: formatMoney } = useCurrency();
   const [searchTerm, setSearchTerm] = useState('');
 
   // Filter sales only
@@ -75,7 +77,7 @@ export const SalesModule: React.FC<SalesModuleProps> = ({
 
         <div className="my-1">
           <span className="font-brand text-3xl font-extrabold tracking-tight text-[var(--color-brand-900)]">
-            {formatCurrency(breakdown.totalVendas)}
+            {formatMoney(breakdown.totalVendas)}
           </span>
         </div>
         <p className="text-xs text-[#6B3E42]/80 font-medium">
@@ -99,7 +101,7 @@ export const SalesModule: React.FC<SalesModuleProps> = ({
               </div>
             </div>
             <span className="font-brand font-black text-lg text-[var(--color-brand-900)]">
-              {formatCurrency(breakdown.totalAReceber)}
+              {formatMoney(breakdown.totalAReceber)}
             </span>
           </div>
         )}
@@ -145,7 +147,7 @@ export const SalesModule: React.FC<SalesModuleProps> = ({
               <span>Total de Reposição</span>
             </div>
             <span className="font-numbers font-marca value-md md:text-3xl text-[#3A5A4A] mb-1">
-              {formatCurrency(breakdown.totalReposicao)}
+              {formatMoney(breakdown.totalReposicao)}
             </span>
             <span className="text-[11px] text-[#3A5A4A]/70 font-medium">
               Insumos e Estoque
@@ -162,7 +164,7 @@ export const SalesModule: React.FC<SalesModuleProps> = ({
               <span>Mão de Obra</span>
             </div>
             <span className="font-numbers font-marca value-md md:text-3xl text-[#5A4B6B] mb-1">
-              {formatCurrency(breakdown.totalMaoDeObra)}
+              {formatMoney(breakdown.totalMaoDeObra)}
             </span>
             <span className="text-[11px] text-[#5A4B6B]/70 font-medium">
               Salário Confeiteira
@@ -179,7 +181,7 @@ export const SalesModule: React.FC<SalesModuleProps> = ({
               <span>Custos & Invest.</span>
             </div>
             <span className="font-numbers font-marca value-md md:text-3xl text-[#3A4A5A] mb-1">
-              {formatCurrency(breakdown.totalCustosEInvestimento)}
+              {formatMoney(breakdown.totalCustosEInvestimento)}
             </span>
             <span className="text-[11px] text-[#3A4A5A]/70 font-medium">
               Operacional + Reserva
@@ -202,7 +204,7 @@ export const SalesModule: React.FC<SalesModuleProps> = ({
                 </span>
               </div>
               <span className="font-numbers font-marca value-lg md:text-4xl text-[var(--color-brand-900)] shrink-0">
-                {formatCurrency(breakdown.totalLucroLiquido)}
+                {formatMoney(breakdown.totalLucroLiquido)}
               </span>
             </div>
           </div>
@@ -213,7 +215,7 @@ export const SalesModule: React.FC<SalesModuleProps> = ({
           <div className="bg-[#F5D4A8]/20 p-2.5 rounded-[22px] border border-[#F5D4A8]/40 text-[#6B5A42] text-[11px] flex items-center gap-2 font-medium">
             <AlertCircle className="w-4 h-4 text-[#C99B6F] shrink-0" />
             <span>
-              Existem <strong>{breakdown.totalPendingCount} pedidos pendentes ({formatCurrency(breakdown.totalAReceber)})</strong>. Marque como "Pago" para incluí-los nesses totais.
+              Existem <strong>{breakdown.totalPendingCount} pedidos pendentes ({formatMoney(breakdown.totalAReceber)})</strong>. Marque como "Pago" para incluí-los nesses totais.
             </span>
           </div>
         )}
@@ -326,7 +328,7 @@ export const SalesModule: React.FC<SalesModuleProps> = ({
                         isPending ? 'text-[#C99B6F]' : 'text-[#3A5A4A]'
                       }`}
                     >
-                      {isPending ? '' : '+'}{formatCurrency(sale.totalValue)}
+                      {isPending ? '' : '+'}{formatMoney(sale.totalValue)}
                     </span>
 
                     <div className="flex items-center gap-1 mt-0.5">

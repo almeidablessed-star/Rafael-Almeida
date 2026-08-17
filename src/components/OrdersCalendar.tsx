@@ -1,6 +1,7 @@
 ﻿import React, { useState } from 'react';
 import { Transaction } from '../types';
 import { formatCurrency, formatDateBr } from '../utils/formatters';
+import { useCurrency } from '../context/CurrencyContext';
 import {
   ChevronLeft,
   ChevronRight,
@@ -24,6 +25,7 @@ interface OrdersCalendarProps {
 }
 
 export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
+  const { formatCurrency: formatMoney } = useCurrency();
   transactions,
   onOpenAddModal,
   onEditTransaction,

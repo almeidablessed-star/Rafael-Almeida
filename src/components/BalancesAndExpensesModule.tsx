@@ -4,6 +4,7 @@ import { calculateWeeklyBalances } from '../utils/balancesCalculator';
 import { getWeeklyArchives, hasNewWeekStarted, archiveCurrentWeek } from '../utils/weeklyArchiveUtils';
 import { WeeklyHistoryCard } from './WeeklyHistoryCard';
 import { formatCurrency, formatDateBr, getTodayIso } from '../utils/formatters';
+import { useCurrency } from '../context/CurrencyContext';
 import {
   Wallet,
   ShoppingBag,
@@ -35,6 +36,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
   onEditTransaction,
   onDeleteTransaction,
 }) => {
+  const { formatCurrency: formatMoney } = useCurrency();
   const balances = calculateWeeklyBalances(transactions);
 
   // Form state for quick expense logging
@@ -155,7 +157,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
           Saldo Total Disponível
         </span>
         <span style={{ fontSize: '31px', fontWeight: 800, color: '#FFFFFF', letterSpacing: '-0.03em', lineHeight: 1, display: 'block', marginTop: '8px', fontFamily: "'Manrope', sans-serif" }}>
-          {formatCurrency(balances.reposicao.currentBalance + balances.maodeobra.currentBalance + balances.custoEInvestimento.currentBalance)}
+          {formatMoney(balances.reposicao.currentBalance + balances.maodeobra.currentBalance + balances.custoEInvestimento.currentBalance)}
         </span>
 
         {/* Progress bar with category divisions */}
@@ -212,11 +214,11 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
               Para reposição de ingredientes e embalagens.
             </span>
             <span style={{ fontSize: '10px', color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
-              Entrou <strong style={{ color: '#4C7358' }}>+{formatCurrency(balances.reposicao.accumulatedInflow)}</strong> · Gasto <strong style={{ color: '#C4626F' }}>-{formatCurrency(balances.reposicao.totalSpent)}</strong>
+              Entrou <strong style={{ color: '#4C7358' }}>+{formatMoney(balances.reposicao.accumulatedInflow)}</strong> · Gasto <strong style={{ color: '#C4626F' }}>-{formatMoney(balances.reposicao.totalSpent)}</strong>
             </span>
           </div>
           <span style={{ fontSize: '20px', fontWeight: 800, color: '#241B2B', whiteSpace: 'nowrap', fontFamily: "'Manrope', sans-serif" }}>
-            {formatCurrency(balances.reposicao.currentBalance)}
+            {formatMoney(balances.reposicao.currentBalance)}
           </span>
         </div>
 
@@ -247,11 +249,11 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
               Seu salário acumulado pelas produções.
             </span>
             <span style={{ fontSize: '10px', color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
-              Acumulado <strong style={{ color: '#4C7358' }}>+{formatCurrency(balances.maodeobra?.accumulatedInflow || 0)}</strong>
+              Acumulado <strong style={{ color: '#4C7358' }}>+{formatMoney(balances.maodeobra?.accumulatedInflow || 0)}</strong>
             </span>
           </div>
           <span style={{ fontSize: '20px', fontWeight: 800, color: '#241B2B', whiteSpace: 'nowrap', fontFamily: "'Manrope', sans-serif" }}>
-            {formatCurrency(balances.maodeobra?.currentBalance || 0)}
+            {formatMoney(balances.maodeobra?.currentBalance || 0)}
           </span>
         </div>
 
@@ -282,11 +284,11 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
               Dividido por 2 (50% Custo e 50% Investimento).
             </span>
             <span style={{ fontSize: '10px', color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
-              🔴 Custo <strong style={{ color: '#241B2B' }}>{formatCurrency(balances.custoEInvestimento.custoHalf)}</strong> · 📈 Invest. <strong style={{ color: '#241B2B' }}>{formatCurrency(balances.custoEInvestimento.investimentoHalf)}</strong>
+              🔴 Custo <strong style={{ color: '#241B2B' }}>{formatMoney(balances.custoEInvestimento.custoHalf)}</strong> · 📈 Invest. <strong style={{ color: '#241B2B' }}>{formatMoney(balances.custoEInvestimento.investimentoHalf)}</strong>
             </span>
           </div>
           <span style={{ fontSize: '20px', fontWeight: 800, color: '#241B2B', whiteSpace: 'nowrap', fontFamily: "'Manrope', sans-serif" }}>
-            {formatCurrency(balances.custoEInvestimento.currentBalance)}
+            {formatMoney(balances.custoEInvestimento.currentBalance)}
           </span>
         </div>
 
@@ -604,7 +606,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
 
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '5px', flexShrink: 0 }}>
                     <span style={{ fontSize: '13px', fontWeight: 800, color: '#C4626F', fontFamily: "'Manrope', sans-serif" }}>
-                      -{formatCurrency(tx.totalValue)}
+                      -{formatMoney(tx.totalValue)}
                     </span>
 
                     <div style={{ display: 'flex', gap: '4px' }}>

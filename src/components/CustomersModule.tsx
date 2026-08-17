@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Customer, CustomerEvent } from '../types';
 import { formatDateBr, formatDayMonthOnly } from '../utils/formatters';
+import { useCurrency } from '../context/CurrencyContext';
 import {
   Users,
   Plus,

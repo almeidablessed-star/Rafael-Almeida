@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Transaction, CostCategory } from '../types';
 import { formatCurrency, formatDateBr, getCostCategoryLabel } from '../utils/formatters';
+import { useCurrency } from '../context/CurrencyContext';
 import { Receipt, Sparkles, Plus, Search, Calendar, Trash2, Edit3, Tag } from 'lucide-react';
 
 interface CostsModuleProps {
@@ -16,6 +17,7 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
   onEditTransaction,
   onDeleteTransaction,
 }) => {
+  const { formatCurrency: formatMoney } = useCurrency();
   const [activeTab, setActiveTab] = useState<'todos' | 'custos' | 'investimentos'>('todos');
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -101,7 +103,7 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
             </span>
           </div>
           <span className="font-numbers text-2xl md:text-3xl font-black tracking-tight block text-[#3A4A5A] mb-1">
-            {formatCurrency(totalCustos)}
+            {formatMoney(totalCustos)}
           </span>
           <p className="text-xs text-[#3A4A5A]/75 font-medium">
             Gás, Energia, Aluguel, Anúncios, Taxas
@@ -120,7 +122,7 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
             </span>
           </div>
           <span className="font-numbers text-2xl md:text-3xl font-black tracking-tight block text-[#3A5A4A] mb-1">
-            {formatCurrency(totalInvestimentos)}
+            {formatMoney(totalInvestimentos)}
           </span>
           <p className="text-xs text-[#3A5A4A]/75 font-medium">
             Batedeiras, Fornos, Reformas, Cursos
@@ -217,7 +219,7 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
                       isInvestimento ? 'text-[#3A5A4A]' : 'text-[#3A4A5A]'
                     }`}
                   >
-                    -{formatCurrency(item.totalValue)}
+                    -{formatMoney(item.totalValue)}
                   </span>
                   <div className="flex items-center gap-1 mt-1">
                     <button

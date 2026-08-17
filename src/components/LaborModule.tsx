@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Transaction } from '../types';
 import { formatCurrency, formatDateBr, getLaborPeriodLabel } from '../utils/formatters';
+import { useCurrency } from '../context/CurrencyContext';
 import { Users, Plus, Search, Calendar, Trash2, Edit3, Clock } from 'lucide-react';
 
 interface LaborModuleProps {
@@ -16,6 +17,7 @@ export const LaborModule: React.FC<LaborModuleProps> = ({
   onEditTransaction,
   onDeleteTransaction,
 }) => {
+  const { formatCurrency: formatMoney } = useCurrency();
   const [searchTerm, setSearchTerm] = useState('');
 
   // Filter labor expenses only
@@ -82,7 +84,7 @@ export const LaborModule: React.FC<LaborModuleProps> = ({
         </div>
 
         <span className="font-numbers text-3xl md:text-4xl font-black tracking-tight text-[var(--color-brand-900)] block mb-1">
-          {formatCurrency(totalLabor)}
+          {formatMoney(totalLabor)}
         </span>
         <p className="text-xs md:text-sm text-[#5A4B6B]/85 font-medium">
           Pró-labore próprio, diárias de ajudantes, freelancers e entregadores
@@ -143,7 +145,7 @@ export const LaborModule: React.FC<LaborModuleProps> = ({
               {/* Amount & Actions */}
               <div className="text-right flex flex-col items-end shrink-0">
                 <span className="font-brand font-extrabold text-base text-[#5A4B6B]">
-                  -{formatCurrency(item.totalValue)}
+                  -{formatMoney(item.totalValue)}
                 </span>
                 <div className="flex items-center gap-1 mt-1">
                   <button

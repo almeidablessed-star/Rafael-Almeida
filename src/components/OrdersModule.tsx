@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Transaction, TransactionType } from '../types';
 import { formatCurrency, formatDateBr } from '../utils/formatters';
+import { useCurrency } from '../context/CurrencyContext';
 import { getCurrentWeekMonday, getCurrentWeekSunday, filterTransactionsByWeek } from '../utils/weeklyArchiveUtils';
 import { QuotePdfModal } from './QuotePdfModal';
 import {
@@ -32,6 +33,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
   onDeleteTransaction,
   onTogglePaymentStatus,
 }) => {
+  const { formatCurrency: formatMoney } = useCurrency();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'todos' | 'pago' | 'pendente'>('todos');
   const [quoteTx, setQuoteTx] = useState<Transaction | null>(null);
@@ -153,7 +155,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
               TOTAL EM VENDAS
             </div>
             <div className="text-white" style={{ fontSize: '28px', lineHeight: 1, letterSpacing: '-0.03em', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
-              {formatCurrency(totalVendas)}
+              {formatMoney(totalVendas)}
             </div>
           </div>
         </div>
@@ -190,7 +192,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
               fontFamily: "'Manrope', sans-serif"
             }}
           >
-            {formatCurrency(totalPagas)}
+            {formatMoney(totalPagas)}
           </span>
           <span className="text-xs" style={{ color: '#9A8FA0', fontFamily: "'Manrope', sans-serif" }}>
             {paidCount} {paidCount === 1 ? 'pago' : 'pagos'}
@@ -226,7 +228,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
               fontFamily: "'Manrope', sans-serif"
             }}
           >
-            {formatCurrency(totalPendentes)}
+            {formatMoney(totalPendentes)}
           </span>
           <span className="text-xs" style={{ color: '#9A8FA0', fontFamily: "'Manrope', sans-serif" }}>
             {pendingCount} {pendingCount === 1 ? 'pendente' : 'pendentes'}
@@ -407,7 +409,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                   <div className="flex flex-col sm:flex-row sm:items-end items-start justify-between w-full sm:w-auto shrink-0 gap-3">
                     <div className="text-right">
                       <span className="font-black text-[var(--color-ink)]" style={{ fontSize: '22px', fontWeight: 800, color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>
-                        {formatCurrency(tx.totalValue)}
+                        {formatMoney(tx.totalValue)}
                       </span>
                     </div>
 
