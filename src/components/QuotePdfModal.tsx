@@ -125,23 +125,26 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
       // Create a clone to avoid modifying original DOM
       const clonedElem = docElem.cloneNode(true) as HTMLElement;
 
-      // Inject CSS override to ensure all colors are safe (replaces oklab with hex colors)
-      // We keep all classes and styles but override colors globally with !important
-      const styleOverride = document.createElement('style');
-      styleOverride.textContent = `
-        * {
-          background-color: white !important;
-          color: black !important;
-          border-color: #dddddd !important;
-          fill: black !important;
-          stroke: black !important;
+      // Remove all style sheets from clone to prevent oklab color parsing
+      // html2canvas will fall back to computed styles without oklab issues
+      const styleElements = clonedElem.querySelectorAll('style, link[rel="stylesheet"]');
+      styleElements.forEach(el => {
+        // Don't remove styles we're about to add
+        if (!el.textContent?.includes('oklab')) {
+          el.remove();
         }
-        svg { background-color: transparent !important; }
-        .bg-white { background-color: white !important; }
-        [style*="oklab"] { background-color: white !important; color: black !important; }
+      });
+
+      // Inject safe CSS that preserves layout without problematic colors
+      const safeStyles = document.createElement('style');
+      safeStyles.textContent = `
+        body, * {
+          background: white;
+          color: black;
+        }
       `;
-      clonedElem.insertBefore(styleOverride, clonedElem.firstChild);
-      console.log('🎨 Injected CSS color overrides for PDF rendering');
+      clonedElem.insertBefore(safeStyles, clonedElem.firstChild);
+      console.log('🎨 Removed problematic stylesheets and injected safe colors');
 
       // Temporarily append clone to DOM for html2canvas
       clonedElem.style.position = 'absolute';
