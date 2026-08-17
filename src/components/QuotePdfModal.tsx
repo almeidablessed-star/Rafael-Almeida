@@ -406,7 +406,7 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
         {/* PRINTABLE DOCUMENT BODY */}
         <div
           id="quote-pdf-document"
-          className="p-4 sm:p-6 overflow-y-auto space-y-4 bg-[#F6F2F5] text-[#241B2B] print:p-2 print:bg-white"
+          className="p-2 sm:p-3 overflow-y-auto space-y-3 bg-[#F6F2F5] text-[#241B2B] print:p-2 print:bg-white"
         >
           {activeTab === 'cliente' ? (
             /* ======================================================== */
@@ -582,7 +582,7 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
                     <img
                       src={inspirationImage}
                       alt="Foto de Referência do Cliente"
-                      className="w-full h-auto max-h-[480px] object-contain rounded-xl shadow-card"
+                      className="w-full h-auto object-contain rounded-xl shadow-card"
                     />
                   </div>
                 </div>
@@ -721,7 +721,7 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
                     <img
                       src={inspirationImage}
                       alt="Foto de Referência para Cozinha"
-                      className="w-full h-auto max-h-[420px] object-contain rounded-lg"
+                      className="w-full h-auto object-contain rounded-lg"
                     />
                   </div>
                 </div>
