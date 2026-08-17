@@ -496,8 +496,8 @@ export const CustomersModule: React.FC = () => {
           minHeight: '100vh',
           display: 'flex',
           flexDirection: 'column',
-          marginBottom: '-70px',
-          paddingBottom: '70px',
+          marginBottom: '-100px',
+          paddingBottom: '100px',
         }}
       >
         {/* Header with Title only */}
@@ -538,7 +538,7 @@ export const CustomersModule: React.FC = () => {
         </div>
 
         {/* Content Section */}
-        <div className="flex flex-col gap-5"
+        <div className="flex flex-col gap-2"
           style={{
             marginTop: '-70px',
             background: '#F6F2F5',
@@ -550,7 +550,6 @@ export const CustomersModule: React.FC = () => {
             paddingLeft: 'calc(20px + max(0px, env(safe-area-inset-left)))',
             paddingRight: 'calc(20px + max(0px, env(safe-area-inset-right)))',
             flex: 1,
-            minHeight: '100%',
             paddingBottom: 'max(20px, env(safe-area-inset-bottom))',
           }}
         >
@@ -571,7 +570,6 @@ export const CustomersModule: React.FC = () => {
           gap: '9px',
           paddingLeft: '18px',
           paddingRight: '18px',
-          marginTop: '20px',
         }}
       >
         <div style={{ position: 'relative' }}>
