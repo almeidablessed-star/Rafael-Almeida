@@ -281,6 +281,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
             cursor: 'pointer',
             boxShadow: '0 14px 30px rgba(58,35,80,0.36)',
             transformOrigin: 'center',
+            position: 'relative',
+            zIndex: 10,
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = 'translateY(-3px) rotate(-0.6deg)';
