@@ -136,7 +136,6 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
             marginRight: 'calc(-50vw + 50%)',
             paddingLeft: 'calc(20px + max(0px, env(safe-area-inset-left)))',
             paddingRight: 'calc(20px + max(0px, env(safe-area-inset-right)))',
-            boxShadow: 'inset 0 -8px 16px rgba(58,35,80,.06), inset 0 8px 16px rgba(58,35,80,.06)',
             flex: 1,
             paddingBottom: 'max(20px, env(safe-area-inset-bottom))',
           }}
