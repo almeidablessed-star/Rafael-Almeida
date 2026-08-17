@@ -33,7 +33,7 @@ export const getOrCreateStock = (ingredientId: string, ingredientName: string, u
     stock = {
       id: ingredientId,
       name: ingredientName,
-      unit,
+      unit: unit as 'g' | 'kg' | 'ml' | 'L' | 'un' | 'pacote',
       currentQuantity: 0,
       lastUpdated: new Date().toISOString(),
     };
@@ -169,7 +169,7 @@ export const addStockManually = (
     stock = {
       id: ingredientId,
       name: ingredientName,
-      unit,
+      unit: unit as 'g' | 'kg' | 'ml' | 'L' | 'un' | 'pacote',
       currentQuantity: 0,
       lastUpdated: new Date().toISOString(),
     };

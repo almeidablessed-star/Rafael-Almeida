@@ -56,7 +56,8 @@
       "Bash(ipconfig)",
       "PowerShell(ipconfig | Select-String -Pattern \"IPv4 Address\" | Where-Object {$_ -match \"192|10|172\"} | Select-Object -First 1)",
       "Bash(git commit -m 'feat: Create FichaTecnicaSelector component for stock management *)",
-      "Bash(git commit -m 'feat: Integrate FichaTecnicaSelector and stock movements into transaction flow *)"
+      "Bash(git commit -m 'feat: Integrate FichaTecnicaSelector and stock movements into transaction flow *)",
+      "Bash(git commit -m 'fix: Resolve TypeScript type errors in stockManager *)"
     ]
   },
   "hooks": {
