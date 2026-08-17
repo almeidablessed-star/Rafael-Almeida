@@ -125,53 +125,23 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
       // Create a clone to avoid modifying original DOM
       const clonedElem = docElem.cloneNode(true) as HTMLElement;
 
-      // Remove problematic CSS colors (oklab, etc.) by stripping classes and using safe inline styles
-      const stripProblematicColors = (el: Element) => {
-        // Remove all classes to strip CSS color functions like oklab()
-        if (el instanceof SVGElement) {
-          // SVG elements can't set className directly
-          el.removeAttribute('class');
-          el.removeAttribute('style');
-        } else {
-          // HTML elements
-          (el as HTMLElement).className = '';
-
-          // Remove all style attributes and set safe ones
-          (el as HTMLElement).removeAttribute('style');
-          const htmlEl = el as HTMLElement;
-          htmlEl.style.backgroundColor = '#ffffff';
-          htmlEl.style.color = '#000000';
-          htmlEl.style.borderColor = '#dddddd';
-          htmlEl.style.borderBottomColor = '#dddddd';
-          htmlEl.style.borderTopColor = '#dddddd';
-          htmlEl.style.borderLeftColor = '#dddddd';
-          htmlEl.style.borderRightColor = '#dddddd';
-        }
-
-        // Recursively process all children
-        Array.from(el.children).forEach((child) => {
-          stripProblematicColors(child);
-        });
-      };
-      console.log('🔧 Stripping problematic colors from cloned element...');
-      stripProblematicColors(clonedElem);
-      console.log('✅ Color stripping complete');
-
-      // Inject CSS override to ensure all colors are safe
+      // Inject CSS override to ensure all colors are safe (replaces oklab with hex colors)
+      // We keep all classes and styles but override colors globally with !important
       const styleOverride = document.createElement('style');
       styleOverride.textContent = `
         * {
-          color: #000000 !important;
-          background-color: #ffffff !important;
+          background-color: white !important;
+          color: black !important;
           border-color: #dddddd !important;
-          fill: #000000 !important;
-          stroke: #000000 !important;
+          fill: black !important;
+          stroke: black !important;
         }
-        svg {
-          background-color: transparent !important;
-        }
+        svg { background-color: transparent !important; }
+        .bg-white { background-color: white !important; }
+        [style*="oklab"] { background-color: white !important; color: black !important; }
       `;
       clonedElem.insertBefore(styleOverride, clonedElem.firstChild);
+      console.log('🎨 Injected CSS color overrides for PDF rendering');
 
       // Temporarily append clone to DOM for html2canvas
       clonedElem.style.position = 'absolute';
