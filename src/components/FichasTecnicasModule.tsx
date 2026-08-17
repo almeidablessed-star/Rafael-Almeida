@@ -482,7 +482,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
           className="px-5 flex items-center justify-between gap-4"
           style={{
             background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
-            borderRadius: '40px 0px 0px 0px',
+            borderRadius: '0px 0px 0px 0px',
             paddingTop: '40px',
             paddingBottom: '120px',
           }}
