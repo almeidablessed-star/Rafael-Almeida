@@ -77,8 +77,12 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
         className="overflow-hidden shadow-card"
         style={{
           boxShadow: '0 30px 70px rgba(58,35,80,.26)',
-          background: '#FAFAFA',
+          display: 'flex',
+          flexDirection: 'column',
           minHeight: '100vh',
+          background: '#F6F2F5',
+          marginBottom: '-70px',
+          paddingBottom: '70px',
         }}
       >
         {/* Header with Title only */}
@@ -133,6 +137,8 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
             paddingLeft: 'calc(20px + max(0px, env(safe-area-inset-left)))',
             paddingRight: 'calc(20px + max(0px, env(safe-area-inset-right)))',
             boxShadow: 'inset 0 -8px 16px rgba(58,35,80,.06), inset 0 8px 16px rgba(58,35,80,.06)',
+            flex: 1,
+            paddingBottom: 'max(20px, env(safe-area-inset-bottom))',
           }}
         >
 
