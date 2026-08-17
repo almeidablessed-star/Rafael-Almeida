@@ -473,8 +473,12 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         className="overflow-hidden shadow-card"
         style={{
           boxShadow: '0 30px 70px rgba(58,35,80,.26)',
-          background: '#FAFAFA',
+          background: '#F6F2F5',
           minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          marginBottom: '-70px',
+          paddingBottom: '70px',
         }}
       >
         {/* Header with Title only */}
