@@ -640,7 +640,7 @@ export const CustomersModule: React.FC = () => {
           </div>
 
           {/* CUSTOMER PHOTO UPLOAD */}
-          <div className="flex items-center gap-4 bg-[var(--color-neutral-hero)] p-3 rounded-lg border border-[var(--color-accent-gold)]/40">
+          <div className="flex items-center gap-4 rounded-lg border-2 border-[var(--color-accent-gold)]/60 p-4" style={{background: 'linear-gradient(135deg, rgba(245,185,198,0.08) 0%, rgba(194,174,207,0.06) 100%)'}}>
             <div className="w-16 h-16 rounded-full border-2 border-[var(--color-accent-gold)] bg-white text-[var(--color-neutral-charcoal)] flex items-center justify-center overflow-hidden shrink-0 shadow-card relative">
               {photoUrl ? (
                 <img src={photoUrl} alt="Preview" className="w-full h-full object-cover" />
@@ -649,12 +649,12 @@ export const CustomersModule: React.FC = () => {
               )}
             </div>
             <div>
-              <label htmlFor="photo-upload" className="block text-xs font-black text-[var(--color-neutral-charcoal)] mb-1 flex items-center gap-1 cursor-pointer">
-                <Camera className="w-3.5 h-3.5 text-[var(--color-accent-gold)]" /> Foto da Cliente
+              <label htmlFor="photo-upload" className="block text-xs font-black text-[var(--color-neutral-charcoal)] mb-2 flex items-center gap-1.5 cursor-pointer">
+                <Camera className="w-4 h-4 text-[var(--color-accent-gold)]" /> Foto da Cliente
               </label>
               <label
                 htmlFor="photo-upload"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--color-neutral-charcoal)] text-[var(--color-accent-gold)] hover:bg-black rounded-xl text-xs font-bold cursor-pointer transition-colors shadow-card"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--color-neutral-charcoal)] text-white hover:bg-black rounded-lg text-xs font-bold cursor-pointer transition-all shadow-sm active:scale-95"
               >
                 <Camera className="w-3.5 h-3.5" />
                 <span>{photoUrl ? 'Alterar Foto' : 'Escolher Foto'}</span>
@@ -669,10 +669,10 @@ export const CustomersModule: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-black text-[var(--color-neutral-charcoal)] mb-1 flex items-center gap-1">
-                👤 Nome da Cliente *
+              <label className="block text-xs font-black text-[var(--color-neutral-charcoal)] mb-2 flex items-center gap-1.5">
+                👤 <span>Nome da Cliente *</span>
               </label>
               <input
                 type="text"
@@ -680,13 +680,14 @@ export const CustomersModule: React.FC = () => {
                 placeholder="Ex: Camila Santos"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-3.5 py-2 bg-[var(--color-neutral-hero)]/50 border border-[var(--color-accent-gold)]/40 rounded-xl text-xs font-bold text-[var(--color-neutral-charcoal)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)]"
+                className="w-full px-4 py-2.5 rounded-lg text-xs font-bold text-[var(--color-neutral-charcoal)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-gold)] transition-all"
+                style={{background: 'linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(245,185,198,0.06) 100%)', border: '1.5px solid rgba(201,168,120,0.3)'}}
               />
             </div>
 
             <div>
-              <label className="block text-xs font-black text-[var(--color-neutral-charcoal)] mb-1 flex items-center gap-1">
-                <Phone className="w-3.5 h-3.5 text-[var(--color-accent-gold)]" /> Telefone / WhatsApp *
+              <label className="block text-xs font-black text-[var(--color-neutral-charcoal)] mb-2 flex items-center gap-1.5">
+                <Phone className="w-4 h-4 text-[var(--color-accent-gold)]" /> <span>Telefone / WhatsApp *</span>
               </label>
               <input
                 type="text"
@@ -694,19 +695,21 @@ export const CustomersModule: React.FC = () => {
                 placeholder="Ex: (781) 420-6892"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full px-3.5 py-2 bg-[var(--color-neutral-hero)]/50 border border-[var(--color-accent-gold)]/40 rounded-xl text-xs font-bold text-[var(--color-neutral-charcoal)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)]"
+                className="w-full px-4 py-2.5 rounded-lg text-xs font-bold text-[var(--color-neutral-charcoal)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-gold)] transition-all"
+                style={{background: 'linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(194,174,207,0.06) 100%)', border: '1.5px solid rgba(201,168,120,0.3)'}}
               />
             </div>
 
             <div className="sm:col-span-2">
-              <label className="block text-xs font-black text-[var(--color-neutral-charcoal)] mb-1 flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5 text-[var(--color-neutral-charcoal)]" /> Data do Aniversário da Cliente
+              <label className="block text-xs font-black text-[var(--color-neutral-charcoal)] mb-2 flex items-center gap-1.5">
+                <Calendar className="w-4 h-4 text-[var(--color-neutral-charcoal)]" /> <span>Data do Aniversário da Cliente</span>
               </label>
               <input
                 type="date"
                 value={eventDate}
                 onChange={(e) => setEventDate(e.target.value)}
-                className="w-full px-3.5 py-2 bg-[var(--color-neutral-hero)]/50 border border-[var(--color-accent-gold)]/40 rounded-xl text-xs font-bold text-[var(--color-neutral-charcoal)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)]"
+                className="w-full px-4 py-2.5 rounded-lg text-xs font-bold text-[var(--color-neutral-charcoal)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-gold)] transition-all"
+                style={{background: 'linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(169,216,184,0.06) 100%)', border: '1.5px solid rgba(201,168,120,0.3)'}}
               />
             </div>
           </div>
