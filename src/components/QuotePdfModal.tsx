@@ -406,13 +406,13 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
         {/* PRINTABLE DOCUMENT BODY */}
         <div
           id="quote-pdf-document"
-          className="p-2 sm:p-3 overflow-y-auto space-y-3 bg-[#F6F2F5] text-[#241B2B] print:p-2 print:bg-white"
+          className="p-1 sm:p-1.5 overflow-y-auto space-y-1.5 bg-[#F6F2F5] text-[#241B2B] print:p-1 print:bg-white"
         >
           {activeTab === 'cliente' ? (
             /* ======================================================== */
             /* TAB 1: FOLHA DO CLIENTE (GROOVY COMPACT 1-PAGE LAYOUT)   */
             /* ======================================================== */
-            <div className="space-y-3.5">
+            <div className="space-y-2">
               {/* Header Banner - Groovy Brand Identity */}
               <div className="bg-gradient-to-r from-[#3A2350] to-[#A85E86] rounded-lg p-3.5 text-white shadow-card border border-white/20 print:border-neutral-300 print:bg-white print:text-neutral-900 print-avoid-break">
                 <div className="flex items-center justify-between gap-3">
