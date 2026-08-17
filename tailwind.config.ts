@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss';
+import { durations, easingFunctions } from './src/lib/animation-tokens';
 
 const config: Config = {
   content: [
@@ -111,6 +112,8 @@ const config: Config = {
         xl: '24px',
         '2xl': '32px',
       },
+      transitionDuration: durations,
+      transitionTimingFunction: easingFunctions,
     },
   },
   plugins: [],

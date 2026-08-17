@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Transaction, SummaryTotals, TransactionType, TimePeriod } from '../types';
 import { formatCurrency, formatDateBr } from '../utils/formatters';
 import { calculateWeeklyBalances } from '../utils/balancesCalculator';
+import { ANIMATION_DURATIONS, ANIMATION_EASING } from '../lib/animation-tokens';
 import { OrdersCalendar } from './OrdersCalendar';
 import {
   Wallet,
@@ -64,7 +65,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
       {/* 1. PROFIT CARD - Roxo Gradiente (Cabeçalho da Página) */}
       <div
-        className="rounded-b-3xl text-white relative overflow-visible"
+        className="rounded-b-[28px] text-white relative overflow-visible"
         style={{
           background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
           padding: '20px',
@@ -245,6 +246,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             border: 'none',
             cursor: 'pointer',
             boxShadow: '0 14px 30px rgba(58,35,80,0.36)',
+            transformOrigin: 'center',
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = 'translateY(-3px) rotate(-0.6deg)';
