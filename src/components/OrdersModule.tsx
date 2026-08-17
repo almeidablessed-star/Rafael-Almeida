@@ -77,6 +77,8 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
         className="overflow-hidden shadow-card"
         style={{
           boxShadow: '0 30px 70px rgba(58,35,80,.26)',
+          background: '#FFFFFF',
+          minHeight: '100vh',
         }}
       >
         {/* Header with Title only */}
@@ -122,7 +124,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
         <div className="flex flex-col gap-4"
           style={{
             marginTop: '-70px',
-            background: '#F6F2F5',
+            background: '#FFFFFF',
             borderRadius: '28px 28px 0 0',
             position: 'relative',
             padding: '20px',
@@ -130,6 +132,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
             marginRight: 'calc(-50vw + 50%)',
             paddingLeft: 'calc(20px + max(0px, env(safe-area-inset-left)))',
             paddingRight: 'calc(20px + max(0px, env(safe-area-inset-right)))',
+            boxShadow: 'inset 0 8px 16px rgba(58,35,80,.06)',
           }}
         >
 
