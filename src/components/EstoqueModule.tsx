@@ -43,6 +43,18 @@ export function saveStoredStockItems(items: StockItem[]) {
   }
 }
 
+const getArcColor = (percentage: number): { stroke: string; text: string; background: string } => {
+  if (percentage >= 76) {
+    return { stroke: '#4CAF7D', text: '#4CAF7D', background: '#E8F5E9' }; // Verde
+  } else if (percentage >= 51) {
+    return { stroke: '#81C784', text: '#81C784', background: '#F1F8E9' }; // Verde claro
+  } else if (percentage >= 26) {
+    return { stroke: '#F5A623', text: '#F5A623', background: '#FFF3E0' }; // Laranja
+  } else {
+    return { stroke: '#C4626F', text: '#C4626F', background: '#FFEBEE' }; // Vermelho
+  }
+};
+
 export const EstoqueModule: React.FC = () => {
   const [items, setItems] = useState<StockItem[]>(getStoredStockItems());
   const [searchTerm, setSearchTerm] = useState('');
@@ -132,44 +144,121 @@ export const EstoqueModule: React.FC = () => {
     i.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Função para obter a faixa de criticidade (0=vermelho, 1=laranja, 2=verde claro, 3=verde)
+  const getCriticalityRank = (percentage: number): number => {
+    if (percentage <= 25) return 0; // Vermelho - crítico
+    if (percentage <= 50) return 1; // Laranja - aviso
+    if (percentage <= 75) return 2; // Verde claro - normal
+    return 3; // Verde - saudável
+  };
+
+  // Ordenar items por criticidade (vermelho primeiro, verde por último)
+  const sortedItems = [...filteredItems].sort((a, b) => {
+    const percentageA = Math.min((a.quantity / a.minThreshold) * 100, 100);
+    const percentageB = Math.min((b.quantity / b.minThreshold) * 100, 100);
+    const rankA = getCriticalityRank(percentageA);
+    const rankB = getCriticalityRank(percentageB);
+    return rankA - rankB; // Menor rank (vermelho) vem primeiro
+  });
+
   const lowStockCount = items.filter((i) => i.quantity <= i.minThreshold).length;
-  const lowStockItems = filteredItems.filter((i) => i.quantity <= i.minThreshold);
-  const healthyStockItems = filteredItems.filter((i) => i.quantity > i.minThreshold);
 
   return (
     <div className="pb-12 animate-fadeIn">
-      {/* Header Section - Premium Style */}
-      <div className="bg-gradient-to-br from-[#C8E6D7]/20 to-[#C8E6D7]/5 rounded-3xl p-6 mb-6 border border-[#C8E6D7]/30 shadow-card-hover">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
-          <div>
-            <h2 className="heading-lg text-[var(--color-neutral-charcoal)] tracking-tight flex items-center gap-2">
-              <Package className="w-6 h-6 text-[var(--color-primary)]" />
-              Controle de Estoque
-            </h2>
-            <p className="text-xs text-[var(--color-text-secondary)] font-normal mt-2">
-              {items.length} insumos · {lowStockCount} com alerta
-            </p>
-          </div>
+      {/* Header Card — Flutuante com cabeçalho roxo */}
+      <div
+        className="overflow-hidden shadow-card"
+        style={{
+          boxShadow: '0 30px 70px rgba(58,35,80,.26)',
+        }}
+      >
+        {/* Header with Title only */}
+        <div
+          className="px-5 py-10 flex items-center justify-between gap-4 rounded-t-[40px]"
+          style={{
+            background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
+          }}
+        >
+          {/* Title */}
+          <span
+            className="text-white leading-tight flex-1"
+            style={{
+              fontFamily: "'Instrument Serif', serif",
+              fontSize: '31px',
+              lineHeight: '1.1',
+            }}
+          >
+            Estoque
+          </span>
 
+          {/* Button */}
           <button
             onClick={handleOpenAdd}
-            className="py-2.5 px-4 bg-[var(--color-primary)] hover:brightness-110 text-white font-brand font-semibold text-xs rounded-2xl shadow-card active:scale-95 transition-all flex items-center gap-1.5 whitespace-nowrap"
+            className="px-3 py-2 rounded-xl text-[10px] font-black cursor-pointer transition-all active:scale-95 shrink-0"
+            style={{
+              background: '#F5B9C6',
+              color: '#3A2350',
+              fontFamily: "'Manrope', sans-serif",
+            }}
+            title="Adicionar novo insumo"
           >
-            <Plus className="w-4 h-4 stroke-[2.5]" />
-            Adicionar Item
+            Novo Insumo
           </button>
         </div>
 
-        {/* Search Utility */}
-        <div className="relative">
-          <Search className="w-4 h-4 text-[var(--color-neutral-dark-gray)] absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Filtrar por nome..."
-            className="w-full sm:w-80 pl-9 pr-3 py-2 rounded-xl border border-[var(--color-neutral-light)] text-xs text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-primary)] bg-white transition-colors"
-          />
+        {/* Content Section */}
+        <div className="flex flex-col gap-4"
+          style={{
+            marginTop: '-14px',
+            background: '#F6F2F5',
+            borderRadius: '28px 28px 0 0',
+            position: 'relative',
+            padding: '20px',
+            margin: '0 calc(-50vw + 50%)',
+            paddingLeft: 'calc(20px + max(0px, env(safe-area-inset-left)))',
+            paddingRight: 'calc(20px + max(0px, env(safe-area-inset-right)))',
+          }}
+        >
+
+        {/* Search and Button Row - Below Header */}
+        <div
+          style={{
+            display: 'flex',
+            gap: '8px',
+            alignItems: 'center',
+          }}
+        >
+          {/* Search Input */}
+          <div style={{ flex: 1, position: 'relative' }}>
+            <Search
+              className="w-3.75 h-3.75 absolute"
+              style={{
+                color: '#A096A6',
+                left: '13px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+              }}
+            />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Buscar insumo no estoque..."
+              style={{
+                width: '100%',
+                padding: '11px 12px 11px 34px',
+                background: '#FFFFFF',
+                borderRadius: '14px',
+                fontSize: '11px',
+                color: '#A096A6',
+                border: 'none',
+                boxShadow: '0 6px 14px rgba(58,35,80,.07)',
+                fontFamily: "'Manrope', sans-serif",
+                outline: 'none',
+              }}
+            />
+          </div>
+        </div>
         </div>
       </div>
 
@@ -268,185 +357,113 @@ export const EstoqueModule: React.FC = () => {
         </form>
       )}
 
-      {/* Stock Sections */}
-      {filteredItems.length === 0 ? (
-        <div className="p-8 rounded-3xl bg-[var(--color-neutral-cream)] border border-[var(--color-neutral-light)] text-center space-y-2">
+      {/* Stock Sections - Ordered by Criticality */}
+      {sortedItems.length === 0 ? (
+        <div className="p-8 rounded-3xl bg-[var(--color-neutral-cream)] border border-[var(--color-neutral-light)] text-center space-y-2 mt-5">
           <Package className="w-10 h-10 text-[var(--color-neutral-warm-gray)] mx-auto" />
           <p className="text-xs text-[var(--color-text-secondary)] font-normal">
             Nenhum insumo encontrado.
           </p>
         </div>
       ) : (
-        <div className="space-y-8">
-          {/* Low Stock Section */}
-          {lowStockItems.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-4 pb-3 border-b-2 border-[var(--color-semantic-coral)]">
-                <AlertTriangle className="w-5 h-5 text-[var(--color-semantic-coral)]" />
-                <h3 className="font-brand font-semibold text-sm text-[var(--color-neutral-charcoal)]">
-                  Alerta Baixo ({lowStockItems.length})
-                </h3>
-              </div>
+        <div className="space-y-4 px-4 lg:px-6 mt-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {sortedItems.map((item) => {
+                  const percentage = Math.min((item.quantity / item.minThreshold) * 100, 100);
+                  const colors = getArcColor(percentage);
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {lowStockItems.map((item) => (
+                  return (
                   <div
                     key={item.id}
-                    className="bg-[#FBE8D6] border-2 border-[#F5D4A8] rounded-2xl p-4 hover:shadow-card transition-all shadow-card list-item"
+                    className="bg-white rounded-xl p-2.5 transition-all cursor-pointer"
+                    style={{ backgroundColor: '#FFFFFF' }}
                   >
-                    {/* Item Header */}
-                    <div className="flex items-start justify-between mb-3 pb-2 border-b border-[var(--color-semantic-coral)] border-opacity-30">
-                      <span className="font-brand font-semibold text-sm text-[var(--color-neutral-charcoal)] flex-1 pr-2">
-                        {item.name}
-                      </span>
-                      <span className="bg-[var(--color-semantic-coral)] text-white text-[9px] font-semibold px-1.5 py-0.5 rounded-md uppercase shrink-0 animate-pulse">
-                        Baixo
-                      </span>
-                    </div>
+                    {/* Top Section: Two Columns (Gauge Left, Name+Alert Right) */}
+                    <div className="flex gap-3 mb-3">
+                      {/* Gauge Left - Larger */}
+                      <svg width="76" height="64" viewBox="0 0 76 64" className="flex-shrink-0">
+                        <path d="M8 60a30 30 0 0 1 60 0" fill="none" stroke="#F1ECF2" strokeWidth="10" strokeLinecap="round"></path>
+                        <path
+                          d="M8 60a30 30 0 0 1 60 0"
+                          fill="none"
+                          stroke={colors.stroke}
+                          strokeWidth="10"
+                          strokeLinecap="round"
+                          strokeDasharray={`${percentage * 1.26} 126`}
+                        ></path>
+                        <text x="38" y="58" textAnchor="middle" fontSize="12" fontWeight="900" fill={colors.stroke} fontFamily="'Manrope', sans-serif">
+                          {Math.round(percentage)}%
+                        </text>
+                      </svg>
 
-                    {/* Quantity Display (Hero) */}
-                    <div className="mb-3 pb-3 border-b border-[var(--color-neutral-light)]">
-                      <div className="text-right">
-                        <span className="font-numbers font-brand font-semibold text-2xl text-[var(--color-neutral-charcoal)]">
-                          {item.quantity}
-                        </span>
-                        <span className="text-xs text-[var(--color-text-secondary)] font-normal ml-1">
-                          {item.unit}
-                        </span>
-                      </div>
-                    </div>
+                      {/* Right Column: Name + Alert */}
+                      <div className="flex-1 flex flex-col gap-2">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-brand font-semibold text-[14px] text-[var(--color-neutral-charcoal)]">
+                            {item.name}
+                          </h4>
+                          {item.quantity <= item.minThreshold && (
+                            <span style={{ background: '#C4626F', color: '#FFFFFF' }} className="text-white text-[7px] font-semibold px-1 py-0.5 rounded uppercase whitespace-nowrap">
+                              Estoque Baixo
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-[#999999] font-light">
+                          Alertar quando menor que:
+                        </p>
 
-                    {/* Threshold Info */}
-                    <p className="text-[11px] text-[var(--color-text-secondary)] font-normal mb-4">
-                      Mín: {item.minThreshold} {item.unit}
-                    </p>
+                        {/* Quantity Stepper + Action Icons Row */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'space-between' }}>
+                          {/* Quantity Stepper */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#F5F5F5', borderRadius: '20px', padding: '4px 8px', width: 'fit-content' }}>
+                            <button
+                              onClick={() => handleQuickAdjust(item.id, -50)}
+                              style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#E8E8E8', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px', color: '#666', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}
+                              onMouseEnter={(e) => e.currentTarget.style.background = '#D0D0D0'}
+                              onMouseLeave={(e) => e.currentTarget.style.background = '#E8E8E8'}
+                              title="Diminuir 50"
+                            >
+                              −
+                            </button>
+                            <span style={{ fontSize: '12px', fontWeight: '600', color: '#333', minWidth: '70px', textAlign: 'center', fontFamily: "'Manrope', sans-serif" }}>
+                              {item.quantity} {item.unit}
+                            </span>
+                            <button
+                              onClick={() => handleQuickAdjust(item.id, 50)}
+                              style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#E8E8E8', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px', color: '#666', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}
+                              onMouseEnter={(e) => e.currentTarget.style.background = '#D0D0D0'}
+                              onMouseLeave={(e) => e.currentTarget.style.background = '#E8E8E8'}
+                              title="Aumentar 50"
+                            >
+                              +
+                            </button>
+                          </div>
 
-                    {/* Quantity Controls */}
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-1 bg-white rounded-lg border border-[var(--color-neutral-light)] p-1">
-                        <button
-                          onClick={() => handleQuickAdjust(item.id, -100)}
-                          className="w-6 h-6 rounded text-[var(--color-text-primary)] hover:text-[var(--color-primary)] hover:bg-[var(--color-neutral-light)] font-semibold text-xs flex items-center justify-center transition-colors"
-                          title="Diminuir 100"
-                        >
-                          −
-                        </button>
-                        <button
-                          onClick={() => handleQuickAdjust(item.id, 100)}
-                          className="w-6 h-6 rounded text-[var(--color-text-primary)] hover:text-[var(--color-primary)] hover:bg-[var(--color-neutral-light)] font-semibold text-xs flex items-center justify-center transition-colors"
-                          title="Aumentar 100"
-                        >
-                          +
-                        </button>
-                      </div>
-
-                      {/* Edit/Delete Actions */}
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => handleOpenEdit(item)}
-                          className="p-1.5 rounded text-[var(--color-neutral-dark-gray)] hover:text-[var(--color-primary)] hover:bg-[var(--color-neutral-light)] transition-colors"
-                          title="Editar"
-                        >
-                          <Edit3 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item.id)}
-                          className="p-1.5 rounded text-[var(--color-neutral-dark-gray)] hover:text-[var(--color-semantic-coral)] hover:bg-[var(--color-neutral-light)] transition-colors"
-                          title="Excluir"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                          {/* Edit/Delete Actions - Same Row */}
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => handleOpenEdit(item)}
+                              style={{ width: '20px', height: '20px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0' }}
+                              title="Editar"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" style={{ color: '#999', strokeWidth: 2 }} />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(item.id)}
+                              style={{ width: '20px', height: '20px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0' }}
+                              title="Excluir"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" style={{ color: '#999', strokeWidth: 2 }} />
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
-                ))}
+                );
+                })}
               </div>
             </div>
-          )}
-
-          {/* Healthy Stock Section */}
-          {healthyStockItems.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-4 pb-3 border-b-2 border-[var(--color-primary)]">
-                <Check className="w-5 h-5 text-[var(--color-primary)]" />
-                <h3 className="font-brand font-semibold text-sm text-[var(--color-neutral-charcoal)]">
-                  Estoque Normal ({healthyStockItems.length})
-                </h3>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {healthyStockItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="bg-white border border-[var(--color-neutral-light)] rounded-2xl p-4 hover:border-[var(--color-primary)] hover:shadow-card transition-all list-item"
-                  >
-                    {/* Item Header */}
-                    <div className="pb-2 border-b border-[var(--color-neutral-light)] mb-3">
-                      <span className="font-brand font-semibold text-sm text-[var(--color-neutral-charcoal)]">
-                        {item.name}
-                      </span>
-                    </div>
-
-                    {/* Quantity Display (Hero) */}
-                    <div className="mb-3 pb-3 border-b border-[var(--color-neutral-light)]">
-                      <div className="text-right">
-                        <span className="font-numbers font-brand font-semibold text-2xl text-[var(--color-neutral-charcoal)]">
-                          {item.quantity}
-                        </span>
-                        <span className="text-xs text-[var(--color-text-secondary)] font-normal ml-1">
-                          {item.unit}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Threshold Info */}
-                    <p className="text-[11px] text-[var(--color-text-secondary)] font-normal mb-4">
-                      Mín: {item.minThreshold} {item.unit}
-                    </p>
-
-                    {/* Quantity Controls */}
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-1 bg-[var(--color-neutral-cream)] rounded-lg border border-[var(--color-neutral-light)] p-1">
-                        <button
-                          onClick={() => handleQuickAdjust(item.id, -100)}
-                          className="w-6 h-6 rounded text-[var(--color-text-primary)] hover:text-[var(--color-primary)] hover:bg-white font-semibold text-xs flex items-center justify-center transition-colors"
-                          title="Diminuir 100"
-                        >
-                          −
-                        </button>
-                        <button
-                          onClick={() => handleQuickAdjust(item.id, 100)}
-                          className="w-6 h-6 rounded text-[var(--color-text-primary)] hover:text-[var(--color-primary)] hover:bg-white font-semibold text-xs flex items-center justify-center transition-colors"
-                          title="Aumentar 100"
-                        >
-                          +
-                        </button>
-                      </div>
-
-                      {/* Edit/Delete Actions */}
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => handleOpenEdit(item)}
-                          className="p-1.5 rounded text-[var(--color-neutral-dark-gray)] hover:text-[var(--color-primary)] hover:bg-[var(--color-neutral-light)] transition-colors"
-                          title="Editar"
-                        >
-                          <Edit3 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item.id)}
-                          className="p-1.5 rounded text-[var(--color-neutral-dark-gray)] hover:text-[var(--color-semantic-coral)] hover:bg-[var(--color-neutral-light)] transition-colors"
-                          title="Excluir"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
       )}
     </div>
   );

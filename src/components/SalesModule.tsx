@@ -55,7 +55,7 @@ export const SalesModule: React.FC<SalesModuleProps> = ({
     <div className="space-y-4 animate-fadeIn pb-6">
       
       {/* Module Header Card */}
-      <div className="bg-gradient-to-r from-[#E8B4B8] via-[#F5E5E7] to-[#E8B4B8] rounded-2xl p-5 text-[var(--color-brand-900)] shadow-card-hover">
+      <div className="bg-gradient-to-r from-[#E8B4B8] via-[#F5E5E7] to-[#E8B4B8] rounded-[22px] p-5 text-[var(--color-brand-900)] shadow-card-hover">
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs font-bold uppercase tracking-wider text-[#6B3E42] flex items-center gap-1.5">
             <TrendingUp className="w-4 h-4" /> Módulo de Vendas
@@ -84,7 +84,7 @@ export const SalesModule: React.FC<SalesModuleProps> = ({
 
         {/* Resumo A Receber (se houver vendas pendentes) */}
         {breakdown.totalAReceber > 0 && (
-          <div className="mt-3.5 p-3 rounded-2xl bg-[#F5D4A8]/20 backdrop-blur-xs border border-[#F5D4A8]/40 flex items-center justify-between">
+          <div className="mt-3.5 p-3 rounded-[22px] bg-[#F5D4A8]/20 backdrop-blur-xs border border-[#F5D4A8]/40 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="p-1.5 bg-[#F5D4A8] text-[var(--color-brand-900)] rounded-xl">
                 <Clock className="w-4 h-4" />
@@ -106,7 +106,7 @@ export const SalesModule: React.FC<SalesModuleProps> = ({
 
         <button
           onClick={onOpenAddModal}
-          className="mt-4 w-full py-3 px-4 bg-[#F5D4A8] hover:bg-[#C99B6F] text-[var(--color-brand-900)] rounded-2xl font-brand font-bold text-sm shadow-sm active:scale-98 transition-all flex items-center justify-center gap-2"
+          className="mt-4 w-full py-3 px-4 bg-[#F5D4A8] hover:bg-[#C99B6F] text-[var(--color-brand-900)] rounded-[22px] font-brand font-bold text-sm shadow-sm active:scale-98 transition-all flex items-center justify-center gap-2"
         >
           <Plus className="w-5 h-5 stroke-[2.5]" />
           Cadastrar Nova Venda (Entrará como Pendente)
@@ -114,7 +114,7 @@ export const SalesModule: React.FC<SalesModuleProps> = ({
       </div>
 
       {/* Detalhamento de Vendas por Categoria (Apenas Vendas Pagas) */}
-      <div className="bg-white rounded-3xl p-4 border border-[#E8B4B8]/30 shadow-2xs space-y-3">
+      <div className="bg-white rounded-[22px] p-4 border border-[#E8B4B8]/30 shadow-2xs space-y-3">
         <div className="flex items-center justify-between border-b border-[#E8B4B8]/20 pb-2.5">
           <div className="flex items-center gap-2">
             <div className="p-1.5 bg-[#E8B4B8]/15 text-[#6B3E42] rounded-xl">
@@ -136,7 +136,7 @@ export const SalesModule: React.FC<SalesModuleProps> = ({
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
           {/* 1. Total de Reposição - Premium styled with color strip */}
-          <div className="bg-[#C8E6D7]/12 p-5 rounded-2xl border-2 border-[#C8E6D7]/70 flex flex-col justify-between relative overflow-hidden shadow-sm">
+          <div className="bg-[#C8E6D7]/12 p-5 rounded-[22px] border-2 border-[#C8E6D7]/70 flex flex-col justify-between relative overflow-hidden shadow-sm">
             <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#3A5A4A] to-[#5A8A6F]" />
             <div className="flex items-center gap-2 text-[#3A5A4A] font-black text-[11px] mb-2 uppercase tracking-wide">
               <div className="p-2 bg-[#3A5A4A]/15 rounded-lg">
@@ -153,7 +153,7 @@ export const SalesModule: React.FC<SalesModuleProps> = ({
           </div>
 
           {/* 2. Total de Mão de Obra - Premium styled with color strip */}
-          <div className="bg-[#D4C5E2]/12 p-5 rounded-2xl border-2 border-[#D4C5E2]/70 flex flex-col justify-between relative overflow-hidden shadow-sm">
+          <div className="bg-[#D4C5E2]/12 p-5 rounded-[22px] border-2 border-[#D4C5E2]/70 flex flex-col justify-between relative overflow-hidden shadow-sm">
             <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#5A4B6B] to-[#7A6B8B]" />
             <div className="flex items-center gap-2 text-[#5A4B6B] font-black text-[11px] mb-2 uppercase tracking-wide">
               <div className="p-2 bg-[#5A4B6B]/15 rounded-lg">
@@ -170,7 +170,7 @@ export const SalesModule: React.FC<SalesModuleProps> = ({
           </div>
 
           {/* 3. Custos e Investimento - Premium styled with color strip */}
-          <div className="bg-[#B8D4E8]/12 p-5 rounded-2xl border-2 border-[#B8D4E8]/70 flex flex-col justify-between relative overflow-hidden shadow-sm">
+          <div className="bg-[#B8D4E8]/12 p-5 rounded-[22px] border-2 border-[#B8D4E8]/70 flex flex-col justify-between relative overflow-hidden shadow-sm">
             <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#3A4A5A] to-[#5A7A9E]" />
             <div className="flex items-center gap-2 text-[#3A4A5A] font-black text-[11px] mb-2 uppercase tracking-wide">
               <div className="p-2 bg-[#3A4A5A]/15 rounded-lg">
@@ -187,7 +187,7 @@ export const SalesModule: React.FC<SalesModuleProps> = ({
           </div>
 
           {/* 4. Total de Lucro Líquido - Full width highlight */}
-          <div className="md:col-span-3 bg-gradient-to-r from-[#E8B4B8] via-[#F5E5E7] to-[#D4C5E2] p-5 md:p-6 rounded-2xl border-2 border-[#E8B4B8]/60 text-[var(--color-brand-900)] shadow-card-hover relative overflow-hidden">
+          <div className="md:col-span-3 bg-gradient-to-r from-[#E8B4B8] via-[#F5E5E7] to-[#D4C5E2] p-5 md:p-6 rounded-[22px] border-2 border-[#E8B4B8]/60 text-[var(--color-brand-900)] shadow-card-hover relative overflow-hidden">
             <div className="absolute inset-0 opacity-20 pointer-events-none" />
             <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div>
@@ -210,7 +210,7 @@ export const SalesModule: React.FC<SalesModuleProps> = ({
 
         {/* Informative note about pending sales exclusion */}
         {breakdown.totalPendingCount > 0 && (
-          <div className="bg-[#F5D4A8]/20 p-2.5 rounded-2xl border border-[#F5D4A8]/40 text-[#6B5A42] text-[11px] flex items-center gap-2 font-medium">
+          <div className="bg-[#F5D4A8]/20 p-2.5 rounded-[22px] border border-[#F5D4A8]/40 text-[#6B5A42] text-[11px] flex items-center gap-2 font-medium">
             <AlertCircle className="w-4 h-4 text-[#C99B6F] shrink-0" />
             <span>
               Existem <strong>{breakdown.totalPendingCount} pedidos pendentes ({formatCurrency(breakdown.totalAReceber)})</strong>. Marque como "Pago" para incluí-los nesses totais.
@@ -227,7 +227,7 @@ export const SalesModule: React.FC<SalesModuleProps> = ({
           placeholder="Buscar venda por produto, forma de pagamento ou status..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E6E1DB] rounded-2xl text-xs font-medium text-[var(--color-brand-900)] focus:outline-none focus:ring-2 focus:ring-[#E8B4B8]/40 shadow-2xs"
+          className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E6E1DB] rounded-[22px] text-xs font-medium text-[var(--color-brand-900)] focus:outline-none focus:ring-2 focus:ring-[#E8B4B8]/40 shadow-2xs"
         />
       </div>
 
@@ -238,7 +238,7 @@ export const SalesModule: React.FC<SalesModuleProps> = ({
         </h3>
 
         {filteredSales.length === 0 ? (
-          <div className="bg-white rounded-3xl p-8 text-center border border-[#E6E1DB] shadow-2xs">
+          <div className="bg-white rounded-[22px] p-8 text-center border border-[#E6E1DB] shadow-2xs">
             <TrendingUp className="w-10 h-10 text-[#D4C5E2]/40 mx-auto mb-2" />
             <p className="text-sm font-bold text-[var(--color-brand-900)]">Nenhuma venda registrada</p>
             <p className="text-xs text-[var(--color-brand-700)] mt-1">
@@ -252,7 +252,7 @@ export const SalesModule: React.FC<SalesModuleProps> = ({
             return (
               <div
                 key={sale.id}
-                className={`p-4 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                className={`p-4 rounded-[22px] border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
                   isPending
                     ? 'bg-[#F5D4A8]/10 border-[#F5D4A8]/40 shadow-2xs'
                     : 'bg-white border-[#E6E1DB] shadow-2xs hover:border-[#E8B4B8]/50'

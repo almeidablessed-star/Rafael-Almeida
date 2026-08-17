@@ -55,7 +55,7 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
       {/* HERO ACTION CARD - Premium Styled */}
       <button
         onClick={() => onOpenAddModal('custo')}
-        className="w-full group relative overflow-hidden rounded-2xl transition-all active:scale-95 hover:shadow-highlight"
+        className="w-full group relative overflow-hidden rounded-[22px] transition-all active:scale-95 hover:shadow-highlight"
       >
         {/* Background with gradient */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#B8D4E8] to-[#A8C4D8] opacity-100 group-hover:opacity-105 transition-opacity" />
@@ -84,13 +84,13 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
         </div>
 
         {/* Subtle shadow inside */}
-        <div className="absolute inset-0 pointer-events-none rounded-2xl shadow-inset opacity-0 group-hover:opacity-10 transition-opacity" />
+        <div className="absolute inset-0 pointer-events-none rounded-[22px] shadow-inset opacity-0 group-hover:opacity-10 transition-opacity" />
       </button>
 
       {/* Module Header Cards Grid - Premium Styled */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-7">
         {/* Custos Operacionais Card */}
-        <div className="bg-gradient-to-r from-[#B8D4E8] via-[#DDE9F5] to-[#B8D4E8] rounded-2xl p-5 md:p-6 text-[var(--color-brand-900)] shadow-sm border border-[#B8D4E8]/50 relative overflow-hidden">
+        <div className="bg-gradient-to-r from-[#B8D4E8] via-[#DDE9F5] to-[#B8D4E8] rounded-[22px] p-5 md:p-6 text-[var(--color-brand-900)] shadow-sm border border-[#B8D4E8]/50 relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#3A4A5A] to-[#5A7A9E]" />
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] md:text-xs font-bold uppercase tracking-wider text-[#3A4A5A] flex items-center gap-1.5">
@@ -109,7 +109,7 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
         </div>
 
         {/* Investimentos Card */}
-        <div className="bg-gradient-to-r from-[#C8E6D7] via-[#E5F4F0] to-[#C8E6D7] rounded-2xl p-5 md:p-6 text-[var(--color-brand-900)] shadow-sm border border-[#C8E6D7]/50 relative overflow-hidden">
+        <div className="bg-gradient-to-r from-[#C8E6D7] via-[#E5F4F0] to-[#C8E6D7] rounded-[22px] p-5 md:p-6 text-[var(--color-brand-900)] shadow-sm border border-[#C8E6D7]/50 relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#3A5A4A] to-[#5A8A6F]" />
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] md:text-xs font-bold uppercase tracking-wider text-[#3A5A4A] flex items-center gap-1.5">

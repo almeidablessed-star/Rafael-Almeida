@@ -1,10 +1,10 @@
 import { PaymentMethod, TransactionType, LaborPeriod, CostCategory } from '../types';
 
 export const formatCurrency = (value: number): string => {
-  if (isNaN(value)) return '$0.00';
-  return new Intl.NumberFormat('en-US', {
+  if (isNaN(value)) return 'R$ 0,00';
+  return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'BRL',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(value);

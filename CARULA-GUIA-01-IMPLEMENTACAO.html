@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body { margin:0; padding:20px; background:#F6F2F5; font-family:sans-serif; }
+section { background:#fff; border-radius:16px; padding:40px; margin-bottom:20px; }
+</style>
+</head><body>
+<section style="padding:64px 64px 40px; display:flex; flex-direction:column; gap:30px">
+  <div style="max-width:820px; display:flex; flex-direction:column; gap:10px">
+    <div style="font-family:'Instrument Serif',serif; font-size:44px; color:#2B2420">Guia de implementação</div>
+    <div style="font-size:15px; line-height:1.6; color:#5A4E46; text-wrap:pretty">O que trocar no código para chegar ao visual aprovado, sem mexer em abas, textos ou lógica de negócio. Tokens primeiro, depois os padrões de componente, depois o mapa arquivo a arquivo.</div>
+  </div>
+
+  <div style="display:flex; flex-wrap:wrap; gap:20px; align-items:flex-start">
+    <div style="background:#FFFFFF; border-radius:24px; padding:22px; box-shadow:0 8px 20px rgba(58,35,80,.09); display:flex; flex-direction:column; gap:14px;width:620px"><span style="font-family:'Instrument Serif',serif; font-size:26px; color:#241B2B; line-height:1.15">1. Tokens de cor</span>
+      <span style="font-size:12.5px; line-height:1.55; color:#5A4E46">Declare uma vez em <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px">src/index.css</span> (Tailwind 4: bloco <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px">@theme</span>) e use por nome. As classes âmbar/rosa atuais saem.</span>
+      <div style="display:flex; flex-direction:column">
+        <div style="display:flex; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid rgba(36,27,43,.07)">
+  <span style="width:26px; height:26px; border-radius:8px; background:#3A2350; flex-shrink:0; box-shadow:0 2px 6px rgba(58,35,80,.16)"></span>
+  <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; background:#F3E9F3; color:#4A3556; padding:2px 7px; border-radius:6px; white-space:nowrap">--color-brand-900</span>
+  <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; color:#7A6E80; flex-shrink:0">#3A2350</span>
+  <span style="font-size:12.5px; color:#5A4E46; margin-left:auto; text-align:right">Cabeçalhos, sidebar, ação principal, aba ativa</span>
+</div>
+        <div style="display:flex; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid rgba(36,27,43,.07)">
+  <span style="width:26px; height:26px; border-radius:8px; background:#6E3F72; flex-shrink:0; box-shadow:0 2px 6px rgba(58,35,80,.16)"></span>
+  <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; background:#F3E9F3; color:#4A3556; padding:2px 7px; border-radius:6px; white-space:nowrap">--color-brand-700</span>
+  <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; color:#7A6E80; flex-shrink:0">#6E3F72</span>
+  <span style="font-size:12.5px; color:#5A4E46; margin-left:auto; text-align:right">Meio do degradê, ícones, rótulos fortes</span>
+</div>
+        <div style="display:flex; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid rgba(36,27,43,.07)">
+  <span style="width:26px; height:26px; border-radius:8px; background:#A85E86; flex-shrink:0; box-shadow:0 2px 6px rgba(58,35,80,.16)"></span>
+  <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; background:#F3E9F3; color:#4A3556; padding:2px 7px; border-radius:6px; white-space:nowrap">--color-brand-500</span>
+  <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; color:#7A6E80; flex-shrink:0">#A85E86</span>
+  <span style="font-size:12.5px; color:#5A4E46; margin-left:auto; text-align:right">Fim do degradê, acentos</span>
+</div>
+        <div style="display:flex; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid rgba(36,27,43,.07)">
+  <span style="width:26px; height:26px; border-radius:8px; background:#F5B9C6; flex-shrink:0; box-shadow:0 2px 6px rgba(58,35,80,.16)"></span>
+  <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; background:#F3E9F3; color:#4A3556; padding:2px 7px; border-radius:6px; white-space:nowrap">--color-rose-200</span>
+  <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; color:#7A6E80; flex-shrink:0">#F5B9C6</span>
+  <span style="font-size:12.5px; color:#5A4E46; margin-left:auto; text-align:right">Texto e ícones sobre roxo, selos</span>
+</div>
+        <div style="display:flex; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid rgba(36,27,43,.07)">
+  <span style="width:26px; height:26px; border-radius:8px; background:#C4626F; flex-shrink:0; box-shadow:0 2px 6px rgba(58,35,80,.16)"></span>
+  <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; background:#F3E9F3; color:#4A3556; padding:2px 7px; border-radius:6px; white-space:nowrap">--color-rose-600</span>
+  <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; color:#7A6E80; flex-shrink:0">#C4626F</span>
+  <span style="font-size:12.5px; color:#5A4E46; margin-left:auto; text-align:right">Alertas, excluir, valores negativos</span>
+</div>
+        <div style="display:flex; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid rgba(36,27,43,.07)">
+  <span style="width:26px; height:26px; border-radius:8px; background:#E4D9C3; flex-shrink:0; box-shadow:0 2px 6px rgba(58,35,80,.16)"></span>
+  <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; background:#F3E9F3; color:#4A3556; padding:2px 7px; border-radius:6px; white-space:nowrap">--color-sand-200</span>
+  <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; color:#7A6E80; flex-shrink:0">#E4D9C3</span>
+  <span style="font-size:12.5px; color:#5A4E46; margin-left:auto; text-align:right">A receber, datas, neutros quentes</span>
+</div>
+        <div style="display:flex; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid rgba(36,27,43,.07)">
+  <span style="width:26px; height:26px; border-radius:8px; background:#A9D8B8; flex-shrink:0; box-shadow:0 2px 6px rgba(58,35,80,.16)"></span>
+  <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; background:#F3E9F3; color:#4A3556; padding:2px 7px; border-radius:6px; white-space:nowrap">--color-mint-300</span>
+  <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; color:#7A6E80; flex-shrink:0">#A9D8B8</span>
+  <span style="font-size:12.5px; color:#5A4E46; margin-left:auto; text-align:right">Positivo, pago, apoio</span>
+</div>
+        <div style="display:flex; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid rgba(36,27,43,.07)">
+  <span style="width:26px; height:26px; border-radius:8px; background:#F6F2F5; flex-shrink:0; box-shadow:0 2px 6px rgba(58,35,80,.16)"></span>
+  <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; background:#F3E9F3; color:#4A3556; padding:2px 7px; border-radius:6px; white-space:nowrap">--color-surface</span>
+  <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; color:#7A6E80; flex-shrink:0">#F6F2F5</span>
+  <span style="font-size:12.5px; color:#5A4E46; margin-left:auto; text-align:right">Fundo do app</span>
+</div>
+        <div style="display:flex; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid rgba(36,27,43,.07)">
+  <span style="width:26px; height:26px; border-radius:8px; background:#FFFFFF; flex-shrink:0; box-shadow:0 2px 6px rgba(58,35,80,.16)"></span>
+  <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; background:#F3E9F3; color:#4A3556; padding:2px 7px; border-radius:6px; white-space:nowrap">--color-card</span>
+  <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; color:#7A6E80; flex-shrink:0">#FFFFFF</span>
+  <span style="font-size:12.5px; color:#5A4E46; margin-left:auto; text-align:right">Cards e painéis</span>
+</div>
+        <div style="display:flex; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid rgba(36,27,43,.07)">
+  <span style="width:26px; height:26px; border-radius:8px; background:#241B2B; flex-shrink:0; box-shadow:0 2px 6px rgba(58,35,80,.16)"></span>
+  <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; background:#F3E9F3; color:#4A3556; padding:2px 7px; border-radius:6px; white-space:nowrap">--color-ink</span>
+  <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; color:#7A6E80; flex-shrink:0">#241B2B</span>
+  <span style="font-size:12.5px; color:#5A4E46; margin-left:auto; text-align:right">Títulos e valores</span>
+</div>
+        <div style="display:flex; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid rgba(36,27,43,.07)">
+  <span style="width:26px; height:26px; border-radius:8px; background:#7A6E80; flex-shrink:0; box-shadow:0 2px 6px rgba(58,35,80,.16)"></span>
+  <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; background:#F3E9F3; color:#4A3556; padding:2px 7px; border-radius:6px; white-space:nowrap">--color-ink-soft</span>
+  <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; color:#7A6E80; flex-shrink:0">#7A6E80</span>
+  <span style="font-size:12.5px; color:#5A4E46; margin-left:auto; text-align:right">Texto secundário</span>
+</div>
+      </div>
+      <span style="font-size:12.5px; line-height:1.55; color:#5A4E46">Degradê da marca, usado em cabeçalho, sidebar e cards de destaque: <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; background:#F3E9F3; color:#4A3556; padding:2px 7px; border-radius:6px; white-space:nowrap">linear-gradient(155deg,#3A2350 0%,#6E3F72 60%,#A85E86 100%)</span></span></div>
+
+    <div style="background:#FFFFFF; border-radius:24px; padding:22px; box-shadow:0 8px 20px rgba(58,35,80,.09); display:flex; flex-direction:column; gap:14px;width:560px"><span style="font-family:'Instrument Serif',serif; font-size:26px; color:#241B2B; line-height:1.15">2. Tipografia</span>
+      <span style="font-size:12.5px; line-height:1.55; color:#5A4E46">Duas famílias, sem exceções. Carregue no <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px">index.html</span>.</span>
+      <div style="display:flex; flex-direction:column; gap:11px">
+        <div style="display:flex; flex-direction:column; gap:4px; border-bottom:1px solid rgba(36,27,43,.07); padding-bottom:11px">
+          <span style="font-family:'Instrument Serif',serif; font-size:30px; color:#241B2B; line-height:1.1">Instrument Serif</span>
+          <span style="font-size:12.5px; color:#5A4E46; line-height:1.5">Marca (32px mobile / 26px sidebar), títulos de tela (28–30px) e títulos de card (19–24px). Substitui as classes <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; background:#F3E9F3; color:#4A3556; padding:2px 7px; border-radius:6px; white-space:nowrap">font-editorial-bold</span> e <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; background:#F3E9F3; color:#4A3556; padding:2px 7px; border-radius:6px; white-space:nowrap">font-brand</span> onde elas marcam título.</span>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:4px">
+          <span style="font-family:'Manrope',sans-serif; font-size:24px; font-weight:800; color:#241B2B">Manrope 400 · 600 · 700 · 800</span>
+          <span style="font-size:12.5px; color:#5A4E46; line-height:1.5">Todo o resto. Valores em 800, rótulos em 800 com <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; background:#F3E9F3; color:#4A3556; padding:2px 7px; border-radius:6px; white-space:nowrap">letter-spacing:.05em</span> e caixa alta, corpo em 600/400. Mínimos: valor 17px, rótulo 9–11px, corpo 11–13px.</span>
+        </div>
+      </div></div>
+  </div>
+
+  <div style="display:flex; flex-wrap:wrap; gap:20px; align-items:flex-start">
+    <div style="background:#FFFFFF; border-radius:24px; padding:22px; box-shadow:0 8px 20px rgba(58,35,80,.09); display:flex; flex-direction:column; gap:14px;width:620px"><span style="font-family:'Instrument Serif',serif; font-size:26px; color:#241B2B; line-height:1.15">3. Padrões de componente</span>
+      <div style="display:flex; flex-direction:column; gap:13px">
+        <div style="display:flex; gap:13px; align-items:flex-start">
+  <span style="width:26px; height:26px; border-radius:50%; background:#3A2350; color:#F5B9C6; font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0">A</span>
+  <div style="display:flex; flex-direction:column; gap:3px"><span style="font-size:13.5px; font-weight:800; color:#241B2B">Card</span><span style="font-size:12.5px; line-height:1.55; color:#5A4E46">Fundo <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; background:#F3E9F3; color:#4A3556; padding:2px 7px; border-radius:6px; white-space:nowrap">#FFFFFF</span>, raio 22–26px, sombra <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; background:#F3E9F3; color:#4A3556; padding:2px 7px; border-radius:6px; white-space:nowrap">0 8px 20px rgba(58,35,80,.09)</span>. No hover: <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; background:#F3E9F3; color:#4A3556; padding:2px 7px; border-radius:6px; white-space:nowrap">translateY(-5px)</span> e sombra <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; background:#F3E9F3; color:#4A3556; padding:2px 7px; border-radius:6px; white-space:nowrap">0 20px 36px rgba(58,35,80,.18)</span>, transição 0,28s.</span></div>
+</div>
+        <div style="display:flex; gap:13px; align-items:flex-start">
+  <span style="width:26px; height:26px; border-radius:50%; background:#3A2350; color:#F5B9C6; font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0">B</span>
+  <div style="display:flex; flex-direction:column; gap:3px"><span style="font-size:13.5px; font-weight:800; color:#241B2B">Botão principal</span><span style="font-size:12.5px; line-height:1.55; color:#5A4E46">Fundo <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; background:#F3E9F3; color:#4A3556; padding:2px 7px; border-radius:6px; white-space:nowrap">#3A2350</span>, texto <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; background:#F3E9F3; color:#4A3556; padding:2px 7px; border-radius:6px; white-space:nowrap">#F5B9C6</span>, raio 14px, sombra <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; background:#F3E9F3; color:#4A3556; padding:2px 7px; border-radius:6px; white-space:nowrap">0 10px 20px rgba(58,35,80,.3)</span>, hover sobe 2–3px. O “Lançar Pedido” usa o degradê da marca, recortes laterais (dois círculos <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; background:#F3E9F3; color:#4A3556; padding:2px 7px; border-radius:6px; white-space:nowrap">#F6F2F5</span> de 18px), borda pontilhada interna e selo rosa flutuante.</span></div>
+</div>
+        <div style="display:flex; gap:13px; align-items:flex-start">
+  <span style="width:26px; height:26px; border-radius:50%; background:#3A2350; color:#F5B9C6; font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0">C</span>
+  <div style="display:flex; flex-direction:column; gap:3px"><span style="font-size:13.5px; font-weight:800; color:#241B2B">Selo / pílula</span><span style="font-size:12.5px; line-height:1.55; color:#5A4E46">Altura por padding 5px × 10px, fonte 9–10px peso 800, raio 999px, sempre com nowrap. Verde = pago/positivo, bege = pendente/a receber, rosé = alerta, lavanda = categoria.</span></div>
+</div>
+        <div style="display:flex; gap:13px; align-items:flex-start">
+  <span style="width:26px; height:26px; border-radius:50%; background:#3A2350; color:#F5B9C6; font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0">D</span>
+  <div style="display:flex; flex-direction:column; gap:3px"><span style="font-size:13.5px; font-weight:800; color:#241B2B">Medidor</span><span style="font-size:12.5px; line-height:1.55; color:#5A4E46">SVG com <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; background:#F3E9F3; color:#4A3556; padding:2px 7px; border-radius:6px; white-space:nowrap">stroke-linecap:round</span>, trilho <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; background:#F3E9F3; color:#4A3556; padding:2px 7px; border-radius:6px; white-space:nowrap">#F1ECF2</span>. Arco (Estoque) 0–100 = 4× o mínimo; anel completo (Saldos, Fichas, margem) com o valor ao centro.</span></div>
+</div>
+        <div style="display:flex; gap:13px; align-items:flex-start">
+  <span style="width:26px; height:26px; border-radius:50%; background:#3A2350; color:#F5B9C6; font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0">E</span>
+  <div style="display:flex; flex-direction:column; gap:3px"><span style="font-size:13.5px; font-weight:800; color:#241B2B">Barra inferior / sidebar</span><span style="font-size:12.5px; line-height:1.55; color:#5A4E46">Item ativo em cápsula roxa com rótulo rosé; todos sobem 4px no hover. No desktop a mesma lista vira coluna de 236px e desliza 4px para a direita.</span></div>
+</div>
+      </div></div>
+
+    <div style="background:#FFFFFF; border-radius:24px; padding:22px; box-shadow:0 8px 20px rgba(58,35,80,.09); display:flex; flex-direction:column; gap:14px;width:560px"><span style="font-family:'Instrument Serif',serif; font-size:26px; color:#241B2B; line-height:1.15">4. Movimento</span>
+      <div style="display:flex; flex-direction:column; gap:9px; font-size:12.5px; line-height:1.6; color:#5A4E46">
+        <span>Cards: <strong style="color:#241B2B">−5px</strong> · 0,28s · sombra dobra</span>
+        <span>Itens de lista: <strong style="color:#241B2B">+3px no eixo X</strong> · 0,25s · fundo clareia</span>
+        <span>Botões e selos: <strong style="color:#241B2B">−2 a −3px</strong> · 0,22s</span>
+        <span>Abas: <strong style="color:#241B2B">−4px</strong> · 0,25s</span>
+        <span>Brilho do botão de comanda: <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; background:#F3E9F3; color:#4A3556; padding:2px 7px; border-radius:6px; white-space:nowrap">carSweep</span> 5s infinito</span>
+        <span>Halo do card de lucro: <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; background:#F3E9F3; color:#4A3556; padding:2px 7px; border-radius:6px; white-space:nowrap">carGlow</span> 6s infinito</span>
+        <span>Selo rosa flutuante: <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; background:#F3E9F3; color:#4A3556; padding:2px 7px; border-radius:6px; white-space:nowrap">carFloat</span> 4,5s infinito</span>
+      </div>
+      <span style="font-size:12.5px; line-height:1.55; color:#5A4E46; border-top:1px solid rgba(36,27,43,.07); padding-top:12px">Nada pisca ou pulsa em vermelho: o alerta de estoque baixo e o de saldo negativo passam a ser selo estático em <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; background:#F3E9F3; color:#4A3556; padding:2px 7px; border-radius:6px; white-space:nowrap">#C4626F</span>.</span></div>
+  </div>
+
+  <div style="display:flex; flex-direction:column; gap:12px">
+    <span style="font-family:'Instrument Serif',serif; font-size:26px; color:#241B2B; line-height:1.15">5. Mapa arquivo → tela</span>
+    <div style="background:#FFFFFF; border-radius:24px; padding:22px; box-shadow:0 8px 20px rgba(58,35,80,.09); display:flex; flex-direction:column">
+      <div style="display:grid; grid-template-columns:270px 90px 1fr; gap:14px; padding-bottom:9px; border-bottom:1px solid rgba(36,27,43,.12); font-size:11px; font-weight:800; letter-spacing:.06em; color:#7A6E80; text-transform:uppercase"><span>Arquivo</span><span>Tela</span><span>O que muda</span></div>
+      <div style="display:grid; grid-template-columns:270px 90px 1fr; gap:14px; align-items:start; padding:11px 0; border-bottom:1px solid rgba(36,27,43,.07)">
+  <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; color:#4A3556; word-break:break-all">src/index.css</span>
+  <a href="#" style="justify-self:start; font-size:11.5px; font-weight:800; letter-spacing:.08em; background:#3A2350; color:#F5CFD4; padding:5px 11px; border-radius:999px; text-decoration:none"></a>
+  <span style="font-size:12.5px; line-height:1.5; color:#5A4E46">Tokens, fontes e keyframes. Remover a paleta âmbar/slate herdada.</span>
+</div>
+      <div style="display:grid; grid-template-columns:270px 90px 1fr; gap:14px; align-items:start; padding:11px 0; border-bottom:1px solid rgba(36,27,43,.07)">
+  <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; color:#4A3556; word-break:break-all">src/components/Header.tsx</span>
+  <a href="#11a" style="justify-self:start; font-size:11.5px; font-weight:800; letter-spacing:.08em; background:#3A2350; color:#F5CFD4; padding:5px 11px; border-radius:999px; text-decoration:none">11A</a>
+  <span style="font-size:12.5px; line-height:1.5; color:#5A4E46">Marca centrada em serifa, avatar de 36px clicável à esquerda, ícone de versão mobile refeito e download à direita.</span>
+</div>
+      <div style="display:grid; grid-template-columns:270px 90px 1fr; gap:14px; align-items:start; padding:11px 0; border-bottom:1px solid rgba(36,27,43,.07)">
+  <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; color:#4A3556; word-break:break-all">src/components/BottomNav.tsx</span>
+  <a href="#12a" style="justify-self:start; font-size:11.5px; font-weight:800; letter-spacing:.08em; background:#3A2350; color:#F5CFD4; padding:5px 11px; border-radius:999px; text-decoration:none">12A</a>
+  <span style="font-size:12.5px; line-height:1.5; color:#5A4E46">Cápsula roxa no item ativo, rótulo rosé, hover de −4px. No desktop vira a sidebar de 236px.</span>
+</div>
+      <div style="display:grid; grid-template-columns:270px 90px 1fr; gap:14px; align-items:start; padding:11px 0; border-bottom:1px solid rgba(36,27,43,.07)">
+  <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; color:#4A3556; word-break:break-all">src/components/Dashboard.tsx</span>
+  <a href="#3a" style="justify-self:start; font-size:11.5px; font-weight:800; letter-spacing:.08em; background:#3A2350; color:#F5CFD4; padding:5px 11px; border-radius:999px; text-decoration:none">3A</a>
+  <span style="font-size:12.5px; line-height:1.5; color:#5A4E46">Calendário do mês inteiro (só dias), medidor de margem no card de lucro, três medidores nos saldos, botão em etiqueta de comanda.</span>
+</div>
+      <div style="display:grid; grid-template-columns:270px 90px 1fr; gap:14px; align-items:start; padding:11px 0; border-bottom:1px solid rgba(36,27,43,.07)">
+  <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; color:#4A3556; word-break:break-all">src/components/OrdersModule.tsx</span>
+  <a href="#6a" style="justify-self:start; font-size:11.5px; font-weight:800; letter-spacing:.08em; background:#3A2350; color:#F5CFD4; padding:5px 11px; border-radius:999px; text-decoration:none">6A</a>
+  <span style="font-size:12.5px; line-height:1.5; color:#5A4E46">Cabeçalho com totais em degradê, busca, filtros segmentados e pedidos em comanda com ações de tamanho único.</span>
+</div>
+      <div style="display:grid; grid-template-columns:270px 90px 1fr; gap:14px; align-items:start; padding:11px 0; border-bottom:1px solid rgba(36,27,43,.07)">
+  <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; color:#4A3556; word-break:break-all">src/components/FichasTecnicasModule.tsx</span>
+  <a href="#7b" style="justify-self:start; font-size:11.5px; font-weight:800; letter-spacing:.08em; background:#3A2350; color:#F5CFD4; padding:5px 11px; border-radius:999px; text-decoration:none">7B</a>
+  <span style="font-size:12.5px; line-height:1.5; color:#5A4E46">Os 4 quadrados viram anel de composição com a sugestão ao centro; categorias em duas linhas sem corte; Editar / Duplicar / Excluir com cantos assimétricos.</span>
+</div>
+      <div style="display:grid; grid-template-columns:270px 90px 1fr; gap:14px; align-items:start; padding:11px 0; border-bottom:1px solid rgba(36,27,43,.07)">
+  <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; color:#4A3556; word-break:break-all">src/components/EstoqueModule.tsx</span>
+  <a href="#8a" style="justify-self:start; font-size:11.5px; font-weight:800; letter-spacing:.08em; background:#3A2350; color:#F5CFD4; padding:5px 11px; border-radius:999px; text-decoration:none">8A</a>
+  <span style="font-size:12.5px; line-height:1.5; color:#5A4E46">Gauge em arco por insumo, cards em relevo que levantam, item abaixo do nível em rosé.</span>
+</div>
+      <div style="display:grid; grid-template-columns:270px 90px 1fr; gap:14px; align-items:start; padding:11px 0; border-bottom:1px solid rgba(36,27,43,.07)">
+  <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; color:#4A3556; word-break:break-all">src/components/CustomersModule.tsx</span>
+  <a href="#9c" style="justify-self:start; font-size:11.5px; font-weight:800; letter-spacing:.08em; background:#3A2350; color:#F5CFD4; padding:5px 11px; border-radius:999px; text-decoration:none">9C</a>
+  <span style="font-size:12.5px; line-height:1.5; color:#5A4E46">Capa em degradê por cliente, dados em corpo claro, datas comemorativas dentro da própria caixa com abre/fecha na seta.</span>
+</div>
+      <div style="display:grid; grid-template-columns:270px 90px 1fr; gap:14px; align-items:start; padding:11px 0; border-bottom:1px solid rgba(36,27,43,.07)">
+  <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; color:#4A3556; word-break:break-all">src/components/BalancesAndExpensesModule.tsx</span>
+  <a href="#10b" style="justify-self:start; font-size:11.5px; font-weight:800; letter-spacing:.08em; background:#3A2350; color:#F5CFD4; padding:5px 11px; border-radius:999px; text-decoration:none">10B</a>
+  <span style="font-size:12.5px; line-height:1.5; color:#5A4E46">Saldo total em degradê com barra de divisão, cofrinhos em linhas compactas, formulário e histórico na paleta nova.</span>
+</div>
+      <div style="display:grid; grid-template-columns:270px 90px 1fr; gap:14px; align-items:start; padding:11px 0; border-bottom:1px solid rgba(36,27,43,.07)">
+  <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; color:#4A3556; word-break:break-all">src/App.tsx</span>
+  <a href="#13a" style="justify-self:start; font-size:11.5px; font-weight:800; letter-spacing:.08em; background:#3A2350; color:#F5CFD4; padding:5px 11px; border-radius:999px; text-decoration:none">13A</a>
+  <span style="font-size:12.5px; line-height:1.5; color:#5A4E46">Shell responsivo: abaixo de 1024px o layout atual com barra inferior; acima, sidebar fixa + cabeçalho de página + conteúdo em grade.</span>
+</div>
+    </div>
+  </div>
+
+  <div style="max-width:820px; background:#F3E9F3; border-radius:24px; padding:22px; display:flex; flex-direction:column; gap:10px">
+    <span style="font-size:14px; font-weight:800; color:#241B2B">Ordem sugerida</span>
+    <span style="font-size:13px; line-height:1.6; color:#4A3556; text-wrap:pretty">1) tokens e fontes · 2) Header e BottomNav (aparecem em todas as telas) · 3) Dashboard · 4) Orders · 5) Fichas, Estoque, Clientes, Saldos · 6) shell desktop no App. Cada etapa é visual: nenhum handler, rota, cálculo ou texto precisa mudar.</span>
+  </div>
+</section>
+
+
+</body></html>

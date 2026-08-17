@@ -1,707 +1,143 @@
 @import "tailwindcss";
 
-/* ====== Design Token System — Carula Redesign ====== */
-:root {
-  /* Brand Colors */
-  --color-brand-900: #3A2350;
-  --color-brand-700: #6E3F72;
-  --color-brand-500: #A85E86;
+/* ================================================================
+   Carula Confeitaria — camada visual do redesign
+   ================================================================ */
 
-  /* Rose & Alerts */
-  --color-rose-200: #F5B9C6;
-  --color-rose-600: #C4626F;
-
-  /* Neutrals */
-  --color-sand-200: #E4D9C3;
-  --color-mint-300: #A9D8B8;
-  --color-surface: #F6F2F5;
-  --color-card: #FFFFFF;
-  --color-ink: #241B2B;
-  --color-ink-soft: #7A6E80;
-
-  /* Auxiliary Colors */
-  --color-purple-light: #8F5A9C;
-  --color-labor: #7E4F9E;
-  --color-costs: #B08D57;
-  --color-paid: #4C7358;
-  --color-lavender: #F3E9F3;
-  --color-bg-block: #FAF7FA;
-  --color-date-bg: #F0E2C8;
-  --color-meter-track: #F1ECF2;
-
-  /* Legacy mapping for compatibility */
-  --color-primary: #3A2350;
-  --color-primary-dark: #2D1B3F;
-  --color-primary-light: #6E3F72;
-
-  /* Neutrals */
-  --color-neutral-white: #FFFFFF;
-  --color-neutral-hero: #F6F2F5;
-  --color-neutral-light: #F5F3F0;
-  --color-neutral-medium: #E6E1DB;
-  --color-neutral-warm-gray: #E4D9C3;
-  --color-neutral-dark-gray: #5C5550;
-  --color-neutral-charcoal: #241B2B;
-
-  /* Section-Specific Colors (Vitrine Moderna) */
-  --color-vendas: #A85E86;
-  --color-vendas-light: #F5B9C6;
-  --color-vendas-dark: #3A2350;
-
-  --color-labor: #A85E86;
-  --color-labor-light: #F5B9C6;
-  --color-labor-dark: #3A2350;
-
-  --color-reposicao: #A9D8B8;
-  --color-reposicao-light: #A9D8B8;
-  --color-reposicao-dark: #3A2350;
-
-  --color-destaque: #E4D9C3;
-  --color-destaque-light: #F5F3F0;
-  --color-destaque-dark: #3A2350;
-
-  --color-dados: #A9D8B8;
-  --color-dados-light: #A9D8B8;
-  --color-dados-dark: #3A2350;
-
-  /* Accent Rose (for CTAs) */
-  --color-accent-gold: #F5B9C6;
-  --color-accent-gold-dark: #A85E86;
-  --color-accent-gold-light: #F5B9C6;
-
-  /* Semantic Colors */
-  --color-semantic-success: #A9D8B8;
-  --color-semantic-warning: #E4D9C3;
-  --color-semantic-error: #C85A54;
-  --color-semantic-info: #6E3F72;
-
-  /* Component States */
-  --color-focus-ring: #3A2350;
-  --color-border: #E6E1DB;
-  --color-border-subtle: rgba(58, 35, 80, 0.08);
-  --color-text-primary: #241B2B;
-  --color-text-secondary: #6E3F72;
-  --color-text-muted: rgba(36, 27, 43, 0.6);
-
-  /* Hover States */
-  --color-primary-hover: #2D1B3F;
-  --color-accent-hover: #A85E86;
-  --color-neutral-hover: #F5F3F0;
-
-  /* Legacy Bridge Mapping */
-  --color-pastry-pink: #F5B9C6;
-  --color-pastry-cream: #F6F2F5;
-  --color-pastry-yellow: #E4D9C3;
-  --color-pastry-lavender: #6E3F72;
-  --color-pastry-sage: #A9D8B8;
-  --color-pastry-chocolate: #241B2B;
-  --color-pastry-light-pink: #F5B9C6;
-  --color-pastry-pink-hover: #A85E86;
-}
-
-/* Dark Mode Variables (defined but not activated) */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-pastry-pink-dark: #E8A0B0;
-    --color-pastry-cream-dark: #1a1512;
-    --color-pastry-yellow-dark: #D4A85C;
-    --color-pastry-lavender-dark: #B299D9;
-    --color-pastry-sage-dark: #A8BC86;
-    --color-pastry-chocolate-dark: #F5F1E8;
-    --color-pastry-light-pink-dark: #F5C6CE;
-
-    --color-semantic-coral-dark: #F5A878;
-    --color-semantic-gold-dark: #F5D76E;
-    --color-semantic-orange-dark: #FF7B5C;
-    --color-semantic-purple-dark: #C9A3FF;
-    --color-semantic-dark-purple-dark: #E8C5FF;
-
-    --color-neutral-white-dark: #0f0d0a;
-    --color-neutral-off-white-dark: #1a1512;
-    --color-neutral-light-dark: #2B2420;
-    --color-neutral-dark-dark: #F5F1E8;
-
-    --color-focus-ring-dark: #E8A0B0;
-    --color-border-light-dark: #E8A0B0;
-    --color-border-muted-dark: rgba(232, 160, 176, 0.2);
-    --color-text-primary-dark: #F5F1E8;
-    --color-text-secondary-dark: rgba(245, 241, 232, 0.7);
-    --color-text-muted-dark: rgba(245, 241, 232, 0.4);
-  }
-}
-
-/* Carula Design System Fonts */
+/* === GOOGLE FONTS === */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fredoka:wght@500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap');
 
-@layer base {
-  body {
-    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-variant-numeric: lining-nums tabular-nums;
-    font-feature-settings: "lnum" 1, "tnum" 1;
-    background-color: var(--color-surface);
-    color: var(--color-ink);
-    -webkit-tap-highlight-color: transparent;
-    line-height: 1.6;
-    letter-spacing: -0.02em;
-  }
+:root {
+  /* === BRAND COLORS === */
+  --car-brand-900: #3A2350;
+  --car-brand-800: #4A2A5C;
+  --car-brand-700: #6E3F72;
+  --car-brand-600: #A85E86;
+  --car-rose-200: #F5B9C6;
+  --car-rose-100: #F5CFD4;
+  --car-rose-50: #FFF8F6;
+  --car-sand-200: #E4D9C3;
+  --car-sand-100: #EDE7DC;
+  --car-sand-50: #F6F2F5;
+  --car-text-900: #241B2B;
+  --car-text-800: #2B2420;
+  --car-text-700: #5A4E46;
+  --car-text-600: #7A6E80;
+  --car-green: #A9D8B8;
+  --car-gold: #B08D57;
 
-  /* Display — Editorial Premium Headlines */
-  h1 {
-    font-size: 36px;
-    font-weight: 700;
-    line-height: 1.15;
-    letter-spacing: -1px;
-    color: var(--color-neutral-charcoal);
-    margin-bottom: 0.5em;
-  }
+  /* === CSS VARIABLES (for compatibility with existing code) === */
+  --color-brand-900: #3A2350;
+  --color-brand-800: #4A2A5C;
+  --color-brand-700: #6E3F72;
+  --color-brand-500: #A85E86;
+  --color-rose-200: #F5B9C6;
+  --color-rose-100: #F5CFD4;
+  --color-rose-50: #FFF8F6;
+  --color-sand-200: #E4D9C3;
+  --color-sand-100: #EDE7DC;
+  --color-sand-50: #F6F2F5;
+  --color-ink: #241B2B;
+  --color-ink-text: #2B2420;
+  --color-ink-soft: #7A6E80;
+  --color-mint-300: #A9D8B8;
+  --color-gold: #B08D57;
+  --color-surface: #F6F2F5;
+  --color-meter-track: #F0E9EE;
 
-  /* Section Heading */
-  h2 {
-    font-size: 28px;
-    font-weight: 700;
-    line-height: 1.2;
-    letter-spacing: -0.5px;
-    color: var(--color-neutral-charcoal);
-    margin-bottom: 0.75em;
-  }
-
-  /* Card/Section Title */
-  h3 {
-    font-size: 20px;
-    font-weight: 600;
-    line-height: 1.3;
-    color: var(--color-neutral-charcoal);
-    margin-bottom: 0.5em;
-  }
-
-  /* Subheading */
-  h4 {
-    font-size: 16px;
-    font-weight: 600;
-    line-height: 1.4;
-    color: var(--color-neutral-charcoal);
-    margin-bottom: 0.5em;
-  }
-
-  /* Body Large — Important descriptions */
-  .text-large {
-    font-size: 15px;
-    font-weight: 500;
-    line-height: 1.5;
-    color: var(--color-text-primary);
-  }
-
-  /* Caption — Small labels */
-  small, .text-small {
-    font-size: 12px;
-    font-weight: 500;
-    line-height: 1.4;
-    color: var(--color-text-secondary);
-    letter-spacing: 0.5px;
-  }
-
-  .font-brand {
-    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-weight: 600;
-    color: var(--color-neutral-charcoal);
-  }
-
-  .font-display {
-    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 36px;
-    font-weight: 700;
-    line-height: 1.15;
-    letter-spacing: -1px;
-  }
-}
-
-.font-numbers {
-  font-family: 'Manrope', system-ui, -apple-system, sans-serif;
-  font-variant-numeric: lining-nums tabular-nums;
-  font-feature-settings: "lnum" 1, "tnum" 1;
-}
-
-/* Global Surface Classes — Premium Editorial Palette */
-.bg-pastry-hero {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
-}
-
-.bg-pastry-cream {
-  background-color: var(--color-neutral-hero);
-}
-
-.bg-pastry-pink {
-  background-color: var(--color-accent-gold);
-}
-
-.bg-pastry-yellow {
-  background-color: var(--color-semantic-warning);
-}
-
-.bg-pastry-lavender {
-  background-color: var(--color-semantic-info);
-}
-
-.bg-pastry-sage {
-  background-color: var(--color-semantic-success);
-}
-
-.bg-pastry-chocolate {
-  background-color: var(--color-neutral-charcoal);
-}
-
-.text-pastry-chocolate {
-  color: var(--color-text-primary);
-}
-
-.border-pastry-pink {
-  border-color: var(--color-accent-gold);
-}
-
-/* Primary Identity Gradients — Subtle, Premium */
-.bg-carula-gradient {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
-}
-
-.bg-carula-gradient-accent {
-  background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-accent-gold-light) 100%);
-}
-
-/* Safe area insets for iOS devices */
-.pt-safe-header {
-  padding-top: max(3.25rem, calc(0.75rem + env(safe-area-inset-top, 0px)));
-}
-
-.pb-safe {
-  padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
-}
-
-.bottom-nav-safe {
-  padding-bottom: max(4.5rem, calc(3.5rem + env(safe-area-inset-bottom)));
-}
-
-/* Hide scrollbars for horizontal tab scrolling */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-/* Carula Redesign Animations */
-@keyframes carSweep {
-  0% {
-    transform: translateX(-120%);
-  }
-  60%, 100% {
-    transform: translateX(220%);
-  }
-}
-
-@keyframes carGlow {
-  0%, 100% {
-    opacity: 0.45;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.8;
-    transform: scale(1.06);
-  }
+  /* === GRADIENTS === */
+  --comanda-gradient: linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86);
 }
 
 @keyframes carFloat {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-6px);
-  }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
 }
 
-/* Modal Entry Animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+@keyframes carShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
-@keyframes scaleUp {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+@keyframes carRing {
+  from { stroke-dashoffset: 339; }
+  to { stroke-dashoffset: 105; }
 }
 
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(100%);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+@keyframes carRingB {
+  from { stroke-dashoffset: 301; }
+  to { stroke-dashoffset: 66; }
 }
 
-@layer utilities {
-  /* Carula Redesign Animations */
-  .animate-carSweep {
-    animation: carSweep 5s ease-in-out infinite;
-  }
-
-  .animate-carGlow {
-    animation: carGlow 6s ease-in-out infinite;
-  }
-
-  .animate-carFloat {
-    animation: carFloat 4.5s ease-in-out infinite;
-  }
-
-  /* Modal Animations */
-  .animate-fadeIn {
-    animation: fadeIn 200ms ease-out forwards;
-  }
-
-  .animate-scaleUp {
-    animation: scaleUp 300ms ease-out forwards;
-  }
-
-  .animate-slideUp {
-    animation: slideUp 400ms ease-out forwards;
-  }
-
-  /* Brand Gradient */
-  .bg-brand-gradient {
-    background: linear-gradient(155deg, var(--color-brand-900) 0%, var(--color-brand-700) 60%, var(--color-brand-500) 100%);
-  }
-
-  /* Marca (Instrument Serif) — 32px mobile */
-  .font-marca {
-    font-family: 'Instrument Serif', serif;
-    font-weight: 400;
-    font-size: 32px;
-    line-height: 1;
-  }
-
-  /* Heading Styles — Screen Titles 28–30px (mobile) */
-  .heading-lg {
-    font-family: 'Instrument Serif', serif;
-    font-size: 30px;
-    font-weight: 400;
-    line-height: 1.1;
-  }
-
-  .heading-md {
-    font-family: 'Instrument Serif', serif;
-    font-size: 28px;
-    font-weight: 400;
-    line-height: 1.15;
-  }
-
-  /* Card Titles 19–24px (mobile) */
-  .heading-card {
-    font-family: 'Instrument Serif', serif;
-    font-size: 24px;
-    font-weight: 400;
-    line-height: 1.2;
-  }
-
-  .heading-card-sm {
-    font-family: 'Instrument Serif', serif;
-    font-size: 19px;
-    font-weight: 400;
-    line-height: 1.25;
-  }
-
-  /* Value Styles */
-  .value-lg {
-    font-family: 'Manrope', sans-serif;
-    font-size: 32px;
-    font-weight: 800;
-    letter-spacing: -0.03em;
-  }
-
-  .value-md {
-    font-family: 'Manrope', sans-serif;
-    font-size: 24px;
-    font-weight: 800;
-    letter-spacing: -0.03em;
-  }
-
-  /* Label Styles */
-  .label-sm {
-    font-family: 'Manrope', sans-serif;
-    font-size: 9px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-  }
-
-  /* Card Shadow Styles */
-  .shadow-card {
-    box-shadow: 0 8px 20px rgba(58, 35, 80, 0.09);
-  }
-
-  .shadow-card-hover {
-    box-shadow: 0 20px 36px rgba(58, 35, 80, 0.18);
-  }
-
-  .shadow-btn {
-    box-shadow: 0 10px 20px rgba(58, 35, 80, 0.3);
-  }
-
-  .shadow-highlight {
-    box-shadow: 0 14px 30px rgba(58, 35, 80, 0.3);
-  }
-
-  .shadow-nav-bottom {
-    box-shadow: 0 -8px 24px rgba(58, 35, 80, 0.07);
-  }
-
-  .shadow-modal {
-    box-shadow: 0 30px 70px rgba(58, 35, 80, 0.26);
-  }
+@keyframes carGlow {
+  0%, 100% { opacity: .45; transform: scale(1); }
+  50% { opacity: .8; transform: scale(1.06); }
 }
 
-/* Accessibility: Respect prefers-reduced-motion */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+@keyframes carRise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* ====== Card Hierarchy — Carula Redesign ====== */
-.card-metric {
-  background-color: var(--color-card);
-  border-radius: 22px;
-  border: none;
-  box-shadow: 0 8px 20px rgba(58, 35, 80, 0.09);
-  transition: transform 0.28s ease, box-shadow 0.28s ease;
+@keyframes carSweep {
+  0% { transform: translateX(-120%); }
+  60%, 100% { transform: translateX(220%); }
 }
 
-.card-metric:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 20px 36px rgba(58, 35, 80, 0.18);
+body {
+  margin: 0;
+  background: var(--car-sand-100);
+  font-family: 'Plus Jakarta Sans', 'Manrope', sans-serif;
+  font-variant-numeric: lining-nums tabular-nums;
+  color: var(--car-text-900);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.card-feature {
-  background-color: var(--color-card);
-  border-radius: 22px;
-  border: none;
-  box-shadow: 0 8px 20px rgba(58, 35, 80, 0.09);
-  transition: transform 0.28s ease, box-shadow 0.28s ease;
+a {
+  color: #E82C1B;
+  text-decoration: none;
 }
 
-.card-feature:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 20px 36px rgba(58, 35, 80, 0.18);
+a:hover {
+  color: var(--car-text-800);
 }
 
-.card-support {
-  background-color: var(--color-surface);
-  border-radius: 22px;
-  border: none;
-  box-shadow: 0 8px 20px rgba(58, 35, 80, 0.09);
+.car-float {
+  animation: carFloat 4.5s ease-in-out infinite;
 }
 
-/* ====== Button Hierarchy — Carula Redesign ====== */
-.btn-primary {
-  padding: 12px 20px;
-  background-color: var(--color-brand-900);
-  color: var(--color-rose-200);
-  font-weight: 800;
-  font-size: 14px;
-  border-radius: 14px;
-  border: none;
-  box-shadow: 0 10px 20px rgba(58, 35, 80, 0.3);
-  transition: transform 220ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 220ms cubic-bezier(0.23, 1, 0.32, 1), background-color 220ms ease;
-  cursor: pointer;
-}
-@media (hover: hover) and (pointer: fine) {
-  .btn-primary:hover {
-    background-color: #2D1B3F;
-    box-shadow: 0 14px 28px rgba(58, 35, 80, 0.4);
-    transform: translateY(-3px);
-  }
-}
-.btn-primary:active {
-  transform: scale(0.97) translateY(-3px);
+.car-sweep {
+  animation: carSweep 5s ease-in-out infinite;
 }
 
-.btn-secondary {
-  padding: 10px 16px;
-  background-color: var(--color-card);
-  border: 1px solid rgba(58, 35, 80, 0.1);
-  color: var(--color-ink);
-  font-weight: 600;
-  font-size: 14px;
-  border-radius: 14px;
-  transition: transform 220ms cubic-bezier(0.23, 1, 0.32, 1), border-color 220ms ease, background-color 220ms ease;
-  cursor: pointer;
-}
-@media (hover: hover) and (pointer: fine) {
-  .btn-secondary:hover {
-    background-color: var(--color-surface);
-    border-color: var(--color-brand-700);
-    transform: translateY(-2px);
-  }
-}
-.btn-secondary:active {
-  transform: scale(0.97) translateY(-2px);
+.car-glow {
+  animation: carGlow 3s ease-in-out infinite;
 }
 
-.btn-tertiary {
-  padding: 8px 12px;
-  background-color: transparent;
-  color: var(--color-brand-700);
-  font-weight: 600;
-  font-size: 14px;
-  border-radius: 10px;
-  transition: transform 220ms cubic-bezier(0.23, 1, 0.32, 1), color 220ms ease, background-color 220ms ease;
-  cursor: pointer;
-  border: none;
-}
-@media (hover: hover) and (pointer: fine) {
-  .btn-tertiary:hover {
-    color: var(--color-brand-900);
-    background-color: rgba(58, 35, 80, 0.08);
-    transform: translateY(-2px);
-  }
-}
-.btn-tertiary:active {
-  transform: scale(0.97) translateY(-2px);
+.car-rise {
+  animation: carRise 0.6s ease-out;
 }
 
-.btn-danger {
-  padding: 12px 20px;
-  background-color: var(--color-rose-600);
-  color: white;
-  font-weight: 800;
-  font-size: 14px;
-  border-radius: 14px;
-  border: none;
-  box-shadow: 0 10px 20px rgba(196, 98, 111, 0.3);
-  transition: transform 220ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 220ms cubic-bezier(0.23, 1, 0.32, 1), background-color 220ms ease;
-  cursor: pointer;
-}
-@media (hover: hover) and (pointer: fine) {
-  .btn-danger:hover {
-    background-color: #B8483E;
-    box-shadow: 0 14px 28px rgba(196, 98, 111, 0.4);
-    transform: translateY(-3px);
-  }
-}
-.btn-danger:active {
-  transform: scale(0.97) translateY(-3px);
+.font-serif-display {
+  font-family: 'Instrument Serif', serif;
 }
 
-/* Popover origin-awareness (Emil's principle) */
-.popover {
-  transform-origin: var(--transform-origin, center);
+.font-serif-elegant {
+  font-family: 'Playfair Display', serif;
 }
 
-/* List item stagger animation (30-80ms cascade) */
-.list-item {
-  animation: slideUpFade 300ms ease-out forwards;
-}
-.list-item:nth-child(1) { animation-delay: 0ms; }
-.list-item:nth-child(2) { animation-delay: 50ms; }
-.list-item:nth-child(3) { animation-delay: 100ms; }
-.list-item:nth-child(4) { animation-delay: 150ms; }
-.list-item:nth-child(5) { animation-delay: 200ms; }
-
-@keyframes slideUpFade {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* === SAFE AREA SUPPORT === */
+.pt-safe-header {
+  padding-top: max(1rem, env(safe-area-inset-top));
 }
 
-/* ====== Seal / Pill Styles ====== */
-.seal {
-  display: inline-block;
-  padding: 5px 10px;
-  border-radius: 999px;
-  font-size: 10px;
-  font-weight: 800;
-  white-space: nowrap;
-  letter-spacing: 0.04em;
-  font-family: 'Manrope', sans-serif;
-  text-transform: uppercase;
+.pb-safe {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
 
-.seal-positive {
-  background-color: var(--color-mint-300);
-  color: #2B2420;
-}
-
-.seal-pending {
-  background-color: var(--color-sand-200);
-  color: #5A4E46;
-}
-
-.seal-alert {
-  background-color: var(--color-rose-200);
-  color: var(--color-brand-900);
-}
-
-.seal-category {
-  background-color: var(--color-lavender);
-  color: var(--color-brand-700);
-}
-
-/* ====== Card Elevations ====== */
-.card-elevated {
-  background-color: var(--color-card);
-  border-radius: 20px;
-  border: 1px solid rgba(58, 35, 80, 0.06);
-  box-shadow: 0 8px 20px rgba(58, 35, 80, 0.09);
-  transition: all 0.28s cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-.card-elevated:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 20px 36px rgba(58, 35, 80, 0.18);
-}
-
-/* ====== BottomNav Hover States (Touch-Aware) ====== */
-@media (hover: hover) and (pointer: fine) {
-  .bottom-nav button:not([aria-current="page"]):hover {
-    transform: translateY(-4px);
-    background-color: rgba(58, 35, 80, 0.06);
-  }
-}
-
-/* ====== Responsive Utilities ====== */
-@media (min-width: 1024px) {
-  .sidebar-responsive {
-    width: 236px;
-    flex-shrink: 0;
-  }
-
-  .content-main {
-    flex: 1;
-    overflow-y: auto;
-  }
-
-  .nav-vertical {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
+.bottom-nav-safe {
+  padding-bottom: max(5rem, calc(5rem + env(safe-area-inset-bottom)));
 }

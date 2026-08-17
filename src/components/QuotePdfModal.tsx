@@ -364,31 +364,31 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
         }
       `}</style>
 
-      <div className="bg-white rounded-xl max-w-2xl w-full shadow-highlight overflow-hidden flex flex-col max-h-[92vh] print:max-h-none print:shadow-none print:rounded-none border-2 border-pink-300 relative" aria-label="Orçamento PDF">
-        
+      <div className="bg-white rounded-xl max-w-2xl w-full shadow-highlight overflow-hidden flex flex-col max-h-[92vh] print:max-h-none print:shadow-none print:rounded-none border-2 border-pink-200 relative" aria-label="Orçamento PDF">
+
         {/* STICKY TOP CONTROL BAR - ALWAYS VISIBLE & CLEAR ON ALL DEVICES */}
-        <div className="p-2.5 sm:p-3 bg-[var(--color-pastry-chocolate)] text-[var(--color-pastry-cream)] flex items-center justify-between gap-2 no-print shrink-0 sticky top-0 z-50 border-b border-[var(--color-pastry-chocolate)]/20">
+        <div className="p-2.5 sm:p-3 bg-gradient-to-r from-[#3A2350] to-[#A85E86] text-white flex items-center justify-between gap-2 no-print shrink-0 sticky top-0 z-50 border-b border-white/10 shadow-sm">
           {/* Mode Switcher */}
           <div className="flex items-center gap-1 bg-white/10 p-1 rounded-lg">
             <button
               onClick={() => setActiveTab('cliente')}
               className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeTab === 'cliente'
-                  ? 'bg-[var(--color-pastry-pink)] text-[var(--color-pastry-chocolate)] shadow-card font-extrabold'
-                  : 'text-[var(--color-pastry-cream)]/80 hover:text-white'
+                  ? 'bg-[#F5B9C6] text-[#3A2350] shadow-sm font-extrabold'
+                  : 'text-white/70 hover:text-white'
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5 text-[var(--color-pastry-chocolate)]" /> Folha do Cliente
+              <Sparkles className="w-3 h-3" /> Folha do Cliente
             </button>
             <button
               onClick={() => setActiveTab('cozinha')}
               className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeTab === 'cozinha'
-                  ? 'bg-[var(--color-pastry-yellow)] text-[var(--color-pastry-chocolate)] shadow-card font-extrabold'
-                  : 'text-[var(--color-pastry-cream)]/80 hover:text-white'
+                  ? 'bg-[#A9D8B8] text-[#3A2350] shadow-sm font-extrabold'
+                  : 'text-white/70 hover:text-white'
               }`}
             >
-              <ChefHat className="w-3.5 h-3.5 text-[var(--color-pastry-chocolate)]" /> Cozinha
+              <ChefHat className="w-3 h-3" /> Cozinha
             </button>
           </div>
 
@@ -397,51 +397,20 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
             <button
               onClick={handleDownloadPdf}
               disabled={isGeneratingPdf}
-              className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-[var(--color-pastry-pink)] hover:bg-[var(--color-pastry-pink-hover)] text-[var(--color-pastry-chocolate)] text-[11px] sm:text-xs font-black flex items-center gap-1 shadow-card active:scale-95 transition-all cursor-pointer"
+              className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-[#F5B9C6] hover:bg-[#E8A0B0] text-[#3A2350] text-[11px] sm:text-xs font-black flex items-center gap-1 shadow-sm active:scale-95 transition-all cursor-pointer"
               title="Baixar arquivo PDF no seu celular ou computador"
             >
-              <FileText className="w-3.5 h-3.5 text-[var(--color-pastry-chocolate)]" />
+              <FileText className="w-3 h-3" />
               <span>{isGeneratingPdf ? 'Gerando PDF...' : 'Baixar PDF'}</span>
             </button>
 
-            {/* Download Image Button */}
-            <button
-              onClick={handleDownloadImage}
-              disabled={isGeneratingImage}
-              className="px-2.5 py-1.5 rounded-xl bg-semantic-success-800 hover:bg-semantic-success-900 text-white text-[11px] sm:text-xs font-bold flex items-center gap-1 shadow-card active:scale-95 transition-all cursor-pointer"
-              title="Baixar imagem PNG para enviar pelo WhatsApp"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{isGeneratingImage ? 'Gerando...' : 'Baixar Imagem'}</span>
-            </button>
-
-            {/* Print/PDF Button */}
-            <button
-              onClick={handlePrint}
-              className="px-2.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-[var(--color-pastry-cream)] text-[11px] sm:text-xs font-bold flex items-center gap-1 transition-all cursor-pointer"
-              title="Imprimir ou Salvar pelo Navegador"
-            >
-              <Printer className="w-3.5 h-3.5 text-[var(--color-pastry-pink)]" />
-              <span className="hidden md:inline">Imprimir</span>
-            </button>
-
-            {/* COPY TEXT */}
-            <button
-              onClick={handleCopyText}
-              className="p-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-[var(--color-pastry-pink)] cursor-pointer"
-              title="Copiar texto do pedido"
-            >
-              {copied ? <Check className="w-4 h-4 text-semantic-success-400" /> : <Copy className="w-4 h-4" />}
-            </button>
-
-            {/* BIG CLEAR PROMINENT CLOSE BUTTON */}
+            {/* Close Button - Icon Only */}
             <button
               onClick={onClose}
-              className="px-2.5 py-1.5 rounded-xl bg-semantic-error-700 hover:bg-semantic-error-800 text-white text-[11px] sm:text-xs font-bold flex items-center gap-1 shadow-card active:scale-95 transition-all shrink-0 ml-1 cursor-pointer"
+              className="w-8 h-8 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-sm active:scale-95 transition-all cursor-pointer"
               title="Fechar Janela"
             >
-              <X className="w-4 h-4 stroke-[3]" />
-              <span>FECHAR</span>
+              <X className="w-4 h-4 stroke-[2.5]" />
             </button>
           </div>
         </div>
@@ -449,7 +418,7 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
         {/* PRINTABLE DOCUMENT BODY */}
         <div
           id="quote-pdf-document"
-          className="p-4 sm:p-6 overflow-y-auto space-y-4 bg-[var(--color-pastry-cream)] text-[var(--color-pastry-chocolate)] print:p-2 print:bg-white"
+          className="p-4 sm:p-6 overflow-y-auto space-y-4 bg-[#F6F2F5] text-[#241B2B] print:p-2 print:bg-white"
         >
           {activeTab === 'cliente' ? (
             /* ======================================================== */
@@ -457,7 +426,7 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
             /* ======================================================== */
             <div className="space-y-3.5">
               {/* Header Banner - Groovy Brand Identity */}
-              <div className="bg-[var(--color-pastry-yellow)] rounded-lg p-3.5 text-[var(--color-pastry-chocolate)] shadow-card border border-[var(--color-pastry-light-pink)]/60 print:border-neutral-300 print:bg-none print:text-neutral-900 print-avoid-break">
+              <div className="bg-gradient-to-r from-[#3A2350] to-[#A85E86] rounded-lg p-3.5 text-white shadow-card border border-white/20 print:border-neutral-300 print:bg-white print:text-neutral-900 print-avoid-break">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-lg bg-white border-2 border-[var(--color-pastry-light-pink)] shadow-card flex items-center justify-center overflow-hidden shrink-0">
@@ -509,8 +478,8 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
               {/* Grid 1: Client & Event Information */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 print-avoid-break">
                 {/* Customer Box */}
-                <div className="bg-white p-3 rounded-lg border border-[var(--color-text-muted)] shadow-card space-y-1.5">
-                  <h4 className="label-sm tracking-wider text-[var(--color-pastry-chocolate)] flex items-center gap-1 border-b border-[var(--color-text-muted)] pb-0.5">
+                <div className="bg-white p-3 rounded-[16px] border border-[#E6E1DB] shadow-sm space-y-1.5">
+                  <h4 className="text-[9px] font-black uppercase tracking-wider text-[#241B2B] flex items-center gap-1 border-b border-[#E6E1DB] pb-0.5" style={{ fontFamily: "'Manrope', sans-serif", letterSpacing: '.06em' }}>
                     👤 Dados da Cliente Especial
                   </h4>
                   <div className="flex items-center gap-2.5">
@@ -537,8 +506,8 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
                 </div>
 
                 {/* Event & Delivery Box */}
-                <div className="bg-white p-3 rounded-lg border border-[var(--color-text-muted)] shadow-card space-y-1">
-                  <h4 className="label-sm tracking-wider text-[var(--color-pastry-chocolate)] flex items-center gap-1 border-b border-[var(--color-text-muted)] pb-0.5">
+                <div className="bg-white p-3 rounded-[16px] border border-[#E6E1DB] shadow-sm space-y-1">
+                  <h4 className="text-[9px] font-black uppercase tracking-wider text-[#241B2B] flex items-center gap-1 border-b border-[#E6E1DB] pb-0.5" style={{ fontFamily: "'Manrope', sans-serif", letterSpacing: '.06em' }}>
                     📅 Evento & Horário de Entrega
                   </h4>
                   <div className="flex items-center justify-between text-xs font-bold text-[var(--color-pastry-chocolate)]">
@@ -562,10 +531,10 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
               </div>
 
               {/* Items Table & Summary */}
-              <div className="bg-white p-3.5 rounded-lg border border-[var(--color-text-muted)] shadow-card space-y-2 print-avoid-break">
-                <div className="flex items-center justify-between border-b border-[var(--color-text-muted)] pb-1">
-                  <h4 className="label-sm tracking-wider text-[var(--color-pastry-chocolate)] flex items-center gap-1">
-                    <ShoppingBag className="w-3.5 h-3.5 text-[var(--color-pastry-chocolate)]" />
+              <div className="bg-white p-3.5 rounded-[16px] border border-[#E6E1DB] shadow-sm space-y-2 print-avoid-break">
+                <div className="flex items-center justify-between border-b border-[#E6E1DB] pb-1">
+                  <h4 className="text-[9px] font-black uppercase tracking-wider text-[#241B2B] flex items-center gap-1" style={{ fontFamily: "'Manrope', sans-serif", letterSpacing: '.06em' }}>
+                    <ShoppingBag className="w-3 h-3 text-[#241B2B]" />
                     Itens Solicitados
                   </h4>
                   <span className="bg-[var(--color-pastry-pink)]/60 text-[var(--color-pastry-chocolate)] text-[10px] font-bold px-2 py-0.5 rounded-full border border-[var(--color-pastry-light-pink)]/60">
@@ -575,7 +544,7 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
 
                 <div className="space-y-1">
                   {itemLines.map((line, idx) => (
-                    <div key={idx} className="flex items-center gap-2 text-xs font-bold text-[var(--color-pastry-chocolate)] bg-[var(--color-pastry-cream)]/60 p-2 rounded-xl border border-[var(--color-text-muted)]">
+                    <div key={`item-${idx}-${line}`} className="flex items-center gap-2 text-xs font-bold text-[var(--color-pastry-chocolate)] bg-[var(--color-pastry-cream)]/60 p-2 rounded-xl border border-[var(--color-text-muted)]">
                       <span className="bg-[var(--color-pastry-chocolate)] text-[var(--color-pastry-pink)] text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center shrink-0">
                         {idx + 1}
                       </span>
@@ -593,14 +562,14 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
 
               {/* INSPIRATION PHOTO - DISPLAYED IN FULL 100% UNCROPPED VISIBILITY */}
               {inspirationImage ? (
-                <div className="bg-white p-3 rounded-lg border-2 border-[var(--color-pastry-light-pink)] shadow-card space-y-2 print-avoid-break">
+                <div className="bg-white p-3 rounded-[16px] border-2 border-[#F5B9C6] shadow-sm space-y-2 print-avoid-break">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="label-sm tracking-wider text-[var(--color-pastry-chocolate)] flex items-center gap-1">
-                      <Camera className="w-4 h-4 text-[var(--color-pastry-chocolate)]" /> Foto de Referência do Cliente
+                    <span className="text-[9px] font-black uppercase tracking-wider text-[#241B2B] flex items-center gap-1" style={{ fontFamily: "'Manrope', sans-serif", letterSpacing: '.06em' }}>
+                      <Camera className="w-3 h-3 text-[#241B2B]" /> Foto de Referência do Cliente
                     </span>
                     <div className="flex items-center gap-1.5 no-print">
-                      <label className="px-2.5 py-1 rounded-xl bg-[var(--color-pastry-pink)] hover:bg-[var(--color-pastry-pink-hover)] text-[var(--color-pastry-chocolate)] font-bold text-[10px] flex items-center gap-1 cursor-pointer transition-colors shadow-card">
-                        <Camera className="w-3 h-3 text-[var(--color-pastry-chocolate)]" />
+                      <label className="px-2.5 py-1 rounded-xl bg-[#F5B9C6] hover:bg-[#E8A0B0] text-[#3A2350] font-bold text-[10px] flex items-center gap-1 cursor-pointer transition-colors shadow-sm" style={{ fontFamily: "'Manrope', sans-serif" }}>
+                        <Camera className="w-3 h-3 text-[#3A2350]" />
                         <span>Alterar Foto</span>
                         <input
                           type="file"
@@ -612,10 +581,10 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
                       <button
                         type="button"
                         onClick={handleRemoveImage}
-                        className="px-2 py-1 rounded-xl bg-semantic-error-100 hover:bg-semantic-error-200 text-semantic-error-800 font-bold text-[10px] flex items-center gap-1 transition-colors cursor-pointer"
+                        className="px-2 py-1 rounded-xl bg-red-100 hover:bg-red-200 text-red-700 font-bold text-[10px] flex items-center gap-1 transition-colors cursor-pointer"
                         title="Remover Foto de Referência"
                       >
-                        <Trash2 className="w-3 h-3 text-semantic-error-600" />
+                        <Trash2 className="w-3 h-3 text-red-600" />
                         <span>Remover</span>
                       </button>
                     </div>
@@ -652,21 +621,21 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
               )}
 
               {/* Total & Payment Badge */}
-              <div className="bg-[var(--color-pastry-yellow)] p-3.5 rounded-lg border-2 border-[var(--color-pastry-light-pink)] flex items-center justify-between gap-3 print-avoid-break">
+              <div className="bg-gradient-to-r from-[#3A2350] to-[#A85E86] p-3.5 rounded-[16px] border-2 border-white/20 flex items-center justify-between gap-3 print-avoid-break">
                 <div>
-                  <span className="label-sm text-[var(--color-pastry-chocolate)]/80 block">
+                  <span className="text-[9px] font-black uppercase text-white/80 block" style={{ fontFamily: "'Manrope', sans-serif" }}>
                     Forma de Pagamento:
                   </span>
-                  <span className="inline-block bg-[var(--color-pastry-chocolate)] text-[var(--color-pastry-pink)] font-bold text-[11px] px-3 py-0.5 rounded-full uppercase shadow-card">
+                  <span className="inline-block bg-[#F5B9C6] text-[#3A2350] font-black text-[11px] px-3 py-0.5 rounded-full uppercase shadow-sm">
                     ⚡ {transaction.paymentMethod === 'cash' ? 'DINHEIRO / ESPÉCIE' : (transaction.paymentMethod ? transaction.paymentMethod.toUpperCase() : 'A COMBINAR')}
                   </span>
                 </div>
 
                 <div className="text-right">
-                  <span className="label-sm text-[var(--color-pastry-chocolate)]/80 block">
+                  <span className="text-[9px] font-black uppercase text-white/80 block" style={{ fontFamily: "'Manrope', sans-serif" }}>
                     VALOR TOTAL DO PEDIDO:
                   </span>
-                  <span className="font-numbers font-marca value-md text-[var(--color-pastry-chocolate)]">
+                  <span className="font-black text-white" style={{ fontSize: '24px', fontFamily: "'Manrope', sans-serif" }}>
                     {formatCurrency(transaction.totalValue)}
                   </span>
                 </div>
@@ -688,20 +657,20 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
             /* ======================================================== */
             <div className="space-y-3.5">
               {/* Internal Banner Header */}
-              <div className="bg-[var(--color-pastry-chocolate)] rounded-lg p-4 text-[var(--color-pastry-cream)] shadow-card border border-[var(--color-pastry-chocolate)] print-avoid-break">
+              <div className="bg-gradient-to-r from-[#3A2350] to-[#A85E86] rounded-lg p-4 text-white shadow-sm border border-white/20 print-avoid-break">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <ChefHat className="w-6 h-6 text-[var(--color-pastry-yellow)]" />
+                    <ChefHat className="w-6 h-6 text-[#A9D8B8]" />
                     <div>
-                      <h2 className="font-bold text-lg text-white">
+                      <h2 className="font-bold text-lg text-white" style={{ fontFamily: "'Instrument Serif', serif" }}>
                         FICHA TÉCNICA DE PRODUÇÃO - COZINHA
                       </h2>
-                      <p className="text-[11px] text-[var(--color-pastry-cream)]/80 font-medium">
+                      <p className="text-[11px] text-white/70 font-medium" style={{ fontFamily: "'Manrope', sans-serif" }}>
                         Somente Insumos e Ingredientes da Receita
                       </p>
                     </div>
                   </div>
-                  <span className="bg-[var(--color-pastry-yellow)] text-[var(--color-pastry-chocolate)] font-bold text-xs px-2.5 py-1 rounded-full uppercase">
+                  <span className="bg-[#A9D8B8] text-[#3A2350] font-bold text-xs px-2.5 py-1 rounded-full uppercase" style={{ fontFamily: "'Manrope', sans-serif" }}>
                     Uso Interno
                   </span>
                 </div>
@@ -709,37 +678,37 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
 
               {/* Quick Summary Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 print-avoid-break">
-                <div className="bg-white p-3 rounded-lg border border-[var(--color-text-muted)] shadow-card">
-                  <span className="label-sm text-[var(--color-pastry-chocolate)]/70 block">Cliente</span>
-                  <p className="font-bold text-xs text-[var(--color-pastry-chocolate)]">{transaction.customerName || 'Cliente'}</p>
-                  <p className="text-[10px] text-[var(--color-pastry-chocolate)]/70">{transaction.customerPhone}</p>
+                <div className="bg-white p-3 rounded-[16px] border border-[#E6E1DB] shadow-sm">
+                  <span className="text-[9px] font-black uppercase tracking-wider text-[#241B2B] block" style={{ fontFamily: "'Manrope', sans-serif" }}>Cliente</span>
+                  <p className="font-bold text-xs text-[#241B2B]">{transaction.customerName || 'Cliente'}</p>
+                  <p className="text-[10px] text-[#7A6E80]">{transaction.customerPhone}</p>
                 </div>
 
-                <div className="bg-white p-3 rounded-lg border border-[var(--color-text-muted)] shadow-card">
-                  <span className="label-sm text-[var(--color-pastry-chocolate)]/70 block">Horário de Entrega</span>
-                  <p className="font-bold text-xs text-[var(--color-pastry-chocolate)] flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5 text-[var(--color-pastry-chocolate)]" />
+                <div className="bg-white p-3 rounded-[16px] border border-[#E6E1DB] shadow-sm">
+                  <span className="text-[9px] font-black uppercase tracking-wider text-[#241B2B] block" style={{ fontFamily: "'Manrope', sans-serif" }}>Horário de Entrega</span>
+                  <p className="font-bold text-xs text-[#241B2B] flex items-center gap-1">
+                    <Clock className="w-3 h-3 text-[#241B2B]" />
                     {transaction.deliveryTime || 'Horário a definir'} ({transaction.eventDate ? formatDateBr(transaction.eventDate) : formatDateBr(transaction.date)})
                   </p>
-                  <p className="text-[10px] text-[var(--color-pastry-chocolate)]/70 truncate">{transaction.deliveryAddress || 'Retirada'}</p>
+                  <p className="text-[10px] text-[#7A6E80] truncate">{transaction.deliveryAddress || 'Retirada'}</p>
                 </div>
 
-                <div className="bg-white p-3 rounded-lg border border-[var(--color-text-muted)] shadow-card">
-                  <span className="label-sm text-[var(--color-pastry-chocolate)]/70 block">Observações do Cliente</span>
-                  <p className="font-semibold text-xs text-[var(--color-pastry-chocolate)] italic">{transaction.observations || 'Nenhuma observação especial'}</p>
+                <div className="bg-white p-3 rounded-[16px] border border-[#E6E1DB] shadow-sm">
+                  <span className="text-[9px] font-black uppercase tracking-wider text-[#241B2B] block" style={{ fontFamily: "'Manrope', sans-serif" }}>Observações do Cliente</span>
+                  <p className="font-semibold text-xs text-[#241B2B] italic">{transaction.observations || 'Nenhuma observação especial'}</p>
                 </div>
               </div>
 
               {/* Inspiration Image for Decorators - WITH UPLOAD/CHANGE/REMOVE IN KITCHEN TAB */}
               {inspirationImage ? (
-                <div className="bg-white p-3 rounded-lg border-2 border-[var(--color-pastry-light-pink)] space-y-2 print-avoid-break shadow-card">
+                <div className="bg-white p-3 rounded-[16px] border-2 border-[#F5B9C6] space-y-2 print-avoid-break shadow-sm">
                   <div className="flex items-center justify-between gap-2">
-                    <h4 className="font-bold text-xs text-[var(--color-pastry-chocolate)] flex items-center gap-1">
-                      <Camera className="w-4 h-4 text-[var(--color-pastry-chocolate)]" /> Foto de Referência para Decoração na Cozinha
+                    <h4 className="text-[9px] font-black uppercase tracking-wider text-[#241B2B] flex items-center gap-1" style={{ fontFamily: "'Manrope', sans-serif" }}>
+                      <Camera className="w-3 h-3 text-[#241B2B]" /> Foto de Referência para Decoração na Cozinha
                     </h4>
                     <div className="flex items-center gap-1.5 no-print">
-                      <label className="px-2.5 py-1 rounded-xl bg-[var(--color-pastry-pink)] hover:bg-[var(--color-pastry-pink-hover)] text-[var(--color-pastry-chocolate)] font-bold text-[10px] flex items-center gap-1 cursor-pointer transition-colors shadow-card">
-                        <Camera className="w-3 h-3 text-[var(--color-pastry-chocolate)]" />
+                      <label className="px-2.5 py-1 rounded-xl bg-[#F5B9C6] hover:bg-[#E8A0B0] text-[#3A2350] font-bold text-[10px] flex items-center gap-1 cursor-pointer transition-colors shadow-sm" style={{ fontFamily: "'Manrope', sans-serif" }}>
+                        <Camera className="w-3 h-3 text-[#3A2350]" />
                         <span>Alterar Foto</span>
                         <input
                           type="file"
@@ -751,10 +720,10 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
                       <button
                         type="button"
                         onClick={handleRemoveImage}
-                        className="px-2 py-1 rounded-xl bg-semantic-error-100 hover:bg-semantic-error-200 text-semantic-error-800 font-bold text-[10px] flex items-center gap-1 transition-colors cursor-pointer"
+                        className="px-2 py-1 rounded-xl bg-red-100 hover:bg-red-200 text-red-700 font-bold text-[10px] flex items-center gap-1 transition-colors cursor-pointer"
                         title="Remover Foto de Referência"
                       >
-                        <Trash2 className="w-3 h-3 text-semantic-error-600" />
+                        <Trash2 className="w-3 h-3 text-red-600" />
                         <span>Remover</span>
                       </button>
                     </div>
@@ -769,15 +738,15 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
                   </div>
                 </div>
               ) : (
-                <div className="bg-white p-3.5 rounded-lg border-2 border-dashed border-[var(--color-pastry-light-pink)] shadow-card no-print hover:bg-[var(--color-pastry-pink)]/10 transition-colors">
+                <div className="bg-white p-3.5 rounded-[16px] border-2 border-dashed border-[#F5B9C6] shadow-sm no-print hover:bg-[#F5B9C6]/10 transition-colors">
                   <label className="flex flex-col items-center justify-center py-3 cursor-pointer text-center space-y-1.5">
-                    <div className="w-9 h-9 rounded-full bg-[var(--color-pastry-pink)]/60 text-[var(--color-pastry-chocolate)] flex items-center justify-center shadow-card">
-                      <Upload className="w-4.5 h-4.5" />
+                    <div className="w-9 h-9 rounded-full bg-[#F5B9C6]/60 text-[#3A2350] flex items-center justify-center shadow-sm">
+                      <Upload className="w-4 h-4" />
                     </div>
-                    <span className="font-bold text-xs text-[var(--color-pastry-chocolate)]">
+                    <span className="font-bold text-xs text-[#241B2B]" style={{ fontFamily: "'Manrope', sans-serif" }}>
                       + Adicionar Foto de Referência para Cozinha
                     </span>
-                    <span className="text-[10px] text-[var(--color-pastry-chocolate)]/70 max-w-sm">
+                    <span className="text-[10px] text-[#7A6E80] max-w-sm">
                       Clique aqui para enviar a foto do modelo/bolo para a equipe de produção e decoração.
                     </span>
                     <input
@@ -793,17 +762,17 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
               {/* Breakdown of Recipe Items with Clickable Expandable Accordion */}
               <div className="space-y-3 print-avoid-break">
                 <div className="flex items-center justify-between">
-                  <h4 className="font-bold text-xs text-[var(--color-pastry-chocolate)] uppercase tracking-wider flex items-center gap-1.5">
-                    <Layers className="w-4 h-4 text-[var(--color-pastry-chocolate)]" />
+                  <h4 className="font-bold text-xs text-[#241B2B] uppercase tracking-wider flex items-center gap-1.5" style={{ fontFamily: "'Manrope', sans-serif" }}>
+                    <Layers className="w-4 h-4 text-[#241B2B]" />
                     Insumos da Produção ({recipeItems.length} {recipeItems.length === 1 ? 'item de receita' : 'itens de receita'})
                   </h4>
-                  <span className="text-[10px] text-[var(--color-pastry-chocolate)]/70 font-bold">
+                  <span className="text-[10px] text-[#7A6E80] font-bold">
                     Clique no item para abrir/fechar ingredientes
                   </span>
                 </div>
 
                 {recipeItems.length === 0 ? (
-                  <div className="bg-white p-4 rounded-lg border border-[var(--color-text-muted)] text-center text-xs text-[var(--color-pastry-chocolate)]/70 font-medium">
+                  <div className="bg-white p-4 rounded-[16px] border border-[#E6E1DB] text-center text-xs text-[#7A6E80] font-medium shadow-sm">
                     Nenhum item de receita cadastrado nesta ordem.
                   </div>
                 ) : (
@@ -813,17 +782,17 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
 
                     return (
                       <div
-                        key={idx}
-                        className="bg-white rounded-lg border-2 border-[var(--color-text-muted)] shadow-card overflow-hidden transition-all"
+                        key={`recipe-${idx}-${itemStr}`}
+                        className="bg-white rounded-[16px] border-2 border-[#E6E1DB] shadow-sm overflow-hidden transition-all"
                       >
                         {/* CLICKABLE ITEM HEADER */}
                         <button
                           type="button"
                           onClick={() => toggleAccordion(idx)}
-                          className="w-full p-3 bg-[var(--color-pastry-cream)] hover:bg-[var(--color-pastry-yellow)]/50 flex items-center justify-between text-left border-b border-[var(--color-text-muted)] transition-colors cursor-pointer"
+                          className="w-full p-3 bg-[#F6F2F5] hover:bg-[#E8D5E8] flex items-center justify-between text-left border-b border-[#E6E1DB] transition-colors cursor-pointer"
                         >
-                          <span className="font-bold text-xs text-[var(--color-pastry-chocolate)] flex items-center gap-2">
-                            <span className="w-5 h-5 rounded-full bg-[var(--color-pastry-chocolate)] text-[var(--color-pastry-pink)] text-[10px] font-bold flex items-center justify-center shrink-0">
+                          <span className="font-bold text-xs text-[#241B2B] flex items-center gap-2" style={{ fontFamily: "'Manrope', sans-serif" }}>
+                            <span className="w-5 h-5 rounded-full bg-[#3A2350] text-[#F5B9C6] text-[10px] font-bold flex items-center justify-center shrink-0">
                               {idx + 1}
                             </span>
                             <span>{itemStr}</span>
@@ -831,14 +800,14 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
 
                           <div className="flex items-center gap-2 shrink-0">
                             {ficha && (
-                              <span className="text-[10px] font-bold bg-[var(--color-pastry-pink)] text-[var(--color-pastry-chocolate)] px-2 py-0.5 rounded-full border border-[var(--color-pastry-light-pink)]/60">
+                              <span className="text-[10px] font-bold bg-[#F5B9C6] text-[#3A2350] px-2 py-0.5 rounded-full border border-[#E8A0B0]/60" style={{ fontFamily: "'Manrope', sans-serif" }}>
                                 Rendimento: {ficha.yieldInfo}
                               </span>
                             )}
                             {isOpen ? (
-                              <ChevronUp className="w-4 h-4 text-[var(--color-pastry-chocolate)]/60" />
+                              <ChevronUp className="w-4 h-4 text-[#7A6E80]" />
                             ) : (
-                              <ChevronDown className="w-4 h-4 text-[var(--color-pastry-chocolate)]/60" />
+                              <ChevronDown className="w-4 h-4 text-[#7A6E80]" />
                             )}
                           </div>
                         </button>
@@ -848,17 +817,17 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
                           <div className="p-3.5 space-y-2 bg-white animate-fadeIn">
                             {ficha && ficha.ingredients.length > 0 ? (
                               <div className="space-y-1.5">
-                                <span className="label-sm text-[var(--color-pastry-chocolate)]/70 block">
+                                <span className="text-[9px] font-black uppercase tracking-wider text-[#7A6E80] block" style={{ fontFamily: "'Manrope', sans-serif" }}>
                                   Insumos e Quantidades (Ex: 300g Farinha, 300g Açúcar):
                                 </span>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 text-xs">
                                   {ficha.ingredients.map((ing) => (
                                     <div
                                       key={ing.id}
-                                      className="bg-[var(--color-pastry-cream)] p-2 rounded-xl border border-[var(--color-text-muted)] flex items-center justify-between"
+                                      className="bg-[#F6F2F5] p-2 rounded-xl border border-[#E6E1DB] flex items-center justify-between"
                                     >
-                                      <span className="font-bold text-[var(--color-pastry-chocolate)]">🥣 {ing.name}</span>
-                                      <strong className="font-bold text-[var(--color-pastry-chocolate)] bg-[var(--color-pastry-yellow)] px-2 py-0.5 rounded-lg text-[11px]">
+                                      <span className="font-bold text-[#241B2B]">🥣 {ing.name}</span>
+                                      <strong className="font-bold text-[#3A2350] bg-[#A9D8B8] px-2 py-0.5 rounded-lg text-[11px]">
                                         {ing.quantity} {ing.unit}
                                       </strong>
                                     </div>
@@ -866,7 +835,7 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
                                 </div>
                               </div>
                             ) : (
-                              <p className="text-[11px] text-[var(--color-pastry-chocolate)]/70 font-medium italic p-2 bg-[var(--color-pastry-cream)] rounded-xl border border-[var(--color-text-muted)]">
+                              <p className="text-[11px] text-[#7A6E80] font-medium italic p-2 bg-[#F6F2F5] rounded-xl border border-[#E6E1DB]">
                                 bolo/doce artesanal. Monte os insumos base da receita padrão para {itemStr}.
                               </p>
                             )}

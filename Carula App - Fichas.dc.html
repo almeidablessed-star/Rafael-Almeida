@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body { margin:0; background:#EDE7DC; font-family:'Manrope',sans-serif; font-variant-numeric: lining-nums tabular-nums; }
+a { color:#E82C1B; text-decoration:none; }
+a:hover { color:#2B2420; }
+</style>
+</helmet>
+
+<div style="width:390px; background:#F6F2F5; border-radius:40px; overflow:hidden; box-shadow:0 30px 70px rgba(58,35,80,.26); display:flex; flex-direction:column; font-family:'Manrope',sans-serif">
+  <!-- Header -->
+  <div style="padding:20px; background:linear-gradient(155deg,#3A2350 0%,#6E3F72 60%,#A85E86 100%); display:flex; align-items:center; justify-content:space-between; gap:12px">
+    <span style="font-family:'Instrument Serif',serif; font-size:29px; color:#FFFFFF; line-height:1.1">Fichas Técnicas</span>
+    <span style="display:flex; align-items:center; gap:7px; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.3); color:#FFFFFF; font-weight:800; font-size:11px; padding:9px 14px; border-radius:14px; white-space:nowrap; cursor:pointer; transition:all .22s ease" style-hover="background:#FFFFFF; color:#3A2350"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>Nova Ficha</span>
+  </div>
+
+  <!-- Content -->
+  <div style="padding:16px 18px 18px; display:flex; flex-direction:column; gap:14px; margin-top:-14px; background:#F6F2F5; border-radius:28px 28px 0 0; overflow-y:auto; max-height:550px;">
+    <!-- Category Tabs -->
+    <div style="display:flex; flex-wrap:wrap; gap:7px; background:#FFFFFF; border-radius:20px; padding:10px; box-shadow:0 6px 16px rgba(58,35,80,.07)">
+      <sc-for list="{{ categories }}" as="cat" hint-placeholder-count="4">
+        <span style="flex-shrink:0; font-size:10.5px; font-weight:{{ cat.active ? '800' : '700' }}; color:{{ cat.active ? '#FFFFFF' : '#5B4A6B' }}; background:{{ cat.active ? 'linear-gradient(140deg,#6E3F72,#A85E86)' : '#FFFFFF' }}; border-bottom:2px solid {{ cat.active ? 'transparent' : '#E3D8E5' }}; padding:8px 12px; border-radius:12px 12px 4px 4px; box-shadow:{{ cat.active ? '0 8px 16px rgba(110,63,114,.32)' : 'none' }}; cursor:pointer; transition:transform .22s ease, box-shadow .22s ease" style-hover="transform:translateY(-4px); box-shadow:0 10px 18px rgba(58,35,80,.16)">{{ cat.label }}</span>
+      </sc-for>
+    </div>
+
+    <!-- Recipes List -->
+    <div style="display:flex; flex-direction:column; gap:13px">
+      <sc-for list="{{ fichas }}" as="ficha" hint-placeholder-count="2">
+        <div style="background:#FFFFFF; border-radius:26px; padding:16px; display:flex; flex-direction:column; gap:12px; box-shadow:0 8px 20px rgba(58,35,80,.09); cursor:pointer; transition:transform .28s ease, box-shadow .28s ease" style-hover="transform:translateY(-5px); box-shadow:0 20px 36px rgba(58,35,80,.18)">
+          <div style="display:flex; gap:12px; align-items:flex-start">
+            <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:7px">
+              <span style="font-family:'Instrument Serif',serif; font-size:21px; color:#241B2B; line-height:1.15">{{ ficha.nome }}</span>
+              <span style="align-self:flex-start; font-size:10px; font-weight:700; color:#5B4A6B; background:#F3E9F3; padding:4px 10px; border-radius:999px">{{ ficha.tamanho }}</span>
+            </div>
+            <img src="{{ ficha.imagemUrl }}" alt="{{ ficha.nome }}" referrerpolicy="no-referrer" style="width:72px; height:72px; object-fit:cover; border-radius:18px; border:2px solid #FFFFFF; box-shadow:0 8px 18px rgba(58,35,80,.18); flex-shrink:0">
+          </div>
+          
+          <div style="display:flex; align-items:center; gap:14px; background:#FAF7FA; border-radius:18px; padding:14px">
+            <div style="position:relative; width:82px; height:82px; flex-shrink:0">
+              <svg width="82" height="82" viewBox="0 0 82 82" style="transform:rotate(-90deg)">
+                <circle cx="41" cy="41" r="35" fill="none" stroke="#F1ECF2" stroke-width="10"></circle>
+                <circle cx="41" cy="41" r="35" fill="none" stroke="#6E3F72" stroke-width="10" stroke-dasharray="{{ ficha.repoPercent }}" stroke-dashoffset="0"></circle>
+                <circle cx="41" cy="41" r="35" fill="none" stroke="#C4626F" stroke-width="10" stroke-dasharray="{{ ficha.maoPercent }}" stroke-dashoffset="-{{ ficha.repoPercent }}"></circle>
+                <circle cx="41" cy="41" r="35" fill="none" stroke="#B08D57" stroke-width="10" stroke-dasharray="{{ ficha.custoPercent }}" stroke-dashoffset="-{{ ficha.repoPlusMao }}"></circle>
+              </svg>
+              <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1"><span style="font-size:8px; font-weight:800; color:#8A7E90; letter-spacing:.03em">SUGESTÃO</span><span style="font-size:13px; font-weight:800; color:#241B2B; margin-top:3px">{{ ficha.sugestaoFormatada }}</span></div>
+            </div>
+            <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:6px">
+              <span style="display:flex; align-items:center; gap:7px; font-size:10px; color:#5B4A6B"><span style="width:9px; height:9px; border-radius:3px; background:#6E3F72; flex-shrink:0"></span>Reposição<strong style="color:#241B2B; margin-left:auto">{{ ficha.repoFormatada }}</strong></span>
+              <span style="display:flex; align-items:center; gap:7px; font-size:10px; color:#5B4A6B"><span style="width:9px; height:9px; border-radius:3px; background:#C4626F; flex-shrink:0"></span>Mão de Obra<strong style="color:#241B2B; margin-left:auto">{{ ficha.maoFormatada }}</strong></span>
+              <span style="display:flex; align-items:center; gap:7px; font-size:10px; color:#5B4A6B"><span style="width:9px; height:9px; border-radius:3px; background:#B08D57; flex-shrink:0"></span>Custos Op.<strong style="color:#241B2B; margin-left:auto">{{ ficha.custoFormatada }}</strong></span>
+            </div>
+          </div>
+          
+          <span style="align-self:flex-start; display:flex; align-items:center; gap:6px; font-size:10.5px; font-weight:800; color:#3A2350; background:#F6F2F5; padding:7px 13px; border-radius:999px; cursor:pointer; transition:transform .2s ease, background .2s ease" style-hover="transform:translateY(-2px); background:#EFE6F0">Ver {{ ficha.insumos }} Insumos<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3A2350" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></span>
+          
+          <div style="display:flex; gap:7px">
+            <span style="flex:1; display:flex; align-items:center; justify-content:center; gap:6px; height:36px; font-size:11px; font-weight:800; cursor:pointer; border-radius:18px 18px 6px 18px; background:#3A2350; color:#F5B9C6; box-shadow:0 8px 16px rgba(58,35,80,.28); transition:transform .22s ease" style-hover="transform:translateY(-3px)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F5B9C6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10-10-4-4L4 16z"></path></svg>Editar</span>
+            <span style="flex:1; display:flex; align-items:center; justify-content:center; gap:6px; height:36px; font-size:11px; font-weight:800; cursor:pointer; border-radius:18px 18px 18px 6px; background:#F3E9F3; color:#6E3F72; transition:transform .22s ease, background .22s ease" style-hover="transform:translateY(-3px); background:#E8DAEA"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6E3F72" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"></rect><path d="M5 15V6a2 2 0 0 1 2-2h9"></path></svg>Duplicar</span>
+            <span style="flex:1; display:flex; align-items:center; justify-content:center; gap:6px; height:36px; font-size:11px; font-weight:800; cursor:pointer; border-radius:18px 18px 6px 18px; background:#FBECEE; color:#C4626F; transition:transform .22s ease, background .22s ease" style-hover="transform:translateY(-3px); background:#F7DCE1"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C4626F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"></path></svg>Excluir</span>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <div style="margin-top:auto; background:#FFFFFF; border-top:1px solid rgba(36,27,43,.08); padding:12px 8px 22px; display:flex; justify-content:space-around; box-shadow:0 -8px 24px rgba(58,35,80,.07)">
+    <div style="display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px 11px; border-radius:16px; cursor:pointer; transition:transform .25s ease" style-hover="transform:translateY(-4px)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#A096A6" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg><span style="font-size:9px; font-weight:600; color:#A096A6">Início</span></div>
+    <div style="display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px 11px; border-radius:16px; cursor:pointer; transition:transform .25s ease" style-hover="transform:translateY(-4px)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#A096A6" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16l-1.2 13H5.2z"></path><path d="M9 7a3 3 0 0 1 6 0"></path></svg><span style="font-size:9px; font-weight:600; color:#A096A6">Pedidos</span></div>
+    <div style="display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px 11px; border-radius:16px; background:#3A2350; box-shadow:0 8px 18px rgba(58,35,80,.3); cursor:pointer; transition:transform .25s ease" style-hover="transform:translateY(-4px)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#F5B9C6" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h9a3 3 0 0 1 3 3v13H6a2 2 0 0 1-2-2z"></path><path d="M20 5v15"></path></svg><span style="font-size:9px; font-weight:800; color:#F5B9C6">Fichas</span></div>
+    <div style="display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px 11px; border-radius:16px; cursor:pointer; transition:transform .25s ease" style-hover="transform:translateY(-4px)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#A096A6" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3.2"></circle><path d="M3.5 20a5.5 5.5 0 0 1 11 0"></path><circle cx="17.5" cy="10" r="2.2"></circle></svg><span style="font-size:9px; font-weight:600; color:#A096A6">Clientes</span></div>
+    <div style="display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px 11px; border-radius:16px; cursor:pointer; transition:transform .25s ease" style-hover="transform:translateY(-4px)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#A096A6" stroke-width="1.9" stroke-linejoin="round"><rect x="3" y="10" width="8" height="7" rx="1.2"></rect><rect x="13" y="10" width="8" height="7" rx="1.2"></rect><rect x="8" y="3" width="8" height="6" rx="1.2"></rect></svg><span style="font-size:9px; font-weight:600; color:#A096A6">Estoque</span></div>
+    <div style="display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px 11px; border-radius:16px; cursor:pointer; transition:transform .25s ease" style-hover="transform:translateY(-4px)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#A096A6" stroke-width="1.9" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="3"></rect><circle cx="17" cy="12.5" r="1.4" fill="#A096A6" stroke="none"></circle></svg><span style="font-size:9px; font-weight:600; color:#A096A6">Saldos</span></div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;390px&quot;,&quot;height&quot;:&quot;844px&quot;}}">
+class Component extends DCLogic {
+  state = {
+    fichas: [],
+  };
+
+  componentDidMount() {
+    this.loadFichas();
+  }
+
+  loadFichas = () => {
+    const fichas = [
+      {
+        nome: 'Bolo Vulcão Ninho com Nutella',
+        tamanho: '10 fatias (Aproximadamente 1.5kg)',
+        imagemUrl: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&auto=format&fit=crop&q=80',
+        reposicao: 35.93,
+        maoDeObra: 20.00,
+        custosOp: 10.00,
+        sugestao: 65.93,
+        insumos: 7,
+        repoPercent: 119.9,
+        maoPercent: 66.7,
+        custoPercent: 33.4,
+        repoPlusMao: 186.6,
+      },
+      {
+        nome: 'Bolo Red Velvet Especial Velvet',
+        tamanho: '15 fatias (Aproximadamente 2.0kg)',
+        imagemUrl: 'https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?w=600&auto=format&fit=crop&q=80',
+        reposicao: 35.75,
+        maoDeObra: 25.00,
+        custosOp: 12.00,
+        sugestao: 72.75,
+        insumos: 5,
+        repoPercent: 108.1,
+        maoPercent: 75.6,
+        custoPercent: 36.3,
+        repoPlusMao: 183.7,
+      },
+      {
+        nome: 'Bolo de Cenoura com Brigaderia',
+        tamanho: '12 fatias (Forma Vulcão 22cm)',
+        imagemUrl: 'https://images.unsplash.com/photo-1557925923-33b27f891f88?w=600&auto=format&fit=crop&q=80',
+        reposicao: 20.40,
+        maoDeObra: 18.00,
+        custosOp: 9.00,
+        sugestao: 47.40,
+        insumos: 5,
+        repoPercent: 94.7,
+        maoPercent: 83.5,
+        custoPercent: 41.8,
+        repoPlusMao: 178.2,
+      },
+    ];
+    this.setState({ fichas });
+  };
+
+  formatCurrency = (val) => `$ ${val.toFixed(2)}`;
+
+  renderVals = () => {
+    const { fichas } = this.state;
+
+    const fichasFormatted = fichas.map(f => ({
+      ...f,
+      repoFormatada: this.formatCurrency(f.reposicao),
+      maoFormatada: this.formatCurrency(f.maoDeObra),
+      custoFormatada: this.formatCurrency(f.custosOp),
+      sugestaoFormatada: this.formatCurrency(f.sugestao),
+    }));
+
+    return {
+      fichas: fichasFormatted,
+      categories: [
+        { label: '🎂 Bolos', active: true },
+        { label: '🧁 Doces & Sobremesas', active: false },
+        { label: '🥟 Salgados', active: false },
+        { label: '🥗 Saudáveis & Fit', active: false },
+      ],
+    };
+  };
+}
+
+</script>
+</body>
+</html>

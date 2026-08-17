@@ -18,6 +18,16 @@ import {
 } from './utils/storage';
 import { getTodayIso } from './utils/formatters';
 
+import {
+  Home,
+  ShoppingBag,
+  BookOpen,
+  Users,
+  Boxes,
+  Wallet,
+  Smartphone,
+  Download,
+} from 'lucide-react';
 import { Header } from './components/Header';
 import { BottomNav } from './components/BottomNav';
 import { PeriodSelector } from './components/PeriodSelector';
@@ -38,6 +48,8 @@ import { TransactionFormModal } from './components/TransactionFormModal';
 import { DeleteConfirmModal } from './components/DeleteConfirmModal';
 import { PwaInstallModal } from './components/PwaInstallModal';
 import { BackupModal } from './components/BackupModal';
+import { ProfileModal } from './components/ProfileModal';
+import { LoginModal } from './components/LoginModal';
 
 export default function App() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -55,6 +67,11 @@ export default function App() {
   const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null);
   const [isPwaModalOpen, setIsPwaModalOpen] = useState(false);
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(() => {
+    return localStorage.getItem('carula_logged_in') === 'true';
+  });
 
   // Load transactions on mount
   useEffect(() => {
@@ -141,43 +158,119 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-hero text-neutral-charcoal flex flex-col font-sans lg:flex-row">
+    <div className="min-h-screen bg-[var(--color-surface)] text-[var(--color-ink)] flex flex-col lg:flex-row font-sans lg:rounded-none" style={{
+      borderRadius: 'clamp(0px, 3vw, 40px)',
+      overflow: 'hidden',
+    }}>
 
-      {/* Top Header - Mobile Only */}
-      <Header
-        onOpenPwaModal={() => setIsPwaModalOpen(true)}
-        onOpenBackupModal={() => setIsBackupModalOpen(true)}
-      />
 
-      {/* Sidebar Navigation - Desktop Only (≥1024px) */}
-      <nav className="hidden lg:flex lg:flex-col lg:fixed lg:left-0 lg:top-0 lg:h-screen lg:w-[236px] lg:bg-brand-gradient lg:shadow-highlight lg:overflow-y-auto">
-        <div className="p-6 flex flex-col gap-2">
-          {[
-            { id: 'dashboard', label: 'Início' },
-            { id: 'pedidos', label: 'Pedidos' },
-            { id: 'fichas', label: 'Fichas' },
-            { id: 'clientes', label: 'Clientes' },
-            { id: 'estoque', label: 'Estoque' },
-            { id: 'saldos', label: 'Saldos' },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as TabType)}
-              className={`px-4 py-2 rounded-[14px] text-sm font-black uppercase tracking-[0.14em] transition-all ${
-                activeTab === tab.id
-                  ? 'bg-gradient-to-r from-[var(--color-rose-200)] to-[var(--color-rose-600)] text-[var(--color-brand-900)]'
-                  : 'text-white/70 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+      {/* Desktop Sidebar — 236px, degradê roxo (referência 13a) */}
+      <aside
+        className="hidden lg:flex flex-col w-[236px] fixed left-0 top-0 bottom-0 z-50 text-white"
+        style={{
+          background: 'var(--sidebar-gradient)',
+          padding: '26px 18px',
+        }}
+      >
+        {/* Avatar + Marca */}
+        <div className="flex items-center gap-3 mb-8">
+          <button
+            onClick={() => setIsPwaModalOpen(true)}
+            className="flex-shrink-0 w-10 h-10 rounded-full transition-transform duration-250 hover:scale-105"
+            style={{
+              background: 'linear-gradient(140deg, var(--color-rose-200), var(--color-rose-600))',
+              padding: '2px',
+            }}
+            title="Perfil"
+          >
+            <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
+              <span className="font-marca text-lg text-[var(--color-brand-700)]">C</span>
+            </div>
+          </button>
+          <div>
+            <div className="font-marca text-[26px] text-white" style={{ lineHeight: 1 }}>Carula</div>
+            <div className="text-[8px] font-bold uppercase tracking-[0.44em] text-white/70 mt-0.5">Confeitaria</div>
+          </div>
         </div>
-      </nav>
 
-      {/* Main Screen Container */}
-      <main className="flex-1 w-full lg:ml-[236px] flex flex-col">
-        <div className="flex-1 max-w-lg lg:max-w-none w-full mx-auto px-4 pt-4 lg:pt-6 bottom-nav-safe lg:bottom-nav-safe lg:px-8">
+        {/* Nav Items */}
+        <nav className="flex-1 space-y-1">
+          {[
+            { id: 'dashboard', label: 'Início', icon: Home },
+            { id: 'pedidos', label: 'Pedidos', icon: ShoppingBag },
+            { id: 'fichas', label: 'Fichas', icon: BookOpen },
+            { id: 'clientes', label: 'Clientes', icon: Users },
+            { id: 'estoque', label: 'Estoque', icon: Boxes },
+            { id: 'saldos', label: 'Saldos', icon: Wallet },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as TabType)}
+                className={`sidebar-item w-full flex items-center gap-[11px] font-semibold text-[12.5px] cursor-pointer ${
+                  isActive ? 'text-[var(--color-brand-900)]' : 'text-[#C7B6CE]'
+                }`}
+                style={{
+                  padding: '11px 13px',
+                  borderRadius: '14px',
+                  background: isActive ? 'var(--active-nav-gradient)' : 'transparent',
+                }}
+              >
+                <Icon className="w-[18px] h-[18px]" strokeWidth={1.9} />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* Rodapé sidebar */}
+        <div className="pt-4 space-y-2 border-t border-white/10">
+          <button
+            onClick={() => setIsPwaModalOpen(true)}
+            className="sidebar-item w-full flex items-center gap-2 text-[9.5px] font-extrabold uppercase tracking-wide cursor-pointer text-[var(--color-rose-200)]"
+            style={{
+              padding: '8px 11px',
+              borderRadius: '12px',
+              background: 'rgba(255,255,255,0.12)',
+              border: '1px solid rgba(255,255,255,0.2)',
+            }}
+          >
+            <Smartphone className="w-[13px] h-[13px]" strokeWidth={2} />
+            Versão Mobile
+          </button>
+          <button
+            onClick={() => setIsBackupModalOpen(true)}
+            className="sidebar-item w-full flex items-center gap-2 text-[9.5px] font-bold cursor-pointer text-white/75"
+            style={{
+              padding: '8px 11px',
+              borderRadius: '12px',
+              background: 'rgba(255,255,255,0.08)',
+            }}
+          >
+            <Download className="w-[13px] h-[13px]" strokeWidth={2} />
+            Baixar dados
+          </button>
+        </div>
+      </aside>
+
+      {/* Main Layout Container */}
+      <div className="flex-1 flex flex-col lg:ml-[236px]">
+        {/* Desktop Header */}
+        <div className="hidden lg:block">
+          <Header
+            onOpenPwaModal={() => setIsPwaModalOpen(true)}
+            onOpenBackupModal={() => setIsBackupModalOpen(true)}
+          />
+        </div>
+
+        {/* Main Screen Container */}
+        <main className="flex-1 max-w-4xl w-full mx-auto px-0 lg:px-4 pb-20 lg:pb-8 bottom-nav-safe" style={{
+          paddingTop: 'max(0px, env(safe-area-inset-top))',
+          paddingLeft: 'max(0px, env(safe-area-inset-left))',
+          paddingRight: 'max(0px, env(safe-area-inset-right))',
+        }}>
 
         {/* Tab Content Router */}
         {activeTab === 'dashboard' && (
@@ -191,6 +284,15 @@ export default function App() {
             onEditTransaction={handleOpenEditModal}
             onDeleteTransaction={handleRequestDelete}
             onTogglePaymentStatus={handleTogglePaymentStatus}
+            onOpenPwaModal={() => setIsPwaModalOpen(true)}
+            onOpenBackupModal={() => setIsBackupModalOpen(true)}
+            onOpenProfileModal={() => {
+              if (isUserLoggedIn) {
+                setIsProfileModalOpen(true);
+              } else {
+                setIsLoginModalOpen(true);
+              }
+            }}
           />
         )}
 
@@ -301,10 +403,10 @@ export default function App() {
           />
         )}
 
-        </div>
-      </main>
+        </main>
+      </div>
 
-      {/* Fixed Bottom Navigation Bar - Mobile Only (< 1024px) */}
+      {/* Fixed Bottom Navigation Bar - Mobile Only */}
       <div className="lg:hidden">
         <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
       </div>
@@ -340,6 +442,23 @@ export default function App() {
         onRestoreTransactions={handleRestoreTransactions}
         onResetSampleData={handleResetSampleData}
         onClearAll={handleClearAll}
+      />
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+        onLoginSuccess={(email) => {
+          setIsUserLoggedIn(true);
+          setIsLoginModalOpen(false);
+          setIsProfileModalOpen(true);
+        }}
+      />
+
+      {/* Profile Modal */}
+      <ProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
       />
 
     </div>

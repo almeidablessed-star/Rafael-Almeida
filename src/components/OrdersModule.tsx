@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Transaction, TransactionType } from '../types';
 import { formatCurrency, formatDateBr } from '../utils/formatters';
+import { getCurrentWeekMonday, getCurrentWeekSunday, filterTransactionsByWeek } from '../utils/weeklyArchiveUtils';
 import { QuotePdfModal } from './QuotePdfModal';
 import {
   ShoppingBag,
@@ -38,7 +39,12 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
   // Filter sales/orders only
   const sales = transactions.filter((t) => t.type === 'venda');
 
-  const filteredSales = sales.filter((s) => {
+  // Filter by current week
+  const weekStart = getCurrentWeekMonday();
+  const weekEnd = getCurrentWeekSunday();
+  const weeklySales = filterTransactionsByWeek(sales, weekStart, weekEnd);
+
+  const filteredSales = weeklySales.filter((s) => {
     const matchesSearch =
       s.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (s.customerName && s.customerName.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -50,123 +56,262 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
     return matchesSearch && matchesStatus;
   });
 
-  // Financial calculations
-  const totalVendas = sales.reduce((acc, curr) => acc + (curr.totalValue || 0), 0);
-  const totalPagas = sales
+  // Financial calculations (weekly only)
+  const totalVendas = weeklySales.reduce((acc, curr) => acc + (curr.totalValue || 0), 0);
+  const totalPagas = weeklySales
     .filter((s) => (s.paymentStatus || 'pago') === 'pago')
     .reduce((acc, curr) => acc + (curr.totalValue || 0), 0);
-  const totalPendentes = sales
+  const totalPendentes = weeklySales
     .filter((s) => s.paymentStatus === 'pendente')
     .reduce((acc, curr) => acc + (curr.totalValue || 0), 0);
 
-  const pendingCount = sales.filter((s) => s.paymentStatus === 'pendente').length;
-  const paidCount = sales.filter((s) => (s.paymentStatus || 'pago') === 'pago').length;
+  const pendingCount = weeklySales.filter((s) => s.paymentStatus === 'pendente').length;
+  const paidCount = weeklySales.filter((s) => (s.paymentStatus || 'pago') === 'pago').length;
 
   return (
     <div className="space-y-4 animate-fadeIn pb-8">
-      {/* Module Header Banner */}
-      <div className="bg-[#F5D4A8] rounded-2xl p-5 text-[var(--color-ink)] border border-[#F5D4A8]/40 shadow-card relative overflow-hidden flex items-center justify-between">
-        <h2 className="font-bold text-2xl sm:text-3xl text-[var(--color-ink)] tracking-tight">
-          Pedidos & Encomendas
-        </h2>
-        <span className="bg-[var(--color-ink)] text-[var(--color-rose-200)] font-medium text-[10px] px-3.5 py-1.5 rounded-full uppercase shrink-0">
-          {sales.length} {sales.length === 1 ? 'Pedido' : 'Pedidos'}
-        </span>
-      </div>
+      {/* Header Card — Flutuante com cabeçalho roxo */}
+      <div
+        className="overflow-hidden shadow-card"
+        style={{
+          boxShadow: '0 30px 70px rgba(58,35,80,.26)',
+        }}
+      >
+        {/* Header with Title only */}
+        <div
+          className="px-5 py-10 flex items-center justify-between gap-4 rounded-t-[40px]"
+          style={{
+            background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
+          }}
+        >
+          {/* Title */}
+          <span
+            className="text-white leading-tight flex-1"
+            style={{
+              fontFamily: "'Instrument Serif', serif",
+              fontSize: '31px',
+              lineHeight: '1.1',
+            }}
+          >
+            Pedidos & Encomendas
+          </span>
 
-      {/* Summary Cards Row - Premium Style */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        {/* Total Vendas */}
-        <div className="bg-gradient-to-br from-[#F5D4A8]/30 to-[#F5D4A8]/10 rounded-2xl p-4 border border-[#F5D4A8]/40 shadow-card hover:shadow-card-hover transition-all relative overflow-hidden">
-          <div className="flex gap-3 items-start">
-            <div className="flex-1 min-w-0">
-              <span className="label-sm text-[#6B5A42] block mb-1">Total em Vendas</span>
-              <span className="font-numbers font-marca value-md text-[var(--color-brand-900)] block">{formatCurrency(totalVendas)}</span>
-              <span className="text-[10px] text-[#6B5A42]/70 font-medium mt-2">{sales.length} encomendas registradas</span>
+          {/* Badge */}
+          <span
+            className="uppercase font-black shrink-0 whitespace-nowrap"
+            style={{
+              background: '#F5B9C6',
+              color: '#3A2350',
+              fontSize: '10px',
+              padding: '6px 12px',
+              borderRadius: '999px',
+              fontFamily: "'Manrope', sans-serif",
+              fontWeight: 800,
+            }}
+          >
+            {sales.length} {sales.length === 1 ? 'Pedido' : 'Pedidos'}
+          </span>
+        </div>
+
+        {/* Content Section */}
+        <div className="flex flex-col gap-4"
+          style={{
+            marginTop: '-14px',
+            background: '#F6F2F5',
+            borderRadius: '28px 28px 0 0',
+            position: 'relative',
+            padding: '20px',
+            margin: '0 calc(-50vw + 50%)',
+            paddingLeft: 'calc(20px + max(0px, env(safe-area-inset-left)))',
+            paddingRight: 'calc(20px + max(0px, env(safe-area-inset-right)))',
+          }}
+        >
+
+      {/* Total em Vendas Card with Chart - NOW AT TOP */}
+      <div className="rounded-[24px] p-5 shadow-card" style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)', boxShadow: '0 30px 70px rgba(58,35,80,.26)' }}>
+        <div className="flex items-center gap-4">
+          {/* Circular Chart */}
+          <div className="flex-shrink-0 relative w-[92px] h-[92px]" style={{ filter: 'drop-shadow(0 0 12px rgba(169,216,184,0.7))', borderRadius: '50%' }}>
+            <svg width="92" height="92" viewBox="0 0 92 92" style={{ transform: 'rotate(-90deg)', borderRadius: '50%' }}>
+              <circle cx="46" cy="46" r="38" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="9" />
+              <circle
+                cx="46" cy="46" r="38" fill="none" stroke="#A9D8B8" strokeWidth="9"
+                strokeDasharray={totalVendas > 0 ? `${239 * (totalPagas / totalVendas)} ${239}` : '0 239'}
+                strokeLinecap="round"
+              />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center leading-[1]">
+              <span className="text-[16px] font-black text-white" style={{ fontFamily: "'Manrope', sans-serif" }}>
+                {totalVendas > 0 ? Math.round((totalPagas / totalVendas) * 100) : 0}%
+              </span>
             </div>
-            <div className="w-10 h-10 rounded-full bg-[#F5D4A8] flex items-center justify-center shrink-0 shadow-sm">
-              <ShoppingBag className="w-5 h-5 text-[var(--color-brand-900)]" />
+          </div>
+
+          {/* Text and Values */}
+          <div className="flex-1">
+            <div className="text-[9px] font-black uppercase tracking-[0.14em]" style={{ color: 'rgba(247,220,225,0.8)', fontFamily: "'Manrope', sans-serif", fontWeight: 800, marginBottom: '4px' }}>
+              TOTAL EM VENDAS
+            </div>
+            <div className="text-white" style={{ fontSize: '28px', lineHeight: 1, letterSpacing: '-0.03em', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
+              {formatCurrency(totalVendas)}
             </div>
           </div>
         </div>
+      </div>
 
+      {/* Summary Cards Row - Reduced to 2 cards (Pagas + A Receber) */}
+      <div className="flex gap-2" style={{ gap: '8px' }}>
         {/* Vendas Pagas */}
-        <div className="bg-gradient-to-br from-[#C8E6D7]/30 to-[#C8E6D7]/10 rounded-2xl p-4 border border-[#C8E6D7]/40 shadow-card-hover hover:shadow-highlight transition-all relative overflow-hidden">
-          <div className="flex gap-3 items-start">
-            <div className="flex-1 min-w-0">
-              <span className="label-sm text-[#3A5A4A] block mb-1">Vendas Pagas</span>
-              <span className="font-numbers font-marca value-md text-[#3A5A4A] block">{formatCurrency(totalPagas)}</span>
-              <span className="text-[10px] text-[#3A5A4A]/70 font-medium mt-2">{paidCount} {paidCount === 1 ? 'pedido pago' : 'pedidos pagos'}</span>
-            </div>
-            <div className="w-10 h-10 rounded-full bg-[#C8E6D7] flex items-center justify-center shrink-0 shadow-sm">
-              <CheckCircle2 className="w-5 h-5 text-[#3A5A4A]" />
-            </div>
-          </div>
+        <div
+          className="flex-1 bg-white rounded-[18px] shadow-card flex flex-col gap-[3px]"
+          style={{
+            padding: '13px',
+            boxShadow: '0 8px 18px rgba(58,35,80,.08)',
+            background: 'linear-gradient(to bottom, rgba(168, 94, 134, 0.15), rgba(110, 63, 114, 0.08) 3px, white 3px)',
+            transition: 'transform 0.25s ease'
+          }}
+        >
+          <span
+            className="text-[8px] font-black uppercase"
+            style={{
+              color: '#4C7358',
+              fontFamily: "'Manrope', sans-serif",
+              letterSpacing: '.06em',
+              minHeight: '20px'
+            }}
+          >
+            ✓ VENDAS PAGAS
+          </span>
+          <span
+            className="font-black"
+            style={{
+              fontSize: '16px',
+              color: '#241B2B',
+              fontFamily: "'Manrope', sans-serif"
+            }}
+          >
+            {formatCurrency(totalPagas)}
+          </span>
+          <span className="text-xs" style={{ color: '#9A8FA0', fontFamily: "'Manrope', sans-serif" }}>
+            {paidCount} {paidCount === 1 ? 'pago' : 'pagos'}
+          </span>
         </div>
 
         {/* A Receber */}
-        <div className="bg-gradient-to-br from-[#B8D4E8]/30 to-[#B8D4E8]/10 rounded-2xl p-4 border border-[#B8D4E8]/40 shadow-card-hover hover:shadow-highlight transition-all relative overflow-hidden">
-          <div className="flex gap-3 items-start">
-            <div className="flex-1 min-w-0">
-              <span className="label-sm text-[#3A4A5A] block mb-1">A Receber</span>
-              <span className="font-numbers font-marca value-md text-[#3A4A5A] block">{formatCurrency(totalPendentes)}</span>
-              <span className="text-[10px] text-[#3A4A5A]/70 font-medium mt-2">{pendingCount} {pendingCount === 1 ? 'pedido pendente' : 'pedidos pendentes'}</span>
-            </div>
-            <div className="w-10 h-10 rounded-full bg-[#B8D4E8] flex items-center justify-center shrink-0 shadow-sm">
-              <Clock className="w-5 h-5 text-[#3A4A5A]" />
-            </div>
-          </div>
+        <div
+          className="flex-1 bg-white rounded-[18px] shadow-card flex flex-col gap-[3px]"
+          style={{
+            padding: '13px',
+            boxShadow: '0 8px 18px rgba(58,35,80,.08)',
+            background: 'linear-gradient(to bottom, rgba(168, 94, 134, 0.15), rgba(110, 63, 114, 0.08) 3px, white 3px)',
+            transition: 'transform 0.25s ease'
+          }}
+        >
+          <span
+            className="text-[8px] font-black uppercase"
+            style={{
+              color: '#8A7340',
+              fontFamily: "'Manrope', sans-serif",
+              letterSpacing: '.06em',
+              minHeight: '20px'
+            }}
+          >
+            ⏳ A RECEBER (PENDENTES)
+          </span>
+          <span
+            className="font-black"
+            style={{
+              fontSize: '16px',
+              color: '#241B2B',
+              fontFamily: "'Manrope', sans-serif"
+            }}
+          >
+            {formatCurrency(totalPendentes)}
+          </span>
+          <span className="text-xs" style={{ color: '#9A8FA0', fontFamily: "'Manrope', sans-serif" }}>
+            {pendingCount} {pendingCount === 1 ? 'pendente' : 'pendentes'}
+          </span>
         </div>
       </div>
 
       {/* Search & Filters */}
-      <div className="bg-[var(--color-surface)] p-3.5 rounded-lg border border-[#E6E1DB] shadow-card space-y-3">
+      <div className="flex flex-col gap-[11px]">
         <div className="relative">
-          <Search className="w-4 h-4 text-[var(--color-ink)]/50 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-[#A096A6] absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Buscar por nome da cliente ou descrição do produto..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-[#E6E1DB] rounded-full text-xs font-medium text-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-neutral-charcoal/20"
+            className="w-full pl-10 pr-3.5 py-2.5 bg-white rounded-full text-[11px] text-[#A096A6] focus:outline-none focus:ring-2 focus:ring-neutral-charcoal/20"
+            style={{
+              fontFamily: "'Manrope', sans-serif",
+              boxShadow: '0 6px 14px rgba(58,35,80,.07)',
+            }}
           />
         </div>
 
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-0.5">
-          <span className="text-[11px] font-bold text-[var(--color-ink)]/70 uppercase mr-1 flex items-center gap-1">
-            <Filter className="w-3 h-3" /> Status:
+        <div className="flex items-center gap-[14px] overflow-x-auto no-scrollbar" style={{ paddingBottom: '0.25rem', borderBottom: '1px solid rgba(36,27,43,.1)' }}>
+          <span className="text-[10px] font-bold text-[#9A8FA0] uppercase flex items-center gap-1" style={{ fontFamily: "'Manrope', sans-serif", letterSpacing: '.06em' }}>
+            STATUS:
           </span>
 
           <button
             onClick={() => setStatusFilter('todos')}
-            className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+            className={`px-3 py-1 text-xs font-bold transition-all cursor-pointer ${
               statusFilter === 'todos'
-                ? 'bg-[var(--color-ink)] text-[var(--color-accent-gold)] shadow-card'
-                : 'bg-white text-[var(--color-ink)] border border-[#E6E1DB] hover:bg-white/80'
+                ? 'text-[#3A2350] border-b-2 border-[#3A2350]'
+                : 'text-[#7A6E80] hover:text-[#3A2350]'
             }`}
+            style={{
+              fontSize: '12px',
+              fontFamily: "'Manrope', sans-serif",
+              fontWeight: statusFilter === 'todos' ? 800 : 600,
+              background: 'none',
+              border: 'none',
+              padding: '8px 0',
+              marginBottom: statusFilter === 'todos' ? '-1px' : '0',
+            }}
           >
             Todos ({sales.length})
           </button>
 
           <button
             onClick={() => setStatusFilter('pago')}
-            className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+            className={`text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
               statusFilter === 'pago'
-                ? 'bg-[#C8E6D7] text-[#3A5A4A] shadow-card'
-                : 'bg-white text-[var(--color-brand-900)] border border-[#E6E1DB] hover:bg-white/80'
+                ? 'text-[#3A2350] border-b-2 border-[#3A2350]'
+                : 'text-[#7A6E80] hover:text-[#3A2350]'
             }`}
+            style={{
+              fontSize: '12px',
+              fontFamily: "'Manrope', sans-serif",
+              fontWeight: statusFilter === 'pago' ? 800 : 600,
+              background: 'none',
+              border: 'none',
+              padding: '8px 0',
+              marginBottom: statusFilter === 'pago' ? '-1px' : '0',
+            }}
           >
-            <CheckCircle2 className="w-3 h-3 text-[#5A8A6F]" />
             Pagos ({paidCount})
           </button>
 
           <button
             onClick={() => setStatusFilter('pendente')}
-            className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+            className={`text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
               statusFilter === 'pendente'
-                ? 'bg-[var(--color-ink)] text-[var(--color-accent-gold)] shadow-card'
-                : 'bg-white text-[var(--color-ink)] border border-[#E6E1DB] hover:bg-white/80'
+                ? 'text-[#3A2350] border-b-2 border-[#3A2350]'
+                : 'text-[#7A6E80] hover:text-[#3A2350]'
             }`}
+            style={{
+              fontSize: '12px',
+              fontFamily: "'Manrope', sans-serif",
+              fontWeight: statusFilter === 'pendente' ? 800 : 600,
+              background: 'none',
+              border: 'none',
+              padding: '8px 0',
+              marginBottom: statusFilter === 'pendente' ? '-1px' : '0',
+            }}
           >
             <Clock className="w-3 h-3 text-semantic-warning" />
             Pendentes ({pendingCount})
@@ -197,51 +342,83 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
             return (
               <div
                 key={tx.id}
-                className={`p-4 rounded-xl border shadow-card transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
-                  isPending
-                    ? 'bg-semantic-warning/20 border-semantic-warning/30'
-                    : 'bg-white border-[#E6E1DB] hover:border-semantic-warning/30'
-                }`}
+                className="bg-white rounded-3xl shadow-card transition-all duration-300 cursor-pointer relative overflow-hidden"
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-6px)';
+                  e.currentTarget.style.boxShadow = '0 20px 40px rgba(58,35,80,0.2)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(58,35,80,0.08)';
+                }}
               >
-                <div className="min-w-0 flex-1 space-y-1">
-                  {/* CLIENT CHIP & STATUS */}
-                  <div className="flex items-center gap-2 flex-wrap mb-1.5">
-                    <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[var(--color-accent-gold)]/70 border border-[var(--color-accent-gold)]/30 text-[var(--color-ink)] font-black text-xs uppercase shadow-card">
-                      <Users className="w-3.5 h-3.5 shrink-0" />
-                      CLIENTE: {tx.customerName ? tx.customerName.toUpperCase() : 'CLIENTE CADASTRADO'}
-                    </span>
+                {/* Stripe lateral */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    width: '6px',
+                    background: isPending ? 'linear-gradient(180deg, #E4D9C3, #B08D57)' : 'linear-gradient(180deg, #8F5A9C, #C4626F)',
+                  }}
+                />
 
-                    {isPending ? (
-                      <span className="bg-[#F5D4A8] text-[var(--color-brand-900)] px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center gap-1">
-                        <Clock className="w-3 h-3" /> Pendente
+                {/* Notches circulares laterais */}
+                <div style={{
+                  position: 'absolute',
+                  width: '18px', height: '18px', borderRadius: '50%',
+                  background: 'var(--color-surface)',
+                  left: '-9px', top: '50%', transform: 'translateY(-50%)',
+                }} />
+                <div style={{
+                  position: 'absolute',
+                  width: '18px', height: '18px', borderRadius: '50%',
+                  background: 'var(--color-surface)',
+                  right: '-9px', top: '50%', transform: 'translateY(-50%)',
+                }} />
+
+                {/* Content */}
+                <div className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pl-8">
+
+                  <div className="flex-1 min-w-0 space-y-2">
+                    {/* CLIENT CHIP & STATUS */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="inline-flex items-center gap-1 rounded-full" style={{ fontSize: '10px', fontWeight: 800, color: '#3A2350', background: '#F3E9F3', padding: '5px 11px', fontFamily: "'Manrope', sans-serif" }}>
+                        👤 CLIENTE: {tx.customerName ? tx.customerName.toUpperCase() : 'CLIENTE'}
                       </span>
-                    ) : (
-                      <span className="bg-[#C8E6D7] text-[#3A5A4A] px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3" /> Pago
-                      </span>
-                    )}
+
+                      {isPending ? (
+                        <span className="rounded-full flex items-center gap-1" style={{ fontSize: '9px', fontWeight: 800, color: '#5B4A2E', background: '#E4D9C3', padding: '5px 10px', fontFamily: "'Manrope', sans-serif" }}>
+                          ⏳ Pendente
+                        </span>
+                      ) : (
+                        <span className="rounded-full flex items-center gap-1" style={{ fontSize: '9px', fontWeight: 800, color: '#26402F', background: '#A9D8B8', padding: '5px 10px', fontFamily: "'Manrope', sans-serif" }}>
+                          ✅ Pago
+                        </span>
+                      )}
+                    </div>
+
+                    <div style={{ fontSize: '10px', color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
+                      📅 Data: <strong style={{ color: '#241B2B', fontWeight: 'normal' }}>{formatDateBr(tx.date)}</strong> • Pgto: <strong style={{ color: '#241B2B', fontWeight: 'normal' }}>{tx.paymentMethod || 'N/A'}</strong>
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-2 text-[11px] text-[var(--color-ink)]/70 font-medium pt-0.5">
-                    <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5 shrink-0" /> Data: <strong className="text-[var(--color-ink)]">{formatDateBr(tx.date)}</strong></span>
-                    {tx.paymentMethod && (
-                      <span>• Pgto: <strong className="text-[var(--color-ink)] uppercase">{tx.paymentMethod}</strong></span>
-                    )}
-                  </div>
-                </div>
+                  <div className="flex flex-col sm:flex-row sm:items-end items-start justify-between w-full sm:w-auto shrink-0 gap-3">
+                    <div className="text-right">
+                      <span className="font-black text-[var(--color-ink)]" style={{ fontSize: '22px', fontWeight: 800, color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>
+                        {formatCurrency(tx.totalValue)}
+                      </span>
+                    </div>
 
-                <div className="text-right flex items-center sm:flex-col sm:items-end justify-between w-full sm:w-auto shrink-0 border-t sm:border-t-0 pt-2 sm:pt-0 border-[#E6E1DB]">
-                  <span className="font-numbers font-black text-sm text-[var(--color-ink)]">
-                    {formatCurrency(tx.totalValue)}
-                  </span>
-
-                  <div className="flex items-center gap-1.5 mt-1.5">
+                    <div className="flex items-center gap-[6px]">
                     <button
                       onClick={() => setQuoteTx(tx)}
-                      className="px-3 py-1.5 rounded-full bg-[var(--color-ink)] hover:bg-black text-[var(--color-accent-gold)] font-medium text-[11px] shadow-card transition-all flex items-center gap-1 cursor-pointer active:scale-95"
+                      className="rounded-full transition-all flex items-center gap-1 cursor-pointer active:scale-95 hover:translate-y-[-2px]"
+                      style={{ fontSize: '10px', fontWeight: 700, color: '#F5B9C6', background: '#3A2350', padding: '7px 12px', fontFamily: "'Manrope', sans-serif" }}
                       title="Gerar e Visualizar Orçamento em PDF"
                     >
-                      <Printer className="w-3.5 h-3.5 text-[var(--color-accent-gold)]" />
+                      <Printer className="w-3 h-3" style={{ stroke: '#F5B9C6', strokeWidth: 2 }} />
                       <span>PDF</span>
                     </button>
 
@@ -249,20 +426,20 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                       isPending ? (
                         <button
                           onClick={() => onTogglePaymentStatus(tx)}
-                          className="px-3 py-1.5 rounded-full bg-[#C8E6D7] hover:bg-[#5A8A6F] text-[#3A5A4A] hover:text-white font-bold text-[11px] shadow-card transition-all flex items-center gap-1 cursor-pointer active:scale-95"
+                          className="rounded-full transition-all flex items-center gap-1 cursor-pointer active:scale-95 hover:translate-y-[-2px]"
+                          style={{ fontSize: '10px', fontWeight: 800, color: '#26402F', background: '#A9D8B8', padding: '7px 12px', fontFamily: "'Manrope', sans-serif" }}
                           title="Clique para marcar este pedido como PAGO"
                         >
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                          <span>Marcar PAGO</span>
+                          <span>✅ Marcar PAGO</span>
                         </button>
                       ) : (
                         <button
                           onClick={() => onTogglePaymentStatus(tx)}
-                          className="px-3 py-1.5 rounded-full bg-semantic-warning/20 hover:bg-semantic-warning/30 text-semantic-warning border border-semantic-warning font-bold text-[11px] transition-all flex items-center gap-1 cursor-pointer active:scale-95"
+                          className="rounded-full transition-all flex items-center gap-1 cursor-pointer active:scale-95 hover:translate-y-[-2px]"
+                          style={{ fontSize: '10px', fontWeight: 700, color: '#5B4A2E', background: '#F0E2C8', padding: '7px 12px', fontFamily: "'Manrope', sans-serif" }}
                           title="Clique para alterar este pedido para PENDENTE"
                         >
-                          <Clock className="w-3.5 h-3.5 text-semantic-warning" />
-                          <span>Mudar p/ Pendente</span>
+                          <span>Pendente</span>
                         </button>
                       )
                     )}
@@ -270,21 +447,28 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                     {onEditTransaction && (
                       <button
                         onClick={() => onEditTransaction(tx)}
-                        className="p-1.5 rounded-full text-[var(--color-ink)]/70 hover:text-[var(--color-ink)] hover:bg-white/80 transition-colors cursor-pointer"
+                        className="rounded-full transition-all cursor-pointer"
+                        style={{ width: '28px', height: '28px', background: '#F6F2F5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = '#EFE6F0'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = '#F6F2F5'}
                         title="Editar"
                       >
-                        <Edit3 className="w-4 h-4" />
+                        <Edit3 className="w-3.5 h-3.5" style={{ stroke: '#7A6E80', strokeWidth: 2 }} />
                       </button>
                     )}
                     {onDeleteTransaction && (
                       <button
                         onClick={() => onDeleteTransaction(tx)}
-                        className="p-1.5 rounded-full text-[var(--color-ink)]/70 hover:text-semantic-error hover:bg-semantic-error/10 transition-colors cursor-pointer"
+                        className="rounded-full transition-all cursor-pointer"
+                        style={{ width: '28px', height: '28px', background: '#F6F2F5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = '#FBE9EC'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = '#F6F2F5'}
                         title="Excluir"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3.5 h-3.5" style={{ stroke: '#C4626F', strokeWidth: 2 }} />
                       </button>
                     )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -300,6 +484,8 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
           onClose={() => setQuoteTx(null)}
         />
       )}
+        </div>
+      </div>
     </div>
   );
 };

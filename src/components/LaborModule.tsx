@@ -35,7 +35,7 @@ export const LaborModule: React.FC<LaborModuleProps> = ({
       {/* HERO ACTION CARD - Premium Styled */}
       <button
         onClick={onOpenAddModal}
-        className="w-full group relative overflow-hidden rounded-2xl transition-all active:scale-95 hover:shadow-highlight"
+        className="w-full group relative overflow-hidden rounded-[22px] transition-all active:scale-95 hover:shadow-highlight"
       >
         {/* Background with gradient */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#D4C5E2] to-[#C4B5D2] opacity-100 group-hover:opacity-105 transition-opacity" />
@@ -64,11 +64,11 @@ export const LaborModule: React.FC<LaborModuleProps> = ({
         </div>
 
         {/* Subtle shadow inside */}
-        <div className="absolute inset-0 pointer-events-none rounded-2xl shadow-inset opacity-0 group-hover:opacity-10 transition-opacity" />
+        <div className="absolute inset-0 pointer-events-none rounded-[22px] shadow-inset opacity-0 group-hover:opacity-10 transition-opacity" />
       </button>
 
       {/* Module Summary Card */}
-      <div className="bg-gradient-to-r from-[#D4C5E2] via-[#EDE5F5] to-[#D4C5E2] rounded-2xl p-5 md:p-6 text-[var(--color-brand-900)] shadow-sm border border-[#D4C5E2]/50">
+      <div className="bg-gradient-to-r from-[#D4C5E2] via-[#EDE5F5] to-[#D4C5E2] rounded-[22px] p-5 md:p-6 text-[var(--color-brand-900)] shadow-sm border border-[#D4C5E2]/50">
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs md:text-sm font-bold uppercase tracking-wider text-[#5A4B6B] flex items-center gap-1.5">
             <div className="p-2 bg-[#5A4B6B]/15 rounded-lg">

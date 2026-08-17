@@ -1,0 +1,6 @@
+{
+  "name": "Carula Confeitaria",
+  "description": "Aplicativo de gestão financeira simples, prático e intuitivo para Carula Confeitaria.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

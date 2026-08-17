@@ -1,0 +1,4 @@
+<!-- CARULA — COPIE PARA SEU COMPONENTE REACT -->
+<!-- Adapte cada <div> para componente React se necessário -->
+
+
