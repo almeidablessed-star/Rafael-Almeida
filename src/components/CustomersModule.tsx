@@ -844,9 +844,10 @@ export const CustomersModule: React.FC = () => {
             return (
               <div
                 key={c.id}
-                className="bg-white shadow-card transition-all overflow-hidden"
+                className="shadow-card transition-all overflow-hidden"
                 style={{
                   borderRadius: '24px',
+                  background: 'linear-gradient(135deg, rgba(245,185,198,0.12) 0%, rgba(255,255,255,0.8) 100%)',
                 }}
               >
                 {/* GRADIENT HEADER */}
