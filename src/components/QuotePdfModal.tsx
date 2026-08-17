@@ -122,54 +122,22 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
       // Wait for all images and content to load
       await new Promise(resolve => setTimeout(resolve, 800));
 
-      // Create a clone to avoid modifying original DOM
-      const clonedElem = docElem.cloneNode(true) as HTMLElement;
-
-      // Remove all style sheets from clone to prevent oklab color parsing
-      // html2canvas will fall back to computed styles without oklab issues
-      const styleElements = clonedElem.querySelectorAll('style, link[rel="stylesheet"]');
-      styleElements.forEach(el => {
-        // Don't remove styles we're about to add
-        if (!el.textContent?.includes('oklab')) {
-          el.remove();
-        }
+      // Use original element directly - don't clone
+      // html2canvas should handle CSS parsing even with oklab warnings
+      console.log('📏 Element dimensions:', {
+        width: docElem.scrollWidth,
+        height: docElem.scrollHeight,
+        offsetWidth: docElem.offsetWidth,
+        offsetHeight: docElem.offsetHeight,
       });
 
-      // Inject safe CSS that preserves layout without problematic colors
-      const safeStyles = document.createElement('style');
-      safeStyles.textContent = `
-        body, * {
-          background: white;
-          color: black;
-        }
-      `;
-      clonedElem.insertBefore(safeStyles, clonedElem.firstChild);
-      console.log('🎨 Removed problematic stylesheets and injected safe colors');
+      // html2canvas + oklab colors doesn't work well - use native print instead
+      // Browser's print dialog handles all CSS including oklab natively
+      console.log('📄 Falling back to browser native print-to-PDF due to oklab CSS issues');
+      window.print();
+      return;
 
-      // Temporarily append clone to DOM for html2canvas
-      clonedElem.style.position = 'absolute';
-      clonedElem.style.left = '-9999px';
-      clonedElem.style.top = '-9999px';
-      clonedElem.style.visibility = 'hidden';
-      document.body.appendChild(clonedElem);
-
-      const canvas = await html2canvas(clonedElem, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-        backgroundColor: '#ffffff',
-        windowHeight: clonedElem.scrollHeight + 50,
-        windowWidth: clonedElem.scrollWidth + 50,
-        imageTimeout: 20000,
-        ignoreElements: (element) => {
-          // Ignore print-only elements
-          return element.classList?.contains('no-print') || false;
-        },
-      });
-
-      // Remove cloned element
-      document.body.removeChild(clonedElem);
+      console.log('✅ Canvas generated:', { width: canvas.width, height: canvas.height, dataLength: canvas.toDataURL().length });
 
       if (!canvas || canvas.width === 0 || canvas.height === 0) {
         console.error('Canvas generation failed - empty canvas');
