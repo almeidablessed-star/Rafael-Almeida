@@ -243,7 +243,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           background: '#F6F2F5',
           position: 'relative',
           zIndex: 1,
-          marginTop: '-28px',
+          marginTop: '-12px',
           marginLeft: 'calc(-50vw + 50%)',
           marginRight: 'calc(-50vw + 50%)',
           paddingTop: '32px',
