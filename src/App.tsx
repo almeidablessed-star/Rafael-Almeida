@@ -8,6 +8,7 @@ import {
 import {
   getStoredTransactions,
   addTransaction,
+  addSaleWithFicha,
   updateTransaction,
   deleteTransaction,
   resetToSampleData,
@@ -17,6 +18,7 @@ import {
   calculateSummary,
 } from './utils/storage';
 import { getTodayIso } from './utils/formatters';
+import { getStoredFichas } from './components/FichasTecnicasModule';
 
 import {
   Home,
@@ -118,7 +120,21 @@ export default function App() {
         setTransactions(getStoredTransactions());
       }
     } else {
-      addTransaction(txData);
+      // If fichaId is present, use addSaleWithFicha for automatic stock deduction
+      if (txData.fichaId && txData.type === 'venda') {
+        const fichas = getStoredFichas();
+        const ficha = fichas.find((f) => f.id === txData.fichaId);
+        if (ficha) {
+          // Remove fichaId from txData as addSaleWithFicha expects it separately
+          const { fichaId, ...txDataWithoutFicha } = txData;
+          addSaleWithFicha(txDataWithoutFicha, ficha);
+        } else {
+          // Fallback if ficha not found
+          addTransaction(txData);
+        }
+      } else {
+        addTransaction(txData);
+      }
       setTransactions(getStoredTransactions());
     }
   };

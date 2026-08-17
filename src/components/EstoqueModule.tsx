@@ -11,6 +11,7 @@ import {
   X,
   Sparkles,
 } from 'lucide-react';
+import { StockMovementsHistory } from './StockMovementsHistory';
 
 const DEFAULT_STOCK_ITEMS: StockItem[] = [
   { id: '1', name: 'Farinha de Trigo', quantity: 5000, unit: 'g', minThreshold: 1000, costPerUnit: 0.005 },
@@ -465,6 +466,19 @@ export const EstoqueModule: React.FC = () => {
               </div>
             </div>
       )}
+
+      {/* Stock Movements History Section */}
+      <div className="mt-8 px-4 lg:px-6">
+        <div className="mb-4">
+          <h2 className="text-lg font-bold text-[#3A2350]" style={{ fontFamily: "'Manrope', sans-serif" }}>
+            Histórico de Movimentações
+          </h2>
+          <p className="text-xs text-[#7A6E80] mt-1">
+            Rastreie todas as consumições, devoluções e reposições automáticas de estoque
+          </p>
+        </div>
+        <StockMovementsHistory maxItems={50} />
+      </div>
     </div>
   );
 };

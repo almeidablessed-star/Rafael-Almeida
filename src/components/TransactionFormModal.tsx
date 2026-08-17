@@ -8,9 +8,12 @@ import {
   CostCategory,
   BakeryPreset,
   Customer,
+  FichaTecnica,
 } from '../types';
 import { getStoredCustomers } from './CustomersModule';
+import { getStoredFichas } from './FichasTecnicasModule';
 import { QuotePdfModal } from './QuotePdfModal';
+import { FichaTecnicaSelector } from './FichaTecnicaSelector';
 import {
   BAKERY_PRODUCT_PRESETS,
   INGREDIENT_PRESETS,
@@ -97,10 +100,16 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   const [inspirationImage, setInspirationImage] = useState<string>('');
   const [showPdfQuoteModal, setShowPdfQuoteModal] = useState<boolean>(false);
   const [storedCustomers, setStoredCustomers] = useState<Customer[]>([]);
+  const [storedFichas, setStoredFichas] = useState<FichaTecnica[]>([]);
+  const [selectedFichaId, setSelectedFichaId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     if (isOpen) {
       setStoredCustomers(getStoredCustomers());
+      setStoredFichas(getStoredFichas());
+    } else {
+      // Reset ficha selection when modal closes
+      setSelectedFichaId(undefined);
     }
   }, [isOpen]);
 
@@ -542,6 +551,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
           paymentMethod,
           paymentStatus,
           notes: notesStr,
+          fichaId: selectedFichaId || undefined,
         },
         editingTransaction?.id
       );
@@ -836,6 +846,15 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* FICHA TÉCNICA SELECTOR */}
+              <div className="bg-gradient-to-b from-white to-gray-50 p-4 rounded-lg border border-gray-200">
+                <FichaTecnicaSelector
+                  fichas={storedFichas}
+                  selectedFichaId={selectedFichaId}
+                  onSelect={setSelectedFichaId}
+                />
               </div>
 
               {/* ORDER ITEMS LIST */}
