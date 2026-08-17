@@ -63,7 +63,8 @@
       "Bash(git commit -m 'fix: Add purple background to iPhone status bar area *)",
       "Bash(git commit -m 'fix: Restore rounded corners on Início tab header card *)",
       "Bash(git commit -m 'fix: Restore lateral spacing and increase '\\\\''Lançar Pedido'\\\\'' gap *)",
-      "Bash(git commit -m 'fix: Restore lateral spacing on purple header card *)"
+      "Bash(git commit -m 'fix: Restore lateral spacing on purple header card *)",
+      "Bash(git commit -m 'fix: Improve PDF generation and download functionality *)"
     ]
   },
   "hooks": {

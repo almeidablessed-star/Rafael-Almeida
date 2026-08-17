@@ -118,6 +118,9 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
     try {
       setIsGeneratingPdf(true);
 
+      // Wait for all images and content to load
+      await new Promise(resolve => setTimeout(resolve, 500));
+
       // Ensure content is visible for html2canvas
       const originalDisplay = docElem.style.display;
       docElem.style.display = 'block';
@@ -127,9 +130,10 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
         useCORS: true,
         allowTaint: true,
         logging: false,
-        backgroundColor: 'var(--color-card)',
+        backgroundColor: '#ffffff',
         windowHeight: docElem.scrollHeight,
         windowWidth: docElem.scrollWidth,
+        imageTimeout: 15000,
       });
 
       // Restore original display
@@ -146,6 +150,7 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4',
+        compress: true,
       });
 
       const pdfWidth = pdf.internal.pageSize.getWidth();
@@ -165,29 +170,27 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
 
       const isCozinha = activeTab === 'cozinha';
       const clientName = (transaction.customerName || 'Cliente').replace(/\s+/g, '_');
+      const timestamp = new Date().getTime();
       const filename = isCozinha
-        ? `Ficha_Cozinha_${clientName}_CarulaCake.pdf`
-        : `Folha_Cliente_${clientName}_CarulaCake.pdf`;
+        ? `Ficha_Cozinha_${clientName}_${timestamp}.pdf`
+        : `Folha_Cliente_${clientName}_${timestamp}.pdf`;
 
-      // Method 1: Try pdf.save(filename)
-      try {
-        pdf.save(filename);
-      } catch (saveErr) {
-        // Method 2: Blob URL trigger anchor
-        const pdfBlob = pdf.output('blob');
-        const blobUrl = URL.createObjectURL(pdfBlob);
-        const link = document.createElement('a');
-        link.href = blobUrl;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
-      }
+      // Always use Blob URL method for reliable download
+      const pdfBlob = pdf.output('blob');
+      const blobUrl = URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = filename;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 2000);
+
+      alert('PDF baixado com sucesso! Verifique sua pasta de Downloads.');
     } catch (err) {
       console.error('Error generating PDF:', err);
-      // Fallback: trigger standard browser print dialog
-      window.print();
+      alert('Erro ao gerar PDF. Tente novamente.');
     } finally {
       setIsGeneratingPdf(false);
     }
