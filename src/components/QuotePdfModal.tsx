@@ -131,18 +131,6 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
         offsetHeight: docElem.offsetHeight,
       });
 
-      // Remove style tags containing oklab to prevent html2canvas errors
-      const allStyles = document.querySelectorAll('style');
-      const removedStyles: string[] = [];
-      allStyles.forEach(styleEl => {
-        if (styleEl.textContent?.includes('oklab')) {
-          removedStyles.push(styleEl.textContent);
-          styleEl.remove();
-        }
-      });
-
-      console.log('🎨 Removed', removedStyles.length, 'style tags with oklab');
-
       const canvas = await html2canvas(docElem, {
         scale: 2,
         useCORS: true,
@@ -153,13 +141,18 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
         windowWidth: docElem.scrollWidth,
         imageTimeout: 15000,
         ignoreElements: (el) => el.classList?.contains('no-print') || false,
-      });
-
-      // Restore the removed styles
-      allStyles.forEach((styleEl, idx) => {
-        if (idx < removedStyles.length) {
-          styleEl.textContent = removedStyles[idx];
-        }
+        onclone: (clonedDocument) => {
+          // Remove all class attributes from cloned element to prevent CSS parsing
+          const allElements = clonedDocument.querySelectorAll('*');
+          allElements.forEach((el) => {
+            el.removeAttribute('class');
+            // Also remove style tags that might contain oklab
+            if (el.tagName === 'STYLE' && el.textContent?.includes('oklab')) {
+              el.remove();
+            }
+          });
+          console.log('🧹 Cleaned classes and oklab styles in cloned document');
+        },
       });
 
       console.log('✅ Canvas generated:', { width: canvas.width, height: canvas.height });
