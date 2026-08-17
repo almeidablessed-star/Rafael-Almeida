@@ -658,7 +658,7 @@ export const CustomersModule: React.FC = () => {
               </label>
               <label
                 htmlFor="photo-upload"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--color-neutral-charcoal)] text-white hover:bg-black rounded-lg text-xs font-bold cursor-pointer transition-all shadow-sm active:scale-95"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--color-accent-gold)] text-[var(--color-neutral-charcoal)] hover:bg-[var(--color-accent-gold)]/90 active:scale-95 rounded-lg text-xs font-bold cursor-pointer transition-all shadow-sm"
               >
                 <Camera className="w-3.5 h-3.5" />
                 <span>{photoUrl ? 'Alterar Foto' : 'Escolher Foto'}</span>
@@ -805,13 +805,13 @@ export const CustomersModule: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsFormOpen(false)}
-              className="px-4 py-2 rounded-xl bg-[var(--color-neutral-hero)] text-[var(--color-neutral-charcoal)] font-bold text-xs hover:bg-[var(--color-accent-gold)]/20"
+              className="px-4 py-2 rounded-xl bg-[var(--color-neutral-hero)] text-[var(--color-neutral-charcoal)] font-bold text-xs hover:bg-[var(--color-neutral-hero)]/70 active:scale-95 transition-all duration-normal"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="px-5 py-2 rounded-xl bg-[var(--color-neutral-charcoal)] hover:bg-black text-[var(--color-accent-gold)] font-brand font-bold text-xs shadow-sm"
+              className="px-5 py-2 rounded-xl bg-[var(--color-neutral-charcoal)] hover:bg-[#2A2520] text-white font-brand font-bold text-xs shadow-sm active:scale-95 transition-all duration-normal"
             >
               Salvar Cadastro
             </button>
