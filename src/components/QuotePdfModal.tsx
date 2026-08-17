@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import html2canvas from 'html2canvas';
+import { toPng } from 'html-to-image';
 import jsPDF from 'jspdf';
 import { Transaction } from '../types';
 import { formatCurrency, formatDateBr } from '../utils/formatters';
@@ -107,7 +107,7 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
     window.print();
   };
 
-  // Download PDF document directly
+  // Download PDF document directly using html-to-image
   const handleDownloadPdf = async () => {
     const docElem = document.getElementById('quote-pdf-document');
     if (!docElem) {
@@ -116,46 +116,20 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
     }
 
     try {
-      console.log('🎯 Starting PDF generation with HTML2PDF...');
+      console.log('🎯 Starting PDF generation with html-to-image...');
       setIsGeneratingPdf(true);
 
       // Wait for images to load
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Create a fresh copy of the element with computed styles as inline
-      const cloned = docElem.cloneNode(true) as HTMLElement;
-
-      // Create an off-screen container with pdf-render class to force RGB colors
-      const container = document.createElement('div');
-      container.className = 'pdf-render';
-      container.style.position = 'absolute';
-      container.style.left = '-10000px';
-      container.style.width = '800px';
-      container.appendChild(cloned);
-      document.body.appendChild(container);
-
-      // Wait for layout and CSS to be computed
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // Remove all class attributes which might contain problematic oklab CSS
-      const allElements = cloned.querySelectorAll('*');
-      allElements.forEach(el => {
-        el.removeAttribute('class');
-      });
-
       try {
-        const canvas = await html2canvas(cloned, {
-          scale: 2,
-          useCORS: true,
-          allowTaint: true,
-          logging: false,
-          backgroundColor: '#ffffff',
-          windowHeight: cloned.scrollHeight,
-          windowWidth: cloned.scrollWidth,
-          imageTimeout: 15000,
+        // Use html-to-image which has better CSS support than html2canvas
+        const imgData = await toPng(docElem, {
+          cacheBust: true,
+          pixelRatio: 2,
         });
 
-        console.log('✅ Canvas generated:', { width: canvas.width, height: canvas.height });
+        console.log('✅ Image generated');
 
         const pdf = new jsPDF({
           orientation: 'portrait',
@@ -163,31 +137,36 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
           format: 'a4',
         });
 
-        const imgData = canvas.toDataURL('image/png');
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
-        const imgWidth = canvas.width;
-        const imgHeight = canvas.height;
+        // Create image from data and get dimensions
+        const img = new Image();
+        img.onload = () => {
+          const pdfWidth = pdf.internal.pageSize.getWidth();
+          const pdfHeight = pdf.internal.pageSize.getHeight();
+          const imgWidth = img.width;
+          const imgHeight = img.height;
 
-        const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-        const scaledWidth = imgWidth * ratio;
-        const scaledHeight = imgHeight * ratio;
-        const x = (pdfWidth - scaledWidth) / 2;
+          const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+          const scaledWidth = imgWidth * ratio;
+          const scaledHeight = imgHeight * ratio;
+          const x = (pdfWidth - scaledWidth) / 2;
 
-        pdf.addImage(imgData, 'PNG', x, 5, scaledWidth, scaledHeight);
+          pdf.addImage(imgData, 'PNG', x, 5, scaledWidth, scaledHeight);
 
-        const isCozinha = activeTab === 'cozinha';
-        const clientName = (transaction.customerName || 'Cliente').replace(/\s+/g, '_');
-        const timestamp = new Date().getTime();
-        const filename = isCozinha
-          ? `Ficha_Cozinha_${clientName}_${timestamp}.pdf`
-          : `Folha_Cliente_${clientName}_${timestamp}.pdf`;
+          const isCozinha = activeTab === 'cozinha';
+          const clientName = (transaction.customerName || 'Cliente').replace(/\s+/g, '_');
+          const timestamp = new Date().getTime();
+          const filename = isCozinha
+            ? `Ficha_Cozinha_${clientName}_${timestamp}.pdf`
+            : `Folha_Cliente_${clientName}_${timestamp}.pdf`;
 
-        pdf.save(filename);
-        console.log('✅ PDF saved:', filename);
+          pdf.save(filename);
+          console.log('✅ PDF saved:', filename);
+        };
+        img.src = imgData;
 
-      } finally {
-        document.body.removeChild(container);
+      } catch (err) {
+        console.error('Error in html-to-image conversion:', err);
+        throw err;
       }
 
     } catch (err) {
