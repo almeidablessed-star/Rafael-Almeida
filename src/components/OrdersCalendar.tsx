@@ -25,13 +25,13 @@ interface OrdersCalendarProps {
 }
 
 export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
-  const { formatCurrency: formatMoney } = useCurrency();
   transactions,
   onOpenAddModal,
   onEditTransaction,
   onDeleteTransaction,
   onTogglePaymentStatus,
 }) => {
+  const { formatCurrency: formatMoney } = useCurrency();
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [selectedDateStr, setSelectedDateStr] = useState<string | null>(null);
 
