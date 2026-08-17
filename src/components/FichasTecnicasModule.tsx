@@ -467,7 +467,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   const filteredFichas = fichas.filter((f) => f.category === selectedCategory);
 
   return (
-    <div className="space-y-0 pb-12 animate-fadeIn overflow-hidden">
+    <div className="space-y-0 pb-12 animate-fadeIn" style={{ background: '#F6F2F5', minHeight: '100vh' }}>
       {/* Header - Roxo Gradiente */}
       <div
         className="overflow-hidden shadow-card"
@@ -477,8 +477,8 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
           minHeight: '100vh',
           display: 'flex',
           flexDirection: 'column',
-          marginBottom: '-70px',
-          paddingBottom: '70px',
+          marginBottom: '-100px',
+          paddingBottom: '100px',
         }}
       >
         {/* Header with Title only */}
