@@ -81,7 +81,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
       {/* 1. PROFIT CARD - Roxo Gradiente (Cabeçalho da Página) */}
       <div
-        className="rounded-b-[28px] text-white relative overflow-visible"
+        className="rounded-[28px] text-white relative overflow-visible"
         style={{
           background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
           padding: '20px',
@@ -91,6 +91,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           marginLeft: 'calc(-50vw + 50%)',
           marginRight: 'calc(-50vw + 50%)',
           marginTop: '0px',
+          zIndex: 50,
         }}
       >
 
