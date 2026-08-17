@@ -237,7 +237,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       </div>
 
-      {/* Panel Overlay - Sobreposição com border-radius */}
       <div
         className="pb-6 space-y-4"
         style={{

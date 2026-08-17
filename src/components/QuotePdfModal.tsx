@@ -116,36 +116,96 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
     }
 
     try {
+      console.log('🎯 NEW VERSION: Starting PDF generation with fixed stripProblematicColors');
       setIsGeneratingPdf(true);
 
       // Wait for all images and content to load
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 800));
 
-      // Ensure content is visible for html2canvas
-      const originalDisplay = docElem.style.display;
-      docElem.style.display = 'block';
+      // Create a clone to avoid modifying original DOM
+      const clonedElem = docElem.cloneNode(true) as HTMLElement;
 
-      const canvas = await html2canvas(docElem, {
+      // Remove problematic CSS colors (oklab, etc.) by stripping classes and using safe inline styles
+      const stripProblematicColors = (el: Element) => {
+        // Remove all classes to strip CSS color functions like oklab()
+        if (el instanceof SVGElement) {
+          // SVG elements can't set className directly
+          el.removeAttribute('class');
+          el.removeAttribute('style');
+        } else {
+          // HTML elements
+          (el as HTMLElement).className = '';
+
+          // Remove all style attributes and set safe ones
+          (el as HTMLElement).removeAttribute('style');
+          const htmlEl = el as HTMLElement;
+          htmlEl.style.backgroundColor = '#ffffff';
+          htmlEl.style.color = '#000000';
+          htmlEl.style.borderColor = '#dddddd';
+          htmlEl.style.borderBottomColor = '#dddddd';
+          htmlEl.style.borderTopColor = '#dddddd';
+          htmlEl.style.borderLeftColor = '#dddddd';
+          htmlEl.style.borderRightColor = '#dddddd';
+        }
+
+        // Recursively process all children
+        Array.from(el.children).forEach((child) => {
+          stripProblematicColors(child);
+        });
+      };
+      console.log('🔧 Stripping problematic colors from cloned element...');
+      stripProblematicColors(clonedElem);
+      console.log('✅ Color stripping complete');
+
+      // Inject CSS override to ensure all colors are safe
+      const styleOverride = document.createElement('style');
+      styleOverride.textContent = `
+        * {
+          color: #000000 !important;
+          background-color: #ffffff !important;
+          border-color: #dddddd !important;
+          fill: #000000 !important;
+          stroke: #000000 !important;
+        }
+        svg {
+          background-color: transparent !important;
+        }
+      `;
+      clonedElem.insertBefore(styleOverride, clonedElem.firstChild);
+
+      // Temporarily append clone to DOM for html2canvas
+      clonedElem.style.position = 'absolute';
+      clonedElem.style.left = '-9999px';
+      clonedElem.style.top = '-9999px';
+      clonedElem.style.visibility = 'hidden';
+      document.body.appendChild(clonedElem);
+
+      const canvas = await html2canvas(clonedElem, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
         logging: false,
         backgroundColor: '#ffffff',
-        windowHeight: docElem.scrollHeight,
-        windowWidth: docElem.scrollWidth,
-        imageTimeout: 15000,
+        windowHeight: clonedElem.scrollHeight + 50,
+        windowWidth: clonedElem.scrollWidth + 50,
+        imageTimeout: 20000,
+        ignoreElements: (element) => {
+          // Ignore print-only elements
+          return element.classList?.contains('no-print') || false;
+        },
       });
 
-      // Restore original display
-      docElem.style.display = originalDisplay;
+      // Remove cloned element
+      document.body.removeChild(clonedElem);
 
       if (!canvas || canvas.width === 0 || canvas.height === 0) {
         console.error('Canvas generation failed - empty canvas');
+        alert('Falha ao gerar imagem. Usando impressão padrão.');
         window.print();
         return;
       }
 
-      const imgData = canvas.toDataURL('image/jpeg', 0.98);
+      const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -166,7 +226,7 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
       const x = (pdfWidth - renderWidth) / 2;
       const y = 5;
 
-      pdf.addImage(imgData, 'JPEG', x, y, renderWidth, renderHeight);
+      pdf.addImage(imgData, 'PNG', x, y, renderWidth, renderHeight);
 
       const isCozinha = activeTab === 'cozinha';
       const clientName = (transaction.customerName || 'Cliente').replace(/\s+/g, '_');
@@ -175,22 +235,13 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
         ? `Ficha_Cozinha_${clientName}_${timestamp}.pdf`
         : `Folha_Cliente_${clientName}_${timestamp}.pdf`;
 
-      // Always use Blob URL method for reliable download
-      const pdfBlob = pdf.output('blob');
-      const blobUrl = URL.createObjectURL(pdfBlob);
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = filename;
-      link.style.display = 'none';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 2000);
+      // Use pdf.save() which triggers browser download
+      pdf.save(filename);
 
-      alert('PDF baixado com sucesso! Verifique sua pasta de Downloads.');
     } catch (err) {
       console.error('Error generating PDF:', err);
-      alert('Erro ao gerar PDF. Tente novamente.');
+      alert('Erro ao gerar PDF. Use a opção de impressão do navegador.');
+      window.print();
     } finally {
       setIsGeneratingPdf(false);
     }
