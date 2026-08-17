@@ -123,30 +123,11 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       try {
-        // Clone the element to remove height restrictions
-        const clonedElem = docElem.cloneNode(true) as HTMLElement;
-        clonedElem.style.maxHeight = 'none';
-        clonedElem.style.height = 'auto';
-        clonedElem.style.overflow = 'visible';
-
-        // Temporarily append clone to get full dimensions
-        const tempContainer = document.createElement('div');
-        tempContainer.style.position = 'fixed';
-        tempContainer.style.left = '-9999px';
-        tempContainer.style.top = '-9999px';
-        tempContainer.style.visibility = 'hidden';
-        tempContainer.style.pointerEvents = 'none';
-        tempContainer.appendChild(clonedElem);
-        document.body.appendChild(tempContainer);
-
         // Use html-to-image which has better CSS support than html2canvas
-        const imgData = await toPng(clonedElem, {
+        const imgData = await toPng(docElem, {
           cacheBust: true,
           pixelRatio: 2,
         });
-
-        // Remove temporary container
-        document.body.removeChild(tempContainer);
 
         console.log('✅ Image generated');
 
@@ -164,18 +145,12 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
           const imgWidth = img.width;
           const imgHeight = img.height;
 
-          // Calculate how many pages we need
-          const ratio = pdfWidth / imgWidth;
+          const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+          const scaledWidth = imgWidth * ratio;
           const scaledHeight = imgHeight * ratio;
-          const pagesNeeded = Math.ceil(scaledHeight / pdfHeight);
+          const x = (pdfWidth - scaledWidth) / 2;
 
-          // Add image to PDF, allowing it to span multiple pages if necessary
-          pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, scaledHeight);
-
-          // Add additional pages if needed
-          for (let i = 1; i < pagesNeeded; i++) {
-            pdf.addPage();
-          }
+          pdf.addImage(imgData, 'PNG', x, 5, scaledWidth, scaledHeight);
 
           const isCozinha = activeTab === 'cozinha';
           const clientName = (transaction.customerName || 'Cliente').replace(/\s+/g, '_');
