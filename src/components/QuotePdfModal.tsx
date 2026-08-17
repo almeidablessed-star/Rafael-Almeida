@@ -131,19 +131,42 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
         offsetHeight: docElem.offsetHeight,
       });
 
-      // html2canvas + oklab colors doesn't work well - use native print instead
-      // Browser's print dialog handles all CSS including oklab natively
-      console.log('📄 Falling back to browser native print-to-PDF due to oklab CSS issues');
-      window.print();
-      return;
+      // Remove style tags containing oklab to prevent html2canvas errors
+      const allStyles = document.querySelectorAll('style');
+      const removedStyles: string[] = [];
+      allStyles.forEach(styleEl => {
+        if (styleEl.textContent?.includes('oklab')) {
+          removedStyles.push(styleEl.textContent);
+          styleEl.remove();
+        }
+      });
 
-      console.log('✅ Canvas generated:', { width: canvas.width, height: canvas.height, dataLength: canvas.toDataURL().length });
+      console.log('🎨 Removed', removedStyles.length, 'style tags with oklab');
+
+      const canvas = await html2canvas(docElem, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+        windowHeight: docElem.scrollHeight,
+        windowWidth: docElem.scrollWidth,
+        imageTimeout: 15000,
+        ignoreElements: (el) => el.classList?.contains('no-print') || false,
+      });
+
+      // Restore the removed styles
+      allStyles.forEach((styleEl, idx) => {
+        if (idx < removedStyles.length) {
+          styleEl.textContent = removedStyles[idx];
+        }
+      });
+
+      console.log('✅ Canvas generated:', { width: canvas.width, height: canvas.height });
 
       if (!canvas || canvas.width === 0 || canvas.height === 0) {
         console.error('Canvas generation failed - empty canvas');
-        alert('Falha ao gerar imagem. Usando impressão padrão.');
-        window.print();
-        return;
+        throw new Error('Canvas is empty');
       }
 
       const imgData = canvas.toDataURL('image/png');
@@ -181,8 +204,7 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
 
     } catch (err) {
       console.error('Error generating PDF:', err);
-      alert('Erro ao gerar PDF. Use a opção de impressão do navegador.');
-      window.print();
+      alert('Erro ao gerar PDF. Tente novamente.');
     } finally {
       setIsGeneratingPdf(false);
     }
