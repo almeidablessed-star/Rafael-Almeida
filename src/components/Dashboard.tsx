@@ -85,8 +85,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
         style={{
           background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
           padding: '20px',
-          paddingBottom: '0px',
-          paddingTop: '0px',
+          paddingBottom: '28px',
+          paddingTop: '28px',
           boxShadow: '0 30px 70px rgba(58,35,80,0.26)',
           marginLeft: '18px',
           marginRight: '18px',
