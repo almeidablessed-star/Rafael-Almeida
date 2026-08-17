@@ -77,7 +77,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
         className="overflow-hidden shadow-card"
         style={{
           boxShadow: '0 30px 70px rgba(58,35,80,.26)',
-          background: '#FFFFFF',
+          background: '#FAFAFA',
           minHeight: '100vh',
         }}
       >
