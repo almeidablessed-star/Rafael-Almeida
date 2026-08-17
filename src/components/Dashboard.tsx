@@ -253,22 +253,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
         }}
       >
 
-        {/* Card General de Fundo - por baixo de todos os elementos */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '-8px',
-            left: 'calc(-50vw + 50% + 8px)',
-            right: 'calc(-50vw + 50% + 8px)',
-            bottom: '-50px',
-            background: '#FFFFFF',
-            borderRadius: '24px',
-            zIndex: -1,
-            boxShadow: '0 8px 24px rgba(58,35,80,0.08)',
-            pointerEvents: 'none',
-          }}
-        />
-
         {/* 2. COMANDA TICKET BUTTON - "LANÇAR PEDIDO" */}
         <button
           onClick={() => onOpenAddModal('venda')}
