@@ -486,12 +486,18 @@ export const CustomersModule: React.FC = () => {
   });
 
   return (
-    <div className="space-y-4 animate-fadeIn pb-12">
+    <div className="space-y-4 animate-fadeIn pb-12" style={{ background: '#F6F2F5' }}>
       {/* Header Card — Flutuante com cabeçalho roxo */}
       <div
         className="overflow-hidden shadow-card"
         style={{
           boxShadow: '0 30px 70px rgba(58,35,80,.26)',
+          background: '#F6F2F5',
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          marginBottom: '-70px',
+          paddingBottom: '70px',
         }}
       >
         {/* Header with Title only */}
@@ -499,7 +505,7 @@ export const CustomersModule: React.FC = () => {
           className="px-5 flex items-center justify-between gap-4"
           style={{
             background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
-            borderRadius: '40px 0px 0px 0px',
+            borderRadius: '0px 0px 0px 0px',
             paddingTop: '40px',
             paddingBottom: '120px',
           }}
@@ -543,6 +549,9 @@ export const CustomersModule: React.FC = () => {
             marginRight: 'calc(-50vw + 50%)',
             paddingLeft: 'calc(20px + max(0px, env(safe-area-inset-left)))',
             paddingRight: 'calc(20px + max(0px, env(safe-area-inset-right)))',
+            flex: 1,
+            minHeight: '100%',
+            paddingBottom: 'max(20px, env(safe-area-inset-bottom))',
           }}
         >
 
