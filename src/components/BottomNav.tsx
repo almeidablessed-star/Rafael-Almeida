@@ -68,7 +68,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) 
         zIndex: 9999,
       }}
     >
-      <div className="max-w-lg mx-auto flex items-center justify-around" style={{ padding: '12px 8px 22px' }}>
+      <div className="max-w-lg mx-auto flex items-center justify-around" style={{ padding: '2px 8px 2px' }}>
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
