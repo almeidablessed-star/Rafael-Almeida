@@ -38,6 +38,13 @@ export interface Customer {
   createdAt?: number;
 }
 
+export interface ConsumedIngredient {
+  ingredientId: string;
+  ingredientName: string;
+  quantity: number;
+  unit: string;
+}
+
 export interface Transaction {
   id: string;
   type: TransactionType;
@@ -61,6 +68,8 @@ export interface Transaction {
   category?: CostCategory;
   notes?: string;
   createdAt: number;
+  fichaId?: string; // Which technical sheet was used for this sale
+  consumedIngredients?: ConsumedIngredient[]; // Ingredients automatically consumed from this sale
 }
 
 export type TimePeriod = 'hoje' | 'semana' | 'mes' | 'ano' | 'tudo' | 'personalizado';
@@ -91,6 +100,30 @@ export interface IngredientUsage {
   unit: 'g' | 'kg' | 'ml' | 'L' | 'un' | 'pacote';
   unitCost: number;
   totalCost: number;
+}
+
+export interface IngredientStock {
+  id: string;
+  name: string;
+  unit: 'g' | 'kg' | 'ml' | 'L' | 'un' | 'pacote';
+  currentQuantity: number; // Can be negative
+  lastUpdated: string; // ISO date
+}
+
+export type StockMovementType = 'consumption' | 'return' | 'restock';
+
+export interface StockMovement {
+  id: string;
+  date: string; // ISO date
+  type: StockMovementType;
+  ingredientId: string;
+  ingredientName: string;
+  quantity: number; // Positive for consumption/return, negative for reversal
+  unit: string;
+  relatedTransactionId?: string; // Which sale/restock caused this
+  relatedFichaId?: string; // Which technical sheet was used
+  description: string;
+  createdAt: number;
 }
 
 export interface FichaTecnica {

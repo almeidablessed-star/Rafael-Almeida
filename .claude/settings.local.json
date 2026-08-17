@@ -51,7 +51,10 @@
       "Bash(node serve.js)",
       "Bash(node extract-design.js)",
       "Bash(git config *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(npx impeccable-cli *)",
+      "Bash(ipconfig)",
+      "PowerShell(ipconfig | Select-String -Pattern \"IPv4 Address\" | Where-Object {$_ -match \"192|10|172\"} | Select-Object -First 1)"
     ]
   },
   "hooks": {

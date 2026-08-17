@@ -1,7 +1,8 @@
-import { Transaction, TimePeriod, SummaryTotals } from '../types';
+import { Transaction, TimePeriod, SummaryTotals, FichaTecnica } from '../types';
 import { SAMPLE_INITIAL_TRANSACTIONS } from '../data/presetData';
 import { getTodayIso } from './formatters';
 import { parseSaleDetail } from './weeklyCalculator';
+import { consumeIngredientsFromFicha, returnIngredientsToStock } from './stockManager';
 
 const STORAGE_KEY = 'carulaconfeitaria_transacoes_v3';
 
@@ -52,8 +53,45 @@ export const updateTransaction = (updatedTx: Transaction): void => {
 
 export const deleteTransaction = (id: string): void => {
   const current = getStoredTransactions();
+  const transaction = current.find((t) => t.id === id);
+
+  // If it's a sale that consumed ingredients, return them to stock
+  if (transaction && transaction.type === 'venda' && transaction.consumedIngredients && transaction.consumedIngredients.length > 0) {
+    returnIngredientsToStock(id, transaction.consumedIngredients, getTodayIso());
+  }
+
   const updated = current.filter((t) => t.id !== id);
   saveTransactions(updated);
+};
+
+// Special function to add a sale with automatic ingredient consumption from a technical sheet
+export const addSaleWithFicha = (
+  saleData: Omit<Transaction, 'id' | 'createdAt' | 'consumedIngredients'>,
+  ficha: FichaTecnica
+): Transaction => {
+  const current = getStoredTransactions();
+  const txId = 'tx-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7);
+
+  // Consume ingredients from the technical sheet
+  const consumedIngredients = consumeIngredientsFromFicha(
+    ficha.id,
+    ficha,
+    txId,
+    saleData.date
+  );
+
+  // Create transaction with consumed ingredients
+  const createdTx: Transaction = {
+    ...saleData,
+    id: txId,
+    createdAt: Date.now(),
+    fichaId: ficha.id,
+    consumedIngredients,
+  };
+
+  const updated = [createdTx, ...current];
+  saveTransactions(updated);
+  return createdTx;
 };
 
 export const resetToSampleData = (): Transaction[] => {
