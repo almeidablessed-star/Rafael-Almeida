@@ -165,7 +165,7 @@ export const EstoqueModule: React.FC = () => {
   const lowStockCount = items.filter((i) => i.quantity <= i.minThreshold).length;
 
   return (
-    <div className="pb-12 animate-fadeIn">
+    <div className="pb-12 animate-fadeIn" style={{ background: '#FAF7FA' }}>
       {/* Header Card — Flutuante com cabeçalho roxo */}
       <div
         className="overflow-hidden shadow-card"
@@ -178,7 +178,7 @@ export const EstoqueModule: React.FC = () => {
           className="px-5 flex items-center justify-between gap-4"
           style={{
             background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
-            borderRadius: '40px 0px 0px 0px',
+            borderRadius: '0px 0px 0px 0px',
             paddingTop: '40px',
             paddingBottom: '120px',
           }}
@@ -214,7 +214,7 @@ export const EstoqueModule: React.FC = () => {
         <div className="flex flex-col gap-4"
           style={{
             marginTop: '-70px',
-            background: '#F6F2F5',
+            background: '#FAF7FA',
             borderRadius: '28px 28px 0 0',
             position: 'relative',
             padding: '20px',

@@ -486,14 +486,13 @@ export const CustomersModule: React.FC = () => {
   });
 
   return (
-    <div className="space-y-4 animate-fadeIn pb-12" style={{ background: '#F6F2F5' }}>
+    <div className="space-y-4 animate-fadeIn pb-12" style={{ background: '#FAF7FA' }}>
       {/* Header Card — Flutuante com cabeçalho roxo */}
       <div
         className="overflow-hidden shadow-card"
         style={{
           boxShadow: '0 30px 70px rgba(58,35,80,.26)',
-          background: '#F6F2F5',
-          minHeight: '100vh',
+          background: '#FAF7FA',
           display: 'flex',
           flexDirection: 'column',
           marginBottom: '-100px',
@@ -538,19 +537,18 @@ export const CustomersModule: React.FC = () => {
         </div>
 
         {/* Content Section */}
-        <div className="flex flex-col gap-2"
+        <div className="flex flex-col gap-3"
           style={{
             marginTop: '-70px',
-            background: '#F6F2F5',
+            background: '#FAF7FA',
             borderRadius: '28px 28px 0 0',
             position: 'relative',
-            padding: '20px',
+            paddingTop: '16px',
+            paddingBottom: 'max(20px, env(safe-area-inset-bottom))',
             marginLeft: 'calc(-50vw + 50%)',
             marginRight: 'calc(-50vw + 50%)',
             paddingLeft: 'calc(20px + max(0px, env(safe-area-inset-left)))',
             paddingRight: 'calc(20px + max(0px, env(safe-area-inset-right)))',
-            flex: 1,
-            paddingBottom: 'max(20px, env(safe-area-inset-bottom))',
           }}
         >
 
@@ -839,6 +837,7 @@ export const CustomersModule: React.FC = () => {
         style={{
           paddingLeft: '18px',
           paddingRight: '18px',
+          background: '#FAF7FA',
         }}
       >
         {filteredCustomers.length === 0 ? (
@@ -1072,7 +1071,7 @@ export const CustomersModule: React.FC = () => {
                     type="button"
                     onClick={() => setExpandedDatesCustomerId(expandedDatesCustomerId === c.id ? null : c.id)}
                     style={{
-                      background: '#F6F2F5',
+                      background: '#FAF7FA',
                       border: '1px solid rgba(36,27,43,.08)',
                       borderRadius: '16px 16px 0 0',
                       borderBottomWidth: '0px',
@@ -1086,7 +1085,7 @@ export const CustomersModule: React.FC = () => {
                       width: '100%',
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.background = '#EFE6F0'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = '#F6F2F5'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = '#FAF7FA'}
                   >
                     <span
                       style={{
