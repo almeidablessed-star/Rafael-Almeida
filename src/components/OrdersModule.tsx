@@ -86,7 +86,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
           className="px-5 flex items-center justify-between gap-4"
           style={{
             background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
-            borderRadius: '40px 0px 0px 0px',
+            borderRadius: '0px 0px 0px 0px',
             paddingTop: '40px',
             paddingBottom: '120px',
           }}
@@ -124,7 +124,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
         <div className="flex flex-col gap-4"
           style={{
             marginTop: '-70px',
-            background: '#FFFFFF',
+            background: '#F6F2F5',
             borderRadius: '28px 28px 0 0',
             position: 'relative',
             padding: '20px',
