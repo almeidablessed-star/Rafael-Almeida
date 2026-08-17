@@ -3,6 +3,7 @@ import { Transaction, SummaryTotals, TransactionType, TimePeriod } from '../type
 import { formatCurrency, formatDateBr } from '../utils/formatters';
 import { calculateWeeklyBalances } from '../utils/balancesCalculator';
 import { ANIMATION_DURATIONS, ANIMATION_EASING } from '../lib/animation-tokens';
+import { useCurrency } from '../context/CurrencyContext';
 import { OrdersCalendar } from './OrdersCalendar';
 import {
   Wallet,
@@ -51,6 +52,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onOpenBackupModal,
   onOpenProfileModal,
 }) => {
+  const { formatCurrency: formatMoney } = useCurrency();
   const transactionsList = allTransactions.length > 0 ? allTransactions : (recentTransactions || []);
   const balances = calculateWeeklyBalances(transactionsList);
 
@@ -176,7 +178,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 LUCRO LÍQUIDO DO MÊS
               </div>
               <div className="text-white" style={{ fontSize: '32px', lineHeight: 1, letterSpacing: '-0.03em', marginTop: '0px', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
-                {formatCurrency(profit)}
+                {formatMoney(profit)}
               </div>
               <div className="flex items-center gap-2 mt-2">
                 <span className="inline-flex items-center px-3 py-1 text-[10px] font-black rounded-full whitespace-nowrap" style={{ background: '#A9D8B8', color: '#26402F' }}>
@@ -188,7 +190,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           {/* Success Message */}
           <div className="text-[12px] leading-[1.6]" style={{ color: 'rgba(247,220,225,0.84)' }}>
-            🎉 <strong style={{ color: '#FFFFFF' }}>Resultado excelente!</strong> Suas vendas superaram todas as despesas e custos por <strong style={{ color: '#FFFFFF' }}>{formatCurrency(profit)}</strong> no período.
+            🎉 <strong style={{ color: '#FFFFFF' }}>Resultado excelente!</strong> Suas vendas superaram todas as despesas e custos por <strong style={{ color: '#FFFFFF' }}>{formatMoney(profit)}</strong> no período.
           </div>
 
           {/* Bottom: 3 Small Boxes */}
@@ -196,19 +198,19 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="flex-1 rounded-[16px] p-3 text-center" style={{ background: 'rgba(255,255,255,0.12)' }}>
               <div className="text-[9px] text-white/75 uppercase tracking-[0.06em]" style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 700 }}>VENDAS PAGAS</div>
               <div className="text-white mt-1" style={{ fontSize: '15px', lineHeight: 1, fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
-                {formatCurrency(balances.totalPaidSales || 0)}
+                {formatMoney(balances.totalPaidSales || 0)}
               </div>
             </div>
             <div className="flex-1 rounded-[16px] p-3 text-center" style={{ background: 'rgba(255,255,255,0.12)' }}>
               <div className="text-[9px] text-white/75 uppercase tracking-[0.06em]" style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 700 }}>SAÍDAS</div>
               <div className="text-white mt-1" style={{ fontSize: '15px', lineHeight: 1, fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
-                {formatCurrency(balances.totalExpensesAmount || 0)}
+                {formatMoney(balances.totalExpensesAmount || 0)}
               </div>
             </div>
             <div className="flex-1 rounded-[16px] p-3 text-center" style={{ background: 'rgba(228,217,195,0.28)' }}>
               <div className="text-[9px] uppercase tracking-[0.06em]" style={{ color: '#F0E2C8', fontFamily: "'Manrope', sans-serif", fontWeight: 700 }}>⏳ A RECEBER</div>
               <div className="text-white mt-1" style={{ fontSize: '15px', lineHeight: 1, fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
-                {formatCurrency(balances.pendingSales || 0)}
+                {formatMoney(balances.pendingSales || 0)}
               </div>
             </div>
           </div>
@@ -335,7 +337,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <div className="text-[9px] uppercase tracking-[0.05em] mt-2" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', minHeight: '24px' }}>
                 REPOSIÇÃO
               </div>
-              <div className="text-[15px] mt-2" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>{formatCurrency(balances.reposicao || 1240)}</div>
+              <div className="text-[15px] mt-2" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>{formatMoney(balances.reposicao || 1240)}</div>
             </div>
 
             {/* Mão de Obra */}
@@ -366,7 +368,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <div className="text-[9px] uppercase tracking-[0.05em] mt-2" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', minHeight: '24px' }}>
                 MÃO DE OBRA
               </div>
-              <div className="text-[15px] mt-2" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>{formatCurrency(balances.labor || 860)}</div>
+              <div className="text-[15px] mt-2" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>{formatMoney(balances.labor || 860)}</div>
             </div>
 
             {/* Custo + Investimento */}
@@ -397,13 +399,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <div className="text-[9px] uppercase tracking-[0.05em] mt-2" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', minHeight: '24px' }}>
                 CUSTO + INVEST.
               </div>
-              <div className="text-[15px] mt-2" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>{formatCurrency(balances.costs || 620)}</div>
+              <div className="text-[15px] mt-2" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>{formatMoney(balances.costs || 620)}</div>
             </div>
           </div>
 
           {/* Note about cost division */}
           <p className="text-[10px]" style={{ color: '#9A8FA0' }}>
-            50% Custo ({formatCurrency((balances.costs || 620) / 2)}) / 50% Invest.
+            50% Custo ({formatMoney((balances.costs || 620) / 2)}) / 50% Invest.
           </p>
         </div>
 

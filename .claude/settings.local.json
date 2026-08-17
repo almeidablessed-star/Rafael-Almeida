@@ -50,7 +50,8 @@
       "Bash(node analyze-html.js)",
       "Bash(node serve.js)",
       "Bash(node extract-design.js)",
-      "Bash(git config *)"
+      "Bash(git config *)",
+      "Bash(git commit -m ' *)"
     ]
   },
   "hooks": {

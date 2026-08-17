@@ -1,13 +1,23 @@
 import { PaymentMethod, TransactionType, LaborPeriod, CostCategory } from '../types';
 
-export const formatCurrency = (value: number): string => {
-  if (isNaN(value)) return 'R$ 0,00';
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value);
+export const formatCurrency = (value: number, currency: 'BRL' | 'USD' = 'BRL'): string => {
+  if (isNaN(value)) return currency === 'BRL' ? 'R$ 0,00' : '$ 0.00';
+
+  if (currency === 'BRL') {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+  } else {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+  }
 };
 
 export const parseCurrencyInput = (input: string): number => {

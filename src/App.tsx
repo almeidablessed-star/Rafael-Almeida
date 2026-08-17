@@ -50,6 +50,7 @@ import { PwaInstallModal } from './components/PwaInstallModal';
 import { BackupModal } from './components/BackupModal';
 import { ProfileModal } from './components/ProfileModal';
 import { LoginModal } from './components/LoginModal';
+import { CurrencyProvider } from './context/CurrencyContext';
 
 export default function App() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -158,10 +159,11 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-surface)] text-[var(--color-ink)] flex flex-col lg:flex-row font-sans lg:rounded-none" style={{
-      borderRadius: 'clamp(0px, 3vw, 40px)',
-      overflow: 'hidden',
-    }}>
+    <CurrencyProvider>
+      <div className="min-h-screen bg-[var(--color-surface)] text-[var(--color-ink)] flex flex-col lg:flex-row font-sans lg:rounded-none" style={{
+        borderRadius: 'clamp(0px, 3vw, 40px)',
+        overflow: 'hidden',
+      }}>
 
 
       {/* Desktop Sidebar — 236px, degradê roxo (referência 13a) */}
@@ -461,6 +463,7 @@ export default function App() {
         onClose={() => setIsProfileModalOpen(false)}
       />
 
-    </div>
+      </div>
+    </CurrencyProvider>
   );
 }

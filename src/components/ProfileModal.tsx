@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { X, Camera } from 'lucide-react';
+import { useCurrency } from '../context/CurrencyContext';
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -13,9 +14,11 @@ interface ProfileData {
   email: string;
   address: string;
   instagram: string;
+  currency: 'BRL' | 'USD';
 }
 
 export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
+  const { currency, setCurrency } = useCurrency();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -28,6 +31,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
       email: localStorage.getItem('user_email') || '',
       address: '',
       instagram: '',
+      currency: 'BRL',
     };
   });
 
@@ -113,6 +117,37 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
         }}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Currency Selector - Minimal */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+          <button
+            onClick={() => setCurrency(currency === 'BRL' ? 'USD' : 'BRL')}
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: '4px 8px',
+              fontFamily: "'Manrope', sans-serif",
+              fontSize: '13px',
+              fontWeight: 600,
+              color: '#7A6E80',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              transition: 'color 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.color = '#3A2350';
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.color = '#7A6E80';
+            }}
+            title={`Clique para alternar para ${currency === 'BRL' ? 'USD' : 'BRL'}`}
+          >
+            {currency}
+            <span style={{ fontSize: '10px', lineHeight: 1 }}>▼</span>
+          </button>
+        </div>
+
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px' }}>
           <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: '28px', color: '#241B2B', margin: 0 }}>
