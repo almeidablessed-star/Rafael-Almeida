@@ -49,6 +49,25 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [inspirationImage, setInspirationImage] = useState<string>(transaction.inspirationImage || '');
 
+  // DEBUG: Capture console logs for iOS testing
+  const [debugLogs, setDebugLogs] = useState<string[]>([]);
+  const [showDebugPanel, setShowDebugPanel] = useState(false);
+
+  // Intercept console.log to capture debug output
+  React.useEffect(() => {
+    const originalLog = console.log;
+    console.log = (...args: any[]) => {
+      originalLog(...args);
+      const message = args.map(arg =>
+        typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+      ).join(' ');
+      setDebugLogs(prev => [...prev, message]);
+    };
+    return () => {
+      console.log = originalLog;
+    };
+  }, []);
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -577,6 +596,45 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
   };
 
   return createPortal(
+    <>
+      {/* DEBUG PANEL - iOS Logging Console */}
+      <div className="fixed bottom-0 left-0 right-0 z-[100000] bg-black text-white text-xs p-2 max-h-48 overflow-y-auto font-mono border-t-2 border-yellow-400" style={{display: showDebugPanel ? 'block' : 'none'}}>
+        <div className="flex justify-between items-center mb-2 sticky top-0 bg-black">
+          <span className="font-bold">📋 DEBUG LOGS</span>
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(debugLogs.join('\n'));
+                alert('Logs copiados para clipboard!');
+              }}
+              className="px-2 py-1 bg-yellow-600 hover:bg-yellow-700 rounded text-white text-xs"
+            >
+              📋 Copiar
+            </button>
+            <button
+              onClick={() => setShowDebugPanel(false)}
+              className="px-2 py-1 bg-red-600 hover:bg-red-700 rounded text-white text-xs"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+        {debugLogs.map((log, idx) => (
+          <div key={idx} className="mb-1 text-yellow-300">
+            {log}
+          </div>
+        ))}
+      </div>
+
+      {/* DEBUG TOGGLE BUTTON */}
+      <button
+        onClick={() => setShowDebugPanel(!showDebugPanel)}
+        className="fixed bottom-4 right-4 z-[99999] px-3 py-2 bg-yellow-500 hover:bg-yellow-600 text-black font-bold rounded-lg text-xs"
+        style={{display: 'block'}}
+      >
+        🐛 DEBUG
+      </button>
+
     <div className="fixed inset-0 z-[99999] bg-neutral-950/85 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 overflow-y-auto print:p-0 print:bg-white print:fixed print:inset-0" role="dialog" aria-modal="true">
       {/* Strict Print CSS for Single Page output */}
       <style>{`
@@ -1096,7 +1154,9 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
           )}
         </div>
       </div>
-    </div>,
+    </div>
+    </>
+    ,
     document.body
   );
 };
