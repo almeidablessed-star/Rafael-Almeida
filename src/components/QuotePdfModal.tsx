@@ -448,21 +448,6 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
                 </div>
               </div>
 
-              {/* Title & Document Code */}
-              <div className="flex items-center justify-between border-b-2 border-[var(--color-pastry-light-pink)]/60 pb-1.5 print-avoid-break">
-                <div>
-                  <span className="label-sm tracking-widest text-[var(--color-pastry-chocolate)]/80 block">
-                    ✦ FOLHA OFICIAL DE PEDIDO ✦
-                  </span>
-                  <h3 className="font-bold text-base text-[var(--color-pastry-chocolate)] leading-tight">
-                    Pedido #{transaction.date?.replace(/-/g, '') || '01'}
-                  </h3>
-                </div>
-                <span className="bg-[var(--color-pastry-pink)]/70 text-[var(--color-pastry-chocolate)] border border-[var(--color-pastry-light-pink)] px-2.5 py-0.5 rounded-full text-[11px] font-bold">
-                  Emissão: {transaction.date ? formatDateBr(transaction.date) : formatDateBr(new Date().toISOString().split('T')[0])}
-                </span>
-              </div>
-
               {/* Grid 1: Client & Event Information */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 print-avoid-break">
                 {/* Customer Box */}
