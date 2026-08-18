@@ -629,8 +629,8 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
       {/* DEBUG TOGGLE BUTTON */}
       <button
         onClick={() => setShowDebugPanel(!showDebugPanel)}
-        className="fixed bottom-4 right-4 z-[99999] px-3 py-2 bg-yellow-500 hover:bg-yellow-600 text-black font-bold rounded-lg text-xs"
-        style={{display: 'block'}}
+        className="fixed bottom-4 right-4 px-3 py-2 bg-yellow-500 hover:bg-yellow-600 text-black font-bold rounded-lg text-xs"
+        style={{display: 'block', zIndex: 999999}}
       >
         🐛 DEBUG
       </button>
