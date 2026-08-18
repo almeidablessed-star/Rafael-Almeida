@@ -406,13 +406,13 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
         {/* PRINTABLE DOCUMENT BODY */}
         <div
           id="quote-pdf-document"
-          className="p-1.5 sm:p-2 overflow-y-auto space-y-2 bg-[#F6F2F5] text-[#241B2B] print:p-1.5 print:bg-white"
+          className="p-1 sm:p-1.5 overflow-y-auto space-y-1 sm:space-y-2 bg-[#F6F2F5] text-[#241B2B] print:p-1 print:bg-white"
         >
           {activeTab === 'cliente' ? (
             /* ======================================================== */
             /* TAB 1: FOLHA DO CLIENTE (GROOVY COMPACT 1-PAGE LAYOUT)   */
             /* ======================================================== */
-            <div className="space-y-2">
+            <div className="space-y-1 sm:space-y-2">
               {/* Header Banner - Groovy Brand Identity */}
               <div className="bg-gradient-to-r from-[#3A2350] to-[#A85E86] rounded-lg p-3.5 text-white shadow-card border border-white/20 print:border-neutral-300 print:bg-white print:text-neutral-900 print-avoid-break">
                 <div className="flex items-center justify-between gap-3">
@@ -578,11 +578,11 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
                     </div>
                   </div>
 
-                  <div className="w-full rounded-lg overflow-hidden border border-[var(--color-pastry-light-pink)]/50 bg-[var(--color-pastry-cream)]/40 flex items-center justify-center p-2">
+                  <div className="w-full rounded-lg overflow-hidden border border-[var(--color-pastry-light-pink)]/50 bg-[var(--color-pastry-cream)]/40 flex items-center justify-center p-1">
                     <img
                       src={inspirationImage}
                       alt="Foto de Referência do Cliente"
-                      className="w-full h-auto max-h-[240px] sm:max-h-none object-contain rounded-xl shadow-card"
+                      className="w-full h-auto max-h-[150px] sm:max-h-none object-contain rounded-xl shadow-card"
                     />
                   </div>
                 </div>
@@ -717,11 +717,11 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
                     </div>
                   </div>
 
-                  <div className="w-full rounded-xl overflow-hidden border border-[var(--color-pastry-light-pink)]/50 bg-[var(--color-pastry-cream)]/30 flex items-center justify-center p-2">
+                  <div className="w-full rounded-xl overflow-hidden border border-[var(--color-pastry-light-pink)]/50 bg-[var(--color-pastry-cream)]/30 flex items-center justify-center p-1">
                     <img
                       src={inspirationImage}
                       alt="Foto de Referência para Cozinha"
-                      className="w-full h-auto max-h-[240px] sm:max-h-none object-contain rounded-lg"
+                      className="w-full h-auto max-h-[150px] sm:max-h-none object-contain rounded-lg"
                     />
                   </div>
                 </div>
