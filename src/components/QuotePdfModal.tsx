@@ -406,7 +406,7 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
         {/* PRINTABLE DOCUMENT BODY */}
         <div
           id="quote-pdf-document"
-          className="p-1 sm:p-1.5 overflow-y-auto space-y-1.5 bg-[#F6F2F5] text-[#241B2B] print:p-1 print:bg-white"
+          className="p-1.5 sm:p-2 overflow-y-auto space-y-2 bg-[#F6F2F5] text-[#241B2B] print:p-1.5 print:bg-white"
         >
           {activeTab === 'cliente' ? (
             /* ======================================================== */
