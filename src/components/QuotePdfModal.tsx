@@ -582,7 +582,7 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
                     <img
                       src={inspirationImage}
                       alt="Foto de Referência do Cliente"
-                      className="w-full h-auto object-contain rounded-xl shadow-card"
+                      className="w-full h-auto max-h-[240px] sm:max-h-none object-contain rounded-xl shadow-card"
                     />
                   </div>
                 </div>
@@ -721,7 +721,7 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
                     <img
                       src={inspirationImage}
                       alt="Foto de Referência para Cozinha"
-                      className="w-full h-auto object-contain rounded-lg"
+                      className="w-full h-auto max-h-[240px] sm:max-h-none object-contain rounded-lg"
                     />
                   </div>
                 </div>
