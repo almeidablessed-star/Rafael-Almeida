@@ -3,5 +3,9 @@
   "outputDirectory": ".next",
   "env": {
     "NODE_ENV": "production"
-  }
+  },
+  "crons": [],
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "skipGitConnectDuringProd": false
 }
