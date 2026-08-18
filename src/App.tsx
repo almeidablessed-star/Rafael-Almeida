@@ -1,4 +1,4 @@
-// v2.0 - Updated with PDF image rendering fixes and visual redesign
+// v2.1 - Fresh rebuild with latest redesign - force Vercel deployment
 import React, { useState, useEffect } from 'react';
 import {
   Transaction,
