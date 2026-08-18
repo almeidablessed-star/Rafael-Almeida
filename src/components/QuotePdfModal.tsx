@@ -123,36 +123,62 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
       const images = docElem.querySelectorAll('img');
       console.log(`Found ${images.length} images to load`);
 
+      // Force set crossorigin on all images for proper CORS handling
+      Array.from(images).forEach((img) => {
+        if (!img.hasAttribute('crossorigin')) {
+          img.setAttribute('crossorigin', 'anonymous');
+        }
+      });
+
       const imageLoadPromises = Array.from(images).map((img, idx) => {
         return new Promise<void>((resolve) => {
-          if (img.complete && img.naturalHeight !== 0) {
-            console.log(`Image ${idx} already loaded`);
+          const timeout = setTimeout(() => {
+            console.log(`Image ${idx} timeout - continuing anyway`);
+            resolve();
+          }, 3500);
+
+          const handleLoad = () => {
+            clearTimeout(timeout);
+            console.log(`Image ${idx} loaded successfully`);
+            img.removeEventListener('load', handleLoad);
+            img.removeEventListener('error', handleError);
+            resolve();
+          };
+
+          const handleError = () => {
+            clearTimeout(timeout);
+            console.log(`Image ${idx} error - continuing anyway`);
+            img.removeEventListener('load', handleLoad);
+            img.removeEventListener('error', handleError);
+            resolve();
+          };
+
+          // Check if image is already fully loaded
+          if (img.complete && img.naturalHeight > 0) {
+            console.log(`Image ${idx} already loaded (complete, naturalHeight=${img.naturalHeight})`);
+            clearTimeout(timeout);
             resolve();
           } else {
-            console.log(`Waiting for image ${idx} to load...`);
-            const handleLoad = () => {
-              console.log(`Image ${idx} loaded`);
-              img.removeEventListener('load', handleLoad);
-              img.removeEventListener('error', handleError);
-              resolve();
-            };
-            const handleError = () => {
-              console.log(`Image ${idx} error, continuing anyway`);
-              img.removeEventListener('load', handleLoad);
-              img.removeEventListener('error', handleError);
-              resolve();
-            };
-            img.addEventListener('load', handleLoad);
-            img.addEventListener('error', handleError);
-            // Timeout fallback
-            setTimeout(resolve, 2000);
+            console.log(`Waiting for image ${idx}...`);
+            img.addEventListener('load', handleLoad, { once: true });
+            img.addEventListener('error', handleError, { once: true });
+
+            // Force re-load for data URLs to ensure they're rendered
+            if (img.src && img.src.startsWith('data:')) {
+              console.log(`Force-reloading data URL for image ${idx}`);
+              const src = img.src;
+              img.src = '';
+              Promise.resolve().then(() => {
+                img.src = src;
+              });
+            }
           }
         });
       });
 
       await Promise.all(imageLoadPromises);
       // Extra time to ensure browser has rendered everything
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 1000));
       console.log('✅ All images loaded and rendered');
 
       // Force image elements to be visible and ensure they have dimensions
@@ -169,16 +195,90 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
         console.log('✅ Found images with dimensions');
       }
 
+      // Store states for restoration in all scopes
+      const overflowElements = docElem.querySelectorAll('[class*="overflow-hidden"]');
+      const overflowStates: Array<{elem: Element, overflow: string}> = [];
+      const imageHeightStates: Array<{elem: Element, maxHeight: string}> = [];
+      const containerStates: Array<{elem: Element, maxHeight: string}> = [];
+
+      // Temporarily remove overflow-hidden from image containers to allow html-to-image to capture them
+      overflowElements.forEach(elem => {
+        const currentOverflow = window.getComputedStyle(elem).overflow;
+        overflowStates.push({ elem, overflow: currentOverflow });
+        (elem as HTMLElement).style.overflow = 'visible';
+        console.log('✅ Removed overflow-hidden temporarily');
+      });
+
+      // Temporarily remove max-height restrictions from inspiration images
+      const inspirationImages = docElem.querySelectorAll('.inspiration-image');
+      console.log(`Found ${inspirationImages.length} inspiration images with class`);
+      console.log(`Total img elements in docElem: ${docElem.querySelectorAll('img').length}`);
+
+      inspirationImages.forEach(img => {
+        const imgElement = img as HTMLElement;
+        const currentMaxHeight = imgElement.style.maxHeight;
+
+        imageHeightStates.push({ elem: img, maxHeight: currentMaxHeight });
+
+        // Use !important to override Tailwind classes and ensure visibility
+        imgElement.style.setProperty('max-height', 'none', 'important');
+        imgElement.style.setProperty('height', 'auto', 'important');
+        imgElement.style.setProperty('width', '100%', 'important');
+        imgElement.style.setProperty('display', 'block', 'important');
+        imgElement.style.setProperty('visibility', 'visible', 'important');
+        imgElement.style.setProperty('opacity', '1', 'important');
+        imgElement.style.setProperty('min-height', '50px', 'important');
+
+        console.log('✅ Removed max-height restrictions from inspiration images', {
+          complete: (imgElement as any).complete,
+          naturalHeight: (imgElement as any).naturalHeight,
+          currentSrc: (imgElement as any).src?.substring(0, 50),
+        });
+      });
+
+      // Also ensure image containers don't hide overflow
+      const imageContainers = docElem.querySelectorAll('.inspiration-image-container');
+      console.log(`Found ${imageContainers.length} image containers`);
+      imageContainers.forEach(container => {
+        const containerElement = container as HTMLElement;
+        const currentMaxHeight = containerElement.style.maxHeight;
+        containerStates.push({ elem: container, maxHeight: currentMaxHeight });
+
+        // Force container to show all content
+        containerElement.style.setProperty('max-height', 'none', 'important');
+        containerElement.style.setProperty('height', 'auto', 'important');
+        containerElement.style.setProperty('overflow', 'visible', 'important');
+        containerElement.style.setProperty('min-height', '100px', 'important');
+
+        console.log('✅ Cleared max-height and overflow from image container', {
+          offsetHeight: containerElement.offsetHeight,
+          offsetWidth: containerElement.offsetWidth,
+        });
+      });
+
+      // Extra delay to let browser re-render without overflow-hidden and max-height restrictions
+      await new Promise(resolve => setTimeout(resolve, 800));
+
       try {
+        // Verify images are still in DOM before capturing
+        const imgsBeforeCapture = docElem.querySelectorAll('img');
+        console.log(`Images found before capture: ${imgsBeforeCapture.length}`);
+        imgsBeforeCapture.forEach((img, idx) => {
+          const imgElement = img as HTMLElement;
+          const isVisible = imgElement.offsetHeight > 0 && imgElement.offsetWidth > 0;
+          console.log(`  Img ${idx}: src=${(img as any).src?.substring(0, 50)}, complete=${(img as any).complete}, naturalHeight=${(img as any).naturalHeight}, visible=${isVisible}, offsetHeight=${imgElement.offsetHeight}, offsetWidth=${imgElement.offsetWidth}`);
+        });
+
         // Use html-to-image which has better CSS support than html2canvas
         const imgData = await toPng(docElem, {
           cacheBust: true,
-          pixelRatio: 1,
+          pixelRatio: 2,
           allowTaint: true,
           useCORS: true,
           backgroundColor: '#FFFFFF',
           logging: true,
           quality: 0.95,
+          scale: 2,
         });
 
         console.log('✅ Image generated');
@@ -213,6 +313,39 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
 
           pdf.save(filename);
           console.log('✅ PDF saved:', filename);
+
+          // Restore overflow-hidden on image containers
+          overflowStates.forEach(({ elem, overflow }) => {
+            (elem as HTMLElement).style.overflow = overflow;
+            console.log('✅ Restored overflow property');
+          });
+
+          // Restore max-height restrictions on inspiration images
+          imageHeightStates.forEach(({ elem, maxHeight }) => {
+            const imgElement = elem as HTMLElement;
+            if (maxHeight) {
+              imgElement.style.maxHeight = maxHeight;
+            } else {
+              imgElement.style.removeProperty('max-height');
+            }
+            imgElement.style.removeProperty('height');
+            imgElement.style.removeProperty('width');
+            console.log('✅ Restored image styles');
+          });
+
+          // Restore image container styles
+          containerStates.forEach(({ elem, maxHeight }) => {
+            const containerElement = elem as HTMLElement;
+            if (maxHeight) {
+              containerElement.style.maxHeight = maxHeight;
+            } else {
+              containerElement.style.removeProperty('max-height');
+            }
+            containerElement.style.removeProperty('height');
+            containerElement.style.removeProperty('overflow');
+            containerElement.style.removeProperty('min-height');
+            console.log('✅ Restored container styles');
+          });
         };
         img.src = imgData;
 
@@ -224,6 +357,34 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
     } catch (err) {
       console.error('Error generating PDF:', err);
       alert('Erro ao gerar PDF. Tente novamente.');
+      // Restore overflow-hidden in case of error
+      overflowStates.forEach(({ elem, overflow }) => {
+        (elem as HTMLElement).style.overflow = overflow;
+      });
+      // Restore max-height in case of error
+      imageHeightStates.forEach(({ elem, maxHeight }) => {
+        const imgElement = elem as HTMLElement;
+        if (maxHeight) {
+          imgElement.style.maxHeight = maxHeight;
+        } else {
+          imgElement.style.removeProperty('max-height');
+        }
+        imgElement.style.removeProperty('height');
+        imgElement.style.removeProperty('width');
+      });
+
+      // Restore container styles in case of error
+      containerStates.forEach(({ elem, maxHeight }) => {
+        const containerElement = elem as HTMLElement;
+        if (maxHeight) {
+          containerElement.style.maxHeight = maxHeight;
+        } else {
+          containerElement.style.removeProperty('max-height');
+        }
+        containerElement.style.removeProperty('height');
+        containerElement.style.removeProperty('overflow');
+        containerElement.style.removeProperty('min-height');
+      });
     } finally {
       setIsGeneratingPdf(false);
     }
@@ -615,11 +776,11 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
                     </div>
                   </div>
 
-                  <div className="w-full rounded-lg overflow-hidden border border-[var(--color-pastry-light-pink)]/50 bg-[var(--color-pastry-cream)]/40 flex items-center justify-center p-1 print:overflow-visible">
+                  <div className="w-full rounded-lg overflow-hidden border border-[var(--color-pastry-light-pink)]/50 bg-[var(--color-pastry-cream)]/40 flex items-center justify-center p-1 print:overflow-visible inspiration-image-container">
                     <img
                       src={inspirationImage}
                       alt="Foto de Referência do Cliente"
-                      className="w-full h-auto max-h-[150px] sm:max-h-none print:max-h-full object-contain rounded-xl shadow-card"
+                      className="w-full h-auto max-h-[150px] sm:max-h-none object-contain rounded-xl shadow-card inspiration-image"
                     />
                   </div>
                 </div>
@@ -754,11 +915,11 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
                     </div>
                   </div>
 
-                  <div className="w-full rounded-xl overflow-hidden border border-[var(--color-pastry-light-pink)]/50 bg-[var(--color-pastry-cream)]/30 flex items-center justify-center p-1 print:overflow-visible">
+                  <div className="w-full rounded-xl overflow-hidden border border-[var(--color-pastry-light-pink)]/50 bg-[var(--color-pastry-cream)]/30 flex items-center justify-center p-1 print:overflow-visible inspiration-image-container">
                     <img
                       src={inspirationImage}
                       alt="Foto de Referência para Cozinha"
-                      className="w-full h-auto max-h-[150px] sm:max-h-none print:max-h-full object-contain rounded-lg"
+                      className="w-full h-auto max-h-[150px] sm:max-h-none object-contain rounded-lg inspiration-image"
                     />
                   </div>
                 </div>
