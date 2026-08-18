@@ -119,14 +119,28 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
       console.log('🎯 Starting PDF generation with html-to-image...');
       setIsGeneratingPdf(true);
 
-      // Wait for images to load
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Wait for all images to load before generating PDF
+      const images = docElem.querySelectorAll('img');
+      const imageLoadPromises = Array.from(images).map(img => {
+        return new Promise<void>((resolve) => {
+          if (img.complete) {
+            resolve();
+          } else {
+            img.onload = () => resolve();
+            img.onerror = () => resolve();
+          }
+        });
+      });
+      await Promise.all(imageLoadPromises);
+      console.log('✅ All images loaded');
 
       try {
         // Use html-to-image which has better CSS support than html2canvas
         const imgData = await toPng(docElem, {
           cacheBust: true,
           pixelRatio: 2,
+          allowTaint: true,
+          useCORS: true,
         });
 
         console.log('✅ Image generated');
