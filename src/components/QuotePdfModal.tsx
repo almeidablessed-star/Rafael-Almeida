@@ -256,9 +256,15 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
         });
       });
 
+      // Detect if running on iOS (Safari mobile has known timing issues with html-to-image)
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      const isIosSafari = isIOS && /Safari/.test(navigator.userAgent) && !/Chrome|Firefox/.test(navigator.userAgent);
+
       // Extra delay to let browser re-render without overflow-hidden and max-height restrictions
-      // Increased to 1500ms to ensure data URL images are fully rendered
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Increased to 1500ms for desktop, 2500ms for iOS due to Safari WebKit rendering differences
+      const delayMs = isIosSafari ? 2500 : 1500;
+      console.log(`📱 iOS Safari detected: ${isIosSafari}. Using delay: ${delayMs}ms`);
+      await new Promise(resolve => setTimeout(resolve, delayMs));
 
       try {
         // Verify images are still in DOM before capturing
@@ -275,19 +281,49 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
           console.log(`  Img ${idx}: src=${(img as any).src?.substring(0, 50)}, complete=${(img as any).complete}, naturalHeight=${(img as any).naturalHeight}, visible=${isVisible}, offsetHeight=${imgElement.offsetHeight}, offsetWidth=${imgElement.offsetWidth}`);
         });
 
-        // Use html-to-image which has better CSS support than html2canvas
-        const imgData = await toPng(docElem, {
-          cacheBust: true,
-          pixelRatio: 2,
-          allowTaint: true,
-          useCORS: true,
-          backgroundColor: '#FFFFFF',
-          logging: true,
-          quality: 0.95,
-          scale: 2,
-        });
+        // iOS Safari has known issues with html-to-image not capturing images on first try
+        // Implement retry logic: up to 3 attempts with delays between each
+        let imgData: string | undefined;
+        const maxRetries = isIosSafari ? 3 : 1;
 
-        console.log('✅ Image generated');
+        for (let attempt = 0; attempt < maxRetries; attempt++) {
+          console.log(`🔄 PDF capture attempt ${attempt + 1}/${maxRetries}...`);
+
+          try {
+            // Use html-to-image which has better CSS support than html2canvas
+            imgData = await toPng(docElem, {
+              cacheBust: true,
+              pixelRatio: 2,
+              allowTaint: true,
+              useCORS: true,
+              backgroundColor: '#FFFFFF',
+              logging: true,
+              quality: 0.95,
+              scale: 2,
+            });
+
+            // Check if capture was successful (on iOS, first attempt may return blank/small image)
+            if (imgData && imgData.length > 50000) {
+              console.log(`✅ Image generated successfully on attempt ${attempt + 1}`);
+              break;
+            } else if (attempt < maxRetries - 1) {
+              console.warn(`⚠️ Attempt ${attempt + 1} returned small/blank image. Retrying in 400ms...`);
+              imgData = undefined;
+              await new Promise(resolve => setTimeout(resolve, 400));
+            }
+          } catch (err) {
+            console.error(`❌ Error on attempt ${attempt + 1}:`, err);
+            if (attempt < maxRetries - 1) {
+              await new Promise(resolve => setTimeout(resolve, 400));
+            } else {
+              throw err;
+            }
+          }
+        }
+
+        if (!imgData) {
+          throw new Error('Failed to generate PDF image after all retry attempts');
+        }
 
         const pdf = new jsPDF({
           orientation: 'portrait',
