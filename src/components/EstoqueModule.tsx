@@ -371,8 +371,8 @@ export const EstoqueModule: React.FC = () => {
           </p>
         </div>
       ) : (
-        <div className="space-y-4 px-4 lg:px-6 mt-5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="space-y-4 px-4 mt-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {sortedItems.map((item) => {
                   const percentage = Math.min((item.quantity / item.minThreshold) * 100, 100);
                   const colors = getArcColor(percentage);
@@ -472,7 +472,7 @@ export const EstoqueModule: React.FC = () => {
       )}
 
       {/* Stock Movements History Section */}
-      <div className="mt-8 px-4 lg:px-6">
+      <div className="mt-8 px-4">
         <div className="mb-4">
           <h2 className="text-lg font-bold text-[#3A2350]" style={{ fontFamily: "'Manrope', sans-serif" }}>
             Histórico de Movimentações

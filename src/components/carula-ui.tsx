@@ -19,32 +19,22 @@ export const AppShell: React.FC<AppShellProps> = ({
   children,
 }) => {
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row" style={{ background: 'var(--car-surface)' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--car-surface)' }}>
       {/* Mobile Header */}
-      <div className="lg:hidden">
+      <div>
         {header}
       </div>
 
-      {/* Desktop Sidebar Header */}
-      <div className="hidden lg:block" style={{ width: '236px', flexShrink: 0 }}>
-        {desktopHeader}
-      </div>
-
       {/* Main Content */}
-      <main className="flex-1 flex flex-col pb-20 lg:pb-0 overflow-y-auto">
+      <main className="flex-1 flex flex-col pb-20 overflow-y-auto">
         <div className="flex-1">
           {children}
         </div>
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <div className="lg:hidden">
+      <div>
         <BottomNav activeTab={active} onTabChange={onChange} />
-      </div>
-
-      {/* Desktop Sidebar Navigation */}
-      <div className="hidden lg:block" style={{ width: '236px', flexShrink: 0 }}>
-        {/* Sidebar content will be here */}
       </div>
     </div>
   );
