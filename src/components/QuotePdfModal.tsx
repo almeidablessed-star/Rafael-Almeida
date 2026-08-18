@@ -155,13 +155,30 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
       await new Promise(resolve => setTimeout(resolve, 500));
       console.log('✅ All images loaded and rendered');
 
+      // Force image elements to be visible and ensure they have dimensions
+      const allImages = docElem.querySelectorAll('img');
+      let imageWithDimensions = false;
+      allImages.forEach((img, idx) => {
+        console.log(`Image ${idx}: complete=${(img as any).complete}, naturalHeight=${(img as any).naturalHeight}, width=${img.width}, height=${img.height}`);
+        if ((img as any).naturalHeight > 0 && img.width > 0) {
+          imageWithDimensions = true;
+        }
+      });
+
+      if (imageWithDimensions) {
+        console.log('✅ Found images with dimensions');
+      }
+
       try {
         // Use html-to-image which has better CSS support than html2canvas
         const imgData = await toPng(docElem, {
           cacheBust: true,
-          pixelRatio: 2,
+          pixelRatio: 1,
           allowTaint: true,
           useCORS: true,
+          backgroundColor: '#FFFFFF',
+          logging: true,
+          quality: 0.95,
         });
 
         console.log('✅ Image generated');
