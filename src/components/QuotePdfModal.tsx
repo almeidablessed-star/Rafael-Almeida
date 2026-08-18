@@ -615,11 +615,11 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
                     </div>
                   </div>
 
-                  <div className="w-full rounded-lg overflow-hidden border border-[var(--color-pastry-light-pink)]/50 bg-[var(--color-pastry-cream)]/40 flex items-center justify-center p-1">
+                  <div className="w-full rounded-lg overflow-hidden border border-[var(--color-pastry-light-pink)]/50 bg-[var(--color-pastry-cream)]/40 flex items-center justify-center p-1 print:overflow-visible">
                     <img
                       src={inspirationImage}
                       alt="Foto de Referência do Cliente"
-                      className="w-full h-auto max-h-[150px] sm:max-h-none object-contain rounded-xl shadow-card"
+                      className="w-full h-auto max-h-[150px] sm:max-h-none print:max-h-full object-contain rounded-xl shadow-card"
                     />
                   </div>
                 </div>
@@ -754,11 +754,11 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
                     </div>
                   </div>
 
-                  <div className="w-full rounded-xl overflow-hidden border border-[var(--color-pastry-light-pink)]/50 bg-[var(--color-pastry-cream)]/30 flex items-center justify-center p-1">
+                  <div className="w-full rounded-xl overflow-hidden border border-[var(--color-pastry-light-pink)]/50 bg-[var(--color-pastry-cream)]/30 flex items-center justify-center p-1 print:overflow-visible">
                     <img
                       src={inspirationImage}
                       alt="Foto de Referência para Cozinha"
-                      className="w-full h-auto max-h-[150px] sm:max-h-none object-contain rounded-lg"
+                      className="w-full h-auto max-h-[150px] sm:max-h-none print:max-h-full object-contain rounded-lg"
                     />
                   </div>
                 </div>
