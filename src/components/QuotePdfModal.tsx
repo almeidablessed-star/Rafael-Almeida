@@ -287,7 +287,22 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
         const maxRetries = isIosSafari ? 3 : 1;
 
         for (let attempt = 0; attempt < maxRetries; attempt++) {
-          console.log(`🔄 PDF capture attempt ${attempt + 1}/${maxRetries}...`);
+          console.log(`\n🔄 PDF capture attempt ${attempt + 1}/${maxRetries}...`);
+
+          // DEBUG: Log detailed state before each attempt
+          const imgsBeforeAttempt = docElem.querySelectorAll('img');
+          console.log(`[DEBUG] Before attempt ${attempt + 1}:`);
+          console.log(`  - Total images in DOM: ${imgsBeforeAttempt.length}`);
+          imgsBeforeAttempt.forEach((img, idx) => {
+            console.log(`  - Img ${idx}: complete=${(img as any).complete}, naturalHeight=${(img as any).naturalHeight}, width=${img.width}, computed display=${window.getComputedStyle(img).display}, visibility=${window.getComputedStyle(img).visibility}`);
+          });
+
+          // Log computed styles that might affect rendering
+          const parentContainer = docElem.querySelector('.inspiration-image-container');
+          if (parentContainer) {
+            const cs = window.getComputedStyle(parentContainer);
+            console.log(`  - Container overflow: ${cs.overflow}, max-height: ${cs.maxHeight}, height: ${cs.height}`);
+          }
 
           try {
             // Use html-to-image which has better CSS support than html2canvas
@@ -303,11 +318,14 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
             });
 
             // Check if capture was successful (on iOS, first attempt may return blank/small image)
+            const capturedSize = imgData ? imgData.length : 0;
+            console.log(`[DEBUG] Attempt ${attempt + 1} result: imgData size=${capturedSize} bytes`);
+
             if (imgData && imgData.length > 50000) {
               console.log(`✅ Image generated successfully on attempt ${attempt + 1}`);
               break;
             } else if (attempt < maxRetries - 1) {
-              console.warn(`⚠️ Attempt ${attempt + 1} returned small/blank image. Retrying in 400ms...`);
+              console.warn(`⚠️ Attempt ${attempt + 1} returned small/blank image (${capturedSize}B). Retrying in 400ms...`);
               imgData = undefined;
               await new Promise(resolve => setTimeout(resolve, 400));
             }
