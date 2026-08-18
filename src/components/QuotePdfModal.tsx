@@ -62,32 +62,13 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
     reader.onload = (event) => {
       const result = event.target?.result as string;
       if (result) {
-        // Pre-decode image for Safari iOS compatibility
-        // Forces Safari to render the data URL image before PDF generation
-        const img = new Image();
-        img.src = result;
-        img.decode()
-          .then(() => {
-            console.log('✅ Image pre-decoded successfully for Safari iOS');
-            setInspirationImage(result);
-            if ('id' in transaction && transaction.id) {
-              updateTransaction({
-                ...transaction,
-                inspirationImage: result,
-              });
-            }
-          })
-          .catch(() => {
-            // Fallback: proceed even if decode fails
-            console.warn('⚠️ Image decode failed, proceeding anyway');
-            setInspirationImage(result);
-            if ('id' in transaction && transaction.id) {
-              updateTransaction({
-                ...transaction,
-                inspirationImage: result,
-              });
-            }
+        setInspirationImage(result);
+        if ('id' in transaction && transaction.id) {
+          updateTransaction({
+            ...transaction,
+            inspirationImage: result,
           });
+        }
       }
     };
     reader.readAsDataURL(file);
@@ -284,24 +265,6 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
       const delayMs = isIosSafari ? 2500 : 1500;
       console.log(`📱 iOS Safari detected: ${isIosSafari}. Using delay: ${delayMs}ms`);
       await new Promise(resolve => setTimeout(resolve, delayMs));
-
-      // Second safeguard: Force-decode all images again before PDF capture (Safari iOS compatibility)
-      // This ensures images are fully rendered before html-to-image attempts to capture
-      if (isIosSafari) {
-        const imgsForDecode = docElem.querySelectorAll('img');
-        console.log(`🔄 Pre-decoding ${imgsForDecode.length} images for Safari iOS...`);
-        const decodePromises = Array.from(imgsForDecode).map((img, idx) => {
-          return (img as any).decode?.()
-            .then(() => {
-              console.log(`  ✅ Image ${idx} pre-decoded`);
-            })
-            .catch(() => {
-              console.log(`  ⚠️ Image ${idx} decode failed, continuing anyway`);
-            });
-        });
-        await Promise.all(decodePromises);
-        console.log('✅ All images pre-decoded');
-      }
 
       try {
         // Verify images are still in DOM before capturing
