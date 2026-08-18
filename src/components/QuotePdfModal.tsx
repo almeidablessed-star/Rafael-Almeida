@@ -121,18 +121,39 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
 
       // Wait for all images to load before generating PDF
       const images = docElem.querySelectorAll('img');
-      const imageLoadPromises = Array.from(images).map(img => {
+      console.log(`Found ${images.length} images to load`);
+
+      const imageLoadPromises = Array.from(images).map((img, idx) => {
         return new Promise<void>((resolve) => {
-          if (img.complete) {
+          if (img.complete && img.naturalHeight !== 0) {
+            console.log(`Image ${idx} already loaded`);
             resolve();
           } else {
-            img.onload = () => resolve();
-            img.onerror = () => resolve();
+            console.log(`Waiting for image ${idx} to load...`);
+            const handleLoad = () => {
+              console.log(`Image ${idx} loaded`);
+              img.removeEventListener('load', handleLoad);
+              img.removeEventListener('error', handleError);
+              resolve();
+            };
+            const handleError = () => {
+              console.log(`Image ${idx} error, continuing anyway`);
+              img.removeEventListener('load', handleLoad);
+              img.removeEventListener('error', handleError);
+              resolve();
+            };
+            img.addEventListener('load', handleLoad);
+            img.addEventListener('error', handleError);
+            // Timeout fallback
+            setTimeout(resolve, 2000);
           }
         });
       });
+
       await Promise.all(imageLoadPromises);
-      console.log('✅ All images loaded');
+      // Extra time to ensure browser has rendered everything
+      await new Promise(resolve => setTimeout(resolve, 500));
+      console.log('✅ All images loaded and rendered');
 
       try {
         // Use html-to-image which has better CSS support than html2canvas
