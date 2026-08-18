@@ -41,12 +41,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
   // Filter sales/orders only
   const sales = transactions.filter((t) => t.type === 'venda');
 
-  // Filter by current week
-  const weekStart = getCurrentWeekMonday();
-  const weekEnd = getCurrentWeekSunday();
-  const weeklySales = filterTransactionsByWeek(sales, weekStart, weekEnd);
-
-  const filteredSales = weeklySales.filter((s) => {
+  const filteredSales = sales.filter((s) => {
     const matchesSearch =
       s.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (s.customerName && s.customerName.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -58,17 +53,17 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
     return matchesSearch && matchesStatus;
   });
 
-  // Financial calculations (weekly only)
-  const totalVendas = weeklySales.reduce((acc, curr) => acc + (curr.totalValue || 0), 0);
-  const totalPagas = weeklySales
+  // Financial calculations
+  const totalVendas = sales.reduce((acc, curr) => acc + (curr.totalValue || 0), 0);
+  const totalPagas = sales
     .filter((s) => (s.paymentStatus || 'pago') === 'pago')
     .reduce((acc, curr) => acc + (curr.totalValue || 0), 0);
-  const totalPendentes = weeklySales
+  const totalPendentes = sales
     .filter((s) => s.paymentStatus === 'pendente')
     .reduce((acc, curr) => acc + (curr.totalValue || 0), 0);
 
-  const pendingCount = weeklySales.filter((s) => s.paymentStatus === 'pendente').length;
-  const paidCount = weeklySales.filter((s) => (s.paymentStatus || 'pago') === 'pago').length;
+  const pendingCount = sales.filter((s) => s.paymentStatus === 'pendente').length;
+  const paidCount = sales.filter((s) => (s.paymentStatus || 'pago') === 'pago').length;
 
   return (
     <div className="space-y-4 animate-fadeIn pb-8">
