@@ -257,12 +257,18 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
       });
 
       // Extra delay to let browser re-render without overflow-hidden and max-height restrictions
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // Increased to 1500ms to ensure data URL images are fully rendered
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
       try {
         // Verify images are still in DOM before capturing
         const imgsBeforeCapture = docElem.querySelectorAll('img');
         console.log(`Images found before capture: ${imgsBeforeCapture.length}`);
+
+        // Additional check: if no images found, something is wrong with timing or selectors
+        if (imgsBeforeCapture.length === 0) {
+          console.warn('⚠️ WARNING: No images found in DOM before PDF capture. This suggests the image state has not updated the DOM yet.');
+        }
         imgsBeforeCapture.forEach((img, idx) => {
           const imgElement = img as HTMLElement;
           const isVisible = imgElement.offsetHeight > 0 && imgElement.offsetWidth > 0;
