@@ -595,10 +595,19 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
     }));
   };
 
-  return createPortal(
+  return (
     <>
-      {/* DEBUG PANEL - iOS Logging Console */}
-      <div className="fixed bottom-0 left-0 right-0 z-[100000] bg-black text-white text-xs p-2 max-h-48 overflow-y-auto font-mono border-t-2 border-yellow-400" style={{display: showDebugPanel ? 'block' : 'none'}}>
+      {/* DEBUG TOGGLE BUTTON - OUTSIDE MODAL */}
+      <button
+        onClick={() => setShowDebugPanel(!showDebugPanel)}
+        className="fixed bottom-4 right-4 px-3 py-2 bg-yellow-500 hover:bg-yellow-600 text-black font-bold rounded-lg text-xs"
+        style={{position: 'fixed', zIndex: 999999}}
+      >
+        🐛 DEBUG
+      </button>
+
+      {/* DEBUG PANEL - OUTSIDE MODAL */}
+      <div className="fixed bottom-0 left-0 right-0 bg-black text-white text-xs p-2 max-h-48 overflow-y-auto font-mono border-t-2 border-yellow-400" style={{display: showDebugPanel ? 'block' : 'none', zIndex: 999998}}>
         <div className="flex justify-between items-center mb-2 sticky top-0 bg-black">
           <span className="font-bold">📋 DEBUG LOGS</span>
           <div className="flex gap-2">
@@ -626,16 +635,8 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
         ))}
       </div>
 
-      {/* DEBUG TOGGLE BUTTON */}
-      <button
-        onClick={() => setShowDebugPanel(!showDebugPanel)}
-        className="fixed bottom-4 right-4 px-3 py-2 bg-yellow-500 hover:bg-yellow-600 text-black font-bold rounded-lg text-xs"
-        style={{display: 'block', zIndex: 999999}}
-      >
-        🐛 DEBUG
-      </button>
-
-    <div className="fixed inset-0 z-[99999] bg-neutral-950/85 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 overflow-y-auto print:p-0 print:bg-white print:fixed print:inset-0" role="dialog" aria-modal="true">
+      {createPortal(
+      <div className="fixed inset-0 z-[99999] bg-neutral-950/85 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 overflow-y-auto print:p-0 print:bg-white print:fixed print:inset-0" role="dialog" aria-modal="true">
       {/* Strict Print CSS for Single Page output */}
       <style>{`
         @media print {
@@ -1155,8 +1156,7 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
         </div>
       </div>
     </div>
+      )}
     </>
-    ,
-    document.body
   );
 };
