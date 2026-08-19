@@ -20,6 +20,7 @@ import {
 } from './utils/storage';
 import { getTodayIso } from './utils/formatters';
 import { getStoredFichas } from './components/FichasTecnicasModule';
+import { useUndo } from './hooks/useUndo';
 
 import {
   Home,
@@ -58,7 +59,7 @@ import { CurrencyProvider } from './context/CurrencyContext';
 export default function App() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
-  
+
   // Period filter state
   const [period, setPeriod] = useState<TimePeriod>('mes'); // Default to 'Este Mês'
   const [customStartDate, setCustomStartDate] = useState<string>(getTodayIso());
@@ -76,6 +77,10 @@ export default function App() {
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(() => {
     return localStorage.getItem('carula_logged_in') === 'true';
   });
+
+  // Undo state
+  const { saveForUndo, getUndoData, hasUndo } = useUndo();
+  const [showUndoToast, setShowUndoToast] = useState(false);
 
   // Load transactions on mount
   useEffect(() => {
@@ -155,9 +160,27 @@ export default function App() {
   };
 
   const handleConfirmDelete = (id: string) => {
+    // Save for undo before deleting
+    const toDelete = transactions.find(t => t.id === id);
+    if (toDelete) {
+      saveForUndo(toDelete);
+      setShowUndoToast(true);
+      // Auto-hide toast after 10 seconds
+      setTimeout(() => setShowUndoToast(false), 10000);
+    }
+
     deleteTransaction(id);
     setTransactions(getStoredTransactions());
     setDeletingTransaction(null);
+  };
+
+  const handleUndo = () => {
+    const undoTx = getUndoData();
+    if (undoTx) {
+      addTransaction(undoTx);
+      setTransactions(getStoredTransactions());
+      setShowUndoToast(false);
+    }
   };
 
   const handleRestoreTransactions = (txs: Transaction[]) => {
@@ -373,6 +396,19 @@ export default function App() {
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
       />
+
+      {/* Undo Toast */}
+      {showUndoToast && (
+        <div className="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-neutral-900 text-white rounded-lg p-4 shadow-lg z-40 flex items-center gap-3" style={{ animation: 'fadeIn 0.3s ease-out' }}>
+          <span className="text-sm font-medium">Pedido deletado</span>
+          <button
+            onClick={handleUndo}
+            className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs font-bold transition-all active:scale-95"
+          >
+            ↩️ Desfazer
+          </button>
+        </div>
+      )}
 
       </div>
     </CurrencyProvider>

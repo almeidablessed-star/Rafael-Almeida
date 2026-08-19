@@ -27,19 +27,27 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
           </div>
 
           <h3 id="deleteTitle" className="font-brand font-bold text-base text-neutral-900 mb-1">
-            Excluir Lançamento?
+            Excluir {transaction.type === 'venda' ? 'Pedido' : 'Lançamento'}?
           </h3>
 
-          <p className="text-xs text-neutral-900/70 mb-4 leading-relaxed">
-            Tem certeza que deseja excluir o lançamento{' '}
-            <strong className="text-neutral-900">"{transaction.description}"</strong> no valor de{' '}
-            <strong className="text-semantic-error-600">{formatCurrency(transaction.totalValue)}</strong>?
-          </p>
-
-          <div className="bg-semantic-error-100/10 p-3 rounded-lg mb-4 text-left border border-semantic-error-300/30 text-[11px] text-neutral-900/70 space-y-1">
-            <div>• <strong>Data:</strong> {formatDateBr(transaction.date)}</div>
-            {transaction.quantity > 1 && <div>• <strong>Quantidade:</strong> {transaction.quantity}x</div>}
-            <div className="text-semantic-error-600 font-medium pt-0.5">• Os valores serão removidos dos cálculos do dashboard imediatamente.</div>
+          <div className="bg-semantic-error-50 p-4 rounded-lg mb-4 text-left border border-semantic-error-300/60 space-y-2.5">
+            {transaction.type === 'venda' && transaction.customerName && (
+              <div className="text-sm">
+                <span className="text-neutral-600">👤 Cliente:</span>
+                <strong className="text-neutral-900 ml-2">{transaction.customerName.toUpperCase()}</strong>
+              </div>
+            )}
+            <div className="text-sm">
+              <span className="text-neutral-600">💰 Valor:</span>
+              <strong className="text-semantic-error-600 ml-2">{formatCurrency(transaction.totalValue)}</strong>
+            </div>
+            <div className="text-sm">
+              <span className="text-neutral-600">📅 Data:</span>
+              <strong className="text-neutral-900 ml-2">{formatDateBr(transaction.date)}</strong>
+            </div>
+            <div className="text-[11px] text-semantic-error-600 font-medium pt-1 border-t border-semantic-error-300/40">
+              ⚠️ Esta ação é irreversível por 10 segundos — use "Desfazer" se deletar por engano.
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-2">

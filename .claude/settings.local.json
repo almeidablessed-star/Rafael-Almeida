@@ -100,7 +100,9 @@
       "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")",
       "Bash(node \"C:\\\\Users\\\\Rafael\\\\.claude\\\\skills\\\\impeccable\\\\scripts\\\\context.mjs\")",
       "Bash(node \"C:\\\\Users\\\\Rafael\\\\.claude\\\\skills\\\\impeccable\\\\scripts\\\\context.mjs\" --target src)",
-      "Bash(node \"C:\\\\Users\\\\Rafael\\\\.claude\\\\skills\\\\impeccable\\\\scripts\\\\detect.mjs\" --json src/components/*.tsx)"
+      "Bash(node \"C:\\\\Users\\\\Rafael\\\\.claude\\\\skills\\\\impeccable\\\\scripts\\\\detect.mjs\" --json src/components/*.tsx)",
+      "Bash(node \"C:\\\\Users\\\\Rafael\\\\.claude\\\\skills\\\\impeccable\\\\scripts\\\\context.mjs\" --target src/)",
+      "Bash(cd \"C:\\\\Users\\\\Rafael\\\\Documents\\\\projetos\\\\carula\" && ls \"C:\\\\Users\\\\Rafael\\\\.claude\\\\skills\\\\impeccable\\\\scripts\\\\\" | grep critique)"
     ]
   },
   "hooks": {
