@@ -399,11 +399,12 @@ export default function App() {
 
       {/* Undo Toast */}
       {showUndoToast && (
-        <div className="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-neutral-900 text-white rounded-lg p-4 shadow-lg z-40 flex items-center gap-3" style={{ animation: 'fadeIn 0.3s ease-out' }}>
-          <span className="text-sm font-medium">Pedido deletado</span>
+        <div className="fixed bottom-24 left-1/2 transform -translate-x-1/2 rounded-2xl p-4 z-40 flex items-center gap-3 shadow-lg" style={{ background: 'linear-gradient(135deg, #6E3F72 0%, #3A2350 100%)', animation: 'fadeIn 0.3s ease-out', fontFamily: "'Manrope', sans-serif" }}>
+          <span className="text-sm font-bold text-white">✓ Pedido deletado</span>
           <button
             onClick={handleUndo}
-            className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs font-bold transition-all active:scale-95"
+            className="px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-95 hover:shadow-md"
+            style={{ background: '#F5B9C6', color: '#3A2350', fontFamily: "'Manrope', sans-serif" }}
           >
             ↩️ Desfazer
           </button>
