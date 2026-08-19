@@ -165,7 +165,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
         setInspirationImage(editingTransaction.inspirationImage || '');
         // Look up if existing description matches a catalog cake name
         const matchedName = UNIQUE_CAKE_NAMES.find((name) =>
-          editingTransaction.description.toLowerCase().includes(name.toLowerCase())
+          (editingTransaction.description || '').toLowerCase().includes(name.toLowerCase())
         );
 
         if (matchedName) {

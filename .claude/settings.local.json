@@ -88,7 +88,16 @@
       "Bash(git push *)",
       "Bash(git merge *)",
       "Bash(git ls-remote *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(git stash *)",
+      "WebSearch",
+      "Bash(gh api *)",
+      "Bash(curl -s \"https://rafael-almeida-teste-pdf-ios.vercel.app\" -o /dev/null -w \"Status: %{http_code}\\\\n\")",
+      "Bash(gh repo *)",
+      "Bash(curl -s \"https://rafael-almeida-ag3n1jxo8-almeida6.vercel.app/\" -o /dev/null -w \"Status: %{http_code}\\\\n\")",
+      "Bash(git pull *)",
+      "Bash(xargs grep -l \"Meu Perfil\\\\|perfil\\\\|profile\")",
+      "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")"
     ]
   },
   "hooks": {

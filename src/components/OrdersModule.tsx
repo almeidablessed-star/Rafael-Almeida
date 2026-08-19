@@ -352,6 +352,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
               <div
                 key={tx.id}
                 className="bg-white rounded-3xl shadow-card transition-all duration-300 cursor-pointer relative overflow-hidden"
+                onClick={() => onEditTransaction(tx)}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-6px)';
                   e.currentTarget.style.boxShadow = '0 20px 40px rgba(58,35,80,0.2)';
