@@ -112,6 +112,10 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
   });
 
   const sellerProfile = getStoredUserProfile();
+  // Get seller photo from carula_profile (primary source - user's profile modal)
+  const carulaProfileData = JSON.parse(localStorage.getItem('carula_profile') || '{}');
+  const sellerPhotoUrl = carulaProfileData.photo || sellerProfile.photoUrl;
+
   const storedFichas = getStoredFichas();
   const storedCustomers = getStoredCustomers();
 
@@ -732,9 +736,9 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-lg bg-white border-2 border-[var(--color-pastry-light-pink)] shadow-card flex items-center justify-center overflow-hidden shrink-0">
-                      {sellerProfile.photoUrl ? (
+                      {sellerPhotoUrl ? (
                         <img
-                          src={sellerProfile.photoUrl}
+                          src={sellerPhotoUrl}
                           alt={sellerProfile.name}
                           className="w-full h-full object-cover"
                         />

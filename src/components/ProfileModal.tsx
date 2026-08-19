@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { X, Camera } from 'lucide-react';
+import { X, Camera, Edit2 } from 'lucide-react';
 import { useCurrency } from '../context/CurrencyContext';
 
 interface ProfileModalProps {
@@ -171,7 +171,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
         </div>
 
         {/* Photo Section */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '32px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '32px', position: 'relative' }}>
           {/* Photo Circle */}
           <div
             style={{
@@ -202,36 +202,72 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
               <div style={{ fontSize: '48px', fontWeight: 'bold', color: '#FFFFFF' }}>C</div>
             )}
 
-            {/* Camera Button */}
+            {/* Camera Button - Centered */}
+            {!profileData.photo && (
+              <button
+                onClick={handlePhotoClick}
+                style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '50%',
+                  background: '#3A2350',
+                  border: '3px solid #FFFFFF',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#FFFFFF',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.background = '#5A3A70';
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.background = '#3A2350';
+                }}
+                title="Adicionar foto"
+              >
+                <Camera size={18} />
+              </button>
+            )}
+          </div>
+
+          {/* Edit Button - Outside Circle Bottom Right */}
+          {profileData.photo && (
             <button
               onClick={handlePhotoClick}
               style={{
                 position: 'absolute',
                 bottom: '0',
                 right: '0',
-                width: '40px',
-                height: '40px',
+                width: '32px',
+                height: '32px',
                 borderRadius: '50%',
-                background: '#3A2350',
-                border: '3px solid #FFFFFF',
+                background: '#C4626F',
+                border: '2px solid #FFFFFF',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 color: '#FFFFFF',
-                transition: 'background 0.2s ease',
+                transition: 'all 0.2s ease',
+                boxShadow: '0 2px 8px rgba(196, 98, 111, 0.3)',
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background = '#5A3A70';
+                (e.currentTarget as HTMLButtonElement).style.background = '#E07080';
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background = '#3A2350';
+                (e.currentTarget as HTMLButtonElement).style.background = '#C4626F';
               }}
               title="Trocar foto"
             >
-              <Camera size={18} />
+              <Edit2 size={16} />
             </button>
-          </div>
+          )}
 
           <input
             ref={fileInputRef}
