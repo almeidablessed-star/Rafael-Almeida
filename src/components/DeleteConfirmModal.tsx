@@ -62,7 +62,7 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
                 onConfirmDelete(transaction.id);
                 onClose();
               }}
-              className="py-2.5 px-4 bg-pastry-pink hover:bg-pastry-pink/90 text-white font-bold text-xs rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1.5"
+              className="py-2.5 px-4 bg-red-700 hover:bg-red-800 text-white font-bold text-xs rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1.5"
             >
               <Trash2 className="w-4 h-4" />
               Sim, Excluir
