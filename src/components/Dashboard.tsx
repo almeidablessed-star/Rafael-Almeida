@@ -318,7 +318,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </button>
 
         {/* 3. SALDOS & DIVISÃO DOS PEDIDOS - 3 Medidores */}
-        <div className="space-y-3">
+        <div className="space-y-3 w-full">
           <div>
             <h3 className="font-serif-display text-[23px]" style={{ color: '#241B2B' }}>
               Saldos &amp; Divisão dos Pedidos
