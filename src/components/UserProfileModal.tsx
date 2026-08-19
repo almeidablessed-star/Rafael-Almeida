@@ -106,7 +106,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
               ) : (
                 <User className="w-10 h-10 text-pink-300" />
               )}
-              <label className="absolute inset-0 bg-slate-900/40 opacity-0 hover:opacity-100 flex items-center justify-center text-white cursor-pointer transition-opacity">
+              <label className="absolute inset-0 bg-slate-900/40 opacity-0 hover:opacity-100 text-white cursor-pointer transition-opacity" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Camera className="w-6 h-6" />
                 <input
                   type="file"
