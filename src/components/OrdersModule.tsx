@@ -338,7 +338,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
             </p>
             <button
               onClick={() => onOpenAddModal('venda')}
-              className="px-4 py-2 bg-[var(--color-ink)] text-[var(--color-accent-gold)] text-xs font-medium rounded-full inline-flex items-center gap-1.5 cursor-pointer"
+              className="px-4 py-2 bg-[#6E3F72] text-white text-xs font-medium rounded-full inline-flex items-center gap-1.5 cursor-pointer hover:bg-[#5A2F5E] transition-colors"
             >
               <PlusCircle className="w-3.5 h-3.5" />
               Lançar Novo Pedido
