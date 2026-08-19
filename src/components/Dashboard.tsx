@@ -329,7 +329,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
 
           {/* 3 Circular Gauges */}
-          <div className="flex gap-3">
+          <div className="flex gap-3 w-full">
             {/* Reposição */}
             <div
               className="flex-1 bg-white rounded-[22px] p-4 text-center transition-all duration-300 cursor-pointer"
