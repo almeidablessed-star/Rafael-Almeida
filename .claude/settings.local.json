@@ -97,7 +97,10 @@
       "Bash(curl -s \"https://rafael-almeida-ag3n1jxo8-almeida6.vercel.app/\" -o /dev/null -w \"Status: %{http_code}\\\\n\")",
       "Bash(git pull *)",
       "Bash(xargs grep -l \"Meu Perfil\\\\|perfil\\\\|profile\")",
-      "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")"
+      "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")",
+      "Bash(node \"C:\\\\Users\\\\Rafael\\\\.claude\\\\skills\\\\impeccable\\\\scripts\\\\context.mjs\")",
+      "Bash(node \"C:\\\\Users\\\\Rafael\\\\.claude\\\\skills\\\\impeccable\\\\scripts\\\\context.mjs\" --target src)",
+      "Bash(node \"C:\\\\Users\\\\Rafael\\\\.claude\\\\skills\\\\impeccable\\\\scripts\\\\detect.mjs\" --json src/components/*.tsx)"
     ]
   },
   "hooks": {

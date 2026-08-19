@@ -745,7 +745,7 @@ export const CustomersModule: React.FC = () => {
             </div>
 
             {additionalEvents.map((ev) => (
-              <div key={ev.id} className="flex items-center gap-2 bg-[var(--color-neutral-hero)] p-2 rounded-xl border border-[var(--color-accent-gold)]/40">
+              <div key={ev.id} className="flex items-center gap-3 bg-[var(--color-neutral-hero)] p-2 rounded-xl border border-[var(--color-accent-gold)]/40">
                 <input
                   type="text"
                   placeholder="Nome da data comemorativa"
@@ -1169,7 +1169,7 @@ export const CustomersModule: React.FC = () => {
                             }}
                           >
                             <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '1px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                 {ev.isHoliday ? <Gift className="w-3.5 h-3.5 text-[var(--color-neutral-charcoal)] shrink-0" /> : <Cake className="w-3.5 h-3.5 text-[var(--color-neutral-charcoal)] shrink-0" />}
                                 <span
                                   style={{

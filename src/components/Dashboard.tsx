@@ -125,7 +125,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
             {/* "Carula Confeitaria" Title */}
             <div className="flex-1 text-center">
-              <div className="font-serif-display text-[32px] text-white leading-[1] tracking-[0.01em]">
+              <div className="font-serif-display text-[32px] text-white leading-[1.2] tracking-[0.01em]">
                 Carula
               </div>
               <div style={{ fontSize: '8px', fontWeight: 700, letterSpacing: '0.44em', color: 'rgba(247,220,225,0.78)', marginTop: '3px', paddingLeft: '0.44em', textTransform: 'uppercase', fontFamily: "'Manrope', sans-serif" }}>

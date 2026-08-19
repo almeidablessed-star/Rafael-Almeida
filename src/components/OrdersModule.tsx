@@ -96,7 +96,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
             style={{
               fontFamily: "'Instrument Serif', serif",
               fontSize: '31px',
-              lineHeight: '1.1',
+              lineHeight: '1.3',
             }}
           >
             Pedidos & Encomendas
@@ -393,7 +393,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
 
                   <div className="flex-1 min-w-0 space-y-2">
                     {/* CLIENT CHIP & STATUS */}
-                    <div className="flex items-center gap-2 flex-wrap">
+                    <div className="flex items-center gap-3 flex-wrap">
                       <span className="inline-flex items-center gap-1 rounded-full" style={{ fontSize: '10px', fontWeight: 800, color: '#3A2350', background: '#F3E9F3', padding: '5px 11px', fontFamily: "'Manrope', sans-serif" }}>
                         👤 CLIENTE: {tx.customerName ? tx.customerName.toUpperCase() : 'CLIENTE'}
                       </span>

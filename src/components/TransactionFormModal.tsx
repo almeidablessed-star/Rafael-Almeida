@@ -677,7 +677,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
 
                 {storedCustomers.length > 0 && (
                   <div>
-                    <label className="block text-[11px] font-bold text-pink-900 mb-1 flex items-center gap-1">
+                    <label className="block text-[11px] font-bold text-pink-900 mb-2.5 flex items-center gap-1">
                       <Users className="w-3.5 h-3.5 text-pink-600" /> Puxar Dados de Cliente Cadastrada:
                     </label>
                     <select
@@ -1011,7 +1011,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       )}
 
                       {/* QUANTITY & AUTO-FILLED BREAKDOWN PREVIEW */}
-                      <div className="pt-2 border-t border-pink-200/80 flex flex-wrap items-center justify-between gap-3">
+                      <div className="pt-3 border-t border-pink-200/80 flex flex-wrap items-center justify-between gap-3">
                         {/* Quantity Counter */}
                         <div className="flex items-center gap-1">
                           <span className="text-[11px] font-bold text-neutral-600">Qtd:</span>
@@ -1048,7 +1048,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       </div>
 
                       {/* Small Auto-Fill Cost Breakdown Pills */}
-                      <div className="bg-white p-2 rounded-xl border border-pink-100 text-[10px] grid grid-cols-4 gap-1 text-center font-semibold text-neutral-600">
+                      <div className="bg-white p-2 rounded-xl border border-pink-100 text-[10px] grid grid-cols-4 gap-2 text-center font-semibold text-neutral-600">
                         <div title="Reposição de Insumos">
                           <span className="block text-semantic-warning-700 font-bold">Reposição</span>
                           <span className="font-extrabold text-neutral-900">
