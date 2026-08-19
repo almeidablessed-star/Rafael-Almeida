@@ -300,66 +300,49 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
           console.log(`  Img ${idx}: src=${(img as any).src?.substring(0, 50)}, complete=${(img as any).complete}, naturalHeight=${(img as any).naturalHeight}, visible=${isVisible}, offsetHeight=${imgElement.offsetHeight}, offsetWidth=${imgElement.offsetWidth}`);
         });
 
-        // iOS Safari has known issues with html-to-image not capturing images on first try
-        // Implement retry logic: up to 3 attempts with delays between each
+        // iOS Safari has known issue: first toPng() call often returns blank, second succeeds
+        // Solution: Always do internal double attempt (user only sees single click)
         let imgData: string | undefined;
-        const maxRetries = isIosSafari ? 3 : 1;
 
-        for (let attempt = 0; attempt < maxRetries; attempt++) {
-          console.log(`\n🔄 PDF capture attempt ${attempt + 1}/${maxRetries}...`);
-
-          // DEBUG: Log detailed state before each attempt
-          const imgsBeforeAttempt = docElem.querySelectorAll('img');
-          console.log(`[DEBUG] Before attempt ${attempt + 1}:`);
-          console.log(`  - Total images in DOM: ${imgsBeforeAttempt.length}`);
-          imgsBeforeAttempt.forEach((img, idx) => {
-            console.log(`  - Img ${idx}: complete=${(img as any).complete}, naturalHeight=${(img as any).naturalHeight}, width=${img.width}, computed display=${window.getComputedStyle(img).display}, visibility=${window.getComputedStyle(img).visibility}`);
+        // First attempt (discarded) - primes the canvas/rendering pipeline
+        console.log(`\n🔄 PDF capture attempt 1/2 (priming)...`);
+        try {
+          await toPng(docElem, {
+            cacheBust: true,
+            pixelRatio: 2,
+            allowTaint: true,
+            useCORS: true,
+            backgroundColor: '#FFFFFF',
+            logging: false,
+            quality: 0.95,
+            scale: 2,
           });
-
-          // Log computed styles that might affect rendering
-          const parentContainer = docElem.querySelector('.inspiration-image-container');
-          if (parentContainer) {
-            const cs = window.getComputedStyle(parentContainer);
-            console.log(`  - Container overflow: ${cs.overflow}, max-height: ${cs.maxHeight}, height: ${cs.height}`);
-          }
-
-          try {
-            // Use html-to-image which has better CSS support than html2canvas
-            imgData = await toPng(docElem, {
-              cacheBust: true,
-              pixelRatio: 2,
-              allowTaint: true,
-              useCORS: true,
-              backgroundColor: '#FFFFFF',
-              logging: true,
-              quality: 0.95,
-              scale: 2,
-            });
-
-            // Check if capture was successful (on iOS, first attempt may return blank/small image)
-            const capturedSize = imgData ? imgData.length : 0;
-            console.log(`[DEBUG] Attempt ${attempt + 1} result: imgData size=${capturedSize} bytes`);
-
-            if (imgData && imgData.length > 50000) {
-              console.log(`✅ Image generated successfully on attempt ${attempt + 1}`);
-              break;
-            } else if (attempt < maxRetries - 1) {
-              console.warn(`⚠️ Attempt ${attempt + 1} returned small/blank image (${capturedSize}B). Retrying in 400ms...`);
-              imgData = undefined;
-              await new Promise(resolve => setTimeout(resolve, 400));
-            }
-          } catch (err) {
-            console.error(`❌ Error on attempt ${attempt + 1}:`, err);
-            if (attempt < maxRetries - 1) {
-              await new Promise(resolve => setTimeout(resolve, 400));
-            } else {
-              throw err;
-            }
-          }
+          console.log(`✅ First attempt completed (result discarded, primed for second)`);
+        } catch (err) {
+          console.log(`⚠️ First attempt threw error (expected on some cases): ${err}`);
         }
 
+        // Wait between attempts - gives browser time to update canvas state
+        await new Promise(resolve => setTimeout(resolve, 300));
+
+        // Second attempt (used) - this should have the image
+        console.log(`🔄 PDF capture attempt 2/2 (final)...`);
+        imgData = await toPng(docElem, {
+          cacheBust: true,
+          pixelRatio: 2,
+          allowTaint: true,
+          useCORS: true,
+          backgroundColor: '#FFFFFF',
+          logging: true,
+          quality: 0.95,
+          scale: 2,
+        });
+
+        const capturedSize = imgData ? imgData.length : 0;
+        console.log(`✅ Second attempt result: imgData size=${capturedSize} bytes`);
+
         if (!imgData) {
-          throw new Error('Failed to generate PDF image after all retry attempts');
+          throw new Error('Failed to generate PDF image on second attempt');
         }
 
         const pdf = new jsPDF({
@@ -635,8 +618,7 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
         ))}
       </div>
 
-      {createPortal(
-      <div className="fixed inset-0 z-[99999] bg-neutral-950/85 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 overflow-y-auto print:p-0 print:bg-white print:fixed print:inset-0" role="dialog" aria-modal="true">
+      <div className="fixed inset-0 z-50 bg-neutral-950/85 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 overflow-y-auto print:p-0 print:bg-white print:fixed print:inset-0" role="dialog" aria-modal="true">
       {/* Strict Print CSS for Single Page output */}
       <style>{`
         @media print {
@@ -1156,7 +1138,6 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
         </div>
       </div>
     </div>
-      )}
     </>
   );
 };
