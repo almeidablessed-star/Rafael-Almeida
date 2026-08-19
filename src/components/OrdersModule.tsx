@@ -423,7 +423,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
 
                     <div className="flex items-center gap-[6px]">
                     <button
-                      onClick={() => setQuoteTx(tx)}
+                      onClick={(e) => { e.stopPropagation(); setQuoteTx(tx); }}
                       className="rounded-full transition-all flex items-center gap-1 cursor-pointer active:scale-95 hover:translate-y-[-2px]"
                       style={{ fontSize: '10px', fontWeight: 700, color: '#F5B9C6', background: '#3A2350', padding: '7px 12px', fontFamily: "'Manrope', sans-serif" }}
                       title="Gerar e Visualizar Orçamento em PDF"
@@ -435,7 +435,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                     {onTogglePaymentStatus && (
                       isPending ? (
                         <button
-                          onClick={() => onTogglePaymentStatus(tx)}
+                          onClick={(e) => { e.stopPropagation(); onTogglePaymentStatus(tx); }}
                           className="rounded-full transition-all flex items-center gap-1 cursor-pointer active:scale-95 hover:translate-y-[-2px]"
                           style={{ fontSize: '10px', fontWeight: 800, color: '#26402F', background: '#A9D8B8', padding: '7px 12px', fontFamily: "'Manrope', sans-serif" }}
                           title="Clique para marcar este pedido como PAGO"
@@ -444,7 +444,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                         </button>
                       ) : (
                         <button
-                          onClick={() => onTogglePaymentStatus(tx)}
+                          onClick={(e) => { e.stopPropagation(); onTogglePaymentStatus(tx); }}
                           className="rounded-full transition-all flex items-center gap-1 cursor-pointer active:scale-95 hover:translate-y-[-2px]"
                           style={{ fontSize: '10px', fontWeight: 700, color: '#5B4A2E', background: '#F0E2C8', padding: '7px 12px', fontFamily: "'Manrope', sans-serif" }}
                           title="Clique para alterar este pedido para PENDENTE"
@@ -456,7 +456,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
 
                     {onEditTransaction && (
                       <button
-                        onClick={() => onEditTransaction(tx)}
+                        onClick={(e) => { e.stopPropagation(); onEditTransaction(tx); }}
                         className="rounded-full transition-all cursor-pointer"
                         style={{ width: '28px', height: '28px', background: '#F6F2F5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                         onMouseEnter={(e) => e.currentTarget.style.background = '#EFE6F0'}
@@ -468,7 +468,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                     )}
                     {onDeleteTransaction && (
                       <button
-                        onClick={() => onDeleteTransaction(tx)}
+                        onClick={(e) => { e.stopPropagation(); onDeleteTransaction(tx); }}
                         className="rounded-full transition-all cursor-pointer"
                         style={{ width: '28px', height: '28px', background: '#F6F2F5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                         onMouseEnter={(e) => e.currentTarget.style.background = '#FBE9EC'}
