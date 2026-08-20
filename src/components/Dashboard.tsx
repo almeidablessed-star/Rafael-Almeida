@@ -5,6 +5,7 @@ import { calculateWeeklyBalances } from '../utils/balancesCalculator';
 import { ANIMATION_DURATIONS, ANIMATION_EASING } from '../lib/animation-tokens';
 import { useCurrency } from '../context/CurrencyContext';
 import { OrdersCalendar } from './OrdersCalendar';
+import { AvatarProfile } from './AvatarProfile';
 import {
   Wallet,
   ShoppingBag,
@@ -102,26 +103,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <div className="relative z-10 space-y-4">
           {/* Header: Logo, Title, Icons */}
           <div className="flex items-center justify-between gap-3">
-            {/* Logo "C" Badge - 34x34px */}
-            <button
-              onClick={onOpenProfileModal}
-              className="flex-shrink-0 w-[34px] h-[34px] rounded-[12px] flex items-center justify-center font-serif-display text-base cursor-pointer"
-              style={{
-                background: 'rgba(255,255,255,.16)',
-                border: '1px solid rgba(255,255,255,.24)',
-                color: '#F7DCE1',
-                transition: 'background-color 0.25s ease',
-                padding: 0,
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(255,255,255,.3)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(255,255,255,.16)';
-              }}
-            >
-              C
-            </button>
+            {/* Avatar Profile - Circular */}
+            <AvatarProfile onClick={onOpenProfileModal} />
 
             {/* "Carula Confeitaria" Title */}
             <div className="flex-1 text-center">

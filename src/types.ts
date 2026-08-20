@@ -126,17 +126,24 @@ export interface StockMovement {
   createdAt: number;
 }
 
+export interface TamanhoOpcao {
+  id: string;
+  descricao: string; // e.g. "10 fatias", "15 fatias", "20 fatias"
+  preco: number;
+  quantidade?: number; // e.g. número de fatias, unidades, etc
+}
+
 export interface FichaTecnica {
   id: string;
   name: string;
   category: 'bolos' | 'doces' | 'salgados' | 'saudaveis' | 'kids';
   imageUrl?: string;
-  yieldInfo: string; // e.g. "10 fatias" or "50 unidades"
+  tamanhos: TamanhoOpcao[]; // Lista de tamanhos com preços
   ingredients: IngredientUsage[];
   maoDeObraCost: number;
   custoCost: number;
   investimentoCost: number;
-  sugestaoVenda: number;
+  createdAt?: number;
 }
 
 export interface SummaryTotals {

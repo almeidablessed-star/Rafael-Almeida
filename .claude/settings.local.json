@@ -103,7 +103,12 @@
       "Bash(node \"C:\\\\Users\\\\Rafael\\\\.claude\\\\skills\\\\impeccable\\\\scripts\\\\detect.mjs\" --json src/components/*.tsx)",
       "Bash(node \"C:\\\\Users\\\\Rafael\\\\.claude\\\\skills\\\\impeccable\\\\scripts\\\\context.mjs\" --target src/)",
       "Bash(cd \"C:\\\\Users\\\\Rafael\\\\Documents\\\\projetos\\\\carula\" && ls \"C:\\\\Users\\\\Rafael\\\\.claude\\\\skills\\\\impeccable\\\\scripts\\\\\" | grep critique)",
-      "Bash(netstat -ano)"
+      "Bash(netstat -ano)",
+      "Bash(curl -s http://localhost:3000)",
+      "mcp__claude-in-chrome__tabs_context_mcp",
+      "Bash(awk -F: '$1 < 110 {print}')",
+      "Bash(curl -s http://localhost:3001)",
+      "Bash(node -c \"C:\\\\Users\\\\Rafael\\\\Documents\\\\projetos\\\\carula\\\\src\\\\App.tsx\")"
     ]
   },
   "hooks": {

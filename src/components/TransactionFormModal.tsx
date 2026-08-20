@@ -14,6 +14,7 @@ import { getStoredCustomers } from './CustomersModule';
 import { getStoredFichas } from './FichasTecnicasModule';
 import { QuotePdfModal } from './QuotePdfModal';
 import { FichaTecnicaSelector } from './FichaTecnicaSelector';
+import { useFichasTecnicas } from '../hooks/useFichasTecnicas';
 import {
   BAKERY_PRODUCT_PRESETS,
   INGREDIENT_PRESETS,
@@ -87,6 +88,10 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   onClose,
   onSave,
 }) => {
+  // PASSO 2: Hook para ler fichas técnicas do Supabase
+  const fichasTecnicasResult = useFichasTecnicas();
+  const supabaseFichas = fichasTecnicasResult?.fichas || [];
+
   const [type, setType] = useState<TransactionType>(initialType);
 
   // Sales Order State (when type === 'venda')
@@ -106,12 +111,19 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       setStoredCustomers(getStoredCustomers());
-      setStoredFichas(getStoredFichas());
+      // PASSO 2: Preferir fichas do Supabase, fallback para localStorage
+      if (supabaseFichas && supabaseFichas.length > 0) {
+        console.log('✓ PASSO 2: Carregando fichas do Supabase:', supabaseFichas.length, 'fichas encontradas');
+        setStoredFichas(supabaseFichas);
+      } else {
+        console.log('📁 PASSO 2: Usando fichas do localStorage (Supabase vazio ou não autenticado)');
+        setStoredFichas(getStoredFichas());
+      }
     } else {
       // Reset ficha selection when modal closes
       setSelectedFichaId(undefined);
     }
-  }, [isOpen]);
+  }, [isOpen, supabaseFichas]);
 
   const [orderItems, setOrderItems] = useState<OrderItemState[]>([
     { id: '1', productName: 'Bolo Maria', slices: 20, quantity: 1 },

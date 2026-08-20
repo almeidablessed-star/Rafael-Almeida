@@ -6,7 +6,6 @@ import { Transaction } from '../types';
 import { formatCurrency, formatDateBr } from '../utils/formatters';
 import { getStoredUserProfile } from '../utils/userProfile';
 import { getStoredFichas } from './FichasTecnicasModule';
-import { getStoredCustomers } from './CustomersModule';
 import { updateTransaction } from '../utils/storage';
 import {
   Printer,
@@ -117,14 +116,8 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
   const sellerPhotoUrl = carulaProfileData.photo || sellerProfile.photoUrl;
 
   const storedFichas = getStoredFichas();
-  const storedCustomers = getStoredCustomers();
 
-  const matchedCustomer = storedCustomers.find(
-    (c) =>
-      (transaction.customerName && c.name.toLowerCase() === transaction.customerName.toLowerCase()) ||
-      (transaction.customerPhone && c.phone === transaction.customerPhone)
-  );
-  const custPhoto = transaction.customerPhotoUrl || matchedCustomer?.photoUrl;
+  const custPhoto = transaction.customerPhotoUrl;
 
   const handlePrint = () => {
     window.print();

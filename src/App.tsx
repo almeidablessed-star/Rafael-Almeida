@@ -1,5 +1,6 @@
 // v2.1 - Fresh rebuild with latest redesign - force Vercel deployment
 import React, { useState, useEffect } from 'react';
+import { AuthProvider } from './context/AuthContext';
 import {
   Transaction,
   TabType,
@@ -198,8 +199,17 @@ export default function App() {
     setTransactions(cleared);
   };
 
+  const handleLogout = () => {
+    localStorage.setItem('carula_logged_in', 'false');
+    localStorage.removeItem('carula_current_user');
+    localStorage.removeItem('user_email');
+    setIsUserLoggedIn(false);
+    setIsProfileModalOpen(false);
+  };
+
   return (
-    <CurrencyProvider>
+    <AuthProvider>
+      <CurrencyProvider>
       <div className="min-h-screen text-[var(--color-ink)] flex flex-col font-sans" style={{
         overflow: 'hidden',
       }}>
@@ -395,6 +405,7 @@ export default function App() {
       <ProfileModal
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
+        onLogout={handleLogout}
       />
 
       {/* Undo Toast */}
@@ -412,6 +423,7 @@ export default function App() {
       )}
 
       </div>
-    </CurrencyProvider>
+      </CurrencyProvider>
+    </AuthProvider>
   );
 }

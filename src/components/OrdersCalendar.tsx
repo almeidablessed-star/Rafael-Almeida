@@ -70,17 +70,19 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
   const monthSales = transactions.filter((tx) => {
     if (tx.type !== 'venda') return false;
     if (!tx.date) return false;
-    const [y, m] = tx.date.split('-').map(Number);
+    const dateStr = typeof tx.date === 'string' ? tx.date : (tx.date instanceof Date ? tx.date.toISOString().split('T')[0] : String(tx.date));
+    const [y, m] = dateStr.split('-').map(Number);
     return y === year && m === month + 1;
   });
 
   // Group sales by date string 'YYYY-MM-DD'
   const salesByDate: Record<string, Transaction[]> = {};
   monthSales.forEach((tx) => {
-    if (!salesByDate[tx.date]) {
-      salesByDate[tx.date] = [];
+    const dateStr = typeof tx.date === 'string' ? tx.date : (tx.date instanceof Date ? tx.date.toISOString().split('T')[0] : String(tx.date));
+    if (!salesByDate[dateStr]) {
+      salesByDate[dateStr] = [];
     }
-    salesByDate[tx.date].push(tx);
+    salesByDate[dateStr].push(tx);
   });
 
   // Today string YYYY-MM-DD

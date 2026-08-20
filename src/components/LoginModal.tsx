@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -8,6 +9,7 @@ interface LoginModalProps {
 }
 
 export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLoginSuccess }) => {
+  const { login, signup } = useAuth();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -24,29 +26,17 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
 
     setLoading(true);
 
-    // Simular delay de requisição
-    setTimeout(() => {
-      // Verificar se existe uma conta registrada
-      const storedAccounts = JSON.parse(localStorage.getItem('carula_accounts') || '[]');
-      const accountExists = storedAccounts.find((acc: any) => acc.email === email && acc.password === btoa(password));
+    try {
+      await login(email, password);
+      setMessage({ type: 'success', text: 'Login realizado com sucesso!' });
 
-      if (accountExists) {
-        // Marcar como logado
-        localStorage.setItem('carula_logged_in', 'true');
-        localStorage.setItem('carula_current_user', email);
-        localStorage.setItem('user_email', email);
-
-        setMessage({ type: 'success', text: 'Login realizado com sucesso!' });
-        setLoading(false);
-
-        setTimeout(() => {
-          onLoginSuccess(email);
-        }, 1000);
-      } else {
-        setMessage({ type: 'error', text: 'Email ou senha incorretos' });
-        setLoading(false);
-      }
-    }, 500);
+      setTimeout(() => {
+        onLoginSuccess(email);
+      }, 1000);
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message || 'Email ou senha incorretos' });
+      setLoading(false);
+    }
   };
 
   const handleSignUp = async () => {
@@ -77,39 +67,17 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
 
     setLoading(true);
 
-    // Simular delay de requisição
-    setTimeout(() => {
-      const storedAccounts = JSON.parse(localStorage.getItem('carula_accounts') || '[]');
-      const emailExists = storedAccounts.find((acc: any) => acc.email === email);
+    try {
+      await signup(email, password);
+      setMessage({ type: 'success', text: 'Conta criada com sucesso!' });
 
-      if (emailExists) {
-        setMessage({ type: 'error', text: 'Este email já está registrado' });
-        setLoading(false);
-      } else {
-        // Criar nova conta
-        const newAccount = {
-          email,
-          password: btoa(password),
-          businessName,
-          createdAt: new Date().toISOString(),
-        };
-
-        storedAccounts.push(newAccount);
-        localStorage.setItem('carula_accounts', JSON.stringify(storedAccounts));
-
-        // Auto-login após registro
-        localStorage.setItem('carula_logged_in', 'true');
-        localStorage.setItem('carula_current_user', email);
-        localStorage.setItem('user_email', email);
-
-        setMessage({ type: 'success', text: 'Conta criada com sucesso!' });
-        setLoading(false);
-
-        setTimeout(() => {
-          onLoginSuccess(email);
-        }, 1000);
-      }
-    }, 500);
+      setTimeout(() => {
+        onLoginSuccess(email);
+      }, 1000);
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message || 'Erro ao criar conta. Tente novamente.' });
+      setLoading(false);
+    }
   };
 
   if (!isOpen) return null;

@@ -5,6 +5,7 @@ import { useCurrency } from '../context/CurrencyContext';
 interface ProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onLogout?: () => void;
 }
 
 interface ProfileData {
@@ -17,7 +18,7 @@ interface ProfileData {
   currency: 'BRL' | 'USD';
 }
 
-export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
+export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onLogout }) => {
   const { currency, setCurrency } = useCurrency();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -102,17 +103,17 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
       <div
         style={{
           position: 'fixed',
-          top: '40px',
+          top: '60px',
           left: '50%',
           transform: 'translateX(-50%)',
           background: '#FFFFFF',
           borderRadius: '24px',
-          padding: '32px 24px',
+          padding: '32px 24px 120px 24px',
           width: '90%',
           maxWidth: '420px',
           zIndex: 1001,
           boxShadow: '0 20px 60px rgba(58, 35, 80, 0.2)',
-          maxHeight: '90vh',
+          maxHeight: '85vh',
           overflow: 'auto',
         }}
         onClick={(e) => e.stopPropagation()}
@@ -176,8 +177,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
           <div
             style={{
               position: 'relative',
-              width: '120px',
-              height: '120px',
+              width: '90px',
+              height: '90px',
               borderRadius: '50%',
               background: profileData.photo ? 'transparent' : 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
               display: 'flex',
@@ -211,11 +212,11 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
                   top: '50%',
                   left: '50%',
                   transform: 'translate(-50%, -50%)',
-                  width: '40px',
-                  height: '40px',
+                  width: '36px',
+                  height: '36px',
                   borderRadius: '50%',
                   background: '#3A2350',
-                  border: '3px solid #FFFFFF',
+                  border: '2px solid #FFFFFF',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
@@ -507,6 +508,35 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
             }}
           >
             {message.text}
+          </div>
+        )}
+
+        {/* Logout Button - Discrete */}
+        {onLogout && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px', paddingTop: '8px', borderTop: '1px solid #F0E8F2' }}>
+            <button
+              onClick={onLogout}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: '6px 12px',
+                fontFamily: "'Manrope', sans-serif",
+                fontSize: '12px',
+                fontWeight: 600,
+                color: '#C4626F',
+                cursor: 'pointer',
+                transition: 'color 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.color = '#E07080';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.color = '#C4626F';
+              }}
+              title="Sair da conta"
+            >
+              Log Out
+            </button>
           </div>
         )}
 

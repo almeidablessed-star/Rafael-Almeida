@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { Customer, CustomerEvent } from '../types';
 import { formatDateBr, formatDayMonthOnly } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
+import { useCustomers } from '../hooks/useCustomers';
 import {
   Users,
   Plus,
@@ -35,6 +36,22 @@ import {
 
 export const MENU_CANVA_URL =
   'https://www.canva.com/design/DAG--k_X91E/3m0qL5l-K1_O9n2KzR6oAQ/view?utm_content=DAG--k_X91E&utm_campaign=designshare&utm_medium=link2&utm_source=unspecified';
+
+export function getStoredCustomers(): Customer[] {
+  try {
+    const data = localStorage.getItem('carula_customers');
+    if (data) {
+      const parsed: Customer[] = JSON.parse(data);
+      return parsed.map((c) => ({
+        ...c,
+        notes: '',
+      }));
+    }
+  } catch (e) {
+    console.error('Erro ao ler clientes do localStorage:', e);
+  }
+  return [];
+}
 
 export interface UniversalHoliday {
   id: string;
@@ -191,32 +208,9 @@ const DEFAULT_CUSTOMERS: Customer[] = [
   },
 ];
 
-export function getStoredCustomers(): Customer[] {
-  try {
-    const data = localStorage.getItem('carula_customers');
-    if (data) {
-      const parsed: Customer[] = JSON.parse(data);
-      return parsed.map((c) => ({
-        ...c,
-        notes: '',
-      }));
-    }
-  } catch (e) {
-    console.error('Error loading customers from localStorage:', e);
-  }
-  return DEFAULT_CUSTOMERS;
-}
-
-export function saveStoredCustomers(customers: Customer[]) {
-  try {
-    localStorage.setItem('carula_customers', JSON.stringify(customers));
-  } catch (e) {
-    console.error('Error saving customers to localStorage:', e);
-  }
-}
 
 export const CustomersModule: React.FC = () => {
-  const [customers, setCustomers] = useState<Customer[]>(getStoredCustomers());
+  const { customers, isLoading: isLoadingCustomers, error: customersError, addCustomer, updateCustomer, deleteCustomer } = useCustomers();
   const [searchTerm, setSearchTerm] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -232,13 +226,11 @@ export const CustomersModule: React.FC = () => {
   const [city, setCity] = useState('');
   const [notes, setNotes] = useState('');
   const [showToast, setShowToast] = useState(false);
+  const [formError, setFormError] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
   // Expanded customers state in the Dates view
   const [expandedCustomerId, setExpandedCustomerId] = useState<string | null>(null);
-
-  useEffect(() => {
-    saveStoredCustomers(customers);
-  }, [customers]);
 
   const handleOpenAdd = () => {
     setEditingId(null);
@@ -296,12 +288,14 @@ export const CustomersModule: React.FC = () => {
     setAdditionalEvents((prev) => prev.filter((e) => e.id !== id));
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
 
-    const newCustomer: Customer = {
-      id: editingId || String(Date.now()),
+    setFormError('');
+    setIsSaving(true);
+
+    const customerData: Omit<Customer, 'id' | 'createdAt'> = {
       name: name.trim(),
       phone: phone.trim(),
       photoUrl: photoUrl || undefined,
@@ -311,24 +305,35 @@ export const CustomersModule: React.FC = () => {
       address: address.trim() || undefined,
       city: city.trim() || undefined,
       notes: notes.trim() || undefined,
-      createdAt: editingId ? undefined : Date.now(),
     };
 
-    if (editingId) {
-      setCustomers((prev) => prev.map((c) => (c.id === editingId ? newCustomer : c)));
-    } else {
-      setCustomers((prev) => [newCustomer, ...prev]);
-    }
+    try {
+      if (editingId) {
+        await updateCustomer(editingId, customerData);
+      } else {
+        await addCustomer(customerData);
+      }
 
-    setIsFormOpen(false);
-    setEditingId(null);
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
+      setIsFormOpen(false);
+      setEditingId(null);
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+    } catch (err: any) {
+      setFormError(err.message || 'Erro ao salvar cliente');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('Tem certeza que deseja excluir esta cliente?')) {
-      setCustomers((prev) => prev.filter((c) => c.id !== id));
+      try {
+        await deleteCustomer(id);
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
+      } catch (err: any) {
+        setFormError(err.message || 'Erro ao deletar cliente');
+      }
     }
   };
 
@@ -485,8 +490,26 @@ export const CustomersModule: React.FC = () => {
     };
   });
 
+  if (isLoadingCustomers) {
+    return (
+      <div className="flex items-center justify-center h-screen" style={{ background: '#FAF7FA' }}>
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-full border-4 border-gray-200 border-t-[#6E3F72] animate-spin" />
+          <p className="text-gray-600">Carregando clientes...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4 animate-fadeIn pb-12" style={{ background: '#FAF7FA' }}>
+      {/* Error Alert */}
+      {(customersError || formError) && (
+        <div className="mx-4 mt-4 p-3 rounded-lg bg-red-50 border border-red-200">
+          <p className="text-sm text-red-600">{customersError || formError}</p>
+        </div>
+      )}
+
       {/* Header Card — Flutuante com cabeçalho roxo */}
       <div
         className="overflow-hidden shadow-card"
@@ -652,6 +675,11 @@ export const CustomersModule: React.FC = () => {
           onSubmit={handleSave}
           className="bg-white p-4 sm:p-5 space-y-4"
         >
+          {formError && (
+            <div className="p-3 rounded-lg bg-red-50 border border-red-200">
+              <p className="text-sm text-red-600">{formError}</p>
+            </div>
+          )}
 
           {/* CUSTOMER PHOTO UPLOAD */}
           <div className="flex items-center gap-4 rounded-lg p-4" style={{background: 'linear-gradient(135deg, rgba(160,100,130,0.55) 0%, rgba(245,185,198,0.10) 100%)'}}>
@@ -821,9 +849,14 @@ export const CustomersModule: React.FC = () => {
             </button>
             <button
               type="submit"
-              className="px-5 py-2 rounded-xl bg-[var(--color-accent-gold)] hover:bg-[var(--color-accent-gold)]/90 text-[var(--color-neutral-charcoal)] font-brand font-bold text-xs shadow-sm active:scale-95 transition-all duration-normal"
+              disabled={isSaving}
+              className="px-5 py-2 rounded-xl text-[var(--color-neutral-charcoal)] font-brand font-bold text-xs shadow-sm active:scale-95 transition-all duration-normal disabled:opacity-60 disabled:cursor-not-allowed"
+              style={{
+                backgroundColor: isSaving ? '#D4A574' : 'var(--color-accent-gold)',
+                backgroundImage: isSaving ? 'none' : undefined,
+              }}
             >
-              Salvar Cadastro
+              {isSaving ? 'Salvando...' : 'Salvar Cadastro'}
             </button>
           </div>
         </form>

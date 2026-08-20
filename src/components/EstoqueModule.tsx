@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StockItem } from '../types';
+import { useEstoque } from '../hooks/useEstoque';
 import {
   Package,
   Plus,
@@ -57,10 +58,11 @@ const getArcColor = (percentage: number): { stroke: string; text: string; backgr
 };
 
 export const EstoqueModule: React.FC = () => {
-  const [items, setItems] = useState<StockItem[]>(getStoredStockItems());
+  const { estoque: items, isLoading: isLoadingEstoque, error: estoqueError, addEstoque, updateEstoque, deleteEstoque } = useEstoque();
   const [searchTerm, setSearchTerm] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [formError, setFormError] = useState('');
 
   // Form State
   const [name, setName] = useState('');
@@ -69,9 +71,7 @@ export const EstoqueModule: React.FC = () => {
   const [minThreshold, setMinThreshold] = useState('');
   const [costPerUnit, setCostPerUnit] = useState('');
 
-  useEffect(() => {
-    saveStoredStockItems(items);
-  }, [items]);
+  // Itens são agora gerenciados pelo hook useEstoque (salva no Supabase)
 
   const handleOpenAdd = () => {
     setName('');
@@ -93,52 +93,56 @@ export const EstoqueModule: React.FC = () => {
     setIsAdding(true);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
 
+    setFormError('');
     const qtyNum = parseFloat(quantity.replace(',', '.')) || 0;
     const threshNum = parseFloat(minThreshold.replace(',', '.')) || 0;
     const costNum = parseFloat(costPerUnit.replace(',', '.')) || 0;
 
-    if (editingId) {
-      setItems((prev) =>
-        prev.map((i) =>
-          i.id === editingId
-            ? { ...i, name: name.trim(), quantity: qtyNum, unit, minThreshold: threshNum, costPerUnit: costNum }
-            : i
-        )
-      );
-    } else {
-      const newItem: StockItem = {
-        id: Date.now().toString(),
-        name: name.trim(),
-        quantity: qtyNum,
-        unit,
-        minThreshold: threshNum,
-        costPerUnit: costNum,
-      };
-      setItems((prev) => [newItem, ...prev]);
-    }
+    const itemData: Omit<StockItem, 'id'> = {
+      name: name.trim(),
+      quantity: qtyNum,
+      unit,
+      minThreshold: threshNum,
+      costPerUnit: costNum,
+    };
 
-    setIsAdding(false);
-    setEditingId(null);
+    try {
+      if (editingId) {
+        await updateEstoque(editingId, itemData);
+      } else {
+        await addEstoque(itemData);
+      }
+      setIsAdding(false);
+      setEditingId(null);
+    } catch (err) {
+      setFormError((err as any).message || 'Erro ao salvar item');
+    }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('Deseja excluir este item do estoque?')) {
-      setItems((prev) => prev.filter((i) => i.id !== id));
+      try {
+        await deleteEstoque(id);
+      } catch (err) {
+        setFormError((err as any).message || 'Erro ao deletar item');
+      }
     }
   };
 
-  const handleQuickAdjust = (id: string, delta: number) => {
-    setItems((prev) =>
-      prev.map((i) => {
-        if (i.id !== id) return i;
-        const newQty = Math.max(0, i.quantity + delta);
-        return { ...i, quantity: newQty };
-      })
-    );
+  const handleQuickAdjust = async (id: string, delta: number) => {
+    const item = items.find(i => i.id === id);
+    if (!item) return;
+
+    const newQty = Math.max(0, item.quantity + delta);
+    try {
+      await updateEstoque(id, { ...item, quantity: newQty });
+    } catch (err) {
+      setFormError((err as any).message || 'Erro ao ajustar quantidade');
+    }
   };
 
   const filteredItems = items.filter((i) =>
@@ -231,6 +235,7 @@ export const EstoqueModule: React.FC = () => {
             display: 'flex',
             gap: '8px',
             alignItems: 'center',
+            marginBottom: '16px',
           }}
         >
           {/* Search Input */}
@@ -264,13 +269,11 @@ export const EstoqueModule: React.FC = () => {
             />
           </div>
         </div>
-        </div>
-      </div>
 
-      {/* Form Modal / Inline Box */}
-      {isAdding && (
-        <form onSubmit={handleSave} className="bg-white rounded-3xl p-5 border border-[var(--color-neutral-medium)] shadow-card space-y-4 animate-slideUp">
-          <div className="flex items-center justify-between pb-3 border-b border-[var(--color-neutral-light)]">
+        {/* Form Modal / Inline Box */}
+        {isAdding && (
+          <form onSubmit={handleSave} className="bg-white rounded-3xl p-5 border border-[var(--color-neutral-medium)] shadow-card space-y-4 animate-slideUp" style={{ marginBottom: '16px' }}>
+            <div className="flex items-center justify-between pb-3 border-b border-[var(--color-neutral-light)]">
             <h3 className="font-brand font-semibold text-sm text-[var(--color-neutral-charcoal)] flex items-center gap-1.5">
               <Sparkles className="w-4 h-4 text-[var(--color-primary)]" />
               {editingId ? 'Editar Item' : 'Novo Item'}
@@ -353,14 +356,17 @@ export const EstoqueModule: React.FC = () => {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded-xl bg-[var(--color-primary)] hover:brightness-110 text-white font-brand font-semibold text-xs shadow-card flex items-center gap-1 transition-all active:scale-95"
+              className="px-4 py-2 rounded-xl text-white font-brand font-semibold text-xs shadow-card flex items-center gap-1 transition-all active:scale-95 hover:opacity-90"
+              style={{
+                background: 'linear-gradient(135deg, #6E3F72 0%, #3A2350 100%)',
+              }}
             >
               <Check className="w-4 h-4 stroke-[2.5]" />
               Salvar
             </button>
           </div>
         </form>
-      )}
+        )}
 
       {/* Stock Sections - Ordered by Criticality */}
       {sortedItems.length === 0 ? (
@@ -470,6 +476,7 @@ export const EstoqueModule: React.FC = () => {
               </div>
             </div>
       )}
+      </div>
 
       {/* Stock Movements History Section */}
       <div className="mt-8 px-4">
@@ -482,6 +489,7 @@ export const EstoqueModule: React.FC = () => {
           </p>
         </div>
         <StockMovementsHistory maxItems={50} />
+      </div>
       </div>
     </div>
   );

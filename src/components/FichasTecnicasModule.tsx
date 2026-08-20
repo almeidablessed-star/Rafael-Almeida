@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { FichaTecnica, IngredientUsage, Transaction } from '../types';
+import { FichaTecnica, IngredientUsage, Transaction, TamanhoOpcao } from '../types';
 import { formatCurrency } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
+import { useFichasTecnicas } from '../hooks/useFichasTecnicas';
 import {
   BookOpen,
   Plus,
@@ -22,14 +23,31 @@ import {
   ChevronUp,
 } from 'lucide-react';
 
+// Helpers para compatibilidade com a nova estrutura de tamanhos
+const getPrincipalTamanho = (ficha: FichaTecnica) => {
+  return ficha.tamanhos?.[0] || { id: 't1', descricao: '10 fatias', preco: 0 };
+};
+
+const getYieldInfoCompat = (ficha: FichaTecnica) => {
+  return getPrincipalTamanho(ficha).descricao || '10 fatias';
+};
+
+const getSugestaoVendaCompat = (ficha: FichaTecnica) => {
+  return getPrincipalTamanho(ficha).preco || 0;
+};
+
 const DEFAULT_FICHAS: FichaTecnica[] = [
-  // 1. BOLOS
+  // Exemplo: Bolo com múltiplos tamanhos
   {
-    id: 'f1',
+    id: 'f1-example',
     name: 'Bolo Vulcão Ninho com Nutella',
     category: 'bolos',
     imageUrl: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&auto=format&fit=crop&q=80',
-    yieldInfo: '10 fatias (Aproximadamente 1.5kg)',
+    tamanhos: [
+      { id: 'ts-10', descricao: '10 fatias', preco: 55.00, quantidade: 10 },
+      { id: 'ts-15', descricao: '15 fatias', preco: 75.00, quantidade: 15 },
+      { id: 'ts-20', descricao: '20 fatias', preco: 90.00, quantidade: 20 },
+    ],
     ingredients: [
       { id: 'i1', name: 'Farinha de Trigo', quantity: 300, unit: 'g', unitCost: 0.005, totalCost: 1.50 },
       { id: 'i2', name: 'Açúcar Refinado', quantity: 250, unit: 'g', unitCost: 0.004, totalCost: 1.00 },
@@ -42,206 +60,8 @@ const DEFAULT_FICHAS: FichaTecnica[] = [
     maoDeObraCost: 20.00,
     custoCost: 5.00,
     investimentoCost: 5.00,
-    sugestaoVenda: 65.93,
   },
-  {
-    id: 'f1_2',
-    name: 'Bolo Red Velvet Especial Velvet',
-    category: 'bolos',
-    imageUrl: 'https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?w=600&auto=format&fit=crop&q=80',
-    yieldInfo: '15 fatias (Aproximadamente 2.0kg)',
-    ingredients: [
-      { id: 'ir1', name: 'Farinha de Trigo Especial', quantity: 350, unit: 'g', unitCost: 0.005, totalCost: 1.75 },
-      { id: 'ir2', name: 'Cream Cheese Tradicional', quantity: 300, unit: 'g', unitCost: 0.045, totalCost: 13.50 },
-      { id: 'ir3', name: 'Leite Condensado', quantity: 2, unit: 'un', unitCost: 6.50, totalCost: 13.00 },
-      { id: 'ir4', name: 'Manteiga sem Sal', quantity: 100, unit: 'g', unitCost: 0.035, totalCost: 3.50 },
-      { id: 'ir5', name: 'Cacau e Corante Red Velvet', quantity: 1, unit: 'un', unitCost: 4.00, totalCost: 4.00 },
-    ],
-    maoDeObraCost: 25.00,
-    custoCost: 6.00,
-    investimentoCost: 6.00,
-    sugestaoVenda: 72.75,
-  },
-  {
-    id: 'f1_3',
-    name: 'Bolo de Cenoura com Brigaderia',
-    category: 'bolos',
-    imageUrl: 'https://images.unsplash.com/photo-1557925923-33b27f891f88?w=600&auto=format&fit=crop&q=80',
-    yieldInfo: '12 fatias (Forma Vulcão 22cm)',
-    ingredients: [
-      { id: 'ic1', name: 'Cenouras Frescas', quantity: 250, unit: 'g', unitCost: 0.006, totalCost: 1.50 },
-      { id: 'ic2', name: 'Farinha de Trigo', quantity: 280, unit: 'g', unitCost: 0.005, totalCost: 1.40 },
-      { id: 'ic3', name: 'Açúcar & Óleo Vegetal', quantity: 1, unit: 'un', unitCost: 2.50, totalCost: 2.50 },
-      { id: 'ic4', name: 'Leite Condensado', quantity: 2, unit: 'un', unitCost: 6.50, totalCost: 13.00 },
-      { id: 'ic5', name: 'Cacau em Pó 50%', quantity: 80, unit: 'g', unitCost: 0.025, totalCost: 2.00 },
-    ],
-    maoDeObraCost: 18.00,
-    custoCost: 4.50,
-    investimentoCost: 4.50,
-    sugestaoVenda: 47.40,
-  },
-
-  // 2. DOCES & SOBREMESAS
-  {
-    id: 'f2',
-    name: 'Brigadeiro Gourmet ao Leite',
-    category: 'doces',
-    imageUrl: 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=600&auto=format&fit=crop&q=80',
-    yieldInfo: '50 unidades (20g cada)',
-    ingredients: [
-      { id: 'i8', name: 'Leite Condensado', quantity: 2, unit: 'un', unitCost: 6.50, totalCost: 13.00 },
-      { id: 'i9', name: 'Creme de Leite', quantity: 1, unit: 'un', unitCost: 4.20, totalCost: 4.20 },
-      { id: 'i10', name: 'Cacau em Pó 100%', quantity: 40, unit: 'g', unitCost: 0.0265, totalCost: 1.06 },
-      { id: 'i11', name: 'Manteiga sem Sal', quantity: 30, unit: 'g', unitCost: 0.035, totalCost: 1.05 },
-      { id: 'i12', name: 'Granulado Gourmet', quantity: 150, unit: 'g', unitCost: 0.032, totalCost: 4.80 },
-    ],
-    maoDeObraCost: 15.00,
-    custoCost: 3.50,
-    investimentoCost: 3.50,
-    sugestaoVenda: 46.11,
-  },
-  {
-    id: 'f2_2',
-    name: 'Pudim Cremoso de Leite Condensado',
-    category: 'doces',
-    imageUrl: 'https://images.unsplash.com/photo-1528975604071-b4dc52a2d18c?w=600&auto=format&fit=crop&q=80',
-    yieldInfo: '12 fatias (Forma Pudim 20cm)',
-    ingredients: [
-      { id: 'ip1', name: 'Leite Condensado', quantity: 2, unit: 'un', unitCost: 6.50, totalCost: 13.00 },
-      { id: 'ip2', name: 'Leite Integral', quantity: 400, unit: 'ml', unitCost: 0.005, totalCost: 2.00 },
-      { id: 'ip3', name: 'Ovos Caipiras', quantity: 4, unit: 'un', unitCost: 0.80, totalCost: 3.20 },
-      { id: 'ip4', name: 'Açúcar para Calda Caramelizada', quantity: 150, unit: 'g', unitCost: 0.004, totalCost: 0.60 },
-    ],
-    maoDeObraCost: 15.00,
-    custoCost: 3.50,
-    investimentoCost: 3.50,
-    sugestaoVenda: 40.80,
-  },
-  {
-    id: 'f2_3',
-    name: 'Sobremesa na Taça Ninho com Morangos',
-    category: 'doces',
-    imageUrl: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=600&auto=format&fit=crop&q=80',
-    yieldInfo: 'Taça de 1.8L (8 a 10 pessoas)',
-    ingredients: [
-      { id: 'it1', name: 'Morangos Frescos Selecionados', quantity: 400, unit: 'g', unitCost: 0.025, totalCost: 10.00 },
-      { id: 'it2', name: 'Leite Condensado', quantity: 2, unit: 'un', unitCost: 6.50, totalCost: 13.00 },
-      { id: 'it3', name: 'Leite Ninho em Pó', quantity: 120, unit: 'g', unitCost: 0.035, totalCost: 4.20 },
-      { id: 'it4', name: 'Creme de Leite & Chantilly', quantity: 1, unit: 'un', unitCost: 6.00, totalCost: 6.00 },
-    ],
-    maoDeObraCost: 20.00,
-    custoCost: 5.00,
-    investimentoCost: 5.00,
-    sugestaoVenda: 63.20,
-  },
-
-  // 3. SALGADOS
-  {
-    id: 'f3',
-    name: 'Coxinha Especial de Frango com Catupiry',
-    category: 'salgados',
-    imageUrl: 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=600&auto=format&fit=crop&q=80',
-    yieldInfo: '25 unidades salgados grandes (100g cada)',
-    ingredients: [
-      { id: 'i13', name: 'Peito de Frango Desfiado', quantity: 800, unit: 'g', unitCost: 0.018, totalCost: 14.40 },
-      { id: 'i14', name: 'Farinha de Trigo', quantity: 600, unit: 'g', unitCost: 0.005, totalCost: 3.00 },
-      { id: 'i15', name: 'Requeijão Culinário Catupiry', quantity: 300, unit: 'g', unitCost: 0.025, totalCost: 7.50 },
-      { id: 'i16', name: 'Temperos & Caldo Especial', quantity: 1, unit: 'un', unitCost: 3.00, totalCost: 3.00 },
-      { id: 'i17', name: 'Farinha de Rosca e Óleo', quantity: 1, unit: 'un', unitCost: 5.00, totalCost: 5.00 },
-    ],
-    maoDeObraCost: 20.00,
-    custoCost: 4.00,
-    investimentoCost: 4.00,
-    sugestaoVenda: 60.90,
-  },
-  {
-    id: 'f3_2',
-    name: 'Empadão Folhado de Frango e Milho',
-    category: 'salgados',
-    imageUrl: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?w=600&auto=format&fit=crop&q=80',
-    yieldInfo: '8 porções grandes (Forma 25cm)',
-    ingredients: [
-      { id: 'ie1', name: 'Massa Folhada & Manteiga', quantity: 1, unit: 'un', unitCost: 8.00, totalCost: 8.00 },
-      { id: 'ie2', name: 'Peito de Frango Temperado', quantity: 500, unit: 'g', unitCost: 0.018, totalCost: 9.00 },
-      { id: 'ie3', name: 'Milho Verde & Requeijão', quantity: 1, unit: 'un', unitCost: 6.00, totalCost: 6.00 },
-    ],
-    maoDeObraCost: 18.00,
-    custoCost: 4.00,
-    investimentoCost: 4.00,
-    sugestaoVenda: 49.00,
-  },
-
-  // 4. SAUDÁVEIS & FIT
-  {
-    id: 'f4',
-    name: 'Bolo Fit de Banana, Aveia e Cacau 70%',
-    category: 'saudaveis',
-    imageUrl: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=600&auto=format&fit=crop&q=80',
-    yieldInfo: '10 fatias (Forma Inglesa 22cm)',
-    ingredients: [
-      { id: 'is1', name: 'Bananas Caturra Maduras', quantity: 4, unit: 'un', unitCost: 0.75, totalCost: 3.00 },
-      { id: 'is2', name: 'Aveia em Flocos Finos', quantity: 200, unit: 'g', unitCost: 0.012, totalCost: 2.40 },
-      { id: 'is3', name: 'Ovos Caipiras', quantity: 3, unit: 'un', unitCost: 0.80, totalCost: 2.40 },
-      { id: 'is4', name: 'Cacau em Pó 70%', quantity: 40, unit: 'g', unitCost: 0.035, totalCost: 1.40 },
-      { id: 'is5', name: 'Castanha de Caju Picada', quantity: 50, unit: 'g', unitCost: 0.060, totalCost: 3.00 },
-    ],
-    maoDeObraCost: 16.00,
-    custoCost: 3.50,
-    investimentoCost: 3.50,
-    sugestaoVenda: 35.20,
-  },
-  {
-    id: 'f4_2',
-    name: 'Brownie Low Carb de Amêndoas',
-    category: 'saudaveis',
-    imageUrl: 'https://images.unsplash.com/photo-1515037893149-de7f840978e2?w=600&auto=format&fit=crop&q=80',
-    yieldInfo: '12 quadradinhos (Sem Glúten & Sem Açúcar)',
-    ingredients: [
-      { id: 'ib1', name: 'Farinha de Amêndoas', quantity: 150, unit: 'g', unitCost: 0.075, totalCost: 11.25 },
-      { id: 'ib2', name: 'Chocolate 70% Cacau', quantity: 120, unit: 'g', unitCost: 0.060, totalCost: 7.20 },
-      { id: 'ib3', name: 'Adoçante Xylitol/Eritritol', quantity: 80, unit: 'g', unitCost: 0.050, totalCost: 4.00 },
-      { id: 'ib4', name: 'Manteiga Ghee Purificada', quantity: 60, unit: 'g', unitCost: 0.065, totalCost: 3.90 },
-    ],
-    maoDeObraCost: 18.00,
-    custoCost: 4.00,
-    investimentoCost: 4.00,
-    sugestaoVenda: 52.35,
-  },
-
-  // 5. KIDS FRIENDLY
-  {
-    id: 'f5',
-    name: 'Mini Cupcakes Coloridos Festivos',
-    category: 'kids',
-    imageUrl: 'https://images.unsplash.com/photo-1576618148400-f54bed99fcfd?w=600&auto=format&fit=crop&q=80',
-    yieldInfo: '24 mini cupcakes decorados',
-    ingredients: [
-      { id: 'ik1', name: 'Farinha de Trigo & Açúcar', quantity: 1, unit: 'un', unitCost: 3.50, totalCost: 3.50 },
-      { id: 'ik2', name: 'Leite, Ovos & Manteiga', quantity: 1, unit: 'un', unitCost: 4.50, totalCost: 4.50 },
-      { id: 'ik3', name: 'Chantilly & Confeitos Coloridos', quantity: 1, unit: 'un', unitCost: 7.00, totalCost: 7.00 },
-      { id: 'ik4', name: 'Forminhas Especiais Kids', quantity: 24, unit: 'un', unitCost: 0.15, totalCost: 3.60 },
-    ],
-    maoDeObraCost: 18.00,
-    custoCost: 4.00,
-    investimentoCost: 4.00,
-    sugestaoVenda: 44.60,
-  },
-  {
-    id: 'f5_2',
-    name: 'Picolé Saudável de Frutas com Iogurte',
-    category: 'kids',
-    imageUrl: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=600&auto=format&fit=crop&q=80',
-    yieldInfo: '10 picolés artesanais',
-    ingredients: [
-      { id: 'ipf1', name: 'Morangos & Mangas Frescas', quantity: 300, unit: 'g', unitCost: 0.020, totalCost: 6.00 },
-      { id: 'ipf2', name: 'Iogurte Natural Integral', quantity: 300, unit: 'g', unitCost: 0.015, totalCost: 4.50 },
-      { id: 'ipf3', name: 'Mel Puro de Abelha', quantity: 50, unit: 'g', unitCost: 0.040, totalCost: 2.00 },
-    ],
-    maoDeObraCost: 12.00,
-    custoCost: 2.50,
-    investimentoCost: 2.50,
-    sugestaoVenda: 29.50,
-  },
+  // Novas fichas serão adicionadas via Supabase
 ];
 
 export function getStoredFichas(): FichaTecnica[] {
@@ -292,7 +112,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   onNavigateToTab,
 }) => {
   const { formatCurrency: formatMoney } = useCurrency();
-  const [fichas, setFichas] = useState<FichaTecnica[]>(getStoredFichas());
+  const { fichas, isLoading: isLoadingFichas, error: fichasError, addFicha, updateFicha, deleteFicha } = useFichasTecnicas();
   const [selectedCategory, setSelectedCategory] = useState<'bolos' | 'doces' | 'salgados' | 'saudaveis' | 'kids'>('bolos');
   const [isCreating, setIsCreating] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -333,9 +153,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   const [custoCost, setCustoCost] = useState('5');
   const [investimentoCost, setInvestimentoCost] = useState('5');
 
-  useEffect(() => {
-    saveStoredFichas(fichas);
-  }, [fichas]);
+  // Fichas são agora gerenciadas pelo hook useFichasTecnicas (salva no Supabase)
 
   const totalReposicao = ingredients.reduce((sum, ing) => sum + (ing.totalCost || 0), 0);
   const mdoNum = parseFloat(maoDeObraCost.replace(',', '.')) || 0;
@@ -360,7 +178,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     setName(ficha.name);
     setCategory(ficha.category);
     setImageUrl(ficha.imageUrl || '');
-    setYieldInfo(ficha.yieldInfo);
+    setYieldInfo(getYieldInfoCompat(ficha));
     setIngredients(ficha.ingredients || []);
     setMaoDeObraCost((ficha.maoDeObraCost || 0).toString());
     setCustoCost((ficha.custoCost || 0).toString());
@@ -395,53 +213,72 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     setIngredients((prev) => prev.filter((i) => i.id !== id));
   };
 
-  const handleSaveFicha = (e: React.FormEvent) => {
+  const handleSaveFicha = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
 
-    const newFicha: FichaTecnica = {
-      id: editingId || Date.now().toString(),
+    // Converter yieldInfo e sugestaoVenda para array de tamanhos
+    const tamanho: TamanhoOpcao = {
+      id: `ts-${Date.now()}`,
+      descricao: yieldInfo.trim() || '1 unidade',
+      preco: calculatedSuggestedPrice,
+    };
+
+    const fichaData: Omit<FichaTecnica, 'id' | 'createdAt'> = {
       name: name.trim(),
       category,
       imageUrl: imageUrl.trim() || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&auto=format&fit=crop&q=80',
-      yieldInfo: yieldInfo.trim() || '1 unidade',
+      tamanhos: [tamanho],
       ingredients,
       maoDeObraCost: mdoNum,
       custoCost: cusNum,
       investimentoCost: invNum,
-      sugestaoVenda: calculatedSuggestedPrice,
     };
 
-    if (editingId) {
-      setFichas((prev) => prev.map((f) => (f.id === editingId ? newFicha : f)));
-    } else {
-      setFichas((prev) => [newFicha, ...prev]);
+    try {
+      if (editingId) {
+        await updateFicha(editingId, fichaData);
+      } else {
+        await addFicha(fichaData);
+      }
+      setIsCreating(false);
+      setEditingId(null);
+    } catch (err) {
+      alert('Erro ao salvar ficha técnica: ' + (err as any).message);
     }
-
-    setIsCreating(false);
-    setEditingId(null);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('Deseja excluir esta ficha técnica?')) {
-      const updated = fichas.filter((f) => f.id !== id);
-      saveStoredFichas(updated);
-      setFichas(updated);
+      try {
+        console.log('Deletando ficha com ID:', id);
+        await deleteFicha(id);
+        console.log('Ficha deletada com sucesso');
+      } catch (err: any) {
+        console.error('Erro ao deletar:', err);
+        alert('Erro ao deletar ficha técnica: ' + (err.message || JSON.stringify(err)));
+      }
     }
   };
 
-  const handleDuplicate = (fichaToDup: FichaTecnica) => {
-    const duplicated: FichaTecnica = {
-      ...fichaToDup,
-      id: Date.now().toString(),
-      name: `${fichaToDup.name} (Cópia)`,
-      ingredients: (fichaToDup.ingredients || []).map((ing, idx) => ({ ...ing, id: `${Date.now()}_${idx}` })),
-    };
-    const updated = [duplicated, ...fichas];
-    saveStoredFichas(updated);
-    setFichas(updated);
-    setLaunchSuccessMsg(`Ficha "${fichaToDup.name}" duplicada com sucesso!`);
-    setTimeout(() => setLaunchSuccessMsg(null), 3500);
+  const handleDuplicate = async (fichaToDup: FichaTecnica) => {
+    try {
+      const fichaData: Omit<FichaTecnica, 'id' | 'createdAt'> = {
+        name: `${fichaToDup.name} (Cópia)`,
+        category: fichaToDup.category,
+        imageUrl: fichaToDup.imageUrl,
+        tamanhos: fichaToDup.tamanhos,
+        ingredients: (fichaToDup.ingredients || []).map((ing, idx) => ({ ...ing, id: `${Date.now()}_${idx}` })),
+        maoDeObraCost: fichaToDup.maoDeObraCost,
+        custoCost: fichaToDup.custoCost,
+        investimentoCost: fichaToDup.investimentoCost,
+      };
+      await addFicha(fichaData);
+      setLaunchSuccessMsg(`Ficha "${fichaToDup.name}" duplicada com sucesso!`);
+      setTimeout(() => setLaunchSuccessMsg(null), 3500);
+    } catch (err) {
+      alert('Erro ao duplicar ficha: ' + (err as any).message);
+    }
   };
 
   const handleLaunchSaleFromFicha = (ficha: FichaTecnica) => {
@@ -451,16 +288,16 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 
     onAddTransaction({
       type: 'venda',
-      description: `${ficha.name} (${ficha.yieldInfo}) - Ficha Técnica`,
+      description: `${ficha.name} (${getYieldInfoCompat(ficha)}) - Ficha Técnica`,
       quantity: 1,
-      unitValue: ficha.sugestaoVenda,
-      totalValue: ficha.sugestaoVenda,
+      unitValue: getSugestaoVendaCompat(ficha),
+      totalValue: getSugestaoVendaCompat(ficha),
       date: today,
       paymentStatus: 'pago',
       notes: `Lançado via Ficha Técnica. Reposição: ${formatMoney(repoTotal)}, Mão de Obra: ${formatMoney(ficha.maoDeObraCost)}, Custo/Invest: ${formatMoney((ficha.custoCost || 0) + (ficha.investimentoCost || 0))}`,
     });
 
-    setLaunchSuccessMsg(`Venda de "${ficha.name}" no valor de ${formatMoney(ficha.sugestaoVenda)} lançada com sucesso no Caixa!`);
+    setLaunchSuccessMsg(`Venda de "${ficha.name}" no valor de ${formatMoney(getSugestaoVendaCompat(ficha))} lançada com sucesso no Caixa!`);
     setTimeout(() => setLaunchSuccessMsg(null), 4000);
   };
 
@@ -1052,7 +889,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         borderRadius: '999px',
                       }}
                     >
-                      {ficha.yieldInfo}
+                      {getYieldInfoCompat(ficha)}
                     </span>
                   </div>
 
@@ -1162,7 +999,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                           fontFamily: "'Manrope', sans-serif",
                         }}
                       >
-                        {formatMoney(ficha.sugestaoVenda)}
+                        {formatMoney(getSugestaoVendaCompat(ficha))}
                       </span>
                     </div>
                   </div>
