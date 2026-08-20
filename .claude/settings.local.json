@@ -108,7 +108,10 @@
       "mcp__claude-in-chrome__tabs_context_mcp",
       "Bash(awk -F: '$1 < 110 {print}')",
       "Bash(curl -s http://localhost:3001)",
-      "Bash(node -c \"C:\\\\Users\\\\Rafael\\\\Documents\\\\projetos\\\\carula\\\\src\\\\App.tsx\")"
+      "Bash(node -c \"C:\\\\Users\\\\Rafael\\\\Documents\\\\projetos\\\\carula\\\\src\\\\App.tsx\")",
+      "WebFetch(domain:supabase.com)",
+      "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(32\\).toString\\('hex'\\)\\)\")",
+      "Bash(curl -X POST https://inqyobsjuztztvafpzxn.supabase.co/functions/v1/smart-processor -H 'Content-Type: application/json' -d '{ *)"
     ]
   },
   "hooks": {

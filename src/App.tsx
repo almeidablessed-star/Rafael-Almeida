@@ -33,10 +33,12 @@ import {
   Smartphone,
   Download,
 } from 'lucide-react';
+import { useAuth } from './context/AuthContext';
 import { Header } from './components/Header';
 import { BottomNav } from './components/BottomNav';
 import { PeriodSelector } from './components/PeriodSelector';
 import { Dashboard } from './components/Dashboard';
+import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { OrdersModule } from './components/OrdersModule';
 import { SalesModule } from './components/SalesModule';
 import { RestockModule } from './components/RestockModule';
@@ -57,7 +59,8 @@ import { ProfileModal } from './components/ProfileModal';
 import { LoginModal } from './components/LoginModal';
 import { CurrencyProvider } from './context/CurrencyContext';
 
-export default function App() {
+function AppContent() {
+  const { isResetPasswordRequired } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
 
@@ -207,12 +210,13 @@ export default function App() {
     setIsProfileModalOpen(false);
   };
 
+  if (isResetPasswordRequired) {
+    return <ResetPasswordPage />;
+  }
+
   return (
-    <AuthProvider>
-      <CurrencyProvider>
-      <div className="min-h-screen text-[var(--color-ink)] flex flex-col font-sans" style={{
-        overflow: 'hidden',
-      }}>
+    <CurrencyProvider>
+      <div className="min-h-screen text-[var(--color-ink)] flex flex-col font-sans" style={{ overflow: 'hidden' }}>
 
         {/* Main Screen Container */}
         <main className="flex-1 max-w-full w-full mx-auto px-0 pb-20 bottom-nav-safe" style={{
@@ -423,7 +427,14 @@ export default function App() {
       )}
 
       </div>
-      </CurrencyProvider>
+    </CurrencyProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
     </AuthProvider>
   );
 }

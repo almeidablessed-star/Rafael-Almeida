@@ -17,6 +17,7 @@ interface AuthContextType {
   session: Session | null;
   isLoading: boolean;
   isSetupRequired: boolean;
+  isResetPasswordRequired: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string) => Promise<void>;
   setupProfile: (nome: string, nome_confeitaria: string, moeda: 'USD' | 'BRL') => Promise<void>;
@@ -31,15 +32,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSetupRequired, setIsSetupRequired] = useState(false);
+  const [isResetPasswordRequired, setIsResetPasswordRequired] = useState(false);
 
   useEffect(() => {
     const initAuth = async () => {
       try {
+        // Detectar se é um reset password flow
+        const params = new URLSearchParams(window.location.search);
+        const isRecovery = params.get('type') === 'recovery';
+
         const { data: { session: currentSession } } = await supabase.auth.getSession();
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
 
         if (currentSession?.user) {
+          // Se vem de recovery link, mostrar tela de reset password
+          if (isRecovery) {
+            setIsResetPasswordRequired(true);
+            setIsLoading(false);
+            return;
+          }
+
           await fetchUserProfile(currentSession.user.id);
         }
       } catch (error) {
@@ -56,10 +69,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSession(session);
         setUser(session?.user ?? null);
 
+        // Se o evento é de recovery (reset password), manter isResetPasswordRequired como true
+        if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') {
+          const params = new URLSearchParams(window.location.search);
+          if (params.get('type') === 'recovery') {
+            setIsResetPasswordRequired(true);
+            return;
+          }
+        }
+
         if (session?.user) {
+          setIsResetPasswordRequired(false);
           await fetchUserProfile(session.user.id);
         } else {
           setUserProfile(null);
+          setIsResetPasswordRequired(false);
         }
       }
     );
@@ -202,6 +226,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         session,
         isLoading,
         isSetupRequired,
+        isResetPasswordRequired,
         login,
         signup,
         setupProfile,
