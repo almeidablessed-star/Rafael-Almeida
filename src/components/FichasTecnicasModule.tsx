@@ -36,6 +36,23 @@ const getSugestaoVendaCompat = (ficha: FichaTecnica) => {
   return getPrincipalTamanho(ficha).preco || 0;
 };
 
+const getTamanhoSelecionado = (ficha: FichaTecnica, selectedTamanhoId?: string) => {
+  if (!selectedTamanhoId || !ficha.tamanhos) return getPrincipalTamanho(ficha);
+  return ficha.tamanhos.find(t => t.id === selectedTamanhoId) || getPrincipalTamanho(ficha);
+};
+
+const getMaoDeObraParaTamanho = (tamanho: TamanhoOpcao, fichaGlobal: number) => {
+  return tamanho.maoDeObraCost !== undefined ? tamanho.maoDeObraCost : fichaGlobal;
+};
+
+const getCustoParaTamanho = (tamanho: TamanhoOpcao, fichaGlobal: number) => {
+  return tamanho.custoCost !== undefined ? tamanho.custoCost : fichaGlobal;
+};
+
+const getInvestimentoParaTamanho = (tamanho: TamanhoOpcao, fichaGlobal: number) => {
+  return tamanho.investimentoCost !== undefined ? tamanho.investimentoCost : fichaGlobal;
+};
+
 const DEFAULT_FICHAS: FichaTecnica[] = [
   // Exemplo: Bolo com múltiplos tamanhos
   {
@@ -118,6 +135,8 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [expandedFichaId, setExpandedFichaId] = useState<string | null>(null);
   const [launchSuccessMsg, setLaunchSuccessMsg] = useState<string | null>(null);
+  const [expandedTamanhosId, setExpandedTamanhosId] = useState<string | null>(null);
+  const [selectedTamanhoIdByFicha, setSelectedTamanhoIdByFicha] = useState<Record<string, string>>({}); // Rastreia tamanho selecionado por ficha
 
   // Form State
   const [name, setName] = useState('');
@@ -153,6 +172,22 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   const [custoCost, setCustoCost] = useState('5');
   const [investimentoCost, setInvestimentoCost] = useState('5');
 
+  // Estado para gerenciar múltiplos tamanhos
+  const [tamanhos, setTamanhos] = useState<Array<{
+    id: string;
+    descricao: string;
+    preco: string;
+    maoDeObraCost: string;
+    custoCost: string;
+    investimentoCost: string;
+  }>>([
+    { id: 'ts-10', descricao: '10 fatias', preco: '55', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
+    { id: 'ts-15', descricao: '15 fatias', preco: '75', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
+    { id: 'ts-20', descricao: '20 fatias', preco: '90', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
+    { id: 'ts-25', descricao: '25 fatias', preco: '100', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
+    { id: 'ts-30', descricao: '30 fatias', preco: '120', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
+  ]);
+
   // Fichas são agora gerenciadas pelo hook useFichasTecnicas (salva no Supabase)
 
   const totalReposicao = ingredients.reduce((sum, ing) => sum + (ing.totalCost || 0), 0);
@@ -170,6 +205,13 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     setMaoDeObraCost('20');
     setCustoCost('5');
     setInvestimentoCost('5');
+    setTamanhos([
+      { id: 'ts-10', descricao: '10 fatias', preco: '55', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
+      { id: 'ts-15', descricao: '15 fatias', preco: '75', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
+      { id: 'ts-20', descricao: '20 fatias', preco: '90', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
+      { id: 'ts-25', descricao: '25 fatias', preco: '100', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
+      { id: 'ts-30', descricao: '30 fatias', preco: '120', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
+    ]);
     setEditingId(null);
     setIsCreating(true);
   };
@@ -183,6 +225,26 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     setMaoDeObraCost((ficha.maoDeObraCost || 0).toString());
     setCustoCost((ficha.custoCost || 0).toString());
     setInvestimentoCost((ficha.investimentoCost || 0).toString());
+
+    // Carregar tamanhos da ficha, convertendo para string
+    if (ficha.tamanhos && ficha.tamanhos.length > 0) {
+      setTamanhos(
+        ficha.tamanhos.map((t) => ({
+          id: t.id,
+          descricao: t.descricao,
+          preco: (t.preco || 0).toString(),
+          maoDeObraCost: (t.maoDeObraCost || 0).toString(),
+          custoCost: (t.custoCost || 0).toString(),
+          investimentoCost: (t.investimentoCost || 0).toString(),
+        }))
+      );
+    } else {
+      // Se não há tamanhos, usar padrão
+      setTamanhos([
+        { id: 'ts-10', descricao: '10 fatias', preco: '0', maoDeObraCost: '0', custoCost: '0', investimentoCost: '0' },
+      ]);
+    }
+
     setEditingId(ficha.id);
     setIsCreating(true);
   };
@@ -213,22 +275,52 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     setIngredients((prev) => prev.filter((i) => i.id !== id));
   };
 
+  const handleUpdateTamanho = (id: string, field: string, value: string) => {
+    setTamanhos((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, [field]: value } : t))
+    );
+  };
+
+  const handleAddTamanho = () => {
+    const newId = `ts-${Date.now()}`;
+    setTamanhos((prev) => [
+      ...prev,
+      {
+        id: newId,
+        descricao: `${prev.length * 5 + 10} fatias`,
+        preco: '0',
+        maoDeObraCost: maoDeObraCost,
+        custoCost: custoCost,
+        investimentoCost: investimentoCost,
+      },
+    ]);
+  };
+
+  const handleRemoveTamanho = (id: string) => {
+    if (tamanhos.length > 1) {
+      setTamanhos((prev) => prev.filter((t) => t.id !== id));
+    }
+  };
+
   const handleSaveFicha = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
 
-    // Converter yieldInfo e sugestaoVenda para array de tamanhos
-    const tamanho: TamanhoOpcao = {
-      id: `ts-${Date.now()}`,
-      descricao: yieldInfo.trim() || '1 unidade',
-      preco: calculatedSuggestedPrice,
-    };
+    // Converter tamanhos do formulário para TamanhoOpcao
+    const tamanhosData: TamanhoOpcao[] = tamanhos.map((t) => ({
+      id: t.id,
+      descricao: t.descricao,
+      preco: parseFloat(t.preco) || 0,
+      maoDeObraCost: parseFloat(t.maoDeObraCost) || 0,
+      custoCost: parseFloat(t.custoCost) || 0,
+      investimentoCost: parseFloat(t.investimentoCost) || 0,
+    }));
 
     const fichaData: Omit<FichaTecnica, 'id' | 'createdAt'> = {
       name: name.trim(),
       category,
       imageUrl: imageUrl.trim() || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&auto=format&fit=crop&q=80',
-      tamanhos: [tamanho],
+      tamanhos: tamanhosData,
       ingredients,
       maoDeObraCost: mdoNum,
       custoCost: cusNum,
@@ -733,43 +825,107 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
             </div>
           </div>
 
-          {/* LABOR & COSTS & INVESTMENT BREAKDOWN */}
-          <div className="grid grid-cols-3 gap-2.5 text-xs">
-            <div>
-              <label className="block text-[11px] font-bold text-[var(--color-pastry-chocolate)] mb-1">
-                Mão de Obra ($)
-              </label>
-              <input
-                type="text"
-                inputMode="decimal"
-                value={maoDeObraCost}
-                onChange={(e) => setMaoDeObraCost(e.target.value)}
-                className="w-full px-2.5 py-2 border border-neutral-300 rounded-xl font-bold text-[var(--color-pastry-chocolate)]"
-              />
+          {/* TAMANHOS E PREÇOS */}
+          <div className="bg-[var(--color-pastry-cream)] p-4 rounded-lg border border-[var(--color-pastry-light-pink)]/40 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-extrabold uppercase text-[var(--color-pastry-chocolate)]">
+                Tamanhos & Preços ({tamanhos.length})
+              </span>
+              <button
+                type="button"
+                onClick={handleAddTamanho}
+                className="text-xs font-bold text-[var(--color-pastry-chocolate)] hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                <PlusCircle className="w-4 h-4 text-[var(--color-pastry-light-pink)]" />
+                <span>Adicionar</span>
+              </button>
             </div>
-            <div>
-              <label className="block text-[11px] font-bold text-[var(--color-pastry-chocolate)] mb-1">
-                Custo ($)
-              </label>
-              <input
-                type="text"
-                inputMode="decimal"
-                value={custoCost}
-                onChange={(e) => setCustoCost(e.target.value)}
-                className="w-full px-2.5 py-2 border border-neutral-300 rounded-xl font-bold text-[var(--color-pastry-chocolate)]"
-              />
-            </div>
-            <div>
-              <label className="block text-[11px] font-bold text-[var(--color-pastry-chocolate)] mb-1">
-                Investimento ($)
-              </label>
-              <input
-                type="text"
-                inputMode="decimal"
-                value={investimentoCost}
-                onChange={(e) => setInvestimentoCost(e.target.value)}
-                className="w-full px-2.5 py-2 border border-neutral-300 rounded-xl font-bold text-[var(--color-pastry-chocolate)]"
-              />
+
+            <div className="space-y-2">
+              {tamanhos.map((tamanho) => (
+                <div key={tamanho.id} className="bg-white p-2.5 rounded-xl border border-[var(--color-pastry-light-pink)]/30 space-y-2">
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <label className="block text-[10px] font-bold text-[var(--color-pastry-chocolate)] mb-1">
+                        Descrição
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Ex: 10 fatias"
+                        value={tamanho.descricao}
+                        onChange={(e) => handleUpdateTamanho(tamanho.id, 'descricao', e.target.value)}
+                        className="w-full px-2 py-1.5 border border-neutral-300 rounded-lg text-xs font-semibold"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-[var(--color-pastry-chocolate)] mb-1">
+                        Preço ($)
+                      </label>
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        placeholder="0.00"
+                        value={tamanho.preco}
+                        onChange={(e) => handleUpdateTamanho(tamanho.id, 'preco', e.target.value)}
+                        className="w-full px-2 py-1.5 border border-neutral-300 rounded-lg text-xs font-bold text-center"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2 text-xs">
+                    <div>
+                      <label className="block text-[10px] font-bold text-[var(--color-pastry-chocolate)] mb-1">
+                        Mão de Obra ($)
+                      </label>
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        placeholder="0"
+                        value={tamanho.maoDeObraCost}
+                        onChange={(e) => handleUpdateTamanho(tamanho.id, 'maoDeObraCost', e.target.value)}
+                        className="w-full px-2 py-1.5 border border-neutral-300 rounded-lg text-xs font-bold text-center"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-[var(--color-pastry-chocolate)] mb-1">
+                        Custo ($)
+                      </label>
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        placeholder="0"
+                        value={tamanho.custoCost}
+                        onChange={(e) => handleUpdateTamanho(tamanho.id, 'custoCost', e.target.value)}
+                        className="w-full px-2 py-1.5 border border-neutral-300 rounded-lg text-xs font-bold text-center"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-[var(--color-pastry-chocolate)] mb-1">
+                        Investimento ($)
+                      </label>
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        placeholder="0"
+                        value={tamanho.investimentoCost}
+                        onChange={(e) => handleUpdateTamanho(tamanho.id, 'investimentoCost', e.target.value)}
+                        className="w-full px-2 py-1.5 border border-neutral-300 rounded-lg text-xs font-bold text-center"
+                      />
+                    </div>
+                  </div>
+
+                  {tamanhos.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveTamanho(tamanho.id)}
+                      className="w-full text-xs font-bold text-semantic-error-600 hover:bg-semantic-error-50 py-1 rounded cursor-pointer transition"
+                    >
+                      <Trash2 className="w-3.5 h-3.5 inline mr-1" />
+                      Remover
+                    </button>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
 
@@ -826,18 +982,21 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
           filteredFichas.map((ficha) => {
             const ingList = ficha.ingredients || [];
             const isExpanded = expandedFichaId === ficha.id;
+            const tamanhoSelecionado = getTamanhoSelecionado(ficha, selectedTamanhoIdByFicha[ficha.id]);
 
-            // Calcula os segmentos do gauge com base nos custos
+            // Calcula os segmentos do gauge com base nos custos do tamanho selecionado
             const circumference = 2 * Math.PI * 35;
             const repoTotal = ingList.reduce((acc, i) => acc + (i.totalCost || 0), 0);
-            const maoDeObraTotal = ficha.maoDeObraCost || 0;
-            const custosTotal = (ficha.custoCost || 0) + (ficha.investimentoCost || 0);
+            const maoDeObraTotal = getMaoDeObraParaTamanho(tamanhoSelecionado, ficha.maoDeObraCost || 0);
+            const custoTotal = getCustoParaTamanho(tamanhoSelecionado, ficha.custoCost || 0);
+            const investimentoTotal = getInvestimentoParaTamanho(tamanhoSelecionado, ficha.investimentoCost || 0);
+            const custosTotal = custoTotal + investimentoTotal;
             const totalCosts = repoTotal + maoDeObraTotal + custosTotal;
 
-            // Calcular stroke-dasharray para cada segmento
-            const repoLength = (repoTotal / totalCosts) * circumference;
-            const maoLength = (maoDeObraTotal / totalCosts) * circumference;
-            const custosLength = (custosTotal / totalCosts) * circumference;
+            // Calcular stroke-dasharray para cada segmento (protegido contra divisão por zero)
+            const repoLength = totalCosts > 0 ? (repoTotal / totalCosts) * circumference : 0;
+            const maoLength = totalCosts > 0 ? (maoDeObraTotal / totalCosts) * circumference : 0;
+            const custosLength = totalCosts > 0 ? (custosTotal / totalCosts) * circumference : 0;
 
             return (
               <div
@@ -877,20 +1036,48 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                     >
                       {ficha.name}
                     </span>
-                    {/* BADGE DE FATIAS */}
-                    <span
-                      style={{
-                        alignSelf: 'flex-start',
-                        fontSize: '10px',
-                        fontWeight: 700,
-                        color: '#5B4A6B',
-                        background: '#F3E9F3',
-                        padding: '4px 10px',
-                        borderRadius: '999px',
-                      }}
-                    >
-                      {getYieldInfoCompat(ficha)}
-                    </span>
+                    {/* FILEIRA DE BOTÕES DE TAMANHO - SEMPRE VISÍVEL */}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignSelf: 'flex-start' }}>
+                      {ficha.tamanhos && ficha.tamanhos.length > 0 ? (
+                        ficha.tamanhos.map((tamanho) => (
+                          <button
+                            key={tamanho.id}
+                            onClick={() => setSelectedTamanhoIdByFicha(prev => ({ ...prev, [ficha.id]: tamanho.id }))}
+                            style={{
+                              fontSize: '8px',
+                              fontWeight: selectedTamanhoIdByFicha[ficha.id] === tamanho.id ? 700 : 600,
+                              color: selectedTamanhoIdByFicha[ficha.id] === tamanho.id ? '#FFFFFF' : '#5B4A6B',
+                              background: selectedTamanhoIdByFicha[ficha.id] === tamanho.id
+                                ? 'linear-gradient(140deg,#6E3F72,#A85E86)'
+                                : '#F3E9F3',
+                              padding: '4px 8px',
+                              borderRadius: '6px',
+                              border: 'none',
+                              cursor: 'pointer',
+                              transition: 'all .15s ease',
+                              boxShadow: selectedTamanhoIdByFicha[ficha.id] === tamanho.id
+                                ? '0 4px 12px rgba(110,63,114,.25)'
+                                : 'none',
+                              whiteSpace: 'nowrap',
+                            }}
+                            onMouseEnter={(e) => {
+                              if (selectedTamanhoIdByFicha[ficha.id] !== tamanho.id) {
+                                e.currentTarget.style.background = '#EFE6F0';
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              if (selectedTamanhoIdByFicha[ficha.id] !== tamanho.id) {
+                                e.currentTarget.style.background = '#F3E9F3';
+                              }
+                            }}
+                          >
+                            {tamanho.descricao.replace(' fatias', 'cm')}
+                          </button>
+                        ))
+                      ) : (
+                        <span style={{ fontSize: '9px', color: '#999' }}>Sem tamanhos</span>
+                      )}
+                    </div>
                   </div>
 
                   {/* DIREITA: IMAGEM */}
@@ -941,8 +1128,8 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         fill="none"
                         stroke="#6E3F72"
                         strokeWidth="10"
-                        strokeDasharray={`${repoLength} ${circumference}`}
-                        strokeDashoffset="0"
+                        strokeDasharray={`${isFinite(repoLength) ? repoLength : 0} ${circumference}`}
+                        strokeDashoffset={0}
                       ></circle>
                       {/* Mão de Obra - rosa */}
                       <circle
@@ -952,8 +1139,8 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         fill="none"
                         stroke="#C4626F"
                         strokeWidth="10"
-                        strokeDasharray={`${maoLength} ${circumference}`}
-                        strokeDashoffset={-repoLength}
+                        strokeDasharray={`${isFinite(maoLength) ? maoLength : 0} ${circumference}`}
+                        strokeDashoffset={-(isFinite(repoLength) ? repoLength : 0)}
                       ></circle>
                       {/* Custos Op. - marrom */}
                       <circle
@@ -963,8 +1150,8 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         fill="none"
                         stroke="#B08D57"
                         strokeWidth="10"
-                        strokeDasharray={`${custosLength} ${circumference}`}
-                        strokeDashoffset={-(repoLength + maoLength)}
+                        strokeDasharray={`${isFinite(custosLength) ? custosLength : 0} ${circumference}`}
+                        strokeDashoffset={-((isFinite(repoLength) ? repoLength : 0) + (isFinite(maoLength) ? maoLength : 0))}
                       ></circle>
                     </svg>
                     {/* TEXTO NO CENTRO DO GAUGE */}
@@ -999,7 +1186,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                           fontFamily: "'Manrope', sans-serif",
                         }}
                       >
-                        {formatMoney(getSugestaoVendaCompat(ficha))}
+                        {formatMoney(tamanhoSelecionado.preco || 0)}
                       </span>
                     </div>
                   </div>
@@ -1016,13 +1203,13 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                     <span style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '10px', color: '#5B4A6B' }}>
                       <span style={{ width: '9px', height: '9px', borderRadius: '3px', background: '#C4626F', flexShrink: 0 }}></span>
                       Mão de Obra
-                      <span style={{ color: '#241B2B', marginLeft: 'auto', fontWeight: 400 }}>{formatMoney(ficha.maoDeObraCost)}</span>
+                      <span style={{ color: '#241B2B', marginLeft: 'auto', fontWeight: 400 }}>{formatMoney(maoDeObraTotal)}</span>
                     </span>
                     {/* Custos */}
                     <span style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '10px', color: '#5B4A6B' }}>
                       <span style={{ width: '9px', height: '9px', borderRadius: '3px', background: '#B08D57', flexShrink: 0 }}></span>
                       Custos Op.
-                      <span style={{ color: '#241B2B', marginLeft: 'auto', fontWeight: 400 }}>{formatMoney((ficha.custoCost || 0) + (ficha.investimentoCost || 0))}</span>
+                      <span style={{ color: '#241B2B', marginLeft: 'auto', fontWeight: 400 }}>{formatMoney(custosTotal)}</span>
                     </span>
                   </div>
                 </div>

@@ -131,6 +131,9 @@ export interface TamanhoOpcao {
   descricao: string; // e.g. "10 fatias", "15 fatias", "20 fatias"
   preco: number;
   quantidade?: number; // e.g. número de fatias, unidades, etc
+  maoDeObraCost?: number; // Custo de mão de obra específico deste tamanho
+  custoCost?: number; // Custo operacional específico deste tamanho
+  investimentoCost?: number; // Investimento específico deste tamanho
 }
 
 export interface FichaTecnica {

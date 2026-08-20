@@ -9,7 +9,15 @@ interface SupabaseFichaTecnica {
   nome_produto: string;
   categoria: string;
   foto_url?: string;
-  tamanhos: TamanhoOpcao[];
+  tamanhos: Array<{
+    id: string;
+    descricao: string;
+    preco: number;
+    quantidade?: number;
+    maoDeObraCost?: number;
+    custoCost?: number;
+    investimentoCost?: number;
+  }>;
   insumos: IngredientUsage[];
   mao_de_obra: number;
   custo: number;
@@ -35,12 +43,24 @@ export const useFichasTecnicas = () => {
     if (normalizedCategory === 'bolo') normalizedCategory = 'bolos';
     if (normalizedCategory === 'doce') normalizedCategory = 'doces';
 
+    // Garantir que toda ficha tenha os 5 tamanhos padrão (fallback para fichas antigas)
+    let tamanhos = data.tamanhos || [];
+    if (tamanhos.length === 0) {
+      tamanhos = [
+        { id: 'ts-10', descricao: '10 fatias', preco: 0, maoDeObraCost: 0, custoCost: 0, investimentoCost: 0 },
+        { id: 'ts-15', descricao: '15 fatias', preco: 0, maoDeObraCost: 0, custoCost: 0, investimentoCost: 0 },
+        { id: 'ts-20', descricao: '20 fatias', preco: 0, maoDeObraCost: 0, custoCost: 0, investimentoCost: 0 },
+        { id: 'ts-25', descricao: '25 fatias', preco: 0, maoDeObraCost: 0, custoCost: 0, investimentoCost: 0 },
+        { id: 'ts-30', descricao: '30 fatias', preco: 0, maoDeObraCost: 0, custoCost: 0, investimentoCost: 0 },
+      ];
+    }
+
     return {
       id: String(data.id),
       name: data.nome_produto,
       category: normalizedCategory as any,
       imageUrl: data.foto_url,
-      tamanhos: data.tamanhos || [],
+      tamanhos: tamanhos,
       ingredients: data.insumos || [],
       maoDeObraCost: data.mao_de_obra,
       custoCost: data.custo,
@@ -53,7 +73,15 @@ export const useFichasTecnicas = () => {
     nome_produto: ficha.name,
     categoria: ficha.category,
     foto_url: ficha.imageUrl || null,
-    tamanhos: ficha.tamanhos || [],
+    tamanhos: (ficha.tamanhos || []).map(t => ({
+      id: t.id,
+      descricao: t.descricao,
+      preco: t.preco,
+      quantidade: t.quantidade,
+      maoDeObraCost: t.maoDeObraCost ?? 0,
+      custoCost: t.custoCost ?? 0,
+      investimentoCost: t.investimentoCost ?? 0,
+    })),
     insumos: ficha.ingredients || [],
     mao_de_obra: ficha.maoDeObraCost,
     custo: ficha.custoCost,
