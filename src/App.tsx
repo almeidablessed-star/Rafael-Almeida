@@ -34,6 +34,7 @@ import {
   Download,
 } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import { Header } from './components/Header';
 import { BottomNav } from './components/BottomNav';
 import { PeriodSelector } from './components/PeriodSelector';
@@ -434,7 +435,9 @@ function AppContent() {
 export default function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <ProtectedRoute>
+        <AppContent />
+      </ProtectedRoute>
     </AuthProvider>
   );
 }
