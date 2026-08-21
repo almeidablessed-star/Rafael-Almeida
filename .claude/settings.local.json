@@ -111,7 +111,9 @@
       "Bash(node -c \"C:\\\\Users\\\\Rafael\\\\Documents\\\\projetos\\\\carula\\\\src\\\\App.tsx\")",
       "WebFetch(domain:supabase.com)",
       "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(32\\).toString\\('hex'\\)\\)\")",
-      "Bash(curl -X POST https://inqyobsjuztztvafpzxn.supabase.co/functions/v1/smart-processor -H 'Content-Type: application/json' -d '{ *)"
+      "Bash(curl -X POST https://inqyobsjuztztvafpzxn.supabase.co/functions/v1/smart-processor -H 'Content-Type: application/json' -d '{ *)",
+      "Bash(supabase secrets *)",
+      "Bash(curl -X POST https://inqyobsjuztztvafpzxn.supabase.co/functions/v1/smart-processor -H 'Content-Type: application/json' -H 'X-Hotmart-Token: fbeab4cad8864200f9c6b3d4fe849c508b50e9cf3aa817a9a17d7562d5f95314' -d '{ *)"
     ]
   },
   "hooks": {

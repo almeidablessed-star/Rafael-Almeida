@@ -18,6 +18,7 @@ interface AuthContextType {
   isLoading: boolean;
   isSetupRequired: boolean;
   isResetPasswordRequired: boolean;
+  isOtpVerificationRequired: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string) => Promise<void>;
   setupProfile: (nome: string, nome_confeitaria: string, moeda: 'USD' | 'BRL') => Promise<void>;
@@ -33,22 +34,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
   const [isSetupRequired, setIsSetupRequired] = useState(false);
   const [isResetPasswordRequired, setIsResetPasswordRequired] = useState(false);
+  const [isOtpVerificationRequired, setIsOtpVerificationRequired] = useState(false);
 
   useEffect(() => {
     const initAuth = async () => {
       try {
-        // Detectar se é um reset password flow (pode estar em query string ou hash)
+        // Detectar tipo de flow (otp_verification ou recovery)
         const params = new URLSearchParams(window.location.search);
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
-        const isRecovery = params.get('type') === 'recovery' || hashParams.get('type') === 'recovery';
+        const flowType = params.get('type') || hashParams.get('type');
 
         const { data: { session: currentSession } } = await supabase.auth.getSession();
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
 
         if (currentSession?.user) {
-          // Se vem de recovery link, mostrar tela de reset password
-          if (isRecovery) {
+          if (flowType === 'otp_verification') {
+            setIsOtpVerificationRequired(true);
+            setIsLoading(false);
+            return;
+          }
+
+          if (flowType === 'recovery') {
             setIsResetPasswordRequired(true);
             setIsLoading(false);
             return;
@@ -70,10 +77,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSession(session);
         setUser(session?.user ?? null);
 
-        // Se o evento é de recovery (reset password), manter isResetPasswordRequired como true
         if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') {
           const params = new URLSearchParams(window.location.search);
-          if (params.get('type') === 'recovery') {
+          const flowType = params.get('type');
+
+          if (flowType === 'otp_verification') {
+            setIsOtpVerificationRequired(true);
+            return;
+          }
+
+          if (flowType === 'recovery') {
             setIsResetPasswordRequired(true);
             return;
           }
@@ -81,10 +94,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (session?.user) {
           setIsResetPasswordRequired(false);
+          setIsOtpVerificationRequired(false);
           await fetchUserProfile(session.user.id);
         } else {
           setUserProfile(null);
           setIsResetPasswordRequired(false);
+          setIsOtpVerificationRequired(false);
         }
       }
     );
@@ -228,6 +243,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isLoading,
         isSetupRequired,
         isResetPasswordRequired,
+        isOtpVerificationRequired,
         login,
         signup,
         setupProfile,

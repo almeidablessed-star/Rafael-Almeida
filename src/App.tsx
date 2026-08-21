@@ -40,6 +40,7 @@ import { BottomNav } from './components/BottomNav';
 import { PeriodSelector } from './components/PeriodSelector';
 import { Dashboard } from './components/Dashboard';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
+import { VerifyOtpPage } from './pages/VerifyOtpPage';
 import { OrdersModule } from './components/OrdersModule';
 import { SalesModule } from './components/SalesModule';
 import { RestockModule } from './components/RestockModule';
@@ -61,7 +62,7 @@ import { LoginModal } from './components/LoginModal';
 import { CurrencyProvider } from './context/CurrencyContext';
 
 function AppContent() {
-  const { isResetPasswordRequired } = useAuth();
+  const { isResetPasswordRequired, isOtpVerificationRequired } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
 
@@ -210,6 +211,10 @@ function AppContent() {
     setIsUserLoggedIn(false);
     setIsProfileModalOpen(false);
   };
+
+  if (isOtpVerificationRequired) {
+    return <VerifyOtpPage />;
+  }
 
   if (isResetPasswordRequired) {
     return <ResetPasswordPage />;
