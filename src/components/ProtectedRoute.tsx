@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { LoginPage } from '../pages/LoginPage';
 import { SignupPage } from '../pages/SignupPage';
 import { SetupProfilePage } from '../pages/SetupProfilePage';
+import { VerifyOtpStandalonePage } from '../pages/VerifyOtpStandalonePage';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -10,7 +11,7 @@ interface ProtectedRouteProps {
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { user, userProfile, isLoading, isSetupRequired } = useAuth();
-  const [authMode, setAuthMode] = React.useState<'login' | 'signup'>('login');
+  const [authMode, setAuthMode] = React.useState<'login' | 'signup' | 'verify-otp'>('login');
 
   if (isLoading) {
     return (
@@ -24,8 +25,12 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   }
 
   if (!user) {
+    if (authMode === 'verify-otp') {
+      return <VerifyOtpStandalonePage onBackClick={() => setAuthMode('login')} />;
+    }
+
     return authMode === 'login' ? (
-      <LoginPage onSignupClick={() => setAuthMode('signup')} />
+      <LoginPage onSignupClick={() => setAuthMode('signup')} onVerifyOtpClick={() => setAuthMode('verify-otp')} />
     ) : (
       <SignupPage onLoginClick={() => setAuthMode('login')} />
     );

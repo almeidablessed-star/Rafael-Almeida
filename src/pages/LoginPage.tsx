@@ -5,9 +5,10 @@ import { CarulaLogo } from '../components/CarulaLogo';
 
 interface LoginPageProps {
   onSignupClick: () => void;
+  onVerifyOtpClick?: () => void;
 }
 
-export const LoginPage: React.FC<LoginPageProps> = ({ onSignupClick }) => {
+export const LoginPage: React.FC<LoginPageProps> = ({ onSignupClick, onVerifyOtpClick }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -82,16 +83,32 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSignupClick }) => {
           </button>
         </form>
 
-        <div className="mt-8 pt-8 border-t border-gray-200">
-          <p className="text-center text-gray-600 mb-4">
-            Não tem conta?
-          </p>
-          <button
-            onClick={onSignupClick}
-            className="w-full py-3 rounded-xl font-semibold border-2 border-[#6E3F72] text-[#6E3F72] hover:bg-[#6E3F72] hover:text-white transition-all"
-          >
-            Criar Conta
-          </button>
+        <div className="mt-8 pt-8 border-t border-gray-200 space-y-3">
+          <div>
+            <p className="text-center text-gray-600 mb-4">
+              Não tem conta?
+            </p>
+            <button
+              onClick={onSignupClick}
+              className="w-full py-3 rounded-xl font-semibold border-2 border-[#6E3F72] text-[#6E3F72] hover:bg-[#6E3F72] hover:text-white transition-all"
+            >
+              Criar Conta
+            </button>
+          </div>
+
+          {onVerifyOtpClick && (
+            <div>
+              <p className="text-center text-gray-600 mb-4 text-sm">
+                Já recebeu um código?
+              </p>
+              <button
+                onClick={onVerifyOtpClick}
+                className="w-full py-3 rounded-xl font-semibold bg-gray-100 text-[#6E3F72] hover:bg-gray-200 transition-all text-sm"
+              >
+                Verificar Código
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
