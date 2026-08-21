@@ -26,7 +26,7 @@ export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = (
 
     try {
       // Call Edge Function to verify OTP and get session
-      const response = await fetch('https://inqyobsjuztztvafpzxn.supabase.co/functions/v1/complete-otp', {
+      const response = await fetch('https://inqyobsjuztztvafpzxn.supabase.co/functions/v1/swift-responder', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, code: otp }),
