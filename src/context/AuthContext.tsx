@@ -37,9 +37,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const initAuth = async () => {
       try {
-        // Detectar se é um reset password flow
+        // Detectar se é um reset password flow (pode estar em query string ou hash)
         const params = new URLSearchParams(window.location.search);
-        const isRecovery = params.get('type') === 'recovery';
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const isRecovery = params.get('type') === 'recovery' || hashParams.get('type') === 'recovery';
 
         const { data: { session: currentSession } } = await supabase.auth.getSession();
         setSession(currentSession);
