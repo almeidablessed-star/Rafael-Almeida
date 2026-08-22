@@ -402,8 +402,7 @@ function AppContent() {
       <LoginModal
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
-        onLoginSuccess={(email) => {
-          setIsUserLoggedIn(true);
+        onLoginSuccess={() => {
           setIsLoginModalOpen(false);
           setIsProfileModalOpen(true);
         }}
