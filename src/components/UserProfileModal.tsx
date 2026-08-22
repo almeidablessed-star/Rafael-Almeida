@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { UserProfile } from '../types';
 import { getStoredUserProfile, saveStoredUserProfile } from '../utils/userProfile';
+import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabase';
 import {
   User,
   X,
@@ -26,15 +28,17 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   onClose,
   onProfileUpdated,
 }) => {
+  const { user, userProfile } = useAuth();
   const currentProfile = getStoredUserProfile();
 
-  const [name, setName] = useState(currentProfile.name || 'Carula Cake Confeitaria');
-  const [email, setEmail] = useState(currentProfile.email || 'almeida.blessed@gmail.com');
+  const [name, setName] = useState(userProfile?.nome || currentProfile.name || 'Carula Cake Confeitaria');
+  const [email, setEmail] = useState(user?.email || currentProfile.email || 'almeida.blessed@gmail.com');
   const [phone, setPhone] = useState(currentProfile.phone || '(781) 420-6892');
   const [address, setAddress] = useState(currentProfile.address || 'Beverly, MA');
   const [instagram, setInstagram] = useState(currentProfile.instagram || '@carulacake');
-  const [photoUrl, setPhotoUrl] = useState(currentProfile.photoUrl || '');
+  const [photoUrl, setPhotoUrl] = useState(userProfile?.foto_url || currentProfile.photoUrl || '');
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   if (!isOpen) return null;
 
@@ -49,24 +53,53 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
     }
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    const updated: UserProfile = {
-      name: name.trim() || 'Carula Cake Confeitaria',
-      email: email.trim(),
-      phone: phone.trim(),
-      address: address.trim(),
-      instagram: instagram.trim(),
-      photoUrl: photoUrl.trim(),
-    };
 
-    saveStoredUserProfile(updated);
-    onProfileUpdated(updated);
-    setSavedSuccess(true);
-    setTimeout(() => {
-      setSavedSuccess(false);
-      onClose();
-    }, 1200);
+    if (!user) {
+      alert('Usuário não encontrado');
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      // Update user profile in Supabase
+      const { error } = await supabase
+        .from('usuarias')
+        .update({
+          nome: name.trim() || 'Carula Cake Confeitaria',
+          foto_url: photoUrl.trim(),
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        alert('Erro ao salvar perfil');
+        return;
+      }
+
+      // Also update localStorage for fallback
+      const updated: UserProfile = {
+        name: name.trim() || 'Carula Cake Confeitaria',
+        email: email.trim(),
+        phone: phone.trim(),
+        address: address.trim(),
+        instagram: instagram.trim(),
+        photoUrl: photoUrl.trim(),
+      };
+
+      saveStoredUserProfile(updated);
+      onProfileUpdated(updated);
+      setSavedSuccess(true);
+      setTimeout(() => {
+        setSavedSuccess(false);
+        onClose();
+      }, 1200);
+    } catch (err) {
+      alert('Erro ao salvar perfil');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return createPortal(
@@ -224,12 +257,17 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
             <button
               type="submit"
-              className="px-5 py-2 rounded-xl bg-pink-600 hover:bg-pink-700 text-white font-bold text-xs shadow-sm flex items-center gap-1.5"
+              disabled={isSaving}
+              className="px-5 py-2 rounded-xl bg-pink-600 hover:bg-pink-700 text-white font-bold text-xs shadow-sm flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {savedSuccess ? (
                 <>
                   <Check className="w-4 h-4 text-semantic-success-300" />
                   <span>Salvo!</span>
+                </>
+              ) : isSaving ? (
+                <>
+                  <span>Salvando...</span>
                 </>
               ) : (
                 <>
