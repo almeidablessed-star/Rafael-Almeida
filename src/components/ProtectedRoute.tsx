@@ -10,7 +10,7 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { user, userProfile, isLoading, isSetupRequired } = useAuth();
+  const { user, userProfile, isLoading, isSetupRequired, isResetPasswordRequired, isOtpVerificationRequired } = useAuth();
   const [authMode, setAuthMode] = React.useState<'login' | 'signup' | 'verify-otp'>('login');
 
   if (isLoading) {
@@ -36,6 +36,12 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
+  // If user needs to reset password or verify OTP, show AppContent which will handle those flows
+  if (isResetPasswordRequired || isOtpVerificationRequired) {
+    return <>{children}</>;
+  }
+
+  // If user has no profile, show setup
   if (isSetupRequired || !userProfile) {
     return <SetupProfilePage />;
   }
