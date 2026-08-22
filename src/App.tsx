@@ -62,7 +62,7 @@ import { LoginModal } from './components/LoginModal';
 import { CurrencyProvider } from './context/CurrencyContext';
 
 function AppContent() {
-  const { isResetPasswordRequired, isOtpVerificationRequired, user } = useAuth();
+  const { isResetPasswordRequired, isOtpVerificationRequired, user, logout } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
 
@@ -201,7 +201,12 @@ function AppContent() {
     setTransactions(cleared);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
     setIsProfileModalOpen(false);
   };
 
