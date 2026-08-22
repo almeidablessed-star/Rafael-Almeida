@@ -19,6 +19,7 @@ interface AuthContextType {
   isSetupRequired: boolean;
   isResetPasswordRequired: boolean;
   isOtpVerificationRequired: boolean;
+  isValidatingProfile: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string) => Promise<void>;
   setupProfile: (nome: string, nome_confeitaria: string, moeda: 'USD' | 'BRL') => Promise<void>;
@@ -35,6 +36,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isSetupRequired, setIsSetupRequired] = useState(false);
   const [isResetPasswordRequired, setIsResetPasswordRequired] = useState(false);
   const [isOtpVerificationRequired, setIsOtpVerificationRequired] = useState(false);
+  const [isValidatingProfile, setIsValidatingProfile] = useState(false);
 
   useEffect(() => {
     const initAuth = async () => {
@@ -108,6 +110,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const fetchUserProfile = async (userId: string) => {
+    setIsValidatingProfile(true);
     try {
       const { data, error } = await supabase
         .from('usuarias')
@@ -128,6 +131,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } catch (error) {
       console.error('Error fetching user profile:', error);
+    } finally {
+      setIsValidatingProfile(false);
     }
   };
 
@@ -244,6 +249,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isSetupRequired,
         isResetPasswordRequired,
         isOtpVerificationRequired,
+        isValidatingProfile,
         login,
         signup,
         setupProfile,

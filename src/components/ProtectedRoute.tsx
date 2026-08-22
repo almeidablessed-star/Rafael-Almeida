@@ -10,10 +10,10 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { user, userProfile, isLoading, isSetupRequired, isResetPasswordRequired, isOtpVerificationRequired } = useAuth();
+  const { user, userProfile, isLoading, isSetupRequired, isResetPasswordRequired, isOtpVerificationRequired, isValidatingProfile } = useAuth();
   const [authMode, setAuthMode] = React.useState<'login' | 'signup' | 'verify-otp'>('login');
 
-  if (isLoading) {
+  if (isLoading || isValidatingProfile) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#F5F5F5] to-white">
         <div className="flex flex-col items-center gap-4">
