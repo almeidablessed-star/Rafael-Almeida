@@ -62,7 +62,7 @@ import { LoginModal } from './components/LoginModal';
 import { CurrencyProvider } from './context/CurrencyContext';
 
 function AppContent() {
-  const { isResetPasswordRequired, isOtpVerificationRequired } = useAuth();
+  const { isResetPasswordRequired, isOtpVerificationRequired, user } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
 
@@ -80,9 +80,6 @@ function AppContent() {
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [isUserLoggedIn, setIsUserLoggedIn] = useState(() => {
-    return localStorage.getItem('carula_logged_in') === 'true';
-  });
 
   // Undo state
   const { saveForUndo, getUndoData, hasUndo } = useUndo();
@@ -205,10 +202,6 @@ function AppContent() {
   };
 
   const handleLogout = () => {
-    localStorage.setItem('carula_logged_in', 'false');
-    localStorage.removeItem('carula_current_user');
-    localStorage.removeItem('user_email');
-    setIsUserLoggedIn(false);
     setIsProfileModalOpen(false);
   };
 
@@ -246,7 +239,7 @@ function AppContent() {
             onOpenPwaModal={() => setIsPwaModalOpen(true)}
             onOpenBackupModal={() => setIsBackupModalOpen(true)}
             onOpenProfileModal={() => {
-              if (isUserLoggedIn) {
+              if (user) {
                 setIsProfileModalOpen(true);
               } else {
                 setIsLoginModalOpen(true);
