@@ -42,8 +42,21 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   }
 
   // If user has no profile, show setup
+  // But only after we're sure the profile isn't loading (show loading screen instead)
   if (isSetupRequired || !userProfile) {
-    return <SetupProfilePage />;
+    // If we just authenticated but profile is still loading, show loading screen to prevent flash
+    if (!isLoading && isSetupRequired && !userProfile) {
+      return <SetupProfilePage />;
+    }
+    // Show loading while validating profile
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#F5F5F5] to-white">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-full border-4 border-gray-200 border-t-[#6E3F72] animate-spin" />
+          <p className="text-gray-600">Carregando...</p>
+        </div>
+      </div>
+    );
   }
 
   return <>{children}</>;
