@@ -1,6 +1,8 @@
 import React, { useRef, useState } from 'react';
 import { X, Camera, Edit2 } from 'lucide-react';
 import { useCurrency } from '../context/CurrencyContext';
+import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabase';
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -20,19 +22,20 @@ interface ProfileData {
 
 export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onLogout }) => {
   const { currency, setCurrency } = useCurrency();
+  const { user, userProfile } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const [profileData, setProfileData] = useState<ProfileData>(() => {
-    const stored = localStorage.getItem('carula_profile');
-    return stored ? JSON.parse(stored) : {
-      photo: null,
-      name: 'Carula Confeitaria',
+    return {
+      photo: userProfile?.foto_url || null,
+      name: userProfile?.nome || '',
       phone: '',
-      email: localStorage.getItem('user_email') || '',
+      email: user?.email || '',
       address: '',
       instagram: '',
-      currency: 'BRL',
+      currency: userProfile?.moeda || 'BRL',
     };
   });
 
@@ -61,19 +64,45 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
     }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!profileData.name.trim()) {
       setMessage({ type: 'error', text: 'Nome é obrigatório' });
       return;
     }
 
-    localStorage.setItem('carula_profile', JSON.stringify(profileData));
-    setMessage({ type: 'success', text: 'Perfil salvo com sucesso!' });
+    if (!user) {
+      setMessage({ type: 'error', text: 'Usuário não encontrado' });
+      return;
+    }
 
-    setTimeout(() => {
-      setMessage(null);
-      onClose();
-    }, 1500);
+    setIsSaving(true);
+
+    try {
+      // Update user profile in Supabase
+      const { error } = await supabase
+        .from('usuarias')
+        .update({
+          nome: profileData.name,
+          foto_url: profileData.photo,
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        setMessage({ type: 'error', text: 'Erro ao salvar perfil' });
+        return;
+      }
+
+      setMessage({ type: 'success', text: 'Perfil salvo com sucesso!' });
+
+      setTimeout(() => {
+        setMessage(null);
+        onClose();
+      }, 1500);
+    } catch (err) {
+      setMessage({ type: 'error', text: 'Erro ao salvar perfil' });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -568,27 +597,28 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
           </button>
           <button
             onClick={handleSave}
+            disabled={isSaving}
             style={{
               flex: 1,
               padding: '12px',
               borderRadius: '12px',
-              background: '#3A2350',
+              background: isSaving ? '#A9A3B1' : '#3A2350',
               color: '#FFFFFF',
               border: 'none',
               fontFamily: "'Manrope', sans-serif",
               fontSize: '14px',
               fontWeight: 700,
-              cursor: 'pointer',
+              cursor: isSaving ? 'not-allowed' : 'pointer',
               transition: 'background 0.2s ease',
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background = '#5A3A70';
+              if (!isSaving) (e.currentTarget as HTMLButtonElement).style.background = '#5A3A70';
             }}
             onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background = '#3A2350';
+              if (!isSaving) (e.currentTarget as HTMLButtonElement).style.background = '#3A2350';
             }}
           >
-            Salvar Perfil
+            {isSaving ? 'Salvando...' : 'Salvar Perfil'}
           </button>
         </div>
       </div>
