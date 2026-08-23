@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { Lock, CheckCircle, AlertCircle } from 'lucide-react';
 
 export const ResetPasswordPage: React.FC = () => {
-  const { logout } = useAuth();
+  const { logout, beginAuthTransition, endAuthTransition } = useAuth();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -37,11 +37,18 @@ export const ResetPasswordPage: React.FC = () => {
     setError(null);
 
     try {
+      // updateUser emits USER_UPDATED, which the auth listener would otherwise
+      // read as a completed login - clearing the recovery flag and unmounting
+      // this page before it can confirm anything. Hold it off until the
+      // logout and redirect below.
+      beginAuthTransition();
+
       const { error: updateError } = await supabase.auth.updateUser({
         password: password,
       });
 
       if (updateError) {
+        endAuthTransition();
         setError(updateError.message);
         return;
       }
@@ -58,6 +65,7 @@ export const ResetPasswordPage: React.FC = () => {
         window.location.href = '/';
       }, 2000);
     } catch (err: any) {
+      endAuthTransition();
       setError(err.message || 'Erro ao atualizar senha');
     } finally {
       setIsLoading(false);

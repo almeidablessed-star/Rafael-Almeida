@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 
@@ -20,6 +20,8 @@ interface AuthContextType {
   isResetPasswordRequired: boolean;
   isOtpVerificationRequired: boolean;
   isValidatingProfile: boolean;
+  beginAuthTransition: () => void;
+  endAuthTransition: () => void;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string) => Promise<void>;
   setupProfile: (nome: string, nome_confeitaria: string, moeda: 'USD' | 'BRL') => Promise<void>;
@@ -37,6 +39,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isResetPasswordRequired, setIsResetPasswordRequired] = useState(false);
   const [isOtpVerificationRequired, setIsOtpVerificationRequired] = useState(false);
   const [isValidatingProfile, setIsValidatingProfile] = useState(false);
+
+  // The OTP and password-reset screens change the session in the middle of a
+  // multi-step handoff, well before the next screen is ready. Adopting those
+  // intermediate sessions hands the render to the post-login screens and
+  // unmounts the screen the user is still looking at. A page raises this flag
+  // before it touches the session and then redirects when it is done; a ref,
+  // because the auth listener closes over its initial state.
+  const authTransitionRef = useRef(false);
+
+  const beginAuthTransition = () => {
+    authTransitionRef.current = true;
+  };
+
+  // Must be called if the handoff fails, otherwise the redirect never happens
+  // and the listener stays deaf for the rest of the page's life.
+  const endAuthTransition = () => {
+    authTransitionRef.current = false;
+  };
 
   useEffect(() => {
     const initAuth = async () => {
@@ -76,6 +96,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        // Mid-handoff: the page owning the flow redirects when it is ready, and
+        // the session is persisted for the reload to pick up. Ignoring the event
+        // keeps the current screen on until then.
+        if (authTransitionRef.current) return;
+
         setSession(session);
         setUser(session?.user ?? null);
 
@@ -100,6 +125,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           await fetchUserProfile(session.user.id);
         } else {
           setUserProfile(null);
+          setIsSetupRequired(false);
           setIsResetPasswordRequired(false);
           setIsOtpVerificationRequired(false);
         }
@@ -234,6 +260,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(null);
       setUserProfile(null);
       setSession(null);
+      setIsSetupRequired(false);
     } catch (error) {
       throw error;
     }
@@ -250,6 +277,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isResetPasswordRequired,
         isOtpVerificationRequired,
         isValidatingProfile,
+        beginAuthTransition,
+        endAuthTransition,
         login,
         signup,
         setupProfile,

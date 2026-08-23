@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
 import { Lock, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
 
 interface VerifyOtpStandalonePageProps {
@@ -7,6 +8,7 @@ interface VerifyOtpStandalonePageProps {
 }
 
 export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = ({ onBackClick }) => {
+  const { beginAuthTransition, endAuthTransition } = useAuth();
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -39,8 +41,12 @@ export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = (
         return;
       }
 
-      // Set session with returned tokens
+      // Set session with returned tokens. The session lands here but the user
+      // still has to set a password, so hold the auth listener off until the
+      // redirect below - otherwise the post-login screens take over and unmount
+      // this page while it is showing its confirmation.
       if (data.accessToken) {
+        beginAuthTransition();
         await supabase.auth.setSession({
           access_token: data.accessToken,
           refresh_token: data.refreshToken || '',
@@ -54,6 +60,7 @@ export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = (
         window.location.href = '/?type=recovery';
       }, 1500);
     } catch (err: any) {
+      endAuthTransition();
       setError(err.message || 'Erro ao verificar código');
     } finally {
       setIsLoading(false);
