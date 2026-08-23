@@ -8,8 +8,9 @@ const supabase = createClient(
 
 const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
 
-// Hotmart retries on 5xx but not on 4xx, so transient failures must return 5xx
-// and permanent ones (bad payload, wrong secret) must return 4xx.
+// Only a 2xx reliably stops Hotmart from retrying, so failures that can never
+// succeed on a retry are acknowledged with 200 and left in the logs, while
+// genuinely transient ones return 5xx to be retried.
 function json(body: unknown, status: number) {
   return new Response(JSON.stringify(body), {
     status,
@@ -35,6 +36,16 @@ function readHottok(req: Request): string {
 // acknowledged with 200 so Hotmart stops retrying, but create no user.
 const GRANTING_EVENTS = ['PURCHASE_APPROVED', 'PURCHASE_COMPLETE'];
 const GRANTING_STATUSES = ['APPROVED', 'COMPLETE', 'COMPLETED'];
+
+// A 4xx from Resend means the request itself was rejected - an invalid or
+// disallowed recipient, a sender the account may not use. Sending it again
+// replays the same rejection, so it must not be retried. 429 is the exception:
+// rate limiting clears on its own.
+function isPermanentEmailError(error: any): boolean {
+  const status = error?.statusCode;
+  if (typeof status !== 'number') return false;
+  return status >= 400 && status < 500 && status !== 429;
+}
 
 interface NormalizedPayload {
   email?: string;
@@ -187,6 +198,23 @@ Deno.serve(async (req) => {
     if (emailResult.error) {
       console.error('Error sending email:', emailResult.error);
       await rollback('Email delivery failed');
+
+      if (isPermanentEmailError(emailResult.error)) {
+        // Acknowledged so Hotmart stops retrying, but nobody got access. This
+        // line is the only trace a paying buyer was dropped - watch for it.
+        console.error(
+          `PERMANENT email failure for ${email} - purchase processed, no access granted`
+        );
+        return json(
+          {
+            message: 'Email permanently rejected, not retrying',
+            email,
+            reason: emailResult.error?.message,
+          },
+          200
+        );
+      }
+
       return json({ error: 'Failed to send email' }, 500);
     }
 
