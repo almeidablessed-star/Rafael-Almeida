@@ -8,6 +8,14 @@
       "port": 3000,
       "autoPort": false,
       "url": "http://localhost:3000"
+    },
+    {
+      "name": "carula-site",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["-y", "serve", "C:\\Users\\Rafael\\Documents\\CARULA SITE\\site", "-l", "4321"],
+      "port": 4321,
+      "autoPort": false,
+      "url": "http://localhost:4321"
     }
   ]
 }
