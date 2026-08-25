@@ -45,15 +45,23 @@ export const getOrCreateStock = (ingredientId: string, ingredientName: string, u
 };
 
 // Consume ingredients from a technical sheet when sale is created
+//
+// `orderQuantity` e QUANTAS unidades do produto foram vendidas. A ficha
+// descreve os insumos de UMA unidade, entao tudo e multiplicado por ele.
+// Sem esse fator um pedido de 5 bolos baixava insumo de 1 — o estoque
+// derretia silenciosamente a cada venda multipla.
 export const consumeIngredientsFromFicha = (
   fichaId: string,
   ficha: FichaTecnica,
   transactionId: string,
-  saleDate: string
+  saleDate: string,
+  orderQuantity: number = 1
 ): ConsumedIngredient[] => {
   const stocks = getIngredientStocks();
   const movements = getStockMovements();
   const consumed: ConsumedIngredient[] = [];
+
+  const factor = Number(orderQuantity) > 0 ? Number(orderQuantity) : 1;
 
   // Process each ingredient in the technical sheet
   ficha.ingredients.forEach(ingredient => {
@@ -70,8 +78,10 @@ export const consumeIngredientsFromFicha = (
       stocks.push(stock);
     }
 
+    const totalQuantity = ingredient.quantity * factor;
+
     // Consume the quantity
-    stock.currentQuantity -= ingredient.quantity;
+    stock.currentQuantity -= totalQuantity;
     stock.lastUpdated = new Date().toISOString();
 
     // Record the movement
@@ -81,11 +91,11 @@ export const consumeIngredientsFromFicha = (
       type: 'consumption',
       ingredientId: ingredient.id,
       ingredientName: ingredient.name,
-      quantity: ingredient.quantity,
+      quantity: totalQuantity,
       unit: ingredient.unit,
       relatedTransactionId: transactionId,
       relatedFichaId: fichaId,
-      description: `Consumo: ${ficha.name} (Pedido #${transactionId.slice(-6)})`,
+      description: `Consumo: ${factor}x ${ficha.name} (Pedido #${transactionId.slice(-6)})`,
       createdAt: Date.now(),
     };
     movements.push(movement);
@@ -94,7 +104,7 @@ export const consumeIngredientsFromFicha = (
     consumed.push({
       ingredientId: ingredient.id,
       ingredientName: ingredient.name,
-      quantity: ingredient.quantity,
+      quantity: totalQuantity,
       unit: ingredient.unit,
     });
   });
@@ -104,6 +114,44 @@ export const consumeIngredientsFromFicha = (
   saveMovements(movements);
 
   return consumed;
+};
+
+/**
+ * Consome os insumos de um pedido inteiro, que pode ter varios produtos
+ * diferentes ("2x Bolo Franciele + 3x Bolo Matilda").
+ *
+ * Agrega o resultado por insumo: se dois bolos usam farinha, o pedido gera UMA
+ * linha de farinha com o total somado. Isso importa no cancelamento, que
+ * devolve percorrendo essa lista — linhas duplicadas devolveriam certo por
+ * acaso, mas a leitura do historico ficaria confusa.
+ */
+export const consumeIngredientsForOrder = (
+  items: { ficha: FichaTecnica; quantity: number }[],
+  transactionId: string,
+  saleDate: string
+): ConsumedIngredient[] => {
+  const aggregated = new Map<string, ConsumedIngredient>();
+
+  items.forEach(({ ficha, quantity }) => {
+    const consumed = consumeIngredientsFromFicha(
+      ficha.id,
+      ficha,
+      transactionId,
+      saleDate,
+      quantity
+    );
+
+    consumed.forEach((c) => {
+      const existing = aggregated.get(c.ingredientId);
+      if (existing) {
+        existing.quantity += c.quantity;
+      } else {
+        aggregated.set(c.ingredientId, { ...c });
+      }
+    });
+  });
+
+  return Array.from(aggregated.values());
 };
 
 // Return ingredients to stock when sale is cancelled

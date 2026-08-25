@@ -45,6 +45,18 @@ export interface ConsumedIngredient {
   unit: string;
 }
 
+/**
+ * Vinculo entre um item do pedido e a ficha tecnica que o produz.
+ * Um pedido pode ter varios itens diferentes ("2x Bolo Franciele + 3x Bolo
+ * Matilda"), entao o vinculo e uma LISTA — o campo legado `fichaId` sozinho
+ * nao consegue representar isso.
+ */
+export interface FichaOrderItem {
+  fichaId: string;
+  fichaName: string;
+  quantity: number; // quantas unidades DESTE item foram vendidas
+}
+
 export interface Transaction {
   id: string;
   type: TransactionType;
@@ -68,7 +80,8 @@ export interface Transaction {
   category?: CostCategory;
   notes?: string;
   createdAt: number;
-  fichaId?: string; // Which technical sheet was used for this sale
+  fichaId?: string; // Legado: primeira ficha do pedido. Preferir `fichaItems`.
+  fichaItems?: FichaOrderItem[]; // Todas as fichas do pedido, com a qtd de cada item
   consumedIngredients?: ConsumedIngredient[]; // Ingredients automatically consumed from this sale
 }
 

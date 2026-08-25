@@ -1,8 +1,12 @@
-import { Transaction, TimePeriod, SummaryTotals, FichaTecnica } from '../types';
+import { Transaction, TimePeriod, SummaryTotals, FichaTecnica, FichaOrderItem } from '../types';
 import { SAMPLE_INITIAL_TRANSACTIONS } from '../data/presetData';
 import { getTodayIso } from './formatters';
 import { parseSaleDetail } from './weeklyCalculator';
-import { consumeIngredientsFromFicha, returnIngredientsToStock } from './stockManager';
+import {
+  consumeIngredientsFromFicha,
+  consumeIngredientsForOrder,
+  returnIngredientsToStock,
+} from './stockManager';
 
 const STORAGE_KEY = 'carulaconfeitaria_transacoes_v3';
 
@@ -51,6 +55,58 @@ export const updateTransaction = (updatedTx: Transaction): void => {
   saveTransactions(updated);
 };
 
+/**
+ * Atualiza uma venda reequilibrando o estoque.
+ *
+ * Estrategia: DEVOLVE tudo o que a versao antiga consumiu e CONSOME de novo
+ * pela versao nova. Nao calculamos delta de propositio — o delta so funciona
+ * quando muda apenas a quantidade, e quebra quando a vendedora troca o produto
+ * ou mistura itens. Devolver-e-reconsumir da o resultado certo em todos os
+ * casos e reaproveita dois caminhos que ja estao provados.
+ *
+ * `fichasDisponiveis` e passado de fora (e nao lido aqui) para manter este
+ * modulo sem dependencia do modulo de fichas, que importa deste.
+ */
+export const updateSaleWithStock = (
+  updatedTx: Transaction,
+  fichasDisponiveis: FichaTecnica[]
+): Transaction => {
+  const current = getStoredTransactions();
+  const existing = current.find((t) => t.id === updatedTx.id);
+
+  // 1. Desfaz o consumo antigo, se havia
+  if (existing?.consumedIngredients?.length) {
+    returnIngredientsToStock(
+      existing.id,
+      existing.consumedIngredients,
+      updatedTx.date || getTodayIso()
+    );
+  }
+
+  // 2. Reconsome pela composicao nova
+  const fichaItems = updatedTx.fichaItems || [];
+  const resolved = fichaItems
+    .map((item) => {
+      const ficha = fichasDisponiveis.find((f) => f.id === item.fichaId);
+      return ficha ? { ficha, quantity: item.quantity } : null;
+    })
+    .filter((x): x is { ficha: FichaTecnica; quantity: number } => x !== null);
+
+  const consumedIngredients = resolved.length
+    ? consumeIngredientsForOrder(resolved, updatedTx.id, updatedTx.date)
+    : [];
+
+  const finalTx: Transaction = {
+    ...updatedTx,
+    fichaItems,
+    fichaId: fichaItems[0]?.fichaId,
+    consumedIngredients,
+  };
+
+  saveTransactions(current.map((t) => (t.id === finalTx.id ? finalTx : t)));
+  return finalTx;
+};
+
 export const deleteTransaction = (id: string): void => {
   const current = getStoredTransactions();
   const transaction = current.find((t) => t.id === id);
@@ -65,9 +121,12 @@ export const deleteTransaction = (id: string): void => {
 };
 
 // Special function to add a sale with automatic ingredient consumption from a technical sheet
+//
+// `orderQuantity` = quantas unidades do produto. A ficha descreve UMA unidade.
 export const addSaleWithFicha = (
   saleData: Omit<Transaction, 'id' | 'createdAt' | 'consumedIngredients'>,
-  ficha: FichaTecnica
+  ficha: FichaTecnica,
+  orderQuantity: number = 1
 ): Transaction => {
   const current = getStoredTransactions();
   const txId = 'tx-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7);
@@ -77,7 +136,8 @@ export const addSaleWithFicha = (
     ficha.id,
     ficha,
     txId,
-    saleData.date
+    saleData.date,
+    orderQuantity
   );
 
   // Create transaction with consumed ingredients
@@ -86,11 +146,51 @@ export const addSaleWithFicha = (
     id: txId,
     createdAt: Date.now(),
     fichaId: ficha.id,
+    fichaItems: [{ fichaId: ficha.id, fichaName: ficha.name, quantity: orderQuantity }],
     consumedIngredients,
   };
 
   const updated = [createdTx, ...current];
   saveTransactions(updated);
+  return createdTx;
+};
+
+/**
+ * Lanca uma venda que pode conter varios produtos diferentes, cada um com sua
+ * ficha e sua quantidade. E o caminho usado pelo formulario de pedido.
+ *
+ * Se nenhum item casar com uma ficha (ex.: produto avulso digitado a mao), a
+ * venda e criada normalmente e simplesmente nao movimenta estoque.
+ */
+export const addSaleWithFichaItems = (
+  saleData: Omit<Transaction, 'id' | 'createdAt' | 'consumedIngredients'>,
+  fichaItems: FichaOrderItem[],
+  fichasDisponiveis: FichaTecnica[]
+): Transaction => {
+  const current = getStoredTransactions();
+  const txId = 'tx-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7);
+
+  const resolved = fichaItems
+    .map((item) => {
+      const ficha = fichasDisponiveis.find((f) => f.id === item.fichaId);
+      return ficha ? { ficha, quantity: item.quantity } : null;
+    })
+    .filter((x): x is { ficha: FichaTecnica; quantity: number } => x !== null);
+
+  const consumedIngredients = resolved.length
+    ? consumeIngredientsForOrder(resolved, txId, saleData.date)
+    : [];
+
+  const createdTx: Transaction = {
+    ...saleData,
+    id: txId,
+    createdAt: Date.now(),
+    fichaId: fichaItems[0]?.fichaId,
+    fichaItems,
+    consumedIngredients,
+  };
+
+  saveTransactions([createdTx, ...current]);
   return createdTx;
 };
 

@@ -13,7 +13,6 @@ import {
 import { getStoredCustomers } from './CustomersModule';
 import { getStoredFichas } from './FichasTecnicasModule';
 import { QuotePdfModal } from './QuotePdfModal';
-import { FichaTecnicaSelector } from './FichaTecnicaSelector';
 import { useFichasTecnicas } from '../hooks/useFichasTecnicas';
 import {
   BAKERY_PRODUCT_PRESETS,
@@ -29,6 +28,7 @@ import {
   calculateProportionalBreakdown,
 } from '../data/bakeryCatalog';
 import { getTodayIso, formatCurrency, getTransactionTypeDetails } from '../utils/formatters';
+import { buildFichaItems } from '../utils/fichaMatcher';
 import {
   X,
   Plus,
@@ -106,7 +106,6 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   const [showPdfQuoteModal, setShowPdfQuoteModal] = useState<boolean>(false);
   const [storedCustomers, setStoredCustomers] = useState<Customer[]>([]);
   const [storedFichas, setStoredFichas] = useState<FichaTecnica[]>([]);
-  const [selectedFichaId, setSelectedFichaId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     if (isOpen) {
@@ -119,9 +118,6 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
         console.log('📁 PASSO 2: Usando fichas do localStorage (Supabase vazio ou não autenticado)');
         setStoredFichas(getStoredFichas());
       }
-    } else {
-      // Reset ficha selection when modal closes
-      setSelectedFichaId(undefined);
     }
   }, [isOpen, supabaseFichas]);
 
@@ -563,7 +559,9 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
           paymentMethod,
           paymentStatus,
           notes: notesStr,
-          fichaId: selectedFichaId || undefined,
+          // A ficha nao e escolhida na tela: o sistema casa cada item do pedido
+          // com sua ficha pelo nome do produto. Ver utils/fichaMatcher.ts.
+          fichaItems: buildFichaItems(orderItems, storedFichas),
         },
         editingTransaction?.id
       );

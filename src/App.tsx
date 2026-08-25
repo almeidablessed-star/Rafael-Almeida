@@ -10,8 +10,9 @@ import {
 import {
   getStoredTransactions,
   addTransaction,
-  addSaleWithFicha,
+  addSaleWithFichaItems,
   updateTransaction,
+  updateSaleWithStock,
   deleteTransaction,
   resetToSampleData,
   clearAllTransactions,
@@ -125,22 +126,20 @@ function AppContent() {
           ...existing,
           ...txData,
         };
-        updateTransaction(updated);
+        // Vendas reequilibram o estoque na edicao (devolve o antigo, consome o
+        // novo). Os demais tipos nao movimentam estoque, entao seguem simples.
+        if (updated.type === 'venda') {
+          updateSaleWithStock(updated, getStoredFichas());
+        } else {
+          updateTransaction(updated);
+        }
         setTransactions(getStoredTransactions());
       }
     } else {
-      // If fichaId is present, use addSaleWithFicha for automatic stock deduction
-      if (txData.fichaId && txData.type === 'venda') {
-        const fichas = getStoredFichas();
-        const ficha = fichas.find((f) => f.id === txData.fichaId);
-        if (ficha) {
-          // Remove fichaId from txData as addSaleWithFicha expects it separately
-          const { fichaId, ...txDataWithoutFicha } = txData;
-          addSaleWithFicha(txDataWithoutFicha, ficha);
-        } else {
-          // Fallback if ficha not found
-          addTransaction(txData);
-        }
+      // O formulario ja casou cada item do pedido com sua ficha (fichaItems).
+      // Com pelo menos um vinculo, a venda baixa estoque automaticamente.
+      if (txData.type === 'venda' && txData.fichaItems && txData.fichaItems.length > 0) {
+        addSaleWithFichaItems(txData, txData.fichaItems, getStoredFichas());
       } else {
         addTransaction(txData);
       }
