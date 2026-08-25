@@ -860,15 +860,6 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                 </div>
               </div>
 
-              {/* FICHA TÉCNICA SELECTOR */}
-              <div className="bg-gradient-to-b from-white to-gray-50 p-4 rounded-lg border border-gray-200">
-                <FichaTecnicaSelector
-                  fichas={storedFichas}
-                  selectedFichaId={selectedFichaId}
-                  onSelect={setSelectedFichaId}
-                />
-              </div>
-
               {/* ORDER ITEMS LIST */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">

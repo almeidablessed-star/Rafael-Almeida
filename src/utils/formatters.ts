@@ -96,8 +96,8 @@ export const getTransactionTypeDetails = (type: TransactionType) => {
       return {
         label: 'Venda',
         plural: 'Vendas',
-        color: 'text-emerald-700 bg-emerald-50 border-emerald-200',
-        badgeBg: 'bg-emerald-100 text-emerald-800',
+        color: 'text-rose-700 bg-rose-50 border-rose-200',
+        badgeBg: 'bg-gradient-to-r from-rose-300 to-pink-300 text-rose-900',
         icon: 'TrendingUp',
         isPositive: true,
       };
