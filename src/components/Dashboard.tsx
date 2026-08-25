@@ -66,20 +66,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
   return (
     <div className="space-y-0 pb-8 animate-fadeIn">
 
-      {/* Status bar background filler (covers clock, signal, battery area) */}
-      <div
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 'max(0px, env(safe-area-inset-top))',
-          background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
-          zIndex: 40,
-          pointerEvents: 'none',
-        }}
-      />
-
       {/* 1. PROFIT CARD - Roxo Gradiente (Cabeçalho da Página) */}
       <div
         className="text-white relative overflow-hidden"
@@ -87,11 +73,18 @@ export const Dashboard: React.FC<DashboardProps> = ({
           background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
           padding: '20px',
           paddingBottom: '28px',
-          paddingTop: '28px',
+          // Sangra para cima cobrindo a safe area e devolve o mesmo valor em
+          // padding, para que o gradiente seja um só (sem emenda) e o conteudo
+          // fique exatamente onde estava. Altura cresce o mesmo tanto que a
+          // margem sobe, entao nada abaixo do card se move.
+          paddingTop: 'calc(28px + env(safe-area-inset-top, 0px))',
           boxShadow: '0 30px 70px rgba(58,35,80,0.26)',
           marginLeft: 'calc(-50vw + 50%)',
           marginRight: 'calc(-50vw + 50%)',
-          marginTop: '0px',
+          // Subtracao, nao multiplicacao: calc(-1 * env(...)) e rejeitado por
+          // versoes do WebKit, o que descarta a declaracao inteira e faz o card
+          // parar de sangrar para cima.
+          marginTop: 'calc(0px - env(safe-area-inset-top, 0px))',
           paddingLeft: 'calc(50vw - 50% + 18px)',
           paddingRight: 'calc(50vw - 50% + 18px)',
           borderRadius: '32px 0px 32px 32px',
