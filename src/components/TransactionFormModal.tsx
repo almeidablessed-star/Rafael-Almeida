@@ -892,7 +892,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                           <button
                             type="button"
                             onClick={() => handleRemoveItem(item.id)}
-                            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+                            className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-xl transition-all"
                             title="Remover este item"
                           >
                             <Trash2 className="w-4 h-4" />
