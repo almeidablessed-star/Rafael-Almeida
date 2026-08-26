@@ -409,7 +409,7 @@ export const EstoqueModule: React.FC = () => {
                           stroke={colors.stroke}
                           strokeWidth="10"
                           strokeLinecap="round"
-                          strokeDasharray={`${percentage * 1.26} 126`}
+                          strokeDasharray={`${percentage * (Math.PI * 30 / 100)} ${Math.PI * 30}`}
                         ></path>
                         <text x="38" y="58" textAnchor="middle" fontSize="12" fontWeight="900" fill={colors.stroke} fontFamily="'Manrope', sans-serif">
                           {Math.round(percentage)}%
