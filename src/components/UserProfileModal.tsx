@@ -4,6 +4,7 @@ import { UserProfile } from '../types';
 import { getStoredUserProfile, saveStoredUserProfile } from '../utils/userProfile';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
+import { compressImageFile } from '../utils/imageCompression';
 import {
   User,
   X,
@@ -47,14 +48,10 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPhotoUrl(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      setPhotoUrl(await compressImageFile(file));
     }
   };
 

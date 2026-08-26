@@ -3,6 +3,7 @@ import { FichaTecnica, IngredientUsage, Transaction, TamanhoOpcao } from '../typ
 import { formatCurrency } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
 import { useFichasTecnicas } from '../hooks/useFichasTecnicas';
+import { compressImageFile } from '../utils/imageCompression';
 import {
   BookOpen,
   Plus,
@@ -734,14 +735,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={(e) => {
+                    onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (file) {
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                          setImageUrl(reader.result as string);
-                        };
-                        reader.readAsDataURL(file);
+                        setImageUrl(await compressImageFile(file));
                       }
                     }}
                     className="hidden"

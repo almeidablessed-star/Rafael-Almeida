@@ -55,6 +55,7 @@ import {
   Users,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { compressImageFile } from '../utils/imageCompression';
 
 export interface OrderItemState {
   id: string;
@@ -1002,16 +1003,10 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       <input
                         type="file"
                         accept="image/*"
-                        onChange={(e) => {
+                        onChange={async (e) => {
                           const file = e.target.files?.[0];
                           if (file) {
-                            const reader = new FileReader();
-                            reader.onload = (ev) => {
-                              if (ev.target?.result) {
-                                setInspirationImage(ev.target.result as string);
-                              }
-                            };
-                            reader.readAsDataURL(file);
+                            setInspirationImage(await compressImageFile(file));
                           }
                         }}
                         className="hidden"

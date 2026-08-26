@@ -7,6 +7,7 @@ import { formatCurrency, formatDateBr } from '../utils/formatters';
 import { useAuth } from '../context/AuthContext';
 import { getStoredFichas } from './FichasTecnicasModule';
 import { updateTransaction } from '../utils/storage';
+import { compressImageFile } from '../utils/imageCompression';
 import {
   Printer,
   X,
@@ -67,7 +68,7 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
     };
   }, []);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -76,20 +77,16 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const result = event.target?.result as string;
-      if (result) {
-        setInspirationImage(result);
-        if ('id' in transaction && transaction.id) {
-          updateTransaction({
-            ...transaction,
-            inspirationImage: result,
-          });
-        }
+    const result = await compressImageFile(file);
+    if (result) {
+      setInspirationImage(result);
+      if ('id' in transaction && transaction.id) {
+        updateTransaction({
+          ...transaction,
+          inspirationImage: result,
+        });
       }
-    };
-    reader.readAsDataURL(file);
+    }
   };
 
   const handleRemoveImage = () => {
@@ -315,6 +312,27 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
           console.log(`  Img ${idx}: src=${(img as any).src?.substring(0, 50)}, complete=${(img as any).complete}, naturalHeight=${(img as any).naturalHeight}, visible=${isVisible}, offsetHeight=${imgElement.offsetHeight}, offsetWidth=${imgElement.offsetWidth}`);
         });
 
+        // Captura a folha no tamanho natural dela. A pagina do PDF e que sera
+        // criada com essa mesma proporcao, mais abaixo — assim a imagem preenche
+        // a pagina de canto a canto por construcao, sem faixa branca em lado
+        // nenhum.
+        //
+        // Nao adianta forcar a moldura da captura (ja tentei 794x1123, A4 a
+        // 96dpi): ampliar o container NAO estica o conteudo. A folha usa
+        // breakpoints do Tailwind (sm:p-1.5, sm:space-y-2), que respondem a
+        // largura da JANELA, nao a do elemento. Num iPhone de 375px o `sm:`
+        // nunca ativa, o conteudo continua diagramado para ~355px e o resto da
+        // moldura vira branco — media a sobra em 883px, 56% da largura, tudo do
+        // lado direito. Trocava margem centrada por margem de um lado so.
+        //
+        // O PDF nao e mais um A4 exato, e isso e intencional: e um arquivo para
+        // enviar ao cliente, nao para imprimir.
+        const capturaFolha = {
+          cacheBust: true,
+          pixelRatio: 2,
+          backgroundColor: '#FFFFFF',
+        };
+
         // iOS Safari has known issue: first toPng() call often returns blank, second succeeds
         // Solution: Always do internal double attempt (user only sees single click)
         let imgData: string | undefined;
@@ -322,16 +340,7 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
         // First attempt (discarded) - primes the canvas/rendering pipeline
         console.log(`\n🔄 PDF capture attempt 1/2 (priming)...`);
         try {
-          await toPng(docElem, {
-            cacheBust: true,
-            pixelRatio: 2,
-            allowTaint: true,
-            useCORS: true,
-            backgroundColor: '#FFFFFF',
-            logging: false,
-            quality: 0.95,
-            scale: 2,
-          });
+          await toPng(docElem, capturaFolha);
           console.log(`✅ First attempt completed (result discarded, primed for second)`);
         } catch (err) {
           console.log(`⚠️ First attempt threw error (expected on some cases): ${err}`);
@@ -342,16 +351,7 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
 
         // Second attempt (used) - this should have the image
         console.log(`🔄 PDF capture attempt 2/2 (final)...`);
-        imgData = await toPng(docElem, {
-          cacheBust: true,
-          pixelRatio: 2,
-          allowTaint: true,
-          useCORS: true,
-          backgroundColor: '#FFFFFF',
-          logging: true,
-          quality: 0.95,
-          scale: 2,
-        });
+        imgData = await toPng(docElem, capturaFolha);
 
         const capturedSize = imgData ? imgData.length : 0;
         console.log(`✅ Second attempt result: imgData size=${capturedSize} bytes`);
@@ -360,26 +360,26 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
           throw new Error('Failed to generate PDF image on second attempt');
         }
 
-        const pdf = new jsPDF({
-          orientation: 'portrait',
-          unit: 'mm',
-          format: 'a4',
-        });
-
         // Create image from data and get dimensions
         const img = new Image();
         img.onload = () => {
-          const pdfWidth = pdf.internal.pageSize.getWidth();
-          const pdfHeight = pdf.internal.pageSize.getHeight();
-          const imgWidth = img.width;
-          const imgHeight = img.height;
+          // A pagina e criada com a proporcao da propria folha, em vez de
+          // encaixar a folha num A4. Assim a imagem preenche a pagina de canto a
+          // canto e nao sobra branco em lado nenhum — no visualizador do celular
+          // o PDF encosta nas bordas da tela.
+          //
+          // unit 'px' para casar 1:1 com o PNG capturado; sem conversao para mm
+          // nao ha arredondamento que deixe uma fresta de um pixel na borda.
+          //
+          // Deliberadamente NAO e A4: este PDF e para enviar ao cliente e
+          // guardar, nao para imprimir.
+          const pdf = new jsPDF({
+            orientation: img.height >= img.width ? 'portrait' : 'landscape',
+            unit: 'px',
+            format: [img.width, img.height],
+          });
 
-          const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-          const scaledWidth = imgWidth * ratio;
-          const scaledHeight = imgHeight * ratio;
-          const x = (pdfWidth - scaledWidth) / 2;
-
-          pdf.addImage(imgData, 'PNG', x, 5, scaledWidth, scaledHeight);
+          pdf.addImage(imgData, 'PNG', 0, 0, img.width, img.height);
 
           const isCozinha = activeTab === 'cozinha';
           const clientName = (transaction.customerName || 'Cliente').replace(/\s+/g, '_');

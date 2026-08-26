@@ -4,6 +4,7 @@ import { Customer, CustomerEvent } from '../types';
 import { formatDateBr, formatDayMonthOnly } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
 import { useCustomers } from '../context/CustomersContext';
+import { compressImageFile } from '../utils/imageCompression';
 import {
   Users,
   Plus,
@@ -262,14 +263,10 @@ export const CustomersModule: React.FC = () => {
     setIsFormOpen(true);
   };
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPhotoUrl(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      setPhotoUrl(await compressImageFile(file));
     }
   };
 

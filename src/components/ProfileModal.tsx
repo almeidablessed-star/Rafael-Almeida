@@ -3,6 +3,7 @@ import { X, Camera, Edit2 } from 'lucide-react';
 import { useCurrency } from '../context/CurrencyContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
+import { compressImageFile } from '../utils/imageCompression';
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -62,17 +63,14 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
     fileInputRef.current?.click();
   };
 
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setProfileData(prev => ({
-          ...prev,
-          photo: event.target?.result as string,
-        }));
-      };
-      reader.readAsDataURL(file);
+      const photo = await compressImageFile(file);
+      setProfileData(prev => ({
+        ...prev,
+        photo,
+      }));
     }
   };
 
