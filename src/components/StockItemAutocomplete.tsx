@@ -98,7 +98,10 @@ export const StockItemAutocomplete: React.FC<StockItemAutocompleteProps> = ({
       <input
         type="text"
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => {
+          onChange(e.target.value);
+          if (isEnabled) setShowItemList(true);
+        }}
         onFocus={() => isEnabled && setShowItemList(true)}
         onKeyDown={handleItemKeyDown}
         placeholder={placeholder}
