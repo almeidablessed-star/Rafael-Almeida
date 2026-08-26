@@ -41,10 +41,6 @@ export const StockItemAutocomplete: React.FC<StockItemAutocompleteProps> = ({
   };
 
   const matchingItems = React.useMemo(() => {
-    if (!isEnabled) {
-      addLog(`matchingItems: isEnabled=false, retornando []`);
-      return [];
-    }
     const q = normalizeName(value);
     addLog(`matchingItems: value="${value}", normalized="${q}", stockItems.length=${stockItems.length}`);
     if (!q) {
@@ -54,7 +50,7 @@ export const StockItemAutocomplete: React.FC<StockItemAutocompleteProps> = ({
     const filtered = stockItems.filter((item) => normalizeName(item.name).includes(q));
     addLog(`matchingItems: filtrado=${filtered.length} itens`);
     return filtered;
-  }, [value, stockItems, isEnabled]);
+  }, [value, stockItems]);
 
   const applyStockItem = (item: StockItem) => {
     onChange(item.name);
