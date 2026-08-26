@@ -112,6 +112,10 @@ export const StockItemAutocomplete: React.FC<StockItemAutocompleteProps> = ({
     addLog(`render: value="${value}", showItemList=${showItemList}, matchingItems=${matchingItems.length}, isEnabled=${isEnabled}`);
   }, [value, showItemList, matchingItems.length, isEnabled]);
 
+  React.useEffect(() => {
+    addLog(`showItemList mudou para: ${showItemList}`);
+  }, [showItemList]);
+
   return (
     <div ref={itemBoxRef} style={{ position: 'relative' }}>
       <div style={{ fontSize: '9px', color: '#999', marginBottom: '4px', padding: '4px', background: '#f5f5f5', borderRadius: '4px', maxHeight: '80px', overflow: 'auto' }}>
