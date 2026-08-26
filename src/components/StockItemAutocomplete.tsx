@@ -124,7 +124,7 @@ export const StockItemAutocomplete: React.FC<StockItemAutocompleteProps> = ({
         }}
       />
 
-      {isEnabled && showItemList && matchingItems.length > 0 && (
+      {showItemList && matchingItems.length > 0 && (
         <div style={{ position: 'absolute', zIndex: 30, left: 0, right: 0, marginTop: '4px' }}>
           <div style={{ position: 'relative' }}>
             <ul
