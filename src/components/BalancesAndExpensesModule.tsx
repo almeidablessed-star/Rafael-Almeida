@@ -49,7 +49,6 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
   const [showSuccessToast, setShowSuccessToast] = useState(false);
 
   // Stock item state (optional)
-  const [itemName, setItemName] = useState('');
   const [itemQuantity, setItemQuantity] = useState('');
   const [itemUnit, setItemUnit] = useState<'g' | 'kg' | 'ml' | 'L' | 'un' | 'pacote'>('un');
 
@@ -72,8 +71,8 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
     }
   }, [transactions]);
 
-  const findExistingItem = (name: string): StockItem | undefined => {
-    const normalized = name.toLowerCase().trim();
+  const findExistingItem = (itemName: string): StockItem | undefined => {
+    const normalized = itemName.toLowerCase().trim();
     return estoque.find(item => item.name.toLowerCase().trim() === normalized);
   };
 
@@ -84,20 +83,20 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
       return;
     }
 
-    // Validate stock item fields: both or neither
+    // Validate stock item fields: if quantity is filled, description is used as item name
     const itemQtyNum = itemQuantity ? parseFloat(itemQuantity.replace(',', '.')) : 0;
-    const hasItemName = itemName.trim().length > 0;
     const hasItemQty = itemQtyNum > 0;
 
-    if ((hasItemName && !hasItemQty) || (!hasItemName && hasItemQty)) {
-      alert('Se preenchendo item comprado, preencha tanto nome quanto quantidade');
+    if (hasItemQty && itemQtyNum <= 0) {
+      alert('Quantidade deve ser maior que zero');
       return;
     }
 
-    // Register stock item if provided
-    if (hasItemName && hasItemQty) {
+    // Register stock item if quantity provided
+    if (hasItemQty) {
       try {
-        const existing = findExistingItem(itemName);
+        const itemNameFromDescription = description.trim();
+        const existing = findExistingItem(itemNameFromDescription);
         if (existing) {
           await updateEstoque(existing.id, {
             ...existing,
@@ -105,7 +104,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
           });
         } else {
           await addEstoque({
-            name: itemName.trim(),
+            name: itemNameFromDescription,
             quantity: itemQtyNum,
             unit: itemUnit,
             minThreshold: 0,
@@ -126,14 +125,13 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
       totalValue: valNum,
       date: date || getTodayIso(),
       paymentStatus: 'pago',
-      notes: `Compra registrada em ${category === 'reposicao' ? 'Reposição de Insumos' : 'Investimento'}${hasItemName ? ` - Item: ${itemName.trim()} (${itemQtyNum}${itemUnit})` : ''}`,
+      notes: `Compra registrada em ${category === 'reposicao' ? 'Reposição de Insumos' : 'Investimento'}${hasItemQty ? ` - Item: ${description.trim()} (${itemQtyNum}${itemUnit})` : ''}`,
     });
 
     // Reset form
     setDescription('');
     setAmount('');
     setDate(getTodayIso());
-    setItemName('');
     setItemQuantity('');
     setItemUnit('un');
     setShowSuccessToast(true);
@@ -270,7 +268,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
               type="text"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Ex: 2 sacos de farinha, 2 formas e bicos"
+              placeholder={itemQuantity ? "Nome do item (ex: Farinha, Açúcar, Caixa, Pote)" : "Ex: 2 sacos de farinha, 2 formas e bicos"}
               style={{ padding: '11px 13px', background: '#FAF7FA', border: '1px solid rgba(36,27,43,.08)', borderRadius: '14px', fontSize: '11px', color: '#A096A6', fontFamily: "'Manrope', sans-serif" }}
               required
             />
@@ -363,25 +361,12 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
             </div>
           </div>
 
-          {/* Item Comprado (Opcional) */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', paddingTop: '8px', borderTop: '1px solid rgba(36,27,43,.08)' }}>
-            <label style={{ fontSize: '9.5px', fontWeight: 800, color: '#5B4A6B', fontFamily: "'Manrope', sans-serif", letterSpacing: '0.05em' }}>
-              📦 Item Comprado (Opcional)
-            </label>
-            <div style={{ display: 'flex', gap: '8px', flexDirection: 'column' }}>
-              <input
-                type="text"
-                value={itemName}
-                onChange={(e) => setItemName(e.target.value)}
-                placeholder="Ex: Farinha, Açúcar, Caixa, Pote, etc."
-                list="existing-items"
-                style={{ padding: '11px 13px', background: '#FAF7FA', border: '1px solid rgba(36,27,43,.08)', borderRadius: '14px', fontSize: '11px', color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}
-              />
-              <datalist id="existing-items">
-                {estoque.map(item => (
-                  <option key={item.id} value={item.name} />
-                ))}
-              </datalist>
+          {/* Quantidade e Unidade para Estoque (Opcional) */}
+          {itemQuantity || false ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', paddingTop: '8px', borderTop: '1px solid rgba(36,27,43,.08)' }}>
+              <label style={{ fontSize: '9.5px', fontWeight: 800, color: '#5B4A6B', fontFamily: "'Manrope', sans-serif", letterSpacing: '0.05em' }}>
+                📦 Quantidade e Unidade no Estoque (Opcional)
+              </label>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <input
                   type="number"
@@ -406,7 +391,22 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
                 </select>
               </div>
             </div>
-          </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', paddingTop: '8px', borderTop: '1px solid rgba(36,27,43,.08)' }}>
+              <label style={{ fontSize: '9.5px', fontWeight: 800, color: '#5B4A6B', fontFamily: "'Manrope', sans-serif", letterSpacing: '0.05em' }}>
+                📦 Vincular ao Estoque (Opcional)
+              </label>
+              <input
+                type="number"
+                value={itemQuantity}
+                onChange={(e) => setItemQuantity(e.target.value)}
+                placeholder="Deixe em branco se não é uma compra de item/insumo"
+                step="0.01"
+                min="0"
+                style={{ padding: '11px 13px', background: '#FAF7FA', border: '1px solid rgba(36,27,43,.08)', borderRadius: '14px', fontSize: '11px', color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}
+              />
+            </div>
+          )}
 
           <button
             type="submit"
