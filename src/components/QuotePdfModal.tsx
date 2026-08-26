@@ -5,7 +5,7 @@ import jsPDF from 'jspdf';
 import { Transaction } from '../types';
 import { formatCurrency, formatDateBr } from '../utils/formatters';
 import { useAuth } from '../context/AuthContext';
-import { getStoredFichas } from './FichasTecnicasModule';
+import { useFichasTecnicas } from '../context/FichasTecnicasContext';
 import { updateTransaction } from '../utils/storage';
 import { compressImageFile } from '../utils/imageCompression';
 import {
@@ -130,7 +130,7 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
   const sellerAddress = userProfile?.endereco || '';
   const sellerPhotoUrl = userProfile?.foto_url || '';
 
-  const storedFichas = getStoredFichas();
+  const { fichas } = useFichasTecnicas();
 
   const custPhoto = transaction.customerPhotoUrl;
 
@@ -569,7 +569,7 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
 
   // Helper to find technical recipe details for kitchen sheet
   const getRecipeDetailsForItem = (lineItem: string) => {
-    const matchedFicha = storedFichas.find((f) =>
+    const matchedFicha = fichas.find((f) =>
       lineItem.toLowerCase().includes(f.name.toLowerCase()) ||
       f.name.toLowerCase().includes(lineItem.toLowerCase())
     );

@@ -88,6 +88,12 @@ export const updateSaleWithStock = (
   const resolved = fichaItems
     .map((item) => {
       const ficha = fichasDisponiveis.find((f) => f.id === item.fichaId);
+      if (!ficha) {
+        console.warn(
+          `[ESTOQUE] Aviso: fichaId "${item.fichaId}" não encontrado no catálogo. ` +
+          `Item não baixará estoque. Fichas disponíveis: ${fichasDisponiveis.map(f => f.id).join(', ') || '(nenhuma)'}`
+        );
+      }
       return ficha ? { ficha, quantity: item.quantity } : null;
     })
     .filter((x): x is { ficha: FichaTecnica; quantity: number } => x !== null);
@@ -173,6 +179,12 @@ export const addSaleWithFichaItems = (
   const resolved = fichaItems
     .map((item) => {
       const ficha = fichasDisponiveis.find((f) => f.id === item.fichaId);
+      if (!ficha) {
+        console.warn(
+          `[ESTOQUE] Aviso: fichaId "${item.fichaId}" não encontrado no catálogo. ` +
+          `Item não baixará estoque. Fichas disponíveis: ${fichasDisponiveis.map(f => f.id).join(', ') || '(nenhuma)'}`
+        );
+      }
       return ficha ? { ficha, quantity: item.quantity } : null;
     })
     .filter((x): x is { ficha: FichaTecnica; quantity: number } => x !== null);

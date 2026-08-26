@@ -21,8 +21,8 @@ import {
   calculateSummary,
 } from './utils/storage';
 import { getTodayIso } from './utils/formatters';
-import { getStoredFichas } from './components/FichasTecnicasModule';
 import { useUndo } from './hooks/useUndo';
+import { useFichasTecnicas } from './context/FichasTecnicasContext';
 
 import {
   Home,
@@ -66,6 +66,7 @@ import { FichasTecnicasProvider } from './context/FichasTecnicasContext';
 
 function AppContent() {
   const { isResetPasswordRequired, isOtpVerificationRequired, user, logout } = useAuth();
+  const { fichas } = useFichasTecnicas();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
 
@@ -131,7 +132,7 @@ function AppContent() {
         // Vendas reequilibram o estoque na edicao (devolve o antigo, consome o
         // novo). Os demais tipos nao movimentam estoque, entao seguem simples.
         if (updated.type === 'venda') {
-          updateSaleWithStock(updated, getStoredFichas());
+          updateSaleWithStock(updated, fichas);
         } else {
           updateTransaction(updated);
         }
@@ -141,7 +142,7 @@ function AppContent() {
       // O formulario ja casou cada item do pedido com sua ficha (fichaItems).
       // Com pelo menos um vinculo, a venda baixa estoque automaticamente.
       if (txData.type === 'venda' && txData.fichaItems && txData.fichaItems.length > 0) {
-        addSaleWithFichaItems(txData, txData.fichaItems, getStoredFichas());
+        addSaleWithFichaItems(txData, txData.fichaItems, fichas);
       } else {
         addTransaction(txData);
       }
