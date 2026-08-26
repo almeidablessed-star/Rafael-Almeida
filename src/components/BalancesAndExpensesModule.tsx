@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Transaction, TransactionType, WeeklyArchive } from '../types';
+import { Transaction, TransactionType, WeeklyArchive, StockItem } from '../types';
 import { calculateWeeklyBalances } from '../utils/balancesCalculator';
 import { getWeeklyArchives, hasNewWeekStarted, archiveCurrentWeek } from '../utils/weeklyArchiveUtils';
 import { WeeklyHistoryCard } from './WeeklyHistoryCard';
 import { formatCurrency, formatDateBr, getTodayIso } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
+import { useEstoque } from '../hooks/useEstoque';
 import {
   Wallet,
   ShoppingBag,
@@ -38,6 +39,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
 }) => {
   const { formatCurrency: formatMoney } = useCurrency();
   const balances = calculateWeeklyBalances(transactions);
+  const { estoque, addEstoque, updateEstoque } = useEstoque();
 
   // Form state for quick expense logging
   const [description, setDescription] = useState('');
@@ -45,6 +47,11 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(getTodayIso());
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+
+  // Stock item state (optional)
+  const [itemName, setItemName] = useState('');
+  const [itemQuantity, setItemQuantity] = useState('');
+  const [itemUnit, setItemUnit] = useState<'g' | 'kg' | 'ml' | 'L' | 'un' | 'pacote'>('un');
 
   // History filtering
   const [selectedFilter, setSelectedFilter] = useState<'todos' | 'reposicao' | 'investimento'>('todos');
@@ -65,11 +72,50 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
     }
   }, [transactions]);
 
-  const handleSaveExpense = (e: React.FormEvent) => {
+  const findExistingItem = (name: string): StockItem | undefined => {
+    const normalized = name.toLowerCase().trim();
+    return estoque.find(item => item.name.toLowerCase().trim() === normalized);
+  };
+
+  const handleSaveExpense = async (e: React.FormEvent) => {
     e.preventDefault();
     const valNum = parseFloat(amount.replace(',', '.'));
     if (!description.trim() || isNaN(valNum) || valNum <= 0) {
       return;
+    }
+
+    // Validate stock item fields: both or neither
+    const itemQtyNum = itemQuantity ? parseFloat(itemQuantity.replace(',', '.')) : 0;
+    const hasItemName = itemName.trim().length > 0;
+    const hasItemQty = itemQtyNum > 0;
+
+    if ((hasItemName && !hasItemQty) || (!hasItemName && hasItemQty)) {
+      alert('Se preenchendo item comprado, preencha tanto nome quanto quantidade');
+      return;
+    }
+
+    // Register stock item if provided
+    if (hasItemName && hasItemQty) {
+      try {
+        const existing = findExistingItem(itemName);
+        if (existing) {
+          await updateEstoque(existing.id, {
+            ...existing,
+            quantity: existing.quantity + itemQtyNum,
+          });
+        } else {
+          await addEstoque({
+            name: itemName.trim(),
+            quantity: itemQtyNum,
+            unit: itemUnit,
+            minThreshold: 0,
+            costPerUnit: 0,
+          });
+        }
+      } catch (err) {
+        console.error('Erro ao atualizar estoque:', err);
+        alert('Erro ao registrar item no estoque. Despesa registrada, mas verifique o estoque.');
+      }
     }
 
     onAddTransaction({
@@ -80,13 +126,16 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
       totalValue: valNum,
       date: date || getTodayIso(),
       paymentStatus: 'pago',
-      notes: `Compra registrada em ${category === 'reposicao' ? 'Reposição de Insumos' : 'Investimento'}`,
+      notes: `Compra registrada em ${category === 'reposicao' ? 'Reposição de Insumos' : 'Investimento'}${hasItemName ? ` - Item: ${itemName.trim()} (${itemQtyNum}${itemUnit})` : ''}`,
     });
 
     // Reset form
     setDescription('');
     setAmount('');
     setDate(getTodayIso());
+    setItemName('');
+    setItemQuantity('');
+    setItemUnit('un');
     setShowSuccessToast(true);
     setTimeout(() => setShowSuccessToast(false), 3000);
   };
@@ -311,6 +360,51 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
                 style={{ padding: '11px 13px', background: '#FAF7FA', border: '1px solid rgba(36,27,43,.08)', borderRadius: '14px', fontSize: '11px', color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}
                 required
               />
+            </div>
+          </div>
+
+          {/* Item Comprado (Opcional) */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', paddingTop: '8px', borderTop: '1px solid rgba(36,27,43,.08)' }}>
+            <label style={{ fontSize: '9.5px', fontWeight: 800, color: '#5B4A6B', fontFamily: "'Manrope', sans-serif", letterSpacing: '0.05em' }}>
+              📦 Item Comprado (Opcional)
+            </label>
+            <div style={{ display: 'flex', gap: '8px', flexDirection: 'column' }}>
+              <input
+                type="text"
+                value={itemName}
+                onChange={(e) => setItemName(e.target.value)}
+                placeholder="Ex: Farinha, Açúcar, Caixa, Pote, etc."
+                list="existing-items"
+                style={{ padding: '11px 13px', background: '#FAF7FA', border: '1px solid rgba(36,27,43,.08)', borderRadius: '14px', fontSize: '11px', color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}
+              />
+              <datalist id="existing-items">
+                {estoque.map(item => (
+                  <option key={item.id} value={item.name} />
+                ))}
+              </datalist>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <input
+                  type="number"
+                  value={itemQuantity}
+                  onChange={(e) => setItemQuantity(e.target.value)}
+                  placeholder="Quantidade"
+                  step="0.01"
+                  min="0"
+                  style={{ flex: 1, padding: '11px 13px', background: '#FAF7FA', border: '1px solid rgba(36,27,43,.08)', borderRadius: '14px', fontSize: '11px', color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}
+                />
+                <select
+                  value={itemUnit}
+                  onChange={(e) => setItemUnit(e.target.value as any)}
+                  style={{ padding: '11px 13px', background: '#FAF7FA', border: '1px solid rgba(36,27,43,.08)', borderRadius: '14px', fontSize: '11px', color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}
+                >
+                  <option value="un">Unidade</option>
+                  <option value="kg">kg</option>
+                  <option value="g">g</option>
+                  <option value="L">L</option>
+                  <option value="ml">ml</option>
+                  <option value="pacote">Pacote</option>
+                </select>
+              </div>
             </div>
           </div>
 
