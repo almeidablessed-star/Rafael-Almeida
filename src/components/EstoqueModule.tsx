@@ -159,8 +159,9 @@ export const EstoqueModule: React.FC = () => {
 
   // Ordenar items por criticidade (vermelho primeiro, verde por último)
   const sortedItems = [...filteredItems].sort((a, b) => {
-    const percentageA = Math.min((a.quantity / a.minThreshold) * 100, 100);
-    const percentageB = Math.min((b.quantity / b.minThreshold) * 100, 100);
+    // Proteção contra minThreshold = 0 (divisão por zero)
+    const percentageA = a.minThreshold > 0 ? Math.min((a.quantity / a.minThreshold) * 100, 100) : 100;
+    const percentageB = b.minThreshold > 0 ? Math.min((b.quantity / b.minThreshold) * 100, 100) : 100;
     const rankA = getCriticalityRank(percentageA);
     const rankB = getCriticalityRank(percentageB);
     return rankA - rankB; // Menor rank (vermelho) vem primeiro

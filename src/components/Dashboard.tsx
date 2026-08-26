@@ -63,6 +63,18 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const profit = Math.max(0, totalIn - totalOut);
   const marginPercent = totalIn > 0 ? Math.round((profit / totalIn) * 100) : 0;
 
+  // Calcular porcentuais por categoria — antes tentava acessar fields que nao existem
+  // Agora calcula a partir dos valores reais do objeto CategoryBalance
+  const reposicaoPercent = balances.reposicao.accumulatedInflow > 0
+    ? Math.round((balances.reposicao.currentBalance / balances.reposicao.accumulatedInflow) * 100)
+    : 0;
+  const laborPercent = balances.maodeobra.accumulatedInflow > 0
+    ? Math.round((balances.maodeobra.currentBalance / balances.maodeobra.accumulatedInflow) * 100)
+    : 0;
+  const costsPercent = balances.custoEInvestimento.accumulatedInflow > 0
+    ? Math.round((balances.custoEInvestimento.currentBalance / balances.custoEInvestimento.accumulatedInflow) * 100)
+    : 0;
+
   return (
     <div className="space-y-0 pb-8 animate-fadeIn">
 
@@ -328,12 +340,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   <circle cx="28" cy="28" r="23" fill="none" stroke="#F0E9EE" strokeWidth="6" />
                   <circle
                     cx="28" cy="28" r="23" fill="none" stroke="#C4626F" strokeWidth="6"
-                    strokeDasharray={`${145 * (balances.reposicaoPercent / 100 || 0.72)} ${145}`}
+                    strokeDasharray={`${145 * (reposicaoPercent / 100)} ${145}`}
                     strokeLinecap="round"
                   />
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center text-[11px] font-black" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
-                  {Math.round(balances.reposicaoPercent || 72)}%
+                  {Math.round(reposicaoPercent)}%
                 </div>
               </div>
               <div className="text-[9px] uppercase tracking-[0.05em] mt-2" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', minHeight: '24px' }}>
@@ -359,12 +371,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   <circle cx="28" cy="28" r="23" fill="none" stroke="#F0E9EE" strokeWidth="6" />
                   <circle
                     cx="28" cy="28" r="23" fill="none" stroke="#7E4F9E" strokeWidth="6"
-                    strokeDasharray={`${145 * (balances.laborPercent / 100 || 0.48)} ${145}`}
+                    strokeDasharray={`${145 * (laborPercent / 100)} ${145}`}
                     strokeLinecap="round"
                   />
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center text-[11px] font-black" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
-                  {Math.round(balances.laborPercent || 48)}%
+                  {Math.round(laborPercent)}%
                 </div>
               </div>
               <div className="text-[9px] uppercase tracking-[0.05em] mt-2" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', minHeight: '24px' }}>
@@ -390,12 +402,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   <circle cx="28" cy="28" r="23" fill="none" stroke="#F0E9EE" strokeWidth="6" />
                   <circle
                     cx="28" cy="28" r="23" fill="none" stroke="#B08D57" strokeWidth="6"
-                    strokeDasharray={`${145 * (balances.costsPercent / 100 || 0.35)} ${145}`}
+                    strokeDasharray={`${145 * (costsPercent / 100)} ${145}`}
                     strokeLinecap="round"
                   />
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center text-[11px] font-black" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
-                  {Math.round(balances.costsPercent || 35)}%
+                  {Math.round(costsPercent)}%
                 </div>
               </div>
               <div className="text-[9px] uppercase tracking-[0.05em] mt-2" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', minHeight: '24px' }}>
