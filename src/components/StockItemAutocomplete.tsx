@@ -83,14 +83,14 @@ export const StockItemAutocomplete: React.FC<StockItemAutocompleteProps> = ({
 
   useEffect(() => {
     if (!showItemList) return;
-    const onDocClick = (e: MouseEvent) => {
+    const onDocClick = (e: Event) => {
       if (itemBoxRef.current && !itemBoxRef.current.contains(e.target as Node)) {
         setShowItemList(false);
         setHighlightedItem(-1);
       }
     };
-    document.addEventListener('mousedown', onDocClick);
-    return () => document.removeEventListener('mousedown', onDocClick);
+    document.addEventListener('pointerdown', onDocClick);
+    return () => document.removeEventListener('pointerdown', onDocClick);
   }, [showItemList]);
 
   return (
@@ -100,6 +100,11 @@ export const StockItemAutocomplete: React.FC<StockItemAutocompleteProps> = ({
         value={value}
         onChange={(e) => {
           onChange(e.target.value);
+          if (isEnabled) setShowItemList(true);
+        }}
+        onInput={(e) => {
+          const target = e.target as HTMLInputElement;
+          onChange(target.value);
           if (isEnabled) setShowItemList(true);
         }}
         onFocus={() => isEnabled && setShowItemList(true)}
@@ -145,6 +150,11 @@ export const StockItemAutocomplete: React.FC<StockItemAutocompleteProps> = ({
                       e.preventDefault();
                       applyStockItem(item);
                     }}
+                    onTouchStart={(e) => {
+                      e.preventDefault();
+                      applyStockItem(item);
+                    }}
+                    onClick={() => applyStockItem(item)}
                     onMouseEnter={() => setHighlightedItem(i)}
                     style={{
                       width: '100%',
