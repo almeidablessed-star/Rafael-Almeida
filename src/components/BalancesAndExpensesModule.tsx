@@ -362,51 +362,34 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
           </div>
 
           {/* Quantidade e Unidade para Estoque (Opcional) */}
-          {itemQuantity || false ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', paddingTop: '8px', borderTop: '1px solid rgba(36,27,43,.08)' }}>
-              <label style={{ fontSize: '9.5px', fontWeight: 800, color: '#5B4A6B', fontFamily: "'Manrope', sans-serif", letterSpacing: '0.05em' }}>
-                📦 Quantidade e Unidade no Estoque (Opcional)
-              </label>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <input
-                  type="number"
-                  value={itemQuantity}
-                  onChange={(e) => setItemQuantity(e.target.value)}
-                  placeholder="Quantidade"
-                  step="0.01"
-                  min="0"
-                  style={{ flex: 1, padding: '11px 13px', background: '#FAF7FA', border: '1px solid rgba(36,27,43,.08)', borderRadius: '14px', fontSize: '11px', color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}
-                />
-                <select
-                  value={itemUnit}
-                  onChange={(e) => setItemUnit(e.target.value as any)}
-                  style={{ padding: '11px 13px', background: '#FAF7FA', border: '1px solid rgba(36,27,43,.08)', borderRadius: '14px', fontSize: '11px', color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}
-                >
-                  <option value="un">Unidade</option>
-                  <option value="kg">kg</option>
-                  <option value="g">g</option>
-                  <option value="L">L</option>
-                  <option value="ml">ml</option>
-                  <option value="pacote">Pacote</option>
-                </select>
-              </div>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', paddingTop: '8px', borderTop: '1px solid rgba(36,27,43,.08)' }}>
-              <label style={{ fontSize: '9.5px', fontWeight: 800, color: '#5B4A6B', fontFamily: "'Manrope', sans-serif", letterSpacing: '0.05em' }}>
-                📦 Vincular ao Estoque (Opcional)
-              </label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', paddingTop: '8px', borderTop: '1px solid rgba(36,27,43,.08)' }}>
+            <label style={{ fontSize: '9.5px', fontWeight: 800, color: '#5B4A6B', fontFamily: "'Manrope', sans-serif", letterSpacing: '0.05em' }}>
+              📦 Quantidade e Unidade no Estoque (Opcional)
+            </label>
+            <div style={{ display: 'flex', gap: '8px' }}>
               <input
                 type="number"
                 value={itemQuantity}
                 onChange={(e) => setItemQuantity(e.target.value)}
-                placeholder="Deixe em branco se não é uma compra de item/insumo"
+                placeholder="Quantidade"
                 step="0.01"
                 min="0"
-                style={{ padding: '11px 13px', background: '#FAF7FA', border: '1px solid rgba(36,27,43,.08)', borderRadius: '14px', fontSize: '11px', color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}
+                style={{ flex: 1, padding: '11px 13px', background: '#FAF7FA', border: '1px solid rgba(36,27,43,.08)', borderRadius: '14px', fontSize: '11px', color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}
               />
+              <select
+                value={itemUnit}
+                onChange={(e) => setItemUnit(e.target.value as any)}
+                style={{ padding: '11px 13px', background: '#FAF7FA', border: '1px solid rgba(36,27,43,.08)', borderRadius: '14px', fontSize: '11px', color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}
+              >
+                <option value="un">Unidade</option>
+                <option value="kg">kg</option>
+                <option value="g">g</option>
+                <option value="L">L</option>
+                <option value="ml">ml</option>
+                <option value="pacote">Pacote</option>
+              </select>
             </div>
-          )}
+          </div>
 
           <button
             type="submit"
