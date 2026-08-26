@@ -84,6 +84,25 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
     return estoque.find(item => item.name.toLowerCase().trim() === normalized);
   };
 
+  const convertQuantityToTargetUnit = (quantity: number, fromUnit: string, toUnit: string): number => {
+    if (fromUnit === toUnit) return quantity;
+
+    // Convert to base units first
+    const baseMap: { [key: string]: number } = {
+      'g': 1,
+      'kg': 1000,
+      'ml': 1,
+      'L': 1000,
+      'un': 1,
+      'pacote': 1,
+    };
+
+    const fromBase = baseMap[fromUnit] || 1;
+    const toBase = baseMap[toUnit] || 1;
+
+    return (quantity * fromBase) / toBase;
+  };
+
   const handleSaveExpense = async (e: React.FormEvent) => {
     e.preventDefault();
     const valNum = parseFloat(amount.replace(',', '.'));
@@ -104,18 +123,25 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
     if (hasItemQty) {
       try {
         const itemNameFromDescription = description.trim();
+        console.log('[handleSaveExpense] Procurando item:', itemNameFromDescription, 'em estoque:', estoque);
         const existing = findExistingItem(itemNameFromDescription);
+        console.log('[handleSaveExpense] Item encontrado:', existing);
         if (existing) {
+          console.log('[handleSaveExpense] Atualizando item existente:', existing.id);
+          const convertedQty = convertQuantityToTargetUnit(itemQtyNum, itemUnit, existing.unit);
+          console.log('[handleSaveExpense] Quantidade convertida:', itemQtyNum, itemUnit, '→', convertedQty, existing.unit);
           await updateEstoque(existing.id, {
             ...existing,
-            quantity: existing.quantity + itemQtyNum,
+            quantity: existing.quantity + convertedQty,
           });
         } else {
+          console.log('[handleSaveExpense] Criando novo item:', itemNameFromDescription, itemQtyNum, itemUnit);
           await addEstoque({
             name: itemNameFromDescription,
             quantity: itemQtyNum,
             unit: itemUnit,
             minThreshold: 0,
+            minThresholdUnit: itemUnit,
             costPerUnit: 0,
           });
         }

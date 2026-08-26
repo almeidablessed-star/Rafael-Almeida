@@ -71,6 +71,18 @@ export const EstoqueModule: React.FC = () => {
   const [minThreshold, setMinThreshold] = useState('');
   const [costPerUnit, setCostPerUnit] = useState('');
 
+  // Efeito para resetar o formulário quando isAdding muda
+  useEffect(() => {
+    if (!isAdding) {
+      setName('');
+      setQuantity('');
+      setUnit('g');
+      setMinThreshold('');
+      setCostPerUnit('');
+      setEditingId(null);
+    }
+  }, [isAdding]);
+
   // Itens são agora gerenciados pelo hook useEstoque (salva no Supabase)
 
   const handleOpenAdd = () => {
@@ -84,6 +96,7 @@ export const EstoqueModule: React.FC = () => {
   };
 
   const handleOpenEdit = (item: StockItem) => {
+    console.log('[handleOpenEdit] item:', item, 'quantity:', item.quantity);
     setName(item.name);
     setQuantity(item.quantity.toString());
     setUnit(item.unit);
@@ -131,6 +144,34 @@ export const EstoqueModule: React.FC = () => {
         setFormError((err as any).message || 'Erro ao deletar item');
       }
     }
+  };
+
+  const normalizeToCommonUnit = (value: number, fromUnit: string, toUnit: string): number => {
+    if (fromUnit === toUnit) return value;
+    if (fromUnit === 'kg' && toUnit === 'g') return value * 1000;
+    if (fromUnit === 'g' && toUnit === 'kg') return value / 1000;
+    if (fromUnit === 'L' && toUnit === 'ml') return value * 1000;
+    if (fromUnit === 'ml' && toUnit === 'L') return value / 1000;
+    return value;
+  };
+
+  const getThresholdDelta = (unit: string): number => {
+    if (unit === 'kg' || unit === 'L') return 0.5;
+    if (unit === 'g' || unit === 'ml') return 100;
+    return 1; // un, pacote
+  };
+
+  const handleQuickAdjustThreshold = async (id: string, delta: number) => {
+    const item = items.find(i => i.id === id);
+    if (!item) return;
+    const newThreshold = Math.max(0, item.minThreshold + delta);
+    await updateEstoque(id, { ...item, minThreshold: newThreshold });
+  };
+
+  const handleChangeThresholdUnit = async (id: string, newUnit: string) => {
+    const item = items.find(i => i.id === id);
+    if (!item) return;
+    await updateEstoque(id, { ...item, minThresholdUnit: newUnit as any });
   };
 
   const handleQuickAdjust = async (id: string, delta: number) => {
@@ -430,31 +471,43 @@ export const EstoqueModule: React.FC = () => {
                           Alertar quando menor que:
                         </p>
 
-                        {/* Quantity Stepper + Action Icons Row */}
+                        {/* Threshold Stepper + Unit Selector + Action Icons Row */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'space-between' }}>
-                          {/* Quantity Stepper */}
+                          {/* Threshold Stepper + Unit Selector */}
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#F5F5F5', borderRadius: '20px', padding: '4px 8px', width: 'fit-content' }}>
                             <button
-                              onClick={() => handleQuickAdjust(item.id, -50)}
+                              onClick={() => handleQuickAdjustThreshold(item.id, -getThresholdDelta(item.minThresholdUnit))}
                               style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#E8E8E8', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px', color: '#666', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}
                               onMouseEnter={(e) => e.currentTarget.style.background = '#D0D0D0'}
                               onMouseLeave={(e) => e.currentTarget.style.background = '#E8E8E8'}
-                              title="Diminuir 50"
+                              title="Diminuir"
                             >
                               −
                             </button>
-                            <span style={{ fontSize: '12px', fontWeight: '600', color: '#333', minWidth: '70px', textAlign: 'center', fontFamily: "'Manrope', sans-serif" }}>
-                              {item.quantity} {item.unit}
+                            <span style={{ fontSize: '12px', fontWeight: '600', color: '#333', minWidth: '50px', textAlign: 'center', fontFamily: "'Manrope', sans-serif" }}>
+                              {item.minThreshold}
                             </span>
                             <button
-                              onClick={() => handleQuickAdjust(item.id, 50)}
+                              onClick={() => handleQuickAdjustThreshold(item.id, getThresholdDelta(item.minThresholdUnit))}
                               style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#E8E8E8', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px', color: '#666', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}
                               onMouseEnter={(e) => e.currentTarget.style.background = '#D0D0D0'}
                               onMouseLeave={(e) => e.currentTarget.style.background = '#E8E8E8'}
-                              title="Aumentar 50"
+                              title="Aumentar"
                             >
                               +
                             </button>
+                            <select
+                              value={item.minThresholdUnit}
+                              onChange={(e) => handleChangeThresholdUnit(item.id, e.target.value)}
+                              style={{ fontSize: '11px', padding: '2px 4px', borderRadius: '8px', border: '1px solid #ddd', background: '#FFFFFF', cursor: 'pointer', fontFamily: "'Manrope', sans-serif" }}
+                            >
+                              <option value="g">g</option>
+                              <option value="kg">kg</option>
+                              <option value="ml">ml</option>
+                              <option value="L">L</option>
+                              <option value="un">un</option>
+                              <option value="pacote">pacote</option>
+                            </select>
                           </div>
 
                           {/* Edit/Delete Actions - Same Row */}

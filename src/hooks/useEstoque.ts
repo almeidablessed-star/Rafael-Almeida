@@ -10,6 +10,7 @@ interface SupabaseEstoque {
   quantidade_atual: number;
   unidade_medida: string;
   nivel_minimo: number;
+  nivel_minimo_unidade: string;
   created_at: string;
 }
 
@@ -30,6 +31,7 @@ export const useEstoque = () => {
     quantity: data.quantidade_atual,
     unit: data.unidade_medida as any,
     minThreshold: data.nivel_minimo,
+    minThresholdUnit: (data.nivel_minimo_unidade || 'g') as any,
     costPerUnit: 0, // Supabase não tem esse campo, usar 0 por padrão
   });
 
@@ -38,6 +40,7 @@ export const useEstoque = () => {
     quantidade_atual: item.quantity,
     unidade_medida: item.unit,
     nivel_minimo: item.minThreshold,
+    nivel_minimo_unidade: item.minThresholdUnit,
   });
 
   const fetchEstoque = async () => {
@@ -47,6 +50,7 @@ export const useEstoque = () => {
       setIsLoading(true);
       setError(null);
 
+      console.log('[fetchEstoque] Buscando dados do Supabase para usuário:', user.id);
       const { data, error: fetchError } = await supabase
         .from('estoque')
         .select('*')
@@ -55,7 +59,15 @@ export const useEstoque = () => {
 
       if (fetchError) throw fetchError;
 
+      console.log('[fetchEstoque] Dados retornados do Supabase:', data);
+      if (data && data.length > 0) {
+        console.log('[fetchEstoque] Primeiro item bruto:', data[0]);
+      }
       const mapped = data?.map(mapSupabaseToStockItem) || [];
+      console.log('[fetchEstoque] Dados mapeados:', mapped);
+      if (mapped.length > 0) {
+        console.log('[fetchEstoque] Primeiro item mapeado:', mapped[0]);
+      }
       setEstoque(mapped);
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar estoque');
@@ -101,6 +113,7 @@ export const useEstoque = () => {
     try {
       setError(null);
       const supabaseData = mapStockItemToSupabase(itemData);
+      console.log('[updateEstoque] Atualizando item', id, 'com dados:', supabaseData);
 
       const { data, error: updateError } = await supabase
         .from('estoque')
@@ -110,14 +123,19 @@ export const useEstoque = () => {
         .select()
         .single();
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error('[updateEstoque] Erro do Supabase:', updateError);
+        throw updateError;
+      }
 
+      console.log('[updateEstoque] Resposta do Supabase:', data);
       const updatedItem = mapSupabaseToStockItem(data);
-      setEstoque(estoque.map(i => i.id === id ? updatedItem : i));
+      setEstoque(prevEstoque => prevEstoque.map(i => i.id === id ? updatedItem : i));
       return updatedItem;
     } catch (err: any) {
       const message = err.message || 'Erro ao atualizar item de estoque';
       setError(message);
+      console.error('[updateEstoque] Exception:', message, err);
       throw err;
     }
   };
