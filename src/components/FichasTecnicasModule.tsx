@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FichaTecnica, IngredientUsage, Transaction, TamanhoOpcao } from '../types';
 import { formatCurrency } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
-import { useFichasTecnicas } from '../hooks/useFichasTecnicas';
+import { useFichasTecnicas } from '../context/FichasTecnicasContext';
 import { compressImageFile } from '../utils/imageCompression';
 import {
   BookOpen,

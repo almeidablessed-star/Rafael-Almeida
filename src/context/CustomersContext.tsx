@@ -21,8 +21,8 @@ import { Customer } from '../types';
  * Com um provider unico, quem cadastra e quem consulta compartilham o mesmo
  * array: a cliente nova aparece na hora, em qualquer tela.
  *
- * `useFichasTecnicas` ainda tem a mesma estrutura de estado local e vai sofrer
- * do mesmo problema quando duas telas precisarem da mesma lista de fichas.
+ * As fichas tecnicas tinham a mesma estrutura vulneravel e foram convertidas
+ * do mesmo jeito — ver [[FichasTecnicasContext]].
  */
 
 /** Formato da tabela `clientes` no Supabase. */

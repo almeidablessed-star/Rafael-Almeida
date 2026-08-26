@@ -13,7 +13,7 @@ import {
 import { useCustomers } from '../context/CustomersContext';
 import { getStoredFichas } from './FichasTecnicasModule';
 import { QuotePdfModal } from './QuotePdfModal';
-import { useFichasTecnicas } from '../hooks/useFichasTecnicas';
+import { useFichasTecnicas } from '../context/FichasTecnicasContext';
 import {
   BAKERY_PRODUCT_PRESETS,
   INGREDIENT_PRESETS,
