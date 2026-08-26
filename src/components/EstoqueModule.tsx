@@ -157,6 +157,14 @@ export const EstoqueModule: React.FC = () => {
     return 3; // Verde - saudável
   };
 
+  // Função para obter o texto do status baseado na porcentagem (usa mesma lógica do gráfico)
+  const getStatusLabel = (percentage: number): string => {
+    if (percentage <= 25) return 'Estoque Baixo';
+    if (percentage <= 50) return 'Atenção';
+    if (percentage <= 75) return 'Normal';
+    return 'Alto';
+  };
+
   // Ordenar items por criticidade (vermelho primeiro, verde por último)
   const sortedItems = [...filteredItems].sort((a, b) => {
     // Proteção contra minThreshold = 0 (divisão por zero)
@@ -414,11 +422,9 @@ export const EstoqueModule: React.FC = () => {
                           <h4 className="font-brand font-semibold text-[14px] text-[var(--color-neutral-charcoal)]">
                             {item.name}
                           </h4>
-                          {item.quantity <= item.minThreshold && (
-                            <span style={{ background: '#C4626F', color: '#FFFFFF' }} className="text-white text-[7px] font-semibold px-1 py-0.5 rounded uppercase whitespace-nowrap">
-                              Estoque Baixo
-                            </span>
-                          )}
+                          <span style={{ background: colors.background, color: colors.text }} className="text-[7px] font-semibold px-1 py-0.5 rounded uppercase whitespace-nowrap">
+                            {getStatusLabel(percentage)}
+                          </span>
                         </div>
                         <p className="text-[11px] text-[#999999] font-light">
                           Alertar quando menor que:
