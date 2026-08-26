@@ -24,6 +24,12 @@ export const StockItemAutocomplete: React.FC<StockItemAutocompleteProps> = ({
   const itemBoxRef = useRef<HTMLDivElement>(null);
   const itemListRef = useRef<HTMLUListElement>(null);
   const [hasMoreItemsBelow, setHasMoreItemsBelow] = useState(false);
+  const [debugLogs, setDebugLogs] = useState<string[]>([]);
+
+  const addLog = (msg: string) => {
+    console.log(`[StockItemAutocomplete] ${msg}`);
+    setDebugLogs((prev) => [...prev.slice(-4), `${new Date().toLocaleTimeString()}: ${msg}`]);
+  };
 
   const updateItemScrollHint = () => {
     const el = itemListRef.current;
@@ -35,10 +41,19 @@ export const StockItemAutocomplete: React.FC<StockItemAutocompleteProps> = ({
   };
 
   const matchingItems = React.useMemo(() => {
-    if (!isEnabled) return [];
+    if (!isEnabled) {
+      addLog(`matchingItems: isEnabled=false, retornando []`);
+      return [];
+    }
     const q = normalizeName(value);
-    if (!q) return stockItems;
-    return stockItems.filter((item) => normalizeName(item.name).includes(q));
+    addLog(`matchingItems: value="${value}", normalized="${q}", stockItems.length=${stockItems.length}`);
+    if (!q) {
+      addLog(`matchingItems: q vazio, retornando todos ${stockItems.length} itens`);
+      return stockItems;
+    }
+    const filtered = stockItems.filter((item) => normalizeName(item.name).includes(q));
+    addLog(`matchingItems: filtrado=${filtered.length} itens`);
+    return filtered;
   }, [value, stockItems, isEnabled]);
 
   const applyStockItem = (item: StockItem) => {
@@ -93,21 +108,44 @@ export const StockItemAutocomplete: React.FC<StockItemAutocompleteProps> = ({
     return () => document.removeEventListener('pointerdown', onDocClick);
   }, [showItemList]);
 
+  React.useEffect(() => {
+    addLog(`render: value="${value}", showItemList=${showItemList}, matchingItems=${matchingItems.length}, isEnabled=${isEnabled}`);
+  }, [value, showItemList, matchingItems.length, isEnabled]);
+
   return (
     <div ref={itemBoxRef} style={{ position: 'relative' }}>
+      <div style={{ fontSize: '9px', color: '#999', marginBottom: '4px', padding: '4px', background: '#f5f5f5', borderRadius: '4px', maxHeight: '80px', overflow: 'auto' }}>
+        {debugLogs.map((log, i) => (
+          <div key={i}>{log}</div>
+        ))}
+      </div>
       <input
         type="text"
         value={value}
         onChange={(e) => {
+          addLog(`onChange: value="${e.target.value}", isEnabled=${isEnabled}`);
           onChange(e.target.value);
-          if (isEnabled) setShowItemList(true);
+          if (isEnabled) {
+            addLog(`onChange: setShowItemList(true) chamado`);
+            setShowItemList(true);
+          }
         }}
         onInput={(e) => {
           const target = e.target as HTMLInputElement;
+          addLog(`onInput: value="${target.value}", isEnabled=${isEnabled}`);
           onChange(target.value);
-          if (isEnabled) setShowItemList(true);
+          if (isEnabled) {
+            addLog(`onInput: setShowItemList(true) chamado`);
+            setShowItemList(true);
+          }
         }}
-        onFocus={() => isEnabled && setShowItemList(true)}
+        onFocus={() => {
+          addLog(`onFocus: isEnabled=${isEnabled}`);
+          if (isEnabled) {
+            addLog(`onFocus: setShowItemList(true) chamado`);
+            setShowItemList(true);
+          }
+        }}
         onKeyDown={handleItemKeyDown}
         placeholder={placeholder}
         autoComplete="off"

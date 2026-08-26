@@ -60,6 +60,13 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
   // Weekly archives
   const [archives, setArchives] = useState<WeeklyArchive[]>(getWeeklyArchives());
 
+  // Debug: log estoque e itemQuantity
+  useEffect(() => {
+    const isEnabled = itemQuantity.trim().length > 0;
+    console.log(`[BalancesAndExpenses] itemQuantity="${itemQuantity}", isEnabled=${isEnabled}, estoque.length=${estoque.length}`);
+    estoque.forEach(item => console.log(`  - estoque item: "${item.name}"`));
+  }, [itemQuantity, estoque]);
+
   // Auto-archive when new week starts
   useEffect(() => {
     const lastArchiveDate = localStorage.getItem('carula_last_archive_date');
