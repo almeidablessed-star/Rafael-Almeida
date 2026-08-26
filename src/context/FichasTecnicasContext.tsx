@@ -83,6 +83,7 @@ const mapSupabaseToFicha = (data: SupabaseFichaTecnica): FichaTecnica => {
     imageUrl: data.foto_url,
     tamanhos: tamanhos,
     ingredients: data.insumos || [],
+    reposicaoCost: data.reposicao,
     maoDeObraCost: data.mao_de_obra,
     custoCost: data.custo,
     investimentoCost: data.investimento,
@@ -104,9 +105,9 @@ const mapFichaToSupabase = (ficha: Omit<FichaTecnica, 'id' | 'createdAt'>) => ({
     investimentoCost: t.investimentoCost ?? 0,
   })),
   insumos: ficha.ingredients || [],
+  reposicao: ficha.reposicaoCost,
   mao_de_obra: ficha.maoDeObraCost,
   custo: ficha.custoCost,
-  reposicao: ficha.investimentoCost,
   investimento: ficha.investimentoCost,
 });
 

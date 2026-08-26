@@ -156,6 +156,7 @@ export interface FichaTecnica {
   imageUrl?: string;
   tamanhos: TamanhoOpcao[]; // Lista de tamanhos com preços
   ingredients: IngredientUsage[];
+  reposicaoCost: number;
   maoDeObraCost: number;
   custoCost: number;
   investimentoCost: number;
