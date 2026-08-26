@@ -152,43 +152,24 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
           </div>
 
-          {/* Top: Gauge (92px) à esquerda + Label/Valor à direita */}
-          <div className="flex items-center gap-4">
-            {/* Circular Gauge (92px) - À ESQUERDA */}
-            <div className="flex-shrink-0 relative w-[92px] h-[92px]" style={{ filter: 'drop-shadow(0 0 12px rgba(245,185,198,0.7))', borderRadius: '50%' }}>
-              <svg width="92" height="92" viewBox="0 0 92 92" style={{ transform: 'rotate(-90deg)', borderRadius: '50%' }}>
-                <circle cx="46" cy="46" r="38" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="9" />
-                <circle
-                  cx="46" cy="46" r="38" fill="none" stroke="#F5B9C6" strokeWidth="9"
-                  strokeDasharray={`${239 * (marginPercent / 100)} ${239}`}
-                  strokeLinecap="round"
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center leading-[1]">
-                <span className="text-[19px] font-black text-white">{marginPercent}%</span>
-                <span className="text-[8px] mt-[3px]" style={{ color: 'rgba(247,220,225,0.75)' }}>margem</span>
-              </div>
+          {/* Top: Total em Vendas Card */}
+          <div>
+            <div className="text-[9px] font-black uppercase tracking-[0.14em]" style={{ color: 'rgba(247,220,225,0.8)', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
+              TOTAL EM VENDAS
             </div>
-
-            {/* Texto e valor - À DIREITA */}
-            <div className="flex-1">
-              <div className="text-[9px] font-black uppercase tracking-[0.14em]" style={{ color: 'rgba(247,220,225,0.8)', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
-                TOTAL EM VENDAS
-              </div>
-              <div className="text-white" style={{ fontSize: '32px', lineHeight: 1, letterSpacing: '-0.03em', marginTop: '0px', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
-                {formatMoney(totalIn)}
-              </div>
-              <div className="flex items-center gap-2 mt-2">
-                <span className="inline-flex items-center px-3 py-1 text-[10px] font-black rounded-full whitespace-nowrap" style={{ background: '#A9D8B8', color: '#26402F' }}>
-                  Positivo
-                </span>
-              </div>
+            <div className="text-white" style={{ fontSize: '32px', lineHeight: 1, letterSpacing: '-0.03em', marginTop: '0px', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
+              {formatMoney(totalIn)}
+            </div>
+            <div className="flex items-center gap-2 mt-2">
+              <span className="inline-flex items-center px-3 py-1 text-[10px] font-black rounded-full whitespace-nowrap" style={{ background: '#A9D8B8', color: '#26402F' }}>
+                Positivo
+              </span>
             </div>
           </div>
 
           {/* Success Message */}
           <div className="text-[12px] leading-[1.6]" style={{ color: 'rgba(247,220,225,0.84)' }}>
-            🎉 <strong style={{ color: '#FFFFFF' }}>Resultado excelente!</strong> Suas vendas superaram todas as despesas e custos por <strong style={{ color: '#FFFFFF' }}>{formatMoney(profit)}</strong> neste período.
+            🎉 <strong style={{ color: '#FFFFFF' }}>Resultado excelente!</strong> Suas vendas superaram todas as despesas e custos por <strong style={{ color: '#FFFFFF' }}>{formatMoney(profit)}</strong> (margem: <strong style={{ color: '#FFFFFF' }}>{marginPercent}%</strong>) neste período.
           </div>
 
           {/* Bottom: 3 Small Boxes */}
