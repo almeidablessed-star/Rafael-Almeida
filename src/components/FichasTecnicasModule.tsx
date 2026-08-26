@@ -169,6 +169,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   const [ingredients, setIngredients] = useState<IngredientUsage[]>([
     { id: '1', name: 'Farinha de Trigo', quantity: 200, unit: 'g', unitCost: 0.005, totalCost: 1.00 },
   ]);
+  const [reposicaoCost, setReposicaoCost] = useState('0');
   const [maoDeObraCost, setMaoDeObraCost] = useState('20');
   const [custoCost, setCustoCost] = useState('5');
   const [investimentoCost, setInvestimentoCost] = useState('5');
@@ -203,6 +204,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     setImageUrl('');
     setYieldInfo('10 fatias');
     setIngredients([{ id: '1', name: 'Farinha de Trigo', quantity: 200, unit: 'g', unitCost: 0.005, totalCost: 1.00 }]);
+    setReposicaoCost('0');
     setMaoDeObraCost('20');
     setCustoCost('5');
     setInvestimentoCost('5');
@@ -223,6 +225,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     setImageUrl(ficha.imageUrl || '');
     setYieldInfo(getYieldInfoCompat(ficha));
     setIngredients(ficha.ingredients || []);
+    setReposicaoCost((ficha.reposicaoCost || 0).toString());
     setMaoDeObraCost((ficha.maoDeObraCost || 0).toString());
     setCustoCost((ficha.custoCost || 0).toString());
     setInvestimentoCost((ficha.investimentoCost || 0).toString());
@@ -323,6 +326,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
       imageUrl: imageUrl.trim() || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&auto=format&fit=crop&q=80',
       tamanhos: tamanhosData,
       ingredients,
+      reposicaoCost: parseFloat(reposicaoCost) || 0,
       maoDeObraCost: mdoNum,
       custoCost: cusNum,
       investimentoCost: invNum,
@@ -362,6 +366,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         imageUrl: fichaToDup.imageUrl,
         tamanhos: fichaToDup.tamanhos,
         ingredients: (fichaToDup.ingredients || []).map((ing, idx) => ({ ...ing, id: `${Date.now()}_${idx}` })),
+        reposicaoCost: fichaToDup.reposicaoCost,
         maoDeObraCost: fichaToDup.maoDeObraCost,
         custoCost: fichaToDup.custoCost,
         investimentoCost: fichaToDup.investimentoCost,
@@ -819,6 +824,71 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
               <span className="font-extrabold text-sm text-[var(--color-pastry-chocolate)]">
                 {formatMoney(totalReposicao)}
               </span>
+            </div>
+          </div>
+
+          {/* CUSTOS GLOBAIS */}
+          <div className="bg-[var(--color-pastry-cream)] p-4 rounded-lg border border-[var(--color-pastry-light-pink)]/40 space-y-3">
+            <span className="text-xs font-extrabold uppercase text-[var(--color-pastry-chocolate)] block">
+              Custos Globais da Ficha
+            </span>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div>
+                <label className="block text-[10px] font-bold text-[var(--color-pastry-chocolate)] mb-1">
+                  Reposição ($)
+                </label>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="0.00"
+                  value={reposicaoCost}
+                  onChange={(e) => setReposicaoCost(e.target.value)}
+                  className="w-full px-2 py-1.5 border border-neutral-300 rounded-lg text-xs font-bold text-center"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-[var(--color-pastry-chocolate)] mb-1">
+                  Mão de Obra ($)
+                </label>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="0.00"
+                  value={maoDeObraCost}
+                  onChange={(e) => setMaoDeObraCost(e.target.value)}
+                  className="w-full px-2 py-1.5 border border-neutral-300 rounded-lg text-xs font-bold text-center"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-[var(--color-pastry-chocolate)] mb-1">
+                  Custo ($)
+                </label>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="0.00"
+                  value={custoCost}
+                  onChange={(e) => setCustoCost(e.target.value)}
+                  className="w-full px-2 py-1.5 border border-neutral-300 rounded-lg text-xs font-bold text-center"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-[var(--color-pastry-chocolate)] mb-1">
+                  Investimento ($)
+                </label>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="0.00"
+                  value={investimentoCost}
+                  onChange={(e) => setInvestimentoCost(e.target.value)}
+                  className="w-full px-2 py-1.5 border border-neutral-300 rounded-lg text-xs font-bold text-center"
+                />
+              </div>
             </div>
           </div>
 
