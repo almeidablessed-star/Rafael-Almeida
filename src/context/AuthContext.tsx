@@ -2,12 +2,17 @@ import React, { createContext, useContext, useEffect, useRef, useState } from 'r
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 
-interface UserProfile {
+export interface UserProfile {
   id: string;
   nome: string;
   nome_confeitaria: string;
   moeda: 'USD' | 'BRL';
   foto_url?: string;
+  // Contato da confeitaria, exibido no orcamento. Opcionais e possivelmente
+  // vazios: perfil incompleto sai EM BRANCO na folha, nunca com valor padrao.
+  telefone?: string;
+  endereco?: string;
+  instagram?: string;
   created_at?: string;
 }
 
@@ -25,6 +30,10 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string) => Promise<void>;
   setupProfile: (nome: string, nome_confeitaria: string, moeda: 'USD' | 'BRL') => Promise<void>;
+  // Rele o perfil do banco. Sem isso, editar o perfil so aparece na folha de
+  // orcamento depois de recarregar a pagina, porque o contexto guarda a copia
+  // lida no login.
+  refreshUserProfile: () => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -162,6 +171,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  /**
+   * Rele o perfil do banco depois de uma edicao.
+   *
+   * Deliberadamente NAO mexe em isSetupRequired nem em isValidatingProfile,
+   * diferente de fetchUserProfile: esses dois disparam a tela de setup e o
+   * estado de carregamento, e faze-lo aqui traria de volta o bug que f67122d
+   * corrigiu (a tela de setup tomando conta no meio de um fluxo). Aqui o
+   * usuario ja esta logado e com perfil — so queremos os campos frescos.
+   *
+   * Falha silenciosa e proposital: se a releitura nao funcionar, o contexto
+   * segue com a copia anterior. Perder uma atualizacao de exibicao e melhor
+   * do que derrubar quem esta no meio de um orcamento.
+   */
+  const refreshUserProfile = async () => {
+    if (!user) return;
+    try {
+      const { data, error } = await supabase
+        .from('usuarias')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (!error && data) setUserProfile(data);
+    } catch (error) {
+      console.error('Error refreshing user profile:', error);
+    }
+  };
+
   const login = async (email: string, password: string) => {
     try {
       const { error } = await supabase.auth.signInWithPassword({
@@ -282,6 +319,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         login,
         signup,
         setupProfile,
+        refreshUserProfile,
         logout,
       }}
     >

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { X, Camera, Edit2 } from 'lucide-react';
 import { useCurrency } from '../context/CurrencyContext';
 import { useAuth } from '../context/AuthContext';
@@ -22,7 +22,7 @@ interface ProfileData {
 
 export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onLogout }) => {
   const { currency, setCurrency } = useCurrency();
-  const { user, userProfile } = useAuth();
+  const { user, userProfile, refreshUserProfile } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -31,13 +31,32 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
     return {
       photo: userProfile?.foto_url || null,
       name: userProfile?.nome || '',
-      phone: '',
+      // Telefone, endereco e Instagram vinham fixos em '' e nunca eram lidos
+      // de volta: a confeiteira digitava, salvava e encontrava os campos
+      // vazios na proxima abertura. Agora vem do banco, como os demais.
+      phone: userProfile?.telefone || '',
       email: user?.email || '',
-      address: '',
-      instagram: '',
+      address: userProfile?.endereco || '',
+      instagram: userProfile?.instagram || '',
       currency: userProfile?.moeda || 'BRL',
     };
   });
+
+  // O estado inicial acima so roda na primeira montagem. Como o modal fica
+  // montado e apenas escondido, sem isto os campos ficariam congelados na
+  // versao lida no login, ignorando qualquer edicao posterior.
+  useEffect(() => {
+    if (!isOpen) return;
+    setProfileData({
+      photo: userProfile?.foto_url || null,
+      name: userProfile?.nome || '',
+      phone: userProfile?.telefone || '',
+      email: user?.email || '',
+      address: userProfile?.endereco || '',
+      instagram: userProfile?.instagram || '',
+      currency: userProfile?.moeda || 'BRL',
+    });
+  }, [isOpen, userProfile, user]);
 
   const handlePhotoClick = () => {
     fileInputRef.current?.click();
@@ -79,11 +98,24 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
 
     try {
       // Update user profile in Supabase
+      //
+      // Telefone, endereco e Instagram eram exibidos no formulario mas ficavam
+      // de fora deste update — o que a confeiteira digitava nos tres era
+      // descartado ao salvar. Entram aqui junto com os demais.
+      //
+      // String vazia vira null de proposito: campo nao preenchido deve sair EM
+      // BRANCO no orcamento, e null distingue "nao informado" de "informado
+      // como vazio" na leitura.
+      const orNull = (v: string) => (v.trim() ? v.trim() : null);
+
       const { error } = await supabase
         .from('usuarias')
         .update({
-          nome: profileData.name,
+          nome: profileData.name.trim(),
           foto_url: profileData.photo,
+          telefone: orNull(profileData.phone),
+          endereco: orNull(profileData.address),
+          instagram: orNull(profileData.instagram),
         })
         .eq('id', user.id);
 
@@ -91,6 +123,10 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
         setMessage({ type: 'error', text: 'Erro ao salvar perfil' });
         return;
       }
+
+      // Reler o perfil para que a folha de orcamento use os dados novos sem
+      // depender de um reload da pagina.
+      await refreshUserProfile();
 
       setMessage({ type: 'success', text: 'Perfil salvo com sucesso!' });
 

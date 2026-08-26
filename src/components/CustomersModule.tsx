@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { Customer, CustomerEvent } from '../types';
 import { formatDateBr, formatDayMonthOnly } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
-import { useCustomers } from '../hooks/useCustomers';
+import { useCustomers } from '../context/CustomersContext';
 import {
   Users,
   Plus,
@@ -180,7 +180,9 @@ const DEFAULT_CUSTOMERS: Customer[] = [
   {
     id: '1',
     name: 'Camila Santos',
-    phone: '(781) 420-6892',
+    // Numero ficticio de proposito: esta cliente e apenas exemplo, mas usava o
+    // telefone real da dona do app, que aparecia para toda compradora.
+    phone: '(555) 010-0100',
     eventDate: '2026-08-25',
     recurringEventTitle: 'Aniversário',
     additionalEvents: [

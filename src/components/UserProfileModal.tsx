@@ -31,11 +31,16 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   const { user, userProfile } = useAuth();
   const currentProfile = getStoredUserProfile();
 
-  const [name, setName] = useState(userProfile?.nome || currentProfile.name || 'Carula Cake Confeitaria');
-  const [email, setEmail] = useState(user?.email || currentProfile.email || 'almeida.blessed@gmail.com');
-  const [phone, setPhone] = useState(currentProfile.phone || '(781) 420-6892');
-  const [address, setAddress] = useState(currentProfile.address || 'Beverly, MA');
-  const [instagram, setInstagram] = useState(currentProfile.instagram || '@carulacake');
+  // Sem defaults pessoais: estes cinco campos vinham pre-preenchidos com o
+  // nome, os dois e-mails, o telefone, o endereco e o Instagram reais da dona
+  // do app. Qualquer compradora que abrisse o perfil encontrava os dados dela
+  // ja no formulario — e podia salva-los sem perceber. Campo nao preenchido
+  // comeca vazio.
+  const [name, setName] = useState(userProfile?.nome || currentProfile.name || '');
+  const [email, setEmail] = useState(user?.email || currentProfile.email || '');
+  const [phone, setPhone] = useState(currentProfile.phone || '');
+  const [address, setAddress] = useState(currentProfile.address || '');
+  const [instagram, setInstagram] = useState(currentProfile.instagram || '');
   const [photoUrl, setPhotoUrl] = useState(userProfile?.foto_url || currentProfile.photoUrl || '');
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [isSaving, setIsSaving] = useState(false);

@@ -77,7 +77,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           // padding, para que o gradiente seja um só (sem emenda) e o conteudo
           // fique exatamente onde estava. Altura cresce o mesmo tanto que a
           // margem sobe, entao nada abaixo do card se move.
-          paddingTop: 'calc(28px + env(safe-area-inset-top, 0px))',
+          paddingTop: 'calc(8px + env(safe-area-inset-top, 0px))',
           boxShadow: '0 30px 70px rgba(58,35,80,0.26)',
           marginLeft: 'calc(-50vw + 50%)',
           marginRight: 'calc(-50vw + 50%)',
@@ -95,19 +95,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
         {/* Content */}
         <div className="relative z-10 space-y-4">
           {/* Header: Logo, Title, Icons */}
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center justify-between gap-2">
             {/* Avatar Profile - Circular */}
             <AvatarProfile onClick={onOpenProfileModal} />
-
-            {/* "Carula Confeitaria" Title */}
-            <div className="flex-1 text-center">
-              <div className="font-serif-display text-[32px] text-white leading-[1.2] tracking-[0.01em]">
-                Carula
-              </div>
-              <div style={{ fontSize: '8px', fontWeight: 700, letterSpacing: '0.44em', color: 'rgba(247,220,225,0.78)', marginTop: '3px', paddingLeft: '0.44em', textTransform: 'uppercase', fontFamily: "'Manrope', sans-serif" }}>
-                CONFEITARIA
-              </div>
-            </div>
 
             {/* Action Icons - 32x32px each */}
             <div className="flex-shrink-0 flex items-center gap-2">
@@ -213,6 +203,21 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           {/* Spacer - maintains layout spacing */}
           <div style={{ height: '44px' }} />
+        </div>
+
+        {/* "Carula Confeitaria" Title - Centered on screen, floating */}
+        <div
+          className="absolute left-1/2 -translate-x-1/2 text-center z-20"
+          style={{
+            top: 'calc(env(safe-area-inset-top, 0px) + 2px)',
+          }}
+        >
+          <div className="font-serif-display text-[38px] text-white leading-[1.2] tracking-[0.01em]">
+            Carula
+          </div>
+          <div style={{ fontSize: '8px', fontWeight: 700, letterSpacing: '0.44em', color: 'rgba(247,220,225,0.78)', marginTop: '3px', paddingLeft: '0.44em', textTransform: 'uppercase', fontFamily: "'Manrope', sans-serif" }}>
+            CONFEITARIA
+          </div>
         </div>
       </div>
 

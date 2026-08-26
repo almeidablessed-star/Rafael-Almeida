@@ -4,7 +4,7 @@ import { toPng } from 'html-to-image';
 import jsPDF from 'jspdf';
 import { Transaction } from '../types';
 import { formatCurrency, formatDateBr } from '../utils/formatters';
-import { getStoredUserProfile } from '../utils/userProfile';
+import { useAuth } from '../context/AuthContext';
 import { getStoredFichas } from './FichasTecnicasModule';
 import { updateTransaction } from '../utils/storage';
 import {
@@ -110,10 +110,28 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
     3: true,
   });
 
-  const sellerProfile = getStoredUserProfile();
-  // Get seller photo from carula_profile (primary source - user's profile modal)
-  const carulaProfileData = JSON.parse(localStorage.getItem('carula_profile') || '{}');
-  const sellerPhotoUrl = carulaProfileData.photo || sellerProfile.photoUrl;
+  // Dados de quem vende, lidos do perfil real no Supabase.
+  //
+  // Antes isto vinha de duas chaves de localStorage que NENHUMA tela do app
+  // escrevia: `carula_user_profile` so era gravada por UserProfileModal, que
+  // e renderizado apenas pelo Header (codigo morto), e `carula_profile` nao
+  // era escrita por lugar nenhum. O perfil que a confeiteira preenchia ia
+  // para o Supabase e nunca chegava aqui. Na falta dos dois, caia num
+  // DEFAULT_PROFILE fixo com o nome, telefone e e-mail pessoal da dona do
+  // app — ou seja, toda compradora emitia orcamento com o contato dela.
+  //
+  // `nome_confeitaria` e o nome do NEGOCIO (o que deve encabecar a folha);
+  // `nome` e o da pessoa. Sao campos distintos desde o cadastro.
+  const { user, userProfile } = useAuth();
+
+  // O e-mail vive em auth.users, nao em `usuarias` — nao ha coluna espelho de
+  // proposito, para nao criar duas fontes de verdade para o mesmo dado.
+  const sellerEmail = user?.email || '';
+  const sellerName = userProfile?.nome_confeitaria || userProfile?.nome || '';
+  const sellerPhone = userProfile?.telefone || '';
+  const sellerInstagram = userProfile?.instagram || '';
+  const sellerAddress = userProfile?.endereco || '';
+  const sellerPhotoUrl = userProfile?.foto_url || '';
 
   const storedFichas = getStoredFichas();
 
@@ -511,13 +529,21 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
   };
 
   const handleCopyText = () => {
+    // Cada linha da confeitaria so entra se houver dado. Antes elas eram
+    // sempre montadas e, com o perfil vazio, imprimiam o contato fixo da dona
+    // do app — ou "undefined" — na mensagem enviada a cliente.
+    const sellerLines = [
+      sellerName ? `👤 *Confeitaria:* ${sellerName}` : '',
+      [sellerPhone ? `📞 *Contato:* ${sellerPhone}` : '', sellerEmail ? `✉️ ${sellerEmail}` : '']
+        .filter(Boolean).join(' | '),
+      sellerAddress ? `📍 *Endereço:* ${sellerAddress}` : '',
+      sellerInstagram ? `📷 *Instagram:* ${sellerInstagram}` : '',
+    ].filter(Boolean).join('\n');
+
     const text = `
-✨ *PEDIDO DE ENCOMENDA - ${sellerProfile.name.toUpperCase()}* 🎂
+✨ *PEDIDO DE ENCOMENDA${sellerName ? ` - ${sellerName.toUpperCase()}` : ''}* 🎂
 ────────────────────────
-👤 *Confeitaria:* ${sellerProfile.name}
-📞 *Contato:* ${sellerProfile.phone} | ✉️ ${sellerProfile.email}
-📍 *Endereço:* ${sellerProfile.address}
-${sellerProfile.instagram ? `📷 *Instagram:* ${sellerProfile.instagram}` : ''}
+${sellerLines}
 ────────────────────────
 👤 *Cliente:* ${transaction.customerName || 'Cliente'}
 📞 *Telefone:* ${transaction.customerPhone || 'Não informado'}
@@ -533,7 +559,7 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
 💰 *VALOR TOTAL:* ${formatCurrency(transaction.totalValue)}
 💳 *Pagamento:* ${transaction.paymentMethod === 'cash' ? '💵 Cash (Dinheiro)' : '⚡ Zelle'}
 
-💖 _Obrigada por escolher a ${sellerProfile.name}! Feito com amor._ ✨
+💖 _${sellerName ? `Obrigada por escolher a ${sellerName}!` : 'Obrigada pela preferência!'} Feito com amor._ ✨
     `.trim();
 
     navigator.clipboard.writeText(text);
@@ -732,7 +758,7 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
                       {sellerPhotoUrl ? (
                         <img
                           src={sellerPhotoUrl}
-                          alt={sellerProfile.name}
+                          alt={sellerName || 'Foto da confeitaria'}
                           className="w-full h-full object-cover"
                         />
                       ) : (
@@ -740,8 +766,11 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
                       )}
                     </div>
                     <div>
+                      {/* Sem fallback de nome: perfil incompleto sai em branco.
+                          Um orcamento com o nome de outra confeitaria e pior
+                          do que um orcamento sem nome. */}
                       <h2 className="font-bold text-lg sm:text-xl tracking-tight leading-tight text-[var(--color-pastry-chocolate)]">
-                        {sellerProfile.name || 'Carula Cake Confeitaria'}
+                        {sellerName}
                       </h2>
                       <p className="text-[11px] text-[var(--color-pastry-chocolate)]/80 font-bold flex items-center gap-1">
                         <Heart className="w-3 h-3 fill-[#E8A0B0] text-[var(--color-pastry-light-pink)] shrink-0" />
@@ -752,9 +781,9 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
 
                   {/* Seller Contact Info */}
                   <div className="text-[10px] font-bold text-[var(--color-pastry-chocolate)] text-right space-y-0.5 print:text-neutral-800 shrink-0">
-                    {sellerProfile.phone && <div>📞 {sellerProfile.phone}</div>}
-                    {sellerProfile.instagram && <div>📷 {sellerProfile.instagram}</div>}
-                    {sellerProfile.address && <div>📍 {sellerProfile.address}</div>}
+                    {sellerPhone && <div>📞 {sellerPhone}</div>}
+                    {sellerInstagram && <div>📷 {sellerInstagram}</div>}
+                    {sellerAddress && <div>📍 {sellerAddress}</div>}
                   </div>
                 </div>
               </div>
@@ -927,11 +956,15 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
 
               {/* Footer Note */}
               <div className="text-center pt-1 border-t border-[var(--color-pastry-light-pink)]/60 print-avoid-break">
+                {/* Nome e telefone vinham fixos aqui ("Carula Cake
+                    Confeitaria", "(781) 420-6892"), aparecendo no orcamento de
+                    toda compradora. Agora seguem o perfil, e somem quando ele
+                    esta vazio. */}
                 <p className="text-[11px] font-bold text-[var(--color-pastry-chocolate)] flex items-center justify-center gap-1">
-                  Obrigado por escolher a Carula Cake Confeitaria! 💕
+                  {sellerName ? `Obrigado por escolher a ${sellerName}! 💕` : 'Obrigado pela preferência! 💕'}
                 </p>
                 <p className="text-[9px] text-[var(--color-pastry-chocolate)]/70 font-medium">
-                  Encomenda feita com amor e carinho • Contato: {sellerProfile.phone || '(781) 420-6892'}
+                  Encomenda feita com amor e carinho{sellerPhone ? ` • Contato: ${sellerPhone}` : ''}
                 </p>
               </div>
             </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import {
   Transaction,
@@ -10,7 +10,7 @@ import {
   Customer,
   FichaTecnica,
 } from '../types';
-import { getStoredCustomers } from './CustomersModule';
+import { useCustomers } from '../context/CustomersContext';
 import { getStoredFichas } from './FichasTecnicasModule';
 import { QuotePdfModal } from './QuotePdfModal';
 import { useFichasTecnicas } from '../hooks/useFichasTecnicas';
@@ -28,7 +28,7 @@ import {
   calculateProportionalBreakdown,
 } from '../data/bakeryCatalog';
 import { getTodayIso, formatCurrency, getTransactionTypeDetails } from '../utils/formatters';
-import { buildFichaItems } from '../utils/fichaMatcher';
+import { buildFichaItems, normalizeName } from '../utils/fichaMatcher';
 import {
   X,
   Plus,
@@ -92,6 +92,16 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   const fichasTecnicasResult = useFichasTecnicas();
   const supabaseFichas = fichasTecnicasResult?.fichas || [];
 
+  // Clientes vem do Supabase (tabela `clientes`), a mesma fonte que a aba
+  // Clientes grava via useCustomers.
+  //
+  // Antes isto chamava getStoredCustomers(), que le a chave `carula_customers`
+  // do localStorage — uma chave que NENHUMA tela do app escreve. O resultado
+  // era sempre [], e como o seletor de cliente esta dentro de
+  // {storedCustomers.length > 0 && ...}, ele nunca era renderizado: a cadastrada
+  // no Supabase existia, mas o formulario de pedido nao a enxergava.
+  const { customers: storedCustomers } = useCustomers();
+
   const [type, setType] = useState<TransactionType>(initialType);
 
   // Sales Order State (when type === 'venda')
@@ -104,12 +114,141 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   const [observations, setObservations] = useState<string>('');
   const [inspirationImage, setInspirationImage] = useState<string>('');
   const [showPdfQuoteModal, setShowPdfQuoteModal] = useState<boolean>(false);
-  const [storedCustomers, setStoredCustomers] = useState<Customer[]>([]);
   const [storedFichas, setStoredFichas] = useState<FichaTecnica[]>([]);
+
+  // --- Busca de cliente no proprio campo de nome ---
+  const [showCustomerList, setShowCustomerList] = useState(false);
+  const [highlightedCustomer, setHighlightedCustomer] = useState(-1);
+  const customerBoxRef = useRef<HTMLDivElement>(null);
+  const customerListRef = useRef<HTMLUListElement>(null);
+  const [hasMoreCustomersBelow, setHasMoreCustomersBelow] = useState(false);
+
+  /**
+   * Ha item escondido abaixo do corte da caixa?
+   *
+   * Alimenta o esmaecimento do rodape. A tolerancia de 1px evita que
+   * arredondamento de sub-pixel mantenha a faixa acesa quando o scroll ja
+   * chegou ao fim — sem ela, o aviso ficaria mentindo em algumas alturas.
+   */
+  const updateCustomerScrollHint = () => {
+    const el = customerListRef.current;
+    if (!el) {
+      setHasMoreCustomersBelow(false);
+      return;
+    }
+    setHasMoreCustomersBelow(el.scrollHeight - el.scrollTop - el.clientHeight > 1);
+  };
+
+  /**
+   * Clientes que combinam com o texto digitado.
+   *
+   * Casa por nome OU telefone, como a busca da aba Clientes, porque e comum
+   * lembrar do numero e nao do nome. Acento e caixa sao ignorados: quem digita
+   * "jessica" precisa achar "Jéssica".
+   *
+   * Campo vazio mostra a lista inteira — assim o foco no campo ainda revela
+   * quem esta cadastrada, que era o papel do <select> removido.
+   */
+  const matchingCustomers = React.useMemo(() => {
+    const q = normalizeName(customerName);
+    if (!q) return storedCustomers;
+    return storedCustomers.filter(
+      (c) => normalizeName(c.name).includes(q) || (c.phone || '').includes(customerName.trim())
+    );
+  }, [customerName, storedCustomers]);
+
+  /** Copia os dados da cliente escolhida para o formulario. */
+  const applyCustomer = (found: Customer) => {
+    setCustomerName(found.name);
+    setCustomerPhone(found.phone || '');
+    setCustomerPhotoUrl(found.photoUrl || '');
+
+    // A data de evento cadastrada costuma ser de um aniversario passado.
+    // Trazer o dia/mes para o ano corrente evita lancar o pedido no passado.
+    if (found.eventDate) {
+      const parts = found.eventDate.split('-');
+      if (parts.length === 3) {
+        const year = parseInt(parts[0], 10);
+        const currentYear = new Date().getFullYear();
+        setEventDate(
+          year < currentYear ? `${currentYear}-${parts[1]}-${parts[2]}` : found.eventDate
+        );
+      } else {
+        setEventDate(getTodayIso());
+      }
+    } else {
+      setEventDate(getTodayIso());
+    }
+
+    if (found.address || found.city) {
+      setDeliveryAddress(`${found.address || ''}${found.city ? `, ${found.city}` : ''}`);
+    }
+    if (found.notes) setObservations(found.notes);
+
+    setShowCustomerList(false);
+    setHighlightedCustomer(-1);
+  };
+
+  const handleCustomerKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!showCustomerList || matchingCustomers.length === 0) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setHighlightedCustomer((i) => (i + 1) % matchingCustomers.length);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setHighlightedCustomer((i) => (i <= 0 ? matchingCustomers.length - 1 : i - 1));
+    } else if (e.key === 'Enter' && highlightedCustomer >= 0) {
+      // So intercepta o Enter quando ha item destacado; caso contrario o
+      // Enter continua fazendo o que fazia no formulario.
+      e.preventDefault();
+      applyCustomer(matchingCustomers[highlightedCustomer]);
+    } else if (e.key === 'Escape') {
+      setShowCustomerList(false);
+      setHighlightedCustomer(-1);
+    }
+  };
+
+  // Reavalia o esmaecimento quando a lista abre ou o filtro muda: o conteudo
+  // mudou de altura, entao "tem mais abaixo" pode ter virado verdade ou
+  // mentira. O requestAnimationFrame e necessario porque neste tick o DOM
+  // ainda nao refletiu a lista filtrada — medir agora leria a altura antiga.
+  useEffect(() => {
+    if (!showCustomerList) {
+      setHasMoreCustomersBelow(false);
+      return;
+    }
+    const id = requestAnimationFrame(updateCustomerScrollHint);
+    return () => cancelAnimationFrame(id);
+  }, [showCustomerList, matchingCustomers]);
+
+  // Mantem o item destacado dentro da area visivel ao navegar com as setas.
+  // Com a caixa travada em 4 linhas, a partir do 5o item a selecao sairia do
+  // campo de visao e o teclado pareceria nao estar fazendo nada.
+  useEffect(() => {
+    if (highlightedCustomer < 0) return;
+    const item = customerListRef.current?.children[highlightedCustomer] as
+      | HTMLElement
+      | undefined;
+    item?.scrollIntoView({ block: 'nearest' });
+  }, [highlightedCustomer]);
+
+  // Fecha a lista ao clicar fora. Sem isto ela ficaria aberta cobrindo os
+  // campos seguintes do formulario.
+  useEffect(() => {
+    if (!showCustomerList) return;
+    const onDocClick = (e: MouseEvent) => {
+      if (customerBoxRef.current && !customerBoxRef.current.contains(e.target as Node)) {
+        setShowCustomerList(false);
+        setHighlightedCustomer(-1);
+      }
+    };
+    document.addEventListener('mousedown', onDocClick);
+    return () => document.removeEventListener('mousedown', onDocClick);
+  }, [showCustomerList]);
 
   useEffect(() => {
     if (isOpen) {
-      setStoredCustomers(getStoredCustomers());
       // PASSO 2: Preferir fichas do Supabase, fallback para localStorage
       if (supabaseFichas && supabaseFichas.length > 0) {
         console.log('✓ PASSO 2: Carregando fichas do Supabase:', supabaseFichas.length, 'fichas encontradas');
@@ -685,54 +824,12 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                   </button>
                 </div>
 
-                {storedCustomers.length > 0 && (
-                  <div>
-                    <label className="block text-[11px] font-bold text-pink-900 mb-2.5 flex items-center gap-1">
-                      <Users className="w-3.5 h-3.5 text-pink-600" /> Puxar Dados de Cliente Cadastrada:
-                    </label>
-                    <select
-                      onChange={(e) => {
-                        const found = storedCustomers.find((c) => c.id === e.target.value);
-                        if (found) {
-                          setCustomerName(found.name);
-                          setCustomerPhone(found.phone || '');
-                          setCustomerPhotoUrl(found.photoUrl || '');
-                          if (found.eventDate) {
-                            const parts = found.eventDate.split('-');
-                            if (parts.length === 3) {
-                              const year = parseInt(parts[0], 10);
-                              const currentYear = new Date().getFullYear();
-                              if (year < currentYear) {
-                                setEventDate(`${currentYear}-${parts[1]}-${parts[2]}`);
-                              } else {
-                                setEventDate(found.eventDate);
-                              }
-                            } else {
-                              setEventDate(getTodayIso());
-                            }
-                          } else {
-                            setEventDate(getTodayIso());
-                          }
-                          if (found.address || found.city) {
-                            setDeliveryAddress(`${found.address || ''}${found.city ? `, ${found.city}` : ''}`);
-                          }
-                          if (found.notes) setObservations(found.notes);
-                        }
-                      }}
-                      className="w-full px-3 py-2 bg-white border border-pink-300 rounded-xl text-xs font-bold text-neutral-800 focus:outline-none focus:ring-2 focus:ring-pink-500"
-                    >
-                      <option value="">-- Selecionar Cliente da Minha Lista --</option>
-                      {storedCustomers.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          👤 {c.name} ({c.phone})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
+                  {/* O campo de nome e tambem a busca: digitar filtra as
+                      clientes cadastradas em tempo real, e escolher uma
+                      preenche o restante do formulario. Substituiu um <select>
+                      separado que listava todas sem filtrar. */}
+                  <div className="relative" ref={customerBoxRef}>
                     <label className="block text-[11px] font-bold text-neutral-800 mb-1">
                       Nome da Cliente *
                     </label>
@@ -740,9 +837,96 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       type="text"
                       placeholder="Ex: Camila Santos..."
                       value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
+                      onChange={(e) => {
+                        setCustomerName(e.target.value);
+                        setShowCustomerList(true);
+                        setHighlightedCustomer(-1);
+                      }}
+                      onFocus={() => setShowCustomerList(true)}
+                      onKeyDown={handleCustomerKeyDown}
+                      // Desliga o autocomplete do navegador: ele desenharia sua
+                      // propria lista por cima da nossa.
+                      autoComplete="off"
+                      role="combobox"
+                      aria-expanded={showCustomerList && matchingCustomers.length > 0}
+                      aria-autocomplete="list"
+                      aria-controls="lista-clientes"
                       className="w-full px-3 py-2 bg-white border border-pink-300 rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-pink-500"
                     />
+
+                    {showCustomerList && matchingCustomers.length > 0 && (
+                      <div className="absolute z-30 left-0 right-0 mt-1">
+                        <div className="relative">
+                      <ul
+                        id="lista-clientes"
+                        role="listbox"
+                        ref={customerListRef}
+                        onScroll={updateCustomerScrollHint}
+                        // Altura travada em 4 itens (4 x 47px medidos). O limite
+                        // e por altura, nao por contagem: uma cliente sem
+                        // telefone rende um item mais baixo, e o que precisa ser
+                        // garantido e que a caixa nunca cresca — com 5 ou com
+                        // 500 cadastradas ela ocupa o mesmo espaco.
+                        // Sem py-*: padding vertical faria a 5a linha assomar
+                        // por alguns pixels e sujar o corte.
+                        className="max-h-[188px] overflow-y-auto bg-white border border-pink-300 rounded-xl shadow-lg"
+                      >
+                        {matchingCustomers.map((c, i) => (
+                          <li key={c.id} role="option" aria-selected={i === highlightedCustomer}>
+                            <button
+                              type="button"
+                              // onMouseDown, nao onClick: o blur do input dispara
+                              // antes do click e fecharia a lista, engolindo a
+                              // escolha. mousedown chega primeiro.
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                applyCustomer(c);
+                              }}
+                              onMouseEnter={() => setHighlightedCustomer(i)}
+                              className={`w-full text-left px-3 py-2 flex items-center gap-2 transition-colors ${
+                                i === highlightedCustomer ? 'bg-pink-100' : 'hover:bg-pink-50'
+                              }`}
+                            >
+                              {c.photoUrl ? (
+                                <img
+                                  src={c.photoUrl}
+                                  alt=""
+                                  className="w-6 h-6 rounded-full object-cover shrink-0"
+                                />
+                              ) : (
+                                <span className="w-6 h-6 rounded-full bg-pink-200 text-pink-900 text-[10px] font-black flex items-center justify-center shrink-0">
+                                  {c.name.charAt(0).toUpperCase()}
+                                </span>
+                              )}
+                              <span className="min-w-0">
+                                <span className="block text-xs font-bold text-neutral-900 truncate">
+                                  {c.name}
+                                </span>
+                                {c.phone && (
+                                  <span className="block text-[10px] text-neutral-600 truncate">
+                                    {c.phone}
+                                  </span>
+                                )}
+                              </span>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+
+                          {/* Esmaecimento no rodape da caixa, so quando ainda
+                              ha item abaixo do corte. Some ao chegar no fim do
+                              scroll, entao nunca mente dizendo que continua.
+                              pointer-events-none e essencial: sem isso a faixa
+                              engoliria o clique no ultimo item visivel. */}
+                          {hasMoreCustomersBelow && (
+                            <div
+                              aria-hidden="true"
+                              className="pointer-events-none absolute bottom-0 left-0 right-0 h-7 rounded-b-xl bg-gradient-to-t from-white via-white/80 to-transparent"
+                            />
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div>

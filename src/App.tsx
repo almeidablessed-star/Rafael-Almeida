@@ -61,6 +61,7 @@ import { BackupModal } from './components/BackupModal';
 import { ProfileModal } from './components/ProfileModal';
 import { LoginModal } from './components/LoginModal';
 import { CurrencyProvider } from './context/CurrencyContext';
+import { CustomersProvider } from './context/CustomersContext';
 
 function AppContent() {
   const { isResetPasswordRequired, isOtpVerificationRequired, user, logout } = useAuth();
@@ -437,7 +438,14 @@ export default function App() {
   return (
     <AuthProvider>
       <ProtectedRoute>
-        <AppContent />
+        {/* Fonte unica das clientes. Fica dentro do ProtectedRoute porque
+            depende do usuario autenticado, e envolve tudo para que a aba
+            Clientes e o formulario de pedido compartilhem a MESMA lista —
+            antes cada um tinha sua copia e a cliente recem-cadastrada so
+            aparecia no formulario depois de recarregar a pagina. */}
+        <CustomersProvider>
+          <AppContent />
+        </CustomersProvider>
       </ProtectedRoute>
     </AuthProvider>
   );
