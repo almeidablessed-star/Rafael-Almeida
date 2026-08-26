@@ -351,7 +351,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <div className="text-[9px] uppercase tracking-[0.05em] mt-2" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', minHeight: '24px' }}>
                 REPOSIÇÃO
               </div>
-              <div className="text-[15px] mt-2" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>{formatMoney(balances.reposicao || 0)}</div>
+              <div className="text-[15px] mt-2" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>{formatMoney(balances.reposicao.currentBalance || 0)}</div>
             </div>
 
             {/* Mão de Obra */}
@@ -382,7 +382,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <div className="text-[9px] uppercase tracking-[0.05em] mt-2" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', minHeight: '24px' }}>
                 MÃO DE OBRA
               </div>
-              <div className="text-[15px] mt-2" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>{formatMoney(balances.labor || 0)}</div>
+              <div className="text-[15px] mt-2" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>{formatMoney(balances.maodeobra.currentBalance || 0)}</div>
             </div>
 
             {/* Custo + Investimento */}
@@ -413,13 +413,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <div className="text-[9px] uppercase tracking-[0.05em] mt-2" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', minHeight: '24px' }}>
                 CUSTO+INV
               </div>
-              <div className="text-[15px] mt-2" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>{formatMoney(balances.costs || 0)}</div>
+              <div className="text-[15px] mt-2" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>{formatMoney(balances.custoEInvestimento.currentBalance || 0)}</div>
             </div>
           </div>
 
           {/* Note about cost division */}
           <p className="text-[10px]" style={{ color: '#9A8FA0' }}>
-            50% Custo ({formatMoney((balances.costs || 0) / 2)}) / 50% Invest.
+            50% Custo ({formatMoney((balances.custoEInvestimento.currentBalance || 0) / 2)}) / 50% Invest.
           </p>
         </div>
 
