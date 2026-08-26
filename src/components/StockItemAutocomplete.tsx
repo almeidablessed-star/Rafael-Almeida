@@ -127,28 +127,21 @@ export const StockItemAutocomplete: React.FC<StockItemAutocompleteProps> = ({
         type="text"
         value={value}
         onChange={(e) => {
-          addLog(`onChange: value="${e.target.value}", isEnabled=${isEnabled}`);
+          addLog(`onChange: value="${e.target.value}"`);
           onChange(e.target.value);
-          if (isEnabled) {
-            addLog(`onChange: setShowItemList(true) chamado`);
-            setShowItemList(true);
-          }
+          addLog(`onChange: setShowItemList(true) chamado`);
+          setShowItemList(true);
         }}
         onInput={(e) => {
           const target = e.target as HTMLInputElement;
-          addLog(`onInput: value="${target.value}", isEnabled=${isEnabled}`);
+          addLog(`onInput: value="${target.value}"`);
           onChange(target.value);
-          if (isEnabled) {
-            addLog(`onInput: setShowItemList(true) chamado`);
-            setShowItemList(true);
-          }
+          addLog(`onInput: setShowItemList(true) chamado`);
+          setShowItemList(true);
         }}
         onFocus={() => {
-          addLog(`onFocus: isEnabled=${isEnabled}`);
-          if (isEnabled) {
-            addLog(`onFocus: setShowItemList(true) chamado`);
-            setShowItemList(true);
-          }
+          addLog(`onFocus: setShowItemList(true) chamado`);
+          setShowItemList(true);
         }}
         onKeyDown={handleItemKeyDown}
         placeholder={placeholder}
