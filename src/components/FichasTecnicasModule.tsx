@@ -193,10 +193,11 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   // Fichas são agora gerenciadas pelo hook useFichasTecnicas (salva no Supabase)
 
   const totalReposicao = ingredients.reduce((sum, ing) => sum + (ing.totalCost || 0), 0);
+  const repoNum = parseFloat(reposicaoCost.replace(',', '.')) || 0;
   const mdoNum = parseFloat(maoDeObraCost.replace(',', '.')) || 0;
   const cusNum = parseFloat(custoCost.replace(',', '.')) || 0;
   const invNum = parseFloat(investimentoCost.replace(',', '.')) || 0;
-  const calculatedSuggestedPrice = totalReposicao + mdoNum + cusNum + invNum;
+  const calculatedSuggestedPrice = repoNum + mdoNum + cusNum + invNum;
 
   const handleOpenAdd = () => {
     setName('');
@@ -1007,7 +1008,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
               </span>
             </div>
             <div className="text-right text-[11px] text-[var(--color-pastry-cream)]/80 font-medium">
-              Insumos ({formatMoney(totalReposicao)}) + Mão de Obra ({formatMoney(mdoNum)}) + Custos ({formatMoney(cusNum + invNum)})
+              Reposição ({formatMoney(repoNum)}) + Mão de Obra ({formatMoney(mdoNum)}) + Custos ({formatMoney(cusNum + invNum)})
             </div>
           </div>
 
