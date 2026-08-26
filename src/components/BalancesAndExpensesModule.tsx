@@ -3,6 +3,7 @@ import { Transaction, TransactionType, WeeklyArchive, StockItem } from '../types
 import { calculateWeeklyBalances } from '../utils/balancesCalculator';
 import { getWeeklyArchives, hasNewWeekStarted, archiveCurrentWeek } from '../utils/weeklyArchiveUtils';
 import { WeeklyHistoryCard } from './WeeklyHistoryCard';
+import { StockItemAutocomplete } from './StockItemAutocomplete';
 import { formatCurrency, formatDateBr, getTodayIso } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
 import { useEstoque } from '../hooks/useEstoque';
@@ -264,13 +265,13 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
             <label style={{ fontSize: '10.5px', fontWeight: 800, color: '#5B4A6B', fontFamily: "'Manrope', sans-serif" }}>
               O que você comprou? (Descrição)
             </label>
-            <input
-              type="text"
+            <StockItemAutocomplete
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={setDescription}
+              onSelect={() => {}}
+              stockItems={estoque}
+              isEnabled={itemQuantity.trim().length > 0}
               placeholder={itemQuantity ? "Nome do item (ex: Farinha, Açúcar, Caixa, Pote)" : "Ex: 2 sacos de farinha, 2 formas e bicos"}
-              style={{ padding: '11px 13px', background: '#FAF7FA', border: '1px solid rgba(36,27,43,.08)', borderRadius: '14px', fontSize: '11px', color: '#A096A6', fontFamily: "'Manrope', sans-serif" }}
-              required
             />
           </div>
 
