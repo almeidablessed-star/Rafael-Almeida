@@ -173,10 +173,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
             {/* Texto e valor - À DIREITA */}
             <div className="flex-1">
               <div className="text-[9px] font-black uppercase tracking-[0.14em]" style={{ color: 'rgba(247,220,225,0.8)', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
-                LUCRO LÍQUIDO DO MÊS
+                TOTAL EM VENDAS
               </div>
               <div className="text-white" style={{ fontSize: '32px', lineHeight: 1, letterSpacing: '-0.03em', marginTop: '0px', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
-                {formatMoney(profit)}
+                {formatMoney(totalIn)}
               </div>
               <div className="flex items-center gap-2 mt-2">
                 <span className="inline-flex items-center px-3 py-1 text-[10px] font-black rounded-full whitespace-nowrap" style={{ background: '#A9D8B8', color: '#26402F' }}>
@@ -188,7 +188,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           {/* Success Message */}
           <div className="text-[12px] leading-[1.6]" style={{ color: 'rgba(247,220,225,0.84)' }}>
-            🎉 <strong style={{ color: '#FFFFFF' }}>Resultado excelente!</strong> Suas vendas superaram todas as despesas e custos por <strong style={{ color: '#FFFFFF' }}>{formatMoney(profit)}</strong> no período.
+            🎉 <strong style={{ color: '#FFFFFF' }}>Resultado excelente!</strong> Suas vendas superaram todas as despesas e custos por <strong style={{ color: '#FFFFFF' }}>{formatMoney(profit)}</strong> neste período.
           </div>
 
           {/* Bottom: 3 Small Boxes */}
