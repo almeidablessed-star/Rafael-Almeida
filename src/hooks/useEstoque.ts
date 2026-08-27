@@ -11,6 +11,7 @@ interface SupabaseEstoque {
   unidade_medida: string;
   nivel_minimo: number;
   nivel_minimo_unidade: string;
+  preco_unitario: number;
   created_at: string;
 }
 
@@ -32,7 +33,7 @@ export const useEstoque = () => {
     unit: data.unidade_medida as any,
     minThreshold: data.nivel_minimo,
     minThresholdUnit: (data.nivel_minimo_unidade || 'g') as any,
-    costPerUnit: 0, // Supabase não tem esse campo, usar 0 por padrão
+    costPerUnit: data.preco_unitario || 0,
   });
 
   const mapStockItemToSupabase = (item: Omit<StockItem, 'id'>) => ({
@@ -41,6 +42,7 @@ export const useEstoque = () => {
     unidade_medida: item.unit,
     nivel_minimo: item.minThreshold,
     nivel_minimo_unidade: item.minThresholdUnit,
+    preco_unitario: item.costPerUnit || 0,
   });
 
   const fetchEstoque = async () => {

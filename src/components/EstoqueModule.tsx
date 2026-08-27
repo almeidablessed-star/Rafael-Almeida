@@ -45,6 +45,29 @@ export function saveStoredStockItems(items: StockItem[]) {
   }
 }
 
+const getColorBasedOnThreshold = (
+  quantity: number,
+  minThreshold: number
+): { stroke: string; text: string; background: string } => {
+  // Se abaixo do limite: sempre vermelho
+  if (quantity < minThreshold) {
+    return { stroke: '#C4626F', text: '#C4626F', background: '#FFEBEE' }; // Vermelho
+  }
+
+  // Calcular folga percentual acima do mínimo
+  const slack = ((quantity - minThreshold) / minThreshold) * 100;
+
+  if (slack >= 75) {
+    return { stroke: '#4CAF7D', text: '#4CAF7D', background: '#E8F5E9' }; // Verde escuro
+  } else if (slack >= 50) {
+    return { stroke: '#81C784', text: '#81C784', background: '#F1F8E9' }; // Verde claro
+  } else if (slack >= 25) {
+    return { stroke: '#F5A623', text: '#F5A623', background: '#FFF3E0' }; // Laranja
+  } else {
+    return { stroke: '#C4626F', text: '#C4626F', background: '#FFEBEE' }; // Vermelho
+  }
+};
+
 const getArcColor = (percentage: number): { stroke: string; text: string; background: string } => {
   if (percentage >= 76) {
     return { stroke: '#4CAF7D', text: '#4CAF7D', background: '#E8F5E9' }; // Verde
@@ -190,29 +213,34 @@ export const EstoqueModule: React.FC = () => {
     i.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Função para obter a faixa de criticidade (0=vermelho, 1=laranja, 2=verde claro, 3=verde)
-  const getCriticalityRank = (percentage: number): number => {
-    if (percentage <= 25) return 0; // Vermelho - crítico
-    if (percentage <= 50) return 1; // Laranja - aviso
-    if (percentage <= 75) return 2; // Verde claro - normal
-    return 3; // Verde - saudável
+  // Função para obter a faixa de criticidade baseada em quantity vs minThreshold
+  const getCriticalityRank = (quantity: number, minThreshold: number): number => {
+    if (quantity < minThreshold) return 0; // Vermelho - crítico (abaixo do limite)
+    const slack = ((quantity - minThreshold) / minThreshold) * 100;
+    if (slack < 25) return 1; // Vermelho - perto do limite
+    if (slack < 50) return 2; // Laranja - folga baixa
+    if (slack < 75) return 3; // Verde claro - folga média
+    return 4; // Verde escuro - folga alta
   };
 
-  // Função para obter o texto do status baseado na porcentagem (usa mesma lógica do gráfico)
-  const getStatusLabel = (percentage: number): string => {
-    if (percentage <= 25) return 'Estoque Baixo';
-    if (percentage <= 50) return 'Atenção';
-    if (percentage <= 75) return 'Normal';
+  // Função para obter o texto do status baseado em quantity vs minThreshold
+  const getStatusLabel = (quantity: number, minThreshold: number): string => {
+    if (quantity < minThreshold) return 'Crítico';
+    const slack = ((quantity - minThreshold) / minThreshold) * 100;
+    if (slack < 25) return 'Alerta';
+    if (slack < 50) return 'Atenção';
+    if (slack < 75) return 'Normal';
     return 'Alto';
   };
 
   // Ordenar items por criticidade (vermelho primeiro, verde por último)
   const sortedItems = [...filteredItems].sort((a, b) => {
-    // Proteção contra minThreshold = 0 (divisão por zero)
-    const percentageA = a.minThreshold > 0 ? Math.min((a.quantity / a.minThreshold) * 100, 100) : 100;
-    const percentageB = b.minThreshold > 0 ? Math.min((b.quantity / b.minThreshold) * 100, 100) : 100;
-    const rankA = getCriticalityRank(percentageA);
-    const rankB = getCriticalityRank(percentageB);
+    // Normalizar unidades antes de comparar com minThreshold
+    const normalizedQtyA = normalizeToCommonUnit(a.quantity, a.unit, a.minThresholdUnit);
+    const normalizedQtyB = normalizeToCommonUnit(b.quantity, b.unit, b.minThresholdUnit);
+
+    const rankA = getCriticalityRank(normalizedQtyA, a.minThreshold);
+    const rankB = getCriticalityRank(normalizedQtyB, b.minThreshold);
     return rankA - rankB; // Menor rank (vermelho) vem primeiro
   });
 
@@ -394,6 +422,20 @@ export const EstoqueModule: React.FC = () => {
                 className="w-full px-3 py-2.5 rounded-xl border border-[var(--color-neutral-light)] text-xs font-normal text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-primary)] bg-white transition-colors"
               />
             </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[var(--color-text-primary)] mb-1.5">
+                Preço Unitário (R$) — Calculado automaticamente
+              </label>
+              <input
+                type="text"
+                inputMode="decimal"
+                placeholder="0.00"
+                value={costPerUnit}
+                disabled
+                className="w-full px-3 py-2.5 rounded-xl border border-[var(--color-neutral-light)] text-xs font-normal text-[var(--color-text-muted)] placeholder:text-[var(--color-text-muted)] focus:outline-none bg-[var(--color-neutral-light)] transition-colors cursor-not-allowed"
+              />
+            </div>
           </div>
 
           <div className="flex items-center justify-end gap-2 pt-2 border-t border-[var(--color-neutral-light)]">
@@ -430,8 +472,18 @@ export const EstoqueModule: React.FC = () => {
         <div className="space-y-4 px-4 mt-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {sortedItems.map((item) => {
-                  const percentage = Math.min((item.quantity / item.minThreshold) * 100, 100);
-                  const colors = getArcColor(percentage);
+                  // Normalizar unidades antes de comparar
+                  const normalizedQty = normalizeToCommonUnit(item.quantity, item.unit, item.minThresholdUnit);
+                  const colors = getColorBasedOnThreshold(normalizedQty, item.minThreshold);
+
+                  // Para exibição visual do arco: 0% se abaixo do limite, senão percentual de folga
+                  let displayPercentage: number;
+                  if (normalizedQty < item.minThreshold) {
+                    displayPercentage = 0; // Crítico - abaixo do limite
+                  } else {
+                    const slack = ((normalizedQty - item.minThreshold) / item.minThreshold) * 100;
+                    displayPercentage = Math.min(slack, 100); // Folga máxima de 100%
+                  }
 
                   return (
                   <div
@@ -450,10 +502,10 @@ export const EstoqueModule: React.FC = () => {
                           stroke={colors.stroke}
                           strokeWidth="10"
                           strokeLinecap="round"
-                          strokeDasharray={`${percentage * (Math.PI * 30 / 100)} ${Math.PI * 30}`}
+                          strokeDasharray={`${displayPercentage * (Math.PI * 30 / 100)} ${Math.PI * 30}`}
                         ></path>
                         <text x="38" y="58" textAnchor="middle" fontSize="12" fontWeight="900" fill={colors.stroke} fontFamily="'Manrope', sans-serif">
-                          {Math.round(percentage)}%
+                          {Math.round(displayPercentage)}%
                         </text>
                       </svg>
 
@@ -464,7 +516,7 @@ export const EstoqueModule: React.FC = () => {
                             {item.name}
                           </h4>
                           <span style={{ background: colors.background, color: colors.text }} className="text-[7px] font-semibold px-1 py-0.5 rounded uppercase whitespace-nowrap">
-                            {getStatusLabel(percentage)}
+                            {getStatusLabel(normalizedQty, item.minThreshold)}
                           </span>
                         </div>
                         <p className="text-[11px] text-[#999999] font-light">

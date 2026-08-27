@@ -6,6 +6,7 @@ import { WeeklyHistoryCard } from './WeeklyHistoryCard';
 import { StockItemAutocomplete } from './StockItemAutocomplete';
 import { formatCurrency, formatDateBr, getTodayIso } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
+import { useFichasTecnicas } from '../context/FichasTecnicasContext';
 import { useEstoque } from '../hooks/useEstoque';
 import {
   Wallet,
@@ -39,7 +40,8 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
   onDeleteTransaction,
 }) => {
   const { formatCurrency: formatMoney } = useCurrency();
-  const balances = calculateWeeklyBalances(transactions);
+  const { fichas } = useFichasTecnicas();
+  const balances = calculateWeeklyBalances(transactions, fichas);
   const { estoque, addEstoque, updateEstoque } = useEstoque();
 
   // Form state for quick expense logging
@@ -126,6 +128,10 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
         console.log('[handleSaveExpense] Procurando item:', itemNameFromDescription, 'em estoque:', estoque);
         const existing = findExistingItem(itemNameFromDescription);
         console.log('[handleSaveExpense] Item encontrado:', existing);
+
+        // Calcular preço unitário: valor pago / quantidade comprada
+        const costPerUnitCalculated = valNum / itemQtyNum;
+
         if (existing) {
           console.log('[handleSaveExpense] Atualizando item existente:', existing.id);
           const convertedQty = convertQuantityToTargetUnit(itemQtyNum, itemUnit, existing.unit);
@@ -133,6 +139,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
           await updateEstoque(existing.id, {
             ...existing,
             quantity: existing.quantity + convertedQty,
+            costPerUnit: costPerUnitCalculated,
           });
         } else {
           console.log('[handleSaveExpense] Criando novo item:', itemNameFromDescription, itemQtyNum, itemUnit);
@@ -142,7 +149,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
             unit: itemUnit,
             minThreshold: 0,
             minThresholdUnit: itemUnit,
-            costPerUnit: 0,
+            costPerUnit: costPerUnitCalculated,
           });
         }
       } catch (err) {

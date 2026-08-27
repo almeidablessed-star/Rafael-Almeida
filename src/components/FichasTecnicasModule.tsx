@@ -3,6 +3,8 @@ import { FichaTecnica, IngredientUsage, Transaction, TamanhoOpcao } from '../typ
 import { formatCurrency } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
 import { useFichasTecnicas } from '../context/FichasTecnicasContext';
+import { useEstoque } from '../hooks/useEstoque';
+import { StockItemAutocomplete } from './StockItemAutocomplete';
 import { compressImageFile } from '../utils/imageCompression';
 import {
   BookOpen,
@@ -131,6 +133,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 }) => {
   const { formatCurrency: formatMoney } = useCurrency();
   const { fichas, isLoading: isLoadingFichas, error: fichasError, addFicha, updateFicha, deleteFicha } = useFichasTecnicas();
+  const { estoque } = useEstoque();
   const [selectedCategory, setSelectedCategory] = useState<'bolos' | 'doces' | 'salgados' | 'saudaveis' | 'kids'>('bolos');
   const [isCreating, setIsCreating] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -266,6 +269,18 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
       prev.map((ing) => {
         if (ing.id !== id) return ing;
         const updated = { ...ing, [field]: val };
+
+        // Se está atualizando o nome do ingrediente (seleção via autocomplete)
+        if (field === 'name') {
+          const stockItem = estoque.find(item => item.name.toLowerCase() === val.toLowerCase());
+          if (stockItem && stockItem.costPerUnit > 0) {
+            // Pré-preencher unitCost com o valor real do estoque
+            updated.unitCost = stockItem.costPerUnit;
+            updated.totalCost = ing.quantity * stockItem.costPerUnit;
+          }
+        }
+
+        // Se está atualizando quantidade ou unitCost
         if (field === 'quantity' || field === 'unitCost') {
           const q = field === 'quantity' ? parseFloat(val) || 0 : ing.quantity;
           const c = field === 'unitCost' ? parseFloat(val) || 0 : ing.unitCost;
@@ -772,17 +787,18 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 
             <div className="space-y-2">
               {ingredients.map((ing) => (
-                <div key={ing.id} className="bg-white p-2.5 rounded-xl border border-[var(--color-pastry-light-pink)]/30 grid grid-cols-12 gap-2 items-center text-xs">
-                  <div className="col-span-4">
-                    <input
-                      type="text"
-                      placeholder="Ingrediente (ex: Cacau)"
+                <div key={ing.id} className="bg-white p-2.5 rounded-xl border border-[var(--color-pastry-light-pink)]/30 grid grid-cols-12 gap-2 text-xs">
+                  <div className="col-span-12">
+                    <StockItemAutocomplete
                       value={ing.name}
-                      onChange={(e) => handleUpdateIngredient(ing.id, 'name', e.target.value)}
-                      className="w-full px-2 py-1 border border-neutral-300 rounded-lg text-xs font-semibold"
+                      onChange={(val) => handleUpdateIngredient(ing.id, 'name', val)}
+                      onSelect={() => {}}
+                      stockItems={estoque}
+                      isEnabled={true}
+                      placeholder="Ingrediente (ex: Cacau)"
                     />
                   </div>
-                  <div className="col-span-3 flex items-center gap-1">
+                  <div className="col-span-4">
                     <input
                       type="number"
                       placeholder="Qtd"
@@ -790,10 +806,12 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                       onChange={(e) => handleUpdateIngredient(ing.id, 'quantity', e.target.value)}
                       className="w-full px-1.5 py-1 border border-neutral-300 rounded-lg text-xs font-bold text-center"
                     />
+                  </div>
+                  <div className="col-span-2">
                     <select
                       value={ing.unit}
                       onChange={(e) => handleUpdateIngredient(ing.id, 'unit', e.target.value)}
-                      className="px-1 py-1 border border-neutral-300 rounded-lg text-[10px] font-bold"
+                      className="w-full px-1 py-1 border border-neutral-300 rounded-lg text-[10px] font-bold"
                     >
                       <option value="g">g</option>
                       <option value="ml">ml</option>
@@ -801,13 +819,13 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                       <option value="kg">kg</option>
                     </select>
                   </div>
-                  <div className="col-span-4 text-right">
+                  <div className="col-span-5 text-right flex flex-col justify-center">
                     <span className="text-[10px] text-neutral-500 block">Custo Gasto</span>
                     <span className="font-black text-xs text-[var(--color-pastry-chocolate)]">
                       {formatMoney(ing.totalCost || 0)}
                     </span>
                   </div>
-                  <div className="col-span-1 text-right">
+                  <div className="col-span-1 flex justify-end items-center">
                     <button
                       type="button"
                       onClick={() => handleRemoveIngredient(ing.id)}

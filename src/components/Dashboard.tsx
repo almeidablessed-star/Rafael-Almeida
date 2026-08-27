@@ -4,6 +4,7 @@ import { formatCurrency, formatDateBr } from '../utils/formatters';
 import { calculateWeeklyBalances } from '../utils/balancesCalculator';
 import { ANIMATION_DURATIONS, ANIMATION_EASING } from '../lib/animation-tokens';
 import { useCurrency } from '../context/CurrencyContext';
+import { useFichasTecnicas } from '../context/FichasTecnicasContext';
 import { OrdersCalendar } from './OrdersCalendar';
 import { AvatarProfile } from './AvatarProfile';
 import {
@@ -54,8 +55,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onOpenProfileModal,
 }) => {
   const { formatCurrency: formatMoney } = useCurrency();
+  const { fichas } = useFichasTecnicas();
   const transactionsList = allTransactions.length > 0 ? allTransactions : (recentTransactions || []);
-  const balances = calculateWeeklyBalances(transactionsList);
+  const balances = calculateWeeklyBalances(transactionsList, fichas);
 
   // Calculate profit margin percentage (simplified calculation)
   const totalIn = balances.totalPaidSales || 0;
@@ -160,16 +162,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="text-white" style={{ fontSize: '32px', lineHeight: 1, letterSpacing: '-0.03em', marginTop: '0px', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
               {formatMoney(totalIn)}
             </div>
-            <div className="flex items-center gap-2 mt-2">
-              <span className="inline-flex items-center px-3 py-1 text-[10px] font-black rounded-full whitespace-nowrap" style={{ background: '#A9D8B8', color: '#26402F' }}>
-                Positivo
-              </span>
-            </div>
-          </div>
-
-          {/* Success Message */}
-          <div className="text-[12px] leading-[1.6]" style={{ color: 'rgba(247,220,225,0.84)' }}>
-            🎉 <strong style={{ color: '#FFFFFF' }}>Resultado excelente!</strong> Suas vendas superaram todas as despesas e custos por <strong style={{ color: '#FFFFFF' }}>{formatMoney(profit)}</strong> (margem: <strong style={{ color: '#FFFFFF' }}>{marginPercent}%</strong>) neste período.
           </div>
 
           {/* Bottom: 3 Small Boxes */}
