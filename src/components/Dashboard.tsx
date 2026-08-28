@@ -31,6 +31,7 @@ interface DashboardProps {
   recentTransactions?: Transaction[];
   allTransactions?: Transaction[];
   onOpenAddModal: (type: TransactionType) => void;
+  onOpenAddModalWithDate?: (date: string) => void;
   onNavigateToTab: (tabName: any) => void;
   onEditTransaction?: (tx: Transaction) => void;
   onDeleteTransaction?: (tx: Transaction) => void;
@@ -46,6 +47,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   recentTransactions,
   allTransactions = [],
   onOpenAddModal,
+  onOpenAddModalWithDate,
   onNavigateToTab,
   onEditTransaction,
   onDeleteTransaction,
@@ -181,7 +183,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="flex-1 rounded-[16px] p-3 text-center" style={{ background: 'rgba(228,217,195,0.28)' }}>
               <div className="text-[9px] uppercase tracking-[0.06em]" style={{ color: '#F0E2C8', fontFamily: "'Manrope', sans-serif", fontWeight: 700 }}>⏳ A RECEBER</div>
               <div className="text-white mt-1" style={{ fontSize: '15px', lineHeight: 1, fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
-                {formatMoney(balances.pendingSales || 0)}
+                {formatMoney(balances.totalAReceber || 0)}
               </div>
             </div>
           </div>
@@ -398,7 +400,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
         {/* 4. AGENDA DE PEDIDOS - CALENDAR */}
         <div className="mt-6">
-          <OrdersCalendar transactions={transactionsList} />
+          <OrdersCalendar
+            transactions={transactionsList}
+            onOpenAddModal={() => onOpenAddModal('venda')}
+            onOpenAddModalWithDate={onOpenAddModalWithDate}
+          />
         </div>
       </div>
     </div>

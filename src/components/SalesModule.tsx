@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Transaction } from '../types';
 import { formatCurrency, formatDateBr, getPaymentMethodLabel } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
+import { useFichasTecnicas } from '../context/FichasTecnicasContext';
 import { calculateSalesBreakdown } from '../utils/salesCalculator';
 import {
   TrendingUp,
@@ -38,6 +39,7 @@ export const SalesModule: React.FC<SalesModuleProps> = ({
   onTogglePaymentStatus,
 }) => {
   const { formatCurrency: formatMoney } = useCurrency();
+  const { fichas } = useFichasTecnicas();
   const [searchTerm, setSearchTerm] = useState('');
 
   // Filter sales only
@@ -51,7 +53,7 @@ export const SalesModule: React.FC<SalesModuleProps> = ({
   );
 
   // Category Breakdown (calculates only paid sales, sums pending separately in totalAReceber)
-  const breakdown = calculateSalesBreakdown(sales);
+  const breakdown = calculateSalesBreakdown(sales, fichas);
 
   return (
     <div className="space-y-4 animate-fadeIn pb-6">

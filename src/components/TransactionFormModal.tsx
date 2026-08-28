@@ -20,13 +20,6 @@ import {
   LABOR_PRESETS,
   COST_PRESETS,
 } from '../data/presetData';
-import {
-  BAKERY_CATALOG,
-  UNIQUE_CAKE_NAMES,
-  getCakeOptionsByName,
-  getExactCakeRecipe,
-  calculateProportionalBreakdown,
-} from '../data/bakeryCatalog';
 import { getTodayIso, formatCurrency, getTransactionTypeDetails } from '../utils/formatters';
 import { buildFichaItems, normalizeName } from '../utils/fichaMatcher';
 import {
@@ -78,6 +71,7 @@ interface TransactionFormModalProps {
   isOpen: boolean;
   initialType: TransactionType;
   editingTransaction?: Transaction | null;
+  prefilledDate?: string | null;
   onClose: () => void;
   onSave: (tx: Omit<Transaction, 'id' | 'createdAt'>, editingId?: string) => void;
 }
@@ -86,6 +80,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   isOpen,
   initialType,
   editingTransaction,
+  prefilledDate,
   onClose,
   onSave,
 }) => {
@@ -101,7 +96,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   // era sempre [], e como o seletor de cliente esta dentro de
   // {storedCustomers.length > 0 && ...}, ele nunca era renderizado: a cadastrada
   // no Supabase existia, mas o formulario de pedido nao a enxergava.
-  const { customers: storedCustomers } = useCustomers();
+  const { customers: storedCustomers, fetchCustomerPhoto } = useCustomers();
 
   const [type, setType] = useState<TransactionType>(initialType);
 
@@ -109,7 +104,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   const [customerName, setCustomerName] = useState<string>('');
   const [customerPhone, setCustomerPhone] = useState<string>('');
   const [customerPhotoUrl, setCustomerPhotoUrl] = useState<string>('');
-  const [eventDate, setEventDate] = useState<string>(getTodayIso());
+  const [eventDate, setEventDate] = useState<string>(() => prefilledDate || getTodayIso());
   const [deliveryTime, setDeliveryTime] = useState<string>('');
   const [deliveryAddress, setDeliveryAddress] = useState<string>('');
   const [observations, setObservations] = useState<string>('');
@@ -123,6 +118,13 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   const customerBoxRef = useRef<HTMLDivElement>(null);
   const customerListRef = useRef<HTMLUListElement>(null);
   const [hasMoreCustomersBelow, setHasMoreCustomersBelow] = useState(false);
+
+  // Sincronizar prefilledDate com eventDate quando o formulário abre com data pré-preenchida
+  useEffect(() => {
+    if (isOpen && prefilledDate) {
+      setEventDate(prefilledDate);
+    }
+  }, [isOpen, prefilledDate]);
 
   /**
    * Ha item escondido abaixo do corte da caixa?
@@ -159,10 +161,16 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   }, [customerName, storedCustomers]);
 
   /** Copia os dados da cliente escolhida para o formulario. */
-  const applyCustomer = (found: Customer) => {
+  const applyCustomer = async (found: Customer) => {
     setCustomerName(found.name);
     setCustomerPhone(found.phone || '');
     setCustomerPhotoUrl(found.photoUrl || '');
+
+    // Carregar foto sob demanda se não estiver em memória
+    if (!found.photoUrl) {
+      const photoUrl = await fetchCustomerPhoto(found.id);
+      if (photoUrl) setCustomerPhotoUrl(photoUrl);
+    }
 
     // A data de evento cadastrada costuma ser de um aniversario passado.
     // Trazer o dia/mes para o ano corrente evita lancar o pedido no passado.
@@ -253,6 +261,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       // PASSO 2: Preferir fichas do Supabase, fallback para localStorage
       if (supabaseFichas && supabaseFichas.length > 0) {
         console.log('✓ PASSO 2: Carregando fichas do Supabase:', supabaseFichas.length, 'fichas encontradas');
+        console.log('[DEBUG] Fichas carregadas:', supabaseFichas.map(f => f.name));
         setStoredFichas(supabaseFichas);
       } else {
         console.log('📁 PASSO 2: Usando fichas do localStorage (Supabase vazio ou não autenticado)');
@@ -280,6 +289,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   const [quantity, setQuantity] = useState<number>(1);
   const [unitValue, setUnitValue] = useState<string>('');
   const [totalValue, setTotalValue] = useState<string>('');
+  const [signalValue, setSignalValue] = useState<string>('');
 
   // Common fields
   const [date, setDate] = useState<string>(getTodayIso());
@@ -311,20 +321,16 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
         setDeliveryAddress(editingTransaction.deliveryAddress || '');
         setObservations(editingTransaction.observations || '');
         setInspirationImage(editingTransaction.inspirationImage || '');
-        // Look up if existing description matches a catalog cake name
-        const matchedName = UNIQUE_CAKE_NAMES.find((name) =>
-          (editingTransaction.description || '').toLowerCase().includes(name.toLowerCase())
+        // Look up if existing description matches a ficha name
+        const matchedFicha = storedFichas.find((ficha) =>
+          (editingTransaction.description || '').toLowerCase().includes(ficha.name.toLowerCase())
         );
 
-        if (matchedName) {
-          const options = getCakeOptionsByName(matchedName);
-          const matchedSlice = options.find((opt) =>
-            editingTransaction.description.includes(`${opt.slices}`)
-          );
+        if (matchedFicha) {
           setOrderItems([
             {
               id: '1',
-              productName: matchedName,
+              productName: matchedFicha.name,
               slices: matchedSlice ? matchedSlice.slices : (options[0]?.slices || 20),
               quantity: editingTransaction.quantity || 1,
             },
@@ -346,6 +352,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
         setQuantity(editingTransaction.quantity || 1);
         setUnitValue(String(editingTransaction.unitValue || 0));
         setTotalValue(String(editingTransaction.totalValue || 0));
+        setSignalValue(String(editingTransaction.signalValue || editingTransaction.totalValue || 0));
       }
     } else {
       setType(initialType);
@@ -359,9 +366,13 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       setCustomerName('');
       setCustomerPhone('');
       setCustomerPhotoUrl('');
-      setEventDate(getTodayIso());
+      // Não reseta eventDate se veio de um clique no calendário (prefilledDate)
+      if (!prefilledDate) {
+        setEventDate(getTodayIso());
+      }
       setDeliveryTime('');
       setDeliveryAddress('');
+      setSignalValue('');
       setObservations('');
       setInspirationImage('');
 
@@ -384,13 +395,9 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
 
   const typeDetails = getTransactionTypeDetails(type);
 
-  // Categorize product names for dropdown
-  const cakeNamesList = UNIQUE_CAKE_NAMES.filter(
-    (n) => !n.includes('Cupcake') && !n.includes('Brigadeiro')
-  );
-  const sweetsNamesList = UNIQUE_CAKE_NAMES.filter(
-    (n) => n.includes('Cupcake') || n.includes('Brigadeiro')
-  );
+  // Use fichas técnicas reais cadastradas pela confeiteira
+  const cakeNamesList = storedFichas.map(f => f.name);
+  const sweetsNamesList: string[] = [];
 
   // --- Order Items Logic ---
   const getItemBreakdown = (item: OrderItemState) => {
@@ -413,40 +420,20 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       };
     }
 
-    const recipe = getExactCakeRecipe(item.productName, item.slices);
-    if (recipe) {
-      return {
-        name: recipe.cakeName,
-        slices: recipe.slices,
-        unitVenda: recipe.venda,
-        unitReposicao: recipe.reposicao,
-        unitMaodeobra: recipe.maodeobra,
-        unitCusto: recipe.custo,
-        unitInvestimento: recipe.investimento,
-        totalVenda: recipe.venda * item.quantity,
-        totalReposicao: recipe.reposicao * item.quantity,
-        totalMaodeobra: recipe.maodeobra * item.quantity,
-        totalCusto: recipe.custo * item.quantity,
-        totalInvestimento: recipe.investimento * item.quantity,
-      };
-    }
-
-    // Fallback if size not found
-    const options = getCakeOptionsByName(item.productName);
-    const fallbackRecipe = options[0] || BAKERY_CATALOG[0];
+    // If item not linked to a ficha via fichaItems, use zeros (product not in fichas)
     return {
-      name: fallbackRecipe.cakeName,
-      slices: fallbackRecipe.slices,
-      unitVenda: fallbackRecipe.venda,
-      unitReposicao: fallbackRecipe.reposicao,
-      unitMaodeobra: fallbackRecipe.maodeobra,
-      unitCusto: fallbackRecipe.custo,
-      unitInvestimento: fallbackRecipe.investimento,
-      totalVenda: fallbackRecipe.venda * item.quantity,
-      totalReposicao: fallbackRecipe.reposicao * item.quantity,
-      totalMaodeobra: fallbackRecipe.maodeobra * item.quantity,
-      totalCusto: fallbackRecipe.custo * item.quantity,
-      totalInvestimento: fallbackRecipe.investimento * item.quantity,
+      name: item.productName,
+      slices: item.slices || 0,
+      unitVenda: 0,
+      unitReposicao: 0,
+      unitMaodeobra: 0,
+      unitCusto: 0,
+      unitInvestimento: 0,
+      totalVenda: 0,
+      totalReposicao: 0,
+      totalMaodeobra: 0,
+      totalCusto: 0,
+      totalInvestimento: 0,
     };
   };
 
@@ -501,8 +488,9 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
           };
         }
 
-        const availableOptions = getCakeOptionsByName(newProductName);
-        const defaultSlices = availableOptions.length > 0 ? availableOptions[0].slices : 20;
+        // Find matching ficha in storedFichas to get available sizes
+        const matchingFicha = storedFichas.find(f => normalizeName(f.name) === normalizeName(newProductName));
+        const defaultSlices = matchingFicha && matchingFicha.tamanhos.length > 0 ? matchingFicha.tamanhos[0].quantidade || 0 : 0;
 
         return {
           ...item,
@@ -695,7 +683,8 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
           quantity: orderItems.reduce((acc, i) => acc + i.quantity, 0),
           unitValue: grandTotalSalePrice,
           totalValue: grandTotalSalePrice,
-          date,
+          signalValue: signalValue ? Number(signalValue.replace(',', '.')) : undefined,
+          date: eventDate || getTodayIso(),
           paymentMethod,
           paymentStatus,
           notes: notesStr,
@@ -725,6 +714,10 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       return;
     }
 
+    const parsedSignalValue = type === 'venda' && signalValue
+      ? parseFloat(signalValue.replace(',', '.'))
+      : undefined;
+
     onSave(
       {
         type,
@@ -732,6 +725,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
         quantity,
         unitValue: parsedUnit,
         totalValue: parsedTotal,
+        signalValue: parsedSignalValue,
         date,
         supplier: type === 'reposicao' ? supplier.trim() : undefined,
         laborPeriod: type === 'maodeobra' ? laborPeriod : undefined,
@@ -1051,7 +1045,18 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
 
                 {orderItems.map((item, index) => {
                   const bd = itemsBreakdownList[index];
-                  const availableOptions = getCakeOptionsByName(item.productName);
+                  // Get available sizes from the matched ficha in storedFichas
+                  const matchingFicha = storedFichas.find(f => normalizeName(f.name) === normalizeName(item.productName));
+                  const availableOptions = matchingFicha ? matchingFicha.tamanhos.map(t => ({
+                    id: t.id,
+                    cakeName: matchingFicha.name,
+                    slices: t.quantidade || 0,
+                    venda: t.preco,
+                    reposicao: 0,
+                    maodeobra: 0,
+                    custo: 0,
+                    investimento: 0,
+                  })) : [];
 
                   return (
                     <div
@@ -1082,35 +1087,30 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       {/* 1. SELECT PRODUCT DROPDOWN */}
                       <div>
                         <label className="block text-[11px] font-bold text-neutral-700 mb-1">
-                          Escolha o Bolo ou Doce do Catálogo *
+                          Escolha o Produto *
                         </label>
-                        <select
-                          value={item.productName}
-                          onChange={(e) => handleUpdateItemProduct(item.id, e.target.value)}
-                          className="w-full px-3 py-2.5 bg-white border border-neutral-300 rounded-xl text-xs font-extrabold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-pink-500"
-                        >
-                          <optgroup label="🎂 Bolos">
+                        {storedFichas.length === 0 ? (
+                          <div className="w-full px-3 py-3 bg-neutral-50 border border-neutral-300 rounded-xl text-xs font-medium text-neutral-600">
+                            ⚠️ Nenhum produto cadastrado ainda. Cadastre produtos na aba <strong>Fichas Técnicas</strong>.
+                          </div>
+                        ) : (
+                          <select
+                            value={item.productName}
+                            onChange={(e) => handleUpdateItemProduct(item.id, e.target.value)}
+                            className="w-full px-3 py-2.5 bg-white border border-neutral-300 rounded-xl text-xs font-extrabold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-pink-500"
+                          >
                             {cakeNamesList.map((name) => (
                               <option key={name} value={name}>
                                 {name}
                               </option>
                             ))}
-                          </optgroup>
-
-                          <optgroup label="🧁 Doces & Brigadeiros">
-                            {sweetsNamesList.map((name) => (
-                              <option key={name} value={name}>
-                                {name}
+                            <optgroup label="✨ Outro">
+                              <option value="Outro / Personalizado">
+                                ✨ Outro / Personalizado
                               </option>
-                            ))}
-                          </optgroup>
-
-                          <optgroup label="✨ Outro">
-                            <option value="Outro / Personalizado">
-                              ✨ Outro / Personalizado
-                            </option>
-                          </optgroup>
-                        </select>
+                            </optgroup>
+                          </select>
+                        )}
                       </div>
 
                       {/* Custom input fields if 'Outro / Personalizado' */}
@@ -1578,6 +1578,42 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                   </div>
                 </div>
               </div>
+
+              {/* Signal Value (only for vendas) */}
+              {type === 'venda' && (
+                <div>
+                  <label className="block text-xs font-bold text-neutral-700 mb-1 flex items-center justify-between">
+                    <span>Valor do Sinal/Entrada Pago (Opcional)</span>
+                    <span className="text-[11px] font-medium text-neutral-500">{totalValue ? `Máx: $${totalValue}` : '-'}</span>
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-bold text-emerald-600 text-lg">
+                      $
+                    </span>
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      placeholder="Deixe em branco = valor total pago"
+                      value={signalValue}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === '') {
+                          setSignalValue(val);
+                        } else if (totalValue) {
+                          const numVal = parseFloat(val.replace(',', '.'));
+                          const totalNum = parseFloat(totalValue.replace(',', '.')) || 0;
+                          if (numVal <= totalNum) {
+                            setSignalValue(val);
+                          }
+                        } else {
+                          setSignalValue(val);
+                        }
+                      }}
+                      className="w-full pl-9 pr-3.5 py-2.5 text-sm bg-emerald-50/30 border border-emerald-300 rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

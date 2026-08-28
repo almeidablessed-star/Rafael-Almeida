@@ -19,6 +19,7 @@ import {
 interface OrdersCalendarProps {
   transactions: Transaction[];
   onOpenAddModal?: () => void;
+  onOpenAddModalWithDate?: (date: string) => void;
   onEditTransaction?: (tx: Transaction) => void;
   onDeleteTransaction?: (tx: Transaction) => void;
   onTogglePaymentStatus?: (tx: Transaction) => void;
@@ -27,6 +28,7 @@ interface OrdersCalendarProps {
 export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
   transactions,
   onOpenAddModal,
+  onOpenAddModalWithDate,
   onEditTransaction,
   onDeleteTransaction,
   onTogglePaymentStatus,
@@ -34,6 +36,10 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
   const { formatCurrency: formatMoney } = useCurrency();
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [selectedDateStr, setSelectedDateStr] = useState<string | null>(null);
+  const [showWithOrdersFilter, setShowWithOrdersFilter] = useState(false);
+  const [showFreeFilter, setShowFreeFilter] = useState(false);
+  const [detailsDayStr, setDetailsDayStr] = useState<string | null>(null);
+  const [confirmEmptyDayStr, setConfirmEmptyDayStr] = useState<string | null>(null);
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth(); // 0-indexed
@@ -158,47 +164,57 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
             const hasOrders = dayOrders.length > 0;
             const isToday = dayStr === todayStr;
 
-            let bgColor = 'var(--color-surface)';
-            let textColor = 'var(--color-ink)';
-            let borderStyle = 'none';
-            let hoverEffect = 'hover:bg-var(--color-surface)';
+            // Determinar cor baseado nos filtros ativos
+            let bgColor = '#F6F2F5';
+            let textColor = '#241B2B';
+            let boxShadowStyle = 'none';
+            let fontWeightStyle = 400;
+
+            if (hasOrders && showWithOrdersFilter) {
+              bgColor = 'linear-gradient(150deg, #8F5A9C, #C4626F)';
+              textColor = '#FFFFFF';
+              boxShadowStyle = '0 6px 14px rgba(143,90,156,0.34)';
+              fontWeightStyle = 800;
+            } else if (!hasOrders && showFreeFilter) {
+              bgColor = '#B4E7B4';
+              textColor = '#1B5E1B';
+              boxShadowStyle = '0 6px 14px rgba(76,175,80,0.34)';
+              fontWeightStyle = 800;
+            }
 
             if (isToday) {
-              bgColor = 'var(--color-surface)';
-              textColor = 'var(--color-brand-700)';
-              borderStyle = '1.5px solid var(--color-brand-700)';
-            } else if (hasOrders) {
-              bgColor = 'linear-gradient(150deg, #8F5A9C, #C4626F)';
-              textColor = 'white';
-              borderStyle = 'none';
+              textColor = '#6E3F72';
             }
+
+            const handleDayClick = () => {
+              if (hasOrders) {
+                // Abrir modal de detalhes
+                setDetailsDayStr(dayStr);
+              } else {
+                // Abrir diálogo de confirmação
+                setConfirmEmptyDayStr(dayStr);
+              }
+            };
 
             return (
               <button
                 key={dayStr}
+                onClick={handleDayClick}
                 className="aspect-square rounded-[13px] flex items-center justify-center cursor-pointer"
                 style={{
-                  background: hasOrders ? 'linear-gradient(150deg, #8F5A9C, #C4626F)' : '#F6F2F5',
-                  color: hasOrders ? '#FFFFFF' : (isToday ? '#6E3F72' : '#241B2B'),
+                  background: bgColor,
+                  color: textColor,
                   border: isToday ? '1.5px solid #6E3F72' : 'none',
                   fontSize: '12px',
-                  fontWeight: isToday || hasOrders ? 800 : 400,
-                  boxShadow: hasOrders ? '0 6px 14px rgba(143,90,156,0.34)' : 'none',
-                  transition: hasOrders ? 'transform 0.2s ease' : 'all 0.2s ease',
+                  fontWeight: fontWeightStyle,
+                  boxShadow: boxShadowStyle,
+                  transition: 'all 0.2s ease',
                 }}
                 onMouseEnter={(e) => {
-                  if (hasOrders) {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                  } else {
-                    e.currentTarget.style.background = '#EFE6F0';
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                  }
+                  e.currentTarget.style.transform = 'translateY(-2px)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'translateY(0)';
-                  if (!hasOrders) {
-                    e.currentTarget.style.background = '#F6F2F5';
-                  }
                 }}
                 title={`${dayNum} de ${monthNames[month].toLowerCase()}`}
               >
@@ -209,21 +225,119 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
         </div>
       </div>
 
-      {/* Legend */}
+      {/* Filters */}
       <div className="pt-4 border-t flex items-center justify-center gap-6 text-xs uppercase tracking-widest">
-        <div className="flex items-center gap-2">
+        <div
+          className="flex items-center gap-2 cursor-pointer opacity-60"
+          style={{ opacity: 1 }}
+        >
           <div className="w-3 h-3 rounded" style={{ background: 'var(--color-surface)', border: '1.5px solid var(--color-brand-700)' }} />
           <span style={{ color: 'var(--color-ink-soft)', fontSize: '10px', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>Hoje</span>
         </div>
-        <div className="flex items-center gap-2">
+
+        <button
+          onClick={() => setShowWithOrdersFilter(!showWithOrdersFilter)}
+          className="flex items-center gap-2 cursor-pointer transition-opacity hover:opacity-100"
+          style={{ opacity: showWithOrdersFilter ? 1 : 0.6 }}
+        >
           <div className="w-3 h-3 rounded" style={{ background: 'linear-gradient(150deg, #8F5A9C, #C4626F)' }} />
           <span style={{ color: 'var(--color-ink-soft)', fontSize: '10px', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>Com Pedido</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-ink-soft)' }} />
+        </button>
+
+        <button
+          onClick={() => setShowFreeFilter(!showFreeFilter)}
+          className="flex items-center gap-2 cursor-pointer transition-opacity hover:opacity-100"
+          style={{ opacity: showFreeFilter ? 1 : 0.6 }}
+        >
+          <div className="w-3 h-3 rounded" style={{ background: '#B4E7B4' }} />
           <span style={{ color: 'var(--color-ink-soft)', fontSize: '10px', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>Livre</span>
-        </div>
+        </button>
       </div>
+
+      {/* Modal: Detalhes dos Pedidos do Dia */}
+      {detailsDayStr && (
+        <div
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 animate-fadeIn"
+          onClick={() => setDetailsDayStr(null)}
+        >
+          <div
+            className="w-full bg-white rounded-[24px] p-6 space-y-4 max-h-[80vh] max-w-md overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-4 border-b">
+              <h3 className="font-serif-display text-lg" style={{ color: '#241B2B' }}>
+                Pedidos de {formatDateBr(detailsDayStr)}
+              </h3>
+              <button
+                onClick={() => setDetailsDayStr(null)}
+                className="p-1 rounded-full hover:bg-neutral-100"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3 pt-2">
+              {(salesByDate[detailsDayStr] || []).map((tx) => (
+                <div key={tx.id} className="pb-3 border-b last:border-b-0">
+                  <p className="font-bold text-sm" style={{ color: '#241B2B' }}>
+                    {tx.customerName || 'Cliente não informado'}
+                  </p>
+                  <p className="text-xs" style={{ color: '#7A6E80' }}>
+                    {tx.description}
+                  </p>
+                  <div className="flex items-center justify-between mt-1">
+                    <p className="text-xs font-semibold" style={{ color: '#241B2B' }}>
+                      {formatMoney(tx.totalValue)}
+                    </p>
+                    <p className="text-xs" style={{ color: tx.paymentStatus === 'pago' ? '#4CAF7D' : '#F5A623' }}>
+                      {tx.paymentStatus === 'pago' ? 'Pago' : 'Pendente'}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Dialog: Confirmar Lançamento de Pedido em Dia Vazio */}
+      {confirmEmptyDayStr && (
+        <div
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 animate-fadeIn"
+          onClick={() => setConfirmEmptyDayStr(null)}
+        >
+          <div
+            className="bg-white rounded-[24px] p-6 space-y-4 w-[90%] max-w-sm"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="font-serif-display text-lg" style={{ color: '#241B2B' }}>
+              Lançar Pedido
+            </h3>
+            <p style={{ color: '#7A6E80', fontSize: '14px' }}>
+              Gostaria de lançar um pedido para {formatDateBr(confirmEmptyDayStr)}?
+            </p>
+            <div className="flex gap-2 pt-4">
+              <button
+                onClick={() => setConfirmEmptyDayStr(null)}
+                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold"
+                style={{ background: '#F6F2F5', color: '#241B2B' }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  setConfirmEmptyDayStr(null);
+                  onOpenAddModalWithDate?.(confirmEmptyDayStr);
+                }}
+                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white"
+                style={{ background: 'linear-gradient(135deg, #6E3F72 0%, #3A2350 100%)' }}
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

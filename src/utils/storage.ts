@@ -285,7 +285,11 @@ export const calculateSummary = (filteredTxs: Transaction[]): SummaryTotals => {
         if (tx.paymentStatus === 'pendente') {
           totalAReceber += val;
         } else {
-          totalVendas += val;
+          // Se há signalValue, é o sinal que foi pago. O resto fica a receber.
+          const paidAmount = tx.signalValue ? Number(tx.signalValue) : val;
+          const pendingAmount = val - paidAmount;
+          totalVendas += paidAmount;
+          totalAReceber += pendingAmount;
           const detail = parseSaleDetail(tx);
           totalReposicao += detail.reposicao;
           totalMaoDeObra += detail.maoDeObra;

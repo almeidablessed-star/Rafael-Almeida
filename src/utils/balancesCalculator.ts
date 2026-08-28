@@ -1,4 +1,4 @@
-import { Transaction } from '../types';
+import { Transaction, FichaTecnica } from '../types';
 import { parseSaleDetail } from './weeklyCalculator';
 import { getCurrentWeekMonday, getCurrentWeekSunday, filterTransactionsByWeek } from './weeklyArchiveUtils';
 
@@ -20,6 +20,7 @@ export interface SystemBalances {
   paidSalesCount: number;
   totalExpensesCount: number;
   totalPaidSales: number;
+  totalAReceber: number;
   totalExpensesAmount: number;
 }
 
@@ -28,7 +29,7 @@ export interface SystemBalances {
  * Inflow comes automatically from all sales marked as "Pago".
  * Deductions come from expenses logged under 'reposicao', 'maodeobra', 'custo', 'investimento'.
  */
-export function calculateBalances(transactions: Transaction[]): SystemBalances {
+export function calculateBalances(transactions: Transaction[], fichas: FichaTecnica[] = []): SystemBalances {
   let reposicaoInflow = 0;
   let maodeobraInflow = 0;
   let custoInflow = 0;
@@ -50,11 +51,25 @@ export function calculateBalances(transactions: Transaction[]): SystemBalances {
       if (tx.paymentStatus !== 'pendente') {
         paidSalesCount += 1;
         totalPaidSalesAmount += val;
-        const detail = parseSaleDetail(tx);
-        reposicaoInflow += detail.reposicao || 0;
-        maodeobraInflow += (detail.maoDeObra || 0) + (detail.adicionais || 0) + (detail.delivery || 0);
-        custoInflow += detail.custos || 0;
-        investimentoInflow += detail.investimento || 0;
+
+        // Use fichaItems if available (linked fichas), otherwise fallback to parseSaleDetail
+        if (tx.fichaItems && tx.fichaItems.length > 0 && fichas.length > 0) {
+          for (const fichaItem of tx.fichaItems) {
+            const ficha = fichas.find(f => f.id === fichaItem.fichaId);
+            if (ficha) {
+              reposicaoInflow += (ficha.reposicaoCost || 0) * fichaItem.quantity;
+              maodeobraInflow += (ficha.maoDeObraCost || 0) * fichaItem.quantity;
+              custoInflow += (ficha.custoCost || 0) * fichaItem.quantity;
+              investimentoInflow += (ficha.investimentoCost || 0) * fichaItem.quantity;
+            }
+          }
+        } else {
+          const detail = parseSaleDetail(tx);
+          reposicaoInflow += detail.reposicao || 0;
+          maodeobraInflow += (detail.maoDeObra || 0) + (detail.adicionais || 0) + (detail.delivery || 0);
+          custoInflow += detail.custos || 0;
+          investimentoInflow += detail.investimento || 0;
+        }
       }
     } else if (tx.type === 'reposicao') {
       totalExpensesCount += 1;
@@ -113,6 +128,7 @@ export function calculateBalances(transactions: Transaction[]): SystemBalances {
     paidSalesCount,
     totalExpensesCount,
     totalPaidSales: totalPaidSalesAmount,
+    totalAReceber,
     totalExpensesAmount,
   };
 }
@@ -120,7 +136,7 @@ export function calculateBalances(transactions: Transaction[]): SystemBalances {
 /**
  * Calculate balances for the current week only (Monday to Sunday)
  */
-export function calculateWeeklyBalances(transactions: Transaction[]): SystemBalances {
+export function calculateWeeklyBalances(transactions: Transaction[], fichas: FichaTecnica[] = []): SystemBalances {
   const startDate = getCurrentWeekMonday();
   const endDate = getCurrentWeekSunday();
   const weeklyTransactions = filterTransactionsByWeek(transactions, startDate, endDate);
@@ -132,6 +148,7 @@ export function calculateWeeklyBalances(transactions: Transaction[]): SystemBala
   let investimentoInflow = 0;
   let paidSalesCount = 0;
   let totalPaidSalesAmount = 0;
+  let totalAReceber = 0;
 
   let reposicaoSpent = 0;
   let maodeobraSpent = 0;
@@ -146,12 +163,36 @@ export function calculateWeeklyBalances(transactions: Transaction[]): SystemBala
     if (tx.type === 'venda') {
       if (tx.paymentStatus !== 'pendente') {
         paidSalesCount += 1;
-        totalPaidSalesAmount += val;
-        const detail = parseSaleDetail(tx);
-        reposicaoInflow += detail.reposicao || 0;
-        maodeobraInflow += (detail.maoDeObra || 0) + (detail.adicionais || 0) + (detail.delivery || 0);
-        custoInflow += detail.custos || 0;
-        investimentoInflow += detail.investimento || 0;
+        // Usar signalValue se informado, caso contrário assume que foi pago o valor total
+        const paidAmount = tx.signalValue ? Number(tx.signalValue) : val;
+        totalPaidSalesAmount += paidAmount;
+        // Se há sinal, o restante fica a receber
+        if (tx.signalValue) {
+          const remainingAmount = val - paidAmount;
+          totalAReceber += remainingAmount;
+        }
+
+        // Use fichaItems if available (linked fichas), otherwise fallback to parseSaleDetail
+        if (tx.fichaItems && tx.fichaItems.length > 0 && fichas.length > 0) {
+          for (const fichaItem of tx.fichaItems) {
+            const ficha = fichas.find(f => f.id === fichaItem.fichaId);
+            if (ficha) {
+              reposicaoInflow += (ficha.reposicaoCost || 0) * fichaItem.quantity;
+              maodeobraInflow += (ficha.maoDeObraCost || 0) * fichaItem.quantity;
+              custoInflow += (ficha.custoCost || 0) * fichaItem.quantity;
+              investimentoInflow += (ficha.investimentoCost || 0) * fichaItem.quantity;
+            }
+          }
+        } else {
+          const detail = parseSaleDetail(tx);
+          reposicaoInflow += detail.reposicao || 0;
+          maodeobraInflow += (detail.maoDeObra || 0) + (detail.adicionais || 0) + (detail.delivery || 0);
+          custoInflow += detail.custos || 0;
+          investimentoInflow += detail.investimento || 0;
+        }
+      } else {
+        // Pendentes completamente a receber
+        totalAReceber += val;
       }
     } else if (tx.type === 'reposicao') {
       totalExpensesCount += 1;
@@ -210,6 +251,7 @@ export function calculateWeeklyBalances(transactions: Transaction[]): SystemBala
     paidSalesCount,
     totalExpensesCount,
     totalPaidSales: totalPaidSalesAmount,
+    totalAReceber,
     totalExpensesAmount,
   };
 }

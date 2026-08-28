@@ -132,7 +132,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   onNavigateToTab,
 }) => {
   const { formatCurrency: formatMoney } = useCurrency();
-  const { fichas, isLoading: isLoadingFichas, error: fichasError, addFicha, updateFicha, deleteFicha } = useFichasTecnicas();
+  const { fichas, isLoading: isLoadingFichas, error: fichasError, addFicha, updateFicha, deleteFicha, fetchFichaPhoto } = useFichasTecnicas();
   const { estoque } = useEstoque();
   const [selectedCategory, setSelectedCategory] = useState<'bolos' | 'doces' | 'salgados' | 'saudaveis' | 'kids'>('bolos');
   const [isCreating, setIsCreating] = useState(false);
@@ -223,7 +223,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     setIsCreating(true);
   };
 
-  const handleOpenEdit = (ficha: FichaTecnica) => {
+  const handleOpenEdit = async (ficha: FichaTecnica) => {
     setName(ficha.name);
     setCategory(ficha.category);
     setImageUrl(ficha.imageUrl || '');
@@ -255,6 +255,11 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 
     setEditingId(ficha.id);
     setIsCreating(true);
+
+    if (!ficha.imageUrl) {
+      const imageUrl = await fetchFichaPhoto(ficha.id);
+      if (imageUrl) setImageUrl(imageUrl);
+    }
   };
 
   const handleAddIngredient = () => {

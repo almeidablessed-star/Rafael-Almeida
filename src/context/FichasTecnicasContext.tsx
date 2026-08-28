@@ -51,6 +51,7 @@ interface FichasTecnicasContextType {
   isLoading: boolean;
   error: string | null;
   fetchFichas: () => Promise<void>;
+  fetchFichaPhoto: (fichaId: string) => Promise<string | null>;
   addFicha: (data: Omit<FichaTecnica, 'id' | 'createdAt'>) => Promise<FichaTecnica>;
   updateFicha: (id: string, data: Omit<FichaTecnica, 'id' | 'createdAt'>) => Promise<FichaTecnica>;
   deleteFicha: (id: string) => Promise<void>;
@@ -136,16 +137,42 @@ export const FichasTecnicasProvider: React.FC<{ children: React.ReactNode }> = (
 
       const { data, error: fetchError } = await supabase
         .from('fichas_tecnicas')
-        .select('*')
+        .select('id,usuaria_id,nome_produto,categoria,tamanhos,insumos,mao_de_obra,custo,reposicao,investimento,created_at')
         .eq('usuaria_id', user.id)
         .order('created_at', { ascending: false });
 
       if (fetchError) throw fetchError;
 
-      setFichas(data?.map(mapSupabaseToFicha) || []);
+      // Fallback para localStorage se Supabase estiver vazio
+      if (data && data.length > 0) {
+        setFichas(data.map(mapSupabaseToFicha));
+      } else {
+        // Tentar localStorage como fallback
+        const storedData = localStorage.getItem('carula_fichas_tecnicas');
+        if (storedData) {
+          try {
+            const fichasFromStorage = JSON.parse(storedData) as FichaTecnica[];
+            setFichas(fichasFromStorage);
+          } catch (e) {
+            setFichas([]);
+          }
+        } else {
+          setFichas([]);
+        }
+      }
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar fichas técnicas');
       console.error('Error fetching fichas:', err);
+      // Em caso de erro, tentar localStorage como último recurso
+      const storedData = localStorage.getItem('carula_fichas_tecnicas');
+      if (storedData) {
+        try {
+          const fichasFromStorage = JSON.parse(storedData) as FichaTecnica[];
+          setFichas(fichasFromStorage);
+        } catch (e) {
+          setFichas([]);
+        }
+      }
     } finally {
       setIsLoading(false);
     }
@@ -220,9 +247,29 @@ export const FichasTecnicasProvider: React.FC<{ children: React.ReactNode }> = (
     }
   };
 
+  const fetchFichaPhoto = async (fichaId: string): Promise<string | null> => {
+    const existing = fichas.find(f => f.id === fichaId);
+    if (existing?.imageUrl) return existing.imageUrl;
+
+    try {
+      const { data, error } = await supabase
+        .from('fichas_tecnicas')
+        .select('foto_url')
+        .eq('id', parseInt(fichaId))
+        .eq('usuaria_id', user?.id)
+        .single();
+
+      if (error) throw error;
+      return data?.foto_url || null;
+    } catch (err: any) {
+      console.error('Error fetching ficha photo:', err);
+      return null;
+    }
+  };
+
   return (
     <FichasTecnicasContext.Provider
-      value={{ fichas, isLoading, error, fetchFichas, addFicha, updateFicha, deleteFicha }}
+      value={{ fichas, isLoading, error, fetchFichas, fetchFichaPhoto, addFicha, updateFicha, deleteFicha }}
     >
       {children}
     </FichasTecnicasContext.Provider>

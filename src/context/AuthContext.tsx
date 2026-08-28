@@ -34,6 +34,7 @@ interface AuthContextType {
   // orcamento depois de recarregar a pagina, porque o contexto guarda a copia
   // lida no login.
   refreshUserProfile: () => Promise<void>;
+  fetchUserPhoto: () => Promise<string | null>;
   logout: () => Promise<void>;
 }
 
@@ -149,7 +150,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { data, error } = await supabase
         .from('usuarias')
-        .select('*')
+        .select('id,nome,nome_confeitaria,moeda,telefone,endereco,instagram,created_at')
         .eq('id', userId)
         .single();
 
@@ -189,7 +190,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { data, error } = await supabase
         .from('usuarias')
-        .select('*')
+        .select('id,nome,nome_confeitaria,moeda,telefone,endereco,instagram,foto_url,created_at')
         .eq('id', user.id)
         .single();
 
@@ -290,6 +291,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const fetchUserPhoto = async (): Promise<string | null> => {
+    if (!user) return null;
+    if (userProfile?.foto_url) return userProfile.foto_url;
+
+    try {
+      const { data, error } = await supabase
+        .from('usuarias')
+        .select('foto_url')
+        .eq('id', user.id)
+        .single();
+
+      if (error) throw error;
+      return data?.foto_url || null;
+    } catch (err: any) {
+      console.error('Error fetching user photo:', err);
+      return null;
+    }
+  };
+
   const logout = async () => {
     try {
       const { error } = await supabase.auth.signOut();
@@ -320,6 +340,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signup,
         setupProfile,
         refreshUserProfile,
+        fetchUserPhoto,
         logout,
       }}
     >

@@ -45,6 +45,7 @@ interface CustomersContextType {
   isLoading: boolean;
   error: string | null;
   fetchCustomers: () => Promise<void>;
+  fetchCustomerPhoto: (customerId: string) => Promise<string | null>;
   addCustomer: (data: Omit<Customer, 'id' | 'createdAt'>) => Promise<Customer>;
   updateCustomer: (id: string, data: Omit<Customer, 'id' | 'createdAt'>) => Promise<Customer>;
   deleteCustomer: (id: string) => Promise<void>;
@@ -101,7 +102,7 @@ export const CustomersProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
       const { data, error: fetchError } = await supabase
         .from('clientes')
-        .select('*')
+        .select('id,usuaria_id,nome,telefone,endereco,city,notes,eventDate,recurringEventTitle,created_at')
         .eq('usuaria_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -113,6 +114,26 @@ export const CustomersProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       console.error('Error fetching customers:', err);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchCustomerPhoto = async (customerId: string): Promise<string | null> => {
+    const existing = customers.find(c => c.id === customerId);
+    if (existing?.photoUrl) return existing.photoUrl;
+
+    try {
+      const { data, error } = await supabase
+        .from('clientes')
+        .select('photoUrl')
+        .eq('id', parseInt(customerId))
+        .eq('usuaria_id', user?.id)
+        .single();
+
+      if (error) throw error;
+      return data?.photoUrl || null;
+    } catch (err: any) {
+      console.error('Error fetching customer photo:', err);
+      return null;
     }
   };
 
@@ -186,7 +207,7 @@ export const CustomersProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   return (
     <CustomersContext.Provider
-      value={{ customers, isLoading, error, fetchCustomers, addCustomer, updateCustomer, deleteCustomer }}
+      value={{ customers, isLoading, error, fetchCustomers, fetchCustomerPhoto, addCustomer, updateCustomer, deleteCustomer }}
     >
       {children}
     </CustomersContext.Provider>

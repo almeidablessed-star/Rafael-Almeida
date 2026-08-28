@@ -213,7 +213,7 @@ const DEFAULT_CUSTOMERS: Customer[] = [
 
 
 export const CustomersModule: React.FC = () => {
-  const { customers, isLoading: isLoadingCustomers, error: customersError, addCustomer, updateCustomer, deleteCustomer } = useCustomers();
+  const { customers, isLoading: isLoadingCustomers, error: customersError, addCustomer, updateCustomer, deleteCustomer, fetchCustomerPhoto } = useCustomers();
   const [searchTerm, setSearchTerm] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -249,7 +249,7 @@ export const CustomersModule: React.FC = () => {
     setIsFormOpen(true);
   };
 
-  const handleOpenEdit = (c: Customer) => {
+  const handleOpenEdit = async (c: Customer) => {
     setEditingId(c.id);
     setName(c.name);
     setPhone(c.phone);
@@ -261,6 +261,11 @@ export const CustomersModule: React.FC = () => {
     setCity(c.city || '');
     setNotes(c.notes || '');
     setIsFormOpen(true);
+
+    if (!c.photoUrl) {
+      const photo = await fetchCustomerPhoto(c.id);
+      if (photo) setPhotoUrl(photo);
+    }
   };
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {

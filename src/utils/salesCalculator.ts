@@ -1,4 +1,4 @@
-import { Transaction } from '../types';
+import { Transaction, FichaTecnica } from '../types';
 import { parseSaleDetail } from './weeklyCalculator';
 
 export interface SalesBreakdownTotals {
@@ -18,7 +18,7 @@ export interface SalesBreakdownTotals {
  * Calculates the category breakdown across paid sales transactions for a period.
  * Pending sales are summed separately in totalAReceber.
  */
-export function calculateSalesBreakdown(sales: Transaction[]): SalesBreakdownTotals {
+export function calculateSalesBreakdown(sales: Transaction[], fichas: FichaTecnica[] = []): SalesBreakdownTotals {
   let totalVendas = 0;
   let totalAReceber = 0;
   let totalReposicao = 0;
@@ -42,11 +42,24 @@ export function calculateSalesBreakdown(sales: Transaction[]): SalesBreakdownTot
     totalPaidCount += 1;
     totalVendas += val;
 
-    const detail = parseSaleDetail(sale);
-    totalReposicao += detail.reposicao;
-    totalMaoDeObra += detail.maoDeObra;
-    totalCustos += detail.custos;
-    totalInvestimento += detail.investimento;
+    // Use fichaItems if available (linked fichas), otherwise fallback to parseSaleDetail
+    if (sale.fichaItems && sale.fichaItems.length > 0 && fichas.length > 0) {
+      for (const fichaItem of sale.fichaItems) {
+        const ficha = fichas.find(f => f.id === fichaItem.fichaId);
+        if (ficha) {
+          totalReposicao += (ficha.reposicaoCost || 0) * fichaItem.quantity;
+          totalMaoDeObra += (ficha.maoDeObraCost || 0) * fichaItem.quantity;
+          totalCustos += (ficha.custoCost || 0) * fichaItem.quantity;
+          totalInvestimento += (ficha.investimentoCost || 0) * fichaItem.quantity;
+        }
+      }
+    } else {
+      const detail = parseSaleDetail(sale);
+      totalReposicao += detail.reposicao;
+      totalMaoDeObra += detail.maoDeObra;
+      totalCustos += detail.custos;
+      totalInvestimento += detail.investimento;
+    }
   }
 
   const totalCustosEInvestimento = totalCustos + totalInvestimento;

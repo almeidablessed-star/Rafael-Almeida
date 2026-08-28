@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Download, Smartphone, User, Sparkles } from 'lucide-react';
 import { UserProfile } from '../types';
 import { getStoredUserProfile } from '../utils/userProfile';
+import { useAuth } from '../context/AuthContext';
 import { UserProfileModal } from './UserProfileModal';
 import { CarulaLogo } from './CarulaLogo';
 
@@ -14,12 +15,23 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenPwaModal,
   onOpenBackupModal,
 }) => {
+  const { fetchUserPhoto } = useAuth();
   const [profile, setProfile] = useState<UserProfile>(getStoredUserProfile());
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   useEffect(() => {
     setProfile(getStoredUserProfile());
   }, [isProfileModalOpen]);
+
+  useEffect(() => {
+    const loadPhoto = async () => {
+      const photoUrl = await fetchUserPhoto();
+      if (photoUrl) {
+        setProfile(prev => ({ ...prev, photoUrl }));
+      }
+    };
+    loadPhoto();
+  }, [fetchUserPhoto]);
 
   return (
     <header

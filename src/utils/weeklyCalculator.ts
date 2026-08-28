@@ -1,6 +1,68 @@
 import { Transaction } from '../types';
-import { BAKERY_CATALOG, calculateProportionalBreakdown } from '../data/bakeryCatalog';
 import { formatDateBr } from './formatters';
+
+// Calculate proportional breakdown for any custom gross value based on catalog averages or a specific recipe
+export const calculateProportionalBreakdown = (grossTotal: number, selectedRecipe?: any) => {
+  if (grossTotal <= 0) {
+    return {
+      faturamentoBruto: 0,
+      reposicao: 0,
+      maodeobra: 0,
+      custos: 0,
+      investimento: 0,
+      lucroLiquido: 0,
+      reposicaoPct: 30,
+      maodeobraPct: 33.3,
+      custosPct: 16.7,
+      investimentoPct: 20,
+    };
+  }
+
+  // If a specific recipe is selected, use its exact cost ratios
+  if (selectedRecipe && selectedRecipe.venda > 0) {
+    const ratio = grossTotal / selectedRecipe.venda;
+    const reposicao = selectedRecipe.reposicao * ratio;
+    const maodeobra = selectedRecipe.maodeobra * ratio;
+    const custos = selectedRecipe.custo * ratio;
+    const investimento = selectedRecipe.investimento * ratio;
+    const totalDespesas = reposicao + maodeobra + custos + investimento;
+    const lucroLiquido = Math.max(0, grossTotal - totalDespesas);
+
+    return {
+      faturamentoBruto: grossTotal,
+      reposicao,
+      maodeobra,
+      custos,
+      investimento,
+      lucroLiquido,
+      reposicaoPct: (reposicao / grossTotal) * 100,
+      maodeobraPct: (maodeobra / grossTotal) * 100,
+      custosPct: (custos / grossTotal) * 100,
+      investimentoPct: (investimento / grossTotal) * 100,
+    };
+  }
+
+  // Default general bakery catalog proportions (Average: 30% Insumos, 33.3% Mão de obra, 16.7% Custos, 20% Investimento)
+  const reposicao = grossTotal * 0.30;
+  const maodeobra = grossTotal * 0.3333;
+  const custos = grossTotal * 0.1667;
+  const investimento = grossTotal * 0.20;
+  const totalDespesas = reposicao + maodeobra + custos + investimento;
+  const lucroLiquido = Math.max(0, grossTotal - totalDespesas);
+
+  return {
+    faturamentoBruto: grossTotal,
+    reposicao,
+    maodeobra,
+    custos,
+    investimento,
+    lucroLiquido,
+    reposicaoPct: (reposicao / grossTotal) * 100,
+    maodeobraPct: (maodeobra / grossTotal) * 100,
+    custosPct: (custos / grossTotal) * 100,
+    investimentoPct: (investimento / grossTotal) * 100,
+  };
+};
 
 export interface WeeklySaleDetail {
   transaction: Transaction;
@@ -150,27 +212,11 @@ export function parseSaleDetail(sale: Transaction): WeeklySaleDetail {
     custos = cusFromNotes;
     investimento = invFromNotes;
   } else {
-    const descLower = sale.description.toLowerCase();
-    const matchedRecipe = BAKERY_CATALOG.find((recipe) => {
-      const recipeNameLower = recipe.cakeName.toLowerCase();
-      if (!descLower.includes(recipeNameLower)) return false;
-      if (descLower.includes(`${recipe.slices}`)) return true;
-      return true;
-    });
-
-    if (matchedRecipe) {
-      const qty = sale.quantity || 1;
-      reposicao = matchedRecipe.reposicao * qty;
-      maoDeObra = matchedRecipe.maodeobra * qty;
-      custos = matchedRecipe.custo * qty;
-      investimento = matchedRecipe.investimento * qty;
-    } else {
-      const prop = calculateProportionalBreakdown(baseValue > 0 ? baseValue : val);
-      reposicao = prop.reposicao;
-      maoDeObra = prop.maodeobra;
-      custos = prop.custos;
-      investimento = prop.investimento;
-    }
+    const prop = calculateProportionalBreakdown(baseValue > 0 ? baseValue : val);
+    reposicao = prop.reposicao;
+    maoDeObra = prop.maodeobra;
+    custos = prop.custos;
+    investimento = prop.investimento;
   }
 
   const pagamentoPessoal = maoDeObra + adicionais + delivery;

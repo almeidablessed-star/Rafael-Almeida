@@ -48,7 +48,6 @@ import { RestockModule } from './components/RestockModule';
 import { LaborModule } from './components/LaborModule';
 import { CostsModule } from './components/CostsModule';
 import { HistoryModule } from './components/HistoryModule';
-import { CatalogModule } from './components/CatalogModule';
 import { WeeklyClosingModule } from './components/WeeklyClosingModule';
 import { BalancesAndExpensesModule } from './components/BalancesAndExpensesModule';
 import { EstoqueModule } from './components/EstoqueModule';
@@ -68,7 +67,10 @@ function AppContent() {
   const { isResetPasswordRequired, isOtpVerificationRequired, user, logout } = useAuth();
   const { fichas } = useFichasTecnicas();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [activeTab, setActiveTab] = useState<TabType>('dashboard');
+  const [activeTab, setActiveTab] = useState<TabType>(() => {
+    const saved = localStorage.getItem('carula_activeTab');
+    return (saved as TabType) || 'dashboard';
+  });
 
   // Period filter state
   const [period, setPeriod] = useState<TimePeriod>('mes'); // Default to 'Este Mês'
@@ -79,6 +81,7 @@ function AppContent() {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [formInitialType, setFormInitialType] = useState<TransactionType>('venda');
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+  const [prefilledDate, setPrefilledDate] = useState<string | null>(null);
   const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null);
   const [isPwaModalOpen, setIsPwaModalOpen] = useState(false);
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
@@ -94,6 +97,11 @@ function AppContent() {
     const data = getStoredTransactions();
     setTransactions(data);
   }, []);
+
+  // Persist active tab to localStorage
+  useEffect(() => {
+    localStorage.setItem('carula_activeTab', activeTab);
+  }, [activeTab]);
 
   // Filtered transactions & financial metrics
   const filteredTransactions = filterTransactionsByPeriod(
@@ -239,6 +247,10 @@ function AppContent() {
             recentTransactions={filteredTransactions}
             allTransactions={transactions}
             onOpenAddModal={handleOpenAddModal}
+            onOpenAddModalWithDate={(date) => {
+              setPrefilledDate(date);
+              handleOpenAddModal('venda');
+            }}
             onNavigateToTab={(tab) => setActiveTab(tab)}
             onEditTransaction={handleOpenEditModal}
             onDeleteTransaction={handleRequestDelete}
@@ -257,7 +269,7 @@ function AppContent() {
 
         {activeTab === 'pedidos' && (
           <OrdersModule
-            transactions={filteredTransactions}
+            transactions={transactions}
             onOpenAddModal={(type) => handleOpenAddModal(type || 'venda')}
             onEditTransaction={handleOpenEditModal}
             onDeleteTransaction={handleRequestDelete}
@@ -303,16 +315,6 @@ function AppContent() {
 
         {activeTab === 'clientes' && (
           <CustomersModule />
-        )}
-
-        {activeTab === 'catalogo' && (
-          <CatalogModule
-            onAddTransaction={(txData) => {
-              addTransaction(txData);
-              setTransactions(getStoredTransactions());
-            }}
-            onNavigateToTab={(tab) => setActiveTab(tab)}
-          />
         )}
 
         {activeTab === 'vendas' && (
@@ -372,8 +374,15 @@ function AppContent() {
         isOpen={isFormModalOpen}
         initialType={formInitialType}
         editingTransaction={editingTransaction}
-        onClose={() => setIsFormModalOpen(false)}
-        onSave={handleSaveTransaction}
+        prefilledDate={prefilledDate}
+        onClose={() => {
+          setIsFormModalOpen(false);
+          setPrefilledDate(null);
+        }}
+        onSave={(tx, editingId) => {
+          handleSaveTransaction(tx, editingId);
+          setPrefilledDate(null);
+        }}
       />
 
       {/* Custom Delete Confirmation Modal */}

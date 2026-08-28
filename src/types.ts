@@ -72,6 +72,7 @@ export interface Transaction {
   quantity: number;
   unitValue: number;
   totalValue: number;
+  signalValue?: number; // Valor do sinal/entrada pago (opcional). Se não preenchido, = totalValue
   date: string; // YYYY-MM-DD
   paymentMethod?: PaymentMethod;
   paymentStatus?: PaymentStatus;
@@ -87,7 +88,7 @@ export interface Transaction {
 
 export type TimePeriod = 'hoje' | 'semana' | 'mes' | 'ano' | 'tudo' | 'personalizado';
 
-export type TabType = 'dashboard' | 'pedidos' | 'fichas' | 'clientes' | 'estoque' | 'saldos' | 'semana' | 'catalogo' | 'vendas' | 'reposicao' | 'maodeobra' | 'custos' | 'historico';
+export type TabType = 'dashboard' | 'pedidos' | 'fichas' | 'clientes' | 'estoque' | 'saldos' | 'semana' | 'vendas' | 'reposicao' | 'maodeobra' | 'custos' | 'historico';
 
 export interface BakeryPreset {
   id: string;
@@ -103,6 +104,7 @@ export interface StockItem {
   quantity: number;
   unit: 'g' | 'kg' | 'ml' | 'L' | 'un' | 'pacote';
   minThreshold: number;
+  minThresholdUnit: 'g' | 'kg' | 'ml' | 'L' | 'un' | 'pacote';
   costPerUnit: number; // Cost per unit (e.g. per gram or per ml or per unit)
 }
 

@@ -537,7 +537,8 @@ ${transaction.description}
 
 ${transaction.observations ? `📝 *Observações:* ${transaction.observations}` : ''}
 
-💰 *VALOR TOTAL:* ${formatCurrency(transaction.totalValue)}
+💰 *VALOR TOTAL DO PEDIDO:* ${formatCurrency(transaction.totalValue)}
+${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transaction.signalValue)}\n📋 *Restante a Pagar na Entrega:* ${formatCurrency(transaction.totalValue - transaction.signalValue)}` : ''}
 💳 *Pagamento:* ${transaction.paymentMethod === 'cash' ? '💵 Cash (Dinheiro)' : '⚡ Zelle'}
 
 💖 _${sellerName ? `Obrigada por escolher a ${sellerName}!` : 'Obrigada pela preferência!'} Feito com amor._ ✨
@@ -887,13 +888,36 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
                   </span>
                 </div>
 
-                <div className="text-right">
-                  <span className="text-[9px] font-black uppercase text-white/80 block" style={{ fontFamily: "'Manrope', sans-serif" }}>
-                    VALOR TOTAL DO PEDIDO:
-                  </span>
-                  <span className="font-black text-white" style={{ fontSize: '24px', fontFamily: "'Manrope', sans-serif" }}>
-                    {formatCurrency(transaction.totalValue)}
-                  </span>
+                <div className="text-right space-y-2">
+                  <div>
+                    <span className="text-[9px] font-black uppercase text-white/80 block" style={{ fontFamily: "'Manrope', sans-serif" }}>
+                      VALOR TOTAL DO PEDIDO:
+                    </span>
+                    <span className="font-black text-white" style={{ fontSize: '24px', fontFamily: "'Manrope', sans-serif" }}>
+                      {formatCurrency(transaction.totalValue)}
+                    </span>
+                  </div>
+
+                  {transaction.signalValue && (
+                    <div className="border-t border-white/30 pt-1 mt-1">
+                      <div className="flex items-center justify-end gap-2 mb-1">
+                        <span className="text-[9px] font-bold uppercase text-white/80" style={{ fontFamily: "'Manrope', sans-serif" }}>
+                          ✅ Sinal Pago:
+                        </span>
+                        <span className="font-bold text-emerald-200" style={{ fontSize: '14px', fontFamily: "'Manrope', sans-serif" }}>
+                          {formatCurrency(transaction.signalValue)}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-end gap-2">
+                        <span className="text-[9px] font-bold uppercase text-white/80" style={{ fontFamily: "'Manrope', sans-serif" }}>
+                          📋 A Pagar na Entrega:
+                        </span>
+                        <span className="font-bold text-orange-200" style={{ fontSize: '14px', fontFamily: "'Manrope', sans-serif" }}>
+                          {formatCurrency(transaction.totalValue - transaction.signalValue)}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 

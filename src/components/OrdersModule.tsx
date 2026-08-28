@@ -57,10 +57,19 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
   const totalVendas = sales.reduce((acc, curr) => acc + (curr.totalValue || 0), 0);
   const totalPagas = sales
     .filter((s) => (s.paymentStatus || 'pago') === 'pago')
-    .reduce((acc, curr) => acc + (curr.totalValue || 0), 0);
+    .reduce((acc, curr) => {
+      const paidAmount = curr.signalValue ? Number(curr.signalValue) : (curr.totalValue || 0);
+      return acc + paidAmount;
+    }, 0);
   const totalPendentes = sales
     .filter((s) => s.paymentStatus === 'pendente')
     .reduce((acc, curr) => acc + (curr.totalValue || 0), 0);
+  const totalAReceber = sales
+    .filter((s) => (s.paymentStatus || 'pago') === 'pago' && s.signalValue)
+    .reduce((acc, curr) => {
+      const remainingAmount = (curr.totalValue || 0) - (curr.signalValue || 0);
+      return acc + remainingAmount;
+    }, 0);
 
   const pendingCount = sales.filter((s) => s.paymentStatus === 'pendente').length;
   const paidCount = sales.filter((s) => (s.paymentStatus || 'pago') === 'pago').length;
@@ -235,7 +244,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
               fontFamily: "'Manrope', sans-serif"
             }}
           >
-            {formatMoney(totalPendentes)}
+            {formatMoney(totalPendentes + totalAReceber)}
           </span>
           <span className="text-xs" style={{ color: '#9A8FA0', fontFamily: "'Manrope', sans-serif" }}>
             {pendingCount} {pendingCount === 1 ? 'pendente' : 'pendentes'}
@@ -419,6 +428,11 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                       <span className="font-black text-[var(--color-ink)]" style={{ fontSize: '22px', fontWeight: 800, color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>
                         {formatMoney(tx.totalValue)}
                       </span>
+                      {tx.signalValue && (
+                        <div style={{ fontSize: '11px', color: '#7A6E80', fontFamily: "'Manrope', sans-serif", marginTop: '4px' }}>
+                          💰 Sinal: {formatMoney(tx.signalValue)} | Restante: {formatMoney((tx.totalValue || 0) - (tx.signalValue || 0))}
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex items-center gap-[6px]">
