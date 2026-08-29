@@ -205,9 +205,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     { id: '1', name: 'Farinha de Trigo', quantity: 200, unit: 'g', unitCost: 0.005, totalCost: 1.00 },
   ]);
   const [reposicaoCost, setReposicaoCost] = useState('0');
-  const [maoDeObraCost, setMaoDeObraCost] = useState('20');
-  const [custoCost, setCustoCost] = useState('5');
-  const [investimentoCost, setInvestimentoCost] = useState('5');
+  // Custos globais - mantidos como defaults, não editáveis via UI
+  const maoDeObraCost = '0';
+  const custoCost = '0';
+  const investimentoCost = '0';
 
   // Estado para gerenciar múltiplos tamanhos
   const [tamanhos, setTamanhos] = useState<Array<{
@@ -227,10 +228,6 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 
   const totalReposicao = ingredients.reduce((sum, ing) => sum + (ing.totalCost || 0), 0);
   const repoNum = parseFloat(reposicaoCost.replace(',', '.')) || 0;
-  const mdoNum = parseFloat(maoDeObraCost.replace(',', '.')) || 0;
-  const cusNum = parseFloat(custoCost.replace(',', '.')) || 0;
-  const invNum = parseFloat(investimentoCost.replace(',', '.')) || 0;
-  const calculatedSuggestedPrice = repoNum + mdoNum + cusNum + invNum;
 
   const handleOpenAdd = () => {
     setName('');
@@ -239,9 +236,6 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     setYieldInfo('1');
     setIngredients([{ id: '1', name: 'Farinha de Trigo', quantity: 200, unit: 'g', unitCost: 0.005, totalCost: 1.00 }]);
     setReposicaoCost('0');
-    setMaoDeObraCost('20');
-    setCustoCost('5');
-    setInvestimentoCost('5');
     setTamanhos([
       { id: 'ts-1', descricao: '1', preco: '55', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
       { id: 'ts-2', descricao: '2', preco: '75', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
@@ -258,9 +252,6 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     setYieldInfo(getYieldInfoCompat(ficha));
     setIngredients(ficha.ingredients || []);
     setReposicaoCost((ficha.reposicaoCost || 0).toString());
-    setMaoDeObraCost((ficha.maoDeObraCost || 0).toString());
-    setCustoCost((ficha.custoCost || 0).toString());
-    setInvestimentoCost((ficha.investimentoCost || 0).toString());
 
     // Carregar tamanhos da ficha, convertendo para string
     if (ficha.tamanhos && ficha.tamanhos.length > 0) {
@@ -379,9 +370,9 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
       tamanhos: tamanhosData,
       ingredients,
       reposicaoCost: parseFloat(reposicaoCost) || 0,
-      maoDeObraCost: mdoNum,
-      custoCost: cusNum,
-      investimentoCost: invNum,
+      maoDeObraCost: parseFloat(maoDeObraCost) || 0,
+      custoCost: parseFloat(custoCost) || 0,
+      investimentoCost: parseFloat(investimentoCost) || 0,
     };
 
     try {
@@ -907,74 +898,6 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
             </div>
           </div>
 
-          {/* CUSTOS GLOBAIS */}
-          <div className="bg-[var(--color-pastry-cream)] p-4 rounded-lg border border-[var(--color-pastry-light-pink)]/40 space-y-3">
-            <span className="text-xs font-extrabold uppercase text-[var(--color-pastry-chocolate)] block">
-              Custos Globais da Ficha
-            </span>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div>
-                <label className="block text-[10px] font-bold text-[var(--color-pastry-chocolate)] mb-1">
-                  Reposição ($)
-                </label>
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  placeholder="0.00"
-                  value={reposicaoCost}
-                  onChange={(e) => setReposicaoCost(e.target.value)}
-                  className="w-full px-2 py-1.5 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
-                  style={{ fontFamily: "'Manrope', sans-serif" }}
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-bold text-[var(--color-pastry-chocolate)] mb-1">
-                  Mão de Obra ($)
-                </label>
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  placeholder="0.00"
-                  value={maoDeObraCost}
-                  onChange={(e) => setMaoDeObraCost(e.target.value)}
-                  className="w-full px-2 py-1.5 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
-                  style={{ fontFamily: "'Manrope', sans-serif" }}
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-bold text-[var(--color-pastry-chocolate)] mb-1">
-                  Custo ($)
-                </label>
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  placeholder="0.00"
-                  value={custoCost}
-                  onChange={(e) => setCustoCost(e.target.value)}
-                  className="w-full px-2 py-1.5 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
-                  style={{ fontFamily: "'Manrope', sans-serif" }}
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-bold text-[var(--color-pastry-chocolate)] mb-1">
-                  Investimento ($)
-                </label>
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  placeholder="0.00"
-                  value={investimentoCost}
-                  onChange={(e) => setInvestimentoCost(e.target.value)}
-                  className="w-full px-2 py-1.5 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
-                  style={{ fontFamily: "'Manrope', sans-serif" }}
-                />
-              </div>
-            </div>
-          </div>
 
           {/* TAMANHOS E PREÇOS */}
           <div className="bg-[var(--color-pastry-cream)] p-4 rounded-lg border border-[var(--color-pastry-light-pink)]/40 space-y-3">
@@ -1091,11 +1014,11 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                 Sugestão de Preço de Venda
               </span>
               <span className="font-marca text-3xl font-black text-[var(--color-pastry-cream)]">
-                {formatMoney(calculatedSuggestedPrice)}
+                {formatMoney(repoNum)}
               </span>
             </div>
             <div className="text-right text-[11px] text-[var(--color-pastry-cream)]/80 font-medium">
-              Reposição ({formatMoney(repoNum)}) + Mão de Obra ({formatMoney(mdoNum)}) + Custos ({formatMoney(cusNum + invNum)})
+              Total de Ingredientes
             </div>
           </div>
 
