@@ -313,7 +313,7 @@ export const calculateSummary = (filteredTxs: Transaction[]): SummaryTotals => {
   });
 
   const totalSaidas = totalReposicao + totalMaoDeObra + totalCustos + totalInvestimento;
-  const lucroLiquido = totalVendas - totalReposicao - totalCustos - totalInvestimento;
+  const lucroLiquido = totalVendas - totalReposicao - totalMaoDeObra - totalCustos - totalInvestimento;
 
   return {
     totalVendas,

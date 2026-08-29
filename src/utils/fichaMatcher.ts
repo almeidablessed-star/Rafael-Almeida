@@ -66,6 +66,7 @@ export interface MatchableOrderItem {
   productName: string;
   quantity: number;
   customDescription?: string;
+  selectedSlices?: number; // Número de fatias/medida selecionada (para encontrar TamanhoOpcao)
 }
 
 /**
@@ -94,14 +95,25 @@ export const buildFichaItems = (
     const quantity = Number(item.quantity) || 0;
     if (quantity <= 0) return;
 
+    // Encontrar o TamanhoOpcao selecionado pelo número de fatias
+    const selectedTamanho =
+      item.selectedSlices && ficha.tamanhos && ficha.tamanhos.length > 0
+        ? ficha.tamanhos.find(t => t.quantidade === item.selectedSlices)
+        : undefined;
+
     const existing = byFichaId.get(ficha.id);
     if (existing) {
       existing.quantity += quantity;
+      // Se houver tamanho, atualiza (último tamanho selecionado vence)
+      if (selectedTamanho) {
+        existing.selectedTamanhoId = selectedTamanho.id;
+      }
     } else {
       byFichaId.set(ficha.id, {
         fichaId: ficha.id,
         fichaName: ficha.name,
         quantity,
+        selectedTamanhoId: selectedTamanho?.id,
       });
     }
   });

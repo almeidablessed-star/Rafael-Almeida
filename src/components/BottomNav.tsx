@@ -38,10 +38,16 @@ const IconEstoque = (props: { stroke: string; strokeWidth: number }) => (
   </svg>
 );
 
-const IconSaldos = (props: { stroke: string; strokeWidth: number }) => (
+const IconCompras = (props: { stroke: string; strokeWidth: number }) => (
   <svg width="19" height="19" viewBox="0 0 24 24" fill="none" {...props} strokeLinejoin="round">
     <rect x="3" y="6" width="18" height="13" rx="3"/>
     <circle cx="17" cy="12.5" r="1.4" fill={props.stroke} stroke="none"/>
+  </svg>
+);
+
+const IconCustos = (props: { stroke: string; strokeWidth: number }) => (
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" {...props} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/>
   </svg>
 );
 
@@ -57,7 +63,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) 
     { id: 'fichas' as TabType, label: 'Fichas', icon: IconFichas },
     { id: 'clientes' as TabType, label: 'Clientes', icon: IconClientes },
     { id: 'estoque' as TabType, label: 'Estoque', icon: IconEstoque },
-    { id: 'saldos' as TabType, label: 'Saldos', icon: IconSaldos },
+    { id: 'compras' as TabType, label: 'Compras', icon: IconCompras },
+    { id: 'custos' as TabType, label: 'Custos', icon: IconCustos },
   ];
 
   return (
@@ -68,7 +75,17 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) 
         zIndex: 9999,
       }}
     >
-      <div className="max-w-lg mx-auto flex items-center justify-around" style={{ padding: '2px 8px 2px' }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '2px',
+          padding: '2px 8px 2px',
+          overflowX: 'auto',
+          overscrollBehavior: 'contain',
+          maxWidth: '100%',
+        }}
+      >
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -82,14 +99,16 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) 
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: '5px',
-                padding: '8px 11px',
-                borderRadius: '16px',
+                gap: '4px',
+                padding: '6px 9px',
+                borderRadius: '12px',
                 background: isActive ? '#3A2350' : 'transparent',
                 border: 'none',
                 cursor: 'pointer',
                 transition: 'transform 0.25s ease',
                 boxShadow: isActive ? '0 8px 18px rgba(58, 35, 80, 0.3)' : 'none',
+                flexShrink: 0,
+                whiteSpace: 'nowrap',
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-4px)';
@@ -101,15 +120,15 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) 
               <Icon
                 stroke={isActive ? '#F5B9C6' : '#A096A6'}
                 strokeWidth={1.9}
-                style={{ transition: 'stroke 0.25s ease' }}
+                style={{ transition: 'stroke 0.25s ease', width: '18px', height: '18px' }}
               />
               <span
                 style={{
-                  fontSize: '9px',
+                  fontSize: '8px',
                   fontWeight: isActive ? 800 : 600,
                   color: isActive ? '#F5B9C6' : '#A096A6',
                   textTransform: 'uppercase',
-                  letterSpacing: '0.06em',
+                  letterSpacing: '0.04em',
                   transition: 'color 0.25s ease',
                 }}
               >

@@ -57,10 +57,20 @@ export function calculateBalances(transactions: Transaction[], fichas: FichaTecn
           for (const fichaItem of tx.fichaItems) {
             const ficha = fichas.find(f => f.id === fichaItem.fichaId);
             if (ficha) {
-              reposicaoInflow += (ficha.reposicaoCost || 0) * fichaItem.quantity;
-              maodeobraInflow += (ficha.maoDeObraCost || 0) * fichaItem.quantity;
-              custoInflow += (ficha.custoCost || 0) * fichaItem.quantity;
-              investimentoInflow += (ficha.investimentoCost || 0) * fichaItem.quantity;
+              // Se há tamanho selecionado, usar custos específicos do tamanho
+              const selectedTamanho = fichaItem.selectedTamanhoId
+                ? ficha.tamanhos?.find(t => t.id === fichaItem.selectedTamanhoId)
+                : undefined;
+
+              const reposicaoCost = ficha.reposicaoCost || 0;
+              const maoDeObraCost = (selectedTamanho?.maoDeObraCost || ficha.maoDeObraCost) || 0;
+              const custoCost = (selectedTamanho?.custoCost || ficha.custoCost) || 0;
+              const investimentoCost = (selectedTamanho?.investimentoCost || ficha.investimentoCost) || 0;
+
+              reposicaoInflow += reposicaoCost * fichaItem.quantity;
+              maodeobraInflow += maoDeObraCost * fichaItem.quantity;
+              custoInflow += custoCost * fichaItem.quantity;
+              investimentoInflow += investimentoCost * fichaItem.quantity;
             }
           }
         } else {
@@ -177,10 +187,20 @@ export function calculateWeeklyBalances(transactions: Transaction[], fichas: Fic
           for (const fichaItem of tx.fichaItems) {
             const ficha = fichas.find(f => f.id === fichaItem.fichaId);
             if (ficha) {
-              reposicaoInflow += (ficha.reposicaoCost || 0) * fichaItem.quantity;
-              maodeobraInflow += (ficha.maoDeObraCost || 0) * fichaItem.quantity;
-              custoInflow += (ficha.custoCost || 0) * fichaItem.quantity;
-              investimentoInflow += (ficha.investimentoCost || 0) * fichaItem.quantity;
+              // Se há tamanho selecionado, usar custos específicos do tamanho
+              const selectedTamanho = fichaItem.selectedTamanhoId
+                ? ficha.tamanhos?.find(t => t.id === fichaItem.selectedTamanhoId)
+                : undefined;
+
+              const reposicaoCost = ficha.reposicaoCost || 0;
+              const maoDeObraCost = (selectedTamanho?.maoDeObraCost || ficha.maoDeObraCost) || 0;
+              const custoCost = (selectedTamanho?.custoCost || ficha.custoCost) || 0;
+              const investimentoCost = (selectedTamanho?.investimentoCost || ficha.investimentoCost) || 0;
+
+              reposicaoInflow += reposicaoCost * fichaItem.quantity;
+              maodeobraInflow += maoDeObraCost * fichaItem.quantity;
+              custoInflow += custoCost * fichaItem.quantity;
+              investimentoInflow += investimentoCost * fichaItem.quantity;
             }
           }
         } else {
