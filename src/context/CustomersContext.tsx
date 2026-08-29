@@ -49,6 +49,7 @@ interface CustomersContextType {
   addCustomer: (data: Omit<Customer, 'id' | 'createdAt'>) => Promise<Customer>;
   updateCustomer: (id: string, data: Omit<Customer, 'id' | 'createdAt'>) => Promise<Customer>;
   deleteCustomer: (id: string) => Promise<void>;
+  restoreCustomer: (customer: Customer) => Promise<void>;
 }
 
 const CustomersContext = createContext<CustomersContextType | undefined>(undefined);
@@ -205,9 +206,36 @@ export const CustomersProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
+  const restoreCustomer = async (customer: Customer) => {
+    if (!user) throw new Error('User not authenticated');
+
+    try {
+      setError(null);
+      const { data, error: insertError } = await supabase
+        .from('clientes')
+        .insert([
+          {
+            id: parseInt(customer.id),
+            usuaria_id: user.id,
+            ...mapCustomerToSupabase({ name: customer.name, phone: customer.phone, photoUrl: customer.photoUrl, eventDate: customer.eventDate, recurringEventTitle: customer.recurringEventTitle, address: customer.address, city: customer.city, notes: customer.notes }),
+          },
+        ])
+        .select()
+        .single();
+
+      if (insertError) throw insertError;
+
+      const restored = mapSupabaseToCustomer(data);
+      setCustomers((prev) => [restored, ...prev]);
+    } catch (err: any) {
+      setError(err.message || 'Erro ao restaurar cliente');
+      throw err;
+    }
+  };
+
   return (
     <CustomersContext.Provider
-      value={{ customers, isLoading, error, fetchCustomers, fetchCustomerPhoto, addCustomer, updateCustomer, deleteCustomer }}
+      value={{ customers, isLoading, error, fetchCustomers, fetchCustomerPhoto, addCustomer, updateCustomer, deleteCustomer, restoreCustomer }}
     >
       {children}
     </CustomersContext.Provider>

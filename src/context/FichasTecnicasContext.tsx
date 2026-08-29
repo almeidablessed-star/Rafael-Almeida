@@ -55,6 +55,7 @@ interface FichasTecnicasContextType {
   addFicha: (data: Omit<FichaTecnica, 'id' | 'createdAt'>) => Promise<FichaTecnica>;
   updateFicha: (id: string, data: Omit<FichaTecnica, 'id' | 'createdAt'>) => Promise<FichaTecnica>;
   deleteFicha: (id: string) => Promise<void>;
+  restoreFicha: (ficha: FichaTecnica) => Promise<void>;
 }
 
 const FichasTecnicasContext = createContext<FichasTecnicasContextType | undefined>(undefined);
@@ -245,6 +246,41 @@ export const FichasTecnicasProvider: React.FC<{ children: React.ReactNode }> = (
     }
   };
 
+  const restoreFicha = async (ficha: FichaTecnica) => {
+    if (!user) throw new Error('User not authenticated');
+
+    try {
+      setError(null);
+      const { data, error: insertError } = await supabase
+        .from('fichas_tecnicas')
+        .insert([
+          {
+            id: parseInt(ficha.id),
+            usuaria_id: user.id,
+            nome_produto: ficha.name,
+            categoria: ficha.category,
+            foto_url: ficha.imageUrl || null,
+            tamanhos: ficha.tamanhos,
+            insumos: ficha.ingredients,
+            mao_de_obra: ficha.maoDeObraCost,
+            custo: ficha.custoCost,
+            reposicao: ficha.reposicaoCost,
+            investimento: ficha.investimentoCost,
+          },
+        ])
+        .select()
+        .single();
+
+      if (insertError) throw insertError;
+
+      const restored = mapSupabaseToFicha(data);
+      setFichas((prev) => [restored, ...prev]);
+    } catch (err: any) {
+      setError(err.message || 'Erro ao restaurar ficha técnica');
+      throw err;
+    }
+  };
+
   const fetchFichaPhoto = async (fichaId: string): Promise<string | null> => {
     const existing = fichas.find(f => f.id === fichaId);
     if (existing?.imageUrl) return existing.imageUrl;
@@ -267,7 +303,7 @@ export const FichasTecnicasProvider: React.FC<{ children: React.ReactNode }> = (
 
   return (
     <FichasTecnicasContext.Provider
-      value={{ fichas, isLoading, error, fetchFichas, fetchFichaPhoto, addFicha, updateFicha, deleteFicha }}
+      value={{ fichas, isLoading, error, fetchFichas, fetchFichaPhoto, addFicha, updateFicha, deleteFicha, restoreFicha }}
     >
       {children}
     </FichasTecnicasContext.Provider>

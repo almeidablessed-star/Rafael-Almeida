@@ -1,20 +1,25 @@
 import { useState, useCallback } from 'react';
 import { Transaction } from '../types';
 
-export const useUndo = () => {
-  const [undoData, setUndoData] = useState<Transaction | null>(null);
+export interface UndoData {
+  type: 'transaction' | 'customer' | 'ficha';
+  data: any;
+}
 
-  const saveForUndo = useCallback((transaction: Transaction) => {
-    setUndoData(transaction);
+export const useUndo = () => {
+  const [undoStack, setUndoStack] = useState<UndoData | null>(null);
+
+  const saveForUndo = useCallback((data: UndoData) => {
+    setUndoStack(data);
     // Auto-clear after 10 seconds (user won't undo after this)
-    setTimeout(() => setUndoData(null), 10000);
+    setTimeout(() => setUndoStack(null), 10000);
   }, []);
 
   const getUndoData = useCallback(() => {
-    const data = undoData;
-    setUndoData(null); // Clear after retrieval
+    const data = undoStack;
+    setUndoStack(null); // Clear after retrieval
     return data;
-  }, [undoData]);
+  }, [undoStack]);
 
-  return { saveForUndo, getUndoData, hasUndo: undoData !== null };
+  return { saveForUndo, getUndoData, hasUndo: undoStack !== null };
 };
