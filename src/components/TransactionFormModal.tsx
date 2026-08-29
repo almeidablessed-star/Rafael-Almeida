@@ -771,11 +771,11 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
         </div>
 
         {/* Modal Body */}
-        <form onSubmit={handleSubmit} className="p-5 overflow-y-auto space-y-4 flex-1 stagger-children">
+        <form onSubmit={handleSubmit} style={{ fontFamily: "'Manrope', sans-serif" }} className="p-5 overflow-y-auto space-y-4 flex-1 stagger-children">
           {/* Type Selector (if adding new) */}
           {!editingTransaction && (
             <div>
-              <label className="block text-xs font-bold text-neutral-600 mb-1.5 uppercase tracking-wider">
+              <label style={{ fontFamily: "'Manrope', sans-serif" }} className="block text-xs font-bold text-neutral-600 mb-1.5 uppercase tracking-wider">
                 Tipo do Lançamento:
               </label>
               <div className="grid grid-cols-2 gap-1.5 p-1 bg-neutral-100 rounded-lg">
@@ -835,7 +835,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       preenche o restante do formulario. Substituiu um <select>
                       separado que listava todas sem filtrar. */}
                   <div className="relative" ref={customerBoxRef}>
-                    <label className="block text-[11px] font-bold text-neutral-800 mb-1">
+                    <label style={{ fontFamily: "'Manrope', sans-serif" }} className="block text-[11px] font-bold text-neutral-800 mb-1">
                       Nome da Cliente *
                     </label>
                     <input
