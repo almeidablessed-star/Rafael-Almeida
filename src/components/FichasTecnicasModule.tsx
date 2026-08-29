@@ -56,6 +56,33 @@ const getInvestimentoParaTamanho = (tamanho: TamanhoOpcao, fichaGlobal: number) 
   return tamanho.investimentoCost !== undefined ? tamanho.investimentoCost : fichaGlobal;
 };
 
+// Conversão de unidades para cálculo de custo correto
+const convertCostToTargetUnit = (
+  costPerUnit: number,
+  fromUnit: string,
+  toUnit: string
+): number => {
+  // Mapear unidades para gramas/ml como base
+  const toBase: { [key: string]: number } = {
+    'g': 1,
+    'kg': 1000,
+    'ml': 1,
+    'L': 1000,
+    'un': 1,
+    'pacote': 1,
+  };
+
+  const fromBase = toBase[fromUnit] || 1;
+  const toBase_ = toBase[toUnit] || 1;
+
+  // Converter o custo: se o custo é por "from", converter para "to"
+  // Exemplo: R$ 10/kg para grama
+  // fromBase = 1000 (1kg = 1000g), toBase_ = 1 (1g = 1g)
+  // R$ 10/kg = R$ 10 por 1000g = R$ 0,01 por 1g
+  // Fórmula: costPerUnit × (toBase_ / fromBase) = 10 × (1 / 1000) = 0,01 ✅
+  return costPerUnit * (toBase_ / fromBase);
+};
+
 const DEFAULT_FICHAS: FichaTecnica[] = [
   // Exemplo: Bolo com múltiplos tamanhos
   {
@@ -263,7 +290,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   const handleAddIngredient = () => {
     setIngredients((prev) => [
       ...prev,
-      { id: Date.now().toString(), name: '', quantity: 100, unit: 'g', unitCost: 0.01, totalCost: 1.00 },
+      { id: Date.now().toString(), name: '', quantity: 0, unit: 'g', unitCost: 0, totalCost: 0 },
     ]);
   };
 
@@ -277,9 +304,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         if (field === 'name') {
           const stockItem = estoque.find(item => item.name.toLowerCase() === val.toLowerCase());
           if (stockItem && stockItem.costPerUnit > 0) {
-            // Pré-preencher unitCost com o valor real do estoque
-            updated.unitCost = stockItem.costPerUnit;
-            updated.totalCost = ing.quantity * stockItem.costPerUnit;
+            // Converter o custo para a unidade da ficha
+            const convertedCost = convertCostToTargetUnit(stockItem.costPerUnit, stockItem.unit, ing.unit);
+            updated.unitCost = convertedCost;
+            updated.totalCost = ing.quantity * convertedCost;
           }
         }
 
