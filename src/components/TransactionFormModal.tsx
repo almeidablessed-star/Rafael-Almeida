@@ -101,6 +101,8 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   const { customers: storedCustomers, fetchCustomerPhoto } = useCustomers();
 
   const [type, setType] = useState<TransactionType>(initialType);
+  const [isSaving, setIsSaving] = useState(false);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
 
   // Sales Order State (when type === 'venda')
   const [customerName, setCustomerName] = useState<string>('');
@@ -600,10 +602,12 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   };
 
   // --- Form Submit ---
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSaving(true);
 
-    if (type === 'venda') {
+    try {
+      if (type === 'venda') {
       if (grandTotalSalePrice <= 0) {
         alert('Por favor, selecione ao menos um produto válido com valor maior que zero.');
         return;
@@ -746,6 +750,12 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
     );
 
     onClose();
+    setIsSaving(false);
+    setShowSuccessToast(true);
+    setTimeout(() => setShowSuccessToast(false), 2000);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return createPortal(
@@ -1829,14 +1839,36 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
           <div className="pt-2">
             <button
               type="submit"
-              className="w-full py-4 rounded-lg bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-brand text-base font-bold shadow-highlight shadow-pink-200 active:scale-98 transition-all flex items-center justify-center gap-2"
+              disabled={isSaving}
+              className={`w-full py-4 rounded-lg text-white font-brand text-base font-bold shadow-highlight shadow-pink-200 active:scale-98 transition-all flex items-center justify-center gap-2 ${
+                isSaving
+                  ? 'bg-gradient-to-r from-pink-400 to-rose-400 opacity-75 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600'
+              }`}
             >
-              <Check className="w-5 h-5 stroke-[2.5]" />
-              {editingTransaction ? 'Salvar Alterações' : 'Confirmar e Gravar'}
+              {isSaving ? (
+                <>
+                  <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full" />
+                  Salvando...
+                </>
+              ) : (
+                <>
+                  <Check className="w-5 h-5 stroke-[2.5]" />
+                  {editingTransaction ? 'Salvar Alterações' : 'Confirmar e Gravar'}
+                </>
+              )}
             </button>
           </div>
         </form>
       </div>
+
+      {/* Success Toast */}
+      {showSuccessToast && (
+        <div className="fixed bottom-4 left-4 right-4 sm:bottom-8 sm:right-8 sm:left-auto bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg animate-slideUp flex items-center gap-2 max-w-sm">
+          <Check className="w-5 h-5" />
+          <span className="font-bold">{editingTransaction ? 'Alterações salvas!' : 'Pedido gravado com sucesso!'}</span>
+        </div>
+      )}
 
       {showPdfQuoteModal && (
         <QuotePdfModal
