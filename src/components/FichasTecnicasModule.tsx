@@ -4,8 +4,10 @@ import { formatCurrency } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
 import { useFichasTecnicas } from '../context/FichasTecnicasContext';
 import { useEstoque } from '../hooks/useEstoque';
+import { useUndo } from '../hooks/useUndo';
 import { StockItemAutocomplete } from './StockItemAutocomplete';
 import { compressImageFile } from '../utils/imageCompression';
+import { GenericDeleteConfirmModal } from './GenericDeleteConfirmModal';
 import {
   BookOpen,
   Plus,
@@ -159,11 +161,14 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   onNavigateToTab,
 }) => {
   const { formatCurrency: formatMoney } = useCurrency();
-  const { fichas, isLoading: isLoadingFichas, error: fichasError, addFicha, updateFicha, deleteFicha, fetchFichaPhoto } = useFichasTecnicas();
+  const { fichas, isLoading: isLoadingFichas, error: fichasError, addFicha, updateFicha, deleteFicha, restoreFicha, fetchFichaPhoto } = useFichasTecnicas();
   const { estoque } = useEstoque();
+  const { saveForUndo, getUndoData } = useUndo();
   const [selectedCategory, setSelectedCategory] = useState<'bolos' | 'doces' | 'salgados' | 'saudaveis' | 'kids'>('bolos');
   const [isCreating, setIsCreating] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [deletingFicha, setDeletingFicha] = useState<FichaTecnica | null>(null);
+  const [showUndoToast, setShowUndoToast] = useState(false);
   const [expandedFichaId, setExpandedFichaId] = useState<string | null>(null);
   const [launchSuccessMsg, setLaunchSuccessMsg] = useState<string | null>(null);
   const [expandedTamanhosId, setExpandedTamanhosId] = useState<string | null>(null);
@@ -392,15 +397,34 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm('Deseja excluir esta ficha técnica?')) {
+  const handleDelete = (ficha: FichaTecnica) => {
+    setDeletingFicha(ficha);
+  };
+
+  const handleConfirmDelete = async (id: string) => {
+    const fichaToDelete = fichas.find(f => f.id === id);
+    if (!fichaToDelete) return;
+
+    try {
+      saveForUndo({ type: 'ficha', data: fichaToDelete });
+      await deleteFicha(id);
+      setShowUndoToast(true);
+      setTimeout(() => setShowUndoToast(false), 10000);
+    } catch (err: any) {
+      console.error('Erro ao deletar:', err);
+      alert('Erro ao deletar ficha técnica: ' + (err.message || JSON.stringify(err)));
+    }
+  };
+
+  const handleUndo = async () => {
+    const undoData = getUndoData();
+    if (undoData && undoData.type === 'ficha') {
       try {
-        console.log('Deletando ficha com ID:', id);
-        await deleteFicha(id);
-        console.log('Ficha deletada com sucesso');
+        await restoreFicha(undoData.data);
+        setShowUndoToast(false);
       } catch (err: any) {
-        console.error('Erro ao deletar:', err);
-        alert('Erro ao deletar ficha técnica: ' + (err.message || JSON.stringify(err)));
+        console.error('Erro ao restaurar:', err);
+        alert('Erro ao restaurar ficha técnica: ' + (err.message || JSON.stringify(err)));
       }
     }
   };
@@ -1471,7 +1495,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                     Duplicar
                   </button>
                   <button
-                    onClick={() => handleDelete(ficha.id)}
+                    onClick={() => handleDelete(ficha)}
                     style={{
                       flex: 1,
                       display: 'flex',
@@ -1509,6 +1533,37 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         )}
       </div>
         </div>
+
+      {/* Delete Confirmation Modal */}
+      <GenericDeleteConfirmModal
+        isOpen={!!deletingFicha}
+        itemType="ficha"
+        itemName={deletingFicha?.name}
+        itemDetails={[
+          { label: '📂', value: deletingFicha?.category || 'N/A' },
+        ]}
+        onClose={() => setDeletingFicha(null)}
+        onConfirmDelete={() => {
+          if (deletingFicha) {
+            handleConfirmDelete(deletingFicha.id);
+            setDeletingFicha(null);
+          }
+        }}
+      />
+
+      {/* Undo Toast */}
+      {showUndoToast && (
+        <div className="fixed bottom-24 left-1/2 transform -translate-x-1/2 rounded-2xl p-4 z-40 flex items-center gap-3 shadow-lg" style={{ background: 'linear-gradient(135deg, #6E3F72 0%, #3A2350 100%)' }}>
+          <span className="text-sm font-bold text-white">✓ Ficha deletada</span>
+          <button
+            onClick={handleUndo}
+            className="px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-95 hover:shadow-md"
+            style={{ background: '#F5B9C6', color: '#3A2350' }}
+          >
+            ↩️ Desfazer
+          </button>
+        </div>
+      )}
       </div>
     </div>
   );
