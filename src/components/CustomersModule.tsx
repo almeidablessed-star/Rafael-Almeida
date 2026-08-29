@@ -4,7 +4,9 @@ import { Customer, CustomerEvent } from '../types';
 import { formatDateBr, formatDayMonthOnly } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
 import { useCustomers } from '../context/CustomersContext';
+import { useUndo } from '../hooks/useUndo';
 import { compressImageFile } from '../utils/imageCompression';
+import { GenericDeleteConfirmModal } from './GenericDeleteConfirmModal';
 import {
   Users,
   Plus,
@@ -213,10 +215,13 @@ const DEFAULT_CUSTOMERS: Customer[] = [
 
 
 export const CustomersModule: React.FC = () => {
-  const { customers, isLoading: isLoadingCustomers, error: customersError, addCustomer, updateCustomer, deleteCustomer, fetchCustomerPhoto } = useCustomers();
+  const { customers, isLoading: isLoadingCustomers, error: customersError, addCustomer, updateCustomer, deleteCustomer, restoreCustomer, fetchCustomerPhoto } = useCustomers();
+  const { saveForUndo, getUndoData } = useUndo();
   const [searchTerm, setSearchTerm] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [deletingCustomer, setDeletingCustomer] = useState<Customer | null>(null);
+  const [showUndoToast, setShowUndoToast] = useState(false);
 
   // Form states
   const [name, setName] = useState('');
@@ -329,14 +334,32 @@ export const CustomersModule: React.FC = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm('Tem certeza que deseja excluir esta cliente?')) {
+  const handleDelete = (customer: Customer) => {
+    setDeletingCustomer(customer);
+  };
+
+  const handleConfirmDelete = async (id: string) => {
+    const customerToDelete = customers.find(c => c.id === id);
+    if (!customerToDelete) return;
+
+    try {
+      saveForUndo({ type: 'customer', data: customerToDelete });
+      await deleteCustomer(id);
+      setShowUndoToast(true);
+      setTimeout(() => setShowUndoToast(false), 10000);
+    } catch (err: any) {
+      setFormError(err.message || 'Erro ao deletar cliente');
+    }
+  };
+
+  const handleUndo = async () => {
+    const undoData = getUndoData();
+    if (undoData && undoData.type === 'customer') {
       try {
-        await deleteCustomer(id);
-        setShowToast(true);
-        setTimeout(() => setShowToast(false), 3000);
+        await restoreCustomer(undoData.data);
+        setShowUndoToast(false);
       } catch (err: any) {
-        setFormError(err.message || 'Erro ao deletar cliente');
+        setFormError(err.message || 'Erro ao restaurar cliente');
       }
     }
   };
@@ -1066,7 +1089,7 @@ export const CustomersModule: React.FC = () => {
                         <Edit3 className="w-3.5 h-3.5" style={{ stroke: '#7A6E80', strokeWidth: 2 }} />
                       </button>
                       <button
-                        onClick={() => handleDelete(c.id)}
+                        onClick={() => handleDelete(c)}
                         style={{
                           width: '28px',
                           height: '28px',
@@ -1461,6 +1484,37 @@ export const CustomersModule: React.FC = () => {
           </div>
         </div>,
         document.body
+      )}
+
+      {/* Delete Confirmation Modal */}
+      <GenericDeleteConfirmModal
+        isOpen={!!deletingCustomer}
+        itemType="customer"
+        itemName={deletingCustomer?.name}
+        itemDetails={[
+          { label: '📱', value: deletingCustomer?.phone || 'N/A' },
+        ]}
+        onClose={() => setDeletingCustomer(null)}
+        onConfirmDelete={() => {
+          if (deletingCustomer) {
+            handleConfirmDelete(deletingCustomer.id);
+            setDeletingCustomer(null);
+          }
+        }}
+      />
+
+      {/* Undo Toast */}
+      {showUndoToast && (
+        <div className="fixed bottom-24 left-1/2 transform -translate-x-1/2 rounded-2xl p-4 z-40 flex items-center gap-3 shadow-lg" style={{ background: 'linear-gradient(135deg, #6E3F72 0%, #3A2350 100%)' }}>
+          <span className="text-sm font-bold text-white">✓ Cliente deletado</span>
+          <button
+            onClick={handleUndo}
+            className="px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-95 hover:shadow-md"
+            style={{ background: '#F5B9C6', color: '#3A2350' }}
+          >
+            ↩️ Desfazer
+          </button>
+        </div>
       )}
     </div>
   );
