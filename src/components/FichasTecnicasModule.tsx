@@ -28,11 +28,11 @@ import {
 
 // Helpers para compatibilidade com a nova estrutura de tamanhos
 const getPrincipalTamanho = (ficha: FichaTecnica) => {
-  return ficha.tamanhos?.[0] || { id: 't1', descricao: '10 fatias', preco: 0 };
+  return ficha.tamanhos?.[0] || { id: 't1', descricao: '1', preco: 0 };
 };
 
 const getYieldInfoCompat = (ficha: FichaTecnica) => {
-  return getPrincipalTamanho(ficha).descricao || '10 fatias';
+  return getPrincipalTamanho(ficha).descricao || '1';
 };
 
 const getSugestaoVendaCompat = (ficha: FichaTecnica) => {
@@ -64,9 +64,9 @@ const DEFAULT_FICHAS: FichaTecnica[] = [
     category: 'bolos',
     imageUrl: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&auto=format&fit=crop&q=80',
     tamanhos: [
-      { id: 'ts-10', descricao: '10 fatias', preco: 55.00, quantidade: 10 },
-      { id: 'ts-15', descricao: '15 fatias', preco: 75.00, quantidade: 15 },
-      { id: 'ts-20', descricao: '20 fatias', preco: 90.00, quantidade: 20 },
+      { id: 'ts-1', descricao: '1', preco: 55.00, quantidade: 10 },
+      { id: 'ts-2', descricao: '2', preco: 75.00, quantidade: 15 },
+      { id: 'ts-3', descricao: '3', preco: 90.00, quantidade: 20 },
     ],
     ingredients: [
       { id: 'i1', name: 'Farinha de Trigo', quantity: 300, unit: 'g', unitCost: 0.005, totalCost: 1.50 },
@@ -186,11 +186,9 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     custoCost: string;
     investimentoCost: string;
   }>>([
-    { id: 'ts-10', descricao: '10 fatias', preco: '55', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
-    { id: 'ts-15', descricao: '15 fatias', preco: '75', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
-    { id: 'ts-20', descricao: '20 fatias', preco: '90', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
-    { id: 'ts-25', descricao: '25 fatias', preco: '100', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
-    { id: 'ts-30', descricao: '30 fatias', preco: '120', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
+    { id: 'ts-1', descricao: '1', preco: '55', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
+    { id: 'ts-2', descricao: '2', preco: '75', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
+    { id: 'ts-3', descricao: '3', preco: '90', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
   ]);
 
   // Fichas são agora gerenciadas pelo hook useFichasTecnicas (salva no Supabase)
@@ -206,18 +204,16 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     setName('');
     setCategory(selectedCategory);
     setImageUrl('');
-    setYieldInfo('10 fatias');
+    setYieldInfo('1');
     setIngredients([{ id: '1', name: 'Farinha de Trigo', quantity: 200, unit: 'g', unitCost: 0.005, totalCost: 1.00 }]);
     setReposicaoCost('0');
     setMaoDeObraCost('20');
     setCustoCost('5');
     setInvestimentoCost('5');
     setTamanhos([
-      { id: 'ts-10', descricao: '10 fatias', preco: '55', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
-      { id: 'ts-15', descricao: '15 fatias', preco: '75', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
-      { id: 'ts-20', descricao: '20 fatias', preco: '90', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
-      { id: 'ts-25', descricao: '25 fatias', preco: '100', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
-      { id: 'ts-30', descricao: '30 fatias', preco: '120', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
+      { id: 'ts-1', descricao: '1', preco: '55', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
+      { id: 'ts-2', descricao: '2', preco: '75', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
+      { id: 'ts-3', descricao: '3', preco: '90', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
     ]);
     setEditingId(null);
     setIsCreating(true);
@@ -249,7 +245,9 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     } else {
       // Se não há tamanhos, usar padrão
       setTamanhos([
-        { id: 'ts-10', descricao: '10 fatias', preco: '0', maoDeObraCost: '0', custoCost: '0', investimentoCost: '0' },
+        { id: 'ts-1', descricao: '1', preco: '0', maoDeObraCost: '0', custoCost: '0', investimentoCost: '0' },
+        { id: 'ts-2', descricao: '2', preco: '0', maoDeObraCost: '0', custoCost: '0', investimentoCost: '0' },
+        { id: 'ts-3', descricao: '3', preco: '0', maoDeObraCost: '0', custoCost: '0', investimentoCost: '0' },
       ]);
     }
 
@@ -312,7 +310,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
       ...prev,
       {
         id: newId,
-        descricao: `${prev.length * 5 + 10} fatias`,
+        descricao: `${prev.length + 1}`,
         preco: '0',
         maoDeObraCost: maoDeObraCost,
         custoCost: custoCost,
@@ -658,16 +656,16 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 
       {/* Editor Modal / Form */}
       {isCreating && (
-        <form onSubmit={handleSaveFicha} className="bg-white rounded-[32px] p-5 sm:p-6 border-2 border-[var(--color-pastry-light-pink)] shadow-xl space-y-4 animate-slideUp">
-          <div className="flex items-center justify-between border-b border-neutral-100 pb-3">
-            <h3 className="font-brand font-black text-lg text-[var(--color-pastry-chocolate)] flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-[var(--color-pastry-light-pink)]" />
+        <form onSubmit={handleSaveFicha} className="bg-white rounded-[32px] p-5 sm:p-6 border-2 border-[var(--color-pastry-light-pink)] shadow-xl space-y-4 animate-slideUp" style={{ backgroundImage: 'linear-gradient(to bottom, rgba(255,255,255,0.98), #FFFFFF)' }}>
+          <div style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)', borderRadius: '20px 20px 0 0', padding: '20px', margin: '-20px -20px 16px -20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <h3 style={{ fontFamily: "'Instrument Serif', serif", fontSize: '20px', fontWeight: 'bold', color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+              <Sparkles className="w-5 h-5 text-[#F5B9C6]" />
               {editingId ? 'Editar Ficha Técnica' : 'Criar Nova Ficha Técnica'}
             </h3>
             <button
               type="button"
               onClick={() => setIsCreating(false)}
-              className="p-1.5 rounded-full hover:bg-neutral-100 text-neutral-500"
+              className="p-1.5 rounded-full hover:bg-white/20 text-white transition"
             >
               <X className="w-5 h-5" />
             </button>
@@ -675,7 +673,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div>
-              <label className="block text-xs font-bold text-[var(--color-pastry-chocolate)] mb-1">
+              <label className="block text-xs font-bold text-[var(--color-pastry-chocolate)] mb-1" style={{ fontFamily: "'Manrope', sans-serif" }}>
                 Nome do Pedido *
               </label>
               <input
@@ -684,18 +682,18 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                 placeholder="Ex: Bolo Vulcão Ninho com Nutella"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-300 text-xs font-bold text-[var(--color-pastry-chocolate)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)]"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[#F3E9F3] text-xs font-bold text-[var(--color-pastry-chocolate)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)]"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-[var(--color-pastry-chocolate)] mb-1">
+              <label className="block text-xs font-bold text-[var(--color-pastry-chocolate)] mb-1" style={{ fontFamily: "'Manrope', sans-serif" }}>
                 Categoria *
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as any)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-300 text-xs font-extrabold text-[var(--color-pastry-chocolate)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)] bg-white"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[#F3E9F3] text-xs font-extrabold text-[var(--color-pastry-chocolate)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)] bg-white"
               >
                 <option value="bolos">🎂 Bolos & Massas</option>
                 <option value="doces">🧁 Doces & Sobremesas</option>
@@ -706,7 +704,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-[var(--color-pastry-chocolate)] mb-1">
+              <label className="block text-xs font-bold text-[var(--color-pastry-chocolate)] mb-1" style={{ fontFamily: "'Manrope', sans-serif" }}>
                 Rendimento *
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -716,13 +714,13 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   placeholder="Ex: 10 ou 500"
                   value={yieldInfo}
                   onChange={(e) => setYieldInfo(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-300 text-xs font-bold text-[var(--color-pastry-chocolate)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)]"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#F3E9F3] text-xs font-bold text-[var(--color-pastry-chocolate)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)]"
                 />
 
                 <select
                   value={selectedYieldUnit}
                   onChange={(e) => handleApplyYieldUnit(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-300 text-xs font-extrabold text-[var(--color-pastry-chocolate)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)] bg-white cursor-pointer"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#F3E9F3] text-xs font-extrabold text-[var(--color-pastry-chocolate)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)] bg-white cursor-pointer"
                 >
                   <option value="fatias">🍰 Fatias</option>
                   <option value="gramas">⚖️ Gramas (g)</option>
@@ -733,7 +731,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-[var(--color-pastry-chocolate)] mb-1">
+              <label className="block text-xs font-bold text-[var(--color-pastry-chocolate)] mb-1" style={{ fontFamily: "'Manrope', sans-serif" }}>
                 Foto
               </label>
               <div className="flex items-center gap-2.5">
@@ -809,14 +807,14 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                       placeholder="Qtd"
                       value={ing.quantity}
                       onChange={(e) => handleUpdateIngredient(ing.id, 'quantity', e.target.value)}
-                      className="w-full px-1.5 py-1 border border-neutral-300 rounded-lg text-xs font-bold text-center"
+                      className="w-full px-1.5 py-1 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
                     />
                   </div>
                   <div className="col-span-2">
                     <select
                       value={ing.unit}
                       onChange={(e) => handleUpdateIngredient(ing.id, 'unit', e.target.value)}
-                      className="w-full px-1 py-1 border border-neutral-300 rounded-lg text-[10px] font-bold"
+                      className="w-full px-1 py-1 border border-[#F3E9F3] rounded-lg text-[10px] font-bold"
                     >
                       <option value="g">g</option>
                       <option value="ml">ml</option>
@@ -868,7 +866,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   placeholder="0.00"
                   value={reposicaoCost}
                   onChange={(e) => setReposicaoCost(e.target.value)}
-                  className="w-full px-2 py-1.5 border border-neutral-300 rounded-lg text-xs font-bold text-center"
+                  className="w-full px-2 py-1.5 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
                 />
               </div>
 
@@ -882,7 +880,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   placeholder="0.00"
                   value={maoDeObraCost}
                   onChange={(e) => setMaoDeObraCost(e.target.value)}
-                  className="w-full px-2 py-1.5 border border-neutral-300 rounded-lg text-xs font-bold text-center"
+                  className="w-full px-2 py-1.5 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
                 />
               </div>
 
@@ -896,7 +894,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   placeholder="0.00"
                   value={custoCost}
                   onChange={(e) => setCustoCost(e.target.value)}
-                  className="w-full px-2 py-1.5 border border-neutral-300 rounded-lg text-xs font-bold text-center"
+                  className="w-full px-2 py-1.5 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
                 />
               </div>
 
@@ -910,7 +908,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   placeholder="0.00"
                   value={investimentoCost}
                   onChange={(e) => setInvestimentoCost(e.target.value)}
-                  className="w-full px-2 py-1.5 border border-neutral-300 rounded-lg text-xs font-bold text-center"
+                  className="w-full px-2 py-1.5 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
                 />
               </div>
             </div>
@@ -942,10 +940,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                       </label>
                       <input
                         type="text"
-                        placeholder="Ex: 10 fatias"
+                        placeholder="Ex: 1, 2, 3"
                         value={tamanho.descricao}
                         onChange={(e) => handleUpdateTamanho(tamanho.id, 'descricao', e.target.value)}
-                        className="w-full px-2 py-1.5 border border-neutral-300 rounded-lg text-xs font-semibold"
+                        className="w-full px-2 py-1.5 border border-[#F3E9F3] rounded-lg text-xs font-semibold"
                       />
                     </div>
                     <div>
@@ -958,7 +956,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         placeholder="0.00"
                         value={tamanho.preco}
                         onChange={(e) => handleUpdateTamanho(tamanho.id, 'preco', e.target.value)}
-                        className="w-full px-2 py-1.5 border border-neutral-300 rounded-lg text-xs font-bold text-center"
+                        className="w-full px-2 py-1.5 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
                       />
                     </div>
                   </div>
@@ -974,7 +972,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         placeholder="0"
                         value={tamanho.maoDeObraCost}
                         onChange={(e) => handleUpdateTamanho(tamanho.id, 'maoDeObraCost', e.target.value)}
-                        className="w-full px-2 py-1.5 border border-neutral-300 rounded-lg text-xs font-bold text-center"
+                        className="w-full px-2 py-1.5 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
                       />
                     </div>
                     <div>
@@ -987,7 +985,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         placeholder="0"
                         value={tamanho.custoCost}
                         onChange={(e) => handleUpdateTamanho(tamanho.id, 'custoCost', e.target.value)}
-                        className="w-full px-2 py-1.5 border border-neutral-300 rounded-lg text-xs font-bold text-center"
+                        className="w-full px-2 py-1.5 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
                       />
                     </div>
                     <div>
@@ -1000,7 +998,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         placeholder="0"
                         value={tamanho.investimentoCost}
                         onChange={(e) => handleUpdateTamanho(tamanho.id, 'investimentoCost', e.target.value)}
-                        className="w-full px-2 py-1.5 border border-neutral-300 rounded-lg text-xs font-bold text-center"
+                        className="w-full px-2 py-1.5 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
                       />
                     </div>
                   </div>

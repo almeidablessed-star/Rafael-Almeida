@@ -65,15 +65,13 @@ const mapSupabaseToFicha = (data: SupabaseFichaTecnica): FichaTecnica => {
   if (normalizedCategory === 'bolo') normalizedCategory = 'bolos';
   if (normalizedCategory === 'doce') normalizedCategory = 'doces';
 
-  // Garantir que toda ficha tenha os 5 tamanhos padrão (fallback para fichas antigas)
+  // Garantir que toda ficha tenha os 3 tamanhos padrão (fallback para fichas antigas)
   let tamanhos = data.tamanhos || [];
   if (tamanhos.length === 0) {
     tamanhos = [
-      { id: 'ts-10', descricao: '10 fatias', preco: 0, maoDeObraCost: 0, custoCost: 0, investimentoCost: 0 },
-      { id: 'ts-15', descricao: '15 fatias', preco: 0, maoDeObraCost: 0, custoCost: 0, investimentoCost: 0 },
-      { id: 'ts-20', descricao: '20 fatias', preco: 0, maoDeObraCost: 0, custoCost: 0, investimentoCost: 0 },
-      { id: 'ts-25', descricao: '25 fatias', preco: 0, maoDeObraCost: 0, custoCost: 0, investimentoCost: 0 },
-      { id: 'ts-30', descricao: '30 fatias', preco: 0, maoDeObraCost: 0, custoCost: 0, investimentoCost: 0 },
+      { id: 'ts-1', descricao: '1', preco: 0, maoDeObraCost: 0, custoCost: 0, investimentoCost: 0 },
+      { id: 'ts-2', descricao: '2', preco: 0, maoDeObraCost: 0, custoCost: 0, investimentoCost: 0 },
+      { id: 'ts-3', descricao: '3', preco: 0, maoDeObraCost: 0, custoCost: 0, investimentoCost: 0 },
     ];
   }
 
