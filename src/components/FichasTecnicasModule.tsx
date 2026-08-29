@@ -1282,7 +1282,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                       </span>
                       <span
                         style={{
-                          fontSize: '13px',
+                          fontSize: '11px',
                           fontWeight: 800,
                           color: '#241B2B',
                           marginTop: '3px',
