@@ -24,6 +24,7 @@ export const StockItemAutocomplete: React.FC<StockItemAutocompleteProps> = ({
   const itemBoxRef = useRef<HTMLDivElement>(null);
   const itemListRef = useRef<HTMLUListElement>(null);
   const [hasMoreItemsBelow, setHasMoreItemsBelow] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState<'below' | 'above'>('below');
 
   const updateItemScrollHint = () => {
     const el = itemListRef.current;
@@ -70,6 +71,28 @@ export const StockItemAutocomplete: React.FC<StockItemAutocompleteProps> = ({
       setHasMoreItemsBelow(false);
       return;
     }
+
+    // Detectar posição do dropdown e scroll para ficar visível
+    setTimeout(() => {
+      const inputBox = itemBoxRef.current;
+      if (!inputBox) return;
+
+      const rect = inputBox.getBoundingClientRect();
+      const dropdownHeight = 188 + 8; // maxHeight + marginTop
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+
+      // Se há mais espaço acima ou espaço abaixo é insuficiente, abre para cima
+      if (spaceAbove > spaceBelow && spaceAbove > dropdownHeight) {
+        setDropdownPosition('above');
+      } else {
+        setDropdownPosition('below');
+      }
+
+      // Auto-scroll o container pai para colocar o dropdown visível
+      inputBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 0);
+
     const id = requestAnimationFrame(updateItemScrollHint);
     return () => cancelAnimationFrame(id);
   }, [showItemList, matchingItems]);
@@ -112,11 +135,12 @@ export const StockItemAutocomplete: React.FC<StockItemAutocompleteProps> = ({
         autoComplete="off"
         style={{
           width: '100%',
-          padding: '11px 13px',
+          padding: window.innerWidth < 768 ? '12px 13px' : '11px 13px',
+          minHeight: window.innerWidth < 768 ? '44px' : 'auto',
           background: '#FAF7FA',
           border: '1px solid rgba(36,27,43,.08)',
           borderRadius: '14px',
-          fontSize: '11px',
+          fontSize: window.innerWidth < 768 ? '16px' : '11px',
           color: '#241B2B',
           fontFamily: "'Manrope', sans-serif",
           boxSizing: 'border-box',
@@ -124,7 +148,13 @@ export const StockItemAutocomplete: React.FC<StockItemAutocompleteProps> = ({
       />
 
       {showItemList && matchingItems.length > 0 && (
-        <div style={{ position: 'absolute', zIndex: 30, left: 0, right: 0, marginTop: '4px' }}>
+        <div style={{
+          position: 'absolute',
+          zIndex: 9999,
+          left: 0,
+          right: 0,
+          ...(dropdownPosition === 'above' ? { bottom: '100%', marginBottom: '4px' } : { top: '100%', marginTop: '4px' })
+        }}>
           <div style={{ position: 'relative' }}>
             <ul
               ref={itemListRef}
