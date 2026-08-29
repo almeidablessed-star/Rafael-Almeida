@@ -151,7 +151,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { data, error } = await supabase
         .from('usuarias')
-        .select('id,nome,nome_confeitaria,moeda,telefone,endereco,instagram,created_at')
+        .select('id,nome,nome_confeitaria,moeda,telefone,endereco,instagram,labor_period,created_at')
         .eq('id', userId)
         .single();
 
@@ -165,7 +165,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         setUserProfile({
           ...data,
-          laborPeriod: data.labor_period || 'mensal',
+          laborPeriod: (data.labor_period as any) || 'mensal',
         });
         setIsSetupRequired(false);
       }
@@ -194,14 +194,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { data, error } = await supabase
         .from('usuarias')
-        .select('id,nome,nome_confeitaria,moeda,telefone,endereco,instagram,foto_url,created_at')
+        .select('id,nome,nome_confeitaria,moeda,telefone,endereco,instagram,labor_period,foto_url,created_at')
         .eq('id', user.id)
         .single();
 
       if (!error && data) {
         setUserProfile({
           ...data,
-          laborPeriod: data.labor_period || 'mensal',
+          laborPeriod: (data.labor_period as any) || 'mensal',
         });
       }
     } catch (error) {

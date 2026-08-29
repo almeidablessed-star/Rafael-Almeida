@@ -118,6 +118,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
           telefone: orNull(profileData.phone),
           endereco: orNull(profileData.address),
           instagram: orNull(profileData.instagram),
+          labor_period: profileData.laborPeriod,
         })
         .eq('id', user.id);
 
@@ -185,8 +186,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Currency Selector - Minimal */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+        {/* Currency Selector & Labor Period - Minimal */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginBottom: '20px' }}>
           <button
             onClick={() => setCurrency(currency === 'BRL' ? 'USD' : 'BRL')}
             style={{
@@ -214,6 +215,36 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
             {currency}
             <span style={{ fontSize: '10px', lineHeight: 1 }}>▼</span>
           </button>
+
+          {/* Labor Period Selector */}
+          <select
+            value={profileData.laborPeriod}
+            onChange={(e) => setProfileData(prev => ({ ...prev, laborPeriod: e.target.value as LaborPeriod }))}
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: '4px 8px',
+              fontFamily: "'Manrope', sans-serif",
+              fontSize: '13px',
+              fontWeight: 600,
+              color: '#7A6E80',
+              cursor: 'pointer',
+              transition: 'color 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLSelectElement).style.color = '#3A2350';
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLSelectElement).style.color = '#7A6E80';
+            }}
+            title="Período de referência para cálculos"
+          >
+            <option value="diaria">Diária</option>
+            <option value="semanal">Semanal</option>
+            <option value="mensal">Mensal</option>
+            <option value="anual">Anual</option>
+            <option value="encomenda">Por Encomenda</option>
+          </select>
         </div>
 
         {/* Header */}
