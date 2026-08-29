@@ -683,6 +683,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-[#F3E9F3] text-xs font-bold text-[var(--color-pastry-chocolate)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)]"
+                style={{ fontFamily: "'Manrope', sans-serif" }}
               />
             </div>
 
@@ -694,6 +695,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                 value={category}
                 onChange={(e) => setCategory(e.target.value as any)}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-[#F3E9F3] text-xs font-extrabold text-[var(--color-pastry-chocolate)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)] bg-white"
+                style={{ fontFamily: "'Manrope', sans-serif" }}
               >
                 <option value="bolos">🎂 Bolos & Massas</option>
                 <option value="doces">🧁 Doces & Sobremesas</option>
@@ -715,12 +717,14 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   value={yieldInfo}
                   onChange={(e) => setYieldInfo(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-[#F3E9F3] text-xs font-bold text-[var(--color-pastry-chocolate)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)]"
+                style={{ fontFamily: "'Manrope', sans-serif" }}
                 />
 
                 <select
                   value={selectedYieldUnit}
                   onChange={(e) => handleApplyYieldUnit(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-[#F3E9F3] text-xs font-extrabold text-[var(--color-pastry-chocolate)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)] bg-white cursor-pointer"
+                style={{ fontFamily: "'Manrope', sans-serif" }}
                 >
                   <option value="fatias">🍰 Fatias</option>
                   <option value="gramas">⚖️ Gramas (g)</option>
@@ -808,6 +812,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                       value={ing.quantity}
                       onChange={(e) => handleUpdateIngredient(ing.id, 'quantity', e.target.value)}
                       className="w-full px-1.5 py-1 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
+                  style={{ fontFamily: "'Manrope', sans-serif" }}
                     />
                   </div>
                   <div className="col-span-2">
@@ -815,6 +820,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                       value={ing.unit}
                       onChange={(e) => handleUpdateIngredient(ing.id, 'unit', e.target.value)}
                       className="w-full px-1 py-1 border border-[#F3E9F3] rounded-lg text-[10px] font-bold"
+                  style={{ fontFamily: "'Manrope', sans-serif" }}
                     >
                       <option value="g">g</option>
                       <option value="ml">ml</option>
@@ -867,6 +873,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   value={reposicaoCost}
                   onChange={(e) => setReposicaoCost(e.target.value)}
                   className="w-full px-2 py-1.5 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
+                  style={{ fontFamily: "'Manrope', sans-serif" }}
                 />
               </div>
 
@@ -881,6 +888,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   value={maoDeObraCost}
                   onChange={(e) => setMaoDeObraCost(e.target.value)}
                   className="w-full px-2 py-1.5 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
+                  style={{ fontFamily: "'Manrope', sans-serif" }}
                 />
               </div>
 
@@ -895,6 +903,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   value={custoCost}
                   onChange={(e) => setCustoCost(e.target.value)}
                   className="w-full px-2 py-1.5 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
+                  style={{ fontFamily: "'Manrope', sans-serif" }}
                 />
               </div>
 
@@ -909,6 +918,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   value={investimentoCost}
                   onChange={(e) => setInvestimentoCost(e.target.value)}
                   className="w-full px-2 py-1.5 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
+                  style={{ fontFamily: "'Manrope', sans-serif" }}
                 />
               </div>
             </div>
@@ -957,6 +967,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         value={tamanho.preco}
                         onChange={(e) => handleUpdateTamanho(tamanho.id, 'preco', e.target.value)}
                         className="w-full px-2 py-1.5 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
+                  style={{ fontFamily: "'Manrope', sans-serif" }}
                       />
                     </div>
                   </div>
@@ -973,6 +984,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         value={tamanho.maoDeObraCost}
                         onChange={(e) => handleUpdateTamanho(tamanho.id, 'maoDeObraCost', e.target.value)}
                         className="w-full px-2 py-1.5 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
+                  style={{ fontFamily: "'Manrope', sans-serif" }}
                       />
                     </div>
                     <div>
@@ -986,6 +998,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         value={tamanho.custoCost}
                         onChange={(e) => handleUpdateTamanho(tamanho.id, 'custoCost', e.target.value)}
                         className="w-full px-2 py-1.5 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
+                  style={{ fontFamily: "'Manrope', sans-serif" }}
                       />
                     </div>
                     <div>
@@ -999,6 +1012,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         value={tamanho.investimentoCost}
                         onChange={(e) => handleUpdateTamanho(tamanho.id, 'investimentoCost', e.target.value)}
                         className="w-full px-2 py-1.5 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
+                  style={{ fontFamily: "'Manrope', sans-serif" }}
                       />
                     </div>
                   </div>
