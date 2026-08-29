@@ -771,7 +771,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
         </div>
 
         {/* Modal Body */}
-        <form onSubmit={handleSubmit} style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '12px', flex: 1, overflowY: 'auto' }} className="stagger-children">
+        <form onSubmit={handleSubmit} className="p-5 overflow-y-auto space-y-4 flex-1 stagger-children">
           {/* Type Selector (if adding new) */}
           {!editingTransaction && (
             <div>
