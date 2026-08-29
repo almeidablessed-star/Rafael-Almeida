@@ -519,8 +519,11 @@ export const EstoqueModule: React.FC = () => {
                             {getStatusLabel(normalizedQty, item.minThreshold)}
                           </span>
                         </div>
+                        <p className="text-[12px] font-semibold text-[var(--color-neutral-charcoal)]">
+                          {item.quantity} {item.unit}
+                        </p>
                         <p className="text-[11px] text-[#999999] font-light">
-                          Alertar quando menor que:
+                          Alerta quando menor que:
                         </p>
 
                         {/* Threshold Stepper + Unit Selector + Action Icons Row */}
