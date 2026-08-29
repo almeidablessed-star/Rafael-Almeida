@@ -289,35 +289,106 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <div className="space-y-3 w-full">
           <div>
             <h3 className="font-serif-display text-[23px]" style={{ color: '#241B2B' }}>
-              Saldo Total
+              Saldos &amp; Divisão dos Pedidos
             </h3>
             <p className="text-[11px]" style={{ color: '#7A6E80', marginTop: '2px' }}>
-              Diferença entre custos estimados e gastos reais
+              Entradas das vendas pagas − Compras registradas
             </p>
           </div>
 
-          {/* Total Balance Card */}
-          <div
-            className="w-full bg-white rounded-[22px] p-6 transition-all duration-300"
-            style={{ boxShadow: '0 8px 20px rgba(58,35,80,0.08)' }}>
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
-                  Saldo Geral
-                </p>
-                <p className="text-[32px] mt-2" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
-                  {formatMoney((balances.reposicao.currentBalance || 0) + (balances.maodeobra.currentBalance || 0) + (balances.custoEInvestimento.currentBalance || 0))}
-                </p>
+          {/* 3 Circular Gauges */}
+          <div className="flex gap-3 w-full">
+            {/* Reposição */}
+            <div
+              className="flex-1 bg-white rounded-[22px] p-4 text-center transition-all duration-300 cursor-pointer"
+              style={{ boxShadow: '0 8px 20px rgba(58,35,80,0.08)' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-4px)';
+                e.currentTarget.style.boxShadow = '0 16px 32px rgba(58,35,80,0.16)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 8px 20px rgba(58,35,80,0.08)';
+              }}>
+              <div className="relative w-14 h-14 mx-auto">
+                <svg width="56" height="56" viewBox="0 0 56 56" style={{ transform: 'rotate(-90deg)' }}>
+                  <circle cx="28" cy="28" r="23" fill="none" stroke="#F0E9EE" strokeWidth="6" />
+                  <circle
+                    cx="28" cy="28" r="23" fill="none" stroke="#C4626F" strokeWidth="6"
+                    strokeDasharray={`${145 * (reposicaoPercent / 100)} ${145}`}
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center text-[11px] font-black" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
+                  {Math.round(reposicaoPercent)}%
+                </div>
               </div>
-              <div
-                className="w-16 h-16 rounded-full flex items-center justify-center"
-                style={{
-                  backgroundColor: ((balances.reposicao.currentBalance || 0) + (balances.maodeobra.currentBalance || 0) + (balances.custoEInvestimento.currentBalance || 0)) >= 0 ? '#A9D8B8' : '#F5B9C6'
-                }}>
-                <span style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800, fontSize: '14px' }}>
-                  {((balances.reposicao.currentBalance || 0) + (balances.maodeobra.currentBalance || 0) + (balances.custoEInvestimento.currentBalance || 0)) >= 0 ? '✓' : '!'}
-                </span>
+              <div className="text-[9px] uppercase tracking-[0.05em] mt-2" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', minHeight: '24px' }}>
+                REPOSIÇÃO
               </div>
+              <div className="text-[15px] mt-2" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>{formatMoney(balances.reposicao.currentBalance || 0)}</div>
+            </div>
+
+            {/* Mão de Obra */}
+            <div
+              className="flex-1 bg-white rounded-[22px] p-4 text-center transition-all duration-300 cursor-pointer"
+              style={{ boxShadow: '0 8px 20px rgba(58,35,80,0.08)' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-4px)';
+                e.currentTarget.style.boxShadow = '0 16px 32px rgba(58,35,80,0.16)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 8px 20px rgba(58,35,80,0.08)';
+              }}>
+              <div className="relative w-14 h-14 mx-auto">
+                <svg width="56" height="56" viewBox="0 0 56 56" style={{ transform: 'rotate(-90deg)' }}>
+                  <circle cx="28" cy="28" r="23" fill="none" stroke="#F0E9EE" strokeWidth="6" />
+                  <circle
+                    cx="28" cy="28" r="23" fill="none" stroke="#7E4F9E" strokeWidth="6"
+                    strokeDasharray={`${145 * (laborPercent / 100)} ${145}`}
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center text-[11px] font-black" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
+                  {Math.round(laborPercent)}%
+                </div>
+              </div>
+              <div className="text-[9px] uppercase tracking-[0.05em] mt-2" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', minHeight: '24px' }}>
+                MÃO DE OBRA
+              </div>
+              <div className="text-[15px] mt-2" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>{formatMoney(balances.maodeobra.currentBalance || 0)}</div>
+            </div>
+
+            {/* Custo + Investimento */}
+            <div
+              className="flex-1 bg-white rounded-[22px] p-4 text-center transition-all duration-300 cursor-pointer"
+              style={{ boxShadow: '0 8px 20px rgba(58,35,80,0.08)' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-4px)';
+                e.currentTarget.style.boxShadow = '0 16px 32px rgba(58,35,80,0.16)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 8px 20px rgba(58,35,80,0.08)';
+              }}>
+              <div className="relative w-14 h-14 mx-auto">
+                <svg width="56" height="56" viewBox="0 0 56 56" style={{ transform: 'rotate(-90deg)' }}>
+                  <circle cx="28" cy="28" r="23" fill="none" stroke="#F0E9EE" strokeWidth="6" />
+                  <circle
+                    cx="28" cy="28" r="23" fill="none" stroke="#B08D57" strokeWidth="6"
+                    strokeDasharray={`${145 * (costsPercent / 100)} ${145}`}
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center text-[11px] font-black" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
+                  {Math.round(costsPercent)}%
+                </div>
+              </div>
+              <div className="text-[9px] uppercase tracking-[0.05em] mt-2" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', minHeight: '24px' }}>
+                CUSTO+INV
+              </div>
+              <div className="text-[15px] mt-2" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>{formatMoney(balances.custoEInvestimento.currentBalance || 0)}</div>
             </div>
           </div>
 
