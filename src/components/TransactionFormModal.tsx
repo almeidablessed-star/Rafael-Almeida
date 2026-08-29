@@ -333,7 +333,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
             {
               id: '1',
               productName: matchedFicha.name,
-              slices: matchedSlice ? matchedSlice.slices : (options[0]?.slices || 20),
+              slices: matchedFicha.tamanhos?.[0]?.quantidade || 20,
               quantity: editingTransaction.quantity || 1,
             },
           ]);
