@@ -22,9 +22,10 @@ export interface UserProfile {
   address: string;
   photoUrl?: string;
   instagram?: string;
+  laborPeriod?: LaborPeriod;
 }
 
-export type LaborPeriod = 'diaria' | 'semanal' | 'mensal' | 'encomenda';
+export type LaborPeriod = 'diaria' | 'semanal' | 'mensal' | 'anual' | 'encomenda';
 
 export type CostCategory = 'fixo' | 'variavel' | 'investimento';
 

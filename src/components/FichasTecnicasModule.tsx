@@ -995,7 +995,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         value={tamanho.preco}
                         onChange={(e) => handleUpdateTamanho(tamanho.id, 'preco', e.target.value)}
                         className="w-full px-2 py-1.5 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
-                  style={{ fontFamily: "'Manrope', sans-serif" }}
+                        style={{ fontFamily: "'Manrope', sans-serif" }}
                       />
                     </div>
                   </div>
@@ -1012,7 +1012,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         value={tamanho.maoDeObraCost}
                         onChange={(e) => handleUpdateTamanho(tamanho.id, 'maoDeObraCost', e.target.value)}
                         className="w-full px-2 py-1.5 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
-                  style={{ fontFamily: "'Manrope', sans-serif" }}
+                        style={{ fontFamily: "'Manrope', sans-serif" }}
                       />
                     </div>
                     <div>
@@ -1026,7 +1026,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         value={tamanho.custoCost}
                         onChange={(e) => handleUpdateTamanho(tamanho.id, 'custoCost', e.target.value)}
                         className="w-full px-2 py-1.5 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
-                  style={{ fontFamily: "'Manrope', sans-serif" }}
+                        style={{ fontFamily: "'Manrope', sans-serif" }}
                       />
                     </div>
                     <div>
@@ -1040,7 +1040,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         value={tamanho.investimentoCost}
                         onChange={(e) => handleUpdateTamanho(tamanho.id, 'investimentoCost', e.target.value)}
                         className="w-full px-2 py-1.5 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
-                  style={{ fontFamily: "'Manrope', sans-serif" }}
+                        style={{ fontFamily: "'Manrope', sans-serif" }}
                       />
                     </div>
                   </div>

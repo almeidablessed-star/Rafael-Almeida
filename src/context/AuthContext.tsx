@@ -13,6 +13,7 @@ export interface UserProfile {
   telefone?: string;
   endereco?: string;
   instagram?: string;
+  laborPeriod?: 'diaria' | 'semanal' | 'mensal' | 'anual' | 'encomenda';
   created_at?: string;
 }
 
@@ -162,7 +163,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           throw error;
         }
       } else {
-        setUserProfile(data);
+        setUserProfile({
+          ...data,
+          laborPeriod: data.labor_period || 'mensal',
+        });
         setIsSetupRequired(false);
       }
     } catch (error) {
@@ -194,7 +198,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .eq('id', user.id)
         .single();
 
-      if (!error && data) setUserProfile(data);
+      if (!error && data) {
+        setUserProfile({
+          ...data,
+          laborPeriod: data.labor_period || 'mensal',
+        });
+      }
     } catch (error) {
       console.error('Error refreshing user profile:', error);
     }

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { X, Camera, Edit2 } from 'lucide-react';
+import { X, Camera, Edit2, Clock } from 'lucide-react';
+import { LaborPeriod } from '../types';
 import { useCurrency } from '../context/CurrencyContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -19,6 +20,7 @@ interface ProfileData {
   address: string;
   instagram: string;
   currency: 'BRL' | 'USD';
+  laborPeriod: LaborPeriod;
 }
 
 export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onLogout }) => {
@@ -40,6 +42,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
       address: userProfile?.endereco || '',
       instagram: userProfile?.instagram || '',
       currency: userProfile?.moeda || 'BRL',
+      laborPeriod: (userProfile?.laborPeriod as LaborPeriod) || 'mensal',
     };
   });
 
@@ -56,6 +59,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
       address: userProfile?.endereco || '',
       instagram: userProfile?.instagram || '',
       currency: userProfile?.moeda || 'BRL',
+      laborPeriod: (userProfile?.laborPeriod as LaborPeriod) || 'mensal',
     });
   }, [isOpen, userProfile, user]);
 
