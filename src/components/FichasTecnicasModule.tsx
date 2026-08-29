@@ -1083,6 +1083,13 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
           </div>
         ) : (
           filteredFichas.map((ficha) => {
+            // Converter descrição de tamanho quando exibir
+            const getTamanhoDisplay = (tamanho: any, index: number) => {
+              return tamanho.descricao.includes('cm') || tamanho.descricao.includes('fatias')
+                ? String(index + 1)
+                : tamanho.descricao;
+            };
+
             const ingList = ficha.ingredients || [];
             const isExpanded = expandedFichaId === ficha.id;
             const tamanhoSelecionado = getTamanhoSelecionado(ficha, selectedTamanhoIdByFicha[ficha.id]);
@@ -1142,7 +1149,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                     {/* FILEIRA DE BOTÕES DE TAMANHO - SEMPRE VISÍVEL */}
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignSelf: 'flex-start' }}>
                       {ficha.tamanhos && ficha.tamanhos.length > 0 ? (
-                        ficha.tamanhos.map((tamanho) => (
+                        ficha.tamanhos.map((tamanho, index) => (
                           <button
                             key={tamanho.id}
                             onClick={() => setSelectedTamanhoIdByFicha(prev => ({ ...prev, [ficha.id]: tamanho.id }))}
@@ -1174,7 +1181,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                               }
                             }}
                           >
-                            {tamanho.descricao.replace(' fatias', 'cm')}
+                            {getTamanhoDisplay(tamanho, index)}
                           </button>
                         ))
                       ) : (
