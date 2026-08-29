@@ -45,7 +45,6 @@ import { VerifyOtpPage } from './pages/VerifyOtpPage';
 import { OrdersModule } from './components/OrdersModule';
 import { SalesModule } from './components/SalesModule';
 import { RestockModule } from './components/RestockModule';
-import { LaborModule } from './components/LaborModule';
 import { CostsModule } from './components/CostsModule';
 import { HistoryModule } from './components/HistoryModule';
 import { WeeklyClosingModule } from './components/WeeklyClosingModule';
@@ -62,14 +61,19 @@ import { LoginModal } from './components/LoginModal';
 import { CurrencyProvider } from './context/CurrencyContext';
 import { CustomersProvider } from './context/CustomersContext';
 import { FichasTecnicasProvider } from './context/FichasTecnicasContext';
+import { CostsProvider } from './context/CostsContext';
 
 function AppContent() {
-  const { isResetPasswordRequired, isOtpVerificationRequired, user, logout } = useAuth();
+  const { isResetPasswordRequired, isOtpVerificationRequired, user, userProfile, logout } = useAuth();
   const { fichas } = useFichasTecnicas();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [activeTab, setActiveTab] = useState<TabType>(() => {
-    const saved = localStorage.getItem('carula_activeTab');
-    return (saved as TabType) || 'dashboard';
+    const saved = localStorage.getItem('carula_activeTab') as TabType | null;
+    if (saved === 'saldos') {
+      localStorage.setItem('carula_activeTab', 'compras');
+      return 'compras';
+    }
+    return saved || 'dashboard';
   });
 
   // Period filter state
@@ -82,6 +86,7 @@ function AppContent() {
   const [formInitialType, setFormInitialType] = useState<TransactionType>('venda');
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [prefilledDate, setPrefilledDate] = useState<string | null>(null);
+  const [prefilledLaborPeriod, setPrefilledLaborPeriod] = useState<any>(null);
   const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null);
   const [isPwaModalOpen, setIsPwaModalOpen] = useState(false);
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
@@ -117,6 +122,12 @@ function AppContent() {
   const handleOpenAddModal = (type: TransactionType = 'venda') => {
     setFormInitialType(type);
     setEditingTransaction(null);
+    // Pré-preencher com o período de referência do usuário para custos/mão de obra
+    if ((type === 'custo' || type === 'maodeobra') && userProfile?.laborPeriod) {
+      setPrefilledLaborPeriod(userProfile.laborPeriod);
+    } else {
+      setPrefilledLaborPeriod(null);
+    }
     setIsFormModalOpen(true);
   };
 
@@ -287,7 +298,7 @@ function AppContent() {
           />
         )}
 
-        {activeTab === 'saldos' && (
+        {activeTab === 'compras' && (
           <BalancesAndExpensesModule
             transactions={transactions}
             onAddTransaction={(txData) => {
@@ -336,15 +347,6 @@ function AppContent() {
           />
         )}
 
-        {activeTab === 'maodeobra' && (
-          <LaborModule
-            transactions={filteredTransactions}
-            onOpenAddModal={() => handleOpenAddModal('maodeobra')}
-            onEditTransaction={handleOpenEditModal}
-            onDeleteTransaction={handleRequestDelete}
-          />
-        )}
-
         {activeTab === 'custos' && (
           <CostsModule
             transactions={filteredTransactions}
@@ -375,13 +377,16 @@ function AppContent() {
         initialType={formInitialType}
         editingTransaction={editingTransaction}
         prefilledDate={prefilledDate}
+        prefilledLaborPeriod={prefilledLaborPeriod}
         onClose={() => {
           setIsFormModalOpen(false);
           setPrefilledDate(null);
+          setPrefilledLaborPeriod(null);
         }}
         onSave={(tx, editingId) => {
           handleSaveTransaction(tx, editingId);
           setPrefilledDate(null);
+          setPrefilledLaborPeriod(null);
         }}
       />
 
@@ -456,7 +461,9 @@ export default function App() {
             do outro lado depois de recarregar a pagina. */}
         <CustomersProvider>
           <FichasTecnicasProvider>
-            <AppContent />
+            <CostsProvider>
+              <AppContent />
+            </CostsProvider>
           </FichasTecnicasProvider>
         </CustomersProvider>
       </ProtectedRoute>

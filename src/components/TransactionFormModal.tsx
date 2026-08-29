@@ -72,6 +72,7 @@ interface TransactionFormModalProps {
   initialType: TransactionType;
   editingTransaction?: Transaction | null;
   prefilledDate?: string | null;
+  prefilledLaborPeriod?: LaborPeriod | null;
   onClose: () => void;
   onSave: (tx: Omit<Transaction, 'id' | 'createdAt'>, editingId?: string) => void;
 }
@@ -81,6 +82,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   initialType,
   editingTransaction,
   prefilledDate,
+  prefilledLaborPeriod,
   onClose,
   onSave,
 }) => {
@@ -360,7 +362,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       setPaymentMethod('zelle');
       setPaymentStatus('pago');
       setSupplier('');
-      setLaborPeriod('diaria');
+      setLaborPeriod(prefilledLaborPeriod || 'diaria');
       setCostCategory(initialType === 'investimento' ? 'investimento' : 'fixo');
       setNotes('');
       setCustomerName('');
@@ -690,7 +692,15 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
           notes: notesStr,
           // A ficha nao e escolhida na tela: o sistema casa cada item do pedido
           // com sua ficha pelo nome do produto. Ver utils/fichaMatcher.ts.
-          fichaItems: buildFichaItems(orderItems, storedFichas),
+          fichaItems: buildFichaItems(
+            orderItems.map(item => ({
+              productName: item.productName,
+              quantity: item.quantity,
+              customDescription: item.customDescription,
+              selectedSlices: item.slices,
+            })),
+            storedFichas
+          ),
         },
         editingTransaction?.id
       );
