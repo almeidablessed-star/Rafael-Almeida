@@ -525,9 +525,9 @@ export const EstoqueModule: React.FC = () => {
 
                         {/* Quantity Display + Action Icons Row */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'space-between', marginTop: '6px' }}>
-                          <span style={{ fontSize: '13px', fontWeight: '600', color: '#333', fontFamily: "'Manrope', sans-serif" }}>
+                          <div style={{ fontSize: '13px', fontWeight: '600', color: '#333', fontFamily: "'Manrope', sans-serif", border: '1px solid #E0E0E0', borderRadius: '20px', padding: '8px 16px', backgroundColor: '#FAFAFA', minWidth: 'fit-content' }}>
                             {item.quantity} {item.unit}
-                          </span>
+                          </div>
 
                           {/* Edit/Delete Actions */}
                           <div className="flex items-center gap-1">
