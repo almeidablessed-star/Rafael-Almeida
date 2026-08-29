@@ -513,17 +513,14 @@ export const EstoqueModule: React.FC = () => {
                       <div className="flex-1 flex flex-col gap-2">
                         <div className="flex items-center gap-2">
                           <h4 className="font-brand font-semibold text-[14px] text-[var(--color-neutral-charcoal)]">
-                            {item.name}
+                            {item.name.charAt(0).toUpperCase() + item.name.slice(1)}
                           </h4>
                           <span style={{ background: colors.background, color: colors.text }} className="text-[7px] font-semibold px-1 py-0.5 rounded uppercase whitespace-nowrap">
                             {getStatusLabel(normalizedQty, item.minThreshold)}
                           </span>
                         </div>
-                        <p className="text-[12px] font-semibold text-[var(--color-neutral-charcoal)]">
-                          {item.quantity} {item.unit}
-                        </p>
                         <p className="text-[11px] text-[#999999] font-light">
-                          Alerta quando menor que:
+                          Alerta quando menor que: {item.minThreshold} {item.minThresholdUnit}
                         </p>
 
                         {/* Threshold Stepper + Unit Selector + Action Icons Row */}
