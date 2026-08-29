@@ -856,7 +856,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       aria-expanded={showCustomerList && matchingCustomers.length > 0}
                       aria-autocomplete="list"
                       aria-controls="lista-clientes"
-                      className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72]"
+                      className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
                     />
 
                     {showCustomerList && matchingCustomers.length > 0 && (
@@ -943,7 +943,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       placeholder="Ex: (781) 420-6892"
                       value={customerPhone}
                       onChange={(e) => setCustomerPhone(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72]"
+                      className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
                     />
                   </div>
 
@@ -955,7 +955,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       type="date"
                       value={eventDate}
                       onChange={(e) => setEventDate(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72]"
+                      className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
                     />
                   </div>
 
@@ -968,7 +968,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       placeholder="Ex: 103 Cabot St, Beverly..."
                       value={deliveryAddress}
                       onChange={(e) => setDeliveryAddress(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72]"
+                      className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
                     />
                   </div>
 
@@ -980,7 +980,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       type="time"
                       value={deliveryTime}
                       onChange={(e) => setDeliveryTime(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72]"
+                      className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
                     />
                   </div>
                 </div>
@@ -1107,7 +1107,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                           <select
                             value={item.productName}
                             onChange={(e) => handleUpdateItemProduct(item.id, e.target.value)}
-                            className="w-full px-3 py-2.5 bg-white border border-neutral-300 rounded-xl text-xs font-extrabold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72]"
+                            className="w-full px-3 py-2.5 bg-white border border-neutral-300 rounded-xl text-xs font-extrabold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
                           >
                             {cakeNamesList.map((name) => (
                               <option key={name} value={name}>
@@ -1142,7 +1142,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                                   e.target.value
                                 )
                               }
-                              className="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-pink-400"
+                              className="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-pink-400 input-mobile-safe"
                             />
                           </div>
 
@@ -1162,7 +1162,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                                   e.target.value
                                 )
                               }
-                              className="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-pink-400"
+                              className="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-pink-400 input-mobile-safe"
                             />
                           </div>
                         </div>

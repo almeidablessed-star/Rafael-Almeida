@@ -50,6 +50,17 @@
   --comanda-gradient: linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86);
 }
 
+/* === MOBILE-SAFE INPUT SIZES === */
+/* Inputs must be at least 44px tall on mobile to avoid zoom-on-focus behavior
+   and improve touch target size. Font-size >= 16px prevents browser auto-zoom. */
+@media (max-width: 767px) {
+  .input-mobile-safe {
+    min-height: 44px !important;
+    font-size: 16px !important;
+    padding: 12px 13px !important;
+  }
+}
+
 @keyframes carFloat {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-6px); }
