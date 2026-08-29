@@ -1,3 +1,16 @@
+export interface AdministrativeCosts {
+  id?: string;
+  agua: number;
+  aluguel: number;
+  energia: number;
+  gas: number;
+  gasolina: number;
+  internet: number;
+  limpeza: number;
+  horaTrabalho: number;
+  total: number; // Calculado automaticamente
+}
+
 export type TransactionType = 'venda' | 'reposicao' | 'maodeobra' | 'custo' | 'investimento';
 
 export type PaymentMethod = 'zelle' | 'cash' | 'pix' | 'dinheiro' | 'cartao_credito' | 'cartao_debito' | 'transferencia' | 'outro';
@@ -55,6 +68,7 @@ export interface FichaOrderItem {
   fichaId: string;
   fichaName: string;
   quantity: number; // quantas unidades DESTE item foram vendidas
+  selectedTamanhoId?: string; // ID do TamanhoOpcao selecionado (para custos específicos do tamanho)
 }
 
 export interface Transaction {
@@ -88,7 +102,7 @@ export interface Transaction {
 
 export type TimePeriod = 'hoje' | 'semana' | 'mes' | 'ano' | 'tudo' | 'personalizado';
 
-export type TabType = 'dashboard' | 'pedidos' | 'fichas' | 'clientes' | 'estoque' | 'saldos' | 'semana' | 'vendas' | 'reposicao' | 'maodeobra' | 'custos' | 'historico';
+export type TabType = 'dashboard' | 'pedidos' | 'fichas' | 'clientes' | 'estoque' | 'compras' | 'semana' | 'vendas' | 'reposicao' | 'custos' | 'historico';
 
 export interface BakeryPreset {
   id: string;
