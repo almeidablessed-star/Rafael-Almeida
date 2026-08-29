@@ -778,7 +778,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
               <label style={{ fontFamily: "'Manrope', sans-serif" }} className="block text-xs font-bold text-neutral-600 mb-1.5 uppercase tracking-wider">
                 Tipo do Lançamento:
               </label>
-              <div className="grid grid-cols-2 gap-1.5 p-1 bg-neutral-100 rounded-lg">
+              <div className="grid grid-cols-2 gap-1.5 p-1 bg-[#F6F2F5] rounded-lg">
                 {[
                   { id: 'venda', label: 'Venda / Pedido' },
                   { id: 'reposicao', label: 'Estoque / Compra' },
@@ -813,15 +813,15 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
           {type === 'venda' && (
             <div className="space-y-4">
               {/* CUSTOMER & QUOTE DETAILS CARD */}
-              <div className="bg-pink-50/90 p-4 rounded-xl border border-pink-200 shadow-card space-y-3">
-                <div className="flex items-center justify-between border-b border-pink-200/80 pb-2">
-                  <label className="text-xs font-black uppercase tracking-wider text-pink-950 flex items-center gap-1.5">
+              <div className="bg-[#F6F2F5]/90 p-4 rounded-xl border border-[#E6E1DB] shadow-card space-y-3">
+                <div className="flex items-center justify-between border-b border-[#E6E1DB]/80 pb-2">
+                  <label className="text-xs font-black uppercase tracking-wider text-[#3A2350] flex items-center gap-1.5">
                     👤 Dados da Cliente & Orçamento
                   </label>
                   <button
                     type="button"
                     onClick={() => setShowPdfQuoteModal(true)}
-                    className="px-3 py-1 bg-pink-600 hover:bg-pink-700 text-white rounded-xl text-xs font-bold shadow-card flex items-center gap-1 transition-all active:scale-95"
+                    className="px-3 py-1 bg-[#6E3F72] hover:bg-[#5A3560] text-white rounded-xl text-xs font-bold shadow-card flex items-center gap-1 transition-all active:scale-95"
                     title="Gerar e imprimir folha fofa de orçamento em PDF"
                   >
                     <Printer className="w-3.5 h-3.5" />
@@ -856,7 +856,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       aria-expanded={showCustomerList && matchingCustomers.length > 0}
                       aria-autocomplete="list"
                       aria-controls="lista-clientes"
-                      className="w-full px-3 py-2 bg-white border border-pink-300 rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-pink-500"
+                      className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72]"
                     />
 
                     {showCustomerList && matchingCustomers.length > 0 && (
@@ -874,7 +874,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                         // 500 cadastradas ela ocupa o mesmo espaco.
                         // Sem py-*: padding vertical faria a 5a linha assomar
                         // por alguns pixels e sujar o corte.
-                        className="max-h-[188px] overflow-y-auto bg-white border border-pink-300 rounded-xl shadow-lg"
+                        className="max-h-[188px] overflow-y-auto bg-white border border-[#E6E1DB] rounded-xl shadow-lg"
                       >
                         {matchingCustomers.map((c, i) => (
                           <li key={c.id} role="option" aria-selected={i === highlightedCustomer}>
@@ -943,7 +943,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       placeholder="Ex: (781) 420-6892"
                       value={customerPhone}
                       onChange={(e) => setCustomerPhone(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-pink-300 rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-pink-500"
+                      className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72]"
                     />
                   </div>
 
@@ -955,7 +955,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       type="date"
                       value={eventDate}
                       onChange={(e) => setEventDate(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-pink-300 rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-pink-500"
+                      className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72]"
                     />
                   </div>
 
@@ -968,7 +968,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       placeholder="Ex: 103 Cabot St, Beverly..."
                       value={deliveryAddress}
                       onChange={(e) => setDeliveryAddress(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-pink-300 rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-pink-500"
+                      className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72]"
                     />
                   </div>
 
@@ -980,7 +980,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       type="time"
                       value={deliveryTime}
                       onChange={(e) => setDeliveryTime(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-pink-300 rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-pink-500"
+                      className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72]"
                     />
                   </div>
                 </div>
@@ -995,7 +995,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       placeholder="Ex: Cliente escolheu folhas amarelas..."
                       value={observations}
                       onChange={(e) => setObservations(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-pink-300 rounded-xl text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-pink-500"
+                      className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-xl text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72]"
                     />
                   </div>
 
@@ -1018,13 +1018,13 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       />
                       <label
                         htmlFor="inspiration-upload-input"
-                        className="flex-1 py-2 px-3 bg-pink-100 hover:bg-pink-200 text-pink-900 font-bold text-xs rounded-xl cursor-pointer transition-all flex items-center justify-center gap-1.5 border border-pink-300 text-center"
+                        className="flex-1 py-2 px-3 bg-pink-100 hover:bg-pink-200 text-pink-900 font-bold text-xs rounded-xl cursor-pointer transition-all flex items-center justify-center gap-1.5 border border-[#E6E1DB] text-center"
                       >
                         <Upload className="w-3.5 h-3.5 text-pink-700" />
                         <span className="truncate">{inspirationImage ? 'Trocar Foto' : 'Carregar Foto'}</span>
                       </label>
                       {inspirationImage && (
-                        <div className="relative w-9 h-9 rounded-xl overflow-hidden border border-pink-300 shrink-0">
+                        <div className="relative w-9 h-9 rounded-xl overflow-hidden border border-[#E6E1DB] shrink-0">
                           <img src={inspirationImage} alt="Inspiração" className="w-full h-full object-cover" />
                           <button
                             type="button"
@@ -1071,7 +1071,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                   return (
                     <div
                       key={item.id}
-                      className="bg-pink-50/50 p-3.5 rounded-lg border border-pink-200/90 shadow-card space-y-3 relative"
+                      className="bg-pink-50/50 p-3.5 rounded-lg border border-[#E6E1DB]/90 shadow-card space-y-3 relative"
                     >
                       {/* Item Header & Delete */}
                       <div className="flex items-center justify-between">
@@ -1107,7 +1107,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                           <select
                             value={item.productName}
                             onChange={(e) => handleUpdateItemProduct(item.id, e.target.value)}
-                            className="w-full px-3 py-2.5 bg-white border border-neutral-300 rounded-xl text-xs font-extrabold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-pink-500"
+                            className="w-full px-3 py-2.5 bg-white border border-neutral-300 rounded-xl text-xs font-extrabold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72]"
                           >
                             {cakeNamesList.map((name) => (
                               <option key={name} value={name}>
@@ -1188,7 +1188,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                                   onClick={() => handleUpdateItemSlices(item.id, opt.slices)}
                                   className={`py-1.5 px-3 rounded-xl text-xs font-bold transition-all border ${
                                     isSelected
-                                      ? 'bg-pink-600 text-white border-pink-600 shadow-card'
+                                      ? 'bg-[#6E3F72] text-white border-pink-600 shadow-card'
                                       : 'bg-white text-neutral-700 border-neutral-200 hover:bg-pink-50'
                                   }`}
                                 >
@@ -1201,7 +1201,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       )}
 
                       {/* QUANTITY & AUTO-FILLED BREAKDOWN PREVIEW */}
-                      <div className="pt-3 border-t border-pink-200/80 flex flex-wrap items-center justify-between gap-3">
+                      <div className="pt-3 border-t border-[#E6E1DB]/80 flex flex-wrap items-center justify-between gap-3">
                         {/* Quantity Counter */}
                         <div className="flex items-center gap-1">
                           <span className="text-[11px] font-bold text-neutral-600">Qtd:</span>
@@ -1272,7 +1272,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                 <button
                   type="button"
                   onClick={handleAddItem}
-                  className="w-full py-2.5 px-4 bg-pink-50 hover:bg-pink-100 text-pink-800 font-brand font-bold text-xs rounded-lg border-2 border-dashed border-pink-300 transition-all flex items-center justify-center gap-2 active:scale-98 shadow-card"
+                  className="w-full py-2.5 px-4 bg-pink-50 hover:bg-pink-100 text-pink-800 font-brand font-bold text-xs rounded-lg border-2 border-dashed border-[#E6E1DB] transition-all flex items-center justify-center gap-2 active:scale-98 shadow-card"
                 >
                   <PlusCircle className="w-4 h-4 text-pink-600 stroke-[2.5]" />
                   + Adicionar outro item ao mesmo pedido
@@ -1306,7 +1306,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       onClick={() => setHasDelivery(true)}
                       className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
                         hasDelivery
-                          ? 'bg-pink-600 text-white shadow-card'
+                          ? 'bg-[#6E3F72] text-white shadow-card'
                           : 'text-neutral-600 hover:text-neutral-900'
                       }`}
                     >
@@ -1316,7 +1316,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                 </div>
 
                 {hasDelivery && (
-                  <div className="bg-pink-50/70 p-3 rounded-xl border border-pink-200 space-y-2 animate-fadeIn">
+                  <div className="bg-pink-50/70 p-3 rounded-xl border border-[#E6E1DB] space-y-2 animate-fadeIn">
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex-1">
                         <label className="block text-[11px] font-bold text-neutral-700 mb-1">
@@ -1330,7 +1330,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                             value={deliveryMiles}
                             onChange={(e) => setDeliveryMiles(e.target.value)}
                             placeholder="Ex: 5"
-                            className="w-full pl-3 pr-16 py-2 bg-white border border-neutral-300 rounded-lg text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-pink-500"
+                            className="w-full pl-3 pr-16 py-2 bg-white border border-neutral-300 rounded-lg text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72]"
                           />
                           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-neutral-500 font-bold">
                             milhas
@@ -1644,7 +1644,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       key={preset.id}
                       type="button"
                       onClick={() => applyPreset(preset)}
-                      className="px-3 py-1.5 rounded-xl bg-pink-50 hover:bg-pink-100 border border-pink-200/80 text-pink-800 text-xs font-semibold whitespace-nowrap active:scale-95 transition-all"
+                      className="px-3 py-1.5 rounded-xl bg-pink-50 hover:bg-pink-100 border border-[#E6E1DB]/80 text-pink-800 text-xs font-semibold whitespace-nowrap active:scale-95 transition-all"
                     >
                       + {preset.name}
                     </button>
@@ -1738,7 +1738,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                     placeholder="0.00"
                     value={totalValue}
                     onChange={(e) => handleTotalValueChange(e.target.value)}
-                    className="w-full pl-9 pr-3.5 py-3 text-lg font-extrabold bg-pink-50/50 border-2 border-pink-300 rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:bg-white"
+                    className="w-full pl-9 pr-3.5 py-3 text-lg font-extrabold bg-pink-50/50 border-2 border-[#E6E1DB] rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:bg-white"
                   />
                 </div>
               </div>
