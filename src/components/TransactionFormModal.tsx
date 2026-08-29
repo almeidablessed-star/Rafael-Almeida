@@ -750,11 +750,11 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
 
   return createPortal(
     <div className="fixed inset-0 z-[99999] flex items-end sm:items-center justify-center bg-neutral-900/80 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto" role="dialog" aria-modal="true">
-      <div className="w-full max-w-xl bg-white rounded-t-xl sm:rounded-xl shadow-highlight overflow-hidden max-h-[92vh] flex flex-col animate-slideUp" aria-labelledby="transactionModalTitle">
+      <div className="w-full max-w-xl bg-[#F6F2F5] rounded-t-xl sm:rounded-xl shadow-highlight overflow-hidden max-h-[92vh] flex flex-col animate-slideUp" aria-labelledby="transactionModalTitle">
         {/* Modal Header */}
-        <div className={`px-5 py-4 flex items-center justify-between ${typeDetails.badgeBg}`}>
+        <div style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)' }} className="px-5 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span id="transactionModalTitle" className="heading-card-sm text-neutral-800">
+            <span id="transactionModalTitle" style={{ fontFamily: "'Instrument Serif', serif", fontSize: '18px', color: 'white' }}>
               {editingTransaction
                 ? 'Editar Lançamento'
                 : type === 'venda'
@@ -764,14 +764,14 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/80 hover:bg-white text-neutral-700 flex items-center justify-center transition-colors"
+            className="w-8 h-8 rounded-full bg-white/80 hover:bg-white text-[#3A2350] flex items-center justify-center transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Modal Body */}
-        <form onSubmit={handleSubmit} className="p-5 overflow-y-auto space-y-4 flex-1 stagger-children">
+        <form onSubmit={handleSubmit} style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '12px', flex: 1, overflowY: 'auto' }} className="stagger-children">
           {/* Type Selector (if adding new) */}
           {!editingTransaction && (
             <div>
