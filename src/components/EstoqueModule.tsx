@@ -523,46 +523,13 @@ export const EstoqueModule: React.FC = () => {
                           Alerta quando menor que: {item.minThreshold} {item.minThresholdUnit}
                         </p>
 
-                        {/* Threshold Stepper + Unit Selector + Action Icons Row */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'space-between' }}>
-                          {/* Threshold Stepper + Unit Selector */}
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#F5F5F5', borderRadius: '20px', padding: '4px 8px', width: 'fit-content' }}>
-                            <button
-                              onClick={() => handleQuickAdjustThreshold(item.id, -getThresholdDelta(item.minThresholdUnit))}
-                              style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#E8E8E8', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px', color: '#666', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}
-                              onMouseEnter={(e) => e.currentTarget.style.background = '#D0D0D0'}
-                              onMouseLeave={(e) => e.currentTarget.style.background = '#E8E8E8'}
-                              title="Diminuir"
-                            >
-                              −
-                            </button>
-                            <span style={{ fontSize: '12px', fontWeight: '600', color: '#333', minWidth: '50px', textAlign: 'center', fontFamily: "'Manrope', sans-serif" }}>
-                              {item.minThreshold}
-                            </span>
-                            <button
-                              onClick={() => handleQuickAdjustThreshold(item.id, getThresholdDelta(item.minThresholdUnit))}
-                              style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#E8E8E8', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px', color: '#666', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}
-                              onMouseEnter={(e) => e.currentTarget.style.background = '#D0D0D0'}
-                              onMouseLeave={(e) => e.currentTarget.style.background = '#E8E8E8'}
-                              title="Aumentar"
-                            >
-                              +
-                            </button>
-                            <select
-                              value={item.minThresholdUnit}
-                              onChange={(e) => handleChangeThresholdUnit(item.id, e.target.value)}
-                              style={{ fontSize: '11px', padding: '2px 4px', borderRadius: '8px', border: '1px solid #ddd', background: '#FFFFFF', cursor: 'pointer', fontFamily: "'Manrope', sans-serif" }}
-                            >
-                              <option value="g">g</option>
-                              <option value="kg">kg</option>
-                              <option value="ml">ml</option>
-                              <option value="L">L</option>
-                              <option value="un">un</option>
-                              <option value="pacote">pacote</option>
-                            </select>
-                          </div>
+                        {/* Quantity Display + Action Icons Row */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'space-between', marginTop: '6px' }}>
+                          <span style={{ fontSize: '13px', fontWeight: '600', color: '#333', fontFamily: "'Manrope', sans-serif" }}>
+                            − {item.quantity} {item.unit} +
+                          </span>
 
-                          {/* Edit/Delete Actions - Same Row */}
+                          {/* Edit/Delete Actions */}
                           <div className="flex items-center gap-1">
                             <button
                               onClick={() => handleOpenEdit(item)}
