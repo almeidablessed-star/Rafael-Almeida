@@ -9,3 +9,6 @@ coverage/
 
 # Local Claude Code settings - may contain secrets, never commit
 .claude/settings.local.json
+
+# CLI do Supabase (cache local)
+supabase/.temp/

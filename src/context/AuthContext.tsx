@@ -59,6 +59,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // because the auth listener closes over its initial state.
   const authTransitionRef = useRef(false);
 
+  // Identidade da usuaria logada, fora do estado de render.
+  //
+  // O Supabase reemite SIGNED_IN de tempos em tempos (renovacao de token, foco
+  // da aba) e entrega um objeto `user` NOVO a cada evento, mesmo sendo a mesma
+  // pessoa. Como `setUser` trocava o estado por esse objeto diferente-porem-
+  // igual, a identidade que os contexts observam em `useEffect([user])` mudava
+  // junto — e Estoque, Fichas, Clientes e Custos refaziam a busca inteira a
+  // cada poucos segundos, com o app parado (16 requisicoes em 13 segundos).
+  //
+  // Guardando o id aqui, adotamos o objeto novo so quando a usuaria muda DE
+  // FATO. Um ref, e nao estado, porque precisa ser lido de dentro do callback
+  // do listener sem re-registrar o listener.
+  const currentUserIdRef = useRef<string | null>(null);
+
   const beginAuthTransition = () => {
     authTransitionRef.current = true;
   };
@@ -79,7 +93,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         const { data: { session: currentSession } } = await supabase.auth.getSession();
         setSession(currentSession);
-        setUser(currentSession?.user ?? null);
+
+        const currentUser = currentSession?.user ?? null;
+        if (currentUserIdRef.current !== (currentUser?.id ?? null)) {
+          currentUserIdRef.current = currentUser?.id ?? null;
+          setUser(currentUser);
+        }
 
         if (currentSession?.user) {
           if (flowType === 'otp_verification') {
@@ -105,15 +124,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     initAuth();
 
+    // Callback SINCRONO de proposito. O cliente de auth do Supabase serializa
+    // as chamadas disparadas de dentro deste callback; um `await` numa consulta
+    // ao banco aqui dentro reentra no cliente e ele reemite o evento, que era a
+    // outra metade do laco de buscas. A consulta de perfil sai daqui sem espera.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         // Mid-handoff: the page owning the flow redirects when it is ready, and
         // the session is persisted for the reload to pick up. Ignoring the event
         // keeps the current screen on until then.
         if (authTransitionRef.current) return;
 
-        setSession(session);
-        setUser(session?.user ?? null);
+        const nextUser = session?.user ?? null;
+        const nextUserId = nextUser?.id ?? null;
+        const userChanged = currentUserIdRef.current !== nextUserId;
+
+        // Mesma logica do `user`: um token renovado e uma sessao nova de
+        // verdade, mas um evento repetido com o mesmo token nao e.
+        setSession((prev) =>
+          prev?.access_token === session?.access_token ? prev : session
+        );
+
+        if (userChanged) {
+          currentUserIdRef.current = nextUserId;
+          setUser(nextUser);
+        }
 
         if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') {
           const params = new URLSearchParams(window.location.search);
@@ -133,7 +168,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (session?.user) {
           setIsResetPasswordRequired(false);
           setIsOtpVerificationRequired(false);
-          await fetchUserProfile(session.user.id);
+          // So quando a usuaria muda: antes, cada evento repetido refazia a
+          // consulta a `usuarias` sem nenhum dado novo para buscar.
+          if (userChanged) {
+            void fetchUserProfile(session.user.id);
+          }
         } else {
           setUserProfile(null);
           setIsSetupRequired(false);
