@@ -11,9 +11,7 @@ import {
   FichaTecnica,
 } from '../types';
 import { useCustomers } from '../context/CustomersContext';
-import { getStoredFichas } from './FichasTecnicasModule';
 import { QuotePdfModal } from './QuotePdfModal';
-import { useFichasTecnicas } from '../context/FichasTecnicasContext';
 import {
   BAKERY_PRODUCT_PRESETS,
   INGREDIENT_PRESETS,
@@ -22,6 +20,7 @@ import {
 } from '../data/presetData';
 import { getTodayIso, formatCurrency, getTransactionTypeDetails } from '../utils/formatters';
 import { buildFichaItems, normalizeName } from '../utils/fichaMatcher';
+import { calculateProportionalBreakdown } from '../utils/weeklyCalculator';
 import {
   X,
   Plus,
@@ -53,11 +52,43 @@ import { compressImageFile } from '../utils/imageCompression';
 export interface OrderItemState {
   id: string;
   productName: string;
-  slices: number;
+  /**
+   * Qual TamanhoOpcao da ficha foi escolhido. Vazio = nenhum.
+   *
+   * Substituiu o campo `slices`, que guardava o NUMERO DE FATIAS e era usado
+   * para reencontrar o tamanho na ficha. Nao funcionava: `TamanhoOpcao.quantidade`
+   * e opcional e esta indefinida em todas as fichas cadastradas, entao o
+   * casamento por fatias nunca acertava. O resultado era o pedido usar sempre
+   * `tamanhos[0]` — a confeiteira escolhia "30 fatias" e o sistema cobrava e
+   * custeava pelo primeiro tamanho da lista.
+   *
+   * O `id` do tamanho sempre existe e nao muda, entao e por ele que se casa.
+   */
+  selectedTamanhoId: string;
   quantity: number;
   customDescription?: string;
   customUnitValue?: string;
 }
+
+/**
+ * Item novo, SEM produto escolhido.
+ *
+ * Antes nascia com `productName: 'Bolo Maria'` — um nome de exemplo de uma fase
+ * antiga, que nao existe em catalogo nenhum. Como o <select> recebia esse valor
+ * inexistente, o navegador exibia a primeira opcao real da lista enquanto o
+ * estado continuava com "Bolo Maria". A tela mostrava um bolo escolhido, o
+ * estado nao tinha nenhum, e o pedido saia com subtotal R$ 0,00 se a
+ * confeiteira apenas ajustasse a quantidade e salvasse.
+ *
+ * Nascer vazio, com um placeholder explicito no <select>, faz a tela dizer a
+ * verdade: enquanto nada foi escolhido, nada aparece escolhido.
+ */
+export const criarItemVazio = (id: string): OrderItemState => ({
+  id,
+  productName: '',
+  selectedTamanhoId: '',
+  quantity: 1,
+});
 
 export interface AddonItemState {
   id: string;
@@ -73,6 +104,7 @@ interface TransactionFormModalProps {
   editingTransaction?: Transaction | null;
   prefilledDate?: string | null;
   prefilledLaborPeriod?: LaborPeriod | null;
+  fichas: FichaTecnica[]; // Fichas já carregadas do contexto App
   onClose: () => void;
   onSave: (tx: Omit<Transaction, 'id' | 'createdAt'>, editingId?: string) => void;
 }
@@ -83,21 +115,12 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   editingTransaction,
   prefilledDate,
   prefilledLaborPeriod,
+  fichas,
   onClose,
   onSave,
 }) => {
-  // PASSO 2: Hook para ler fichas técnicas do Supabase
-  const fichasTecnicasResult = useFichasTecnicas();
-  const supabaseFichas = fichasTecnicasResult?.fichas || [];
-
   // Clientes vem do Supabase (tabela `clientes`), a mesma fonte que a aba
   // Clientes grava via useCustomers.
-  //
-  // Antes isto chamava getStoredCustomers(), que le a chave `carula_customers`
-  // do localStorage — uma chave que NENHUMA tela do app escreve. O resultado
-  // era sempre [], e como o seletor de cliente esta dentro de
-  // {storedCustomers.length > 0 && ...}, ele nunca era renderizado: a cadastrada
-  // no Supabase existia, mas o formulario de pedido nao a enxergava.
   const { customers: storedCustomers, fetchCustomerPhoto } = useCustomers();
 
   const [type, setType] = useState<TransactionType>(initialType);
@@ -114,7 +137,6 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   const [observations, setObservations] = useState<string>('');
   const [inspirationImage, setInspirationImage] = useState<string>('');
   const [showPdfQuoteModal, setShowPdfQuoteModal] = useState<boolean>(false);
-  const [storedFichas, setStoredFichas] = useState<FichaTecnica[]>([]);
 
   // --- Busca de cliente no proprio campo de nome ---
   const [showCustomerList, setShowCustomerList] = useState(false);
@@ -260,23 +282,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
     return () => document.removeEventListener('mousedown', onDocClick);
   }, [showCustomerList]);
 
-  useEffect(() => {
-    if (isOpen) {
-      // PASSO 2: Preferir fichas do Supabase, fallback para localStorage
-      if (supabaseFichas && supabaseFichas.length > 0) {
-        console.log('✓ PASSO 2: Carregando fichas do Supabase:', supabaseFichas.length, 'fichas encontradas');
-        console.log('[DEBUG] Fichas carregadas:', supabaseFichas.map(f => f.name));
-        setStoredFichas(supabaseFichas);
-      } else {
-        console.log('📁 PASSO 2: Usando fichas do localStorage (Supabase vazio ou não autenticado)');
-        setStoredFichas(getStoredFichas());
-      }
-    }
-  }, [isOpen, supabaseFichas]);
-
-  const [orderItems, setOrderItems] = useState<OrderItemState[]>([
-    { id: '1', productName: 'Bolo Maria', slices: 20, quantity: 1 },
-  ]);
+  const [orderItems, setOrderItems] = useState<OrderItemState[]>([criarItemVazio('1')]);
 
   // Delivery State
   const [hasDelivery, setHasDelivery] = useState<boolean>(false);
@@ -326,7 +332,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
         setObservations(editingTransaction.observations || '');
         setInspirationImage(editingTransaction.inspirationImage || '');
         // Look up if existing description matches a ficha name
-        const matchedFicha = storedFichas.find((ficha) =>
+        const matchedFicha = fichas.find((ficha) =>
           (editingTransaction.description || '').toLowerCase().includes(ficha.name.toLowerCase())
         );
 
@@ -335,7 +341,13 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
             {
               id: '1',
               productName: matchedFicha.name,
-              slices: matchedFicha.tamanhos?.[0]?.quantidade || 20,
+              // Pedido antigo pode nao ter vinculo de tamanho gravado; nesse
+              // caso o primeiro tamanho e o palpite honesto, e a confeiteira
+              // ve qual esta marcado e pode trocar.
+              selectedTamanhoId:
+                editingTransaction.fichaItems?.[0]?.selectedTamanhoId ||
+                matchedFicha.tamanhos?.[0]?.id ||
+                '',
               quantity: editingTransaction.quantity || 1,
             },
           ]);
@@ -344,7 +356,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
             {
               id: '1',
               productName: 'Outro / Personalizado',
-              slices: 20,
+              selectedTamanhoId: '',
               quantity: editingTransaction.quantity || 1,
               customDescription: editingTransaction.description,
               customUnitValue: String(editingTransaction.unitValue || editingTransaction.totalValue || ''),
@@ -381,7 +393,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       setInspirationImage('');
 
       // Default sales items
-      setOrderItems([{ id: '1', productName: 'Bolo Maria', slices: 20, quantity: 1 }]);
+      setOrderItems([criarItemVazio('1')]);
       setHasDelivery(false);
       setDeliveryMiles('');
       setHasAddons(false);
@@ -400,7 +412,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   const typeDetails = getTransactionTypeDetails(type);
 
   // Use fichas técnicas reais cadastradas pela confeiteira
-  const cakeNamesList = storedFichas.map(f => f.name);
+  const cakeNamesList = fichas.map(f => f.name);
   const sweetsNamesList: string[] = [];
 
   // --- Order Items Logic ---
@@ -410,7 +422,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       const prop = calculateProportionalBreakdown(customVenda);
       return {
         name: item.customDescription || 'Item Personalizado',
-        slices: item.slices,
+        tamanhoLabel: '',
         unitVenda: customVenda,
         unitReposicao: prop.reposicao,
         unitMaodeobra: prop.maodeobra,
@@ -424,10 +436,42 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       };
     }
 
-    // If item not linked to a ficha via fichaItems, use zeros (product not in fichas)
+    // Match by ficha name (normalized)
+    const matchingFicha = fichas.find(f => normalizeName(f.name) === normalizeName(item.productName));
+    if (matchingFicha && matchingFicha.tamanhos && matchingFicha.tamanhos.length > 0) {
+      // O tamanho ESCOLHIDO. O fallback para o primeiro cobre pedidos antigos
+      // sendo editados, gravados antes de existir vinculo por id — nao o uso
+      // normal, que era o defeito: preco e custos vinham sempre do tamanho 1.
+      const tamanho =
+        matchingFicha.tamanhos.find((t) => t.id === item.selectedTamanhoId) ||
+        matchingFicha.tamanhos[0];
+
+      const unitVenda = tamanho.preco || 0;
+      const unitMaodeobra = tamanho.maoDeObraCost ?? matchingFicha.maoDeObraCost;
+      const unitCusto = tamanho.custoCost ?? matchingFicha.custoCost;
+      const unitInvestimento = tamanho.investimentoCost ?? matchingFicha.investimentoCost;
+      const unitReposicao = matchingFicha.reposicaoCost;
+
+      return {
+        name: matchingFicha.name,
+        tamanhoLabel: tamanho.descricao || '',
+        unitVenda,
+        unitReposicao,
+        unitMaodeobra,
+        unitCusto,
+        unitInvestimento,
+        totalVenda: unitVenda * item.quantity,
+        totalReposicao: unitReposicao * item.quantity,
+        totalMaodeobra: unitMaodeobra * item.quantity,
+        totalCusto: unitCusto * item.quantity,
+        totalInvestimento: unitInvestimento * item.quantity,
+      };
+    }
+
+    // If not found, use zeros
     return {
       name: item.productName,
-      slices: item.slices || 0,
+      tamanhoLabel: '',
       unitVenda: 0,
       unitReposicao: 0,
       unitMaodeobra: 0,
@@ -465,10 +509,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
 
   // Order Items Manipulators
   const handleAddItem = () => {
-    setOrderItems((prev) => [
-      ...prev,
-      { id: Date.now().toString(), productName: 'Bolo Maria', slices: 20, quantity: 1 },
-    ]);
+    setOrderItems((prev) => [...prev, criarItemVazio(Date.now().toString())]);
   };
 
   const handleRemoveItem = (id: string) => {
@@ -486,28 +527,26 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
           return {
             ...item,
             productName: newProductName,
-            slices: 20,
+            selectedTamanhoId: '',
             customDescription: '',
             customUnitValue: '',
           };
         }
 
-        // Find matching ficha in storedFichas to get available sizes
-        const matchingFicha = storedFichas.find(f => normalizeName(f.name) === normalizeName(newProductName));
-        const defaultSlices = matchingFicha && matchingFicha.tamanhos.length > 0 ? matchingFicha.tamanhos[0].quantidade || 0 : 0;
-
+        // Trocar de produto zera o tamanho: os ids sao de outra ficha agora.
+        const matchingFicha = fichas.find(f => normalizeName(f.name) === normalizeName(newProductName));
         return {
           ...item,
           productName: newProductName,
-          slices: defaultSlices,
+          selectedTamanhoId: matchingFicha?.tamanhos?.[0]?.id || '',
         };
       })
     );
   };
 
-  const handleUpdateItemSlices = (id: string, newSlices: number) => {
+  const handleUpdateItemTamanho = (id: string, tamanhoId: string) => {
     setOrderItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, slices: newSlices } : item))
+      prev.map((item) => (item.id === id ? { ...item, selectedTamanhoId: tamanhoId } : item))
     );
   };
 
@@ -608,6 +647,14 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
 
     try {
       if (type === 'venda') {
+      // Item sem produto escolhido nao deve virar linha de pedido em silencio.
+      // Era assim que o pedido saia com subtotal zero: o <select> exibia o
+      // primeiro bolo da lista e ninguem percebia que nada fora escolhido.
+      if (orderItems.some((item) => !item.productName)) {
+        alert('⚠️ Escolha o produto de cada item do pedido antes de gravar.');
+        return;
+      }
+
       if (grandTotalSalePrice <= 0) {
         alert('Por favor, selecione ao menos um produto válido com valor maior que zero.');
         return;
@@ -616,10 +663,13 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       // Build Order Description
       const descParts = orderItems.map((item, idx) => {
         const bd = itemsBreakdownList[idx];
-        const unitLabel =
-          bd.name.includes('Brigadeiro') || bd.name.includes('Cupcake') ? 'un' : 'cm';
         const qtyPrefix = item.quantity > 1 ? `${item.quantity}x ` : '';
-        return `${qtyPrefix}${bd.name} (${bd.slices} ${unitLabel})`;
+        // A descricao do tamanho vem da ficha ("15 fatias", "20 cm"). Antes o
+        // sufixo era montado aqui com o numero de fatias e uma unidade chutada
+        // pelo nome do produto, o que produzia "(0 cm)" em todo pedido.
+        return bd.tamanhoLabel
+          ? `${qtyPrefix}${bd.name} (${bd.tamanhoLabel})`
+          : `${qtyPrefix}${bd.name}`;
       });
 
       let descStr = descParts.join(' + ');
@@ -701,9 +751,9 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
               productName: item.productName,
               quantity: item.quantity,
               customDescription: item.customDescription,
-              selectedSlices: item.slices,
+              selectedTamanhoId: item.selectedTamanhoId,
             })),
-            storedFichas
+            fichas
           ),
         },
         editingTransaction?.id
@@ -1053,18 +1103,19 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
 
                 {orderItems.map((item, index) => {
                   const bd = itemsBreakdownList[index];
-                  // Get available sizes from the matched ficha in storedFichas
-                  const matchingFicha = storedFichas.find(f => normalizeName(f.name) === normalizeName(item.productName));
-                  const availableOptions = matchingFicha ? matchingFicha.tamanhos.map(t => ({
-                    id: t.id,
-                    cakeName: matchingFicha.name,
-                    slices: t.quantidade || 0,
-                    venda: t.preco,
-                    reposicao: 0,
-                    maodeobra: 0,
-                    custo: 0,
-                    investimento: 0,
-                  })) : [];
+                  // Get available sizes from the matched ficha in fichas
+                  const matchingFicha = fichas.find(f => normalizeName(f.name) === normalizeName(item.productName));
+                  // Identificado por `id` e rotulado por `descricao` — os dois
+                  // campos que a ficha realmente preenche. Antes usava
+                  // `quantidade`, indefinida em todas as fichas, o que gerava
+                  // tres botoes "0 cm" indistinguiveis (e com key duplicada).
+                  const availableOptions = matchingFicha
+                    ? matchingFicha.tamanhos.map((t) => ({
+                        id: t.id,
+                        label: t.descricao || 'Tamanho',
+                        venda: t.preco,
+                      }))
+                    : [];
 
                   return (
                     <div
@@ -1097,7 +1148,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                         <label className="block text-[11px] font-bold text-neutral-700 mb-1">
                           Escolha o Produto *
                         </label>
-                        {storedFichas.length === 0 ? (
+                        {fichas.length === 0 ? (
                           <div className="w-full px-3 py-3 bg-neutral-50 border border-neutral-300 rounded-xl text-xs font-medium text-neutral-600">
                             ⚠️ Nenhum produto cadastrado ainda. Cadastre produtos na aba <strong>Fichas Técnicas</strong>.
                           </div>
@@ -1107,6 +1158,11 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                             onChange={(e) => handleUpdateItemProduct(item.id, e.target.value)}
                             className="w-full px-3 py-2.5 bg-white border border-neutral-300 rounded-xl text-xs font-extrabold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
                           >
+                            {/* Sem este placeholder, um `value` fora da lista faz
+                                o navegador exibir a primeira opcao enquanto o
+                                estado segue vazio — a tela mostrava um bolo
+                                escolhido e o pedido saia por R$ 0,00. */}
+                            <option value="">Selecione o produto…</option>
                             {cakeNamesList.map((name) => (
                               <option key={name} value={name}>
                                 {name}
@@ -1171,29 +1227,20 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                             Tamanho / Medida
                           </label>
                           <div className="flex flex-wrap gap-1.5">
-                            {availableOptions.map((opt) => {
-                              const isSelected = item.slices === opt.slices;
-                              const unitTag =
-                                opt.cakeName.includes('Brigadeiro') ||
-                                opt.cakeName.includes('Cupcake')
-                                  ? 'un'
-                                  : 'cm';
-
-                              return (
-                                <button
-                                  key={opt.slices}
-                                  type="button"
-                                  onClick={() => handleUpdateItemSlices(item.id, opt.slices)}
-                                  className={`py-1.5 px-3 rounded-xl text-xs font-bold transition-all border ${
-                                    isSelected
-                                      ? 'bg-[#6E3F72] text-white border-pink-600 shadow-card'
-                                      : 'bg-white text-neutral-700 border-neutral-200 hover:bg-pink-50'
-                                  }`}
-                                >
-                                  {opt.slices} {unitTag} ({formatCurrency(opt.venda)})
-                                </button>
-                              );
-                            })}
+                            {availableOptions.map((opt) => (
+                              <button
+                                key={opt.id}
+                                type="button"
+                                onClick={() => handleUpdateItemTamanho(item.id, opt.id)}
+                                className={`py-1.5 px-3 rounded-xl text-xs font-bold transition-all border ${
+                                  item.selectedTamanhoId === opt.id
+                                    ? 'bg-[#6E3F72] text-white border-pink-600 shadow-card'
+                                    : 'bg-white text-neutral-700 border-neutral-200 hover:bg-pink-50'
+                                }`}
+                              >
+                                {opt.label} ({formatCurrency(opt.venda)})
+                              </button>
+                            ))}
                           </div>
                         </div>
                       )}
@@ -1874,9 +1921,20 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
         <QuotePdfModal
           transaction={{
             type: 'venda',
+            // Le de `orderItems` para a quantidade e do breakdown para nome e
+            // tamanho. Antes lia `quantity`, `productName` e `slices` do
+            // breakdown, que nunca teve nenhum dos tres — a folha de orcamento
+            // saia com "undefinedx undefined (undefined fatias)".
             description:
-              itemsBreakdownList
-                .map((i) => `${i.quantity}x ${i.productName} (${i.slices} fatias)`)
+              orderItems
+                .map((item, idx) => {
+                  const bd = itemsBreakdownList[idx];
+                  const prefixo = item.quantity > 1 ? `${item.quantity}x ` : '';
+                  return bd.tamanhoLabel
+                    ? `${prefixo}${bd.name} (${bd.tamanhoLabel})`
+                    : `${prefixo}${bd.name}`;
+                })
+                .filter((linha) => linha.trim())
                 .join(' + ') || 'Pedido de Bolo / Doces',
             customerName: customerName.trim() || 'Cliente',
             customerPhone: customerPhone.trim(),

@@ -43,22 +43,54 @@ export const findFichaForProduct = (
   fichas: FichaTecnica[]
 ): FichaTecnica | undefined => {
   const target = normalizeName(productName);
-  if (!target || fichas.length === 0) return undefined;
 
+  console.log('[FICHA MATCHER] findFichaForProduct:', {
+    productName,
+    target,
+    fichasLength: fichas.length,
+    fichaNames: fichas.map(f => ({ id: f.id, name: f.name, normalized: normalizeName(f.name) }))
+  });
+
+  if (!target || fichas.length === 0) {
+    console.log('[FICHA MATCHER] ❌ Early return: target vazio ou fichas vazio');
+    return undefined;
+  }
+
+  // DEGRAU 1: ID exato
   const byId = fichas.find((f) => f.id === productName);
-  if (byId) return byId;
+  if (byId) {
+    console.log('[FICHA MATCHER] ✅ DEGRAU 1 (ID exato) - Encontrado:', byId.name);
+    return byId;
+  }
+  console.log('[FICHA MATCHER] ❌ DEGRAU 1 (ID exato) - Não encontrado');
 
+  // DEGRAU 2: Nome normalizado
   const exact = fichas.find((f) => normalizeName(f.name) === target);
-  if (exact) return exact;
+  if (exact) {
+    console.log('[FICHA MATCHER] ✅ DEGRAU 2 (Nome normalizado) - Encontrado:', exact.name);
+    return exact;
+  }
+  console.log('[FICHA MATCHER] ❌ DEGRAU 2 (Nome normalizado) - Não encontrado');
 
   // Degrau tolerante: exige 4+ caracteres para nao casar por acidente
   // ("Bolo" sozinho casaria com qualquer bolo do catalogo).
-  if (target.length < 4) return undefined;
+  if (target.length < 4) {
+    console.log('[FICHA MATCHER] ❌ DEGRAU 3 (Substring) - Target muito curto:', target.length, 'chars');
+    return undefined;
+  }
 
-  return fichas.find((f) => {
+  const result = fichas.find((f) => {
     const name = normalizeName(f.name);
     return name.includes(target) || target.includes(name);
   });
+
+  if (result) {
+    console.log('[FICHA MATCHER] ✅ DEGRAU 3 (Substring) - Encontrado:', result.name);
+  } else {
+    console.log('[FICHA MATCHER] ❌ DEGRAU 3 (Substring) - Não encontrado');
+  }
+
+  return result;
 };
 
 /** Um item de pedido, no formato minimo que o casamento precisa. */
@@ -66,7 +98,16 @@ export interface MatchableOrderItem {
   productName: string;
   quantity: number;
   customDescription?: string;
-  selectedSlices?: number; // Número de fatias/medida selecionada (para encontrar TamanhoOpcao)
+  /**
+   * Id do TamanhoOpcao escolhido na tela.
+   *
+   * Substituiu `selectedSlices`, que trazia o numero de fatias e era casado
+   * contra `TamanhoOpcao.quantidade`. Esse campo e opcional e esta indefinido em
+   * todas as fichas cadastradas, entao o `find` nunca achava nada e o vinculo de
+   * tamanho saia sempre vazio — o pedido acabava usando o primeiro tamanho da
+   * ficha, independentemente do que a confeiteira escolheu.
+   */
+  selectedTamanhoId?: string;
 }
 
 /**
@@ -95,25 +136,27 @@ export const buildFichaItems = (
     const quantity = Number(item.quantity) || 0;
     if (quantity <= 0) return;
 
-    // Encontrar o TamanhoOpcao selecionado pelo número de fatias
-    const selectedTamanho =
-      item.selectedSlices && ficha.tamanhos && ficha.tamanhos.length > 0
-        ? ficha.tamanhos.find(t => t.quantidade === item.selectedSlices)
-        : undefined;
+    // O id vem pronto da tela; so confirmamos que pertence a esta ficha, para
+    // um id de outro produto nao entrar aqui por descuido.
+    const selectedTamanhoId = (ficha.tamanhos || []).some(
+      (t) => t.id === item.selectedTamanhoId
+    )
+      ? item.selectedTamanhoId
+      : undefined;
 
     const existing = byFichaId.get(ficha.id);
     if (existing) {
       existing.quantity += quantity;
       // Se houver tamanho, atualiza (último tamanho selecionado vence)
-      if (selectedTamanho) {
-        existing.selectedTamanhoId = selectedTamanho.id;
+      if (selectedTamanhoId) {
+        existing.selectedTamanhoId = selectedTamanhoId;
       }
     } else {
       byFichaId.set(ficha.id, {
         fichaId: ficha.id,
         fichaName: ficha.name,
         quantity,
-        selectedTamanhoId: selectedTamanho?.id,
+        selectedTamanhoId,
       });
     }
   });
