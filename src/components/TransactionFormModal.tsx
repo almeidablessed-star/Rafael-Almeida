@@ -20,7 +20,7 @@ import {
 } from '../data/presetData';
 import { getTodayIso, formatCurrency, getTransactionTypeDetails } from '../utils/formatters';
 import { buildFichaItems, normalizeName } from '../utils/fichaMatcher';
-import { calculateProportionalBreakdown } from '../utils/weeklyCalculator';
+import { calculateProportionalBreakdown, derivarProporcoes } from '../utils/weeklyCalculator';
 import {
   X,
   Plus,
@@ -407,6 +407,15 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
     }
   }, [isOpen, initialType, editingTransaction]);
 
+  // Composicao media do catalogo dela, recalculada quando as fichas mudam.
+  // Substituiu percentuais fixos no codigo que somavam 100% — e portanto
+  // mostravam lucro zero em todo item avulso. Ver [[derivarProporcoes]].
+  //
+  // ACIMA do `return null` de proposito: hook depois de retorno condicional
+  // deixa de ser chamado quando o modal fecha, e o React quebra a renderizacao
+  // inteira com "Rendered more hooks than during the previous render".
+  const proporcoesDoCatalogo = React.useMemo(() => derivarProporcoes(fichas), [fichas]);
+
   if (!isOpen) return null;
 
   const typeDetails = getTransactionTypeDetails(type);
@@ -419,7 +428,8 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   const getItemBreakdown = (item: OrderItemState) => {
     if (item.productName === 'Outro / Personalizado') {
       const customVenda = parseFloat(item.customUnitValue?.replace(',', '.') || '0') || 0;
-      const prop = calculateProportionalBreakdown(customVenda);
+      // Item avulso nao tem ficha; estimamos pela media real do catalogo dela.
+      const prop = calculateProportionalBreakdown(customVenda, undefined, proporcoesDoCatalogo);
       return {
         name: item.customDescription || 'Item Personalizado',
         tamanhoLabel: '',
@@ -1321,6 +1331,18 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                           </span>
                         </div>
                       </div>
+
+                      {/* Item avulso sem catalogo de onde tirar a media: os
+                          custos acima sao zero porque nao ha o que estimar, e
+                          o lucro aparenta ser o valor inteiro. Dizer isso e
+                          melhor do que deixar a tela sugerir margem total. */}
+                      {item.productName === 'Outro / Personalizado' &&
+                        !proporcoesDoCatalogo && (
+                          <p className="text-[10px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5">
+                            ⚠️ Sem fichas técnicas cadastradas, não dá para estimar
+                            os custos deste item. Os valores acima ficam zerados.
+                          </p>
+                        )}
                     </div>
                   );
                 })}

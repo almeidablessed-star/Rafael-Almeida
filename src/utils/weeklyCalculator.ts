@@ -1,8 +1,79 @@
-import { Transaction } from '../types';
+import { Transaction, FichaTecnica } from '../types';
 import { formatDateBr } from './formatters';
 
-// Calculate proportional breakdown for any custom gross value based on catalog averages or a specific recipe
-export const calculateProportionalBreakdown = (grossTotal: number, selectedRecipe?: any) => {
+/** Fatia media de cada custo dentro do preco de venda, em fracao de 0 a 1. */
+export interface ProporcoesMedias {
+  reposicao: number;
+  maoDeObra: number;
+  custos: number;
+  investimento: number;
+  /** Quantos tamanhos entraram na media. Zero = nao foi possivel derivar. */
+  baseadoEm: number;
+}
+
+/**
+ * Descobre a composicao media de custo a partir das fichas ja cadastradas.
+ *
+ * Existe para substituir os percentuais fixos que estavam escritos no codigo
+ * (30% insumo / 33,33% mao de obra / 16,67% custo / 20% investimento). Aqueles
+ * numeros somavam exatamente 100%, entao toda venda que caisse neles aparecia
+ * com LUCRO ZERO — nao por calculo, por construcao.
+ *
+ * A media e por TAMANHO, nao por ficha: o mesmo bolo em 10 e em 30 fatias tem
+ * proporcoes bem diferentes (o custo fixo dilui conforme o preco sobe), e cada
+ * tamanho e uma venda possivel. Tamanho sem preco fica de fora — dividir por
+ * zero nao produz proporcao, produz Infinity.
+ *
+ * Retorna `null` quando nao ha nada de onde derivar. Quem chama precisa tratar:
+ * inventar um numero aqui seria repetir o defeito que esta funcao corrige.
+ */
+export const derivarProporcoes = (fichas: FichaTecnica[]): ProporcoesMedias | null => {
+  const amostras: { rep: number; mdo: number; cus: number; inv: number }[] = [];
+
+  (fichas || []).forEach((ficha) => {
+    (ficha.tamanhos || []).forEach((t) => {
+      const venda = Number(t.preco) || 0;
+      if (venda <= 0) return;
+
+      // Reposicao so existe no nivel da ficha; os demais aceitam valor
+      // especifico do tamanho, com o da ficha como padrao.
+      const rep = Number(ficha.reposicaoCost) || 0;
+      const mdo = Number(t.maoDeObraCost ?? ficha.maoDeObraCost) || 0;
+      const cus = Number(t.custoCost ?? ficha.custoCost) || 0;
+      const inv = Number(t.investimentoCost ?? ficha.investimentoCost) || 0;
+
+      amostras.push({ rep: rep / venda, mdo: mdo / venda, cus: cus / venda, inv: inv / venda });
+    });
+  });
+
+  if (amostras.length === 0) return null;
+
+  const media = (campo: 'rep' | 'mdo' | 'cus' | 'inv') =>
+    amostras.reduce((soma, a) => soma + a[campo], 0) / amostras.length;
+
+  return {
+    reposicao: media('rep'),
+    maoDeObra: media('mdo'),
+    custos: media('cus'),
+    investimento: media('inv'),
+    baseadoEm: amostras.length,
+  };
+};
+
+/**
+ * Estima a composicao de custo de um valor de venda avulso.
+ *
+ * Usado quando nao ha ficha por tras do item — "Outro / Personalizado", em que
+ * a confeiteira digita o preco e o sistema nao sabe o que aquilo consome.
+ *
+ * `proporcoes` vem de `derivarProporcoes(fichas)`: a media real do catalogo
+ * dela. Ver a nota no ramo final sobre por que nao ha mais numero fixo aqui.
+ */
+export const calculateProportionalBreakdown = (
+  grossTotal: number,
+  selectedRecipe?: any,
+  proporcoes?: ProporcoesMedias | null
+) => {
   if (grossTotal <= 0) {
     return {
       faturamentoBruto: 0,
@@ -11,10 +82,15 @@ export const calculateProportionalBreakdown = (grossTotal: number, selectedRecip
       custos: 0,
       investimento: 0,
       lucroLiquido: 0,
-      reposicaoPct: 30,
-      maodeobraPct: 33.3,
-      custosPct: 16.7,
-      investimentoPct: 20,
+      // Zerados: sem faturamento nao ha proporcao a exibir. Antes vinham
+      // preenchidos com os percentuais fixos, o que fazia a tela mostrar
+      // "30% reposicao" num pedido vazio.
+      reposicaoPct: 0,
+      maodeobraPct: 0,
+      custosPct: 0,
+      investimentoPct: 0,
+      derivado: !!proporcoes,
+      baseadoEm: proporcoes?.baseadoEm ?? 0,
     };
   }
 
@@ -39,14 +115,26 @@ export const calculateProportionalBreakdown = (grossTotal: number, selectedRecip
       maodeobraPct: (maodeobra / grossTotal) * 100,
       custosPct: (custos / grossTotal) * 100,
       investimentoPct: (investimento / grossTotal) * 100,
+      // Veio de uma receita concreta, nao de media: e o caso mais confiavel.
+      derivado: true,
+      baseadoEm: 1,
     };
   }
 
-  // Default general bakery catalog proportions (Average: 30% Insumos, 33.3% Mão de obra, 16.7% Custos, 20% Investimento)
-  const reposicao = grossTotal * 0.30;
-  const maodeobra = grossTotal * 0.3333;
-  const custos = grossTotal * 0.1667;
-  const investimento = grossTotal * 0.20;
+  // Proporcoes MEDIAS DAS FICHAS DA PROPRIA CONFEITEIRA.
+  //
+  // Aqui existiam quatro numeros fixos no codigo — 30% / 33,33% / 16,67% / 20%
+  // — que somavam exatamente 100%. Toda venda que caisse neste ramo aparecia
+  // com lucro zero, sempre, por construcao e nao por calculo.
+  //
+  // Sem proporcoes derivadas nao ha o que estimar, e chutar seria repetir o
+  // defeito. Devolvemos custo zero com `derivado: false` para a tela poder
+  // dizer que nao foi possivel estimar, em vez de exibir um numero inventado.
+  const p = proporcoes;
+  const reposicao = grossTotal * (p?.reposicao ?? 0);
+  const maodeobra = grossTotal * (p?.maoDeObra ?? 0);
+  const custos = grossTotal * (p?.custos ?? 0);
+  const investimento = grossTotal * (p?.investimento ?? 0);
   const totalDespesas = reposicao + maodeobra + custos + investimento;
   const lucroLiquido = Math.max(0, grossTotal - totalDespesas);
 
@@ -61,6 +149,8 @@ export const calculateProportionalBreakdown = (grossTotal: number, selectedRecip
     maodeobraPct: (maodeobra / grossTotal) * 100,
     custosPct: (custos / grossTotal) * 100,
     investimentoPct: (investimento / grossTotal) * 100,
+    derivado: !!p,
+    baseadoEm: p?.baseadoEm ?? 0,
   };
 };
 
