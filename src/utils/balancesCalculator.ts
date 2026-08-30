@@ -52,34 +52,15 @@ export function calculateBalances(transactions: Transaction[], fichas: FichaTecn
         paidSalesCount += 1;
         totalPaidSalesAmount += val;
 
-        // Use fichaItems if available (linked fichas), otherwise fallback to parseSaleDetail
-        if (tx.fichaItems && tx.fichaItems.length > 0 && fichas.length > 0) {
-          for (const fichaItem of tx.fichaItems) {
-            const ficha = fichas.find(f => f.id === fichaItem.fichaId);
-            if (ficha) {
-              // Se há tamanho selecionado, usar custos específicos do tamanho
-              const selectedTamanho = fichaItem.selectedTamanhoId
-                ? ficha.tamanhos?.find(t => t.id === fichaItem.selectedTamanhoId)
-                : undefined;
-
-              const reposicaoCost = ficha.reposicaoCost || 0;
-              const maoDeObraCost = (selectedTamanho?.maoDeObraCost || ficha.maoDeObraCost) || 0;
-              const custoCost = (selectedTamanho?.custoCost || ficha.custoCost) || 0;
-              const investimentoCost = (selectedTamanho?.investimentoCost || ficha.investimentoCost) || 0;
-
-              reposicaoInflow += reposicaoCost * fichaItem.quantity;
-              maodeobraInflow += maoDeObraCost * fichaItem.quantity;
-              custoInflow += custoCost * fichaItem.quantity;
-              investimentoInflow += investimentoCost * fichaItem.quantity;
-            }
-          }
-        } else {
-          const detail = parseSaleDetail(tx);
-          reposicaoInflow += detail.reposicao || 0;
-          maodeobraInflow += (detail.maoDeObra || 0) + (detail.adicionais || 0) + (detail.delivery || 0);
-          custoInflow += detail.custos || 0;
-          investimentoInflow += detail.investimento || 0;
-        }
+        // Fonte unica: a composicao gravada na venda (com fallback interno
+        // para pedidos antigos). O recalculo pelos custos ATUAIS da ficha que
+        // existia aqui reescrevia o lucro de pedidos ja fechados sempre que um
+        // insumo mudava de preco — uma venda de marco virava outra em agosto.
+        const detail = parseSaleDetail(tx);
+        reposicaoInflow += detail.reposicao || 0;
+        maodeobraInflow += (detail.maoDeObra || 0) + (detail.adicionais || 0) + (detail.delivery || 0);
+        custoInflow += detail.custos || 0;
+        investimentoInflow += detail.investimento || 0;
       }
     } else if (tx.type === 'reposicao') {
       totalExpensesCount += 1;
@@ -182,34 +163,15 @@ export function calculateWeeklyBalances(transactions: Transaction[], fichas: Fic
           totalAReceber += remainingAmount;
         }
 
-        // Use fichaItems if available (linked fichas), otherwise fallback to parseSaleDetail
-        if (tx.fichaItems && tx.fichaItems.length > 0 && fichas.length > 0) {
-          for (const fichaItem of tx.fichaItems) {
-            const ficha = fichas.find(f => f.id === fichaItem.fichaId);
-            if (ficha) {
-              // Se há tamanho selecionado, usar custos específicos do tamanho
-              const selectedTamanho = fichaItem.selectedTamanhoId
-                ? ficha.tamanhos?.find(t => t.id === fichaItem.selectedTamanhoId)
-                : undefined;
-
-              const reposicaoCost = ficha.reposicaoCost || 0;
-              const maoDeObraCost = (selectedTamanho?.maoDeObraCost || ficha.maoDeObraCost) || 0;
-              const custoCost = (selectedTamanho?.custoCost || ficha.custoCost) || 0;
-              const investimentoCost = (selectedTamanho?.investimentoCost || ficha.investimentoCost) || 0;
-
-              reposicaoInflow += reposicaoCost * fichaItem.quantity;
-              maodeobraInflow += maoDeObraCost * fichaItem.quantity;
-              custoInflow += custoCost * fichaItem.quantity;
-              investimentoInflow += investimentoCost * fichaItem.quantity;
-            }
-          }
-        } else {
-          const detail = parseSaleDetail(tx);
-          reposicaoInflow += detail.reposicao || 0;
-          maodeobraInflow += (detail.maoDeObra || 0) + (detail.adicionais || 0) + (detail.delivery || 0);
-          custoInflow += detail.custos || 0;
-          investimentoInflow += detail.investimento || 0;
-        }
+        // Fonte unica: a composicao gravada na venda (com fallback interno
+        // para pedidos antigos). O recalculo pelos custos ATUAIS da ficha que
+        // existia aqui reescrevia o lucro de pedidos ja fechados sempre que um
+        // insumo mudava de preco — uma venda de marco virava outra em agosto.
+        const detail = parseSaleDetail(tx);
+        reposicaoInflow += detail.reposicao || 0;
+        maodeobraInflow += (detail.maoDeObra || 0) + (detail.adicionais || 0) + (detail.delivery || 0);
+        custoInflow += detail.custos || 0;
+        investimentoInflow += detail.investimento || 0;
       } else {
         // Pendentes completamente a receber
         totalAReceber += val;

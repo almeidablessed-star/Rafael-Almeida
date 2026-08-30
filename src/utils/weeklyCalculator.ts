@@ -155,16 +155,61 @@ export function parseSaleDetail(sale: Transaction): WeeklySaleDetail {
   const val = Number(sale.totalValue) || 0;
   const notes = sale.notes || '';
 
+  // CAMINHO PRINCIPAL: a composicao gravada junto da venda.
+  //
+  // Tudo abaixo disto e reconstrucao para pedidos ANTIGOS, lancados antes de
+  // existir o campo `breakdown`. Pedido novo nunca chega la.
+  if (sale.breakdown) {
+    const b = sale.breakdown;
+    const pagamentoPessoal = b.maoDeObra + b.adicionais + b.delivery;
+    const custosEInvestimento = b.custos + b.investimento;
+    return {
+      transaction: sale,
+      isPaid,
+      totalValue: val,
+      maoDeObra: b.maoDeObra,
+      adicionais: b.adicionais,
+      delivery: b.delivery,
+      pagamentoPessoal,
+      reposicao: b.reposicao,
+      custos: b.custos,
+      investimento: b.investimento,
+      custosEInvestimento,
+      caixaConfeitaria: Math.max(0, val - pagamentoPessoal - b.reposicao),
+    };
+  }
+
   const extractNum = (pattern: RegExp): number | null => {
     const match = notes.match(pattern);
     if (!match || !match[1]) return null;
-    let s = match[1].trim().replace(/[^\d.,]/g, '');
-    if (s.includes(',') && s.includes('.')) {
-      s = s.replace(/,/g, '');
-    } else if (s.includes(',')) {
-      s = s.replace(/,/g, '.');
+
+    // O `.` final da frase entra na captura ("Investimento R$ 100,00." vira
+    // "100,00."). Sem retirar, ele e lido como separador decimal e o ultimo
+    // campo do texto — sempre o Investimento — saia 100x maior.
+    const s = match[1].trim().replace(/[^\d.,]/g, '').replace(/[.,]+$/, '');
+
+    // O texto foi escrito em pt-BR ("R$ 1.234,56"): ponto e milhar, virgula e
+    // decimal. A versao antiga assumia en-US e, quando havia os dois
+    // separadores, apagava a virgula — "1.234,56" virava "1.234.56" e o
+    // parseFloat devolvia 1.234. Uma mao de obra de R$ 1.200 entrava como
+    // R$ 1,20. Abaixo de mil o bug nao aparecia, o que o manteve escondido.
+    const temVirgula = s.includes(',');
+    const temPonto = s.includes('.');
+
+    let normalizado: string;
+    if (temVirgula && temPonto) {
+      // O ultimo separador que aparece e o decimal.
+      normalizado =
+        s.lastIndexOf(',') > s.lastIndexOf('.')
+          ? s.replace(/\./g, '').replace(',', '.') // pt-BR
+          : s.replace(/,/g, ''); // en-US
+    } else if (temVirgula) {
+      normalizado = s.replace(',', '.');
+    } else {
+      normalizado = s;
     }
-    const parsed = parseFloat(s);
+
+    const parsed = parseFloat(normalizado);
     return isNaN(parsed) ? null : parsed;
   };
 

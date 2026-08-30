@@ -72,6 +72,33 @@ export interface FichaOrderItem {
   selectedTamanhoId?: string; // ID do TamanhoOpcao selecionado (para custos específicos do tamanho)
 }
 
+/**
+ * Composicao financeira de uma venda, FOTOGRAFADA no momento em que ela foi
+ * lancada.
+ *
+ * Antes este numero nao era guardado em lugar nenhum, e cada tela o reconstruia
+ * de um jeito diferente:
+ *
+ *   1. O resumo do Inicio extraia os valores com EXPRESSAO REGULAR por cima do
+ *      campo de texto `notes` ("Breakdown: Reposição R$ 20,00, ...").
+ *   2. O card de saldos e a aba Compras recalculavam pelos custos ATUAIS da
+ *      ficha — entao reajustar o preco de um insumo reescrevia o lucro de
+ *      pedidos ja fechados, meses atras.
+ *   3. Quando nenhum dos dois funcionava, caia em percentuais fixos que somam
+ *      exatamente 100% (30 + 33,33 + 16,67 + 20), ou seja: lucro zero.
+ *
+ * Uma venda e um fato historico. O que ela custou no dia em que aconteceu nao
+ * muda porque a farinha subiu depois. Gravar aqui encerra as tres divergencias.
+ */
+export interface SaleBreakdown {
+  reposicao: number;
+  maoDeObra: number;
+  custos: number;
+  investimento: number;
+  delivery: number;
+  adicionais: number;
+}
+
 export interface Transaction {
   id: string;
   type: TransactionType;
@@ -98,6 +125,7 @@ export interface Transaction {
   createdAt: number;
   fichaId?: string; // Legado: primeira ficha do pedido. Preferir `fichaItems`.
   fichaItems?: FichaOrderItem[]; // Todas as fichas do pedido, com a qtd de cada item
+  breakdown?: SaleBreakdown; // Composicao financeira congelada no lancamento
   consumedIngredients?: ConsumedIngredient[]; // Ingredients automatically consumed from this sale
 }
 

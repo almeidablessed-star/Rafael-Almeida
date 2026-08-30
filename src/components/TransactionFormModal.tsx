@@ -746,6 +746,18 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
           notes: notesStr,
           // A ficha nao e escolhida na tela: o sistema casa cada item do pedido
           // com sua ficha pelo nome do produto. Ver utils/fichaMatcher.ts.
+          // Fotografia da composicao no momento do lancamento. Estes numeros ja
+          // estavam calculados aqui e eram JOGADOS FORA — as telas depois os
+          // reconstruiam por regex em cima do texto de `notes`, ou recalculando
+          // pelo custo atual da ficha. Ver [[SaleBreakdown]].
+          breakdown: {
+            reposicao: totalItemsReposicao,
+            maoDeObra: totalItemsMaodeobra,
+            custos: totalItemsCusto,
+            investimento: totalItemsInvestimento,
+            delivery: hasDelivery ? deliveryFee : 0,
+            adicionais: totalAddonsValue,
+          },
           fichaItems: buildFichaItems(
             orderItems.map(item => ({
               productName: item.productName,

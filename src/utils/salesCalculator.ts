@@ -42,24 +42,15 @@ export function calculateSalesBreakdown(sales: Transaction[], fichas: FichaTecni
     totalPaidCount += 1;
     totalVendas += val;
 
-    // Use fichaItems if available (linked fichas), otherwise fallback to parseSaleDetail
-    if (sale.fichaItems && sale.fichaItems.length > 0 && fichas.length > 0) {
-      for (const fichaItem of sale.fichaItems) {
-        const ficha = fichas.find(f => f.id === fichaItem.fichaId);
-        if (ficha) {
-          totalReposicao += (ficha.reposicaoCost || 0) * fichaItem.quantity;
-          totalMaoDeObra += (ficha.maoDeObraCost || 0) * fichaItem.quantity;
-          totalCustos += (ficha.custoCost || 0) * fichaItem.quantity;
-          totalInvestimento += (ficha.investimentoCost || 0) * fichaItem.quantity;
-        }
-      }
-    } else {
-      const detail = parseSaleDetail(sale);
-      totalReposicao += detail.reposicao;
-      totalMaoDeObra += detail.maoDeObra;
-      totalCustos += detail.custos;
-      totalInvestimento += detail.investimento;
-    }
+    // Fonte unica: a composicao gravada na venda, com fallback interno para
+    // pedidos antigos. O recalculo pelos custos ATUAIS da ficha que existia
+    // aqui reescrevia o resultado de vendas passadas toda vez que um insumo
+    // mudava de preco — uma venda de marco virava outra venda em agosto.
+    const detail = parseSaleDetail(sale);
+    totalReposicao += detail.reposicao;
+    totalMaoDeObra += detail.maoDeObra;
+    totalCustos += detail.custos;
+    totalInvestimento += detail.investimento;
   }
 
   const totalCustosEInvestimento = totalCustos + totalInvestimento;
