@@ -7,7 +7,8 @@ import { StockItemAutocomplete } from './StockItemAutocomplete';
 import { formatCurrency, formatDateBr, getTodayIso } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
 import { useFichasTecnicas } from '../context/FichasTecnicasContext';
-import { useEstoque } from '../hooks/useEstoque';
+import { useEstoque } from '../context/EstoqueContext';
+import { convertQuantity, convertCostPerUnit } from '../utils/units';
 import {
   Wallet,
   ShoppingBag,
@@ -42,7 +43,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
   const { formatCurrency: formatMoney } = useCurrency();
   const { fichas } = useFichasTecnicas();
   const balances = calculateWeeklyBalances(transactions, fichas);
-  const { estoque, addEstoque, updateEstoque } = useEstoque();
+  const { estoque, addEstoque, updateEstoque, registrarEntrada } = useEstoque();
 
   // Form state for quick expense logging
   const [description, setDescription] = useState('');
@@ -86,24 +87,9 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
     return estoque.find(item => item.name.toLowerCase().trim() === normalized);
   };
 
-  const convertQuantityToTargetUnit = (quantity: number, fromUnit: string, toUnit: string): number => {
-    if (fromUnit === toUnit) return quantity;
-
-    // Convert to base units first
-    const baseMap: { [key: string]: number } = {
-      'g': 1,
-      'kg': 1000,
-      'ml': 1,
-      'L': 1000,
-      'un': 1,
-      'pacote': 1,
-    };
-
-    const fromBase = baseMap[fromUnit] || 1;
-    const toBase = baseMap[toUnit] || 1;
-
-    return (quantity * fromBase) / toBase;
-  };
+  // A conversao mora em utils/units.ts. A copia que existia aqui mapeava todas
+  // as unidades para uma base so, entao g -> ml devolvia um numero em vez de
+  // recusar. Ver [[units]].
 
   const handleSaveExpense = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -133,23 +119,50 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
         const costPerUnitCalculated = valNum / itemQtyNum;
 
         if (existing) {
-          console.log('[handleSaveExpense] Atualizando item existente:', existing.id);
-          const convertedQty = convertQuantityToTargetUnit(itemQtyNum, itemUnit, existing.unit);
-          console.log('[handleSaveExpense] Quantidade convertida:', itemQtyNum, itemUnit, '→', convertedQty, existing.unit);
-          await updateEstoque(existing.id, {
-            ...existing,
-            quantity: existing.quantity + convertedQty,
-            costPerUnit: costPerUnitCalculated,
-          });
+          const convertedQty = convertQuantity(itemQtyNum, itemUnit, existing.unit);
+
+          if (convertedQty === null) {
+            // Comprar 2 L de um item cadastrado em gramas nao tem conversao
+            // possivel. Somar assim mesmo corromperia o saldo em silencio.
+            alert(
+              `⚠️ "${existing.name}" está cadastrado em "${existing.unit}" e você informou "${itemUnit}".\n\n` +
+                `Essas unidades não se convertem. A despesa foi registrada, mas o estoque não foi alterado.\n\n` +
+                `Ajuste a unidade na aba Estoque ou informe a compra na mesma unidade do cadastro.`
+            );
+          } else {
+            const custoNaUnidadeDoEstoque =
+              convertCostPerUnit(costPerUnitCalculated, itemUnit, existing.unit) ?? existing.costPerUnit;
+
+            await updateEstoque(existing.id, {
+              ...existing,
+              quantity: existing.quantity + convertedQty,
+              costPerUnit: custoNaUnidadeDoEstoque,
+            });
+
+            await registrarEntrada({
+              estoqueId: existing.id,
+              itemNome: existing.name,
+              quantidade: convertedQty,
+              unidade: existing.unit,
+              descricao: `Compra: ${itemNameFromDescription} (${itemQtyNum}${itemUnit} por ${formatMoney(valNum)})`,
+            });
+          }
         } else {
-          console.log('[handleSaveExpense] Criando novo item:', itemNameFromDescription, itemQtyNum, itemUnit);
-          await addEstoque({
+          const novo = await addEstoque({
             name: itemNameFromDescription,
             quantity: itemQtyNum,
             unit: itemUnit,
             minThreshold: 0,
             minThresholdUnit: itemUnit,
             costPerUnit: costPerUnitCalculated,
+          });
+
+          await registrarEntrada({
+            estoqueId: novo.id,
+            itemNome: novo.name,
+            quantidade: itemQtyNum,
+            unidade: itemUnit,
+            descricao: `Compra: ${itemNameFromDescription} (${itemQtyNum}${itemUnit} por ${formatMoney(valNum)}) — item criado`,
           });
         }
       } catch (err) {

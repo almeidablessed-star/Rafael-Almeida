@@ -1,12 +1,20 @@
-import { Transaction, TimePeriod, SummaryTotals, FichaTecnica, FichaOrderItem } from '../types';
-import { SAMPLE_INITIAL_TRANSACTIONS } from '../data/presetData';
+import { Transaction, TimePeriod, SummaryTotals, FichaOrderItem } from '../types';
 import { getTodayIso } from './formatters';
 import { parseSaleDetail } from './weeklyCalculator';
-import {
-  consumeIngredientsFromFicha,
-  consumeIngredientsForOrder,
-  returnIngredientsToStock,
-} from './stockManager';
+
+/**
+ * Persistencia das transacoes. NADA de estoque aqui.
+ *
+ * Ate o passo 3 desta refatoracao este modulo tambem movimentava estoque, por
+ * meio do `stockManager` — que gravava num segundo estoque, em localStorage,
+ * completamente separado da tabela `estoque` do Supabase que a aba Estoque
+ * mostra. Lancar pedido debitava um estoque que ninguem via.
+ *
+ * O estoque agora e do `EstoqueContext`, que fala com o banco. Como aquilo e
+ * assincrono e depende da usuaria logada, a orquestracao "grava a venda E baixa
+ * o estoque" subiu para o App, onde o contexto esta disponivel. Este arquivo
+ * voltou a fazer uma coisa so.
+ */
 
 const STORAGE_KEY = 'carulaconfeitaria_transacoes_v3';
 
@@ -55,151 +63,30 @@ export const updateTransaction = (updatedTx: Transaction): void => {
   saveTransactions(updated);
 };
 
-/**
- * Atualiza uma venda reequilibrando o estoque.
- *
- * Estrategia: DEVOLVE tudo o que a versao antiga consumiu e CONSOME de novo
- * pela versao nova. Nao calculamos delta de propositio — o delta so funciona
- * quando muda apenas a quantidade, e quebra quando a vendedora troca o produto
- * ou mistura itens. Devolver-e-reconsumir da o resultado certo em todos os
- * casos e reaproveita dois caminhos que ja estao provados.
- *
- * `fichasDisponiveis` e passado de fora (e nao lido aqui) para manter este
- * modulo sem dependencia do modulo de fichas, que importa deste.
- */
-export const updateSaleWithStock = (
-  updatedTx: Transaction,
-  fichasDisponiveis: FichaTecnica[]
-): Transaction => {
-  const current = getStoredTransactions();
-  const existing = current.find((t) => t.id === updatedTx.id);
-
-  // 1. Desfaz o consumo antigo, se havia
-  if (existing?.consumedIngredients?.length) {
-    returnIngredientsToStock(
-      existing.id,
-      existing.consumedIngredients,
-      updatedTx.date || getTodayIso()
-    );
-  }
-
-  // 2. Reconsome pela composicao nova
-  const fichaItems = updatedTx.fichaItems || [];
-  const resolved = fichaItems
-    .map((item) => {
-      const ficha = fichasDisponiveis.find((f) => f.id === item.fichaId);
-      if (!ficha) {
-        console.warn(
-          `[ESTOQUE] Aviso: fichaId "${item.fichaId}" não encontrado no catálogo. ` +
-          `Item não baixará estoque. Fichas disponíveis: ${fichasDisponiveis.map(f => f.id).join(', ') || '(nenhuma)'}`
-        );
-      }
-      return ficha ? { ficha, quantity: item.quantity } : null;
-    })
-    .filter((x): x is { ficha: FichaTecnica; quantity: number } => x !== null);
-
-  const consumedIngredients = resolved.length
-    ? consumeIngredientsForOrder(resolved, updatedTx.id, updatedTx.date)
-    : [];
-
-  const finalTx: Transaction = {
-    ...updatedTx,
-    fichaItems,
-    fichaId: fichaItems[0]?.fichaId,
-    consumedIngredients,
-  };
-
-  saveTransactions(current.map((t) => (t.id === finalTx.id ? finalTx : t)));
-  return finalTx;
-};
-
 export const deleteTransaction = (id: string): void => {
   const current = getStoredTransactions();
-  const transaction = current.find((t) => t.id === id);
-
-  // If it's a sale that consumed ingredients, return them to stock
-  if (transaction && transaction.type === 'venda' && transaction.consumedIngredients && transaction.consumedIngredients.length > 0) {
-    returnIngredientsToStock(id, transaction.consumedIngredients, getTodayIso());
-  }
-
-  const updated = current.filter((t) => t.id !== id);
-  saveTransactions(updated);
-};
-
-// Special function to add a sale with automatic ingredient consumption from a technical sheet
-//
-// `orderQuantity` = quantas unidades do produto. A ficha descreve UMA unidade.
-export const addSaleWithFicha = (
-  saleData: Omit<Transaction, 'id' | 'createdAt' | 'consumedIngredients'>,
-  ficha: FichaTecnica,
-  orderQuantity: number = 1
-): Transaction => {
-  const current = getStoredTransactions();
-  const txId = 'tx-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7);
-
-  // Consume ingredients from the technical sheet
-  const consumedIngredients = consumeIngredientsFromFicha(
-    ficha.id,
-    ficha,
-    txId,
-    saleData.date,
-    orderQuantity
-  );
-
-  // Create transaction with consumed ingredients
-  const createdTx: Transaction = {
-    ...saleData,
-    id: txId,
-    createdAt: Date.now(),
-    fichaId: ficha.id,
-    fichaItems: [{ fichaId: ficha.id, fichaName: ficha.name, quantity: orderQuantity }],
-    consumedIngredients,
-  };
-
-  const updated = [createdTx, ...current];
-  saveTransactions(updated);
-  return createdTx;
+  saveTransactions(current.filter((t) => t.id !== id));
 };
 
 /**
- * Lanca uma venda que pode conter varios produtos diferentes, cada um com sua
- * ficha e sua quantidade. E o caminho usado pelo formulario de pedido.
+ * Cria a venda com o vinculo das fichas, SEM tocar no estoque.
  *
- * Se nenhum item casar com uma ficha (ex.: produto avulso digitado a mao), a
- * venda e criada normalmente e simplesmente nao movimenta estoque.
+ * A baixa e feita pelo `EstoqueContext` depois que esta funcao retorna, porque
+ * precisa do banco e do usuario logado. O `id` retornado e o que amarra os dois
+ * lados: e ele que vai para `estoque_movimentos.transacao_id` e permite estornar
+ * o pedido inteiro depois.
  */
-export const addSaleWithFichaItems = (
+export const addSale = (
   saleData: Omit<Transaction, 'id' | 'createdAt' | 'consumedIngredients'>,
-  fichaItems: FichaOrderItem[],
-  fichasDisponiveis: FichaTecnica[]
+  fichaItems: FichaOrderItem[]
 ): Transaction => {
   const current = getStoredTransactions();
-  const txId = 'tx-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7);
-
-  const resolved = fichaItems
-    .map((item) => {
-      const ficha = fichasDisponiveis.find((f) => f.id === item.fichaId);
-      if (!ficha) {
-        console.warn(
-          `[ESTOQUE] Aviso: fichaId "${item.fichaId}" não encontrado no catálogo. ` +
-          `Item não baixará estoque. Fichas disponíveis: ${fichasDisponiveis.map(f => f.id).join(', ') || '(nenhuma)'}`
-        );
-      }
-      return ficha ? { ficha, quantity: item.quantity } : null;
-    })
-    .filter((x): x is { ficha: FichaTecnica; quantity: number } => x !== null);
-
-  const consumedIngredients = resolved.length
-    ? consumeIngredientsForOrder(resolved, txId, saleData.date)
-    : [];
-
   const createdTx: Transaction = {
     ...saleData,
-    id: txId,
+    id: 'tx-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
     createdAt: Date.now(),
     fichaId: fichaItems[0]?.fichaId,
     fichaItems,
-    consumedIngredients,
   };
 
   saveTransactions([createdTx, ...current]);

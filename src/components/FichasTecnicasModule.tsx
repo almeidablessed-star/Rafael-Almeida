@@ -3,7 +3,7 @@ import { FichaTecnica, IngredientUsage, Transaction, TamanhoOpcao } from '../typ
 import { formatCurrency } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
 import { useFichasTecnicas } from '../context/FichasTecnicasContext';
-import { useEstoque } from '../hooks/useEstoque';
+import { useEstoque } from '../context/EstoqueContext';
 import { useUndo } from '../hooks/useUndo';
 import { StockItemAutocomplete } from './StockItemAutocomplete';
 import { compressImageFile } from '../utils/imageCompression';

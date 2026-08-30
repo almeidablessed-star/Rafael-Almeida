@@ -10,9 +10,8 @@ import {
 import {
   getStoredTransactions,
   addTransaction,
-  addSaleWithFichaItems,
+  addSale,
   updateTransaction,
-  updateSaleWithStock,
   deleteTransaction,
   resetToSampleData,
   clearAllTransactions,
@@ -23,6 +22,8 @@ import {
 import { getTodayIso } from './utils/formatters';
 import { useUndo } from './hooks/useUndo';
 import { useFichasTecnicas } from './context/FichasTecnicasContext';
+import { useEstoque } from './context/EstoqueContext';
+import { ProblemaBaixa } from './utils/stockConsumption';
 
 import {
   Home,
@@ -62,10 +63,12 @@ import { CurrencyProvider } from './context/CurrencyContext';
 import { CustomersProvider } from './context/CustomersContext';
 import { FichasTecnicasProvider } from './context/FichasTecnicasContext';
 import { CostsProvider } from './context/CostsContext';
+import { EstoqueProvider } from './context/EstoqueContext';
 
 function AppContent() {
   const { isResetPasswordRequired, isOtpVerificationRequired, user, userProfile, logout } = useAuth();
   const { fichas } = useFichasTecnicas();
+  const { consumirParaPedido, devolverPedido } = useEstoque();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [activeTab, setActiveTab] = useState<TabType>(() => {
     const saved = localStorage.getItem('carula_activeTab') as TabType | null;
@@ -120,6 +123,12 @@ function AppContent() {
 
   // Handlers
   const handleOpenAddModal = (type: TransactionType = 'venda') => {
+    // Para vendas, garantir que fichas foram carregadas antes de abrir o modal
+    if (type === 'venda' && fichas.length === 0) {
+      alert('⏳ As fichas técnicas ainda estão carregando. Tente novamente em alguns segundos.');
+      return;
+    }
+
     setFormInitialType(type);
     setEditingTransaction(null);
     // Pré-preencher com o período de referência do usuário para custos/mão de obra
@@ -137,35 +146,103 @@ function AppContent() {
     setIsFormModalOpen(true);
   };
 
-  const handleSaveTransaction = (
+  /** Converte os vinculos gravados no pedido nas fichas de verdade do catalogo. */
+  const resolverItensDoPedido = (fichaItems?: Transaction['fichaItems']) =>
+    (fichaItems || [])
+      .map((item) => {
+        const ficha = fichas.find((f) => f.id === item.fichaId);
+        if (!ficha) {
+          console.warn(`[ESTOQUE] fichaId "${item.fichaId}" não está no catálogo; item não baixará estoque.`);
+        }
+        return ficha ? { ficha, quantity: item.quantity } : null;
+      })
+      .filter((x): x is { ficha: typeof fichas[number]; quantity: number } => x !== null);
+
+  /**
+   * Insumo que a ficha pede e o estoque nao atendeu.
+   *
+   * Isto PRECISA aparecer na tela. A versao antiga criava um item fantasma e o
+   * deixava negativo, entao a confeiteira nunca ficava sabendo que o cadastro
+   * estava incompleto — o estoque so ia ficando errado.
+   */
+  const avisarProblemasDeBaixa = (problemas: ProblemaBaixa[]) => {
+    if (problemas.length === 0) return;
+    const linhas = problemas.map((p) =>
+      p.motivo === 'sem-item-no-estoque'
+        ? `• ${p.insumo} — não está cadastrado na aba Estoque`
+        : `• ${p.insumo} — a ficha usa "${p.unidadeFicha}" e o estoque usa "${p.unidadeEstoque}"`
+    );
+    alert(
+      `⚠️ O pedido foi salvo, mas estes insumos NÃO baixaram do estoque:\n\n` +
+        `${linhas.join('\n')}\n\n` +
+        `Ajuste na aba Estoque para a baixa funcionar nos próximos pedidos.`
+    );
+  };
+
+  const handleSaveTransaction = async (
     txData: Omit<Transaction, 'id' | 'createdAt'>,
     editingId?: string
   ) => {
     if (editingId) {
       const existing = transactions.find((t) => t.id === editingId);
-      if (existing) {
-        const updated: Transaction = {
-          ...existing,
-          ...txData,
-        };
-        // Vendas reequilibram o estoque na edicao (devolve o antigo, consome o
-        // novo). Os demais tipos nao movimentam estoque, entao seguem simples.
-        if (updated.type === 'venda') {
-          updateSaleWithStock(updated, fichas);
-        } else {
-          updateTransaction(updated);
-        }
-        setTransactions(getStoredTransactions());
-      }
-    } else {
-      // O formulario ja casou cada item do pedido com sua ficha (fichaItems).
-      // Com pelo menos um vinculo, a venda baixa estoque automaticamente.
-      if (txData.type === 'venda' && txData.fichaItems && txData.fichaItems.length > 0) {
-        addSaleWithFichaItems(txData, txData.fichaItems, fichas);
-      } else {
-        addTransaction(txData);
-      }
+      if (!existing) return;
+
+      const updated: Transaction = { ...existing, ...txData };
+      updateTransaction(updated);
       setTransactions(getStoredTransactions());
+
+      // Vendas reequilibram o estoque na edicao: devolve tudo o que a versao
+      // antiga consumiu e consome de novo pela composicao nova. Nao calculamos
+      // delta de proposito — delta so funciona quando muda apenas a quantidade,
+      // e quebra quando a confeiteira troca o produto ou mistura itens.
+      if (updated.type === 'venda') {
+        try {
+          await devolverPedido(editingId);
+          const itens = resolverItensDoPedido(updated.fichaItems);
+          if (itens.length > 0) {
+            const resultado = await consumirParaPedido(itens, editingId);
+            avisarProblemasDeBaixa(resultado.problemas);
+          }
+        } catch (err: any) {
+          alert(
+            `⚠️ O pedido foi atualizado, mas o estoque não pôde ser reajustado:\n\n` +
+              `${err?.message || err}\n\nConfira as quantidades na aba Estoque.`
+          );
+        }
+      }
+      return;
+    }
+
+    // Validação defensiva: se é venda mas fichaItems chegou vazio, bloqueia
+    // submit e avisa. Impede que a venda seja registrada sem dar baixa no estoque.
+    if (txData.type === 'venda' && (!txData.fichaItems || txData.fichaItems.length === 0)) {
+      alert('⚠️ Erro: nenhum produto foi vinculado à ficha técnica. Verifique se os produtos estão cadastrados e tente novamente.');
+      return;
+    }
+
+    if (txData.type !== 'venda') {
+      addTransaction(txData);
+      setTransactions(getStoredTransactions());
+      return;
+    }
+
+    // A venda e gravada ANTES da baixa, de proposito. Se a rede cair no meio,
+    // preferimos uma venda registrada com aviso de estoque a uma venda perdida:
+    // o estoque a confeiteira consegue corrigir, o pedido do cliente nao.
+    const criada = addSale(txData, txData.fichaItems!);
+    setTransactions(getStoredTransactions());
+
+    try {
+      const itens = resolverItensDoPedido(criada.fichaItems);
+      if (itens.length > 0) {
+        const resultado = await consumirParaPedido(itens, criada.id);
+        avisarProblemasDeBaixa(resultado.problemas);
+      }
+    } catch (err: any) {
+      alert(
+        `⚠️ O pedido foi salvo, mas a baixa de estoque falhou:\n\n${err?.message || err}\n\n` +
+          `Nenhum insumo foi debitado. Confira a aba Estoque.`
+      );
     }
   };
 
@@ -183,7 +260,7 @@ function AppContent() {
     setTransactions(getStoredTransactions());
   };
 
-  const handleConfirmDelete = (id: string) => {
+  const handleConfirmDelete = async (id: string) => {
     // Save for undo before deleting
     const toDelete = transactions.find(t => t.id === id);
     if (toDelete) {
@@ -196,14 +273,43 @@ function AppContent() {
     deleteTransaction(id);
     setTransactions(getStoredTransactions());
     setDeletingTransaction(null);
+
+    // Pedido cancelado devolve os insumos. O que devolver vem dos movimentos
+    // gravados no banco sob este `id`, nao de uma copia guardada na transacao.
+    if (toDelete?.type === 'venda') {
+      try {
+        await devolverPedido(id);
+      } catch (err: any) {
+        alert(
+          `⚠️ O pedido foi excluído, mas os insumos não voltaram ao estoque:\n\n` +
+            `${err?.message || err}\n\nConfira as quantidades na aba Estoque.`
+        );
+      }
+    }
   };
 
-  const handleUndo = () => {
+  const handleUndo = async () => {
     const undoTx = getUndoData();
-    if (undoTx) {
-      addTransaction(undoTx);
-      setTransactions(getStoredTransactions());
-      setShowUndoToast(false);
+    if (!undoTx) return;
+
+    // Recriada com id novo; a baixa e refeita sob esse id para o rastro no
+    // estoque continuar apontando para o pedido que existe de fato.
+    const recriada = undoTx.type === 'venda' && undoTx.fichaItems?.length
+      ? addSale(undoTx, undoTx.fichaItems)
+      : addTransaction(undoTx);
+
+    setTransactions(getStoredTransactions());
+    setShowUndoToast(false);
+
+    if (recriada.type === 'venda') {
+      try {
+        const itens = resolverItensDoPedido(recriada.fichaItems);
+        if (itens.length > 0) {
+          await consumirParaPedido(itens, recriada.id);
+        }
+      } catch (err: any) {
+        alert(`⚠️ Pedido restaurado, mas a baixa de estoque falhou:\n\n${err?.message || err}`);
+      }
     }
   };
 
@@ -378,6 +484,7 @@ function AppContent() {
         editingTransaction={editingTransaction}
         prefilledDate={prefilledDate}
         prefilledLaborPeriod={prefilledLaborPeriod}
+        fichas={fichas}
         onClose={() => {
           setIsFormModalOpen(false);
           setPrefilledDate(null);
@@ -462,7 +569,9 @@ export default function App() {
         <CustomersProvider>
           <FichasTecnicasProvider>
             <CostsProvider>
-              <AppContent />
+              <EstoqueProvider>
+                <AppContent />
+              </EstoqueProvider>
             </CostsProvider>
           </FichasTecnicasProvider>
         </CustomersProvider>

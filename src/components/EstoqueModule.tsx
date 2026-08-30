@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StockItem } from '../types';
-import { useEstoque } from '../hooks/useEstoque';
+import { useEstoque } from '../context/EstoqueContext';
 import {
   Package,
   Plus,
