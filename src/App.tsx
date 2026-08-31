@@ -7,22 +7,13 @@ import {
   TimePeriod,
   TransactionType,
 } from './types';
-import {
-  getStoredTransactions,
-  addTransaction,
-  addSale,
-  updateTransaction,
-  deleteTransaction,
-  resetToSampleData,
-  clearAllTransactions,
-  saveTransactions,
-  filterTransactionsByPeriod,
-  calculateSummary,
-} from './utils/storage';
+import { filterTransactionsByPeriod, calculateSummary } from './utils/storage';
 import { getTodayIso } from './utils/formatters';
 import { useUndo } from './hooks/useUndo';
 import { useFichasTecnicas } from './context/FichasTecnicasContext';
 import { useEstoque } from './context/EstoqueContext';
+import { useTransacoes } from './context/TransacoesContext';
+import { TransacoesProvider } from './context/TransacoesContext';
 import { ProblemaBaixa } from './utils/stockConsumption';
 
 import {
@@ -69,7 +60,14 @@ function AppContent() {
   const { isResetPasswordRequired, isOtpVerificationRequired, user, userProfile, logout } = useAuth();
   const { fichas } = useFichasTecnicas();
   const { consumirParaPedido, devolverPedido } = useEstoque();
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const {
+    transacoes: transactions,
+    addTransacao,
+    updateTransacao,
+    deleteTransacao,
+    substituirTudo,
+    limparTudo,
+  } = useTransacoes();
   const [activeTab, setActiveTab] = useState<TabType>(() => {
     const saved = localStorage.getItem('carula_activeTab') as TabType | null;
     if (saved === 'saldos') {
@@ -100,11 +98,8 @@ function AppContent() {
   const { saveForUndo, getUndoData, hasUndo } = useUndo();
   const [showUndoToast, setShowUndoToast] = useState(false);
 
-  // Load transactions on mount
-  useEffect(() => {
-    const data = getStoredTransactions();
-    setTransactions(data);
-  }, []);
+  // As transacoes chegam do TransacoesProvider, que busca ao logar. Nao ha mais
+  // carga na montagem nem estado local: o provider e a fonte.
 
   // Persist active tab to localStorage
   useEffect(() => {
@@ -188,8 +183,13 @@ function AppContent() {
       if (!existing) return;
 
       const updated: Transaction = { ...existing, ...txData };
-      updateTransaction(updated);
-      setTransactions(getStoredTransactions());
+
+      try {
+        await updateTransacao(editingId, updated);
+      } catch (err: any) {
+        alert(`⚠️ Não foi possível salvar o lançamento:\n\n${err?.message || err}`);
+        return;
+      }
 
       // Vendas reequilibram o estoque na edicao: devolve tudo o que a versao
       // antiga consumiu e consome de novo pela composicao nova. Nao calculamos
@@ -221,16 +221,24 @@ function AppContent() {
     }
 
     if (txData.type !== 'venda') {
-      addTransaction(txData);
-      setTransactions(getStoredTransactions());
+      try {
+        await addTransacao(txData);
+      } catch (err: any) {
+        alert(`⚠️ Não foi possível gravar o lançamento:\n\n${err?.message || err}`);
+      }
       return;
     }
 
     // A venda e gravada ANTES da baixa, de proposito. Se a rede cair no meio,
     // preferimos uma venda registrada com aviso de estoque a uma venda perdida:
     // o estoque a confeiteira consegue corrigir, o pedido do cliente nao.
-    const criada = addSale(txData, txData.fichaItems!);
-    setTransactions(getStoredTransactions());
+    let criada: Transaction;
+    try {
+      criada = await addTransacao(txData);
+    } catch (err: any) {
+      alert(`⚠️ Não foi possível gravar o pedido:\n\n${err?.message || err}\n\nNada foi salvo.`);
+      return;
+    }
 
     try {
       const itens = resolverItensDoPedido(criada.fichaItems);
@@ -250,14 +258,13 @@ function AppContent() {
     setDeletingTransaction(tx);
   };
 
-  const handleTogglePaymentStatus = (tx: Transaction) => {
+  const handleTogglePaymentStatus = async (tx: Transaction) => {
     const newStatus = tx.paymentStatus === 'pendente' ? 'pago' : 'pendente';
-    const updated: Transaction = {
-      ...tx,
-      paymentStatus: newStatus,
-    };
-    updateTransaction(updated);
-    setTransactions(getStoredTransactions());
+    try {
+      await updateTransacao(tx.id, { ...tx, paymentStatus: newStatus });
+    } catch (err: any) {
+      alert(`⚠️ Não foi possível mudar o status do pagamento:\n\n${err?.message || err}`);
+    }
   };
 
   const handleConfirmDelete = async (id: string) => {
@@ -270,21 +277,31 @@ function AppContent() {
       setTimeout(() => setShowUndoToast(false), 10000);
     }
 
-    deleteTransaction(id);
-    setTransactions(getStoredTransactions());
     setDeletingTransaction(null);
 
-    // Pedido cancelado devolve os insumos. O que devolver vem dos movimentos
-    // gravados no banco sob este `id`, nao de uma copia guardada na transacao.
+    // A DEVOLUCAO VEM ANTES DA EXCLUSAO, e a ordem importa.
+    //
+    // `estoque_movimentos.transacao_id` e chave estrangeira com ON DELETE SET
+    // NULL. Apagar a transacao primeiro zera esse vinculo, e o estorno — que
+    // procura os movimentos justamente por ele — nao acharia mais nada para
+    // devolver. Os insumos ficariam baixados para sempre, em silencio.
     if (toDelete?.type === 'venda') {
       try {
         await devolverPedido(id);
       } catch (err: any) {
         alert(
-          `⚠️ O pedido foi excluído, mas os insumos não voltaram ao estoque:\n\n` +
-            `${err?.message || err}\n\nConfira as quantidades na aba Estoque.`
+          `⚠️ Os insumos não voltaram ao estoque:\n\n${err?.message || err}\n\n` +
+            `O pedido NÃO foi excluído, para o estorno poder ser refeito. ` +
+            `Confira a aba Estoque e tente de novo.`
         );
+        return;
       }
+    }
+
+    try {
+      await deleteTransacao(id);
+    } catch (err: any) {
+      alert(`⚠️ Não foi possível excluir o pedido:\n\n${err?.message || err}`);
     }
   };
 
@@ -294,11 +311,14 @@ function AppContent() {
 
     // Recriada com id novo; a baixa e refeita sob esse id para o rastro no
     // estoque continuar apontando para o pedido que existe de fato.
-    const recriada = undoTx.type === 'venda' && undoTx.fichaItems?.length
-      ? addSale(undoTx, undoTx.fichaItems)
-      : addTransaction(undoTx);
+    let recriada: Transaction;
+    try {
+      recriada = await addTransacao(undoTx);
+    } catch (err: any) {
+      alert(`⚠️ Não foi possível restaurar o pedido:\n\n${err?.message || err}`);
+      return;
+    }
 
-    setTransactions(getStoredTransactions());
     setShowUndoToast(false);
 
     if (recriada.type === 'venda') {
@@ -313,19 +333,20 @@ function AppContent() {
     }
   };
 
-  const handleRestoreTransactions = (txs: Transaction[]) => {
-    saveTransactions(txs);
-    setTransactions(txs);
+  const handleRestoreTransactions = async (txs: Transaction[]) => {
+    try {
+      await substituirTudo(txs);
+    } catch (err: any) {
+      alert(`⚠️ Não foi possível restaurar o backup:\n\n${err?.message || err}`);
+    }
   };
 
-  const handleResetSampleData = () => {
-    const samples = resetToSampleData();
-    setTransactions(samples);
-  };
-
-  const handleClearAll = () => {
-    const cleared = clearAllTransactions();
-    setTransactions(cleared);
+  const handleClearAll = async () => {
+    try {
+      await limparTudo();
+    } catch (err: any) {
+      alert(`⚠️ Não foi possível limpar os lançamentos:\n\n${err?.message || err}`);
+    }
   };
 
   const handleLogout = async () => {
@@ -407,9 +428,12 @@ function AppContent() {
         {activeTab === 'compras' && (
           <BalancesAndExpensesModule
             transactions={transactions}
-            onAddTransaction={(txData) => {
-              addTransaction(txData);
-              setTransactions(getStoredTransactions());
+            onAddTransaction={async (txData) => {
+              try {
+                await addTransacao(txData);
+              } catch (err: any) {
+                alert(`⚠️ Não foi possível gravar o lançamento:\n\n${err?.message || err}`);
+              }
             }}
             onEditTransaction={handleOpenEditModal}
             onDeleteTransaction={handleRequestDelete}
@@ -422,9 +446,12 @@ function AppContent() {
 
         {activeTab === 'fichas' && (
           <FichasTecnicasModule
-            onAddTransaction={(txData) => {
-              addTransaction(txData);
-              setTransactions(getStoredTransactions());
+            onAddTransaction={async (txData) => {
+              try {
+                await addTransacao(txData);
+              } catch (err: any) {
+                alert(`⚠️ Não foi possível gravar o lançamento:\n\n${err?.message || err}`);
+              }
             }}
             onNavigateToTab={(tab) => setActiveTab(tab)}
           />
@@ -517,7 +544,6 @@ function AppContent() {
         transactions={transactions}
         onClose={() => setIsBackupModalOpen(false)}
         onRestoreTransactions={handleRestoreTransactions}
-        onResetSampleData={handleResetSampleData}
         onClearAll={handleClearAll}
       />
 
@@ -570,7 +596,9 @@ export default function App() {
           <FichasTecnicasProvider>
             <CostsProvider>
               <EstoqueProvider>
-                <AppContent />
+                <TransacoesProvider>
+                  <AppContent />
+                </TransacoesProvider>
               </EstoqueProvider>
             </CostsProvider>
           </FichasTecnicasProvider>

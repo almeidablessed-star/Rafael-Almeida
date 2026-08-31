@@ -7,9 +7,10 @@ interface BackupModalProps {
   isOpen: boolean;
   transactions: Transaction[];
   onClose: () => void;
-  onRestoreTransactions: (txs: Transaction[]) => void;
-  onResetSampleData: () => void;
-  onClearAll: () => void;
+  // Assincronos desde que as transacoes passaram a viver no Supabase: o aviso
+  // de sucesso precisa esperar a gravacao, nao adiantar-se a ela.
+  onRestoreTransactions: (txs: Transaction[]) => Promise<void>;
+  onClearAll: () => Promise<void>;
 }
 
 export const BackupModal: React.FC<BackupModalProps> = ({
@@ -17,7 +18,6 @@ export const BackupModal: React.FC<BackupModalProps> = ({
   transactions,
   onClose,
   onRestoreTransactions,
-  onResetSampleData,
   onClearAll,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -39,18 +39,22 @@ export const BackupModal: React.FC<BackupModalProps> = ({
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       try {
         const parsed = JSON.parse(event.target?.result as string);
-        if (Array.isArray(parsed)) {
-          onRestoreTransactions(parsed);
-          alert('Backup restaurado com sucesso! Os dados foram atualizados.');
-          onClose();
-        } else {
+        if (!Array.isArray(parsed)) {
           alert('Arquivo inválido. O arquivo de backup deve ser no formato JSON do Carula Confeitaria.');
+          return;
         }
-      } catch (err) {
-        alert('Erro ao carregar o arquivo. Verifique se é um arquivo JSON válido.');
+
+        // `await` antes do aviso: a restauracao grava no banco e pode falhar.
+        // Sem esperar, a confeiteira lia "restaurado com sucesso" enquanto a
+        // gravacao ainda estava em curso — ou tinha acabado de dar erro.
+        await onRestoreTransactions(parsed);
+        alert('Backup restaurado com sucesso! Os dados foram atualizados.');
+        onClose();
+      } catch (err: any) {
+        alert(`Erro ao restaurar o backup: ${err?.message || 'arquivo JSON inválido.'}`);
       }
     };
     reader.readAsText(file);
@@ -85,9 +89,15 @@ export const BackupModal: React.FC<BackupModalProps> = ({
 
         {/* Security badge note */}
         <div className="bg-semantic-success-50 border border-semantic-success-200 rounded-lg p-3 flex items-center gap-2.5 text-xs text-semantic-success-800 font-medium">
+          {/* Este texto dizia "nada sai do seu dispositivo, tudo e salvo
+              localmente no navegador". Era verdade enquanto os lancamentos
+              viviam no localStorage; deixou de ser quando passaram para o
+              Supabase. Promessa de privacidade desatualizada e pior do que
+              nenhuma — a confeiteira decide o que registrar com base nela. */}
           <ShieldCheck className="w-5 h-5 text-semantic-success-600 shrink-0" />
           <span>
-            Nenhum dado financeiro é enviado para servidores externos. Tudo é salvo localmente no navegador do seu dispositivo.
+            Seus lançamentos ficam guardados na sua conta, protegidos por senha, e
+            aparecem em todos os aparelhos onde você entrar. Só você tem acesso.
           </span>
         </div>
 
@@ -138,11 +148,12 @@ export const BackupModal: React.FC<BackupModalProps> = ({
 
           {/* Clear All Data */}
           <button
-            onClick={() => {
-              if (confirm('ATENÇÃO: Certeza que deseja apagar TODOS os dados e começar do zero? Esta ação é irreversível.')) {
-                onClearAll();
-                onClose();
+            onClick={async () => {
+              if (!confirm('ATENÇÃO: Certeza que deseja apagar TODOS os lançamentos e começar do zero? Esta ação é irreversível e vale para todos os seus aparelhos.')) {
+                return;
               }
+              await onClearAll();
+              onClose();
             }}
             className="w-full p-3 bg-semantic-error-50 hover:bg-rose-100 border border-semantic-error-200 rounded-lg flex items-center justify-between text-left transition-all active:scale-98"
           >

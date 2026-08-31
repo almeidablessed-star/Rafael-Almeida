@@ -6,7 +6,7 @@ import { Transaction } from '../types';
 import { formatCurrency, formatDateBr } from '../utils/formatters';
 import { useAuth } from '../context/AuthContext';
 import { useFichasTecnicas } from '../context/FichasTecnicasContext';
-import { updateTransaction } from '../utils/storage';
+import { useTransacoes } from '../context/TransacoesContext';
 import { compressImageFile } from '../utils/imageCompression';
 import {
   Printer,
@@ -48,6 +48,23 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [inspirationImage, setInspirationImage] = useState<string>(transaction.inspirationImage || '');
+  const { updateTransacao } = useTransacoes();
+
+  /**
+   * Grava a foto de inspiracao no pedido.
+   *
+   * O modal tambem e aberto a partir do FORMULARIO, com um pedido que ainda nao
+   * foi gravado — por isso o `id` e checado antes. Nesse caso a foto vive so no
+   * estado da tela e e persistida junto quando a venda for salva.
+   */
+  const persistirImagem = async (imagem: string) => {
+    if (!('id' in transaction) || !transaction.id) return;
+    try {
+      await updateTransacao(transaction.id, { ...transaction, inspirationImage: imagem });
+    } catch (err: any) {
+      alert(`⚠️ A foto não pôde ser salva no pedido:\n\n${err?.message || err}`);
+    }
+  };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -61,23 +78,13 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
     const result = await compressImageFile(file);
     if (result) {
       setInspirationImage(result);
-      if ('id' in transaction && transaction.id) {
-        updateTransaction({
-          ...transaction,
-          inspirationImage: result,
-        });
-      }
+      await persistirImagem(result);
     }
   };
 
-  const handleRemoveImage = () => {
+  const handleRemoveImage = async () => {
     setInspirationImage('');
-    if ('id' in transaction && transaction.id) {
-      updateTransaction({
-        ...transaction,
-        inspirationImage: '',
-      });
-    }
+    await persistirImagem('');
   };
   
   // Kitchen sheet expandable items accordion state (all open by default)
