@@ -34,6 +34,9 @@ export const AdminCostsCard: React.FC = () => {
     });
   };
 
+  // Só despesas MENSAIS. A hora de trabalho saiu daqui: e uma tarifa por hora,
+  // nao um gasto do mes, e somada junto produzia um total sem sentido — que e
+  // exatamente o numero usado para calcular a meta de faturamento semanal.
   const costFields = [
     { key: 'agua', label: 'Água', icon: Droplet },
     { key: 'aluguel', label: 'Aluguel', icon: Home },
@@ -42,8 +45,11 @@ export const AdminCostsCard: React.FC = () => {
     { key: 'gasolina', label: 'Gasolina', icon: Fuel },
     { key: 'internet', label: 'Internet', icon: Wifi },
     { key: 'limpeza', label: 'Limpeza', icon: Sparkles },
-    { key: 'horaTrabalho', label: 'Hora de Trabalho', icon: Clock },
   ] as const;
+
+  const totalMensal = (localCosts?.agua || 0) + (localCosts?.aluguel || 0) +
+    (localCosts?.energia || 0) + (localCosts?.gas || 0) + (localCosts?.gasolina || 0) +
+    (localCosts?.internet || 0) + (localCosts?.limpeza || 0);
 
   return (
     <div className="space-y-2">
@@ -144,6 +150,34 @@ export const AdminCostsCard: React.FC = () => {
               </p>
             </div>
           ))}
+
+          {/* Tarifa por hora: ocupa a linha inteira e nao soma com as de cima,
+              para a leitura nao sugerir que e mais uma despesa do mes. */}
+          <div
+            style={{
+              gridColumn: '1 / -1',
+              background: '#FAF7FA',
+              border: '1px dashed #E6E1DB',
+              borderRadius: '4px',
+              padding: '8px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px' }}>
+              <Clock style={{ width: '12px', height: '12px', color: 'var(--color-brand-700)' }} />
+              <span style={{
+                fontSize: '9px',
+                fontWeight: 'bold',
+                color: 'var(--color-brand-700)',
+                textTransform: 'uppercase',
+              }}>
+                Sua hora de trabalho
+              </span>
+            </div>
+            <p style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--color-brand-900)', margin: 0 }}>
+              {formatMoney(administrativeCosts.horaTrabalho)}
+              <span style={{ fontSize: '9px', fontWeight: 'normal', color: '#7A6E80' }}> / hora</span>
+            </p>
+          </div>
         </div>
       ) : (
         // Edit Mode - Simples
@@ -199,17 +233,45 @@ export const AdminCostsCard: React.FC = () => {
           }}>
             <span style={{ fontWeight: 'bold', color: 'var(--color-brand-900)' }}>Total Mensal</span>
             <span style={{ fontWeight: 'bold', color: 'var(--color-brand-900)' }}>
-              {formatMoney(
-                (localCosts?.agua || 0) +
-                  (localCosts?.aluguel || 0) +
-                  (localCosts?.energia || 0) +
-                  (localCosts?.gas || 0) +
-                  (localCosts?.gasolina || 0) +
-                  (localCosts?.internet || 0) +
-                  (localCosts?.limpeza || 0) +
-                  (localCosts?.horaTrabalho || 0)
-              )}
+              {formatMoney(totalMensal)}
             </span>
+          </div>
+
+          {/* Tarifa por hora — separada das despesas de propósito. */}
+          <div style={{
+            marginTop: '8px',
+            paddingTop: '8px',
+            borderTop: '1px dashed #E6E1DB',
+          }}>
+            <label style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px',
+              fontSize: '9px',
+              fontWeight: 'bold',
+              color: 'var(--color-brand-900)',
+              marginBottom: '4px',
+            }}>
+              <Clock size={11} />
+              Sua hora de trabalho (R$/hora)
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              value={localCosts?.horaTrabalho || 0}
+              onChange={(e) => handleInputChange('horaTrabalho', parseFloat(e.target.value) || 0)}
+              style={{
+                width: '100%',
+                padding: '6px 8px',
+                fontSize: '11px',
+                border: '1px solid #E6E1DB',
+                borderRadius: '4px',
+              }}
+            />
+            <p style={{ fontSize: '9px', color: '#7A6E80', marginTop: '4px', lineHeight: 1.4 }}>
+              Quanto você cobra pela sua hora. Não entra no total mensal — é a
+              tarifa que você multiplica pelas horas do bolo. Ex: R$ 20/hora × 3h = R$ 60 de mão de obra.
+            </p>
           </div>
 
           {/* Action Buttons */}

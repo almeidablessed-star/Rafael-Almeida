@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Transaction, SummaryTotals, TransactionType, TimePeriod } from '../types';
 import { formatCurrency, formatDateBr } from '../utils/formatters';
 import { calculateWeeklyBalances } from '../utils/balancesCalculator';
+import { calcularMetaSemanal } from '../utils/custosFixos';
+import { useCosts } from '../context/CostsContext';
 import { ANIMATION_DURATIONS, ANIMATION_EASING } from '../lib/animation-tokens';
 import { useCurrency } from '../context/CurrencyContext';
 import { useFichasTecnicas } from '../context/FichasTecnicasContext';
@@ -60,6 +62,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const { fichas } = useFichasTecnicas();
   const transactionsList = allTransactions.length > 0 ? allTransactions : (recentTransactions || []);
   const balances = calculateWeeklyBalances(transactionsList, fichas);
+
+  // Meta usa TODAS as transacoes, nao a lista filtrada pelo seletor de periodo:
+  // "custo fixo da semana" e sempre a semana corrente, mesmo com a tela
+  // mostrando o mes ou o ano.
+  const { administrativeCosts } = useCosts();
+  const meta = calcularMetaSemanal(administrativeCosts, allTransactions || []);
 
   // Calculate profit margin percentage (simplified calculation)
   const totalIn = balances.totalPaidSales || 0;
@@ -396,6 +404,77 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <p className="text-[10px]" style={{ color: '#9A8FA0' }}>
             50% Custo ({formatMoney((balances.custoEInvestimento.currentBalance || 0) / 2)}) / 50% Invest.
           </p>
+        </div>
+
+        {/* 3b. META SEMANAL PARA COBRIR OS CUSTOS FIXOS
+             Fica logo abaixo dos saldos porque responde a pergunta seguinte:
+             "entrou tanto — mas da pra pagar as contas?" */}
+        <div className="space-y-3 w-full mt-6">
+          <div>
+            <h3 className="font-serif-display text-[23px]" style={{ color: '#241B2B' }}>
+              Meta da Semana
+            </h3>
+            <p className="text-[11px]" style={{ color: '#7A6E80', marginTop: '2px' }}>
+              Quanto precisa entrar só para cobrir os custos fixos
+            </p>
+          </div>
+
+          {!meta.temCustoCadastrado ? (
+            <button
+              onClick={() => onNavigateToTab('custos')}
+              className="w-full text-left rounded-2xl p-4 transition-all active:scale-98"
+              style={{ background: '#FFF8E7', border: '1px dashed #E8D9A8' }}
+            >
+              <p className="text-[12px] font-bold" style={{ color: '#8A6D1F' }}>
+                Cadastre seus custos fixos
+              </p>
+              <p className="text-[11px] mt-1" style={{ color: '#9A8FA0' }}>
+                Aluguel, energia, gás, internet… Sem eles não dá para saber quanto
+                você precisa vender por semana. Toque para preencher.
+              </p>
+            </button>
+          ) : (
+            <div className="rounded-2xl p-4 w-full" style={{ background: 'white', boxShadow: '0 6px 18px rgba(58,35,80,.08)', border: '1px solid #EDE6EF' }}>
+              <div className="flex items-end justify-between gap-3">
+                <div>
+                  <p className="text-[9px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
+                    Precisa faturar
+                  </p>
+                  <p className="text-[24px] leading-tight" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
+                    {formatMoney(meta.necessarioPorSemana)}
+                  </p>
+                  <p className="text-[10px]" style={{ color: '#9A8FA0' }}>
+                    por semana · {formatMoney(meta.custoFixoMensal)}/mês em custos fixos
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[9px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
+                    Já entrou
+                  </p>
+                  <p className="text-[18px] leading-tight" style={{ color: meta.metaAtingida ? '#4CAF7D' : '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
+                    {formatMoney(meta.faturadoNaSemana)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-3 h-2 w-full rounded-full overflow-hidden" style={{ background: '#F1EBF2' }}>
+                <div
+                  className="h-full rounded-full"
+                  style={{
+                    width: `${Math.round(meta.progresso * 100)}%`,
+                    background: meta.metaAtingida ? '#4CAF7D' : '#A85E86',
+                    transition: 'width 420ms cubic-bezier(0.22, 1, 0.36, 1)',
+                  }}
+                />
+              </div>
+
+              <p className="text-[11px] mt-2" style={{ color: meta.metaAtingida ? '#4CAF7D' : '#7A6E80', fontWeight: meta.metaAtingida ? 700 : 400 }}>
+                {meta.metaAtingida
+                  ? '✓ Custos fixos cobertos. O que entrar agora é lucro.'
+                  : `Faltam ${formatMoney(meta.faltaFaturar)} para cobrir as contas da semana.`}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* 4. AGENDA DE PEDIDOS - CALENDAR */}

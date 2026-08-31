@@ -13,6 +13,22 @@ interface CostsContextType {
 
 const CostsContext = createContext<CostsContextType | undefined>(undefined);
 
+/**
+ * Soma as despesas MENSAIS.
+ *
+ * `hora_trabalho` fica DE FORA de proposito: e a tarifa por hora da confeiteira
+ * (R$/hora), que ela multiplica pelas horas do bolo para achar a mao de obra
+ * daquele bolo. Somar uma tarifa horaria a aluguel, energia e internet produzia
+ * um "total mensal" sem significado nenhum — e e desse total que sai a meta de
+ * faturamento semanal. Ver [[AdministrativeCosts]].
+ */
+const somarCustosMensais = (c: {
+  agua?: number; aluguel?: number; energia?: number; gas?: number;
+  gasolina?: number; internet?: number; limpeza?: number;
+}) =>
+  (c.agua || 0) + (c.aluguel || 0) + (c.energia || 0) + (c.gas || 0) +
+  (c.gasolina || 0) + (c.internet || 0) + (c.limpeza || 0);
+
 export const CostsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const [administrativeCosts, setAdministrativeCosts] = useState<AdministrativeCosts | null>(null);
@@ -47,7 +63,10 @@ export const CostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           internet: data.internet || 0,
           limpeza: data.limpeza || 0,
           horaTrabalho: data.hora_trabalho || 0,
-          total: data.total || 0,
+          // Calculado aqui, e nao lido de `data.total`: o app nunca GRAVA
+          // aquela coluna, entao ler dela devolvia um valor velho ou nulo
+          // enquanto a tela mostrava outro numero recem-somado.
+          total: somarCustosMensais(data),
         });
       } else {
         setAdministrativeCosts({
@@ -92,8 +111,7 @@ export const CostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       if (saveError) throw saveError;
 
-      const newTotal = costs.agua + costs.aluguel + costs.energia + costs.gas + costs.gasolina + costs.internet + costs.limpeza + costs.horaTrabalho;
-      setAdministrativeCosts({ ...costs, total: newTotal });
+      setAdministrativeCosts({ ...costs, total: somarCustosMensais(costs) });
     } catch (err: any) {
       setError(err.message || 'Erro ao salvar custos');
       throw err;

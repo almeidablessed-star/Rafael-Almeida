@@ -1,5 +1,7 @@
 export interface AdministrativeCosts {
   id?: string;
+
+  // Despesas MENSAIS da confeitaria.
   agua: number;
   aluguel: number;
   energia: number;
@@ -7,8 +9,20 @@ export interface AdministrativeCosts {
   gasolina: number;
   internet: number;
   limpeza: number;
+
+  /**
+   * Quanto a confeiteira cobra pela PROPRIA HORA de trabalho. E uma tarifa
+   * (R$/hora), nao uma despesa do mes: ela multiplica pelas horas que o bolo
+   * levou para chegar na mao de obra daquele bolo.
+   *
+   * Por isso NAO entra em `total`. Somar uma tarifa horaria a aluguel e energia
+   * produzia um "total mensal" sem significado — e era desse total que sairia a
+   * meta de faturamento semanal.
+   */
   horaTrabalho: number;
-  total: number; // Calculado automaticamente
+
+  /** Soma das despesas mensais acima. Nao inclui `horaTrabalho`. */
+  total: number;
 }
 
 export type TransactionType = 'venda' | 'reposicao' | 'maodeobra' | 'custo' | 'investimento';
