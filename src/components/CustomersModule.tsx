@@ -40,21 +40,9 @@ import {
 export const MENU_CANVA_URL =
   'https://www.canva.com/design/DAG--k_X91E/3m0qL5l-K1_O9n2KzR6oAQ/view?utm_content=DAG--k_X91E&utm_campaign=designshare&utm_medium=link2&utm_source=unspecified';
 
-export function getStoredCustomers(): Customer[] {
-  try {
-    const data = localStorage.getItem('carula_customers');
-    if (data) {
-      const parsed: Customer[] = JSON.parse(data);
-      return parsed.map((c) => ({
-        ...c,
-        notes: '',
-      }));
-    }
-  } catch (e) {
-    console.error('Erro ao ler clientes do localStorage:', e);
-  }
-  return [];
-}
+// getStoredCustomers foi removida: lia `carula_customers` do localStorage, de
+// uma fase anterior, e era exportada sem nenhum chamador. As clientes vem do
+// Supabase por [[CustomersContext]].
 
 export interface UniversalHoliday {
   id: string;

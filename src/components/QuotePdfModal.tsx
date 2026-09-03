@@ -135,12 +135,10 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
     }
 
     try {
-      console.log('🎯 Starting PDF generation with html-to-image...');
       setIsGeneratingPdf(true);
 
       // Wait for all images to load before generating PDF
       const images = docElem.querySelectorAll('img');
-      console.log(`Found ${images.length} images to load`);
 
       // Force set crossorigin on all images for proper CORS handling
       Array.from(images).forEach((img) => {
@@ -152,13 +150,11 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
       const imageLoadPromises = Array.from(images).map((img, idx) => {
         return new Promise<void>((resolve) => {
           const timeout = setTimeout(() => {
-            console.log(`Image ${idx} timeout - continuing anyway`);
             resolve();
           }, 3500);
 
           const handleLoad = () => {
             clearTimeout(timeout);
-            console.log(`Image ${idx} loaded successfully`);
             img.removeEventListener('load', handleLoad);
             img.removeEventListener('error', handleError);
             resolve();
@@ -166,7 +162,6 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
 
           const handleError = () => {
             clearTimeout(timeout);
-            console.log(`Image ${idx} error - continuing anyway`);
             img.removeEventListener('load', handleLoad);
             img.removeEventListener('error', handleError);
             resolve();
@@ -174,17 +169,14 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
 
           // Check if image is already fully loaded
           if (img.complete && img.naturalHeight > 0) {
-            console.log(`Image ${idx} already loaded (complete, naturalHeight=${img.naturalHeight})`);
             clearTimeout(timeout);
             resolve();
           } else {
-            console.log(`Waiting for image ${idx}...`);
             img.addEventListener('load', handleLoad, { once: true });
             img.addEventListener('error', handleError, { once: true });
 
             // Force re-load for data URLs to ensure they're rendered
             if (img.src && img.src.startsWith('data:')) {
-              console.log(`Force-reloading data URL for image ${idx}`);
               const src = img.src;
               img.src = '';
               Promise.resolve().then(() => {
@@ -198,22 +190,8 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
       await Promise.all(imageLoadPromises);
       // Extra time to ensure browser has rendered everything
       await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('✅ All images loaded and rendered');
 
       // Force image elements to be visible and ensure they have dimensions
-      const allImages = docElem.querySelectorAll('img');
-      let imageWithDimensions = false;
-      allImages.forEach((img, idx) => {
-        console.log(`Image ${idx}: complete=${(img as any).complete}, naturalHeight=${(img as any).naturalHeight}, width=${img.width}, height=${img.height}`);
-        if ((img as any).naturalHeight > 0 && img.width > 0) {
-          imageWithDimensions = true;
-        }
-      });
-
-      if (imageWithDimensions) {
-        console.log('✅ Found images with dimensions');
-      }
-
       // Store states for restoration in all scopes
       const overflowElements = docElem.querySelectorAll('[class*="overflow-hidden"]');
       const overflowStates: Array<{elem: Element, overflow: string}> = [];
@@ -225,13 +203,10 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
         const currentOverflow = window.getComputedStyle(elem).overflow;
         overflowStates.push({ elem, overflow: currentOverflow });
         (elem as HTMLElement).style.overflow = 'visible';
-        console.log('✅ Removed overflow-hidden temporarily');
       });
 
       // Temporarily remove max-height restrictions from inspiration images
       const inspirationImages = docElem.querySelectorAll('.inspiration-image');
-      console.log(`Found ${inspirationImages.length} inspiration images with class`);
-      console.log(`Total img elements in docElem: ${docElem.querySelectorAll('img').length}`);
 
       inspirationImages.forEach(img => {
         const imgElement = img as HTMLElement;
@@ -248,16 +223,10 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
         imgElement.style.setProperty('opacity', '1', 'important');
         imgElement.style.setProperty('min-height', '50px', 'important');
 
-        console.log('✅ Removed max-height restrictions from inspiration images', {
-          complete: (imgElement as any).complete,
-          naturalHeight: (imgElement as any).naturalHeight,
-          currentSrc: (imgElement as any).src?.substring(0, 50),
-        });
       });
 
       // Also ensure image containers don't hide overflow
       const imageContainers = docElem.querySelectorAll('.inspiration-image-container');
-      console.log(`Found ${imageContainers.length} image containers`);
       imageContainers.forEach(container => {
         const containerElement = container as HTMLElement;
         const currentMaxHeight = containerElement.style.maxHeight;
@@ -269,10 +238,6 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
         containerElement.style.setProperty('overflow', 'visible', 'important');
         containerElement.style.setProperty('min-height', '100px', 'important');
 
-        console.log('✅ Cleared max-height and overflow from image container', {
-          offsetHeight: containerElement.offsetHeight,
-          offsetWidth: containerElement.offsetWidth,
-        });
       });
 
       // Detect if running on iOS (Safari mobile has known timing issues with html-to-image)
@@ -282,13 +247,11 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
       // Extra delay to let browser re-render without overflow-hidden and max-height restrictions
       // Increased to 1500ms for desktop, 2500ms for iOS due to Safari WebKit rendering differences
       const delayMs = isIosSafari ? 2500 : 1500;
-      console.log(`📱 iOS Safari detected: ${isIosSafari}. Using delay: ${delayMs}ms`);
       await new Promise(resolve => setTimeout(resolve, delayMs));
 
       try {
         // Verify images are still in DOM before capturing
         const imgsBeforeCapture = docElem.querySelectorAll('img');
-        console.log(`Images found before capture: ${imgsBeforeCapture.length}`);
 
         // Additional check: if no images found, something is wrong with timing or selectors
         if (imgsBeforeCapture.length === 0) {
@@ -297,7 +260,6 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
         imgsBeforeCapture.forEach((img, idx) => {
           const imgElement = img as HTMLElement;
           const isVisible = imgElement.offsetHeight > 0 && imgElement.offsetWidth > 0;
-          console.log(`  Img ${idx}: src=${(img as any).src?.substring(0, 50)}, complete=${(img as any).complete}, naturalHeight=${(img as any).naturalHeight}, visible=${isVisible}, offsetHeight=${imgElement.offsetHeight}, offsetWidth=${imgElement.offsetWidth}`);
         });
 
         // Captura a folha no tamanho natural dela. A pagina do PDF e que sera
@@ -326,23 +288,18 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
         let imgData: string | undefined;
 
         // First attempt (discarded) - primes the canvas/rendering pipeline
-        console.log(`\n🔄 PDF capture attempt 1/2 (priming)...`);
         try {
           await toPng(docElem, capturaFolha);
-          console.log(`✅ First attempt completed (result discarded, primed for second)`);
         } catch (err) {
-          console.log(`⚠️ First attempt threw error (expected on some cases): ${err}`);
         }
 
         // Wait between attempts - gives browser time to update canvas state
         await new Promise(resolve => setTimeout(resolve, 300));
 
         // Second attempt (used) - this should have the image
-        console.log(`🔄 PDF capture attempt 2/2 (final)...`);
         imgData = await toPng(docElem, capturaFolha);
 
         const capturedSize = imgData ? imgData.length : 0;
-        console.log(`✅ Second attempt result: imgData size=${capturedSize} bytes`);
 
         if (!imgData) {
           throw new Error('Failed to generate PDF image on second attempt');
@@ -377,12 +334,10 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
             : `Folha_Cliente_${clientName}_${timestamp}.pdf`;
 
           pdf.save(filename);
-          console.log('✅ PDF saved:', filename);
 
           // Restore overflow-hidden on image containers
           overflowStates.forEach(({ elem, overflow }) => {
             (elem as HTMLElement).style.overflow = overflow;
-            console.log('✅ Restored overflow property');
           });
 
           // Restore max-height restrictions on inspiration images
@@ -395,7 +350,6 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
             }
             imgElement.style.removeProperty('height');
             imgElement.style.removeProperty('width');
-            console.log('✅ Restored image styles');
           });
 
           // Restore image container styles
@@ -409,7 +363,6 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
             containerElement.style.removeProperty('height');
             containerElement.style.removeProperty('overflow');
             containerElement.style.removeProperty('min-height');
-            console.log('✅ Restored container styles');
           });
         };
         img.src = imgData;

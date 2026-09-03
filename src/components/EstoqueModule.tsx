@@ -14,36 +14,10 @@ import {
 } from 'lucide-react';
 import { StockMovementsHistory } from './StockMovementsHistory';
 
-const DEFAULT_STOCK_ITEMS: StockItem[] = [
-  { id: '1', name: 'Farinha de Trigo', quantity: 5000, unit: 'g', minThreshold: 1000, costPerUnit: 0.005 },
-  { id: '2', name: 'Açúcar Refinado', quantity: 3000, unit: 'g', minThreshold: 1000, costPerUnit: 0.004 },
-  { id: '3', name: 'Cacau em Pó 100%', quantity: 250, unit: 'g', minThreshold: 300, costPerUnit: 0.0265 },
-  { id: '4', name: 'Leite Integral', quantity: 2000, unit: 'ml', minThreshold: 1000, costPerUnit: 0.006 },
-  { id: '5', name: 'Ovos Grandes', quantity: 30, unit: 'un', minThreshold: 12, costPerUnit: 0.50 },
-  { id: '6', name: 'Leite Condensado', quantity: 8, unit: 'un', minThreshold: 4, costPerUnit: 6.50 },
-  { id: '7', name: 'Creme de Leite', quantity: 10, unit: 'un', minThreshold: 5, costPerUnit: 4.20 },
-  { id: '8', name: 'Manteiga sem Sal', quantity: 1000, unit: 'g', minThreshold: 400, costPerUnit: 0.035 },
-];
-
-export function getStoredStockItems(): StockItem[] {
-  try {
-    const data = localStorage.getItem('carula_stock_items');
-    if (data) {
-      return JSON.parse(data);
-    }
-  } catch (e) {
-    console.error('Error reading stock items from localStorage:', e);
-  }
-  return DEFAULT_STOCK_ITEMS;
-}
-
-export function saveStoredStockItems(items: StockItem[]) {
-  try {
-    localStorage.setItem('carula_stock_items', JSON.stringify(items));
-  } catch (e) {
-    console.error('Error saving stock items to localStorage:', e);
-  }
-}
+// DEFAULT_STOCK_ITEMS e as funcoes getStoredStockItems/saveStoredStockItems
+// foram removidos: eram um estoque de exemplo em localStorage, de uma fase
+// anterior, exportado e nunca chamado por tela nenhuma. O estoque real vem do
+// Supabase por [[EstoqueContext]].
 
 const getColorBasedOnThreshold = (
   quantity: number,
@@ -119,7 +93,6 @@ export const EstoqueModule: React.FC = () => {
   };
 
   const handleOpenEdit = (item: StockItem) => {
-    console.log('[handleOpenEdit] item:', item, 'quantity:', item.quantity);
     setName(item.name);
     setQuantity(item.quantity.toString());
     setUnit(item.unit);
@@ -143,6 +116,11 @@ export const EstoqueModule: React.FC = () => {
       quantity: qtyNum,
       unit,
       minThreshold: threshNum,
+      // Faltava, e o campo e obrigatorio: o alerta de estoque baixo era gravado
+      // sem unidade e voltava do banco com "g" fixo, entao um item em litros
+      // avisava na unidade errada. O limite e informado na mesma unidade do
+      // item, entao e `unit` que vale aqui.
+      minThresholdUnit: unit,
       costPerUnit: costNum,
     };
 

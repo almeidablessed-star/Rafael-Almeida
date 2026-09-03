@@ -86,56 +86,10 @@ const convertCostToTargetUnit = (
   return costPerUnit * (toBase_ / fromBase);
 };
 
-const DEFAULT_FICHAS: FichaTecnica[] = [
-  // Exemplo: Bolo com múltiplos tamanhos
-  {
-    id: 'f1-example',
-    name: 'Bolo Vulcão Ninho com Nutella',
-    category: 'bolos',
-    imageUrl: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&auto=format&fit=crop&q=80',
-    tamanhos: [
-      { id: 'ts-1', descricao: '1', preco: 55.00, quantidade: 10 },
-      { id: 'ts-2', descricao: '2', preco: 75.00, quantidade: 15 },
-      { id: 'ts-3', descricao: '3', preco: 90.00, quantidade: 20 },
-    ],
-    ingredients: [
-      { id: 'i1', name: 'Farinha de Trigo', quantity: 300, unit: 'g', unitCost: 0.005, totalCost: 1.50 },
-      { id: 'i2', name: 'Açúcar Refinado', quantity: 250, unit: 'g', unitCost: 0.004, totalCost: 1.00 },
-      { id: 'i3', name: 'Cacau em Pó 100%', quantity: 50, unit: 'g', unitCost: 0.0265, totalCost: 1.33 },
-      { id: 'i4', name: 'Leite Condensado', quantity: 2, unit: 'un', unitCost: 6.50, totalCost: 13.00 },
-      { id: 'i5', name: 'Creme de Leite', quantity: 2, unit: 'un', unitCost: 4.20, totalCost: 8.40 },
-      { id: 'i6', name: 'Leite em Pó Ninho', quantity: 100, unit: 'g', unitCost: 0.035, totalCost: 3.50 },
-      { id: 'i7', name: 'Nutella Original', quantity: 150, unit: 'g', unitCost: 0.048, totalCost: 7.20 },
-    ],
-    maoDeObraCost: 20.00,
-    custoCost: 5.00,
-    investimentoCost: 5.00,
-  },
-  // Novas fichas serão adicionadas via Supabase
-];
-
-export function getStoredFichas(): FichaTecnica[] {
-  try {
-    const data = localStorage.getItem('carula_fichas_tecnicas');
-    if (data) {
-      const parsed = JSON.parse(data);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed;
-      }
-    }
-  } catch (e) {
-    console.error('Error reading fichas tecnicas from localStorage:', e);
-  }
-  return DEFAULT_FICHAS;
-}
-
-export function saveStoredFichas(fichas: FichaTecnica[]) {
-  try {
-    localStorage.setItem('carula_fichas_tecnicas', JSON.stringify(fichas));
-  } catch (e) {
-    console.error('Error saving fichas tecnicas to localStorage:', e);
-  }
-}
+// DEFAULT_FICHAS, getStoredFichas e saveStoredFichas foram removidos: eram uma
+// ficha de exemplo ("Bolo Vulcao Ninho com Nutella") mais leitura e escrita em
+// localStorage, de uma fase anterior, exportadas e nunca chamadas. As fichas
+// reais vem do Supabase por [[FichasTecnicasContext]].
 
 interface FichasTecnicasModuleProps {
   onAddTransaction?: (txData: Omit<Transaction, 'id' | 'createdAt'>) => void;
@@ -211,9 +165,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
       setYieldInfo(`${yieldInfo} ${label}`);
     }
   };
-  const [ingredients, setIngredients] = useState<IngredientUsage[]>([
-    { id: '1', name: 'Farinha de Trigo', quantity: 200, unit: 'g', unitCost: 0.005, totalCost: 1.00 },
-  ]);
+  // Lista da ficha, hoje so um espelho do primeiro tamanho na gravacao. Nasce
+  // vazia: antes vinha com "Farinha de Trigo 200 g" de uma ficha de exemplo,
+  // que entrava em toda ficha nova sem ninguem ter pedido.
+  const [ingredients, setIngredients] = useState<IngredientUsage[]>([]);
   const [reposicaoCost, setReposicaoCost] = useState('0');
   // Custos globais - mantidos como defaults, não editáveis via UI
   const maoDeObraCost = '0';
@@ -232,9 +187,12 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     custoCost: string;
     investimentoCost: string;
   }>>([
-    { id: 'ts-1', descricao: '1', preco: '55', horasTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
-    { id: 'ts-2', descricao: '2', preco: '75', horasTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
-    { id: 'ts-3', descricao: '3', preco: '90', horasTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
+    // Tamanhos em branco. Antes nasciam com preco 55/75/90 e custos 20/5/5 —
+    // numeros de uma ficha de exemplo de outra fase. Quem nao reparasse
+    // cadastrava um bolo com o preco de um bolo que nunca existiu.
+    { id: 'ts-1', descricao: '1', preco: '', horasTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '', custoCost: '', investimentoCost: '' },
+    { id: 'ts-2', descricao: '2', preco: '', horasTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '', custoCost: '', investimentoCost: '' },
+    { id: 'ts-3', descricao: '3', preco: '', horasTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '', custoCost: '', investimentoCost: '' },
   ]);
 
   // Fichas são agora gerenciadas pelo hook useFichasTecnicas (salva no Supabase)
@@ -260,12 +218,12 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     setCategory(selectedCategory);
     setImageUrl('');
     setYieldInfo('1');
-    setIngredients([{ id: '1', name: 'Farinha de Trigo', quantity: 200, unit: 'g', unitCost: 0.005, totalCost: 1.00 }]);
+    setIngredients([]);
     setReposicaoCost('0');
     setTamanhos([
-      { id: 'ts-1', descricao: '1', preco: '55', horasTrabalho: '', valorHora: tarifaSugerida, ingredients: [], maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
-      { id: 'ts-2', descricao: '2', preco: '75', horasTrabalho: '', valorHora: tarifaSugerida, ingredients: [], maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
-      { id: 'ts-3', descricao: '3', preco: '90', horasTrabalho: '', valorHora: tarifaSugerida, ingredients: [], maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
+      { id: 'ts-1', descricao: '1', preco: '', horasTrabalho: '', valorHora: tarifaSugerida, ingredients: [], maoDeObraCost: '', custoCost: '', investimentoCost: '' },
+      { id: 'ts-2', descricao: '2', preco: '', horasTrabalho: '', valorHora: tarifaSugerida, ingredients: [], maoDeObraCost: '', custoCost: '', investimentoCost: '' },
+      { id: 'ts-3', descricao: '3', preco: '', horasTrabalho: '', valorHora: tarifaSugerida, ingredients: [], maoDeObraCost: '', custoCost: '', investimentoCost: '' },
     ]);
     setEditingId(null);
     setIsCreating(true);
@@ -341,13 +299,21 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   ): IngredientUsage => {
     const updated = { ...ing, [field]: val };
 
-    // Nome escolhido no autocomplete: puxa o preco do Estoque
-    if (field === 'name') {
-      const stockItem = estoque.find(item => item.name.toLowerCase() === String(val).toLowerCase());
+    // Nome ou UNIDADE: o custo vem do Estoque e depende dos dois.
+    //
+    // A unidade estava de fora, e o efeito passava despercebido: cadastrar
+    // "leite 100 ml" e depois trocar para "g" mantinha o custo por ml. O numero
+    // continuava plausivel na tela, so que errado — e alimentava a conta aberta
+    // e o preco do bolo.
+    if (field === 'name' || field === 'unit') {
+      const nome = field === 'name' ? String(val) : ing.name;
+      const unidade = field === 'unit' ? String(val) : ing.unit;
+      const stockItem = estoque.find(item => item.name.toLowerCase() === (nome || '').toLowerCase());
+
       if (stockItem && stockItem.costPerUnit > 0) {
-        const convertedCost = convertCostToTargetUnit(stockItem.costPerUnit, stockItem.unit, ing.unit);
+        const convertedCost = convertCostToTargetUnit(stockItem.costPerUnit, stockItem.unit, unidade);
         updated.unitCost = convertedCost;
-        updated.totalCost = ing.quantity * convertedCost;
+        updated.totalCost = (Number(ing.quantity) || 0) * convertedCost;
       }
     }
 

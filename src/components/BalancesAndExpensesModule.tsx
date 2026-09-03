@@ -63,13 +63,6 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
   // Weekly archives
   const [archives, setArchives] = useState<WeeklyArchive[]>(getWeeklyArchives());
 
-  // Debug: log estoque e itemQuantity
-  useEffect(() => {
-    const isEnabled = itemQuantity.trim().length > 0;
-    console.log(`[BalancesAndExpenses] itemQuantity="${itemQuantity}", isEnabled=${isEnabled}, estoque.length=${estoque.length}`);
-    estoque.forEach(item => console.log(`  - estoque item: "${item.name}"`));
-  }, [itemQuantity, estoque]);
-
   // Auto-archive when new week starts
   useEffect(() => {
     const lastArchiveDate = localStorage.getItem('carula_last_archive_date');
@@ -111,9 +104,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
     if (hasItemQty) {
       try {
         const itemNameFromDescription = description.trim();
-        console.log('[handleSaveExpense] Procurando item:', itemNameFromDescription, 'em estoque:', estoque);
         const existing = findExistingItem(itemNameFromDescription);
-        console.log('[handleSaveExpense] Item encontrado:', existing);
 
         // Calcular preço unitário: valor pago / quantidade comprada
         const costPerUnitCalculated = valNum / itemQtyNum;

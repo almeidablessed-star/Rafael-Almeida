@@ -154,36 +154,21 @@ export const FichasTecnicasProvider: React.FC<{ children: React.ReactNode }> = (
 
       if (fetchError) throw fetchError;
 
-      // Fallback para localStorage se Supabase estiver vazio
-      if (data && data.length > 0) {
-        setFichas(data.map(mapSupabaseToFicha));
-      } else {
-        // Tentar localStorage como fallback
-        const storedData = localStorage.getItem('carula_fichas_tecnicas');
-        if (storedData) {
-          try {
-            const fichasFromStorage = JSON.parse(storedData) as FichaTecnica[];
-            setFichas(fichasFromStorage);
-          } catch (e) {
-            setFichas([]);
-          }
-        } else {
-          setFichas([]);
-        }
-      }
+      // Sem fallback para localStorage, de proposito.
+      //
+      // Havia aqui uma queda para `carula_fichas_tecnicas` quando o Supabase
+      // vinha vazio ou dava erro. O efeito era pior do que o problema: fichas
+      // de uma fase antiga voltavam a aparecer na tela com ids que NAO existem
+      // no banco, entao editar ou apagar qualquer uma delas falhava no
+      // `parseInt(id)`. E uma lista vazia por falha de rede virava "voce nao
+      // tem fichas", que e uma afirmacao falsa.
+      //
+      // Vazio agora significa vazio; erro agora aparece como erro.
+      setFichas((data || []).map(mapSupabaseToFicha));
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar fichas técnicas');
       console.error('Error fetching fichas:', err);
-      // Em caso de erro, tentar localStorage como último recurso
-      const storedData = localStorage.getItem('carula_fichas_tecnicas');
-      if (storedData) {
-        try {
-          const fichasFromStorage = JSON.parse(storedData) as FichaTecnica[];
-          setFichas(fichasFromStorage);
-        } catch (e) {
-          setFichas([]);
-        }
-      }
+      setFichas([]);
     } finally {
       setIsLoading(false);
     }

@@ -44,53 +44,33 @@ export const findFichaForProduct = (
 ): FichaTecnica | undefined => {
   const target = normalizeName(productName);
 
-  console.log('[FICHA MATCHER] findFichaForProduct:', {
-    productName,
-    target,
-    fichasLength: fichas.length,
-    fichaNames: fichas.map(f => ({ id: f.id, name: f.name, normalized: normalizeName(f.name) }))
-  });
 
   if (!target || fichas.length === 0) {
-    console.log('[FICHA MATCHER] ❌ Early return: target vazio ou fichas vazio');
     return undefined;
   }
 
   // DEGRAU 1: ID exato
   const byId = fichas.find((f) => f.id === productName);
   if (byId) {
-    console.log('[FICHA MATCHER] ✅ DEGRAU 1 (ID exato) - Encontrado:', byId.name);
     return byId;
   }
-  console.log('[FICHA MATCHER] ❌ DEGRAU 1 (ID exato) - Não encontrado');
 
   // DEGRAU 2: Nome normalizado
   const exact = fichas.find((f) => normalizeName(f.name) === target);
   if (exact) {
-    console.log('[FICHA MATCHER] ✅ DEGRAU 2 (Nome normalizado) - Encontrado:', exact.name);
     return exact;
   }
-  console.log('[FICHA MATCHER] ❌ DEGRAU 2 (Nome normalizado) - Não encontrado');
 
   // Degrau tolerante: exige 4+ caracteres para nao casar por acidente
   // ("Bolo" sozinho casaria com qualquer bolo do catalogo).
   if (target.length < 4) {
-    console.log('[FICHA MATCHER] ❌ DEGRAU 3 (Substring) - Target muito curto:', target.length, 'chars');
     return undefined;
   }
 
-  const result = fichas.find((f) => {
+  return fichas.find((f) => {
     const name = normalizeName(f.name);
     return name.includes(target) || target.includes(name);
   });
-
-  if (result) {
-    console.log('[FICHA MATCHER] ✅ DEGRAU 3 (Substring) - Encontrado:', result.name);
-  } else {
-    console.log('[FICHA MATCHER] ❌ DEGRAU 3 (Substring) - Não encontrado');
-  }
-
-  return result;
 };
 
 /** Um item de pedido, no formato minimo que o casamento precisa. */

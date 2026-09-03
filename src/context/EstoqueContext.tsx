@@ -260,6 +260,15 @@ export const EstoqueProvider: React.FC<{ children: React.ReactNode }> = ({ child
    * confeiteira, entao corrida concorrente e improvavel, e manter o casamento
    * de nomes em TypeScript deixa essa regra legivel para quem mantem o app.
    */
+  /**
+   * Numero curto do pedido para a descricao do movimento.
+   *
+   * Era um `slice(-6)` cru, herdado dos ids do localStorage
+   * ("tx-1788124352483-sfpu5"), que trazia junto o hifen e produzia
+   * "Pedido #-sfpu5". Agora os ids sao numericos e o proprio id ja e curto.
+   */
+  const numeroCurto = (transacaoId: string) => transacaoId.replace(/^tx-/, '').slice(-6);
+
   const consumirParaPedido = async (
     items: { ficha: FichaTecnica; quantity: number; tamanhoId?: string }[],
     transacaoId: string
@@ -295,7 +304,7 @@ export const EstoqueProvider: React.FC<{ children: React.ReactNode }> = ({ child
             unidade: b.unidade,
             transacao_id: transacaoId,
             ficha_id: b.fichaIds[0] ? parseInt(b.fichaIds[0]) : null,
-            descricao: `Consumo: ${rotulo} (Pedido #${transacaoId.slice(-6)})`,
+            descricao: `Consumo: ${rotulo} (Pedido #${numeroCurto(transacaoId)})`,
           })
           .select('id')
           .single();
@@ -381,7 +390,7 @@ export const EstoqueProvider: React.FC<{ children: React.ReactNode }> = ({ child
         quantidade: m.quantidade,
         unidade: m.unidade,
         transacao_id: transacaoId,
-        descricao: `Devolução: ${m.item_nome} (Pedido #${transacaoId.slice(-6)} cancelado)`,
+        descricao: `Devolução: ${m.item_nome} (Pedido #${numeroCurto(transacaoId)} cancelado)`,
       });
     }
 

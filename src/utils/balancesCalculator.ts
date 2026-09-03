@@ -29,100 +29,10 @@ export interface SystemBalances {
  * Inflow comes automatically from all sales marked as "Pago".
  * Deductions come from expenses logged under 'reposicao', 'maodeobra', 'custo', 'investimento'.
  */
-export function calculateBalances(transactions: Transaction[], fichas: FichaTecnica[] = []): SystemBalances {
-  let reposicaoInflow = 0;
-  let maodeobraInflow = 0;
-  let custoInflow = 0;
-  let investimentoInflow = 0;
-  let paidSalesCount = 0;
-  let totalPaidSalesAmount = 0;
-
-  let reposicaoSpent = 0;
-  let maodeobraSpent = 0;
-  let custoSpent = 0;
-  let investimentoSpent = 0;
-  let totalExpensesCount = 0;
-  let totalExpensesAmount = 0;
-
-  for (const tx of transactions) {
-    const val = Number(tx.totalValue) || 0;
-
-    if (tx.type === 'venda') {
-      if (tx.paymentStatus !== 'pendente') {
-        paidSalesCount += 1;
-        totalPaidSalesAmount += val;
-
-        // Fonte unica: a composicao gravada na venda (com fallback interno
-        // para pedidos antigos). O recalculo pelos custos ATUAIS da ficha que
-        // existia aqui reescrevia o lucro de pedidos ja fechados sempre que um
-        // insumo mudava de preco — uma venda de marco virava outra em agosto.
-        const detail = parseSaleDetail(tx);
-        reposicaoInflow += detail.reposicao || 0;
-        maodeobraInflow += (detail.maoDeObra || 0) + (detail.adicionais || 0) + (detail.delivery || 0);
-        custoInflow += detail.custos || 0;
-        investimentoInflow += detail.investimento || 0;
-      }
-    } else if (tx.type === 'reposicao') {
-      totalExpensesCount += 1;
-      totalExpensesAmount += val;
-      reposicaoSpent += val;
-    } else if (tx.type === 'maodeobra') {
-      totalExpensesCount += 1;
-      totalExpensesAmount += val;
-      maodeobraSpent += val;
-    } else if (tx.type === 'custo') {
-      totalExpensesCount += 1;
-      totalExpensesAmount += val;
-      custoSpent += val;
-    } else if (tx.type === 'investimento') {
-      totalExpensesCount += 1;
-      totalExpensesAmount += val;
-      investimentoSpent += val;
-    }
-  }
-
-  const saldoReposicao = reposicaoInflow - reposicaoSpent;
-  const saldoMaodeobra = maodeobraInflow - maodeobraSpent;
-  const saldoInvestimento = investimentoInflow - investimentoSpent;
-
-  const combinedInflow = custoInflow + investimentoInflow;
-  const combinedSpent = custoSpent + investimentoSpent;
-  const saldoCombined = combinedInflow - combinedSpent;
-
-  return {
-    reposicao: {
-      accumulatedInflow: reposicaoInflow,
-      totalSpent: reposicaoSpent,
-      currentBalance: saldoReposicao,
-      isNegative: saldoReposicao < 0,
-    },
-    maodeobra: {
-      accumulatedInflow: maodeobraInflow,
-      totalSpent: maodeobraSpent,
-      currentBalance: saldoMaodeobra,
-      isNegative: saldoMaodeobra < 0,
-    },
-    investimento: {
-      accumulatedInflow: investimentoInflow,
-      totalSpent: investimentoSpent,
-      currentBalance: saldoInvestimento,
-      isNegative: saldoInvestimento < 0,
-    },
-    custoEInvestimento: {
-      accumulatedInflow: combinedInflow,
-      totalSpent: combinedSpent,
-      currentBalance: saldoCombined,
-      isNegative: saldoCombined < 0,
-      custoHalf: saldoCombined / 2,
-      investimentoHalf: saldoCombined / 2,
-    },
-    paidSalesCount,
-    totalExpensesCount,
-    totalPaidSales: totalPaidSalesAmount,
-    totalAReceber,
-    totalExpensesAmount,
-  };
-}
+// calculateBalances foi removida: nenhuma tela a chamava, e ela retornava um
+// `totalAReceber` que nunca era declarado no escopo — teria estourado em
+// runtime se alguem a usasse. A versao viva e calculateWeeklyBalances, logo
+// abaixo.
 
 /**
  * Calculate balances for the current week only (Monday to Sunday)
