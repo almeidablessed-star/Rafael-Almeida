@@ -203,6 +203,24 @@ export interface TamanhoOpcao {
   descricao: string; // e.g. "10 fatias", "15 fatias", "20 fatias"
   preco: number;
   quantidade?: number; // e.g. número de fatias, unidades, etc
+
+  /**
+   * Quanto tempo este tamanho leva para ficar pronto, e quanto a confeiteira
+   * cobra pela hora NESTE bolo.
+   *
+   * A tarifa fica aqui, e nao numa configuracao unica da conta, porque varia:
+   * um bolo decorado vale mais por hora que um simples, e duas pessoas na mesma
+   * conta podem cobrar diferente.
+   *
+   * Sao os campos que ela PREENCHE; `maoDeObraCost` e o resultado (horas x
+   * tarifa) e continua sendo o valor que todo o resto do app le. Guardar os dois
+   * deixa a conta auditavel — da para reabrir a ficha meses depois e ver de
+   * onde saiu aquele numero — e a ficha nao se reescreve sozinha se a tarifa
+   * mudar: ela registra o que foi decidido na epoca.
+   */
+  horasTrabalho?: number;
+  valorHora?: number;
+
   maoDeObraCost?: number; // Custo de mão de obra específico deste tamanho
   custoCost?: number; // Custo operacional específico deste tamanho
   investimentoCost?: number; // Investimento específico deste tamanho

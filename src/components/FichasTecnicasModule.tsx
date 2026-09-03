@@ -4,6 +4,7 @@ import { formatCurrency } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
 import { useFichasTecnicas } from '../context/FichasTecnicasContext';
 import { useEstoque } from '../context/EstoqueContext';
+import { useCosts } from '../context/CostsContext';
 import { useUndo } from '../hooks/useUndo';
 import { StockItemAutocomplete } from './StockItemAutocomplete';
 import { compressImageFile } from '../utils/imageCompression';
@@ -163,6 +164,15 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   const { formatCurrency: formatMoney } = useCurrency();
   const { fichas, isLoading: isLoadingFichas, error: fichasError, addFicha, updateFicha, deleteFicha, restoreFicha, fetchFichaPhoto } = useFichasTecnicas();
   const { estoque } = useEstoque();
+
+  // Tarifa sugerida, vinda de Custos Administrativos. Só PREENCHE tamanhos
+  // novos; cada tamanho continua editável, porque a hora varia por bolo — um
+  // decorado vale mais que um simples. Ficha ja salva nunca e alterada por
+  // mudanca nesta sugestao.
+  const { administrativeCosts } = useCosts();
+  const tarifaSugerida = administrativeCosts?.horaTrabalho
+    ? String(administrativeCosts.horaTrabalho)
+    : '';
   const { saveForUndo, getUndoData } = useUndo();
   const [selectedCategory, setSelectedCategory] = useState<'bolos' | 'doces' | 'salgados' | 'saudaveis' | 'kids'>('bolos');
   const [isCreating, setIsCreating] = useState(false);
@@ -215,19 +225,34 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     id: string;
     descricao: string;
     preco: string;
+    horasTrabalho: string;
+    valorHora: string;
     maoDeObraCost: string;
     custoCost: string;
     investimentoCost: string;
   }>>([
-    { id: 'ts-1', descricao: '1', preco: '55', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
-    { id: 'ts-2', descricao: '2', preco: '75', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
-    { id: 'ts-3', descricao: '3', preco: '90', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
+    { id: 'ts-1', descricao: '1', preco: '55', horasTrabalho: '', valorHora: '', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
+    { id: 'ts-2', descricao: '2', preco: '75', horasTrabalho: '', valorHora: '', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
+    { id: 'ts-3', descricao: '3', preco: '90', horasTrabalho: '', valorHora: '', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
   ]);
 
   // Fichas são agora gerenciadas pelo hook useFichasTecnicas (salva no Supabase)
 
   const totalReposicao = ingredients.reduce((sum, ing) => sum + (ing.totalCost || 0), 0);
   const repoNum = parseFloat(reposicaoCost.replace(',', '.')) || 0;
+
+  /**
+   * Mão de obra de um tamanho: horas x tarifa.
+   *
+   * Sem horas ou sem tarifa, devolve o valor que ja estava gravado — e o que
+   * mantem valida uma ficha cadastrada antes destes campos existirem.
+   */
+  const calcularMaoDeObra = (t: { horasTrabalho: string; valorHora: string; maoDeObraCost: string }) => {
+    const horas = parseFloat((t.horasTrabalho || '').replace(',', '.')) || 0;
+    const tarifa = parseFloat((t.valorHora || '').replace(',', '.')) || 0;
+    const calculada = horas * tarifa;
+    return calculada > 0 ? calculada : parseFloat((t.maoDeObraCost || '').replace(',', '.')) || 0;
+  };
 
   const handleOpenAdd = () => {
     setName('');
@@ -237,9 +262,9 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     setIngredients([{ id: '1', name: 'Farinha de Trigo', quantity: 200, unit: 'g', unitCost: 0.005, totalCost: 1.00 }]);
     setReposicaoCost('0');
     setTamanhos([
-      { id: 'ts-1', descricao: '1', preco: '55', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
-      { id: 'ts-2', descricao: '2', preco: '75', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
-      { id: 'ts-3', descricao: '3', preco: '90', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
+      { id: 'ts-1', descricao: '1', preco: '55', horasTrabalho: '', valorHora: tarifaSugerida, maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
+      { id: 'ts-2', descricao: '2', preco: '75', horasTrabalho: '', valorHora: tarifaSugerida, maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
+      { id: 'ts-3', descricao: '3', preco: '90', horasTrabalho: '', valorHora: tarifaSugerida, maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
     ]);
     setEditingId(null);
     setIsCreating(true);
@@ -260,6 +285,11 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
           id: t.id,
           descricao: t.descricao,
           preco: (t.preco || 0).toString(),
+          // Ficha antiga nao tem horas nem tarifa: os campos abrem VAZIOS e o
+          // `maoDeObraCost` gravado e preservado como esta. Preencher com zero
+          // faria a conta zerar a mao de obra que ela ja tinha definido.
+          horasTrabalho: t.horasTrabalho != null ? String(t.horasTrabalho) : '',
+          valorHora: t.valorHora != null ? String(t.valorHora) : '',
           maoDeObraCost: (t.maoDeObraCost || 0).toString(),
           custoCost: (t.custoCost || 0).toString(),
           investimentoCost: (t.investimentoCost || 0).toString(),
@@ -268,9 +298,9 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     } else {
       // Se não há tamanhos, usar padrão
       setTamanhos([
-        { id: 'ts-1', descricao: '1', preco: '0', maoDeObraCost: '0', custoCost: '0', investimentoCost: '0' },
-        { id: 'ts-2', descricao: '2', preco: '0', maoDeObraCost: '0', custoCost: '0', investimentoCost: '0' },
-        { id: 'ts-3', descricao: '3', preco: '0', maoDeObraCost: '0', custoCost: '0', investimentoCost: '0' },
+        { id: 'ts-1', descricao: '1', preco: '0', horasTrabalho: '', valorHora: '', maoDeObraCost: '0', custoCost: '0', investimentoCost: '0' },
+        { id: 'ts-2', descricao: '2', preco: '0', horasTrabalho: '', valorHora: '', maoDeObraCost: '0', custoCost: '0', investimentoCost: '0' },
+        { id: 'ts-3', descricao: '3', preco: '0', horasTrabalho: '', valorHora: '', maoDeObraCost: '0', custoCost: '0', investimentoCost: '0' },
       ]);
     }
 
@@ -336,6 +366,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         id: newId,
         descricao: `${prev.length + 1}`,
         preco: '0',
+        // Repete a tarifa do tamanho anterior: quem cadastra varios tamanhos do
+        // mesmo bolo costuma cobrar a mesma hora, e so as horas mudam.
+        horasTrabalho: '',
+        valorHora: prev[prev.length - 1]?.valorHora || tarifaSugerida,
         maoDeObraCost: maoDeObraCost,
         custoCost: custoCost,
         investimentoCost: investimentoCost,
@@ -354,14 +388,27 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     if (!name.trim()) return;
 
     // Converter tamanhos do formulário para TamanhoOpcao
-    const tamanhosData: TamanhoOpcao[] = tamanhos.map((t) => ({
-      id: t.id,
-      descricao: t.descricao,
-      preco: parseFloat(t.preco) || 0,
-      maoDeObraCost: parseFloat(t.maoDeObraCost) || 0,
-      custoCost: parseFloat(t.custoCost) || 0,
-      investimentoCost: parseFloat(t.investimentoCost) || 0,
-    }));
+    const tamanhosData: TamanhoOpcao[] = tamanhos.map((t) => {
+      const horas = parseFloat(t.horasTrabalho) || 0;
+      const tarifa = parseFloat(t.valorHora) || 0;
+      const maoDeObraCalculada = horas * tarifa;
+
+      return {
+        id: t.id,
+        descricao: t.descricao,
+        preco: parseFloat(t.preco) || 0,
+        horasTrabalho: horas > 0 ? horas : undefined,
+        valorHora: tarifa > 0 ? tarifa : undefined,
+        // Com horas e tarifa preenchidas, a mao de obra vem da conta. Sem elas,
+        // o valor que ja estava gravado e PRESERVADO — do contrario abrir uma
+        // ficha antiga e salvar zeraria a mao de obra dela sem aviso.
+        maoDeObraCost: maoDeObraCalculada > 0
+          ? maoDeObraCalculada
+          : parseFloat(t.maoDeObraCost) || 0,
+        custoCost: parseFloat(t.custoCost) || 0,
+        investimentoCost: parseFloat(t.investimentoCost) || 0,
+      };
+    });
 
     const fichaData: Omit<FichaTecnica, 'id' | 'createdAt'> = {
       name: name.trim(),
@@ -947,21 +994,55 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-2 text-xs">
+                  {/* MÃO DE OBRA — horas x tarifa.
+                      Era um valor em reais digitado direto. Agora ela informa
+                      quanto tempo o bolo leva e quanto cobra pela hora NESTE
+                      bolo (um decorado vale mais por hora que um simples), e o
+                      app faz a conta. */}
+                  <div className="grid grid-cols-3 gap-2 text-xs items-end">
                     <div>
                       <label className="block text-[10px] font-bold text-[var(--color-pastry-chocolate)] mb-1">
-                        Mão de Obra ($)
+                        Horas
                       </label>
                       <input
                         type="text"
                         inputMode="decimal"
                         placeholder="0"
-                        value={tamanho.maoDeObraCost}
-                        onChange={(e) => handleUpdateTamanho(tamanho.id, 'maoDeObraCost', e.target.value)}
+                        value={tamanho.horasTrabalho}
+                        onChange={(e) => handleUpdateTamanho(tamanho.id, 'horasTrabalho', e.target.value)}
                         className="w-full px-2 py-1.5 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
                         style={{ fontFamily: "'Manrope', sans-serif" }}
                       />
                     </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-[var(--color-pastry-chocolate)] mb-1">
+                        $ / hora
+                      </label>
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        placeholder="0"
+                        value={tamanho.valorHora}
+                        onChange={(e) => handleUpdateTamanho(tamanho.id, 'valorHora', e.target.value)}
+                        className="w-full px-2 py-1.5 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
+                        style={{ fontFamily: "'Manrope', sans-serif" }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-[var(--color-pastry-chocolate)] mb-1">
+                        Mão de Obra
+                      </label>
+                      <div
+                        className="w-full px-2 py-1.5 rounded-lg text-xs font-bold text-center"
+                        style={{ background: '#F6F2F5', color: '#3A2350', fontFamily: "'Manrope', sans-serif" }}
+                        title="Horas × valor da hora"
+                      >
+                        {formatMoney(calcularMaoDeObra(tamanho))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-xs">
                     <div>
                       <label className="block text-[10px] font-bold text-[var(--color-pastry-chocolate)] mb-1">
                         Custo ($)
@@ -991,6 +1072,66 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                       />
                     </div>
                   </div>
+
+                  {/* A CONTA ABERTA — de onde vem cada real deste tamanho.
+                      Os quatro numeros ja existiam espalhados pelo formulario,
+                      mas nada os somava nem comparava com o preco: dava para
+                      cadastrar um bolo que custa mais do que vende sem nada na
+                      tela avisar. Custo fixo NAO entra aqui de proposito — ele
+                      vive na meta semanal do Inicio, porque ratear por bolo
+                      exigiria supor um volume mensal que ninguem sabe. */}
+                  {(() => {
+                    const insumos = totalReposicao + repoNum;
+                    const mdo = calcularMaoDeObra(tamanho);
+                    const cus = parseFloat((tamanho.custoCost || '').replace(',', '.')) || 0;
+                    const inv = parseFloat((tamanho.investimentoCost || '').replace(',', '.')) || 0;
+                    const custoTotal = insumos + mdo + cus + inv;
+                    const preco = parseFloat((tamanho.preco || '').replace(',', '.')) || 0;
+                    const margem = preco - custoTotal;
+                    const margemPct = preco > 0 ? (margem / preco) * 100 : 0;
+                    const noPrejuizo = preco > 0 && margem < 0;
+
+                    return (
+                      <div
+                        className="rounded-lg px-2.5 py-2 text-[10px] space-y-1"
+                        style={{ background: '#FAF7FA', border: '1px solid #F3E9F3' }}
+                      >
+                        <div className="flex justify-between" style={{ color: '#7A6E80' }}>
+                          <span>Insumos</span><span>{formatMoney(insumos)}</span>
+                        </div>
+                        <div className="flex justify-between" style={{ color: '#7A6E80' }}>
+                          <span>Mão de obra</span><span>{formatMoney(mdo)}</span>
+                        </div>
+                        <div className="flex justify-between" style={{ color: '#7A6E80' }}>
+                          <span>Custo + investimento</span><span>{formatMoney(cus + inv)}</span>
+                        </div>
+                        <div
+                          className="flex justify-between font-bold pt-1"
+                          style={{ borderTop: '1px solid #EDE6EF', color: '#3A2350' }}
+                        >
+                          <span>Custo total</span><span>{formatMoney(custoTotal)}</span>
+                        </div>
+                        <div className="flex justify-between font-bold" style={{ color: '#3A2350' }}>
+                          <span>Preço</span><span>{formatMoney(preco)}</span>
+                        </div>
+                        <div
+                          className="flex justify-between font-bold"
+                          style={{ color: noPrejuizo ? '#C4626F' : '#4CAF7D' }}
+                        >
+                          <span>{noPrejuizo ? '⚠️ Prejuízo' : 'Sobra'}</span>
+                          <span>
+                            {formatMoney(margem)}
+                            {preco > 0 && ` (${margemPct.toFixed(0)}%)`}
+                          </span>
+                        </div>
+                        {noPrejuizo && (
+                          <p style={{ color: '#C4626F', lineHeight: 1.4 }}>
+                            Este tamanho custa mais do que você cobra por ele.
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })()}
 
                   {tamanhos.length > 1 && (
                     <button

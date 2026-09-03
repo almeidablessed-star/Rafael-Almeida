@@ -269,8 +269,9 @@ export const AdminCostsCard: React.FC = () => {
               }}
             />
             <p style={{ fontSize: '9px', color: '#7A6E80', marginTop: '4px', lineHeight: 1.4 }}>
-              Quanto você cobra pela sua hora. Não entra no total mensal — é a
-              tarifa que você multiplica pelas horas do bolo. Ex: R$ 20/hora × 3h = R$ 60 de mão de obra.
+              Não entra no total mensal. Serve como sugestão: vem preenchida nas
+              fichas técnicas novas, onde você pode ajustar bolo a bolo — um
+              decorado pode valer mais por hora que um simples.
             </p>
           </div>
 

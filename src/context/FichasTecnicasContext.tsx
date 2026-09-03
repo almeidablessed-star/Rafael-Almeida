@@ -34,6 +34,8 @@ interface SupabaseFichaTecnica {
     descricao: string;
     preco: number;
     quantidade?: number;
+    horasTrabalho?: number;
+    valorHora?: number;
     maoDeObraCost?: number;
     custoCost?: number;
     investimentoCost?: number;
@@ -100,6 +102,11 @@ const mapFichaToSupabase = (ficha: Omit<FichaTecnica, 'id' | 'createdAt'>) => ({
     descricao: t.descricao,
     preco: t.preco,
     quantidade: t.quantidade,
+    // Horas e tarifa: sao o que a confeiteira PREENCHE, e `maoDeObraCost` e o
+    // resultado. Sem grava-las, reabrir a ficha mostrava o valor calculado mas
+    // os campos de origem em branco — a conta perdia a memoria de si mesma.
+    horasTrabalho: t.horasTrabalho ?? null,
+    valorHora: t.valorHora ?? null,
     maoDeObraCost: t.maoDeObraCost ?? 0,
     custoCost: t.custoCost ?? 0,
     investimentoCost: t.investimentoCost ?? 0,
