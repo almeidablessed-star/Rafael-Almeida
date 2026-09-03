@@ -6,6 +6,7 @@ import {
   TabType,
   TimePeriod,
   TransactionType,
+  FichaTecnica,
 } from './types';
 import { filterTransactionsByPeriod, calculateSummary } from './utils/storage';
 import { getTodayIso } from './utils/formatters';
@@ -141,7 +142,13 @@ function AppContent() {
     setIsFormModalOpen(true);
   };
 
-  /** Converte os vinculos gravados no pedido nas fichas de verdade do catalogo. */
+  /**
+   * Converte os vinculos gravados no pedido nas fichas de verdade do catalogo.
+   *
+   * `tamanhoId` vai junto porque cada tamanho tem seus proprios insumos: um
+   * bolo de 30 fatias nao consome o mesmo que um de 10. Sem repassar, a baixa
+   * cairia na lista da ficha e debitaria a quantidade errada.
+   */
   const resolverItensDoPedido = (fichaItems?: Transaction['fichaItems']) =>
     (fichaItems || [])
       .map((item) => {
@@ -149,9 +156,18 @@ function AppContent() {
         if (!ficha) {
           console.warn(`[ESTOQUE] fichaId "${item.fichaId}" não está no catálogo; item não baixará estoque.`);
         }
-        return ficha ? { ficha, quantity: item.quantity } : null;
+        return ficha
+          ? {
+              ficha,
+              quantity: item.quantity,
+              tamanhoId: item.selectedTamanhoId as string | undefined,
+            }
+          : null;
       })
-      .filter((x): x is { ficha: typeof fichas[number]; quantity: number } => x !== null);
+      .filter(
+        (x): x is { ficha: FichaTecnica; quantity: number; tamanhoId: string | undefined } =>
+          x !== null
+      );
 
   /**
    * Insumo que a ficha pede e o estoque nao atendeu.

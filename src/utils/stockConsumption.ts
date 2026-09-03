@@ -1,6 +1,7 @@
 import { FichaTecnica, StockItem } from '../types';
 import { normalizeName } from './fichaMatcher';
 import { convertQuantity } from './units';
+import { insumosDoTamanho } from './fichaInsumos';
 
 /**
  * Decide O QUE baixar do estoque para um pedido, sem tocar em banco nenhum.
@@ -63,7 +64,7 @@ export interface PlanoBaixa {
  * deixar a confeiteira ver que precisa repor.
  */
 export const planejarBaixa = (
-  items: { ficha: FichaTecnica; quantity: number }[],
+  items: { ficha: FichaTecnica; quantity: number; tamanhoId?: string }[],
   estoque: StockItem[]
 ): PlanoBaixa => {
   const porItemDeEstoque = new Map<string, BaixaPlanejada>();
@@ -78,10 +79,12 @@ export const planejarBaixa = (
     problemas.push(p);
   };
 
-  items.forEach(({ ficha, quantity }) => {
+  items.forEach(({ ficha, quantity, tamanhoId }) => {
     const fator = Number(quantity) > 0 ? Number(quantity) : 1;
 
-    (ficha.ingredients || []).forEach((insumo) => {
+    // Insumos DO TAMANHO vendido. Antes usava a lista da ficha para qualquer
+    // tamanho, entao um bolo de 30 fatias debitava o mesmo que um de 10.
+    insumosDoTamanho(ficha, tamanhoId).forEach((insumo) => {
       const alvo = normalizeName(insumo.name);
       const itemEstoque = estoque.find((e) => normalizeName(e.name) === alvo);
 

@@ -36,6 +36,7 @@ interface SupabaseFichaTecnica {
     quantidade?: number;
     horasTrabalho?: number;
     valorHora?: number;
+    ingredients?: IngredientUsage[];
     maoDeObraCost?: number;
     custoCost?: number;
     investimentoCost?: number;
@@ -107,6 +108,10 @@ const mapFichaToSupabase = (ficha: Omit<FichaTecnica, 'id' | 'createdAt'>) => ({
     // os campos de origem em branco — a conta perdia a memoria de si mesma.
     horasTrabalho: t.horasTrabalho ?? null,
     valorHora: t.valorHora ?? null,
+    // Insumos DESTE tamanho. Sem grava-los aqui, a lista por tamanho existiria
+    // so na tela e a baixa de estoque continuaria usando a da ficha — o mesmo
+    // descarte silencioso que acabou de acontecer com horas e tarifa.
+    ingredients: t.ingredients ?? [],
     maoDeObraCost: t.maoDeObraCost ?? 0,
     custoCost: t.custoCost ?? 0,
     investimentoCost: t.investimentoCost ?? 0,

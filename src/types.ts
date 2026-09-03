@@ -221,6 +221,23 @@ export interface TamanhoOpcao {
   horasTrabalho?: number;
   valorHora?: number;
 
+  /**
+   * Insumos DESTE tamanho, com as quantidades dele.
+   *
+   * Um bolo de 10 fatias e um de 30 nao consomem a mesma coisa. Ate aqui a
+   * ficha tinha UMA lista de ingredientes valida para todos os tamanhos, entao
+   * a baixa de estoque debitava a mesma quantidade independentemente do bolo
+   * vendido — o estoque errava mais quanto maior fosse o pedido.
+   *
+   * Cada tamanho tem lista propria, e nao um multiplicador sobre uma receita
+   * base: recheio e decoracao nao crescem na mesma proporcao da massa.
+   *
+   * Opcional para nao invalidar fichas antigas. Quando ausente ou vazia, vale a
+   * lista da ficha — ver [[insumosDoTamanho]], que e por onde TODA leitura deve
+   * passar.
+   */
+  ingredients?: IngredientUsage[];
+
   maoDeObraCost?: number; // Custo de mão de obra específico deste tamanho
   custoCost?: number; // Custo operacional específico deste tamanho
   investimentoCost?: number; // Investimento específico deste tamanho

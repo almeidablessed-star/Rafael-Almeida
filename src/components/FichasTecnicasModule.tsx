@@ -227,13 +227,14 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     preco: string;
     horasTrabalho: string;
     valorHora: string;
+    ingredients: IngredientUsage[];
     maoDeObraCost: string;
     custoCost: string;
     investimentoCost: string;
   }>>([
-    { id: 'ts-1', descricao: '1', preco: '55', horasTrabalho: '', valorHora: '', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
-    { id: 'ts-2', descricao: '2', preco: '75', horasTrabalho: '', valorHora: '', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
-    { id: 'ts-3', descricao: '3', preco: '90', horasTrabalho: '', valorHora: '', maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
+    { id: 'ts-1', descricao: '1', preco: '55', horasTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
+    { id: 'ts-2', descricao: '2', preco: '75', horasTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
+    { id: 'ts-3', descricao: '3', preco: '90', horasTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
   ]);
 
   // Fichas são agora gerenciadas pelo hook useFichasTecnicas (salva no Supabase)
@@ -262,9 +263,9 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     setIngredients([{ id: '1', name: 'Farinha de Trigo', quantity: 200, unit: 'g', unitCost: 0.005, totalCost: 1.00 }]);
     setReposicaoCost('0');
     setTamanhos([
-      { id: 'ts-1', descricao: '1', preco: '55', horasTrabalho: '', valorHora: tarifaSugerida, maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
-      { id: 'ts-2', descricao: '2', preco: '75', horasTrabalho: '', valorHora: tarifaSugerida, maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
-      { id: 'ts-3', descricao: '3', preco: '90', horasTrabalho: '', valorHora: tarifaSugerida, maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
+      { id: 'ts-1', descricao: '1', preco: '55', horasTrabalho: '', valorHora: tarifaSugerida, ingredients: [], maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
+      { id: 'ts-2', descricao: '2', preco: '75', horasTrabalho: '', valorHora: tarifaSugerida, ingredients: [], maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
+      { id: 'ts-3', descricao: '3', preco: '90', horasTrabalho: '', valorHora: tarifaSugerida, ingredients: [], maoDeObraCost: '20', custoCost: '5', investimentoCost: '5' },
     ]);
     setEditingId(null);
     setIsCreating(true);
@@ -290,6 +291,13 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
           // faria a conta zerar a mao de obra que ela ja tinha definido.
           horasTrabalho: t.horasTrabalho != null ? String(t.horasTrabalho) : '',
           valorHora: t.valorHora != null ? String(t.valorHora) : '',
+          // Ficha antiga so tem a lista da ficha: cada tamanho abre com uma
+          // COPIA dela, pronta para ser ajustada. Sem isso a confeiteira
+          // encontraria os tamanhos vazios e acharia que perdeu a receita.
+          ingredients:
+            t.ingredients && t.ingredients.length > 0
+              ? t.ingredients.map((ing, k) => ({ ...ing, id: ing.id || `${t.id}_${k}` }))
+              : (ficha.ingredients || []).map((ing, k) => ({ ...ing, id: `${t.id}_base_${k}` })),
           maoDeObraCost: (t.maoDeObraCost || 0).toString(),
           custoCost: (t.custoCost || 0).toString(),
           investimentoCost: (t.investimentoCost || 0).toString(),
@@ -298,9 +306,9 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     } else {
       // Se não há tamanhos, usar padrão
       setTamanhos([
-        { id: 'ts-1', descricao: '1', preco: '0', horasTrabalho: '', valorHora: '', maoDeObraCost: '0', custoCost: '0', investimentoCost: '0' },
-        { id: 'ts-2', descricao: '2', preco: '0', horasTrabalho: '', valorHora: '', maoDeObraCost: '0', custoCost: '0', investimentoCost: '0' },
-        { id: 'ts-3', descricao: '3', preco: '0', horasTrabalho: '', valorHora: '', maoDeObraCost: '0', custoCost: '0', investimentoCost: '0' },
+        { id: 'ts-1', descricao: '1', preco: '0', horasTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '0', custoCost: '0', investimentoCost: '0' },
+        { id: 'ts-2', descricao: '2', preco: '0', horasTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '0', custoCost: '0', investimentoCost: '0' },
+        { id: 'ts-3', descricao: '3', preco: '0', horasTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '0', custoCost: '0', investimentoCost: '0' },
       ]);
     }
 
@@ -320,32 +328,112 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     ]);
   };
 
+  /**
+   * Aplica a edicao de um campo a um insumo, recalculando o custo.
+   *
+   * Extraida para poder ser usada tanto na lista da ficha quanto nas listas de
+   * cada tamanho, sem duplicar a regra de conversao de unidade.
+   */
+  const aplicarEdicaoDeInsumo = (
+    ing: IngredientUsage,
+    field: keyof IngredientUsage,
+    val: any
+  ): IngredientUsage => {
+    const updated = { ...ing, [field]: val };
+
+    // Nome escolhido no autocomplete: puxa o preco do Estoque
+    if (field === 'name') {
+      const stockItem = estoque.find(item => item.name.toLowerCase() === String(val).toLowerCase());
+      if (stockItem && stockItem.costPerUnit > 0) {
+        const convertedCost = convertCostToTargetUnit(stockItem.costPerUnit, stockItem.unit, ing.unit);
+        updated.unitCost = convertedCost;
+        updated.totalCost = ing.quantity * convertedCost;
+      }
+    }
+
+    if (field === 'quantity' || field === 'unitCost') {
+      const q = field === 'quantity' ? parseFloat(val) || 0 : ing.quantity;
+      const c = field === 'unitCost' ? parseFloat(val) || 0 : ing.unitCost;
+      updated.totalCost = q * c;
+    }
+    return updated;
+  };
+
   const handleUpdateIngredient = (id: string, field: keyof IngredientUsage, val: any) => {
     setIngredients((prev) =>
-      prev.map((ing) => {
-        if (ing.id !== id) return ing;
-        const updated = { ...ing, [field]: val };
-
-        // Se está atualizando o nome do ingrediente (seleção via autocomplete)
-        if (field === 'name') {
-          const stockItem = estoque.find(item => item.name.toLowerCase() === val.toLowerCase());
-          if (stockItem && stockItem.costPerUnit > 0) {
-            // Converter o custo para a unidade da ficha
-            const convertedCost = convertCostToTargetUnit(stockItem.costPerUnit, stockItem.unit, ing.unit);
-            updated.unitCost = convertedCost;
-            updated.totalCost = ing.quantity * convertedCost;
-          }
-        }
-
-        // Se está atualizando quantidade ou unitCost
-        if (field === 'quantity' || field === 'unitCost') {
-          const q = field === 'quantity' ? parseFloat(val) || 0 : ing.quantity;
-          const c = field === 'unitCost' ? parseFloat(val) || 0 : ing.unitCost;
-          updated.totalCost = q * c;
-        }
-        return updated;
-      })
+      prev.map((ing) => (ing.id === id ? aplicarEdicaoDeInsumo(ing, field, val) : ing))
     );
+  };
+
+  // --- Insumos POR TAMANHO ---
+
+  const handleAddInsumoTamanho = (tamanhoId: string) => {
+    setTamanhos((prev) =>
+      prev.map((t) =>
+        t.id === tamanhoId
+          ? {
+              ...t,
+              ingredients: [
+                ...t.ingredients,
+                { id: `${Date.now()}`, name: '', quantity: 0, unit: 'g' as const, unitCost: 0, totalCost: 0 },
+              ],
+            }
+          : t
+      )
+    );
+  };
+
+  const handleUpdateInsumoTamanho = (
+    tamanhoId: string,
+    insumoId: string,
+    field: keyof IngredientUsage,
+    val: any
+  ) => {
+    setTamanhos((prev) =>
+      prev.map((t) =>
+        t.id === tamanhoId
+          ? {
+              ...t,
+              ingredients: t.ingredients.map((ing) =>
+                ing.id === insumoId ? aplicarEdicaoDeInsumo(ing, field, val) : ing
+              ),
+            }
+          : t
+      )
+    );
+  };
+
+  const handleRemoveInsumoTamanho = (tamanhoId: string, insumoId: string) => {
+    setTamanhos((prev) =>
+      prev.map((t) =>
+        t.id === tamanhoId
+          ? { ...t, ingredients: t.ingredients.filter((ing) => ing.id !== insumoId) }
+          : t
+      )
+    );
+  };
+
+  /**
+   * Copia os insumos do tamanho anterior.
+   *
+   * Cadastrar cinco listas do zero para o mesmo bolo e o custo real da escolha
+   * por listas separadas. Copiar e ajustar as quantidades cobre o caminho
+   * comum sem impor a proporcao linear que a opcao por multiplicador imporia.
+   */
+  const handleCopiarInsumosDoAnterior = (tamanhoId: string) => {
+    setTamanhos((prev) => {
+      const idx = prev.findIndex((t) => t.id === tamanhoId);
+      if (idx <= 0) return prev;
+      const origem = prev[idx - 1].ingredients;
+      return prev.map((t, i) =>
+        i === idx
+          ? {
+              ...t,
+              ingredients: origem.map((ing, k) => ({ ...ing, id: `${Date.now()}_${k}` })),
+            }
+          : t
+      );
+    });
   };
 
   const handleRemoveIngredient = (id: string) => {
@@ -370,6 +458,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         // mesmo bolo costuma cobrar a mesma hora, e so as horas mudam.
         horasTrabalho: '',
         valorHora: prev[prev.length - 1]?.valorHora || tarifaSugerida,
+        ingredients: [],
         maoDeObraCost: maoDeObraCost,
         custoCost: custoCost,
         investimentoCost: investimentoCost,
@@ -399,6 +488,8 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         preco: parseFloat(t.preco) || 0,
         horasTrabalho: horas > 0 ? horas : undefined,
         valorHora: tarifa > 0 ? tarifa : undefined,
+        // Insumos deste tamanho, sem as linhas em branco que ficaram por engano.
+        ingredients: t.ingredients.filter((ing) => (ing.name || '').trim()),
         // Com horas e tarifa preenchidas, a mao de obra vem da conta. Sem elas,
         // o valor que ja estava gravado e PRESERVADO — do contrario abrir uma
         // ficha antiga e salvar zeraria a mao de obra dela sem aviso.
@@ -415,7 +506,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
       category,
       imageUrl: imageUrl.trim() || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&auto=format&fit=crop&q=80',
       tamanhos: tamanhosData,
-      ingredients,
+      // A lista da FICHA vira um espelho do primeiro tamanho. A lista que vale
+      // e a de cada tamanho; esta so atende quem ainda le o campo antigo (a
+      // folha de orcamento) e serve de rede para fichas sem lista por tamanho.
+      ingredients: tamanhosData[0]?.ingredients || [],
       reposicaoCost: parseFloat(reposicaoCost) || 0,
       maoDeObraCost: parseFloat(maoDeObraCost) || 0,
       custoCost: parseFloat(custoCost) || 0,
@@ -866,84 +960,12 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
             </div>
           </div>
 
-          {/* INGREDIENTS LIST BUILDER */}
-          <div className="bg-[var(--color-pastry-cream)] p-4 rounded-lg border border-[var(--color-pastry-light-pink)]/40 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-extrabold uppercase text-[var(--color-pastry-chocolate)]">
-                Ingredientes ({ingredients.length})
-              </span>
-              <button
-                type="button"
-                onClick={handleAddIngredient}
-                className="text-xs font-bold text-[var(--color-pastry-chocolate)] hover:underline flex items-center gap-1 cursor-pointer"
-              >
-                <PlusCircle className="w-4 h-4 text-[var(--color-pastry-light-pink)]" />
-                <span>Adicionar</span>
-              </button>
-            </div>
-
-            <div className="space-y-2">
-              {ingredients.map((ing) => (
-                <div key={ing.id} className="bg-white p-2.5 rounded-xl border border-[var(--color-pastry-light-pink)]/30 grid grid-cols-12 gap-2 text-xs">
-                  <div className="col-span-12">
-                    <StockItemAutocomplete
-                      value={ing.name}
-                      onChange={(val) => handleUpdateIngredient(ing.id, 'name', val)}
-                      onSelect={() => {}}
-                      stockItems={estoque}
-                      isEnabled={true}
-                      placeholder="Ingrediente (ex: Cacau)"
-                    />
-                  </div>
-                  <div className="col-span-4">
-                    <input
-                      type="number"
-                      placeholder="Qtd"
-                      value={ing.quantity}
-                      onChange={(e) => handleUpdateIngredient(ing.id, 'quantity', e.target.value)}
-                      className="w-full px-1.5 py-1 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
-                  style={{ fontFamily: "'Manrope', sans-serif" }}
-                    />
-                  </div>
-                  <div className="col-span-2">
-                    <select
-                      value={ing.unit}
-                      onChange={(e) => handleUpdateIngredient(ing.id, 'unit', e.target.value)}
-                      className="w-full px-1 py-1 border border-[#F3E9F3] rounded-lg text-[10px] font-bold"
-                  style={{ fontFamily: "'Manrope', sans-serif" }}
-                    >
-                      <option value="g">g</option>
-                      <option value="ml">ml</option>
-                      <option value="un">un</option>
-                      <option value="kg">kg</option>
-                    </select>
-                  </div>
-                  <div className="col-span-5 text-right flex flex-col justify-center">
-                    <span className="text-[10px] text-neutral-500 block">Custo Gasto</span>
-                    <span className="font-black text-xs text-[var(--color-pastry-chocolate)]">
-                      {formatMoney(ing.totalCost || 0)}
-                    </span>
-                  </div>
-                  <div className="col-span-1 flex justify-end items-center">
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveIngredient(ing.id)}
-                      className="p-1 text-neutral-400 hover:text-semantic-error-600 cursor-pointer"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="pt-2 border-t border-[var(--color-pastry-light-pink)]/30 flex items-center justify-between text-xs font-bold text-[var(--color-pastry-chocolate)]">
-              <span>Total Reposição (Ingredientes):</span>
-              <span className="font-extrabold text-sm text-[var(--color-pastry-chocolate)]">
-                {formatMoney(totalReposicao)}
-              </span>
-            </div>
-          </div>
+          {/* A lista de ingredientes saiu daqui e foi para DENTRO de cada
+              tamanho: um bolo de 10 fatias e um de 30 nao consomem o mesmo,
+              e uma lista unica fazia a baixa de estoque debitar a mesma
+              quantidade para qualquer tamanho vendido. Manter tambem uma
+              lista no nivel da ficha colocaria duas listas concorrentes na
+              mesma tela. Ver [[insumosDoTamanho]]. */}
 
 
           {/* TAMANHOS E PREÇOS */}
@@ -963,7 +985,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
             </div>
 
             <div className="space-y-2">
-              {tamanhos.map((tamanho) => (
+              {tamanhos.map((tamanho, index) => (
                 <div key={tamanho.id} className="bg-white p-2.5 rounded-xl border border-[var(--color-pastry-light-pink)]/30 space-y-2">
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div>
@@ -1073,6 +1095,94 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                     </div>
                   </div>
 
+                  {/* INSUMOS DESTE TAMANHO */}
+                  <div className="pt-2 border-t border-[var(--color-pastry-light-pink)]/30 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-extrabold uppercase text-[var(--color-pastry-chocolate)]">
+                        Insumos deste tamanho ({tamanho.ingredients.length})
+                      </span>
+                      <div className="flex items-center gap-2">
+                        {index > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => handleCopiarInsumosDoAnterior(tamanho.id)}
+                            className="text-[10px] font-bold text-[var(--color-pastry-chocolate)] hover:underline cursor-pointer"
+                            title="Copiar a lista do tamanho anterior para ajustar as quantidades"
+                          >
+                            Copiar anterior
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleAddInsumoTamanho(tamanho.id)}
+                          className="text-[10px] font-bold text-[var(--color-pastry-chocolate)] hover:underline flex items-center gap-1 cursor-pointer"
+                        >
+                          <PlusCircle className="w-3.5 h-3.5 text-[var(--color-pastry-light-pink)]" />
+                          <span>Adicionar</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {tamanho.ingredients.length === 0 && (
+                      <p className="text-[10px]" style={{ color: '#9A8FA0' }}>
+                        Sem insumos neste tamanho — ele não vai baixar estoque.
+                      </p>
+                    )}
+
+                    {tamanho.ingredients.map((ing) => (
+                      <div key={ing.id} className="bg-white p-2 rounded-lg border border-[var(--color-pastry-light-pink)]/30 grid grid-cols-12 gap-1.5 text-xs">
+                        <div className="col-span-12">
+                          <StockItemAutocomplete
+                            value={ing.name}
+                            onChange={(val) => handleUpdateInsumoTamanho(tamanho.id, ing.id, 'name', val)}
+                            onSelect={() => {}}
+                            stockItems={estoque}
+                            isEnabled={true}
+                            placeholder="Ingrediente (ex: Cacau)"
+                          />
+                        </div>
+                        <div className="col-span-4">
+                          <input
+                            type="number"
+                            placeholder="Qtd"
+                            value={ing.quantity}
+                            onChange={(e) => handleUpdateInsumoTamanho(tamanho.id, ing.id, 'quantity', e.target.value)}
+                            className="w-full px-1.5 py-1 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
+                            style={{ fontFamily: "'Manrope', sans-serif" }}
+                          />
+                        </div>
+                        <div className="col-span-3">
+                          <select
+                            value={ing.unit}
+                            onChange={(e) => handleUpdateInsumoTamanho(tamanho.id, ing.id, 'unit', e.target.value)}
+                            className="w-full px-1 py-1 border border-[#F3E9F3] rounded-lg text-[10px] font-bold"
+                            style={{ fontFamily: "'Manrope', sans-serif" }}
+                          >
+                            <option value="g">g</option>
+                            <option value="ml">ml</option>
+                            <option value="un">un</option>
+                            <option value="kg">kg</option>
+                          </select>
+                        </div>
+                        <div className="col-span-4 text-right flex flex-col justify-center">
+                          <span className="text-[9px] text-neutral-500 block">Custo</span>
+                          <span className="font-black text-[11px] text-[var(--color-pastry-chocolate)]">
+                            {formatMoney(ing.totalCost || 0)}
+                          </span>
+                        </div>
+                        <div className="col-span-1 flex justify-end items-center">
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveInsumoTamanho(tamanho.id, ing.id)}
+                            className="p-0.5 text-neutral-400 hover:text-semantic-error-600 cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
                   {/* A CONTA ABERTA — de onde vem cada real deste tamanho.
                       Os quatro numeros ja existiam espalhados pelo formulario,
                       mas nada os somava nem comparava com o preco: dava para
@@ -1081,7 +1191,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                       vive na meta semanal do Inicio, porque ratear por bolo
                       exigiria supor um volume mensal que ninguem sabe. */}
                   {(() => {
-                    const insumos = totalReposicao + repoNum;
+                    // Insumos DESTE tamanho, nao mais uma soma unica da ficha.
+                    const insumos =
+                      tamanho.ingredients.reduce((s, i) => s + (Number(i.totalCost) || 0), 0) +
+                      repoNum;
                     const mdo = calcularMaoDeObra(tamanho);
                     const cus = parseFloat((tamanho.custoCost || '').replace(',', '.')) || 0;
                     const inv = parseFloat((tamanho.investimentoCost || '').replace(',', '.')) || 0;

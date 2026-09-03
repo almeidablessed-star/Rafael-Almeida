@@ -73,7 +73,7 @@ interface EstoqueContextType {
   updateEstoque: (id: string, data: Omit<StockItem, 'id'>) => Promise<StockItem>;
   deleteEstoque: (id: string) => Promise<void>;
   consumirParaPedido: (
-    items: { ficha: FichaTecnica; quantity: number }[],
+    items: { ficha: FichaTecnica; quantity: number; tamanhoId?: string }[],
     transacaoId: string
   ) => Promise<ResultadoBaixa>;
   devolverPedido: (transacaoId: string) => Promise<void>;
@@ -261,7 +261,7 @@ export const EstoqueProvider: React.FC<{ children: React.ReactNode }> = ({ child
    * de nomes em TypeScript deixa essa regra legivel para quem mantem o app.
    */
   const consumirParaPedido = async (
-    items: { ficha: FichaTecnica; quantity: number }[],
+    items: { ficha: FichaTecnica; quantity: number; tamanhoId?: string }[],
     transacaoId: string
   ): Promise<ResultadoBaixa> => {
     if (!user) throw new Error('User not authenticated');
