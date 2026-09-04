@@ -670,9 +670,16 @@ export const CustomersModule: React.FC = () => {
       {/* CLIENT FORM MODAL */}
       {isFormOpen && (
         <div style={{ paddingLeft: '18px', paddingRight: '18px' }} className="mb-4">
-          <div className="bg-white rounded-lg overflow-hidden shadow-lg border border-pink-200 animate-fadeIn">
+          {/* Mesma casca do formulario de Pedido: canto mais redondo, sombra
+              de destaque e borda neutra da paleta, no lugar do rosa avulso. */}
+          <div className="bg-[#F6F2F5] rounded-xl overflow-hidden shadow-highlight border border-[#E6E1DB] animate-fadeIn">
           {/* GRADIENT HEADER */}
-          <div className="bg-gradient-to-r from-[#3A2350] to-[#A85E86] px-4 sm:px-5 py-3 sm:py-4 flex items-center justify-between">
+          {/* O mesmo gradiente do cabecalho do Pedido: tres paradas em 155deg,
+              no lugar do degrade horizontal de duas cores. */}
+          <div
+            style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)' }}
+            className="px-4 sm:px-5 py-3 sm:py-4 flex items-center justify-between"
+          >
             <h3 className="font-brand font-black text-sm sm:text-base text-white flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-[#F5B9C6]" />
               {editingId ? 'Editar Cadastro da(o) Cliente' : 'Cadastrar Nova(o) Cliente'}
@@ -686,9 +693,11 @@ export const CustomersModule: React.FC = () => {
             </button>
           </div>
 
+        {/* Corpo em tom claro, como o do Pedido: os blocos brancos por cima e
+            que criam a separacao. Antes era branco sobre branco. */}
         <form
           onSubmit={handleSave}
-          className="bg-white p-4 sm:p-5 space-y-4"
+          className="bg-[#F6F2F5] p-4 sm:p-5 space-y-4"
         >
           {formError && (
             <div className="p-3 rounded-lg bg-red-50 border border-red-200">
@@ -697,7 +706,7 @@ export const CustomersModule: React.FC = () => {
           )}
 
           {/* CUSTOMER PHOTO UPLOAD */}
-          <div className="flex items-center gap-4 rounded-lg p-4" style={{background: 'linear-gradient(135deg, rgba(160,100,130,0.55) 0%, rgba(245,185,198,0.10) 100%)'}}>
+          <div className="flex items-center gap-4 rounded-xl p-4 border border-[#E6E1DB] shadow-card" style={{background: 'linear-gradient(135deg, rgba(160,100,130,0.55) 0%, rgba(245,185,198,0.10) 100%)'}}>
             <div className="w-16 h-16 rounded-full border-2 border-[var(--color-accent-gold)] bg-white text-[var(--color-neutral-charcoal)] flex items-center justify-center overflow-hidden shrink-0 shadow-card relative">
               {photoUrl ? (
                 <img src={photoUrl} alt="Preview" className="w-full h-full object-cover" />
@@ -726,7 +735,9 @@ export const CustomersModule: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Bloco em cartao branco sobre o corpo claro — o mesmo recurso que
+              separa as secoes no formulario de Pedido. */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-white p-4 rounded-xl border border-[#E6E1DB] shadow-card">
             <div>
               <label className="block text-xs font-black text-[var(--color-neutral-charcoal)] mb-2 flex items-center gap-1.5">
                 👤 <span>Nome da(o) Cliente *</span>
@@ -737,8 +748,7 @@ export const CustomersModule: React.FC = () => {
                 placeholder="Ex: Camila Santos"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-lg text-xs font-bold text-[var(--color-neutral-charcoal)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-gold)] transition-all"
-                style={{background: 'linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(245,185,198,0.06) 100%)', border: '1.5px solid rgba(201,168,120,0.3)'}}
+                className="w-full px-4 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
               />
             </div>
 
@@ -752,8 +762,7 @@ export const CustomersModule: React.FC = () => {
                 placeholder="Ex: (781) 420-6892"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-lg text-xs font-bold text-[var(--color-neutral-charcoal)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-gold)] transition-all"
-                style={{background: 'linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(194,174,207,0.06) 100%)', border: '1.5px solid rgba(201,168,120,0.3)'}}
+                className="w-full px-4 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
               />
             </div>
 
@@ -765,14 +774,13 @@ export const CustomersModule: React.FC = () => {
                 type="date"
                 value={eventDate}
                 onChange={(e) => setEventDate(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-lg text-xs font-bold text-[var(--color-neutral-charcoal)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-gold)] transition-all"
-                style={{background: 'linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(169,216,184,0.06) 100%)', border: '1.5px solid rgba(201,168,120,0.3)'}}
+                className="w-full px-4 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
               />
             </div>
           </div>
 
           {/* ADDITIONAL COMMEMORATIVE DATES */}
-          <div className="space-y-2 pt-2 border-t border-[var(--color-neutral-hero)]">
+          <div className="space-y-2 bg-white p-4 rounded-xl border border-[#E6E1DB] shadow-card">
             <div className="flex items-center justify-between">
               <label className="text-xs font-black text-[var(--color-neutral-charcoal)] flex items-center gap-1">
                 <PlusCircle className="w-3.5 h-3.5 text-[var(--color-accent-gold)]" />
@@ -794,13 +802,13 @@ export const CustomersModule: React.FC = () => {
                   placeholder="Nome da data comemorativa"
                   value={ev.title}
                   onChange={(e) => handleUpdateExtraEvent(ev.id, 'title', e.target.value)}
-                  className="flex-1 px-3 py-1.5 bg-white border border-[var(--color-accent-gold)]/40 rounded-lg text-xs font-bold text-[var(--color-neutral-charcoal)]"
+                  className="flex-1 px-3 py-1.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-[var(--color-neutral-charcoal)]"
                 />
                 <input
                   type="date"
                   value={ev.date}
                   onChange={(e) => handleUpdateExtraEvent(ev.id, 'date', e.target.value)}
-                  className="px-3 py-1.5 bg-white border border-[var(--color-accent-gold)]/40 rounded-lg text-xs font-bold text-[var(--color-neutral-charcoal)]"
+                  className="px-3 py-1.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-[var(--color-neutral-charcoal)]"
                 />
                 <button
                   type="button"
@@ -813,7 +821,7 @@ export const CustomersModule: React.FC = () => {
             ))}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 bg-white p-4 rounded-xl border border-[#E6E1DB] shadow-card">
             <div>
               <label className="block text-xs font-black text-[var(--color-neutral-charcoal)] mb-1 flex items-center gap-1">
                 <MapPin className="w-3.5 h-3.5 text-[var(--color-accent-gold)]" /> Endereço de Entrega
@@ -823,7 +831,7 @@ export const CustomersModule: React.FC = () => {
                 placeholder="Ex: 103 Cabot St"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                className="w-full px-3.5 py-2 bg-[var(--color-neutral-hero)]/50 border border-[var(--color-accent-gold)]/40 rounded-xl text-xs font-bold text-[var(--color-neutral-charcoal)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)]"
+                className="w-full px-3.5 py-2 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-[var(--color-neutral-charcoal)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)]"
               />
             </div>
 
@@ -836,12 +844,12 @@ export const CustomersModule: React.FC = () => {
                 placeholder="Ex: Beverly, Boston, Somerville..."
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
-                className="w-full px-3.5 py-2 bg-[var(--color-neutral-hero)]/50 border border-[var(--color-accent-gold)]/40 rounded-xl text-xs font-bold text-[var(--color-neutral-charcoal)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)]"
+                className="w-full px-3.5 py-2 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-[var(--color-neutral-charcoal)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)]"
               />
             </div>
           </div>
 
-          <div>
+          <div className="bg-white p-4 rounded-xl border border-[#E6E1DB] shadow-card">
             <label className="block text-xs font-black text-[var(--color-neutral-charcoal)] mb-1 flex items-center gap-1">
               <FileText className="w-3.5 h-3.5 text-[var(--color-neutral-charcoal)]/60" /> Observações
             </label>
@@ -850,7 +858,7 @@ export const CustomersModule: React.FC = () => {
               placeholder="Observações..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full px-3.5 py-2 bg-[var(--color-neutral-hero)]/50 border border-[var(--color-accent-gold)]/40 rounded-xl text-xs font-medium text-[var(--color-neutral-charcoal)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)]"
+              className="w-full px-3.5 py-2 bg-white border border-[#E6E1DB] rounded-xl text-xs font-medium text-[var(--color-neutral-charcoal)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)]"
             />
           </div>
 
@@ -862,14 +870,12 @@ export const CustomersModule: React.FC = () => {
             >
               Cancelar
             </button>
+            {/* Roxo da marca, como os botoes de acao do Pedido, no lugar do
+                dourado — que era o unico ponto de ouro do formulario. */}
             <button
               type="submit"
               disabled={isSaving}
-              className="px-5 py-2 rounded-xl text-[var(--color-neutral-charcoal)] font-brand font-bold text-xs shadow-sm active:scale-95 transition-all duration-normal disabled:opacity-60 disabled:cursor-not-allowed"
-              style={{
-                backgroundColor: isSaving ? '#D4A574' : 'var(--color-accent-gold)',
-                backgroundImage: isSaving ? 'none' : undefined,
-              }}
+              className="px-5 py-2 rounded-xl bg-[#6E3F72] hover:bg-[#5A3560] text-white font-brand font-bold text-xs shadow-card active:scale-95 transition-all duration-normal disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {isSaving ? 'Salvando...' : 'Salvar Cadastro'}
             </button>

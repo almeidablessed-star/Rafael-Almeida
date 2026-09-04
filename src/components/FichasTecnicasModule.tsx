@@ -864,7 +864,9 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
             </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          {/* Bloco em cartao branco, como as secoes do formulario de Pedido:
+              o corpo claro fica atras e cada grupo ganha borda e sombra. */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 bg-white p-4 rounded-xl border border-[#E6E1DB] shadow-card">
             <div>
               <label className="block text-xs font-bold text-[var(--color-pastry-chocolate)] mb-1" style={{ fontFamily: "'Manrope', sans-serif" }}>
                 Nome do Pedido *
@@ -978,7 +980,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 
 
           {/* TAMANHOS E PREÇOS */}
-          <div className="bg-[var(--color-pastry-cream)] p-4 rounded-lg border border-[var(--color-pastry-light-pink)]/40 space-y-3">
+          <div className="bg-white p-4 rounded-xl border border-[#E6E1DB] shadow-card space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-extrabold uppercase text-[var(--color-pastry-chocolate)]">
                 Tamanhos & Preços ({tamanhos.length})
@@ -993,9 +995,13 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
               </button>
             </div>
 
+            {/* Cada tamanho e um painel interno em tom claro sobre o cartao
+                branco — a mesma leitura dos blocos aninhados do Pedido, em que
+                o de dentro e mais suave que o de fora, e nao branco sobre
+                branco. */}
             <div className="space-y-2">
               {tamanhos.map((tamanho, index) => (
-                <div key={tamanho.id} className="bg-white p-2.5 rounded-xl border border-[var(--color-pastry-light-pink)]/30 space-y-2">
+                <div key={tamanho.id} className="bg-[#F6F2F5]/90 p-2.5 rounded-xl border border-[#E6E1DB] space-y-2">
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div>
                       <label className="block text-[10px] font-bold text-[var(--color-pastry-chocolate)] mb-1">
@@ -1006,7 +1012,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         placeholder="Ex: 1, 2, 3"
                         value={tamanho.descricao}
                         onChange={(e) => handleUpdateTamanho(tamanho.id, 'descricao', e.target.value)}
-                        className="w-full px-2 py-1.5 border border-[#F3E9F3] rounded-lg text-xs font-semibold"
+                        className="w-full px-2 py-1.5 bg-white border border-[#E6E1DB] rounded-lg text-xs font-semibold"
                       />
                     </div>
                     <div>
@@ -1019,7 +1025,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         placeholder="0.00"
                         value={tamanho.preco}
                         onChange={(e) => handleUpdateTamanho(tamanho.id, 'preco', e.target.value)}
-                        className="w-full px-2 py-1.5 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
+                        className="w-full px-2 py-1.5 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold text-center"
                         style={{ fontFamily: "'Manrope', sans-serif" }}
                       />
                     </div>
@@ -1041,7 +1047,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         placeholder="0"
                         value={tamanho.horasTrabalho}
                         onChange={(e) => handleUpdateTamanho(tamanho.id, 'horasTrabalho', e.target.value)}
-                        className="w-full px-2 py-1.5 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
+                        className="w-full px-2 py-1.5 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold text-center"
                         style={{ fontFamily: "'Manrope', sans-serif" }}
                       />
                     </div>
@@ -1055,7 +1061,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         placeholder="0"
                         value={tamanho.valorHora}
                         onChange={(e) => handleUpdateTamanho(tamanho.id, 'valorHora', e.target.value)}
-                        className="w-full px-2 py-1.5 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
+                        className="w-full px-2 py-1.5 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold text-center"
                         style={{ fontFamily: "'Manrope', sans-serif" }}
                       />
                     </div>
@@ -1084,7 +1090,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         placeholder="0"
                         value={tamanho.custoCost}
                         onChange={(e) => handleUpdateTamanho(tamanho.id, 'custoCost', e.target.value)}
-                        className="w-full px-2 py-1.5 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
+                        className="w-full px-2 py-1.5 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold text-center"
                         style={{ fontFamily: "'Manrope', sans-serif" }}
                       />
                     </div>
@@ -1098,7 +1104,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         placeholder="0"
                         value={tamanho.investimentoCost}
                         onChange={(e) => handleUpdateTamanho(tamanho.id, 'investimentoCost', e.target.value)}
-                        className="w-full px-2 py-1.5 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
+                        className="w-full px-2 py-1.5 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold text-center"
                         style={{ fontFamily: "'Manrope', sans-serif" }}
                       />
                     </div>
@@ -1159,7 +1165,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                             placeholder="Qtd"
                             value={ing.quantity || ''}
                             onChange={(e) => handleUpdateInsumoTamanho(tamanho.id, ing.id, 'quantity', e.target.value)}
-                            className="w-full px-1.5 py-1 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
+                            className="w-full px-1.5 py-1 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold text-center"
                             style={{ fontFamily: "'Manrope', sans-serif" }}
                           />
                         </div>
@@ -1167,7 +1173,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                           <select
                             value={ing.unit}
                             onChange={(e) => handleUpdateInsumoTamanho(tamanho.id, ing.id, 'unit', e.target.value)}
-                            className="w-full px-1 py-1 border border-[#F3E9F3] rounded-lg text-[10px] font-bold"
+                            className="w-full px-1 py-1 bg-white border border-[#E6E1DB] rounded-lg text-[10px] font-bold"
                             style={{ fontFamily: "'Manrope', sans-serif" }}
                           >
                             <option value="g">g</option>
@@ -1313,7 +1319,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
           )}
 
           {/* TOTAL SUGGESTED SELLING PRICE */}
-          <div className="bg-[var(--color-pastry-chocolate)] p-4 rounded-lg text-white flex items-center justify-between">
+          <div className="bg-[var(--color-pastry-chocolate)] p-4 rounded-xl shadow-card text-white flex items-center justify-between">
             <div>
               <span className="label-sm tracking-wider text-[var(--color-pastry-pink)] block">
                 Sugestão de Preço de Venda
