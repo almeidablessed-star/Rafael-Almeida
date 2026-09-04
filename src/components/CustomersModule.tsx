@@ -892,7 +892,10 @@ export const CustomersModule: React.FC = () => {
           <div className="p-8 rounded-xl bg-white border border-dashed border-[var(--color-accent-gold)]/40 text-center space-y-2">
             <Users className="w-10 h-10 text-[var(--color-neutral-charcoal)]/30 mx-auto" />
             <p className="text-xs text-[var(--color-neutral-charcoal)]/60 font-medium">
-              Nenhuma(o) cliente encontrada(o).
+              {/* Sem parenteses aqui: "Nenhuma(o) cliente encontrada(o)" tinha
+                  dois numa frase de quatro palavras. Falar do RESULTADO, e nao
+                  da pessoa, sai neutro sem custar legibilidade. */}
+              Nenhum resultado encontrado.
             </p>
           </div>
         ) : (
