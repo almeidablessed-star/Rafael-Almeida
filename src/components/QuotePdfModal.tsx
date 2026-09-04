@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { toPng } from 'html-to-image';
+// Faltava. `handleDownloadImage` chamava html2canvas sem import nenhum, entao o
+// botao de baixar a folha como imagem estourava ReferenceError no primeiro
+// clique — o `catch` engolia e mostrava "tire um print da tela", como se fosse
+// uma limitacao do navegador. A dependencia sempre esteve no package.json.
+import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { Transaction } from '../types';
 import { formatCurrency, formatDateBr } from '../utils/formatters';
@@ -134,6 +139,46 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
       return;
     }
 
+    // Estilos originais, guardados para serem devolvidos depois da captura.
+    //
+    // Declarados FORA do `try` de proposito. Estavam dentro dele, e o `catch`
+    // — que existe justamente para desfazer as alteracoes quando algo falha —
+    // nao enxerga `const` de outro bloco. Na pratica: qualquer erro na geracao
+    // do PDF fazia o proprio tratamento de erro estourar um ReferenceError, e a
+    // folha ficava com os estilos de captura aplicados (sem recorte, sem
+    // altura maxima) ate a pagina ser recarregada.
+    const overflowStates: Array<{ elem: Element; overflow: string }> = [];
+    const imageHeightStates: Array<{ elem: Element; maxHeight: string }> = [];
+    const containerStates: Array<{ elem: Element; maxHeight: string }> = [];
+
+    /** Devolve a folha ao estado normal. Roda no sucesso e no erro. */
+    const restaurarEstilos = () => {
+      overflowStates.forEach(({ elem, overflow }) => {
+        (elem as HTMLElement).style.overflow = overflow;
+      });
+      imageHeightStates.forEach(({ elem, maxHeight }) => {
+        const imgElement = elem as HTMLElement;
+        if (maxHeight) {
+          imgElement.style.maxHeight = maxHeight;
+        } else {
+          imgElement.style.removeProperty('max-height');
+        }
+        imgElement.style.removeProperty('height');
+        imgElement.style.removeProperty('width');
+      });
+      containerStates.forEach(({ elem, maxHeight }) => {
+        const containerElement = elem as HTMLElement;
+        if (maxHeight) {
+          containerElement.style.maxHeight = maxHeight;
+        } else {
+          containerElement.style.removeProperty('max-height');
+        }
+        containerElement.style.removeProperty('height');
+        containerElement.style.removeProperty('overflow');
+        containerElement.style.removeProperty('min-height');
+      });
+    };
+
     try {
       setIsGeneratingPdf(true);
 
@@ -192,13 +237,8 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Force image elements to be visible and ensure they have dimensions
-      // Store states for restoration in all scopes
-      const overflowElements = docElem.querySelectorAll('[class*="overflow-hidden"]');
-      const overflowStates: Array<{elem: Element, overflow: string}> = [];
-      const imageHeightStates: Array<{elem: Element, maxHeight: string}> = [];
-      const containerStates: Array<{elem: Element, maxHeight: string}> = [];
-
       // Temporarily remove overflow-hidden from image containers to allow html-to-image to capture them
+      const overflowElements = docElem.querySelectorAll('[class*="overflow-hidden"]');
       overflowElements.forEach(elem => {
         const currentOverflow = window.getComputedStyle(elem).overflow;
         overflowStates.push({ elem, overflow: currentOverflow });
@@ -334,36 +374,7 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
             : `Folha_Cliente_${clientName}_${timestamp}.pdf`;
 
           pdf.save(filename);
-
-          // Restore overflow-hidden on image containers
-          overflowStates.forEach(({ elem, overflow }) => {
-            (elem as HTMLElement).style.overflow = overflow;
-          });
-
-          // Restore max-height restrictions on inspiration images
-          imageHeightStates.forEach(({ elem, maxHeight }) => {
-            const imgElement = elem as HTMLElement;
-            if (maxHeight) {
-              imgElement.style.maxHeight = maxHeight;
-            } else {
-              imgElement.style.removeProperty('max-height');
-            }
-            imgElement.style.removeProperty('height');
-            imgElement.style.removeProperty('width');
-          });
-
-          // Restore image container styles
-          containerStates.forEach(({ elem, maxHeight }) => {
-            const containerElement = elem as HTMLElement;
-            if (maxHeight) {
-              containerElement.style.maxHeight = maxHeight;
-            } else {
-              containerElement.style.removeProperty('max-height');
-            }
-            containerElement.style.removeProperty('height');
-            containerElement.style.removeProperty('overflow');
-            containerElement.style.removeProperty('min-height');
-          });
+          restaurarEstilos();
         };
         img.src = imgData;
 
@@ -375,34 +386,7 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
     } catch (err) {
       console.error('Error generating PDF:', err);
       alert('Erro ao gerar PDF. Tente novamente.');
-      // Restore overflow-hidden in case of error
-      overflowStates.forEach(({ elem, overflow }) => {
-        (elem as HTMLElement).style.overflow = overflow;
-      });
-      // Restore max-height in case of error
-      imageHeightStates.forEach(({ elem, maxHeight }) => {
-        const imgElement = elem as HTMLElement;
-        if (maxHeight) {
-          imgElement.style.maxHeight = maxHeight;
-        } else {
-          imgElement.style.removeProperty('max-height');
-        }
-        imgElement.style.removeProperty('height');
-        imgElement.style.removeProperty('width');
-      });
-
-      // Restore container styles in case of error
-      containerStates.forEach(({ elem, maxHeight }) => {
-        const containerElement = elem as HTMLElement;
-        if (maxHeight) {
-          containerElement.style.maxHeight = maxHeight;
-        } else {
-          containerElement.style.removeProperty('max-height');
-        }
-        containerElement.style.removeProperty('height');
-        containerElement.style.removeProperty('overflow');
-        containerElement.style.removeProperty('min-height');
-      });
+      restaurarEstilos();
     } finally {
       setIsGeneratingPdf(false);
     }
