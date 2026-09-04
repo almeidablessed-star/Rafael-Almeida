@@ -29,7 +29,7 @@ interface AuthContextType {
   beginAuthTransition: () => void;
   endAuthTransition: () => void;
   login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string) => Promise<void>;
+  signup: (email: string, password: string, nomeConfeitaria?: string) => Promise<void>;
   setupProfile: (nome: string, nome_confeitaria: string, moeda: 'USD' | 'BRL') => Promise<void>;
   // Rele o perfil do banco. Sem isso, editar o perfil so aparece na folha de
   // orcamento depois de recarregar a pagina, porque o contexto guarda a copia
@@ -261,7 +261,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signup = async (email: string, password: string) => {
+  /**
+   * `nomeConfeitaria` viaja no metadata do auth, e nao numa linha de
+   * `usuarias`: neste ponto o cadastro ainda nao confirmou e a linha so nasce
+   * depois, no setupProfile. Sem essa carona, o nome que a confeiteira digitou
+   * na tela de cadastro era validado como obrigatorio e descartado em seguida
+   * — a tela seguinte pedia tudo de novo, em branco.
+   */
+  const signup = async (email: string, password: string, nomeConfeitaria?: string) => {
+    const signUpOptions = nomeConfeitaria?.trim()
+      ? { data: { nome_confeitaria: nomeConfeitaria.trim() } }
+      : undefined;
+
     try {
       // Validar se o e-mail já existe
       const { data: existingUsers, error: checkError } = await supabase.auth.admin?.listUsers() || { data: null, error: null };
@@ -272,6 +283,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const { error } = await supabase.auth.signUp({
           email,
           password,
+          options: signUpOptions,
         });
 
         if (error) {
@@ -293,6 +305,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const { error } = await supabase.auth.signUp({
           email,
           password,
+          options: signUpOptions,
         });
 
         if (error) throw error;

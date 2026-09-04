@@ -1,15 +1,31 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { User, Store, DollarSign, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { CarulaLogo } from '../components/CarulaLogo';
 
 export const SetupProfilePage: React.FC = () => {
+  const { setupProfile, user } = useAuth();
+
   const [nome, setNome] = useState('');
-  const [nomeConfeitaria, setNomeConfeitaria] = useState('');
+  // Ja preenchido com o que foi digitado na tela de cadastro, que viaja no
+  // metadata do auth. Continua editavel: quem chegou aqui por outro caminho
+  // (conta antiga, recuperacao) encontra o campo vazio, como antes.
+  const [nomeConfeitaria, setNomeConfeitaria] = useState(
+    () => (user?.user_metadata?.nome_confeitaria as string | undefined) || ''
+  );
   const [moeda, setMoeda] = useState<'BRL' | 'USD'>('BRL');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { setupProfile } = useAuth();
+
+  // O `user` chega de forma assincrona: o valor inicial acima roda antes de a
+  // sessao carregar e pegaria vazio. Aqui preenche assim que ele chega, mas so
+  // enquanto o campo estiver intocado — digitar tem precedencia sobre o
+  // metadata, senao a correcao de quem se arrependeu do nome seria desfeita.
+  useEffect(() => {
+    const doMetadata = user?.user_metadata?.nome_confeitaria as string | undefined;
+    if (!doMetadata) return;
+    setNomeConfeitaria((atual) => (atual.trim() ? atual : doMetadata));
+  }, [user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

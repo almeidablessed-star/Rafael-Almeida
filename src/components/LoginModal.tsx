@@ -68,7 +68,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
     setLoading(true);
 
     try {
-      await signup(email, password);
+      await signup(email, password, businessName);
       setMessage({ type: 'success', text: 'Conta criada com sucesso!' });
 
       setTimeout(() => {

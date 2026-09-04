@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { FichaTecnica, IngredientUsage, Transaction, TamanhoOpcao } from '../types';
 import { formatCurrency } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
@@ -27,6 +27,7 @@ import {
   TrendingUp,
   ChevronDown,
   ChevronUp,
+  AlertTriangle,
 } from 'lucide-react';
 
 // Helpers para compatibilidade com a nova estrutura de tamanhos
@@ -196,6 +197,44 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   ]);
 
   // Fichas são agora gerenciadas pelo hook useFichasTecnicas (salva no Supabase)
+
+  /**
+   * Tamanhos cujo preco nao acompanha o tamanho: um bolo maior saindo mais
+   * barato que um menor.
+   *
+   * Existe porque nada no app impedia isso, e o erro so aparecia la na frente,
+   * na hora de lancar o pedido — com a confeiteira cobrando pelo valor errado
+   * sem perceber. Uma ficha real de teste tinha 25 fatias mais barato que 15.
+   *
+   * O "tamanho" sai do primeiro numero da descricao ("25 fatias" -> 25, "20 cm"
+   * -> 20). E o unico dado comparavel que existe: `quantidade` e opcional e
+   * esta indefinida em todas as fichas cadastradas. Descricao sem numero
+   * ("Grande", "P") fica de fora da checagem em vez de virar 0 e disparar
+   * alarme falso.
+   *
+   * E AVISO, nao bloqueio: pode haver motivo real (promocao, tamanho com menos
+   * decoracao), e travar o salvamento por um palpite nosso seria pior.
+   */
+  const avisosDePreco = useMemo(() => {
+    const comparaveis = tamanhos
+      .map((t) => {
+        const medida = parseFloat((t.descricao || '').replace(',', '.').match(/\d+(?:[.,]\d+)?/)?.[0] || '');
+        const preco = parseFloat((t.preco || '').replace(',', '.'));
+        return { descricao: t.descricao, medida, preco };
+      })
+      // Preco 0/vazio significa "ainda nao preencheu", nao "de graca".
+      .filter((t) => Number.isFinite(t.medida) && Number.isFinite(t.preco) && t.preco > 0);
+
+    const avisos: string[] = [];
+    for (const maior of comparaveis) {
+      for (const menor of comparaveis) {
+        if (maior.medida > menor.medida && maior.preco < menor.preco) {
+          avisos.push(`"${maior.descricao}" está mais barato que "${menor.descricao}".`);
+        }
+      }
+    }
+    return avisos;
+  }, [tamanhos]);
 
   const totalReposicao = ingredients.reduce((sum, ing) => sum + (ing.totalCost || 0), 0);
   const repoNum = parseFloat(reposicaoCost.replace(',', '.')) || 0;
@@ -1233,6 +1272,45 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
               ))}
             </div>
           </div>
+
+          {/* Aviso de preco que nao acompanha o tamanho. Nao bloqueia o
+              salvamento — ver a nota em `avisosDePreco`. */}
+          {avisosDePreco.length > 0 && (
+            <div
+              className="p-3.5 rounded-xl border animate-fadeIn"
+              style={{ background: '#FFF6E8', borderColor: '#F0D2A0' }}
+              role="status"
+            >
+              <div className="flex items-start gap-2.5">
+                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" style={{ color: '#B27A16' }} />
+                <div>
+                  <p
+                    className="text-xs font-bold mb-1"
+                    style={{ color: '#7A5310', fontFamily: "'Manrope', sans-serif" }}
+                  >
+                    Confira os preços por tamanho
+                  </p>
+                  <ul className="space-y-0.5">
+                    {avisosDePreco.map((aviso) => (
+                      <li
+                        key={aviso}
+                        className="text-[11px] leading-relaxed"
+                        style={{ color: '#7A5310', fontFamily: "'Manrope', sans-serif" }}
+                      >
+                        {aviso}
+                      </li>
+                    ))}
+                  </ul>
+                  <p
+                    className="text-[11px] mt-1.5"
+                    style={{ color: '#9A7430', fontFamily: "'Manrope', sans-serif" }}
+                  >
+                    Se for de propósito, pode salvar normalmente.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* TOTAL SUGGESTED SELLING PRICE */}
           <div className="bg-[var(--color-pastry-chocolate)] p-4 rounded-lg text-white flex items-center justify-between">
