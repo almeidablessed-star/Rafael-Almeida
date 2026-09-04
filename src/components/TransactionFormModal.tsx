@@ -144,10 +144,29 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   const customerListRef = useRef<HTMLUListElement>(null);
   const [hasMoreCustomersBelow, setHasMoreCustomersBelow] = useState(false);
 
+  /**
+   * A confeiteira ja definiu a data DESTE pedido — clicando num dia do
+   * calendario ou digitando no campo.
+   *
+   * Existe porque escolher a cliente sobrescrevia a data escolhida: o cadastro
+   * da cliente guarda a data do evento dela (aniversario), e `applyCustomer`
+   * copiava esse dia por cima, calado. Todo pedido da Maria caia no aniversario
+   * da Maria, independentemente do dia marcado para a entrega — e quando a
+   * cliente nao tinha data cadastrada, caia em hoje. A data escolhida nunca
+   * sobrevivia a escolha da cliente.
+   *
+   * Com a marca, a data da cliente volta a ser o que sempre deveria ter sido:
+   * uma sugestao para o campo ainda intocado, nunca uma sobrescrita.
+   */
+  const [eventDateTouched, setEventDateTouched] = useState<boolean>(!!prefilledDate);
+
   // Sincronizar prefilledDate com eventDate quando o formulário abre com data pré-preenchida
   useEffect(() => {
     if (isOpen && prefilledDate) {
       setEventDate(prefilledDate);
+      // Clicar num dia do calendario e uma escolha explicita, tanto quanto
+      // digitar: a partir daqui nada mais pode sobrescrever.
+      setEventDateTouched(true);
     }
   }, [isOpen, prefilledDate]);
 
@@ -197,21 +216,21 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       if (photoUrl) setCustomerPhotoUrl(photoUrl);
     }
 
-    // A data de evento cadastrada costuma ser de um aniversario passado.
-    // Trazer o dia/mes para o ano corrente evita lancar o pedido no passado.
-    if (found.eventDate) {
+    // A data cadastrada da cliente e SUGESTAO para o campo ainda intocado. Se a
+    // confeiteira ja escolheu o dia deste pedido, ele manda — ver
+    // [[eventDateTouched]]. E se a cliente nao tem data cadastrada, nao ha o que
+    // sugerir: o campo fica como esta, em vez de ser jogado para hoje.
+    if (!eventDateTouched && found.eventDate) {
       const parts = found.eventDate.split('-');
       if (parts.length === 3) {
+        // A data de evento cadastrada costuma ser de um aniversario passado.
+        // Trazer o dia/mes para o ano corrente evita sugerir uma data vencida.
         const year = parseInt(parts[0], 10);
         const currentYear = new Date().getFullYear();
         setEventDate(
           year < currentYear ? `${currentYear}-${parts[1]}-${parts[2]}` : found.eventDate
         );
-      } else {
-        setEventDate(getTodayIso());
       }
-    } else {
-      setEventDate(getTodayIso());
     }
 
     if (found.address || found.city) {
@@ -326,6 +345,9 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
         setCustomerPhone(editingTransaction.customerPhone || '');
         setCustomerPhotoUrl(editingTransaction.customerPhotoUrl || '');
         setEventDate(editingTransaction.eventDate || getTodayIso());
+        // Pedido ja lancado tem data decidida: reabrir para editar nao pode
+        // deixar a data cadastrada da cliente sobrescreve-la.
+        setEventDateTouched(true);
         setDeliveryTime(editingTransaction.deliveryTime || '');
         setDeliveryAddress(editingTransaction.deliveryAddress || '');
         setObservations(editingTransaction.observations || '');
@@ -385,6 +407,10 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       if (!prefilledDate) {
         setEventDate(getTodayIso());
       }
+      // A marca acompanha a data: um formulario limpo volta a aceitar a
+      // sugestao da cliente, mas um aberto pelo calendario ja nasce decidido.
+      // Sem isto o estado vazaria de um pedido para o proximo.
+      setEventDateTouched(!!prefilledDate);
       setDeliveryTime('');
       setDeliveryAddress('');
       setSignalValue('');
@@ -1602,16 +1628,26 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                   </div>
                 </div>
 
-                {/* Date */}
+                {/* Data da entrega.
+                    Ligado a `eventDate`, e nao a `date`: e `eventDate` que vira
+                    a data gravada do pedido (ver o `date:` na montagem da
+                    transacao). Este campo escrevia em `date`, que era
+                    descartado no salvamento — a confeiteira escolhia o dia,
+                    via o campo mudar, e o pedido caia noutra data. */}
                 <div>
                   <label className="block text-xs font-bold text-neutral-700 mb-1">
-                    Data do Pedido
+                    Data da Entrega
                   </label>
                   <input
                     type="date"
                     required
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
+                    value={eventDate}
+                    onChange={(e) => {
+                      setEventDate(e.target.value);
+                      // Escolha explicita: a partir daqui a data cadastrada da
+                      // cliente nao sobrescreve mais.
+                      setEventDateTouched(true);
+                    }}
                     className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-300 rounded-lg text-sm font-medium text-neutral-800 focus:outline-none focus:ring-2 focus:ring-pink-400"
                   />
                 </div>
