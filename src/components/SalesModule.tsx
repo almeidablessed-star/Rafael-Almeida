@@ -169,7 +169,7 @@ export const SalesModule: React.FC<SalesModuleProps> = ({
               {formatMoney(breakdown.totalMaoDeObra)}
             </span>
             <span className="text-[11px] text-[#5A4B6B]/70 font-medium">
-              Salário Confeiteira
+              Salário Confeiteira(o)
             </span>
           </div>
 

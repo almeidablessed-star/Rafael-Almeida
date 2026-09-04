@@ -570,7 +570,7 @@ export const CustomersModule: React.FC = () => {
             }}
             title="Adicionar novo cliente"
           >
-            Novo Cliente
+            Nova(o) Cliente
           </button>
         </div>
 
@@ -661,7 +661,7 @@ export const CustomersModule: React.FC = () => {
           onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
         >
           <Plus className="w-4 h-4 stroke-[3]" />
-          <span>Cadastrar Nova Cliente</span>
+          <span>Cadastrar Nova(o) Cliente</span>
         </button>
       </div>
         </div>
@@ -675,7 +675,7 @@ export const CustomersModule: React.FC = () => {
           <div className="bg-gradient-to-r from-[#3A2350] to-[#A85E86] px-4 sm:px-5 py-3 sm:py-4 flex items-center justify-between">
             <h3 className="font-brand font-black text-sm sm:text-base text-white flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-[#F5B9C6]" />
-              {editingId ? 'Editar Cadastro da Cliente' : 'Cadastrar Nova Cliente'}
+              {editingId ? 'Editar Cadastro da(o) Cliente' : 'Cadastrar Nova(o) Cliente'}
             </h3>
             <button
               type="button"
@@ -707,7 +707,7 @@ export const CustomersModule: React.FC = () => {
             </div>
             <div>
               <label htmlFor="photo-upload" className="block text-xs font-black text-[var(--color-neutral-charcoal)] mb-2 flex items-center gap-1.5 cursor-pointer">
-                <Camera className="w-4 h-4 text-[var(--color-accent-gold)]" /> Foto da Cliente
+                <Camera className="w-4 h-4 text-[var(--color-accent-gold)]" /> Foto da(o) Cliente
               </label>
               <label
                 htmlFor="photo-upload"
@@ -729,7 +729,7 @@ export const CustomersModule: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-black text-[var(--color-neutral-charcoal)] mb-2 flex items-center gap-1.5">
-                👤 <span>Nome da Cliente *</span>
+                👤 <span>Nome da(o) Cliente *</span>
               </label>
               <input
                 type="text"
@@ -759,7 +759,7 @@ export const CustomersModule: React.FC = () => {
 
             <div className="sm:col-span-2">
               <label className="block text-xs font-black text-[var(--color-neutral-charcoal)] mb-2 flex items-center gap-1.5">
-                <Calendar className="w-4 h-4 text-[var(--color-neutral-charcoal)]" /> <span>Data do Aniversário da Cliente</span>
+                <Calendar className="w-4 h-4 text-[var(--color-neutral-charcoal)]" /> <span>Data do Aniversário da(o) Cliente</span>
               </label>
               <input
                 type="date"
@@ -892,7 +892,7 @@ export const CustomersModule: React.FC = () => {
           <div className="p-8 rounded-xl bg-white border border-dashed border-[var(--color-accent-gold)]/40 text-center space-y-2">
             <Users className="w-10 h-10 text-[var(--color-neutral-charcoal)]/30 mx-auto" />
             <p className="text-xs text-[var(--color-neutral-charcoal)]/60 font-medium">
-              Nenhuma cliente encontrada.
+              Nenhuma(o) cliente encontrada(o).
             </p>
           </div>
         ) : (

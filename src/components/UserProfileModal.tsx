@@ -59,7 +59,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
     e.preventDefault();
 
     if (!user) {
-      alert('Usuário não encontrado');
+      alert('Usuária(o) não encontrada(o)');
       return;
     }
 
@@ -112,7 +112,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
           <div className="flex items-center gap-2">
             <User className="w-5 h-5 text-semantic-warning-300" />
             <h3 id="profileModalTitle" className="font-brand font-black text-base">
-              Meu Perfil de Confeiteira & Logo
+              Meu Perfil de Confeiteira(o) & Logo
             </h3>
           </div>
           <button
@@ -178,7 +178,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
           <div className="space-y-3">
             <div>
               <label className="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1">
-                <Building className="w-3.5 h-3.5 text-pink-600" /> Nome da Confeitaria / Confeiteira *
+                <Building className="w-3.5 h-3.5 text-pink-600" /> Nome da Confeitaria / Confeiteira(o) *
               </label>
               <input
                 type="text"

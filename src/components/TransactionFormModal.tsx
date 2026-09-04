@@ -904,7 +904,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
               <div className="bg-[#F6F2F5]/90 p-4 rounded-xl border border-[#E6E1DB] shadow-card space-y-3">
                 <div className="flex items-center justify-between border-b border-[#E6E1DB]/80 pb-2">
                   <label className="text-xs font-black uppercase tracking-wider text-[#3A2350] flex items-center gap-1.5">
-                    👤 Dados da Cliente & Orçamento
+                    👤 Dados da(o) Cliente & Orçamento
                   </label>
                   <button
                     type="button"
@@ -924,7 +924,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       separado que listava todas sem filtrar. */}
                   <div className="relative" ref={customerBoxRef}>
                     <label style={{ fontFamily: "'Manrope', sans-serif" }} className="block text-[11px] font-bold text-neutral-800 mb-1">
-                      Nome da Cliente *
+                      Nome da(o) Cliente *
                     </label>
                     <input
                       type="text"

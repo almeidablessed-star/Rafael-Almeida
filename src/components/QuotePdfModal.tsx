@@ -423,7 +423,7 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
 ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transaction.signalValue)}\n📋 *Restante a Pagar na Entrega:* ${formatCurrency(transaction.totalValue - transaction.signalValue)}` : ''}
 💳 *Pagamento:* ${transaction.paymentMethod === 'cash' ? '💵 Cash (Dinheiro)' : '⚡ Zelle'}
 
-💖 _${sellerName ? `Obrigada por escolher a ${sellerName}!` : 'Obrigada pela preferência!'} Feito com amor._ ✨
+💖 _${sellerName ? `Obrigada(o) por escolher a ${sellerName}!` : 'Obrigada(o) pela preferência!'} Feito com amor._ ✨
     `.trim();
 
     navigator.clipboard.writeText(text);
@@ -619,7 +619,7 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
                 {/* Customer Box */}
                 <div className="bg-white p-3 rounded-[16px] border border-[#E6E1DB] shadow-sm space-y-1.5">
                   <h4 className="text-[9px] font-black uppercase tracking-wider text-[#241B2B] flex items-center gap-1 border-b border-[#E6E1DB] pb-0.5" style={{ fontFamily: "'Manrope', sans-serif", letterSpacing: '.06em' }}>
-                    👤 Dados da Cliente Especial
+                    👤 Dados da(o) Cliente Especial
                   </h4>
                   <div className="flex items-center gap-2.5">
                     <div className="w-11 h-11 rounded-full border-2 border-[var(--color-pastry-light-pink)] overflow-hidden bg-[var(--color-pastry-pink)]/30 flex items-center justify-center shrink-0 shadow-card">
@@ -810,7 +810,7 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
                     toda compradora. Agora seguem o perfil, e somem quando ele
                     esta vazio. */}
                 <p className="text-[11px] font-bold text-[var(--color-pastry-chocolate)] flex items-center justify-center gap-1">
-                  {sellerName ? `Obrigado por escolher a ${sellerName}! 💕` : 'Obrigado pela preferência! 💕'}
+                  {sellerName ? `Obrigada(o) por escolher a ${sellerName}! 💕` : 'Obrigada(o) pela preferência! 💕'}
                 </p>
                 <p className="text-[9px] text-[var(--color-pastry-chocolate)]/70 font-medium">
                   Encomenda feita com amor e carinho{sellerPhone ? ` • Contato: ${sellerPhone}` : ''}

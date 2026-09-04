@@ -92,7 +92,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
     }
 
     if (!user) {
-      setMessage({ type: 'error', text: 'Usuário não encontrado' });
+      setMessage({ type: 'error', text: 'Usuária(o) não encontrada(o)' });
       return;
     }
 
@@ -393,7 +393,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
                 fontFamily: "'Manrope', sans-serif",
               }}
             >
-              Nome da Confeitaria/Confeiteira
+              Nome da Confeitaria/Confeiteira(o)
             </label>
             <input
               type="text"

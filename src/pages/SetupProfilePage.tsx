@@ -38,7 +38,7 @@ export const SetupProfilePage: React.FC = () => {
           <CarulaLogo />
         </div>
 
-        <h1 className="text-3xl font-bold text-center mb-2">Bem-vinda! 🎉</h1>
+        <h1 className="text-3xl font-bold text-center mb-2">Bem-vinda(o)! 🎉</h1>
         <p className="text-center text-gray-600 mb-8">Vamos completar seu perfil</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">

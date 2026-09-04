@@ -36,7 +36,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSignupClick, onVerifyOtp
           <CarulaLogo />
         </div>
 
-        <h1 className="text-3xl font-bold text-center mb-2">Bem-vinda</h1>
+        {/* Feminino primeiro, masculino entre parenteses: o publico do app e
+            majoritariamente de confeiteiras, e a forma neutra nao pode custar
+            isso a elas. Mesmo padrao em todo texto que se dirige a pessoa. */}
+        <h1 className="text-3xl font-bold text-center mb-2">Bem-vinda(o)</h1>
         <p className="text-center text-gray-600 mb-8">Acesse sua confeitaria</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">

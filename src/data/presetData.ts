@@ -23,7 +23,8 @@ import { BakeryPreset } from '../types';
  */
 
 export const INGREDIENT_PRESETS: BakeryPreset[] = [
-  { id: 'i1', name: 'Farinha de Trigo', type: 'reposicao' },
+  // Plural de proposito: cobre trigo, amendoa, arroz, sem gluten.
+  { id: 'i1', name: 'Farinhas', type: 'reposicao' },
   { id: 'i2', name: 'Açúcar', type: 'reposicao' },
   { id: 'i3', name: 'Leite Condensado', type: 'reposicao' },
   { id: 'i4', name: 'Creme de Leite', type: 'reposicao' },

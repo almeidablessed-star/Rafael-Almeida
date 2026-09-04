@@ -19,7 +19,7 @@ export const VerifyOtpPage: React.FC = () => {
     }
 
     if (!user) {
-      setError('Usuário não encontrado');
+      setError('Usuária(o) não encontrada(o)');
       return;
     }
 
