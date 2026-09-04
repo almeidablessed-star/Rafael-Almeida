@@ -101,11 +101,51 @@ COMMENT ON COLUMN public.transacoes.valor_sinal IS 'Entrada paga. NULL = nao hou
 -- historico de que ele consumiu estoque. A descricao do movimento guarda o
 -- contexto legivel, entao a linha continua fazendo sentido sem o vinculo.
 --
--- Seguro recriar a coluna: a tabela esta vazia (nenhum lancamento real).
+-- A versao original desta migration fazia DROP COLUMN + ADD COLUMN, justificado
+-- por "a tabela esta vazia (nenhum lancamento real)". Isso deixou de ser
+-- verdade: em 04/09/2026 `estoque_movimentos` ja tinha 4 linhas gravadas em
+-- teste. O DROP apagaria o texto do vinculo dessas linhas em silencio — que e
+-- justamente o tipo de perda de rastro que esta tabela existe para evitar.
+--
+-- O valor antigo NAO tem como virar a chave estrangeira nova: eram ids do
+-- localStorage ("tx-1788124352483-sfpu5"), e nao existe linha em `transacoes`
+-- para eles apontarem. Entao a coluna velha e preservada como
+-- `transacao_id_legado`, e a nova nasce vazia ao lado. As 4 linhas continuam
+-- legiveis, com o vinculo antigo consultavel.
+--
+-- Idempotente e seguro rodar de novo: cada passo so age se ainda for preciso.
 DROP INDEX IF EXISTS estoque_movimentos_transacao_idx;
-ALTER TABLE public.estoque_movimentos DROP COLUMN IF EXISTS transacao_id;
-ALTER TABLE public.estoque_movimentos
-  ADD COLUMN transacao_id bigint REFERENCES public.transacoes (id) ON DELETE SET NULL;
+
+DO $$
+BEGIN
+  -- Passo 1: a coluna text antiga vira `transacao_id_legado`, preservando o
+  -- conteudo. So dispara enquanto `transacao_id` ainda for text, ou seja, na
+  -- primeira execucao.
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+     WHERE table_schema = 'public'
+       AND table_name   = 'estoque_movimentos'
+       AND column_name  = 'transacao_id'
+       AND data_type    = 'text'
+  ) THEN
+    ALTER TABLE public.estoque_movimentos
+      RENAME COLUMN transacao_id TO transacao_id_legado;
+  END IF;
+
+  -- Passo 2: cria a coluna nova, ja como chave estrangeira de verdade.
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+     WHERE table_schema = 'public'
+       AND table_name   = 'estoque_movimentos'
+       AND column_name  = 'transacao_id'
+  ) THEN
+    ALTER TABLE public.estoque_movimentos
+      ADD COLUMN transacao_id bigint REFERENCES public.transacoes (id) ON DELETE SET NULL;
+  END IF;
+END $$;
+
+COMMENT ON COLUMN public.estoque_movimentos.transacao_id_legado IS
+  'Id da transacao no localStorage, de antes de `transacoes` existir ("tx-...-xxxxx"). Sem correspondencia em `transacoes`: guardado so como rastro historico. Nao usar em consulta nova — o vinculo vigente e `transacao_id`.';
 
 CREATE INDEX IF NOT EXISTS estoque_movimentos_transacao_idx
   ON public.estoque_movimentos (transacao_id)
