@@ -69,13 +69,16 @@ const mapSupabaseToFicha = (data: SupabaseFichaTecnica): FichaTecnica => {
   if (normalizedCategory === 'bolo') normalizedCategory = 'bolos';
   if (normalizedCategory === 'doce') normalizedCategory = 'doces';
 
-  // Garantir que toda ficha tenha os 3 tamanhos padrão (fallback para fichas antigas)
+  // Ficha sem tamanho nenhum abre com UM, nao com tres.
+  //
+  // Os tres vazios vinham de quando o formulario tambem nascia com tres. Cada
+  // confeiteira tem uma realidade — umas vendem um tamanho so — e dois campos
+  // extras em branco sugeriam que era preciso preencher os tres. Quem precisa
+  // de mais usa o "+ Adicionar" no formulario, um de cada vez.
   let tamanhos = data.tamanhos || [];
   if (tamanhos.length === 0) {
     tamanhos = [
       { id: 'ts-1', descricao: '1', preco: 0, maoDeObraCost: 0, custoCost: 0, investimentoCost: 0 },
-      { id: 'ts-2', descricao: '2', preco: 0, maoDeObraCost: 0, custoCost: 0, investimentoCost: 0 },
-      { id: 'ts-3', descricao: '3', preco: 0, maoDeObraCost: 0, custoCost: 0, investimentoCost: 0 },
     ];
   }
 

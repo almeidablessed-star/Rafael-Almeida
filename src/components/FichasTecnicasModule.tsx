@@ -30,6 +30,15 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 
+/**
+ * Teto de tamanhos por ficha.
+ *
+ * Nao ha regra de negocio exigindo cinco: e o ponto em que a lista deixa de
+ * caber na tela do celular sem virar rolagem infinita. Se a confeiteira
+ * precisar de mais, o numero vive aqui e nao espalhado pelo componente.
+ */
+const MAX_TAMANHOS = 5;
+
 // Helpers para compatibilidade com a nova estrutura de tamanhos
 const getPrincipalTamanho = (ficha: FichaTecnica) => {
   return ficha.tamanhos?.[0] || { id: 't1', descricao: '1', preco: 0 };
@@ -259,10 +268,12 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     setYieldInfo('1');
     setIngredients([]);
     setReposicaoCost('0');
+    // UM tamanho, e nao tres. Cada confeiteira tem uma realidade: umas vendem
+    // um tamanho so, outras varios. Abrir com tres campos vazios alongava o
+    // formulario a toa e sugeria que era preciso preencher os tres. Quem
+    // precisa de mais usa o "+ Adicionar", um de cada vez.
     setTamanhos([
       { id: 'ts-1', descricao: '1', preco: '', horasTrabalho: '', valorHora: tarifaSugerida, ingredients: [], maoDeObraCost: '', custoCost: '', investimentoCost: '' },
-      { id: 'ts-2', descricao: '2', preco: '', horasTrabalho: '', valorHora: tarifaSugerida, ingredients: [], maoDeObraCost: '', custoCost: '', investimentoCost: '' },
-      { id: 'ts-3', descricao: '3', preco: '', horasTrabalho: '', valorHora: tarifaSugerida, ingredients: [], maoDeObraCost: '', custoCost: '', investimentoCost: '' },
     ]);
     setEditingId(null);
     setIsCreating(true);
@@ -452,6 +463,12 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   };
 
   const handleAddTamanho = () => {
+    // Teto de cinco. A checagem fica AQUI, e nao so no botao: esconder o botao
+    // e a pista visual, mas quem garante o limite e a funcao que altera o
+    // estado — sem isto, qualquer outro caminho que chame `handleAddTamanho`
+    // passaria de cinco sem aviso.
+    if (tamanhos.length >= MAX_TAMANHOS) return;
+
     const newId = `ts-${Date.now()}`;
     setTamanhos((prev) => [
       ...prev,
@@ -985,14 +1002,18 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
               <span className="text-xs font-extrabold uppercase text-[var(--color-pastry-chocolate)]">
                 Tamanhos & Preços ({tamanhos.length})
               </span>
-              <button
-                type="button"
-                onClick={handleAddTamanho}
-                className="text-xs font-bold text-[var(--color-pastry-chocolate)] hover:underline flex items-center gap-1 cursor-pointer"
-              >
-                <PlusCircle className="w-4 h-4 text-[var(--color-pastry-light-pink)]" />
-                <span>Adicionar</span>
-              </button>
+              {/* Some ao atingir o teto, em vez de ficar visivel e nao fazer
+                  nada — um botao que nao responde parece defeito. */}
+              {tamanhos.length < MAX_TAMANHOS && (
+                <button
+                  type="button"
+                  onClick={handleAddTamanho}
+                  className="text-xs font-bold text-[#241B2B] hover:underline flex items-center gap-1 cursor-pointer"
+                >
+                  <PlusCircle className="w-4 h-4 text-[#A85E86]" />
+                  <span>Adicionar</span>
+                </button>
+              )}
             </div>
 
             {/* Cada tamanho e um painel interno em tom claro sobre o cartao
@@ -1318,26 +1339,12 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
             </div>
           )}
 
-          {/* TOTAL SUGGESTED SELLING PRICE
-              Cores literais, e nao `var(--color-pastry-*)`: essas variaveis sao
-              declaradas em `src/index.css.css`, que NAO e importado por lugar
-              nenhum (o main.tsx importa `src/index.css`). Em runtime elas
-              resolvem para vazio, entao `bg-[var(--color-pastry-chocolate)]`
-              virava fundo transparente e o texto branco sumia sobre o cartao
-              claro. Ver a nota no fim do commit sobre a folha orfa. */}
-          <div className="bg-[#241B2B] p-4 rounded-xl shadow-card text-white flex items-center justify-between">
-            <div>
-              <span className="label-sm tracking-wider text-[#F5B9C6] block">
-                Sugestão de Preço de Venda
-              </span>
-              <span className="font-marca text-3xl font-black text-[#F6F2F5]">
-                {formatMoney(repoNum)}
-              </span>
-            </div>
-            <div className="text-right text-[11px] text-[#F6F2F5]/80 font-medium">
-              Total de Ingredientes
-            </div>
-          </div>
+          {/* Aqui ficava o bloco "Sugestao de Preco de Venda", em barra escura
+              com o valor em destaque. Removido a pedido: nao foi pedido, nao
+              batia com o resto do app, e o numero que exibia era o
+              `reposicaoCost` da ficha — nao uma sugestao de preco de venda,
+              apesar do rotulo. A conta que importa (custo x preco x sobra) ja
+              aparece dentro de cada tamanho, onde a decisao e tomada. */}
 
           {/* Salvar em roxo solido, Cancelar em branco com borda.
               Cores literais pelo mesmo motivo do bloco de preco acima: o
