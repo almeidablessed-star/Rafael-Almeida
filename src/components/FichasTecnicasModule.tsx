@@ -1318,32 +1318,43 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
             </div>
           )}
 
-          {/* TOTAL SUGGESTED SELLING PRICE */}
-          <div className="bg-[var(--color-pastry-chocolate)] p-4 rounded-xl shadow-card text-white flex items-center justify-between">
+          {/* TOTAL SUGGESTED SELLING PRICE
+              Cores literais, e nao `var(--color-pastry-*)`: essas variaveis sao
+              declaradas em `src/index.css.css`, que NAO e importado por lugar
+              nenhum (o main.tsx importa `src/index.css`). Em runtime elas
+              resolvem para vazio, entao `bg-[var(--color-pastry-chocolate)]`
+              virava fundo transparente e o texto branco sumia sobre o cartao
+              claro. Ver a nota no fim do commit sobre a folha orfa. */}
+          <div className="bg-[#241B2B] p-4 rounded-xl shadow-card text-white flex items-center justify-between">
             <div>
-              <span className="label-sm tracking-wider text-[var(--color-pastry-pink)] block">
+              <span className="label-sm tracking-wider text-[#F5B9C6] block">
                 Sugestão de Preço de Venda
               </span>
-              <span className="font-marca text-3xl font-black text-[var(--color-pastry-cream)]">
+              <span className="font-marca text-3xl font-black text-[#F6F2F5]">
                 {formatMoney(repoNum)}
               </span>
             </div>
-            <div className="text-right text-[11px] text-[var(--color-pastry-cream)]/80 font-medium">
+            <div className="text-right text-[11px] text-[#F6F2F5]/80 font-medium">
               Total de Ingredientes
             </div>
           </div>
 
+          {/* Salvar em roxo solido, Cancelar em branco com borda.
+              Cores literais pelo mesmo motivo do bloco de preco acima: o
+              `bg-[var(--color-pastry-chocolate)]` que estava aqui resolvia para
+              vazio, entao o botao aparecia SEM cor de fundo — nao era a cor
+              errada, era a ausencia dela. */}
           <div className="flex items-center justify-end gap-2 pt-2">
             <button
               type="button"
               onClick={() => setIsCreating(false)}
-              className="px-4 py-2.5 rounded-xl text-xs font-bold text-neutral-600 hover:bg-neutral-100 cursor-pointer"
+              className="px-4 py-2.5 rounded-xl bg-white border border-[#E6E1DB] text-xs font-bold text-neutral-700 hover:bg-neutral-50 shadow-card cursor-pointer transition-all active:scale-95"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="px-5 py-2.5 rounded-xl bg-[var(--color-pastry-chocolate)] hover:bg-black text-[var(--color-pastry-pink)] font-bold text-xs shadow-sm flex items-center gap-1.5 cursor-pointer"
+              className="px-5 py-2.5 rounded-xl bg-[#6E3F72] hover:bg-[#5A3560] text-white font-bold text-xs shadow-card flex items-center gap-1.5 cursor-pointer transition-all active:scale-95"
             >
               <Check className="w-4 h-4 stroke-[2.5]" />
               Salvar Ficha Técnica
