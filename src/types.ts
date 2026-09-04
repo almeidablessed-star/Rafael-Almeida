@@ -151,7 +151,12 @@ export interface BakeryPreset {
   id: string;
   name: string;
   type: TransactionType;
-  defaultUnitValue: number;
+  /**
+   * Classificacao da despesa: fixo, variavel ou investimento. Independe de
+   * regiao e de preco, entao pode vir pronta.
+   *
+   * NAO existe campo de valor aqui, de proposito: ver a nota em [[presetData]].
+   */
   categoryTag?: string;
 }
 

@@ -13,7 +13,6 @@ import {
 import { useCustomers } from '../context/CustomersContext';
 import { QuotePdfModal } from './QuotePdfModal';
 import {
-  BAKERY_PRODUCT_PRESETS,
   INGREDIENT_PRESETS,
   LABOR_PRESETS,
   COST_PRESETS,
@@ -622,15 +621,21 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
     }
   };
 
+  /**
+   * O atalho preenche a DESCRICAO e mais nada de valor.
+   *
+   * Antes escrevia tambem o valor unitario e o total, a partir de um preco
+   * fixo no codigo que nao aparecia no botao. Quem clicasse em "Gas de
+   * Cozinha" ganhava 115 no campo sem ver, e podia salvar sem reparar. Como o
+   * app roda em regioes e moedas diferentes, nenhum preco de referencia se
+   * sustenta — o valor e sempre digitado por quem lanca.
+   */
   const applyPreset = (preset: BakeryPreset) => {
     setDescription(preset.name);
-    setUnitValue(preset.defaultUnitValue.toFixed(2).replace('.', ','));
-    setTotalValue((quantity * preset.defaultUnitValue).toFixed(2).replace('.', ','));
     if (
-      preset.categoryTag &&
-      (preset.categoryTag === 'fixo' ||
-        preset.categoryTag === 'variavel' ||
-        preset.categoryTag === 'investimento')
+      preset.categoryTag === 'fixo' ||
+      preset.categoryTag === 'variavel' ||
+      preset.categoryTag === 'investimento'
     ) {
       setCostCategory(preset.categoryTag as CostCategory);
     }
@@ -638,8 +643,6 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
 
   const getPresetsForCurrentType = (): BakeryPreset[] => {
     switch (type) {
-      case 'venda':
-        return BAKERY_PRODUCT_PRESETS;
       case 'reposicao':
         return INGREDIENT_PRESETS;
       case 'maodeobra':
@@ -647,6 +650,10 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       case 'custo':
       case 'investimento':
         return COST_PRESETS;
+      // 'venda' nao entra: os atalhos so aparecem quando o tipo NAO e venda,
+      // e o pedido tem formulario proprio, movido a fichas tecnicas.
+      default:
+        return [];
     }
   };
 

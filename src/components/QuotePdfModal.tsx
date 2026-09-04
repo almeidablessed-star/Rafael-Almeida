@@ -1,11 +1,6 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { toPng } from 'html-to-image';
-// Faltava. `handleDownloadImage` chamava html2canvas sem import nenhum, entao o
-// botao de baixar a folha como imagem estourava ReferenceError no primeiro
-// clique — o `catch` engolia e mostrava "tire um print da tela", como se fosse
-// uma limitacao do navegador. A dependencia sempre esteve no package.json.
-import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { Transaction } from '../types';
 import { formatCurrency, formatDateBr } from '../utils/formatters';
@@ -50,7 +45,6 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<'cliente' | 'cozinha'>('cliente');
   const [copied, setCopied] = useState(false);
-  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [inspirationImage, setInspirationImage] = useState<string>(transaction.inspirationImage || '');
   const { updateTransacao } = useTransacoes();
@@ -392,66 +386,10 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
     }
   };
 
-  // Download card image as PNG using html2canvas
-  const handleDownloadImage = async () => {
-    const docElem = document.getElementById('quote-pdf-document');
-    if (!docElem) {
-      console.error('Image document element not found');
-      alert('Elemento de documento não encontrado.');
-      return;
-    }
-
-    try {
-      setIsGeneratingImage(true);
-
-      // Ensure content is visible
-      const originalDisplay = docElem.style.display;
-      docElem.style.display = 'block';
-
-      const canvas = await html2canvas(docElem, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-        backgroundColor: '#FFFDF8',
-        windowHeight: docElem.scrollHeight,
-        windowWidth: docElem.scrollWidth,
-        proxy: undefined,
-      });
-
-      // Restore original display
-      docElem.style.display = originalDisplay;
-
-      if (!canvas || canvas.width === 0 || canvas.height === 0) {
-        console.error('Canvas is empty');
-        alert('Não foi possível gerar a imagem. Tente novamente!');
-        return;
-      }
-
-      const dataUrl = canvas.toDataURL('image/png', 0.98);
-      if (!dataUrl || dataUrl.length < 100) {
-        console.error('DataURL is empty or too small');
-        alert('Erro ao converter imagem. Tente novamente!');
-        return;
-      }
-
-      const link = document.createElement('a');
-      link.download = `Pedido_${(transaction.customerName || 'Cliente').replace(/\s+/g, '_')}_CarulaCake.png`;
-      link.href = dataUrl;
-      document.body.appendChild(link);
-
-      // Usar setTimeout para garantir que o link foi adicionado
-      setTimeout(() => {
-        link.click();
-        setTimeout(() => document.body.removeChild(link), 100);
-      }, 10);
-    } catch (err) {
-      console.error('Error generating image:', err);
-      alert('Não foi possível gerar a imagem automaticamente. Você também pode tirar um print da tela!');
-    } finally {
-      setIsGeneratingImage(false);
-    }
-  };
+  // handleDownloadImage foi removida: baixava a folha como PNG via html2canvas,
+  // mas nao estava ligada a botao nenhum — codigo inalcancavel. Levava junto a
+  // dependencia html2canvas para o bundle sem ninguem poder usa-la. O caminho
+  // vivo e handleDownloadPdf, que usa html-to-image.
 
   const handleCopyText = () => {
     // Cada linha da confeitaria so entra se houver dado. Antes elas eram
