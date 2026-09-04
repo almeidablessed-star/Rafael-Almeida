@@ -142,10 +142,22 @@ BEGIN
     ALTER TABLE public.estoque_movimentos
       ADD COLUMN transacao_id bigint REFERENCES public.transacoes (id) ON DELETE SET NULL;
   END IF;
-END $$;
 
-COMMENT ON COLUMN public.estoque_movimentos.transacao_id_legado IS
-  'Id da transacao no localStorage, de antes de `transacoes` existir ("tx-...-xxxxx"). Sem correspondencia em `transacoes`: guardado so como rastro historico. Nao usar em consulta nova — o vinculo vigente e `transacao_id`.';
+  -- Passo 3: documenta a coluna preservada, se ela existir. Vai DENTRO do
+  -- bloco de proposito: um banco onde a versao antiga desta migration ja rodou
+  -- nao tem `transacao_id_legado` (a coluna text foi apagada la atras, nao
+  -- renomeada), e um COMMENT solto ali fora derrubaria a migration inteira com
+  -- 42703 depois de todo o resto ja ter passado.
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+     WHERE table_schema = 'public'
+       AND table_name   = 'estoque_movimentos'
+       AND column_name  = 'transacao_id_legado'
+  ) THEN
+    COMMENT ON COLUMN public.estoque_movimentos.transacao_id_legado IS
+      'Id da transacao no localStorage, de antes de `transacoes` existir ("tx-...-xxxxx"). Sem correspondencia em `transacoes`: guardado so como rastro historico. Nao usar em consulta nova — o vinculo vigente e `transacao_id`.';
+  END IF;
+END $$;
 
 CREATE INDEX IF NOT EXISTS estoque_movimentos_transacao_idx
   ON public.estoque_movimentos (transacao_id)
