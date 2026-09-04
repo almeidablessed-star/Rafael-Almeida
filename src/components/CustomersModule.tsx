@@ -866,7 +866,7 @@ export const CustomersModule: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsFormOpen(false)}
-              className="px-4 py-2 rounded-xl bg-[var(--color-neutral-hero)] text-[var(--color-neutral-charcoal)] font-bold text-xs hover:bg-[var(--color-neutral-hero)]/70 active:scale-95 transition-all duration-normal"
+              className="px-4 py-2 rounded-xl bg-white border border-[#E6E1DB] text-neutral-700 font-bold text-xs hover:bg-neutral-50 shadow-card active:scale-95 transition-all duration-normal"
             >
               Cancelar
             </button>
