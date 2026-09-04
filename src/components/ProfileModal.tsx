@@ -14,7 +14,19 @@ interface ProfileModalProps {
 
 interface ProfileData {
   photo: string | null;
+  /**
+   * Nome da PESSOA. Distinto de `businessName`, que e o do negocio.
+   *
+   * Os dois nasceram separados no cadastro (`usuarias.nome` e
+   * `usuarias.nome_confeitaria`), mas esta tela expunha um campo so, rotulado
+   * "Nome da Confeitaria/Confeiteira(o)", e gravava tudo em `nome`. Quem
+   * digitasse o nome do negocio ali sobrescrevia o pessoal, e
+   * `nome_confeitaria` continuava vazio para sempre — nenhuma tela o escrevia
+   * depois do cadastro.
+   */
   name: string;
+  /** Nome do NEGOCIO. E o que encabeca a folha de orcamento. */
+  businessName: string;
   phone: string;
   email: string;
   address: string;
@@ -34,6 +46,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
     return {
       photo: userProfile?.foto_url || null,
       name: userProfile?.nome || '',
+      businessName: userProfile?.nome_confeitaria || '',
       // Telefone, endereco e Instagram vinham fixos em '' e nunca eram lidos
       // de volta: a confeiteira digitava, salvava e encontrava os campos
       // vazios na proxima abertura. Agora vem do banco, como os demais.
@@ -54,6 +67,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
     setProfileData({
       photo: userProfile?.foto_url || null,
       name: userProfile?.nome || '',
+      businessName: userProfile?.nome_confeitaria || '',
       phone: userProfile?.telefone || '',
       email: user?.email || '',
       address: userProfile?.endereco || '',
@@ -87,7 +101,16 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
 
   const handleSave = async () => {
     if (!profileData.name.trim()) {
-      setMessage({ type: 'error', text: 'Nome é obrigatório' });
+      setMessage({ type: 'error', text: 'Seu nome é obrigatório' });
+      return;
+    }
+
+    // O nome do negocio encabeca a folha de orcamento. Deixar salvar vazio
+    // reintroduz o defeito que esta separacao corrige: sem ele, o orcamento
+    // cai no nome pessoal e a cliente recebe uma folha assinada por "Rafael"
+    // em vez de "Bliss Bakery".
+    if (!profileData.businessName.trim()) {
+      setMessage({ type: 'error', text: 'Nome da confeitaria é obrigatório' });
       return;
     }
 
@@ -114,6 +137,10 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
         .from('usuarias')
         .update({
           nome: profileData.name.trim(),
+          // Faltava aqui: nenhuma tela gravava `nome_confeitaria` depois do
+          // cadastro, entao a folha de orcamento caia no fallback do nome
+          // pessoal e nao havia como corrigir pelo app.
+          nome_confeitaria: profileData.businessName.trim(),
           foto_url: profileData.photo,
           telefone: orNull(profileData.phone),
           endereco: orNull(profileData.address),
@@ -379,7 +406,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
 
         {/* Form Fields */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
-          {/* Nome */}
+          {/* Nome da confeitaria — o que sai no orcamento */}
           <div>
             <label
               style={{
@@ -393,13 +420,65 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
                 fontFamily: "'Manrope', sans-serif",
               }}
             >
-              Nome da Confeitaria/Confeiteira(o)
+              Nome da Confeitaria
+            </label>
+            <input
+              type="text"
+              value={profileData.businessName}
+              onChange={(e) => handleChange('businessName', e.target.value)}
+              placeholder="Ex.: Bliss Bakery"
+              style={{
+                width: '100%',
+                padding: '12px',
+                borderRadius: '12px',
+                border: '1px solid #EDE6EF',
+                fontFamily: "'Manrope', sans-serif",
+                fontSize: '14px',
+                color: '#241B2B',
+                background: '#FFFFFF',
+                boxSizing: 'border-box',
+                transition: 'border-color 0.2s ease',
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = '#C4626F';
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = '#EDE6EF';
+              }}
+            />
+            <p
+              style={{
+                margin: '6px 0 0',
+                fontSize: '11px',
+                color: '#9A8FA0',
+                fontFamily: "'Manrope', sans-serif",
+              }}
+            >
+              É o nome que aparece no cabeçalho do orçamento.
+            </p>
+          </div>
+
+          {/* Nome da pessoa */}
+          <div>
+            <label
+              style={{
+                display: 'block',
+                fontSize: '11px',
+                fontWeight: 700,
+                color: '#7A6E80',
+                marginBottom: '10px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                fontFamily: "'Manrope', sans-serif",
+              }}
+            >
+              Seu Nome
             </label>
             <input
               type="text"
               value={profileData.name}
               onChange={(e) => handleChange('name', e.target.value)}
-              placeholder="Digite o nome"
+              placeholder="Digite seu nome"
               style={{
                 width: '100%',
                 padding: '12px',

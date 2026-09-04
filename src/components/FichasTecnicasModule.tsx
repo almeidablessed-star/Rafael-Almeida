@@ -804,9 +804,13 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         </span>
       </div>
 
-      {/* Editor Modal / Form */}
+      {/* Editor Modal / Form
+          O corpo segue o mesmo tratamento do formulario de Pedidos: fundo claro
+          #F6F2F5 com os campos brancos por cima. Antes era branco sobre branco,
+          sem separacao entre o formulario e os campos — o que deixava a tela
+          chapada em comparacao com a de Pedidos. */}
       {isCreating && (
-        <form onSubmit={handleSaveFicha} className="bg-white rounded-[32px] p-5 sm:p-6 border-2 border-[var(--color-pastry-light-pink)] shadow-xl space-y-4 animate-slideUp" style={{ backgroundImage: 'linear-gradient(to bottom, rgba(255,255,255,0.98), #FFFFFF)' }}>
+        <form onSubmit={handleSaveFicha} className="rounded-[32px] p-5 sm:p-6 border-2 border-[var(--color-pastry-light-pink)] shadow-xl space-y-4 animate-slideUp" style={{ background: '#F6F2F5' }}>
           <div style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)', borderRadius: '20px 20px 0 0', padding: '20px', margin: '-20px -20px 16px -20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <h3 style={{ fontFamily: "'Instrument Serif', serif", fontSize: '20px', fontWeight: 'bold', color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
               <Sparkles className="w-5 h-5 text-[#F5B9C6]" />
@@ -832,7 +836,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                 placeholder="Ex: Bolo Vulcão Ninho com Nutella"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[#F3E9F3] text-xs font-bold text-[var(--color-pastry-chocolate)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)]"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#F3E9F3] text-xs font-bold text-[var(--color-pastry-chocolate)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)]"
                 style={{ fontFamily: "'Manrope', sans-serif" }}
               />
             </div>
@@ -844,7 +848,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as any)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[#F3E9F3] text-xs font-extrabold text-[var(--color-pastry-chocolate)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)] bg-white"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#F3E9F3] text-xs font-extrabold text-[var(--color-pastry-chocolate)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)] bg-white"
                 style={{ fontFamily: "'Manrope', sans-serif" }}
               >
                 <option value="bolos">🎂 Bolos & Massas</option>
@@ -866,14 +870,14 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   placeholder="Ex: 10 ou 500"
                   value={yieldInfo}
                   onChange={(e) => setYieldInfo(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#F3E9F3] text-xs font-bold text-[var(--color-pastry-chocolate)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)]"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#F3E9F3] text-xs font-bold text-[var(--color-pastry-chocolate)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)]"
                 style={{ fontFamily: "'Manrope', sans-serif" }}
                 />
 
                 <select
                   value={selectedYieldUnit}
                   onChange={(e) => handleApplyYieldUnit(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#F3E9F3] text-xs font-extrabold text-[var(--color-pastry-chocolate)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)] bg-white cursor-pointer"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#F3E9F3] text-xs font-extrabold text-[var(--color-pastry-chocolate)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)] bg-white cursor-pointer"
                 style={{ fontFamily: "'Manrope', sans-serif" }}
                 >
                   <option value="fatias">🍰 Fatias</option>
