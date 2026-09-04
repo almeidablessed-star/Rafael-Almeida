@@ -202,10 +202,15 @@ export const AdminCostsCard: React.FC = () => {
               }}>
                 {label}
               </label>
+              {/* Zero vira campo VAZIO, com o "0" so como dica cinza.
+                  Antes o campo trazia um 0 de verdade digitado dentro: quem
+                  fosse escrever 10 acabava com 010, porque o novo numero
+                  grudava no zero em vez de substitui-lo. */}
               <input
                 type="number"
                 step="0.01"
-                value={localCosts?.[key as keyof typeof administrativeCosts] || 0}
+                placeholder="0"
+                value={localCosts?.[key as keyof typeof administrativeCosts] || ''}
                 onChange={(e) =>
                   handleInputChange(key as keyof typeof administrativeCosts, parseFloat(e.target.value) || 0)
                 }
@@ -258,7 +263,8 @@ export const AdminCostsCard: React.FC = () => {
             <input
               type="number"
               step="0.01"
-              value={localCosts?.horaTrabalho || 0}
+              placeholder="0"
+              value={localCosts?.horaTrabalho || ''}
               onChange={(e) => handleInputChange('horaTrabalho', parseFloat(e.target.value) || 0)}
               style={{
                 width: '100%',

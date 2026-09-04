@@ -86,7 +86,10 @@ export const EstoqueModule: React.FC = () => {
     setName('');
     setQuantity('');
     setUnit('g');
-    setMinThreshold('500');
+    // Vazio, nao '500': o campo ja tem placeholder e o valor pre-digitado
+    // grudava no que a pessoa escrevia (500 + 10 = "50010"). Mesmo defeito dos
+    // campos de custo, com outro numero.
+    setMinThreshold('');
     setCostPerUnit('');
     setEditingId(null);
     setIsAdding(true);

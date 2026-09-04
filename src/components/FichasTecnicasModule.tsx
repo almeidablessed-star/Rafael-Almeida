@@ -1108,10 +1108,13 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                           />
                         </div>
                         <div className="col-span-4">
+                          {/* Insumo novo nasce com quantidade 0, e o 0 aparecia
+                              digitado no campo: escrever 200 dava 0200. Zero
+                              vira campo vazio, com "Qtd" de dica. */}
                           <input
                             type="number"
                             placeholder="Qtd"
-                            value={ing.quantity}
+                            value={ing.quantity || ''}
                             onChange={(e) => handleUpdateInsumoTamanho(tamanho.id, ing.id, 'quantity', e.target.value)}
                             className="w-full px-1.5 py-1 border border-[#F3E9F3] rounded-lg text-xs font-bold text-center"
                             style={{ fontFamily: "'Manrope', sans-serif" }}
