@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { toPng } from 'html-to-image';
 import jsPDF from 'jspdf';
@@ -106,7 +106,7 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
   //
   // `nome_confeitaria` e o nome do NEGOCIO (o que deve encabecar a folha);
   // `nome` e o da pessoa. Sao campos distintos desde o cadastro.
-  const { user, userProfile } = useAuth();
+  const { user, userProfile, fetchUserPhoto } = useAuth();
 
   // O e-mail vive em auth.users, nao em `usuarias` — nao ha coluna espelho de
   // proposito, para nao criar duas fontes de verdade para o mesmo dado.
@@ -115,7 +115,32 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
   const sellerPhone = userProfile?.telefone || '';
   const sellerInstagram = userProfile?.instagram || '';
   const sellerAddress = userProfile?.endereco || '';
-  const sellerPhotoUrl = userProfile?.foto_url || '';
+  /**
+   * A foto NAO vem junto do perfil: `fetchUserProfile` deixa `foto_url` de fora
+   * do select de propósito, para nao arrastar um data URI de centenas de KB em
+   * toda abertura de sessao. Quem precisa dela pede por `fetchUserPhoto`, que
+   * usa a copia em memoria quando existe e so vai ao banco quando falta — o
+   * mesmo padrao de [[fetchCustomerPhoto]] e [[fetchFichaPhoto]].
+   *
+   * Ler `userProfile.foto_url` direto, como era feito aqui, dava vazio em toda
+   * sessao recem-aberta: o orcamento saia sem foto, e o Perfil parecia ter
+   * perdido a imagem que continuava gravada no banco.
+   *
+   * A carga assincrona nao corre risco de perder a captura: a geracao do PDF
+   * espera todas as <img> carregarem antes de fotografar a folha.
+   */
+  const [sellerPhotoUrl, setSellerPhotoUrl] = useState<string>(userProfile?.foto_url || '');
+
+  useEffect(() => {
+    if (sellerPhotoUrl) return;
+    let cancelado = false;
+    fetchUserPhoto().then((url) => {
+      if (!cancelado && url) setSellerPhotoUrl(url);
+    });
+    return () => {
+      cancelado = true;
+    };
+  }, [sellerPhotoUrl, fetchUserPhoto]);
 
   const { fichas } = useFichasTecnicas();
 

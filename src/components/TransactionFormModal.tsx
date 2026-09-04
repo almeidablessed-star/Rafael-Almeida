@@ -887,39 +887,20 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
 
         {/* Modal Body */}
         <form onSubmit={handleSubmit} style={{ fontFamily: "'Manrope', sans-serif" }} className="p-5 overflow-y-auto space-y-4 flex-1 stagger-children">
-          {/* Type Selector (if adding new) */}
-          {!editingTransaction && (
-            <div>
-              <label style={{ fontFamily: "'Manrope', sans-serif" }} className="block text-xs font-bold text-neutral-600 mb-1.5 uppercase tracking-wider">
-                Tipo do Lançamento:
-              </label>
-              <div className="grid grid-cols-3 gap-1.5 p-1 bg-[#F6F2F5] rounded-lg">
-                {[
-                  { id: 'venda', label: 'Venda / Pedido' },
-                  { id: 'reposicao', label: 'Estoque / Compra' },
-                  { id: 'custo', label: 'Custo / Invest.' },
-                ].map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => {
-                      const t = item.id as TransactionType;
-                      setType(t);
-                      if (t === 'investimento') setCostCategory('investimento');
-                      else if (t === 'custo') setCostCategory('fixo');
-                    }}
-                    className={`py-2 rounded-xl text-xs font-bold transition-all ${
-                      type === item.id || (type === 'investimento' && item.id === 'custo')
-                        ? 'bg-white text-neutral-800 shadow-card'
-                        : 'text-neutral-500 hover:text-neutral-800'
-                    }`}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+          {/* Aqui ficava o seletor "Tipo do Lançamento", com Venda / Pedido,
+              Estoque / Compra e Custo / Invest.
+
+              As duas ultimas duplicavam, de forma incompleta, o que as abas
+              Compras e Custos ja fazem direito — sem unidade de medida e sem
+              entrar no estoque de verdade. Trocar de tipo aqui levava a
+              confeiteira para um caminho pior do que o da aba propria.
+
+              Só o SELETOR saiu. Os ramos `reposicao`, `custo` e `maodeobra`
+              deste formulario continuam vivos e sao usados: a aba Compras abre
+              este mesmo modal com `initialType='reposicao'` e a de Custos com
+              'custo'/'maodeobra', e editar um lancamento antigo de qualquer
+              tipo cai aqui pelo `editingTransaction`. O tipo agora vem sempre
+              de quem abriu o modal, que e o unico que sabe o contexto. */}
 
           {/* ========================================= */}
           {/* SALES ORDER FORM (WHEN type === 'venda')  */}

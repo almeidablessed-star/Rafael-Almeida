@@ -37,7 +37,7 @@ interface ProfileData {
 
 export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onLogout }) => {
   const { currency, setCurrency } = useCurrency();
-  const { user, userProfile, refreshUserProfile } = useAuth();
+  const { user, userProfile, refreshUserProfile, fetchUserPhoto } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -76,6 +76,32 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
       laborPeriod: (userProfile?.laborPeriod as LaborPeriod) || 'mensal',
     });
   }, [isOpen, userProfile, user]);
+
+  /**
+   * Busca a foto sob demanda ao abrir o modal.
+   *
+   * `fetchUserProfile` nao traz `foto_url` — ver a nota em [[QuotePdfModal]].
+   * Sem isto o modal abria com o circulo vazio numa sessao recem-aberta, e a
+   * confeiteira via como foto perdida: ela continuava gravada no banco, mas o
+   * `handleSave` regravava o `null` que estava na tela por cima. O que parecia
+   * "nao persistiu" era a foto sendo apagada na edicao seguinte.
+   */
+  useEffect(() => {
+    if (!isOpen) return;
+    let cancelado = false;
+
+    fetchUserPhoto().then((url) => {
+      if (!cancelado && url) {
+        // So preenche o vazio. Se a confeiteira ja escolheu uma foto nova
+        // enquanto a busca corria, a escolha dela manda.
+        setProfileData((prev) => (prev.photo ? prev : { ...prev, photo: url }));
+      }
+    });
+
+    return () => {
+      cancelado = true;
+    };
+  }, [isOpen, fetchUserPhoto]);
 
   const handlePhotoClick = () => {
     fileInputRef.current?.click();
@@ -141,7 +167,13 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
           // cadastro, entao a folha de orcamento caia no fallback do nome
           // pessoal e nao havia como corrigir pelo app.
           nome_confeitaria: profileData.businessName.trim(),
-          foto_url: profileData.photo,
+          // A foto entra no update SO quando ha foto. Nao existe acao de
+          // remover no formulario, entao `null` aqui nunca e uma escolha: e o
+          // campo que ainda nao carregou. Enviar esse null apagava do banco uma
+          // foto perfeitamente boa — bastava salvar uma edicao de telefone numa
+          // sessao recem-aberta para perde-la. Omitir a chave deixa o valor
+          // gravado intacto.
+          ...(profileData.photo ? { foto_url: profileData.photo } : {}),
           telefone: orNull(profileData.phone),
           endereco: orNull(profileData.address),
           instagram: orNull(profileData.instagram),
