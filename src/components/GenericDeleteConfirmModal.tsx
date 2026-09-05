@@ -61,7 +61,7 @@ export const GenericDeleteConfirmModal: React.FC<GenericDeleteConfirmModalProps>
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={onClose}
-              className="py-2.5 px-4 bg-semantic-success-600 hover:bg-semantic-success-600/80 text-neutral-900 font-bold text-xs rounded-xl transition-all active:scale-95"
+              className="py-2.5 px-4 bg-white border border-[#E6E1DB] text-neutral-700 font-bold text-xs rounded-xl hover:bg-neutral-50 shadow-card transition-all active:scale-95"
             >
               Cancelar
             </button>

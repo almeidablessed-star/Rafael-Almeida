@@ -1468,7 +1468,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       onClick={() => handleToggleAddons(true)}
                       className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
                         hasAddons
-                          ? 'bg-semantic-info-600 text-white shadow-card'
+                          ? 'bg-purple-600 text-white shadow-card'
                           : 'text-neutral-600 hover:text-neutral-900'
                       }`}
                     >
@@ -1894,7 +1894,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                         onClick={() => setLaborPeriod(item.id as LaborPeriod)}
                         className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all ${
                           laborPeriod === item.id
-                            ? 'bg-semantic-info-600 text-white border-purple-600 shadow-card'
+                            ? 'bg-purple-600 text-white border-purple-600 shadow-card'
                             : 'bg-neutral-50 text-neutral-700 border-neutral-200 hover:bg-neutral-100'
                         }`}
                       >

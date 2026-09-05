@@ -331,7 +331,7 @@ export const WeeklyClosingModule: React.FC<WeeklyClosingModuleProps> = ({
             </p>
             <button
               onClick={onOpenAddModal}
-              className="mt-3 px-3 py-1.5 bg-semantic-info-600 hover:bg-semantic-info-700 text-white font-bold text-xs rounded-xl shadow-card transition-all inline-flex items-center gap-1"
+              className="mt-3 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-card transition-all inline-flex items-center gap-1"
             >
               <Plus className="w-3.5 h-3.5" />
               Lançar Pedido
@@ -398,7 +398,7 @@ export const WeeklyClosingModule: React.FC<WeeklyClosingModuleProps> = ({
                         {!detail.isPaid ? (
                           <button
                             onClick={() => onTogglePaymentStatus(sale)}
-                            className="px-3 py-1.5 rounded-xl bg-semantic-success-600 hover:bg-semantic-success-700 text-white font-bold text-xs shadow-card active:scale-95 transition-all flex items-center gap-1.5"
+                            className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-card active:scale-95 transition-all flex items-center gap-1.5"
                           >
                             <Check className="w-3.5 h-3.5 stroke-[3]" />
                             Marcar como Pago
