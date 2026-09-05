@@ -89,49 +89,113 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
           paddingBottom: '70px',
         }}
       >
-        {/* Header with Title only */}
+        {/* Header roxo: titulo+selo, total em vendas (texto, sem grafico) e
+            os cards de Pagas/A Receber, tudo dentro do mesmo gradiente —
+            como a referencia 6A. Antes "Total em Vendas" tinha um donut de
+            progresso e os dois cards ficavam brancos soltos no corpo claro;
+            a referencia nao tem grafico nenhum ali, e os dois cards vivem
+            dentro do roxo com fundo translucido tingido (verde/areia). */}
         <div
-          className="px-5 flex items-center justify-between gap-4"
+          className="px-5 flex flex-col gap-4"
           style={{
             background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
-            borderRadius: '0px 0px 0px 0px',
-            paddingTop: '40px',
-            paddingBottom: '120px',
+            paddingTop: '24px',
+            paddingBottom: '44px',
           }}
         >
-          {/* Title */}
-          <span
-            className="text-white leading-tight flex-1"
-            style={{
-              fontFamily: "'Instrument Serif', serif",
-              fontSize: '31px',
-              lineHeight: '1.1',
-            }}
-          >
-            Pedidos
-          </span>
+          <div className="flex items-center justify-between gap-4">
+            <span
+              className="text-white leading-tight flex-1"
+              style={{
+                fontFamily: "'Instrument Serif', serif",
+                fontSize: '29px',
+                lineHeight: '1.1',
+              }}
+            >
+              Pedidos &amp; Encomendas
+            </span>
 
-          {/* Badge */}
-          <span
-            className="uppercase font-black shrink-0 whitespace-nowrap"
-            style={{
-              background: '#F5B9C6',
-              color: '#3A2350',
-              fontSize: '10px',
-              padding: '6px 12px',
-              borderRadius: '999px',
-              fontFamily: "'Manrope', sans-serif",
-              fontWeight: 800,
-            }}
-          >
-            {sales.length} {sales.length === 1 ? 'Pedido' : 'Pedidos'}
-          </span>
+            {/* Selo translucido: contra o roxo do fundo, fica "roxo claro",
+                nao mais o salmao solido de antes. */}
+            <span
+              className="uppercase font-black shrink-0 whitespace-nowrap"
+              style={{
+                background: 'rgba(255,255,255,.18)',
+                border: '1px solid rgba(255,255,255,.28)',
+                color: '#FFFFFF',
+                fontSize: '10px',
+                padding: '6px 12px',
+                borderRadius: '999px',
+                fontFamily: "'Manrope', sans-serif",
+                fontWeight: 800,
+              }}
+            >
+              {sales.length} {sales.length === 1 ? 'Pedido' : 'Pedidos'}
+            </span>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <span
+              style={{
+                fontSize: '9px',
+                fontWeight: 800,
+                letterSpacing: '.14em',
+                color: 'rgba(247,220,225,.8)',
+                fontFamily: "'Manrope', sans-serif",
+              }}
+            >
+              TOTAL EM VENDAS
+            </span>
+            <span
+              style={{
+                fontSize: '32px',
+                fontWeight: 800,
+                color: '#FFFFFF',
+                letterSpacing: '-.03em',
+                lineHeight: 1,
+                fontFamily: "'Manrope', sans-serif",
+              }}
+            >
+              {formatMoney(totalVendas)}
+            </span>
+            <span style={{ fontSize: '10px', color: 'rgba(247,220,225,.72)', fontFamily: "'Manrope', sans-serif" }}>
+              {sales.length} {sales.length === 1 ? 'encomenda registrada' : 'encomendas registradas'}
+            </span>
+          </div>
+
+          <div className="flex gap-2">
+            {/* Vendas Pagas */}
+            <div className="flex-1" style={{ background: 'rgba(169,216,184,.22)', borderRadius: '16px', padding: '11px 12px' }}>
+              <div style={{ fontSize: '9px', color: '#CDEBD8', fontWeight: 800, letterSpacing: '.06em', fontFamily: "'Manrope', sans-serif" }}>
+                ✓ VENDAS PAGAS
+              </div>
+              <div style={{ fontSize: '15px', fontWeight: 800, color: '#FFFFFF', marginTop: '3px', fontFamily: "'Manrope', sans-serif" }}>
+                {formatMoney(totalPagas)}
+              </div>
+              <div style={{ fontSize: '9px', color: 'rgba(247,220,225,.7)', marginTop: '2px', fontFamily: "'Manrope', sans-serif" }}>
+                {paidCount} {paidCount === 1 ? 'pedido pago' : 'pedidos pagos'}
+              </div>
+            </div>
+
+            {/* A Receber */}
+            <div className="flex-1" style={{ background: 'rgba(228,217,195,.26)', borderRadius: '16px', padding: '11px 12px' }}>
+              <div style={{ fontSize: '9px', color: '#F0E2C8', fontWeight: 800, letterSpacing: '.06em', fontFamily: "'Manrope', sans-serif" }}>
+                ⏳ A RECEBER (PENDENTES)
+              </div>
+              <div style={{ fontSize: '15px', fontWeight: 800, color: '#FFFFFF', marginTop: '3px', fontFamily: "'Manrope', sans-serif" }}>
+                {formatMoney(totalPendentes + totalAReceber)}
+              </div>
+              <div style={{ fontSize: '9px', color: 'rgba(247,220,225,.7)', marginTop: '2px', fontFamily: "'Manrope', sans-serif" }}>
+                {pendingCount} {pendingCount === 1 ? 'pedido pendente' : 'pedidos pendentes'}
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Content Section */}
         <div className="flex flex-col gap-4"
           style={{
-            marginTop: '-70px',
+            marginTop: '-24px',
             background: '#F6F2F5',
             borderRadius: '28px 28px 0 0',
             position: 'relative',
@@ -144,113 +208,6 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
             paddingBottom: 'max(20px, env(safe-area-inset-bottom))',
           }}
         >
-
-      {/* Total em Vendas Card with Chart - NOW AT TOP */}
-      <div className="rounded-[24px] p-5 shadow-card" style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)', boxShadow: '0 30px 70px rgba(58,35,80,.26)' }}>
-        <div className="flex items-center gap-4">
-          {/* Circular Chart */}
-          <div className="flex-shrink-0 relative w-[92px] h-[92px]" style={{ filter: 'drop-shadow(0 0 12px rgba(169,216,184,0.7))', borderRadius: '50%' }}>
-            <svg width="92" height="92" viewBox="0 0 92 92" style={{ transform: 'rotate(-90deg)', borderRadius: '50%' }}>
-              <circle cx="46" cy="46" r="38" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="9" />
-              <circle
-                cx="46" cy="46" r="38" fill="none" stroke="#A9D8B8" strokeWidth="9"
-                strokeDasharray={totalVendas > 0 ? `${239 * (totalPagas / totalVendas)} ${239}` : '0 239'}
-                strokeLinecap="round"
-              />
-            </svg>
-            <div className="absolute inset-0 flex items-center justify-center leading-[1]">
-              <span className="text-[16px] font-black text-white" style={{ fontFamily: "'Manrope', sans-serif" }}>
-                {totalVendas > 0 ? Math.round((totalPagas / totalVendas) * 100) : 0}%
-              </span>
-            </div>
-          </div>
-
-          {/* Text and Values */}
-          <div className="flex-1">
-            <div className="text-[9px] font-black uppercase tracking-[0.14em]" style={{ color: 'rgba(247,220,225,0.8)', fontFamily: "'Manrope', sans-serif", fontWeight: 800, marginBottom: '4px' }}>
-              TOTAL EM VENDAS
-            </div>
-            <div className="text-white" style={{ fontSize: '28px', lineHeight: 1, letterSpacing: '-0.03em', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
-              {formatMoney(totalVendas)}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Summary Cards Row - Reduced to 2 cards (Pagas + A Receber) */}
-      <div className="flex gap-2" style={{ gap: '8px' }}>
-        {/* Vendas Pagas */}
-        <div
-          className="flex-1 bg-white rounded-[18px] shadow-card flex flex-col gap-[3px]"
-          style={{
-            padding: '13px',
-            boxShadow: '0 8px 18px rgba(58,35,80,.08)',
-            background: 'linear-gradient(to bottom, rgba(168, 94, 134, 0.15), rgba(110, 63, 114, 0.08) 3px, white 3px)',
-            transition: 'transform 0.25s ease'
-          }}
-        >
-          <span
-            className="text-[8px] font-black uppercase"
-            style={{
-              color: '#4C7358',
-              fontFamily: "'Manrope', sans-serif",
-              letterSpacing: '.06em',
-              minHeight: '20px'
-            }}
-          >
-            ✓ VENDAS PAGAS
-          </span>
-          <span
-            className="font-black"
-            style={{
-              fontSize: '16px',
-              color: '#241B2B',
-              fontFamily: "'Manrope', sans-serif"
-            }}
-          >
-            {formatMoney(totalPagas)}
-          </span>
-          <span className="text-xs" style={{ color: '#9A8FA0', fontFamily: "'Manrope', sans-serif" }}>
-            {paidCount} {paidCount === 1 ? 'pago' : 'pagos'}
-          </span>
-        </div>
-
-        {/* A Receber */}
-        <div
-          className="flex-1 bg-white rounded-[18px] shadow-card flex flex-col gap-[3px]"
-          style={{
-            padding: '13px',
-            boxShadow: '0 8px 18px rgba(58,35,80,.08)',
-            background: 'linear-gradient(to bottom, rgba(168, 94, 134, 0.15), rgba(110, 63, 114, 0.08) 3px, white 3px)',
-            transition: 'transform 0.25s ease'
-          }}
-        >
-          <span
-            className="text-[8px] font-black uppercase"
-            style={{
-              color: '#8A7340',
-              fontFamily: "'Manrope', sans-serif",
-              letterSpacing: '.06em',
-              minHeight: '20px'
-            }}
-          >
-            ⏳ A RECEBER (PENDENTES)
-          </span>
-          <span
-            className="font-black"
-            style={{
-              fontSize: '16px',
-              color: '#241B2B',
-              fontFamily: "'Manrope', sans-serif"
-            }}
-          >
-            {formatMoney(totalPendentes + totalAReceber)}
-          </span>
-          <span className="text-xs" style={{ color: '#9A8FA0', fontFamily: "'Manrope', sans-serif" }}>
-            {pendingCount} {pendingCount === 1 ? 'pendente' : 'pendentes'}
-          </span>
-        </div>
-      </div>
 
       {/* Search & Filters */}
       <div className="flex flex-col gap-[11px]">
@@ -360,15 +317,19 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
             return (
               <div
                 key={tx.id}
-                className="bg-white rounded-3xl shadow-card transition-all duration-300 cursor-pointer relative overflow-hidden"
+                className="rounded-3xl transition-all duration-300 cursor-pointer relative overflow-hidden"
+                style={{
+                  background: isPending ? '#FFFCF6' : '#FFFFFF',
+                  boxShadow: '0 8px 20px rgba(58,35,80,.09)',
+                }}
                 onClick={() => onEditTransaction(tx)}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-6px)';
-                  e.currentTarget.style.boxShadow = '0 20px 40px rgba(58,35,80,0.2)';
+                  e.currentTarget.style.boxShadow = '0 18px 34px rgba(58,35,80,.18)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(58,35,80,0.08)';
+                  e.currentTarget.style.boxShadow = '0 8px 20px rgba(58,35,80,.09)';
                 }}
               >
                 {/* Stripe lateral */}
@@ -398,7 +359,10 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                 }} />
 
                 {/* Content */}
-                <div className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pl-8">
+                <div
+                  className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-[9px]"
+                  style={{ padding: '16px 18px 16px 22px' }}
+                >
 
                   <div className="flex-1 min-w-0 space-y-2">
                     {/* CLIENT CHIP & STATUS */}
@@ -419,13 +383,15 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                     </div>
 
                     <div style={{ fontSize: '10px', color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
-                      📅 Data: <strong style={{ color: '#241B2B', fontWeight: 'normal' }}>{formatDateBr(tx.date)}</strong> • Pgto: <strong style={{ color: '#241B2B', fontWeight: 'normal' }}>{tx.paymentMethod || 'N/A'}</strong>
+                      📅 Data: <strong style={{ color: '#241B2B' }}>{formatDateBr(tx.date)}</strong> • Pgto: <strong style={{ color: '#241B2B' }}>{tx.paymentMethod || 'N/A'}</strong>
                     </div>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row sm:items-end items-start justify-between w-full sm:w-auto shrink-0 gap-3">
+                  <div
+                    className="flex flex-row items-center justify-between w-full shrink-0 gap-3 border-t border-dashed border-[rgba(36,27,43,0.14)] pt-[11px] sm:border-t-0 sm:pt-0"
+                  >
                     <div className="text-right">
-                      <span className="font-black text-[var(--color-ink)]" style={{ fontSize: '22px', fontWeight: 800, color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>
+                      <span className="font-black text-[var(--color-ink)]" style={{ fontSize: '17px', fontWeight: 800, color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>
                         {formatMoney(tx.totalValue)}
                       </span>
                       {tx.signalValue && (
@@ -439,7 +405,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                     <button
                       onClick={(e) => { e.stopPropagation(); setQuoteTx(tx); }}
                       className="rounded-full transition-all flex items-center gap-1 cursor-pointer active:scale-95 hover:translate-y-[-2px]"
-                      style={{ fontSize: '10px', fontWeight: 700, color: '#F5B9C6', background: '#3A2350', padding: '7px 12px', fontFamily: "'Manrope', sans-serif" }}
+                      style={{ fontSize: '9px', fontWeight: 800, color: '#F5B9C6', background: '#3A2350', padding: '5px 10px', fontFamily: "'Manrope', sans-serif" }}
                       title="Gerar e Visualizar Orçamento em PDF"
                     >
                       <Printer className="w-3 h-3" style={{ stroke: '#F5B9C6', strokeWidth: 2 }} />
@@ -454,7 +420,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                           style={{ fontSize: '10px', fontWeight: 800, color: '#26402F', background: '#A9D8B8', padding: '7px 12px', fontFamily: "'Manrope', sans-serif" }}
                           title="Clique para marcar este pedido como PAGO"
                         >
-                          <span>✅ Marcar PAGO</span>
+                          <span>✅ Pago</span>
                         </button>
                       ) : (
                         <button
