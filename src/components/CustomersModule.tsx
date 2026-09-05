@@ -558,20 +558,6 @@ export const CustomersModule: React.FC = () => {
           >
             Clientes
           </span>
-
-          {/* Button */}
-          <button
-            onClick={handleOpenAdd}
-            className="px-3 py-2 rounded-xl text-[10px] font-black cursor-pointer transition-all active:scale-95 shrink-0"
-            style={{
-              background: '#F5B9C6',
-              color: '#3A2350',
-              fontFamily: "'Manrope', sans-serif",
-            }}
-            title="Adicionar novo cliente"
-          >
-            Nova(o) Cliente
-          </button>
         </div>
 
         {/* Content Section */}
