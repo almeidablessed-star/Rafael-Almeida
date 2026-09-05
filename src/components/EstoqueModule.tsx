@@ -9,7 +9,6 @@ import {
   Edit3,
   Trash2,
   Check,
-  X,
   Sparkles,
 } from 'lucide-react';
 import { StockMovementsHistory } from './StockMovementsHistory';
@@ -66,6 +65,7 @@ export const EstoqueModule: React.FC = () => {
   const [quantity, setQuantity] = useState('');
   const [unit, setUnit] = useState<'g' | 'kg' | 'ml' | 'L' | 'un' | 'pacote'>('g');
   const [minThreshold, setMinThreshold] = useState('');
+  const [minThresholdUnit, setMinThresholdUnit] = useState<'g' | 'kg' | 'ml' | 'L' | 'un' | 'pacote'>('g');
   const [costPerUnit, setCostPerUnit] = useState('');
 
   // Efeito para resetar o formulário quando isAdding muda
@@ -75,6 +75,7 @@ export const EstoqueModule: React.FC = () => {
       setQuantity('');
       setUnit('g');
       setMinThreshold('');
+      setMinThresholdUnit('g');
       setCostPerUnit('');
       setEditingId(null);
     }
@@ -90,6 +91,7 @@ export const EstoqueModule: React.FC = () => {
     // grudava no que a pessoa escrevia (500 + 10 = "50010"). Mesmo defeito dos
     // campos de custo, com outro numero.
     setMinThreshold('');
+    setMinThresholdUnit('g');
     setCostPerUnit('');
     setEditingId(null);
     setIsAdding(true);
@@ -100,6 +102,10 @@ export const EstoqueModule: React.FC = () => {
     setQuantity(item.quantity.toString());
     setUnit(item.unit);
     setMinThreshold(item.minThreshold.toString());
+    // O alerta pode ser configurado numa unidade diferente da quantidade (ex:
+    // quantidade em L, alerta em ml) — por isso a unidade gravada no item e
+    // que vale aqui, nao a de `unit`.
+    setMinThresholdUnit(item.minThresholdUnit);
     setCostPerUnit((item.costPerUnit || 0).toString());
     setEditingId(item.id);
     setIsAdding(true);
@@ -119,11 +125,11 @@ export const EstoqueModule: React.FC = () => {
       quantity: qtyNum,
       unit,
       minThreshold: threshNum,
-      // Faltava, e o campo e obrigatorio: o alerta de estoque baixo era gravado
-      // sem unidade e voltava do banco com "g" fixo, entao um item em litros
-      // avisava na unidade errada. O limite e informado na mesma unidade do
-      // item, entao e `unit` que vale aqui.
-      minThresholdUnit: unit,
+      // Unidade PROPRIA do alerta, independente de `unit`: a quantidade pode
+      // estar em L e o alerta disparar em ml, por exemplo. Antes o alerta era
+      // gravado sem unidade propria e voltava do banco com "g" fixo — um item
+      // em litros avisava na unidade errada.
+      minThresholdUnit,
       costPerUnit: costNum,
     };
 
@@ -330,115 +336,137 @@ export const EstoqueModule: React.FC = () => {
         </div>
 
         {/* Form Modal / Inline Box */}
+        {/* Mesma casca do formulario de Pedido (ver Clientes e Fichas): corpo
+            claro, cartao branco com borda #E6E1DB e shadow-card por cima, e o
+            cabecalho no gradiente de tres paradas em 155deg. Antes era branco
+            sobre branco, sem cabecalho colorido nem separacao entre secoes. */}
         {isAdding && (
-          <form onSubmit={handleSave} className="bg-white rounded-3xl p-5 border border-[var(--color-neutral-medium)] shadow-card space-y-4 animate-slideUp" style={{ marginBottom: '16px' }}>
-            <div className="flex items-center justify-between pb-3 border-b border-[var(--color-neutral-light)]">
-            <h3 className="font-brand font-semibold text-sm text-[var(--color-neutral-charcoal)] flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-[var(--color-primary)]" />
-              {editingId ? 'Editar Item' : 'Novo Item'}
-            </h3>
-            <button
-              type="button"
-              onClick={() => setIsAdding(false)}
-              className="p-1 rounded-full hover:bg-[var(--color-neutral-light)] text-[var(--color-neutral-dark-gray)] transition-colors"
+          <div className="bg-[#F6F2F5] rounded-xl overflow-hidden shadow-highlight border border-[#E6E1DB] animate-slideUp" style={{ marginBottom: '16px' }}>
+            <div
+              style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)' }}
+              className="px-4 sm:px-5 py-3 sm:py-4 flex items-center justify-between"
             >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="sm:col-span-2">
-              <label className="block text-xs font-semibold text-[var(--color-text-primary)] mb-1.5">
-                Nome do Insumo *
-              </label>
-              <input
-                type="text"
-                required
-                placeholder="Farinha de Trigo"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl border border-[var(--color-neutral-light)] text-xs font-normal text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-primary)] bg-white transition-colors"
-              />
+              <h3 className="font-brand font-black text-sm sm:text-base text-white flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-[#F5B9C6]" />
+                {editingId ? 'Editar Item' : 'Novo Item'}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsAdding(false)}
+                className="text-xs text-white/70 hover:text-white font-bold px-2 py-1 transition-colors"
+              >
+                Cancelar
+              </button>
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-[var(--color-text-primary)] mb-1.5">
-                Quantidade *
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  required
-                  placeholder="500"
-                  value={quantity}
-                  onChange={(e) => setQuantity(e.target.value)}
-                  className="flex-1 px-3 py-2.5 rounded-xl border border-[var(--color-neutral-light)] text-xs font-normal text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-primary)] bg-white transition-colors"
-                />
-                <select
-                  value={unit}
-                  onChange={(e) => setUnit(e.target.value as any)}
-                  className="px-3 py-2.5 rounded-xl border border-[var(--color-neutral-light)] text-xs font-semibold bg-white text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-primary)] transition-colors"
-                >
-                  <option value="g">g</option>
-                  <option value="kg">kg</option>
-                  <option value="ml">ml</option>
-                  <option value="L">L</option>
-                  <option value="un">un</option>
-                  <option value="pacote">pacote</option>
-                </select>
+            <form onSubmit={handleSave} className="bg-[#F6F2F5] p-4 sm:p-5 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white p-4 rounded-xl border border-[#E6E1DB] shadow-card">
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold text-neutral-900 mb-1.5">
+                    Nome do Insumo *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Farinha de Trigo"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full px-3 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-neutral-900 mb-1.5">
+                    Quantidade *
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      required
+                      placeholder="500"
+                      value={quantity}
+                      onChange={(e) => setQuantity(e.target.value)}
+                      className="flex-1 px-3 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
+                    />
+                    <select
+                      value={unit}
+                      onChange={(e) => setUnit(e.target.value as any)}
+                      className="px-3 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
+                    >
+                      <option value="g">g</option>
+                      <option value="kg">kg</option>
+                      <option value="ml">ml</option>
+                      <option value="L">L</option>
+                      <option value="un">un</option>
+                      <option value="pacote">pacote</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-neutral-900 mb-1.5">
+                    Alerta Mínimo
+                  </label>
+                  {/* Unidade PROPRIA, independente da Quantidade: da pra guardar
+                      em L e alertar em ml, por exemplo. */}
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      placeholder="100"
+                      value={minThreshold}
+                      onChange={(e) => setMinThreshold(e.target.value)}
+                      className="flex-1 px-3 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
+                    />
+                    <select
+                      value={minThresholdUnit}
+                      onChange={(e) => setMinThresholdUnit(e.target.value as any)}
+                      className="px-3 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
+                    >
+                      <option value="g">g</option>
+                      <option value="kg">kg</option>
+                      <option value="ml">ml</option>
+                      <option value="L">L</option>
+                      <option value="un">un</option>
+                      <option value="pacote">pacote</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-neutral-900 mb-1.5">
+                    Preço Unitário (R$) — Calculado automaticamente
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="0.00"
+                    value={costPerUnit}
+                    disabled
+                    className="w-full px-3 py-2.5 bg-neutral-100 border border-[#E6E1DB] rounded-xl text-xs font-normal text-neutral-400 placeholder:text-neutral-400 focus:outline-none transition-all cursor-not-allowed"
+                  />
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-[var(--color-text-primary)] mb-1.5">
-                Alerta Mínimo
-              </label>
-              <input
-                type="text"
-                inputMode="decimal"
-                placeholder="100"
-                value={minThreshold}
-                onChange={(e) => setMinThreshold(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl border border-[var(--color-neutral-light)] text-xs font-normal text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-primary)] bg-white transition-colors"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-[var(--color-text-primary)] mb-1.5">
-                Preço Unitário (R$) — Calculado automaticamente
-              </label>
-              <input
-                type="text"
-                inputMode="decimal"
-                placeholder="0.00"
-                value={costPerUnit}
-                disabled
-                className="w-full px-3 py-2.5 rounded-xl border border-[var(--color-neutral-light)] text-xs font-normal text-[var(--color-text-muted)] placeholder:text-[var(--color-text-muted)] focus:outline-none bg-[var(--color-neutral-light)] transition-colors cursor-not-allowed"
-              />
-            </div>
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsAdding(false)}
+                  className="px-4 py-2 rounded-xl bg-white border border-[#E6E1DB] text-neutral-700 font-bold text-xs hover:bg-neutral-50 shadow-card active:scale-95 transition-all duration-normal"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl bg-[#6E3F72] hover:bg-[#5A3560] text-white font-brand font-bold text-xs shadow-card flex items-center gap-1 active:scale-95 transition-all duration-normal"
+                >
+                  <Check className="w-4 h-4 stroke-[2.5]" />
+                  Salvar
+                </button>
+              </div>
+            </form>
           </div>
-
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-[var(--color-neutral-light)]">
-            <button
-              type="button"
-              onClick={() => setIsAdding(false)}
-              className="px-3 py-2 rounded-xl text-xs font-semibold text-[var(--color-text-primary)] hover:text-[var(--color-primary)] hover:bg-[var(--color-neutral-light)] transition-colors"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 rounded-xl text-white font-brand font-semibold text-xs shadow-card flex items-center gap-1 transition-all active:scale-95 hover:opacity-90"
-              style={{
-                background: 'linear-gradient(135deg, #6E3F72 0%, #3A2350 100%)',
-              }}
-            >
-              <Check className="w-4 h-4 stroke-[2.5]" />
-              Salvar
-            </button>
-          </div>
-        </form>
         )}
 
       {/* Stock Sections - Ordered by Criticality */}
