@@ -236,53 +236,71 @@ export const EstoqueModule: React.FC = () => {
   return (
     <div className="pb-12 animate-fadeIn" style={{ background: '#FAF7FA' }}>
       {/* Header Card — Flutuante com cabeçalho roxo */}
+      {/* fontFamily aqui, no container do "8A", nao em cada texto: e assim que
+          a referencia faz — declara Manrope uma vez no card inteiro e so o
+          titulo (Instrument Serif) sobrescreve. `font-sans` do Tailwind nao
+          serve pra isso porque tailwind.config.ts nao esta com `@config` no
+          index.css (Tailwind v4 exige o at-rule); sem ele a classe cai no
+          stack padrao do Tailwind, nao no Manrope custom. */}
       <div
         className="overflow-hidden shadow-card"
         style={{
           boxShadow: '0 30px 70px rgba(58,35,80,.26)',
+          fontFamily: "'Manrope', sans-serif",
         }}
       >
-        {/* Header with Title only */}
+        {/* Header: eyebrow + contador de estoque baixo, titulo, subtitulo */}
         <div
-          className="px-5 flex items-center justify-between gap-4"
+          className="px-5 flex flex-col gap-2"
           style={{
             background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
-            borderRadius: '0px 0px 0px 0px',
-            paddingTop: '40px',
-            paddingBottom: '120px',
+            paddingTop: '24px',
+            paddingBottom: '90px',
           }}
         >
-          {/* Title */}
+          <div className="flex items-center justify-between gap-2.5">
+            <span
+              className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase whitespace-nowrap"
+              style={{ letterSpacing: '.06em', color: 'rgba(247,220,225,.85)' }}
+            >
+              <Package className="w-3.5 h-3.5 shrink-0" style={{ color: '#F5B9C6' }} />
+              Estoque de Insumos &amp; Ingredientes
+            </span>
+
+            {lowStockCount > 0 && (
+              <span
+                className="inline-flex items-center gap-1 text-[9px] font-extrabold uppercase px-2.5 py-1 rounded-full whitespace-nowrap shrink-0"
+                style={{ background: '#C4626F', color: '#FFF8F6' }}
+              >
+                <AlertTriangle className="w-2.5 h-2.5" style={{ strokeWidth: 2.5 }} />
+                {lowStockCount} {lowStockCount === 1 ? 'Estoque Baixo' : 'Estoques Baixos'}
+              </span>
+            )}
+          </div>
+
           <span
-            className="text-white leading-tight flex-1"
+            className="text-white leading-tight"
             style={{
               fontFamily: "'Instrument Serif', serif",
-              fontSize: '31px',
+              fontSize: '29px',
               lineHeight: '1.1',
             }}
           >
-            Estoque
+            Controle de Estoque
           </span>
 
-          {/* Button */}
-          <button
-            onClick={handleOpenAdd}
-            className="px-3 py-2 rounded-xl text-[10px] font-black cursor-pointer transition-all active:scale-95 shrink-0"
-            style={{
-              background: '#F5B9C6',
-              color: '#3A2350',
-              fontFamily: "'Manrope', sans-serif",
-            }}
-            title="Adicionar novo insumo"
+          <span
+            className="text-[11px] leading-relaxed"
+            style={{ color: 'rgba(247,220,225,.8)' }}
           >
-            Novo Insumo
-          </button>
+            Acompanhe suas quantidades em gramas, ml e unidades para nunca faltar ingredientes na produção.
+          </span>
         </div>
 
         {/* Content Section */}
         <div className="flex flex-col gap-4"
           style={{
-            marginTop: '-70px',
+            marginTop: '-56px',
             background: '#FAF7FA',
             borderRadius: '28px 28px 0 0',
             position: 'relative',
@@ -294,7 +312,7 @@ export const EstoqueModule: React.FC = () => {
           }}
         >
 
-        {/* Search and Button Row - Below Header */}
+        {/* Search + Adicionar Insumo - lado a lado, flutuando sobre o header */}
         <div
           style={{
             display: 'flex',
@@ -333,6 +351,32 @@ export const EstoqueModule: React.FC = () => {
               }}
             />
           </div>
+
+          {/* Adicionar Insumo */}
+          <button
+            onClick={handleOpenAdd}
+            className="active:scale-95 transition-transform"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: '#3A2350',
+              color: '#F5B9C6',
+              fontWeight: 800,
+              fontSize: '11px',
+              padding: '11px 13px',
+              borderRadius: '14px',
+              whiteSpace: 'nowrap',
+              cursor: 'pointer',
+              boxShadow: '0 8px 16px rgba(58,35,80,.28)',
+              border: 'none',
+              fontFamily: "'Manrope', sans-serif",
+            }}
+            title="Adicionar novo insumo"
+          >
+            <Plus className="w-3.5 h-3.5" style={{ strokeWidth: 3 }} />
+            Adicionar Insumo
+          </button>
         </div>
 
         {/* Form Modal / Inline Box */}
@@ -494,67 +538,94 @@ export const EstoqueModule: React.FC = () => {
                     displayPercentage = Math.min(slack, 100); // Folga máxima de 100%
                   }
 
+                  const isCritical = normalizedQty < item.minThreshold;
+                  const step = getThresholdDelta(item.unit);
+
                   return (
                   <div
                     key={item.id}
-                    className="bg-white rounded-xl p-2.5 transition-all cursor-pointer"
-                    style={{ backgroundColor: '#FFFFFF' }}
+                    className="rounded-[22px] p-3.5 flex items-center gap-3 transition-all cursor-pointer"
+                    style={{
+                      background: isCritical ? '#FDF4F5' : '#FFFFFF',
+                      border: isCritical ? '1px solid rgba(196,98,111,.35)' : '1px solid rgba(36,27,43,.06)',
+                      boxShadow: '0 8px 20px rgba(58,35,80,.09)',
+                    }}
                   >
-                    {/* Top Section: Two Columns (Gauge Left, Name+Alert Right) */}
-                    <div className="flex gap-3 mb-3">
-                      {/* Gauge Left - Larger */}
-                      <svg width="76" height="64" viewBox="0 0 76 64" className="flex-shrink-0">
-                        <path d="M8 60a30 30 0 0 1 60 0" fill="none" stroke="#F1ECF2" strokeWidth="10" strokeLinecap="round"></path>
-                        <path
-                          d="M8 60a30 30 0 0 1 60 0"
-                          fill="none"
-                          stroke={colors.stroke}
-                          strokeWidth="10"
-                          strokeLinecap="round"
-                          strokeDasharray={`${displayPercentage * (Math.PI * 30 / 100)} ${Math.PI * 30}`}
-                        ></path>
-                        <text x="38" y="58" textAnchor="middle" fontSize="12" fontWeight="900" fill={colors.stroke} fontFamily="'Manrope', sans-serif">
-                          {Math.round(displayPercentage)}%
-                        </text>
-                      </svg>
+                    {/* Gauge Left */}
+                    <svg width="76" height="64" viewBox="0 0 76 64" className="flex-shrink-0">
+                      <path d="M8 60a30 30 0 0 1 60 0" fill="none" stroke="#F1ECF2" strokeWidth="10" strokeLinecap="round"></path>
+                      <path
+                        d="M8 60a30 30 0 0 1 60 0"
+                        fill="none"
+                        stroke={colors.stroke}
+                        strokeWidth="10"
+                        strokeLinecap="round"
+                        strokeDasharray={`${displayPercentage * (Math.PI * 30 / 100)} ${Math.PI * 30}`}
+                      ></path>
+                      <text x="38" y="58" textAnchor="middle" fontSize="12" fontWeight="900" fill={colors.stroke} fontFamily="'Manrope', sans-serif">
+                        {Math.round(displayPercentage)}%
+                      </text>
+                    </svg>
 
-                      {/* Right Column: Name + Alert */}
-                      <div className="flex-1 flex flex-col gap-2">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-brand font-semibold text-[14px] text-[var(--color-neutral-charcoal)]">
-                            {item.name.charAt(0).toUpperCase() + item.name.slice(1)}
-                          </h4>
-                          <span style={{ background: colors.background, color: colors.text }} className="text-[7px] font-semibold px-1 py-0.5 rounded uppercase whitespace-nowrap">
-                            {getStatusLabel(normalizedQty, item.minThreshold)}
+                    {/* Right Column: Name + Alert + Stepper */}
+                    <div className="flex-1 min-w-0 flex flex-col gap-1.5">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className="font-brand font-semibold text-[13px]" style={{ color: '#241B2B' }}>
+                          {item.name.charAt(0).toUpperCase() + item.name.slice(1)}
+                        </h4>
+                        <span style={{ background: colors.background, color: colors.text }} className="text-[8.5px] font-bold px-[7px] py-[3px] rounded-md uppercase whitespace-nowrap">
+                          {getStatusLabel(normalizedQty, item.minThreshold)}
+                        </span>
+                      </div>
+                      <p className="text-[10.5px]" style={{ color: '#7A6E80' }}>
+                        Alerta quando menor que: <strong style={{ color: '#241B2B' }}>{item.minThreshold} {item.minThresholdUnit}</strong>
+                      </p>
+
+                      {/* Stepper de quantidade + Acoes */}
+                      <div className="flex items-center justify-between gap-2 mt-0.5">
+                        <div
+                          className="flex items-center"
+                          style={{ background: '#F6F2F5', border: '1px solid rgba(36,27,43,.08)', borderRadius: '12px', padding: '2px' }}
+                        >
+                          <button
+                            onClick={() => handleQuickAdjust(item.id, -step)}
+                            className="active:scale-95 transition-transform"
+                            style={{ width: '26px', height: '26px', borderRadius: '9px', background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 800, color: '#5B4A6B', border: 'none', cursor: 'pointer', boxShadow: '0 2px 5px rgba(58,35,80,.1)' }}
+                            title="Diminuir quantidade"
+                          >
+                            −
+                          </button>
+                          <span style={{ padding: '0 9px', fontSize: '13px', fontWeight: 800, color: '#241B2B', whiteSpace: 'nowrap' }}>
+                            {item.quantity} <span style={{ fontSize: '10px', fontWeight: 600, color: '#8A7E90' }}>{item.unit}</span>
                           </span>
+                          <button
+                            onClick={() => handleQuickAdjust(item.id, step)}
+                            className="active:scale-95 transition-transform"
+                            style={{ width: '26px', height: '26px', borderRadius: '9px', background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 800, color: '#5B4A6B', border: 'none', cursor: 'pointer', boxShadow: '0 2px 5px rgba(58,35,80,.1)' }}
+                            title="Aumentar quantidade"
+                          >
+                            +
+                          </button>
                         </div>
-                        <p className="text-[11px] text-[#999999] font-light">
-                          Alerta quando menor que: {item.minThreshold} {item.minThresholdUnit}
-                        </p>
 
-                        {/* Quantity Display + Action Icons Row */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'space-between', marginTop: '6px' }}>
-                          <div style={{ fontSize: '13px', fontWeight: '600', color: '#333', fontFamily: "'Manrope', sans-serif", border: '1px solid #E0E0E0', borderRadius: '20px', padding: '8px 16px', backgroundColor: '#FAFAFA', minWidth: 'fit-content' }}>
-                            {item.quantity} {item.unit}
-                          </div>
-
-                          {/* Edit/Delete Actions */}
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={() => handleOpenEdit(item)}
-                              style={{ width: '20px', height: '20px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0' }}
-                              title="Editar"
-                            >
-                              <Edit3 className="w-3.5 h-3.5" style={{ color: '#999', strokeWidth: 2 }} />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(item.id)}
-                              style={{ width: '20px', height: '20px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0' }}
-                              title="Excluir"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" style={{ color: '#999', strokeWidth: 2 }} />
-                            </button>
-                          </div>
+                        {/* Edit/Delete Actions */}
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => handleOpenEdit(item)}
+                            className="hover:bg-[#EFE6F0] transition-colors"
+                            style={{ width: '28px', height: '28px', borderRadius: '9px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0' }}
+                            title="Editar"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" style={{ color: '#7A6E80', strokeWidth: 2 }} />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(item.id)}
+                            className="hover:bg-[#FBE9EC] transition-colors"
+                            style={{ width: '28px', height: '28px', borderRadius: '9px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0' }}
+                            title="Excluir"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" style={{ color: '#C4626F', strokeWidth: 2 }} />
+                          </button>
                         </div>
                       </div>
                     </div>
