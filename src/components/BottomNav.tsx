@@ -48,10 +48,8 @@ const IconCompras = (props: { stroke: string; strokeWidth: number }) => (
 
 const IconCustos = (props: { stroke: string; strokeWidth: number }) => (
   <svg width="19" height="19" viewBox="0 0 24 24" fill="none" {...props} strokeLinecap="round" strokeLinejoin="round">
-    <rect x="2" y="6" width="20" height="12" rx="2.5"/>
-    <circle cx="12" cy="12" r="2.4"/>
-    <path d="M6 12h.01"/>
-    <path d="M18 12h.01"/>
+    <line x1="12" y1="2" x2="12" y2="22"/>
+    <path d="M17 6H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
   </svg>
 );
 

@@ -1560,8 +1560,8 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       onClick={() => setPaymentStatus('pendente')}
                       className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition-all text-left flex items-center justify-between ${
                         paymentStatus === 'pendente'
-                          ? 'bg-semantic-warning-500 text-white border-amber-500 shadow-card'
-                          : 'bg-semantic-warning-50 text-semantic-warning-900 border-semantic-warning-200 hover:bg-semantic-warning-100'
+                          ? 'bg-amber-500 text-white border-amber-500 shadow-card'
+                          : 'bg-amber-50 text-amber-900 border-amber-200 hover:bg-amber-100'
                       }`}
                     >
                       <span>⏳ Pendente (A Receber)</span>
@@ -1572,8 +1572,8 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       onClick={() => setPaymentStatus('pago')}
                       className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition-all text-left flex items-center justify-between ${
                         paymentStatus === 'pago'
-                          ? 'bg-semantic-success-600 text-white border-emerald-600 shadow-card'
-                          : 'bg-semantic-success-50 text-semantic-success-900 border-semantic-success-200 hover:bg-emerald-100'
+                          ? 'bg-emerald-600 text-white border-emerald-600 shadow-card'
+                          : 'bg-emerald-50 text-emerald-900 border-emerald-200 hover:bg-emerald-100'
                       }`}
                     >
                       <span>✅ Pago (Recebido)</span>
@@ -1598,7 +1598,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                         onClick={() => setPaymentMethod(item.id as PaymentMethod)}
                         className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all text-left flex items-center justify-between ${
                           paymentMethod === item.id
-                            ? 'bg-semantic-success-500 text-white border-emerald-500 shadow-card'
+                            ? 'bg-emerald-500 text-white border-emerald-500 shadow-card'
                             : 'bg-neutral-50 text-neutral-700 border-neutral-200 hover:bg-neutral-100'
                         }`}
                       >
