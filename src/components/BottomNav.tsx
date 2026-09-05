@@ -39,15 +39,19 @@ const IconEstoque = (props: { stroke: string; strokeWidth: number }) => (
 );
 
 const IconCompras = (props: { stroke: string; strokeWidth: number }) => (
-  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" {...props} strokeLinejoin="round">
-    <rect x="3" y="6" width="18" height="13" rx="3"/>
-    <circle cx="17" cy="12.5" r="1.4" fill={props.stroke} stroke="none"/>
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" {...props} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M2 3h2.4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 7H6.2"/>
+    <circle cx="9.5" cy="21" r="1.3" fill={props.stroke} stroke="none"/>
+    <circle cx="18" cy="21" r="1.3" fill={props.stroke} stroke="none"/>
   </svg>
 );
 
 const IconCustos = (props: { stroke: string; strokeWidth: number }) => (
   <svg width="19" height="19" viewBox="0 0 24 24" fill="none" {...props} strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/>
+    <rect x="2" y="6" width="20" height="12" rx="2.5"/>
+    <circle cx="12" cy="12" r="2.4"/>
+    <path d="M6 12h.01"/>
+    <path d="M18 12h.01"/>
   </svg>
 );
 
