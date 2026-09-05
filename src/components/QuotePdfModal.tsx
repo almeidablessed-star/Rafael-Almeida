@@ -7,7 +7,9 @@ import { formatCurrency, formatDateBr } from '../utils/formatters';
 import { useAuth } from '../context/AuthContext';
 import { useFichasTecnicas } from '../context/FichasTecnicasContext';
 import { useTransacoes } from '../context/TransacoesContext';
+import { useCustomers } from '../context/CustomersContext';
 import { compressImageFile } from '../utils/imageCompression';
+import { normalizeName } from '../utils/fichaMatcher';
 import {
   Printer,
   X,
@@ -144,7 +146,38 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
 
   const { fichas } = useFichasTecnicas();
 
-  const custPhoto = transaction.customerPhotoUrl;
+  /**
+   * `transaction.customerPhotoUrl` e uma FOTO no momento em que o pedido foi
+   * lancado, gravada na propria transacao (`cliente_foto_url`) — o pedido nao
+   * guarda o id da cliente, so nome/telefone. Pedidos lancados antes da
+   * cliente ter foto cadastrada (ou por uma falha pontual ao capturar a foto
+   * na hora de salvar) ficam com esse retrato permanentemente vazio, mesmo
+   * que a cliente tenha foto no cadastro dela hoje.
+   *
+   * Mesmo padrao de [[sellerPhotoUrl]] acima: quando falta a foto na propria
+   * transacao, procura a cliente pelo nome/telefone em [[useCustomers]] e busca
+   * a foto atual dela sob demanda, em vez de deixar o espaco vazio para sempre.
+   */
+  const { customers, fetchCustomerPhoto } = useCustomers();
+  const [custPhoto, setCustPhoto] = useState<string>(transaction.customerPhotoUrl || '');
+
+  useEffect(() => {
+    if (custPhoto || !transaction.customerName) return;
+    const match = customers.find(
+      (c) =>
+        normalizeName(c.name) === normalizeName(transaction.customerName || '') &&
+        (!transaction.customerPhone || (c.phone || '') === transaction.customerPhone)
+    );
+    if (!match) return;
+
+    let cancelado = false;
+    fetchCustomerPhoto(match.id).then((url) => {
+      if (!cancelado && url) setCustPhoto(url);
+    });
+    return () => {
+      cancelado = true;
+    };
+  }, [custPhoto, transaction.customerName, transaction.customerPhone, customers, fetchCustomerPhoto]);
 
   const handlePrint = () => {
     window.print();
