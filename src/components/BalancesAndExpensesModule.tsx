@@ -239,14 +239,33 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
             Gestão
           </button>
         </div>
-      </div>
+
+        {/* Content Section — mesmo wrapper de largura total usado em
+            Pedidos/Clientes/Fichas/Estoque: sobrepoe o cabecalho subindo 70px
+            e arredonda os dois cantos superiores, revelando o roxo so na
+            curva. Antes esta aba nao tinha esse wrapper: o card de Saldo
+            fazia sua propria sobreposicao sozinho (mx-5, mais estreito que a
+            tela), e a transicao do roxo pro fundo da pagina virava uma linha
+            reta de ponta a ponta, em vez da curva das outras abas. */}
+        <div
+          style={{
+            marginTop: '-70px',
+            background: '#FAF7FA',
+            borderRadius: '28px 28px 0 0',
+            position: 'relative',
+            paddingTop: '20px',
+            marginLeft: 'calc(-50vw + 50%)',
+            marginRight: 'calc(-50vw + 50%)',
+            paddingLeft: 'max(0px, env(safe-area-inset-left))',
+            paddingRight: 'max(0px, env(safe-area-inset-right))',
+          }}
+        >
 
       {/* TOTAL BALANCE CARD - SALDO TOTAL DISPONÍVEL */}
       <div
         className="rounded-[22px] p-6 text-white mx-5"
         style={{
           background: 'linear-gradient(155deg, var(--color-brand-900) 0%, var(--color-brand-700) 60%, var(--color-brand-500) 100%)',
-          marginTop: '-70px',
           position: 'relative',
           zIndex: 50,
         }}
@@ -676,6 +695,9 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
       {/* Weekly History Card */}
       <div style={{ marginTop: '20px' }}>
         <WeeklyHistoryCard archives={archives} />
+      </div>
+
+        </div>
       </div>
     </div>
   );
