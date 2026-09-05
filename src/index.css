@@ -93,7 +93,7 @@
 
 @keyframes carSweep {
   0% { transform: translateX(-120%); }
-  60%, 100% { transform: translateX(220%); }
+  100% { transform: translateX(220%); }
 }
 
 /* O Safari no iOS tinge a status bar a partir de uma cor SOLIDA de fundo —
@@ -134,7 +134,7 @@ a:hover {
 }
 
 .car-sweep {
-  animation: carSweep 5s ease-in-out infinite;
+  animation: carSweep 2.8s ease-in-out infinite alternate;
 }
 
 .car-glow {

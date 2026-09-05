@@ -276,7 +276,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <div className="font-serif-display text-white" style={{ fontSize: '29px', lineHeight: 1 }}>Lançar Pedido</div>
             </div>
             <div
-              className="animate-carFloat flex-shrink-0 w-11 h-11 rounded-[14px] flex items-center justify-center text-2xl font-black"
+              className="car-float flex-shrink-0 w-11 h-11 rounded-[14px] flex items-center justify-center text-2xl font-black"
               style={{
                 background: '#F5B9C6',
                 color: '#3A2350',
@@ -288,7 +288,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
 
           {/* Sweep animation */}
-          <div className="animate-carSweep absolute top-0 left-0 w-[70px] h-full pointer-events-none" style={{
+          <div className="car-sweep absolute top-0 left-0 w-[70px] h-full pointer-events-none" style={{
             background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent)',
           }} />
         </button>
