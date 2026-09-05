@@ -391,7 +391,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
               ...t,
               ingredients: [
                 ...t.ingredients,
-                { id: `${Date.now()}`, name: '', quantity: 0, unit: 'g' as const, unitCost: 0, totalCost: 0 },
+                { id: `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`, name: '', quantity: 0, unit: 'g' as const, unitCost: 0, totalCost: 0 },
               ],
             }
           : t
@@ -469,7 +469,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     // passaria de cinco sem aviso.
     if (tamanhos.length >= MAX_TAMANHOS) return;
 
-    const newId = `ts-${Date.now()}`;
+    const newId = `ts-${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     setTamanhos((prev) => {
       const anterior = prev[prev.length - 1];
       return [
@@ -1212,6 +1212,8 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                             <option value="ml">ml</option>
                             <option value="un">un</option>
                             <option value="kg">kg</option>
+                            <option value="L">L</option>
+                            <option value="pacote">pacote</option>
                           </select>
                         </div>
                         <div className="col-span-4 text-right flex flex-col justify-center">
