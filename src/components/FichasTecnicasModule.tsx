@@ -470,22 +470,32 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     if (tamanhos.length >= MAX_TAMANHOS) return;
 
     const newId = `ts-${Date.now()}`;
-    setTamanhos((prev) => [
-      ...prev,
-      {
-        id: newId,
-        descricao: `${prev.length + 1}`,
-        preco: '0',
-        // Repete a tarifa do tamanho anterior: quem cadastra varios tamanhos do
-        // mesmo bolo costuma cobrar a mesma hora, e so as horas mudam.
-        horasTrabalho: '',
-        valorHora: prev[prev.length - 1]?.valorHora || tarifaSugerida,
-        ingredients: [],
-        maoDeObraCost: maoDeObraCost,
-        custoCost: custoCost,
-        investimentoCost: investimentoCost,
-      },
-    ]);
+    setTamanhos((prev) => {
+      const anterior = prev[prev.length - 1];
+      return [
+        ...prev,
+        {
+          id: newId,
+          descricao: `${prev.length + 1}`,
+          preco: '0',
+          // Repete a tarifa do tamanho anterior: quem cadastra varios tamanhos do
+          // mesmo bolo costuma cobrar a mesma hora, e so as horas mudam.
+          horasTrabalho: '',
+          valorHora: anterior?.valorHora || tarifaSugerida,
+          // Nasce com os MESMOS insumos do tamanho anterior (so a quantidade
+          // muda entre tamanhos do mesmo bolo). Nascer vazio e o que fazia a
+          // confeiteira esquecer de recadastrar um insumo em um tamanho novo
+          // e a baixa de estoque falhar em silencio para ele.
+          ingredients: (anterior?.ingredients || []).map((ing, k) => ({
+            ...ing,
+            id: `${Date.now()}_${k}`,
+          })),
+          maoDeObraCost: maoDeObraCost,
+          custoCost: custoCost,
+          investimentoCost: investimentoCost,
+        },
+      ];
+    });
   };
 
   const handleRemoveTamanho = (id: string) => {
@@ -1008,9 +1018,9 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                 <button
                   type="button"
                   onClick={handleAddTamanho}
-                  className="text-xs font-bold text-[#241B2B] hover:underline flex items-center gap-1 cursor-pointer"
+                  className="text-xs font-bold text-white bg-[#3A2350] hover:bg-[#6E3F72] rounded-full pl-2 pr-3 py-1.5 flex items-center gap-1 active:scale-95 transition cursor-pointer"
                 >
-                  <PlusCircle className="w-4 h-4 text-[#A85E86]" />
+                  <PlusCircle className="w-4 h-4" />
                   <span>Adicionar</span>
                 </button>
               )}
@@ -1142,10 +1152,11 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                           <button
                             type="button"
                             onClick={() => handleCopiarInsumosDoAnterior(tamanho.id)}
-                            className="text-[10px] font-bold text-[var(--color-pastry-chocolate)] hover:underline cursor-pointer"
+                            className="text-[10px] font-bold text-[var(--color-pastry-chocolate)] bg-[var(--color-pastry-light-pink)]/25 border border-[var(--color-pastry-light-pink)] rounded-full px-2 py-1 flex items-center gap-1 hover:bg-[var(--color-pastry-light-pink)]/40 active:scale-95 transition cursor-pointer"
                             title="Copiar a lista do tamanho anterior para ajustar as quantidades"
                           >
-                            Copiar anterior
+                            <Copy className="w-3 h-3" />
+                            <span>Copiar anterior</span>
                           </button>
                         )}
                         <button
