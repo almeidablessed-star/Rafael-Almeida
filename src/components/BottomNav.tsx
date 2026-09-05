@@ -82,7 +82,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) 
           display: 'flex',
           alignItems: 'center',
           gap: '2px',
-          padding: '2px 8px 2px',
+          padding: '10px 4px',
+          width: '100%',
           overflowX: 'auto',
           overscrollBehavior: 'contain',
           maxWidth: '100%',
@@ -102,14 +103,15 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) 
                 flexDirection: 'column',
                 alignItems: 'center',
                 gap: '4px',
-                padding: '6px 9px',
-                borderRadius: '12px',
+                padding: '8px 4px',
+                borderRadius: '14px',
                 background: isActive ? '#3A2350' : 'transparent',
                 border: 'none',
                 cursor: 'pointer',
                 transition: 'transform 0.25s ease',
                 boxShadow: isActive ? '0 8px 18px rgba(58, 35, 80, 0.3)' : 'none',
-                flexShrink: 0,
+                flex: '1 1 0%',
+                minWidth: 0,
                 whiteSpace: 'nowrap',
               }}
               onMouseEnter={(e) => {
@@ -130,7 +132,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) 
                   fontWeight: isActive ? 800 : 600,
                   color: isActive ? '#F5B9C6' : '#A096A6',
                   textTransform: 'uppercase',
-                  letterSpacing: '0.04em',
+                  letterSpacing: '0.02em',
                   transition: 'color 0.25s ease',
                 }}
               >
