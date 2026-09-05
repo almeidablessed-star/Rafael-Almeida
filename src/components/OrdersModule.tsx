@@ -105,10 +105,10 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
             style={{
               fontFamily: "'Instrument Serif', serif",
               fontSize: '31px',
-              lineHeight: '1.3',
+              lineHeight: '1.1',
             }}
           >
-            Pedidos & Encomendas
+            Pedidos
           </span>
 
           {/* Badge */}
