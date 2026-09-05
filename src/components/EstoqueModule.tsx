@@ -27,6 +27,14 @@ const getColorBasedOnThreshold = (
     return { stroke: '#C4626F', text: '#C4626F', background: '#FFEBEE' }; // Vermelho
   }
 
+  // Sem limite configurado (0), a folga percentual daria divisao por zero.
+  // Zerado sem limite e critico; qualquer quantidade acima disso e folga alta.
+  if (minThreshold <= 0) {
+    return quantity > 0
+      ? { stroke: '#4CAF7D', text: '#4CAF7D', background: '#E8F5E9' } // Verde escuro
+      : { stroke: '#C4626F', text: '#C4626F', background: '#FFEBEE' }; // Vermelho
+  }
+
   // Calcular folga percentual acima do mínimo
   const slack = ((quantity - minThreshold) / minThreshold) * 100;
 
@@ -203,6 +211,7 @@ export const EstoqueModule: React.FC = () => {
   // Função para obter a faixa de criticidade baseada em quantity vs minThreshold
   const getCriticalityRank = (quantity: number, minThreshold: number): number => {
     if (quantity < minThreshold) return 0; // Vermelho - crítico (abaixo do limite)
+    if (minThreshold <= 0) return quantity > 0 ? 4 : 0; // Sem limite: divisao por zero
     const slack = ((quantity - minThreshold) / minThreshold) * 100;
     if (slack < 25) return 1; // Vermelho - perto do limite
     if (slack < 50) return 2; // Laranja - folga baixa
@@ -213,6 +222,7 @@ export const EstoqueModule: React.FC = () => {
   // Função para obter o texto do status baseado em quantity vs minThreshold
   const getStatusLabel = (quantity: number, minThreshold: number): string => {
     if (quantity < minThreshold) return 'Crítico';
+    if (minThreshold <= 0) return quantity > 0 ? 'Alto' : 'Crítico'; // Sem limite: divisao por zero
     const slack = ((quantity - minThreshold) / minThreshold) * 100;
     if (slack < 25) return 'Alerta';
     if (slack < 50) return 'Atenção';
@@ -231,7 +241,13 @@ export const EstoqueModule: React.FC = () => {
     return rankA - rankB; // Menor rank (vermelho) vem primeiro
   });
 
-  const lowStockCount = items.filter((i) => i.quantity <= i.minThreshold).length;
+  // Comparar sem normalizar unidade dava falso positivo: 2.5 (kg) <= 500 (g)
+  // e verdadeiro por causa dos numeros crus, mesmo 2.5kg sendo 2500g — bem
+  // acima do alerta de 500g. Mesma normalizacao usada nos cards individuais.
+  const lowStockCount = items.filter((i) => {
+    const normalizedQty = normalizeToCommonUnit(i.quantity, i.unit, i.minThresholdUnit);
+    return normalizedQty <= i.minThreshold;
+  }).length;
 
   return (
     <div className="pb-12 animate-fadeIn" style={{ background: '#FAF7FA' }}>
@@ -258,15 +274,7 @@ export const EstoqueModule: React.FC = () => {
             paddingBottom: '90px',
           }}
         >
-          <div className="flex items-center justify-between gap-2.5">
-            <span
-              className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase whitespace-nowrap"
-              style={{ letterSpacing: '.06em', color: 'rgba(247,220,225,.85)' }}
-            >
-              <Package className="w-3.5 h-3.5 shrink-0" style={{ color: '#F5B9C6' }} />
-              Estoque de Insumos &amp; Ingredientes
-            </span>
-
+          <div className="flex items-center justify-end gap-2.5">
             {lowStockCount > 0 && (
               <span
                 className="inline-flex items-center gap-1 text-[9px] font-extrabold uppercase px-2.5 py-1 rounded-full whitespace-nowrap shrink-0"
@@ -533,12 +541,22 @@ export const EstoqueModule: React.FC = () => {
                   let displayPercentage: number;
                   if (normalizedQty < item.minThreshold) {
                     displayPercentage = 0; // Crítico - abaixo do limite
+                  } else if (item.minThreshold <= 0) {
+                    // Sem limite configurado: (qty - 0) / 0 e divisao por zero.
+                    // Com estoque zerado da NaN (o bug reportado); sem limite e
+                    // zerado e tao critico quanto abaixo de um limite de verdade.
+                    displayPercentage = normalizedQty > 0 ? 100 : 0;
                   } else {
                     const slack = ((normalizedQty - item.minThreshold) / item.minThreshold) * 100;
                     displayPercentage = Math.min(slack, 100); // Folga máxima de 100%
                   }
 
-                  const isCritical = normalizedQty < item.minThreshold;
+                  // Mesma regra do rotulo "Critico": abaixo do limite, OU sem
+                  // limite configurado (0) e zerado — ambos sao 0/0 em potencial
+                  // e precisam do mesmo destaque visual do card.
+                  const isCritical =
+                    normalizedQty < item.minThreshold ||
+                    (item.minThreshold <= 0 && normalizedQty <= 0);
                   const step = getThresholdDelta(item.unit);
 
                   return (
@@ -570,7 +588,7 @@ export const EstoqueModule: React.FC = () => {
                     {/* Right Column: Name + Alert + Stepper */}
                     <div className="flex-1 min-w-0 flex flex-col gap-1.5">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h4 className="font-brand font-semibold text-[13px]" style={{ color: '#241B2B' }}>
+                        <h4 className="font-brand text-[13px]" style={{ color: '#241B2B', fontWeight: 800 }}>
                           {item.name.charAt(0).toUpperCase() + item.name.slice(1)}
                         </h4>
                         <span style={{ background: colors.background, color: colors.text }} className="text-[8.5px] font-bold px-[7px] py-[3px] rounded-md uppercase whitespace-nowrap">
