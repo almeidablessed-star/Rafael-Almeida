@@ -66,43 +66,58 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
   })();
 
   return (
-    <div className="animate-fadeIn" style={{
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100%',
-      background: '#F6F2F5',
-      overflow: 'hidden',
-    }}>
-      {/* Header with Title */}
-      <div style={{
-        background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
-        paddingTop: '12px',
-        paddingBottom: '12px',
-        paddingLeft: '16px',
-        paddingRight: '16px',
-        flexShrink: 0,
-      }}>
-        <span style={{
-          fontFamily: "'Instrument Serif', serif",
-          fontSize: '18px',
-          lineHeight: '1.2',
-          color: 'white',
-          display: 'block',
-        }}>
-          Custos & Investimentos
-        </span>
-      </div>
+    <div className="pb-12 animate-fadeIn" style={{ background: '#F6F2F5' }}>
+      {/* Header Card — Flutuante com cabeçalho roxo, mesmo padrao das outras
+          abas (Pedidos, Clientes, Fichas, Estoque, Compras). Antes esta aba
+          tinha seu proprio layout de altura fixa (height:100%, overflow
+          interno), cabecalho baixinho (12px de padding) e titulo pequeno
+          (18px) — a unica que nao seguia o padrao "folha flutuante" com
+          cabecalho de 40/120px de padding, titulo de 31px e cantos
+          arredondados no card abaixo. */}
+      <div
+        className="overflow-hidden shadow-card"
+        style={{
+          boxShadow: '0 30px 70px rgba(58,35,80,.26)',
+        }}
+      >
+        {/* Header with Title only */}
+        <div
+          className="px-5 flex items-center justify-between gap-4"
+          style={{
+            background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
+            borderRadius: '0px 0px 0px 0px',
+            paddingTop: '40px',
+            paddingBottom: '120px',
+          }}
+        >
+          {/* Title */}
+          <span
+            className="text-white leading-tight flex-1"
+            style={{
+              fontFamily: "'Instrument Serif', serif",
+              fontSize: '31px',
+              lineHeight: '1.1',
+            }}
+          >
+            Custos
+          </span>
+        </div>
 
-      {/* Content - Scrollable */}
-      <div style={{
-        flex: 1,
-        padding: '12px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '10px',
-        overflow: 'auto',
-        overscrollBehavior: 'contain',
-      }}>
+        {/* Content Section */}
+        <div style={{
+          marginTop: '-70px',
+          background: '#F6F2F5',
+          borderRadius: '28px 28px 0 0',
+          position: 'relative',
+          padding: '20px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '10px',
+          marginLeft: 'calc(-50vw + 50%)',
+          marginRight: 'calc(-50vw + 50%)',
+          paddingLeft: 'calc(20px + max(0px, env(safe-area-inset-left)))',
+          paddingRight: 'calc(20px + max(0px, env(safe-area-inset-right)))',
+        }}>
 
         {/* Custos Administrativos Section */}
         <div style={{
@@ -398,6 +413,7 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
           )}
         </div>
 
+        </div>
       </div>
     </div>
   );
