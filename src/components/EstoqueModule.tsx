@@ -548,7 +548,7 @@ export const EstoqueModule: React.FC = () => {
             Rastreie todas as consumições, devoluções e reposições automáticas de estoque
           </p>
         </div>
-        <StockMovementsHistory maxItems={50} />
+        <StockMovementsHistory />
       </div>
       </div>
     </div>
