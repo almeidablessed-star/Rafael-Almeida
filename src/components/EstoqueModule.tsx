@@ -557,7 +557,6 @@ export const EstoqueModule: React.FC = () => {
                   const isCritical =
                     normalizedQty < item.minThreshold ||
                     (item.minThreshold <= 0 && normalizedQty <= 0);
-                  const step = getThresholdDelta(item.unit);
 
                   return (
                   <div
@@ -595,35 +594,46 @@ export const EstoqueModule: React.FC = () => {
                           {getStatusLabel(normalizedQty, item.minThreshold)}
                         </span>
                       </div>
-                      <p className="text-[10.5px]" style={{ color: '#7A6E80' }}>
-                        Alerta quando menor que: <strong style={{ color: '#241B2B' }}>{item.minThreshold} {item.minThresholdUnit}</strong>
-                      </p>
-
-                      {/* Stepper de quantidade + Acoes */}
-                      <div className="flex items-center justify-between gap-2 mt-0.5">
+                      {/* Alerta minimo: quem faz sentido ajustar rapido aqui e o
+                          limite, nao a quantidade (essa so muda de verdade via
+                          Compras ou baixa de Pedido — mexer nela direto aqui
+                          descolava o numero do que realmente aconteceu). */}
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-[10.5px]" style={{ color: '#7A6E80' }}>
+                          Alerta quando menor que:
+                        </span>
                         <div
                           className="flex items-center"
-                          style={{ background: '#F6F2F5', border: '1px solid rgba(36,27,43,.08)', borderRadius: '12px', padding: '2px' }}
+                          style={{ background: '#F6F2F5', border: '1px solid rgba(36,27,43,.08)', borderRadius: '10px', padding: '2px' }}
                         >
                           <button
-                            onClick={() => handleQuickAdjust(item.id, -step)}
+                            onClick={() => handleQuickAdjustThreshold(item.id, -getThresholdDelta(item.minThresholdUnit))}
                             className="active:scale-95 transition-transform"
-                            style={{ width: '26px', height: '26px', borderRadius: '9px', background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 800, color: '#5B4A6B', border: 'none', cursor: 'pointer', boxShadow: '0 2px 5px rgba(58,35,80,.1)' }}
-                            title="Diminuir quantidade"
+                            style={{ width: '22px', height: '22px', borderRadius: '8px', background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 800, color: '#5B4A6B', border: 'none', cursor: 'pointer', boxShadow: '0 2px 5px rgba(58,35,80,.1)' }}
+                            title="Diminuir alerta mínimo"
                           >
                             −
                           </button>
-                          <span style={{ padding: '0 9px', fontSize: '13px', fontWeight: 800, color: '#241B2B', whiteSpace: 'nowrap' }}>
-                            {item.quantity} <span style={{ fontSize: '10px', fontWeight: 600, color: '#8A7E90' }}>{item.unit}</span>
+                          <span style={{ padding: '0 7px', fontSize: '11px', fontWeight: 800, color: '#241B2B', whiteSpace: 'nowrap' }}>
+                            {item.minThreshold} <span style={{ fontSize: '9px', fontWeight: 600, color: '#8A7E90' }}>{item.minThresholdUnit}</span>
                           </span>
                           <button
-                            onClick={() => handleQuickAdjust(item.id, step)}
+                            onClick={() => handleQuickAdjustThreshold(item.id, getThresholdDelta(item.minThresholdUnit))}
                             className="active:scale-95 transition-transform"
-                            style={{ width: '26px', height: '26px', borderRadius: '9px', background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 800, color: '#5B4A6B', border: 'none', cursor: 'pointer', boxShadow: '0 2px 5px rgba(58,35,80,.1)' }}
-                            title="Aumentar quantidade"
+                            style={{ width: '22px', height: '22px', borderRadius: '8px', background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 800, color: '#5B4A6B', border: 'none', cursor: 'pointer', boxShadow: '0 2px 5px rgba(58,35,80,.1)' }}
+                            title="Aumentar alerta mínimo"
                           >
                             +
                           </button>
+                        </div>
+                      </div>
+
+                      {/* Quantidade somente leitura + Acoes */}
+                      <div className="flex items-center justify-between gap-2 mt-0.5">
+                        <div
+                          style={{ fontSize: '13px', fontWeight: 800, color: '#241B2B', background: '#F6F2F5', border: '1px solid rgba(36,27,43,.08)', borderRadius: '12px', padding: '7px 14px', whiteSpace: 'nowrap' }}
+                        >
+                          {item.quantity} <span style={{ fontSize: '10px', fontWeight: 600, color: '#8A7E90' }}>{item.unit}</span>
                         </div>
 
                         {/* Edit/Delete Actions */}
