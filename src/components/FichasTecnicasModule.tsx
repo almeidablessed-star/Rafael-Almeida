@@ -148,6 +148,35 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   const [expandedTamanhosId, setExpandedTamanhosId] = useState<string | null>(null);
   const [selectedTamanhoIdByFicha, setSelectedTamanhoIdByFicha] = useState<Record<string, string>>({}); // Rastreia tamanho selecionado por ficha
 
+  // `fetchFichas` (FichasTecnicasContext) nao traz `foto_url` na listagem —
+  // mesmo motivo do perfil e da cliente: evitar carregar um data URI pesado
+  // pra cada linha so pra montar a lista. Isso deixava a foto do bolo em
+  // branco na lista principal, e so aparecia depois de abrir "Editar" (que
+  // busca sob demanda via `fetchFichaPhoto`). Mesma correcao aplicada aqui:
+  // busca sob demanda a partir da propria lista, uma vez por ficha, cacheada
+  // neste estado local.
+  const [fichaPhotos, setFichaPhotos] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const semFoto = fichas.filter((f) => !f.imageUrl && !fichaPhotos[f.id]);
+    if (semFoto.length === 0) return;
+
+    let cancelado = false;
+    (async () => {
+      for (const ficha of semFoto) {
+        const url = await fetchFichaPhoto(ficha.id);
+        if (!cancelado && url) {
+          setFichaPhotos((prev) => (prev[ficha.id] ? prev : { ...prev, [ficha.id]: url }));
+        }
+      }
+    })();
+
+    return () => {
+      cancelado = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fichas]);
+
   // Form State
   const [name, setName] = useState('');
   const [category, setCategory] = useState<'bolos' | 'doces' | 'salgados' | 'saudaveis' | 'kids'>('bolos');
@@ -1509,7 +1538,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 
                   {/* DIREITA: IMAGEM */}
                   <img
-                    src={ficha.imageUrl}
+                    src={ficha.imageUrl || fichaPhotos[ficha.id]}
                     alt={ficha.name}
                     style={{
                       width: '72px',
