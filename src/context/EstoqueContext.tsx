@@ -34,6 +34,7 @@ interface SupabaseEstoque {
   nivel_minimo: number;
   nivel_minimo_unidade: string;
   preco_unitario: number;
+  quantidade_referencia: number;
   created_at: string;
 }
 
@@ -97,6 +98,9 @@ const mapSupabaseToStockItem = (data: SupabaseEstoque): StockItem => ({
   minThreshold: data.nivel_minimo,
   minThresholdUnit: (data.nivel_minimo_unidade || 'g') as any,
   costPerUnit: data.preco_unitario || 0,
+  // Migration fez backfill com a propria quantidade atual, mas um `|| 0`
+  // aqui evitaria dividir por zero se algum registro escapar disso.
+  fullQuantity: data.quantidade_referencia ?? data.quantidade_atual,
 });
 
 const mapStockItemToSupabase = (item: Omit<StockItem, 'id'>) => ({
@@ -158,7 +162,12 @@ export const EstoqueProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setError(null);
       const { data, error: insertError } = await supabase
         .from('estoque')
-        .insert([{ usuaria_id: user.id, ...mapStockItemToSupabase(itemData) }])
+        .insert([{
+          usuaria_id: user.id,
+          ...mapStockItemToSupabase(itemData),
+          // Cadastro novo: a quantidade inicial e o primeiro "cheio".
+          quantidade_referencia: itemData.quantity,
+        }])
         .select()
         .single();
 
@@ -181,9 +190,24 @@ export const EstoqueProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     try {
       setError(null);
+
+      // So aumento reseta o baseline de "cheio" — compra e edicao manual pra
+      // cima contam igual (decisao do usuario: nao vale a pena diferenciar).
+      // Diminuir (correcao de contagem, por ex) so desce o atual e mantem a
+      // referencia antiga. Consumo e devolucao de pedido nem passam por aqui
+      // — usam update direto em EstoqueContext, entao nunca resetam isto.
+      const itemAtual = estoque.find((i) => i.id === id);
+      const novaReferencia =
+        itemAtual && itemData.quantity > itemAtual.quantity
+          ? itemData.quantity
+          : itemAtual?.fullQuantity;
+
       const { data, error: updateError } = await supabase
         .from('estoque')
-        .update(mapStockItemToSupabase(itemData))
+        .update({
+          ...mapStockItemToSupabase(itemData),
+          ...(novaReferencia !== undefined ? { quantidade_referencia: novaReferencia } : {}),
+        })
         .eq('id', parseInt(id))
         .eq('usuaria_id', user.id)
         .select()

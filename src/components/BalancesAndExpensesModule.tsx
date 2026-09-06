@@ -146,6 +146,9 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
             minThreshold: 0,
             minThresholdUnit: itemUnit,
             costPerUnit: costPerUnitCalculated,
+            // Ignorado por addEstoque, que grava a propria quantidade como
+            // baseline de "cheio". So aqui pra satisfazer o tipo StockItem.
+            fullQuantity: itemQtyNum,
           });
 
           await registrarEntrada({

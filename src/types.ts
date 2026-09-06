@@ -168,6 +168,11 @@ export interface StockItem {
   minThreshold: number;
   minThresholdUnit: 'g' | 'kg' | 'ml' | 'L' | 'un' | 'pacote';
   costPerUnit: number; // Cost per unit (e.g. per gram or per ml or per unit)
+  // Baseline do arco de percentual da aba Estoque: a ultima quantidade
+  // registrada como "cheio" (cadastro novo, compra, ou edicao manual que
+  // aumentou a quantidade). Consumo e devolucao de pedido nunca alteram isto
+  // — so refletem no `quantity`. Ver [[EstoqueContext]].
+  fullQuantity: number;
 }
 
 export interface IngredientUsage {

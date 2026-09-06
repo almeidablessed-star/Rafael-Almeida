@@ -139,6 +139,10 @@ export const EstoqueModule: React.FC = () => {
       // em litros avisava na unidade errada.
       minThresholdUnit,
       costPerUnit: costNum,
+      // Ignorado por addEstoque/updateEstoque — as duas calculam o baseline
+      // de "cheio" por conta propria (ver [[EstoqueContext]]). So aqui pra
+      // satisfazer o tipo StockItem.
+      fullQuantity: qtyNum,
     };
 
     try {
@@ -537,19 +541,15 @@ export const EstoqueModule: React.FC = () => {
                   const normalizedQty = normalizeToCommonUnit(item.quantity, item.unit, item.minThresholdUnit);
                   const colors = getColorBasedOnThreshold(normalizedQty, item.minThreshold);
 
-                  // Para exibição visual do arco: 0% se abaixo do limite, senão percentual de folga
-                  let displayPercentage: number;
-                  if (normalizedQty < item.minThreshold) {
-                    displayPercentage = 0; // Crítico - abaixo do limite
-                  } else if (item.minThreshold <= 0) {
-                    // Sem limite configurado: (qty - 0) / 0 e divisao por zero.
-                    // Com estoque zerado da NaN (o bug reportado); sem limite e
-                    // zerado e tao critico quanto abaixo de um limite de verdade.
-                    displayPercentage = normalizedQty > 0 ? 100 : 0;
-                  } else {
-                    const slack = ((normalizedQty - item.minThreshold) / item.minThreshold) * 100;
-                    displayPercentage = Math.min(slack, 100); // Folga máxima de 100%
-                  }
+                  // Percentual do arco: quanto sobra do ultimo "estoque cheio"
+                  // (quantidade_referencia), NAO do Alerta Minimo — esse so
+                  // colore o card/arco de aviso (colors/isCritical abaixo).
+                  // Decisao do usuario: o Alerta Minimo confundia "quanto
+                  // falta pra acabar" com "quanto ja usei desde que encheu".
+                  const displayPercentage =
+                    item.fullQuantity > 0
+                      ? Math.min(100, Math.max(0, (item.quantity / item.fullQuantity) * 100))
+                      : (item.quantity > 0 ? 100 : 0); // Sem referencia: mesma guarda do bug do NaN
 
                   // Mesma regra do rotulo "Critico": abaixo do limite, OU sem
                   // limite configurado (0) e zerado — ambos sao 0/0 em potencial
