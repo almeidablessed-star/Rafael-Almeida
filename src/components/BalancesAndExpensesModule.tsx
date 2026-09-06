@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Transaction, TransactionType, WeeklyArchive, StockItem } from '../types';
-import { calculateWeeklyBalances } from '../utils/balancesCalculator';
+import { calculateWeeklyBalances } from '../utils/financialEngine';
 import { getWeeklyArchives, hasNewWeekStarted, archiveCurrentWeek } from '../utils/weeklyArchiveUtils';
 import { WeeklyHistoryCard } from './WeeklyHistoryCard';
 import { StockItemAutocomplete } from './StockItemAutocomplete';

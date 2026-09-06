@@ -3,7 +3,7 @@ import { Transaction } from '../types';
 import { formatCurrency, formatDateBr, getPaymentMethodLabel } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
 import { useFichasTecnicas } from '../context/FichasTecnicasContext';
-import { calculateSalesBreakdown } from '../utils/salesCalculator';
+import { calculateSalesBreakdown } from '../utils/financialEngine';
 import {
   TrendingUp,
   Plus,

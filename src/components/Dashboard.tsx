@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Transaction, SummaryTotals, TransactionType, TimePeriod } from '../types';
 import { formatCurrency, formatDateBr } from '../utils/formatters';
-import { calculateWeeklyBalances } from '../utils/balancesCalculator';
-import { calcularMetaSemanal } from '../utils/custosFixos';
+import { calculateWeeklyBalances, calcularMetaSemanal } from '../utils/financialEngine';
 import { useCosts } from '../context/CostsContext';
 import { ANIMATION_DURATIONS, ANIMATION_EASING } from '../lib/animation-tokens';
 import { useCurrency } from '../context/CurrencyContext';

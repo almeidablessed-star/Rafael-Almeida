@@ -8,7 +8,7 @@ import {
   TransactionType,
   FichaTecnica,
 } from './types';
-import { filterTransactionsByPeriod, calculateSummary } from './utils/storage';
+import { filterTransactionsByPeriod, calculateSummary } from './utils/financialEngine';
 import { getTodayIso } from './utils/formatters';
 import { useUndo } from './hooks/useUndo';
 import { useFichasTecnicas } from './context/FichasTecnicasContext';

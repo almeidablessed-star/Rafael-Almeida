@@ -19,7 +19,7 @@ import {
 } from '../data/presetData';
 import { getTodayIso, formatCurrency, getTransactionTypeDetails } from '../utils/formatters';
 import { buildFichaItems, normalizeName } from '../utils/fichaMatcher';
-import { calculateProportionalBreakdown, derivarProporcoes } from '../utils/weeklyCalculator';
+import { calculateProportionalBreakdown, derivarProporcoes } from '../utils/financialEngine';
 import {
   X,
   Plus,

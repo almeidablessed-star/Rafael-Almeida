@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Transaction } from '../types';
-import { calculateWeeklyClosing } from '../utils/weeklyCalculator';
+import { calculateWeeklyClosing } from '../utils/financialEngine';
 import { formatCurrency, formatDateBr, getPaymentMethodLabel } from '../utils/formatters';
 import {
   Calendar,

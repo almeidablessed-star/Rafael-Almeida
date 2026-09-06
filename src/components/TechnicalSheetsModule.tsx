@@ -1,3 +1,6 @@
+// NAO USADO: sem imports em nenhum outro arquivo do projeto (confirmado em 2026-09-06).
+// FichasTecnicasModule.tsx e o componente real em uso. Remocao adiada para fase de limpeza
+// separada, apos o engine financeiro (Parte 5 do spec) estar validado.
 import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 
