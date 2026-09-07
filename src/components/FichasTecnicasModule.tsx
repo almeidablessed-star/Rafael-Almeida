@@ -5,6 +5,7 @@ import { useCurrency } from '../context/CurrencyContext';
 import { useFichasTecnicas } from '../context/FichasTecnicasContext';
 import { useEstoque } from '../context/EstoqueContext';
 import { useCosts } from '../context/CostsContext';
+import { calcularEstruturaFinanceira, calcularPrecoSugeridoProduto, somarDespesasEmpresa } from '../utils/financialEngine';
 import { useUndo } from '../hooks/useUndo';
 import { StockItemAutocomplete } from './StockItemAutocomplete';
 import { compressImageFile } from '../utils/imageCompression';
@@ -137,6 +138,20 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   const tarifaSugerida = administrativeCosts?.horaTrabalho
     ? String(administrativeCosts.horaTrabalho)
     : '';
+
+  // Estrutura financeira da conta, mesma fonte que Dashboard e "Minha
+  // Empresa" (spec Parte 5, Teste 10). Calculada uma vez aqui em cima e
+  // reaproveitada por tamanho, nunca recalculada com formula propria.
+  const despesasMensaisFichas = somarDespesasEmpresa(administrativeCosts?.despesas || []);
+  const estruturaFinanceira = administrativeCosts
+    ? calcularEstruturaFinanceira(
+        administrativeCosts.monthlyIncomeTarget,
+        despesasMensaisFichas,
+        administrativeCosts.cmvTargetPercent,
+        administrativeCosts.investmentTargetPercent,
+        administrativeCosts.profitTargetPercent
+      )
+    : null;
   const { saveForUndo, getUndoData } = useUndo();
   const [selectedCategory, setSelectedCategory] = useState<'bolos' | 'doces' | 'salgados' | 'saudaveis' | 'kids'>('bolos');
   const [isCreating, setIsCreating] = useState(false);
@@ -1285,6 +1300,25 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                     const margemPct = preco > 0 ? (margem / preco) * 100 : 0;
                     const noPrejuizo = preco > 0 && margem < 0;
 
+                    // Preco calculado pelo motor unico (spec Parte 2, item 26:
+                    // "preco atual x preco calculado"). `insumos` daqui em
+                    // cima E o CMV deste tamanho — mesmo numero, sem calcular
+                    // de novo. So aparece com metas validas e CMV do produto
+                    // preenchido: sem isso o engine nao tem o que comparar.
+                    const horasNum = parseFloat((tamanho.horasTrabalho || '').replace(',', '.')) || 0;
+                    const tarifaNum = parseFloat((tamanho.valorHora || '').replace(',', '.')) || 0;
+                    const precoCalculado =
+                      administrativeCosts && estruturaFinanceira?.valido && insumos > 0
+                        ? calcularPrecoSugeridoProduto(
+                            insumos,
+                            horasNum,
+                            tarifaNum,
+                            administrativeCosts.cmvTargetPercent,
+                            estruturaFinanceira
+                          )
+                        : null;
+                    const abaixoDaMeta = precoCalculado != null && preco > 0 && preco < precoCalculado.precoSugerido;
+
                     return (
                       <div
                         className="rounded-lg px-2.5 py-2 text-[10px] space-y-1"
@@ -1322,6 +1356,23 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                           <p style={{ color: '#C4626F', lineHeight: 1.4 }}>
                             Este tamanho custa mais do que você cobra por ele.
                           </p>
+                        )}
+                        {precoCalculado && (
+                          <div className="pt-1" style={{ borderTop: '1px solid #EDE6EF' }}>
+                            <div className="flex justify-between" style={{ color: '#7A6E80' }}>
+                              <span>Preço atual</span><span>{preco > 0 ? formatMoney(preco) : '—'}</span>
+                            </div>
+                            <div className="flex justify-between font-bold" style={{ color: '#3A2350' }}>
+                              <span>Preço calculado</span><span>{formatMoney(precoCalculado.precoSugerido)}</span>
+                            </div>
+                            {preco > 0 && (
+                              <p style={{ color: abaixoDaMeta ? '#C4626F' : '#4CAF7D', lineHeight: 1.4, marginTop: '2px' }}>
+                                {abaixoDaMeta
+                                  ? `⚠️ Abaixo da meta em ${formatMoney(precoCalculado.precoSugerido - preco)}`
+                                  : '✓ Na meta ou acima'}
+                              </p>
+                            )}
+                          </div>
                         )}
                       </div>
                     );

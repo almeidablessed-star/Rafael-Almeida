@@ -3,7 +3,7 @@ import { Transaction, CostCategory } from '../types';
 import { formatCurrency, formatDateBr, getCostCategoryLabel, getLaborPeriodLabel } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
 import { Receipt, Sparkles, Search, Calendar, Trash2, Edit3, Tag, Users, PlusCircle } from 'lucide-react';
-import { AdminCostsCard } from './AdminCostsCard';
+import { MinhaEmpresaCard } from './MinhaEmpresaCard';
 
 interface CostsModuleProps {
   transactions: Transaction[];
@@ -99,7 +99,7 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
               lineHeight: '1.1',
             }}
           >
-            Custos
+            Minha Empresa
           </span>
         </div>
 
@@ -119,16 +119,13 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
           paddingRight: 'calc(20px + max(0px, env(safe-area-inset-right)))',
         }}>
 
-        {/* Custos Administrativos Section */}
-        <div style={{
-          background: 'white',
-          borderRadius: '4px',
-          padding: '10px',
-          boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-          border: '1px solid #E6E1DB',
-        }}>
-          <AdminCostsCard />
-        </div>
+        {/* Minha Empresa — remuneracao, despesas, metas, resumo/distribuicao */}
+        <MinhaEmpresaCard />
+
+        {/* Divisor visual antes do historico de lancamentos avulsos abaixo,
+            que e uma funcionalidade separada (ledger de transacoes de custo/
+            investimento/mao de obra) e continua igual. */}
+        <div style={{ borderTop: '1px dashed #E6E1DB', margin: '4px 0' }} />
 
         {/* Summary Cards - 3 columns */}
         <div style={{

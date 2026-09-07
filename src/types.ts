@@ -47,6 +47,12 @@ export interface AdministrativeCosts {
 
   /** Despesas mensais da empresa, em lista livre com rateio percentual por item. Ver [[DespesaEmpresa]]. */
   despesas: DespesaEmpresa[];
+
+  /** Passo (1-8) onde a usuaria parou no onboarding financeiro obrigatorio. So serve para retomar o fluxo — nao decide bloqueio. */
+  onboardingPassoAtual: number;
+
+  /** NULL enquanto o onboarding financeiro nao foi concluido. E este campo, e nenhum outro, que decide se o app libera o resto das telas (ver [[FinancialOnboardingGate]]). */
+  onboardingCompletoEm: string | null;
 }
 
 /**

@@ -1,4 +1,4 @@
-import { Transaction, TimePeriod, SummaryTotals, FichaTecnica, AdministrativeCosts, DespesaEmpresa } from '../types';
+import { Transaction, TimePeriod, SummaryTotals, FichaTecnica, DespesaEmpresa } from '../types';
 import { getTodayIso, formatDateBr } from './formatters';
 import { getCurrentWeekMonday, getCurrentWeekSunday, filterTransactionsByWeek } from './weeklyArchiveUtils';
 
@@ -862,11 +862,18 @@ export interface MetaSemanal {
   temCustoCadastrado: boolean;
 }
 
+/**
+ * `custoFixoMensal` vem de fora, ja somado (`somarDespesasEmpresa`), em vez
+ * de receber `AdministrativeCosts` e ler `.total` daqui de dentro. Motivo: a
+ * migration 20260906 congelou as 7 colunas fixas antigas — nada mais escreve
+ * nelas apos a aba "Minha Empresa" passar a usar `despesas_empresa`. Ler
+ * `.total` continuaria funcionando sem erro, so devolveria sempre o mesmo
+ * numero antigo, silenciosamente errado a cada despesa editada.
+ */
 export const calcularMetaSemanal = (
-  custos: AdministrativeCosts | null,
+  custoFixoMensal: number,
   transacoes: Transaction[]
 ): MetaSemanal => {
-  const custoFixoMensal = custos?.total || 0;
   const necessarioPorSemana = custoFixoMensal / SEMANAS_POR_MES;
 
   const { startIso, endIso } = getWeekRange();

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Transaction, SummaryTotals, TransactionType, TimePeriod } from '../types';
 import { formatCurrency, formatDateBr } from '../utils/formatters';
-import { calculateWeeklyBalances, calcularMetaSemanal } from '../utils/financialEngine';
+import { calculateWeeklyBalances, calcularMetaSemanal, calcularEstruturaFinanceira, somarDespesasEmpresa } from '../utils/financialEngine';
 import { useCosts } from '../context/CostsContext';
+import { ResumoDistribuicaoCard } from './ResumoDistribuicaoCard';
 import { ANIMATION_DURATIONS, ANIMATION_EASING } from '../lib/animation-tokens';
 import { useCurrency } from '../context/CurrencyContext';
 import { useFichasTecnicas } from '../context/FichasTecnicasContext';
@@ -66,7 +67,21 @@ export const Dashboard: React.FC<DashboardProps> = ({
   // "custo fixo da semana" e sempre a semana corrente, mesmo com a tela
   // mostrando o mes ou o ano.
   const { administrativeCosts } = useCosts();
-  const meta = calcularMetaSemanal(administrativeCosts, allTransactions || []);
+  const despesasMensais = somarDespesasEmpresa(administrativeCosts?.despesas || []);
+  const meta = calcularMetaSemanal(despesasMensais, allTransactions || []);
+
+  // Mesma fonte que "Minha Empresa": faturamento necessario + distribuicao,
+  // calculados uma unica vez pelo engine (spec Parte 5, Teste 10 — os
+  // numeros aqui e na aba Minha Empresa tem que ser sempre identicos).
+  const estruturaFinanceira = administrativeCosts
+    ? calcularEstruturaFinanceira(
+        administrativeCosts.monthlyIncomeTarget,
+        despesasMensais,
+        administrativeCosts.cmvTargetPercent,
+        administrativeCosts.investmentTargetPercent,
+        administrativeCosts.profitTargetPercent
+      )
+    : null;
 
   // Calculate profit margin percentage (simplified calculation)
   const totalIn = balances.totalPaidSales || 0;
@@ -475,6 +490,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
           )}
         </div>
+
+        {/* 3c. ESTRUTURA FINANCEIRA — faturamento necessario e distribuicao,
+             mesmo componente e mesmos numeros da aba "Minha Empresa" (spec
+             Parte 5, Teste 10). So aparece depois que o onboarding financeiro
+             preenche pelo menos o recebimento desejado. */}
+        {estruturaFinanceira && (
+          <div className="mt-6">
+            <ResumoDistribuicaoCard estrutura={estruturaFinanceira} />
+          </div>
+        )}
 
         {/* 4. AGENDA DE PEDIDOS - CALENDAR */}
         <div className="mt-6">

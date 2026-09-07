@@ -56,6 +56,7 @@ import { CustomersProvider } from './context/CustomersContext';
 import { FichasTecnicasProvider } from './context/FichasTecnicasContext';
 import { CostsProvider } from './context/CostsContext';
 import { EstoqueProvider } from './context/EstoqueContext';
+import { FinancialOnboardingGate } from './components/onboarding/FinancialOnboardingGate';
 
 function AppContent() {
   const { isResetPasswordRequired, isOtpVerificationRequired, user, userProfile, logout } = useAuth();
@@ -383,7 +384,6 @@ function AppContent() {
   }
 
   return (
-    <CurrencyProvider>
       <div className="min-h-screen text-[var(--color-ink)] flex flex-col font-sans" style={{ overflow: 'hidden' }}>
 
         {/* Main Screen Container */}
@@ -595,7 +595,6 @@ function AppContent() {
       )}
 
       </div>
-    </CurrencyProvider>
   );
 }
 
@@ -608,17 +607,29 @@ export default function App() {
             tudo para que as telas que GRAVAM e as que LEEM compartilhem a mesma
             lista — antes cada uma tinha sua copia e o cadastro novo so aparecia
             do outro lado depois de recarregar a pagina. */}
-        <CustomersProvider>
-          <FichasTecnicasProvider>
-            <CostsProvider>
-              <EstoqueProvider>
-                <TransacoesProvider>
-                  <AppContent />
-                </TransacoesProvider>
-              </EstoqueProvider>
-            </CostsProvider>
-          </FichasTecnicasProvider>
-        </CustomersProvider>
+        {/* CurrencyProvider fica aqui (e nao mais dentro de AppContent) para que
+            o onboarding financeiro obrigatorio, que renderiza ANTES de AppContent
+            via FinancialOnboardingGate, tambem tenha acesso a useCurrency() — uma
+            unica instancia do provider, nunca duas fontes de moeda em paralelo. */}
+        <CurrencyProvider>
+          <CustomersProvider>
+            <FichasTecnicasProvider>
+              <CostsProvider>
+                {/* Onboarding financeiro obrigatorio (spec "Minha Empresa", Parte
+                    3): bloqueia o restante do app ate a usuaria concluir. Fica
+                    aqui, e nao em ProtectedRoute, porque so o CostsProvider tem
+                    o dado que decide o bloqueio (onboardingCompletoEm). */}
+                <FinancialOnboardingGate>
+                  <EstoqueProvider>
+                    <TransacoesProvider>
+                      <AppContent />
+                    </TransacoesProvider>
+                  </EstoqueProvider>
+                </FinancialOnboardingGate>
+              </CostsProvider>
+            </FichasTecnicasProvider>
+          </CustomersProvider>
+        </CurrencyProvider>
       </ProtectedRoute>
     </AuthProvider>
   );
