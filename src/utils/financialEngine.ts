@@ -1,4 +1,4 @@
-import { Transaction, TimePeriod, SummaryTotals, FichaTecnica, AdministrativeCosts } from '../types';
+import { Transaction, TimePeriod, SummaryTotals, FichaTecnica, AdministrativeCosts, DespesaEmpresa } from '../types';
 import { getTodayIso, formatDateBr } from './formatters';
 import { getCurrentWeekMonday, getCurrentWeekSunday, filterTransactionsByWeek } from './weeklyArchiveUtils';
 
@@ -896,5 +896,247 @@ export const calcularMetaSemanal = (
       : 0,
     metaAtingida: necessarioPorSemana > 0 && faturadoNaSemana >= necessarioPorSemana,
     temCustoCadastrado: custoFixoMensal > 0,
+  };
+};
+
+// ============================================================================
+// Estrutura financeira individualizada da conta ("Minha Empresa")
+// ============================================================================
+//
+// Implementa as formulas da Parte 2 do spec de precificacao: faturamento
+// necessario, distribuicao percentual e preco sugerido por produto. Cada
+// conta calcula os proprios numeros a partir dos proprios dados — nunca uma
+// porcentagem de custo fixa igual para todo mundo (regra mais importante do
+// spec). CMV/investimento/lucro sao METAS informadas pela usuaria, nao
+// constantes deste arquivo.
+
+/** Quanto uma despesa realmente pesa no negocio, depois do rateio. */
+export const valorConsideradoDespesa = (despesa: Pick<DespesaEmpresa, 'valor' | 'percentualRateio'>): number =>
+  (Number(despesa.valor) || 0) * (Number(despesa.percentualRateio) || 0) / 100;
+
+/** Soma de todas as despesas da empresa, ja aplicado o rateio de cada uma. */
+export const somarDespesasEmpresa = (despesas: DespesaEmpresa[]): number =>
+  (despesas || []).reduce((soma, d) => soma + valorConsideradoDespesa(d), 0);
+
+export interface MetaHorasTrabalho {
+  horasPorMes: number;
+  horasPorSemana: number;
+  horasPorDia: number;
+}
+
+/**
+ * Meta de horas de trabalho, so como REFERENCIA — nunca uma obrigacao de
+ * carga horaria (spec Parte 2, item 5). Semana usa 4,33 (52/12 semanas por
+ * mes), a mesma constante ja usada em `calcularMetaSemanal` — dividir por 4
+ * sub-representa a semana e infla a meta diaria artificialmente.
+ */
+export const calcularMetaHoras = (
+  recebimentoDesejado: number,
+  valorHora: number,
+  diasPorSemana: number
+): MetaHorasTrabalho => {
+  if (!valorHora || valorHora <= 0 || !diasPorSemana || diasPorSemana <= 0) {
+    return { horasPorMes: 0, horasPorSemana: 0, horasPorDia: 0 };
+  }
+  const horasPorMes = recebimentoDesejado / valorHora;
+  const horasPorSemana = horasPorMes / SEMANAS_POR_MES;
+  const horasPorDia = horasPorSemana / diasPorSemana;
+  return { horasPorMes, horasPorSemana, horasPorDia };
+};
+
+export interface ValidacaoEstruturaFinanceira {
+  valido: boolean;
+  /** Preenchida apenas quando `valido` e false. */
+  mensagem?: string;
+}
+
+/**
+ * Verifica se sobra espaco para custos e mao de obra antes de calcular o
+ * faturamento (spec Parte 2, item 16). CMV + Investimento + Lucro tem que
+ * ficar abaixo de 100% — do contrario a divisao do faturamento necessario
+ * produz zero, negativo ou infinito.
+ */
+export const validarEstruturaFinanceira = (
+  cmvTargetPercent: number,
+  investmentTargetPercent: number,
+  profitTargetPercent: number
+): ValidacaoEstruturaFinanceira => {
+  const somaMetas = (cmvTargetPercent || 0) + (investmentTargetPercent || 0) + (profitTargetPercent || 0);
+  if (somaMetas >= 100) {
+    return {
+      valido: false,
+      mensagem:
+        'As metas informadas consomem 100% ou mais do faturamento. Reduza uma das porcentagens para que o sistema consiga calcular uma estrutura sustentável.',
+    };
+  }
+  return { valido: true };
+};
+
+export interface EstruturaFinanceira {
+  valido: boolean;
+  mensagemErro?: string;
+
+  recebimentoDesejado: number;
+  despesasMensais: number;
+
+  /** Faturamento necessario = (recebimento + despesas) / (1 - cmv% - investimento% - lucro%). */
+  faturamentoNecessario: number;
+
+  /** % real de custos da conta = despesasMensais / faturamentoNecessario * 100. Dinamico, nunca fixo. */
+  custosPercent: number;
+  /** % de mao de obra = recebimentoDesejado / faturamentoNecessario * 100. */
+  maoDeObraPercent: number;
+
+  cmvTargetPercent: number;
+  investmentTargetPercent: number;
+  profitTargetPercent: number;
+
+  cmvAmount: number;
+  investimentoAmount: number;
+  lucroAmount: number;
+  maoDeObraAmount: number;
+  custosAmount: number;
+}
+
+const ESTRUTURA_INVALIDA = (
+  recebimentoDesejado: number,
+  despesasMensais: number,
+  cmvTargetPercent: number,
+  investmentTargetPercent: number,
+  profitTargetPercent: number,
+  mensagemErro: string
+): EstruturaFinanceira => ({
+  valido: false,
+  mensagemErro,
+  recebimentoDesejado,
+  despesasMensais,
+  faturamentoNecessario: 0,
+  custosPercent: 0,
+  maoDeObraPercent: 0,
+  cmvTargetPercent,
+  investmentTargetPercent,
+  profitTargetPercent,
+  cmvAmount: 0,
+  investimentoAmount: 0,
+  lucroAmount: 0,
+  maoDeObraAmount: 0,
+  custosAmount: 0,
+});
+
+/**
+ * Calcula a estrutura financeira completa de uma conta: faturamento
+ * necessario e a distribuicao entre CMV, custos, mao de obra e lucro (spec
+ * Parte 2, itens 12 a 15). E o coracao do engine — toda tela (Dashboard,
+ * Fichas, Minha Empresa) deve ler destes mesmos numeros, nunca recalcular por
+ * conta propria (spec Parte 5, item 1).
+ */
+export const calcularEstruturaFinanceira = (
+  recebimentoDesejado: number,
+  despesasMensais: number,
+  cmvTargetPercent: number,
+  investmentTargetPercent: number,
+  profitTargetPercent: number
+): EstruturaFinanceira => {
+  const validacao = validarEstruturaFinanceira(cmvTargetPercent, investmentTargetPercent, profitTargetPercent);
+  if (!validacao.valido) {
+    return ESTRUTURA_INVALIDA(
+      recebimentoDesejado,
+      despesasMensais,
+      cmvTargetPercent,
+      investmentTargetPercent,
+      profitTargetPercent,
+      validacao.mensagem!
+    );
+  }
+
+  const fracaoRestante = 1 - (cmvTargetPercent + investmentTargetPercent + profitTargetPercent) / 100;
+  const faturamentoNecessario = (recebimentoDesejado + despesasMensais) / fracaoRestante;
+
+  if (!Number.isFinite(faturamentoNecessario) || faturamentoNecessario < 0) {
+    return ESTRUTURA_INVALIDA(
+      recebimentoDesejado,
+      despesasMensais,
+      cmvTargetPercent,
+      investmentTargetPercent,
+      profitTargetPercent,
+      'Não foi possível calcular um faturamento válido com os valores informados.'
+    );
+  }
+
+  const custosPercent = faturamentoNecessario > 0 ? (despesasMensais / faturamentoNecessario) * 100 : 0;
+  const maoDeObraPercent = faturamentoNecessario > 0 ? (recebimentoDesejado / faturamentoNecessario) * 100 : 0;
+
+  return {
+    valido: true,
+    recebimentoDesejado,
+    despesasMensais,
+    faturamentoNecessario,
+    custosPercent,
+    maoDeObraPercent,
+    cmvTargetPercent,
+    investmentTargetPercent,
+    profitTargetPercent,
+    cmvAmount: faturamentoNecessario * (cmvTargetPercent / 100),
+    investimentoAmount: faturamentoNecessario * (investmentTargetPercent / 100),
+    lucroAmount: faturamentoNecessario * (profitTargetPercent / 100),
+    maoDeObraAmount: recebimentoDesejado,
+    custosAmount: despesasMensais,
+  };
+};
+
+export interface PrecoSugeridoProduto {
+  maoDeObraProduto: number;
+  precoMinimoPorCmv: number;
+  precoMinimoPorEstrutura: number | null;
+  /** Maior valor entre os dois preços mínimos — nunca inventado (spec Parte 2, item 21 e 30). */
+  precoSugerido: number;
+  /** Fração de faturamento disponível para mão de obra na estrutura da conta (100 - CMV% - Custos% - Investimento% - Lucro%). */
+  percentMaoDeObraDisponivel: number | null;
+}
+
+/**
+ * Calcula o preço sugerido de um produto: o maior entre o preço mínimo pelo
+ * CMV e o preço necessário pela estrutura financeira da conta (spec Parte 2,
+ * itens 19 a 21). A meta de lucro e um MINIMO, nunca um teto — se o CMV
+ * empurrar o preço acima do necessário pela estrutura, o lucro projetado
+ * naquele produto fica acima da meta, e isso e esperado (item 22).
+ */
+export const calcularPrecoSugeridoProduto = (
+  cmvProduto: number,
+  horasProducao: number,
+  valorHora: number,
+  cmvTargetPercent: number,
+  estrutura: EstruturaFinanceira
+): PrecoSugeridoProduto => {
+  const maoDeObraProduto = (horasProducao || 0) * (valorHora || 0);
+  const precoMinimoPorCmv = cmvTargetPercent > 0 ? cmvProduto / (cmvTargetPercent / 100) : 0;
+
+  if (!estrutura.valido) {
+    return {
+      maoDeObraProduto,
+      precoMinimoPorCmv,
+      precoMinimoPorEstrutura: null,
+      precoSugerido: precoMinimoPorCmv,
+      percentMaoDeObraDisponivel: null,
+    };
+  }
+
+  // % de mao de obra disponivel = 100 - CMV% - Custos% - Investimento% - Lucro%.
+  // Equivale a maoDeObraPercent da propria estrutura: os cinco somam 100% por
+  // construcao (spec Parte 5, item 7).
+  const percentMaoDeObraDisponivel =
+    100 - cmvTargetPercent - estrutura.custosPercent - estrutura.investmentTargetPercent - estrutura.profitTargetPercent;
+
+  const precoMinimoPorEstrutura =
+    percentMaoDeObraDisponivel > 0 ? maoDeObraProduto / (percentMaoDeObraDisponivel / 100) : null;
+
+  const precoSugerido = Math.max(precoMinimoPorCmv, precoMinimoPorEstrutura ?? 0);
+
+  return {
+    maoDeObraProduto,
+    precoMinimoPorCmv,
+    precoMinimoPorEstrutura,
+    precoSugerido,
+    percentMaoDeObraDisponivel,
   };
 };

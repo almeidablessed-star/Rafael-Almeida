@@ -23,6 +23,47 @@ export interface AdministrativeCosts {
 
   /** Soma das despesas mensais acima. Nao inclui `horaTrabalho`. */
   total: number;
+
+  /**
+   * Quanto a proprietaria quer receber por mes pelo proprio trabalho.
+   * NUNCA e o lucro da empresa — sao conceitos diferentes (spec de
+   * precificacao, Parte 2 item 2). Alimenta o calculo do faturamento
+   * necessario junto com `despesas`, `cmvTargetPercent`,
+   * `investmentTargetPercent` e `profitTargetPercent`.
+   */
+  monthlyIncomeTarget: number;
+
+  /** Dias de trabalho por semana informados pela usuaria. So alimenta a meta de horas exibida como referencia — nunca uma obrigacao de carga horaria. */
+  workingDaysPerWeek: number;
+
+  /** Meta MAXIMA de CMV/reposicao sobre o preco do produto. Default 34, editavel por conta — nunca fixo para todo mundo. */
+  cmvTargetPercent: number;
+
+  /** Meta de reserva da empresa (equipamento, curso, expansao) sobre o faturamento. Default 5, editavel por conta. */
+  investmentTargetPercent: number;
+
+  /** Meta MINIMA de lucro da empresa sobre o faturamento — nunca um teto. Default 13, editavel por conta. */
+  profitTargetPercent: number;
+
+  /** Despesas mensais da empresa, em lista livre com rateio percentual por item. Ver [[DespesaEmpresa]]. */
+  despesas: DespesaEmpresa[];
+}
+
+/**
+ * Uma despesa mensal da empresa, cadastrada livremente (spec Parte 2, item 6).
+ *
+ * `valor` e o valor cheio informado; `percentualRateio` existe para despesas
+ * compartilhadas entre uso pessoal e empresarial (ex: aluguel). O valor
+ * CONSIDERADO no calculo (`valor * percentualRateio / 100`) nunca e
+ * armazenado — e sempre derivado, para nao repetir o erro da antiga coluna
+ * fantasma `administrative_costs.total`.
+ */
+export interface DespesaEmpresa {
+  id?: number;
+  nome: string;
+  valor: number;
+  percentualRateio: number;
+  ordem: number;
 }
 
 export type TransactionType = 'venda' | 'reposicao' | 'maodeobra' | 'custo' | 'investimento';
