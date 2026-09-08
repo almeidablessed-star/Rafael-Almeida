@@ -33,6 +33,15 @@ interface BalancesAndExpensesModuleProps {
   onAddTransaction: (txData: Omit<Transaction, 'id' | 'createdAt'>) => void;
   onEditTransaction: (tx: Transaction) => void;
   onDeleteTransaction: (tx: Transaction) => void;
+  /**
+   * true quando renderizado dentro de Produtos > Compras (spec Modulo
+   * Produtos): pula o cabecalho gradiente proprio "Saldos" e o wrapper de
+   * largura total, que duplicariam o cabecalho "Produtos" que ja existe ali
+   * em cima. A aba "Compras" separada do rodape continua usando a versao
+   * completa, com cabecalho — ela existe por enquanto pela mesma cautela
+   * incremental do resto da migracao.
+   */
+  embedded?: boolean;
 }
 
 export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps> = ({
@@ -40,6 +49,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
   onAddTransaction,
   onEditTransaction,
   onDeleteTransaction,
+  embedded = false,
 }) => {
   const { formatCurrency: formatMoney } = useCurrency();
   const { fichas } = useFichasTecnicas();
@@ -219,73 +229,8 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
     return matchesCategory && matchesSearch;
   });
 
-  return (
-    <div className="pb-12 animate-fadeIn" style={{ background: '#FAF7FA' }}>
-      {/* Header Card — Flutuante com cabeçalho roxo */}
-      <div
-        className="overflow-hidden shadow-card"
-        style={{
-          boxShadow: '0 30px 70px rgba(58,35,80,.26)',
-        }}
-      >
-        {/* Header with Title only */}
-        <div
-          className="px-5 flex items-center justify-between gap-4"
-          style={{
-            background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
-            borderRadius: '0px 0px 0px 0px',
-            paddingTop: '40px',
-            paddingBottom: '120px',
-          }}
-        >
-          {/* Title */}
-          <span
-            className="text-white leading-tight flex-1"
-            style={{
-              fontFamily: "'Instrument Serif', serif",
-              fontSize: '31px',
-              lineHeight: '1.1',
-            }}
-          >
-            Saldos
-          </span>
-
-          {/* Button */}
-          <button
-            onClick={() => {}}
-            className="px-3 py-2 rounded-xl text-[10px] font-black cursor-pointer transition-all active:scale-95 shrink-0"
-            style={{
-              background: '#F5B9C6',
-              color: '#3A2350',
-              fontFamily: "'Manrope', sans-serif",
-            }}
-            title="Gestão de saldos"
-          >
-            Gestão
-          </button>
-        </div>
-
-        {/* Content Section — mesmo wrapper de largura total usado em
-            Pedidos/Clientes/Fichas/Estoque: sobrepoe o cabecalho subindo 70px
-            e arredonda os dois cantos superiores, revelando o roxo so na
-            curva. Antes esta aba nao tinha esse wrapper: o card de Saldo
-            fazia sua propria sobreposicao sozinho (mx-5, mais estreito que a
-            tela), e a transicao do roxo pro fundo da pagina virava uma linha
-            reta de ponta a ponta, em vez da curva das outras abas. */}
-        <div
-          style={{
-            marginTop: '-70px',
-            background: '#FAF7FA',
-            borderRadius: '28px 28px 0 0',
-            position: 'relative',
-            paddingTop: '20px',
-            marginLeft: 'calc(-50vw + 50%)',
-            marginRight: 'calc(-50vw + 50%)',
-            paddingLeft: 'max(0px, env(safe-area-inset-left))',
-            paddingRight: 'max(0px, env(safe-area-inset-right))',
-          }}
-        >
-
+  const conteudo = (
+    <>
       {/* TOTAL BALANCE CARD - SALDO TOTAL DISPONÍVEL */}
       <div
         className="rounded-[22px] p-6 text-white mx-5"
@@ -721,7 +666,80 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
       <div style={{ marginTop: '20px' }}>
         <WeeklyHistoryCard archives={archives} />
       </div>
+    </>
+  );
 
+  if (embedded) {
+    return <div className="flex flex-col gap-5">{conteudo}</div>;
+  }
+
+  return (
+    <div className="pb-12 animate-fadeIn" style={{ background: '#FAF7FA' }}>
+      {/* Header Card — Flutuante com cabeçalho roxo */}
+      <div
+        className="overflow-hidden shadow-card"
+        style={{
+          boxShadow: '0 30px 70px rgba(58,35,80,.26)',
+        }}
+      >
+        {/* Header with Title only */}
+        <div
+          className="px-5 flex items-center justify-between gap-4"
+          style={{
+            background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
+            borderRadius: '0px 0px 0px 0px',
+            paddingTop: '40px',
+            paddingBottom: '120px',
+          }}
+        >
+          {/* Title */}
+          <span
+            className="text-white leading-tight flex-1"
+            style={{
+              fontFamily: "'Instrument Serif', serif",
+              fontSize: '31px',
+              lineHeight: '1.1',
+            }}
+          >
+            Saldos
+          </span>
+
+          {/* Button */}
+          <button
+            onClick={() => {}}
+            className="px-3 py-2 rounded-xl text-[10px] font-black cursor-pointer transition-all active:scale-95 shrink-0"
+            style={{
+              background: '#F5B9C6',
+              color: '#3A2350',
+              fontFamily: "'Manrope', sans-serif",
+            }}
+            title="Gestão de saldos"
+          >
+            Gestão
+          </button>
+        </div>
+
+        {/* Content Section — mesmo wrapper de largura total usado em
+            Pedidos/Clientes/Fichas/Estoque: sobrepoe o cabecalho subindo 70px
+            e arredonda os dois cantos superiores, revelando o roxo so na
+            curva. Antes esta aba nao tinha esse wrapper: o card de Saldo
+            fazia sua propria sobreposicao sozinho (mx-5, mais estreito que a
+            tela), e a transicao do roxo pro fundo da pagina virava uma linha
+            reta de ponta a ponta, em vez da curva das outras abas. */}
+        <div
+          style={{
+            marginTop: '-70px',
+            background: '#FAF7FA',
+            borderRadius: '28px 28px 0 0',
+            position: 'relative',
+            paddingTop: '20px',
+            marginLeft: 'calc(-50vw + 50%)',
+            marginRight: 'calc(-50vw + 50%)',
+            paddingLeft: 'max(0px, env(safe-area-inset-left))',
+            paddingRight: 'max(0px, env(safe-area-inset-right))',
+          }}
+        >
+          {conteudo}
         </div>
       </div>
     </div>

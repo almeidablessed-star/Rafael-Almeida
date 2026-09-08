@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Produto } from '../types';
+import { Produto, Transaction } from '../types';
 import { useProdutos } from '../context/ProdutosContext';
 import { StockMovementsHistory } from './StockMovementsHistory';
+import { BalancesAndExpensesModule } from './BalancesAndExpensesModule';
 import {
   Package,
   Plus,
@@ -88,9 +89,22 @@ const getThresholdDelta = (unit: string): number => {
   return 1;
 };
 
-export const ProdutosModule: React.FC = () => {
+interface ProdutosModuleProps {
+  /** Repassados direto para o BalancesAndExpensesModule embutido na aba Compras. */
+  transactions: Transaction[];
+  onAddTransaction: (txData: Omit<Transaction, 'id' | 'createdAt'>) => void;
+  onEditTransaction: (tx: Transaction) => void;
+  onDeleteTransaction: (tx: Transaction) => void;
+}
+
+export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
+  transactions,
+  onAddTransaction,
+  onEditTransaction,
+  onDeleteTransaction,
+}) => {
   const { produtos, addProduto, updateProduto, deleteProduto, custoPorUnidade } = useProdutos();
-  const [aba, setAba] = useState<'todos' | 'estoque'>('todos');
+  const [aba, setAba] = useState<'todos' | 'estoque' | 'compras'>('todos');
   const [searchTerm, setSearchTerm] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -243,9 +257,9 @@ export const ProdutosModule: React.FC = () => {
             paddingLeft: 'calc(20px + max(0px, env(safe-area-inset-left)))', paddingRight: 'calc(20px + max(0px, env(safe-area-inset-right)))',
           }}
         >
-          {/* Abas Todos / Estoque */}
+          {/* Abas Todos / Estoque / Compras */}
           <div style={{ display: 'flex', gap: '3px', background: 'white', borderRadius: '14px', padding: '3px', boxShadow: '0 6px 14px rgba(58,35,80,.07)' }}>
-            {[{ id: 'todos', label: 'Todos os Produtos' }, { id: 'estoque', label: 'Estoque' }].map((tab) => (
+            {[{ id: 'todos', label: 'Todos os Produtos' }, { id: 'estoque', label: 'Estoque' }, { id: 'compras', label: 'Compras' }].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setAba(tab.id as any)}
@@ -261,7 +275,8 @@ export const ProdutosModule: React.FC = () => {
             ))}
           </div>
 
-          {/* Search + Adicionar */}
+          {/* Search + Adicionar — nao fazem sentido na aba Compras */}
+          {aba !== 'compras' && (
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             <div style={{ flex: 1, position: 'relative' }}>
               <Search className="w-3.75 h-3.75 absolute" style={{ color: '#A096A6', left: '13px', top: '50%', transform: 'translateY(-50%)' }} />
@@ -283,15 +298,16 @@ export const ProdutosModule: React.FC = () => {
               Adicionar Produto
             </button>
           </div>
+          )}
 
-          {formError && (
+          {formError && aba !== 'compras' && (
             <div className="p-2.5 rounded-xl bg-[#FDF4F5] border border-[rgba(196,98,111,.35)] text-[12px] text-[#C4626F]" style={{ fontFamily: "'Manrope', sans-serif" }}>
               {formError}
             </div>
           )}
 
           {/* Form */}
-          {isAdding && (
+          {isAdding && aba !== 'compras' && (
             <div className="bg-[#F6F2F5] rounded-xl overflow-hidden shadow-highlight border border-[#E6E1DB] animate-slideUp">
               <div style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)' }} className="px-4 sm:px-5 py-3 sm:py-4 flex items-center justify-between">
                 <h3 className="font-brand font-black text-sm sm:text-base text-white flex items-center gap-2">
@@ -424,6 +440,20 @@ export const ProdutosModule: React.FC = () => {
             </div>
           )}
 
+          {/* Aba Compras: reaproveita a tela inteira de Compras (mesma que
+              ainda vive sozinha no rodape), so que embutida — sem o
+              cabecalho proprio "Saldos" duplicando o "Produtos" daqui de
+              cima (ver prop `embedded` em BalancesAndExpensesModule.tsx). */}
+          {aba === 'compras' ? (
+            <BalancesAndExpensesModule
+              embedded
+              transactions={transactions}
+              onAddTransaction={onAddTransaction}
+              onEditTransaction={onEditTransaction}
+              onDeleteTransaction={onDeleteTransaction}
+            />
+          ) : (
+          <>
           {/* Lista */}
           {sortedEstoque.length === 0 ? (
             <div className="p-8 rounded-3xl bg-[var(--color-neutral-cream)] border border-[var(--color-neutral-light)] text-center space-y-2">
@@ -564,6 +594,8 @@ export const ProdutosModule: React.FC = () => {
                 </div>
               ))}
             </div>
+          )}
+          </>
           )}
         </div>
       </div>

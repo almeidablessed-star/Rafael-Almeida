@@ -145,6 +145,15 @@ function AppContent() {
     setIsFormModalOpen(true);
   };
 
+  /** Compartilhado entre a aba Compras (rodape) e Produtos > Compras (embutida). */
+  const handleAddCompra = async (txData: Omit<Transaction, 'id' | 'createdAt'>) => {
+    try {
+      await addTransacao(txData);
+    } catch (err: any) {
+      alert(`⚠️ Não foi possível gravar o lançamento:\n\n${err?.message || err}`);
+    }
+  };
+
   /**
    * Converte os vinculos gravados no pedido nas fichas de verdade do catalogo.
    *
@@ -446,13 +455,7 @@ function AppContent() {
         {activeTab === 'compras' && (
           <BalancesAndExpensesModule
             transactions={transactions}
-            onAddTransaction={async (txData) => {
-              try {
-                await addTransacao(txData);
-              } catch (err: any) {
-                alert(`⚠️ Não foi possível gravar o lançamento:\n\n${err?.message || err}`);
-              }
-            }}
+            onAddTransaction={handleAddCompra}
             onEditTransaction={handleOpenEditModal}
             onDeleteTransaction={handleRequestDelete}
           />
@@ -463,7 +466,12 @@ function AppContent() {
         )}
 
         {activeTab === 'produtos' && (
-          <ProdutosModule />
+          <ProdutosModule
+            transactions={transactions}
+            onAddTransaction={handleAddCompra}
+            onEditTransaction={handleOpenEditModal}
+            onDeleteTransaction={handleRequestDelete}
+          />
         )}
 
         {activeTab === 'fichas' && (
