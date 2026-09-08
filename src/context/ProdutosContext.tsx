@@ -1,7 +1,9 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from './AuthContext';
-import { Produto } from '../types';
+import { Produto, FichaTecnica, StockItem } from '../types';
+import { planejarBaixa } from '../utils/stockConsumption';
+import { useEstoque, ResultadoBaixa } from './EstoqueContext';
 
 /**
  * Fonte unica do catalogo de Produtos, compartilhada por todas as telas.
@@ -38,6 +40,11 @@ interface ProdutosContextType {
   deleteProduto: (id: number) => Promise<void>;
   /** Custo por unidade base: precoPago / quantidadeEmbalagem. Nunca armazenado — sempre calculado aqui. */
   custoPorUnidade: (produto: Pick<Produto, 'precoPago' | 'quantidadeEmbalagem'>) => number;
+  consumirParaPedido: (
+    items: { ficha: FichaTecnica; quantity: number; tamanhoId?: string }[],
+    transacaoId: string
+  ) => Promise<ResultadoBaixa>;
+  devolverPedido: (transacaoId: string) => Promise<void>;
 }
 
 const ProdutosContext = createContext<ProdutosContextType | undefined>(undefined);
@@ -70,6 +77,10 @@ const mapProdutoToSupabase = (p: Omit<Produto, 'id'>) => ({
 
 export const ProdutosProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
+  // So para o ramo LEGADO de devolverPedido (movimentos gravados contra a
+  // tabela estoque antes desta ligacao existir). Disponivel porque
+  // EstoqueProvider e ancestral deste provider na arvore (ver App.tsx).
+  const { estoque, fetchEstoque, fetchMovimentos } = useEstoque();
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -186,9 +197,198 @@ export const ProdutosProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const custoPorUnidade = (produto: Pick<Produto, 'precoPago' | 'quantidadeEmbalagem'>): number =>
     produto.quantidadeEmbalagem > 0 ? produto.precoPago / produto.quantidadeEmbalagem : 0;
 
+  /** Numero curto do pedido para a descricao do movimento. Mesma regra de [[EstoqueContext]]. */
+  const numeroCurto = (transacaoId: string) => transacaoId.replace(/^tx-/, '').slice(-6);
+
+  /**
+   * Baixa os insumos de um pedido no catalogo Produtos.
+   *
+   * Substitui a versao antiga de [[EstoqueContext]], que so sabia debitar da
+   * tabela estoque — um Produto cadastrado direto no catalogo novo (fluxo
+   * guiado na Ficha, ou Compras criando um item) tem um id que nunca existiu
+   * la, entao a baixa nunca encontrava o item e nao acontecia. Aqui o plano
+   * roda contra Produtos, e o movimento e gravado em `estoque_movimentos.produto_id`
+   * (coluna nova, ver migration 20260907_estoque_movimentos_produto_id.sql).
+   *
+   * Mesma logica de aplicar-uma-por-vez e desfazer tudo se uma falhar do
+   * EstoqueContext original — meia baixa aplicada e pior que baixa nenhuma.
+   */
+  const consumirParaPedido = async (
+    items: { ficha: FichaTecnica; quantity: number; tamanhoId?: string }[],
+    transacaoId: string
+  ): Promise<ResultadoBaixa> => {
+    if (!user) throw new Error('User not authenticated');
+
+    const produtosComoStockItems: StockItem[] = produtos.map((p) => ({
+      id: String(p.id),
+      name: p.nome,
+      quantity: p.quantidadeAtual || 0,
+      unit: p.unidadeEmbalagem,
+      minThreshold: p.nivelMinimo || 0,
+      minThresholdUnit: p.nivelMinimoUnidade || p.unidadeEmbalagem,
+      costPerUnit: custoPorUnidade(p),
+      fullQuantity: p.quantidadeReferencia || 0,
+    }));
+
+    const plano = planejarBaixa(items, produtosComoStockItems);
+    if (plano.baixas.length === 0) {
+      return { baixados: [], problemas: plano.problemas };
+    }
+
+    const nomePorFicha = new Map(items.map((i) => [i.ficha.id, i.ficha.name]));
+    const aplicadas: { produtoId: string; quantidadeOriginal: number; movimentoId: string }[] = [];
+
+    try {
+      for (const b of plano.baixas) {
+        const { error: errUpdate } = await supabase
+          .from('produtos')
+          .update({ quantidade_atual: b.quantidadeFinal })
+          .eq('id', parseInt(b.estoqueId))
+          .eq('usuaria_id', user.id);
+        if (errUpdate) throw errUpdate;
+
+        const rotulo = b.fichaIds.map((id) => nomePorFicha.get(id) || 'produto').join(' + ');
+        const { data: mov, error: errMov } = await supabase
+          .from('estoque_movimentos')
+          .insert({
+            usuaria_id: user.id,
+            produto_id: parseInt(b.estoqueId),
+            item_nome: b.itemNome,
+            tipo: 'consumo',
+            quantidade: b.quantidade,
+            unidade: b.unidade,
+            transacao_id: transacaoId,
+            ficha_id: b.fichaIds[0] ? parseInt(b.fichaIds[0]) : null,
+            descricao: `Consumo: ${rotulo} (Pedido #${numeroCurto(transacaoId)})`,
+          })
+          .select('id')
+          .single();
+        if (errMov) throw errMov;
+
+        aplicadas.push({
+          produtoId: b.estoqueId,
+          quantidadeOriginal: b.quantidadeFinal + b.quantidade,
+          movimentoId: String(mov.id),
+        });
+      }
+    } catch (err: any) {
+      // Estorno na ordem inversa, mesma regra do EstoqueContext original.
+      for (const a of [...aplicadas].reverse()) {
+        try {
+          await supabase
+            .from('produtos')
+            .update({ quantidade_atual: a.quantidadeOriginal })
+            .eq('id', parseInt(a.produtoId))
+            .eq('usuaria_id', user.id);
+          await supabase.from('estoque_movimentos').delete().eq('id', parseInt(a.movimentoId));
+        } catch (errEstorno) {
+          console.error('[PRODUTOS] Falha ao estornar baixa parcial:', errEstorno);
+        }
+      }
+      setError(err.message || 'Erro ao baixar estoque do pedido');
+      throw err;
+    }
+
+    await fetchProdutos();
+    await fetchMovimentos();
+
+    return {
+      baixados: plano.baixas.map((b) => ({ itemNome: b.itemNome, quantidade: b.quantidade, unidade: b.unidade })),
+      problemas: plano.problemas,
+    };
+  };
+
+  /**
+   * Devolve ao catalogo tudo o que um pedido consumiu.
+   *
+   * Le os movimentos do tipo 'consumo' pelo transacao_id e trata os DOIS
+   * formatos possiveis: `produto_id` (consumo feito por esta versao, contra
+   * Produtos) e `estoque_id` (consumo antigo, gravado antes desta ligacao
+   * existir, contra a tabela estoque). Um pedido antigo cancelado precisa
+   * continuar devolvendo corretamente — por isso o ramo legado fica aqui
+   * tambem, em vez de so em EstoqueContext: um unico cancelamento devolve
+   * tudo, mesmo que o pedido tenha itens dos dois mundos.
+   */
+  const devolverPedido = async (transacaoId: string) => {
+    if (!user) throw new Error('User not authenticated');
+
+    const { data: movs, error: errBusca } = await supabase
+      .from('estoque_movimentos')
+      .select('*')
+      .eq('usuaria_id', user.id)
+      .eq('transacao_id', transacaoId)
+      .eq('tipo', 'consumo');
+    if (errBusca) throw errBusca;
+    if (!movs || movs.length === 0) return;
+
+    let tocouEstoqueAntigo = false;
+
+    for (const m of movs) {
+      if (m.produto_id) {
+        const atual = produtos.find((p) => p.id === m.produto_id);
+        if (!atual) continue; // produto apagado do catalogo: nao ha onde devolver
+
+        await supabase
+          .from('produtos')
+          .update({ quantidade_atual: (atual.quantidadeAtual || 0) + Number(m.quantidade) })
+          .eq('id', m.produto_id)
+          .eq('usuaria_id', user.id);
+
+        await supabase.from('estoque_movimentos').insert({
+          usuaria_id: user.id,
+          produto_id: m.produto_id,
+          item_nome: m.item_nome,
+          tipo: 'devolucao',
+          quantidade: m.quantidade,
+          unidade: m.unidade,
+          transacao_id: transacaoId,
+          descricao: `Devolução: ${m.item_nome} (Pedido #${numeroCurto(transacaoId)} cancelado)`,
+        });
+      } else if (m.estoque_id) {
+        const item = estoque.find((e) => e.id === String(m.estoque_id));
+        if (!item) continue; // insumo apagado do estoque: nao ha onde devolver
+
+        await supabase
+          .from('estoque')
+          .update({ quantidade_atual: item.quantity + Number(m.quantidade) })
+          .eq('id', m.estoque_id)
+          .eq('usuaria_id', user.id);
+
+        await supabase.from('estoque_movimentos').insert({
+          usuaria_id: user.id,
+          estoque_id: m.estoque_id,
+          item_nome: m.item_nome,
+          tipo: 'devolucao',
+          quantidade: m.quantidade,
+          unidade: m.unidade,
+          transacao_id: transacaoId,
+          descricao: `Devolução: ${m.item_nome} (Pedido #${numeroCurto(transacaoId)} cancelado)`,
+        });
+        tocouEstoqueAntigo = true;
+      }
+    }
+
+    await fetchProdutos();
+    if (tocouEstoqueAntigo) {
+      await fetchEstoque();
+    }
+    await fetchMovimentos();
+  };
+
   return (
     <ProdutosContext.Provider
-      value={{ produtos, isLoading, error, fetchProdutos, addProduto, updateProduto, deleteProduto, custoPorUnidade }}
+      value={{
+        produtos,
+        isLoading,
+        error,
+        fetchProdutos,
+        addProduto,
+        updateProduto,
+        deleteProduto,
+        custoPorUnidade,
+        consumirParaPedido,
+        devolverPedido,
+      }}
     >
       {children}
     </ProdutosContext.Provider>

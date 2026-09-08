@@ -70,6 +70,8 @@ interface EstoqueContextType {
   isLoading: boolean;
   error: string | null;
   fetchEstoque: () => Promise<void>;
+  /** Exposto para [[ProdutosContext]]: devolverPedido grava movimentos aqui tambem no ramo legado (estoque_id). */
+  fetchMovimentos: () => Promise<void>;
   addEstoque: (data: Omit<StockItem, 'id'>) => Promise<StockItem>;
   updateEstoque: (id: string, data: Omit<StockItem, 'id'>) => Promise<StockItem>;
   deleteEstoque: (id: string) => Promise<void>;
@@ -276,6 +278,12 @@ export const EstoqueProvider: React.FC<{ children: React.ReactNode }> = ({ child
   /**
    * Baixa os insumos de um pedido.
    *
+   * SUPERSEDIDA por `consumirParaPedido` em [[ProdutosContext]]: App.tsx
+   * chama a versao de la agora, que debita do catalogo Produtos em vez desta
+   * tabela estoque. Mantida aqui (nao apagada) so pela mesma cautela
+   * incremental do resto da migracao — nada foi removido ate o catalogo novo
+   * estar validado em uso real.
+   *
    * Aplica uma linha por vez e, se qualquer uma falhar, DESFAZ as anteriores
    * antes de propagar o erro. Meia baixa aplicada e pior do que baixa nenhuma:
    * o estoque fica errado e nada na tela denuncia.
@@ -376,6 +384,10 @@ export const EstoqueProvider: React.FC<{ children: React.ReactNode }> = ({ child
   /**
    * Devolve ao estoque tudo o que um pedido consumiu.
    *
+   * SUPERSEDIDA por `devolverPedido` em [[ProdutosContext]] (que trata tanto
+   * movimentos novos, contra Produtos, quanto estes antigos, contra esta
+   * tabela). Mantida aqui pela mesma razao da funcao acima.
+   *
    * Le os movimentos DO BANCO pelo `transacao_id` em vez de confiar no
    * `consumedIngredients` gravado junto da transacao. A versao antiga fazia o
    * contrario e casava por id de insumo da ficha, que nem sempre era o id do
@@ -458,6 +470,7 @@ export const EstoqueProvider: React.FC<{ children: React.ReactNode }> = ({ child
         isLoading,
         error,
         fetchEstoque,
+        fetchMovimentos,
         addEstoque,
         updateEstoque,
         deleteEstoque,

@@ -85,8 +85,16 @@ export const planejarBaixa = (
     // Insumos DO TAMANHO vendido. Antes usava a lista da ficha para qualquer
     // tamanho, entao um bolo de 30 fatias debitava o mesmo que um de 10.
     insumosDoTamanho(ficha, tamanhoId).forEach((insumo) => {
-      const alvo = normalizeName(insumo.name);
-      const itemEstoque = estoque.find((e) => normalizeName(e.name) === alvo);
+      // Casamento por ID primeiro — o vinculo real gravado pelo fluxo guiado
+      // da Ficha e pelo casamento em massa das fichas existentes. So cai para
+      // nome normalizado em insumos antigos que nunca ganharam esse vinculo;
+      // sem esse fallback, toda ficha cadastrada antes do catalogo Produtos
+      // pararia de baixar estoque da noite para o dia.
+      const itemEstoque =
+        (insumo.produtoId != null
+          ? estoque.find((e) => e.id === String(insumo.produtoId))
+          : undefined) ??
+        estoque.find((e) => normalizeName(e.name) === normalizeName(insumo.name));
 
       if (!itemEstoque) {
         relatar({

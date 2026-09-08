@@ -12,7 +12,7 @@ import { filterTransactionsByPeriod, calculateSummary } from './utils/financialE
 import { getTodayIso } from './utils/formatters';
 import { useUndo } from './hooks/useUndo';
 import { useFichasTecnicas } from './context/FichasTecnicasContext';
-import { useEstoque } from './context/EstoqueContext';
+import { useProdutos } from './context/ProdutosContext';
 import { useTransacoes } from './context/TransacoesContext';
 import { TransacoesProvider } from './context/TransacoesContext';
 import { ProblemaBaixa } from './utils/stockConsumption';
@@ -63,7 +63,7 @@ import { FinancialOnboardingGate } from './components/onboarding/FinancialOnboar
 function AppContent() {
   const { isResetPasswordRequired, isOtpVerificationRequired, user, userProfile, logout } = useAuth();
   const { fichas } = useFichasTecnicas();
-  const { consumirParaPedido, devolverPedido } = useEstoque();
+  const { consumirParaPedido, devolverPedido } = useProdutos();
   const {
     transacoes: transactions,
     addTransacao,
@@ -183,13 +183,13 @@ function AppContent() {
     if (problemas.length === 0) return;
     const linhas = problemas.map((p) =>
       p.motivo === 'sem-item-no-estoque'
-        ? `• ${p.insumo} — não está cadastrado na aba Estoque`
-        : `• ${p.insumo} — a ficha usa "${p.unidadeFicha}" e o estoque usa "${p.unidadeEstoque}"`
+        ? `• ${p.insumo} — não está cadastrado no catálogo de Produtos`
+        : `• ${p.insumo} — a ficha usa "${p.unidadeFicha}" e o produto usa "${p.unidadeEstoque}"`
     );
     alert(
       `⚠️ O pedido foi salvo, mas estes insumos NÃO baixaram do estoque:\n\n` +
         `${linhas.join('\n')}\n\n` +
-        `Ajuste na aba Estoque para a baixa funcionar nos próximos pedidos.`
+        `Ajuste na aba Produtos para a baixa funcionar nos próximos pedidos.`
     );
   };
 
@@ -225,7 +225,7 @@ function AppContent() {
         } catch (err: any) {
           alert(
             `⚠️ O pedido foi atualizado, mas o estoque não pôde ser reajustado:\n\n` +
-              `${err?.message || err}\n\nConfira as quantidades na aba Estoque.`
+              `${err?.message || err}\n\nConfira as quantidades na aba Produtos.`
           );
         }
       }
@@ -268,7 +268,7 @@ function AppContent() {
     } catch (err: any) {
       alert(
         `⚠️ O pedido foi salvo, mas a baixa de estoque falhou:\n\n${err?.message || err}\n\n` +
-          `Nenhum insumo foi debitado. Confira a aba Estoque.`
+          `Nenhum insumo foi debitado. Confira a aba Produtos.`
       );
     }
   };
@@ -311,7 +311,7 @@ function AppContent() {
         alert(
           `⚠️ Os insumos não voltaram ao estoque:\n\n${err?.message || err}\n\n` +
             `O pedido NÃO foi excluído, para o estorno poder ser refeito. ` +
-            `Confira a aba Estoque e tente de novo.`
+            `Confira a aba Produtos e tente de novo.`
         );
         return;
       }
