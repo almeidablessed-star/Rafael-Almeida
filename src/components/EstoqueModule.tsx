@@ -11,7 +11,6 @@ import {
   Check,
   Sparkles,
 } from 'lucide-react';
-import { StockMovementsHistory } from './StockMovementsHistory';
 
 // DEFAULT_STOCK_ITEMS e as funcoes getStoredStockItems/saveStoredStockItems
 // foram removidos: eram um estoque de exemplo em localStorage, de uma fase
@@ -665,18 +664,11 @@ export const EstoqueModule: React.FC = () => {
       )}
       </div>
 
-      {/* Stock Movements History Section */}
-      <div className="mt-8 px-4">
-        <div className="mb-4">
-          <h2 className="text-lg font-bold text-[#3A2350]" style={{ fontFamily: "'Manrope', sans-serif" }}>
-            Histórico de Movimentações
-          </h2>
-          <p className="text-xs text-[#7A6E80] mt-1">
-            Rastreie todas as consumições, devoluções e reposições automáticas de estoque
-          </p>
-        </div>
-        <StockMovementsHistory />
-      </div>
+      {/* O historico de movimentacoes que vivia aqui mudou para dentro de
+          Produtos > Estoque (ver ProdutosModule.tsx): e o filtro que reflete
+          a baixa/devolucao REAL desde a ligacao ao catalogo Produtos, esta
+          tela continua existindo so pela mesma cautela incremental do resto
+          da migracao, sem nada rodando de verdade sobre ela. */}
       </div>
     </div>
   );

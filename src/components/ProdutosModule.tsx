@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Produto } from '../types';
 import { useProdutos } from '../context/ProdutosContext';
+import { StockMovementsHistory } from './StockMovementsHistory';
 import {
   Package,
   Plus,
@@ -432,6 +433,7 @@ export const ProdutosModule: React.FC = () => {
               </p>
             </div>
           ) : aba === 'estoque' ? (
+            <>
             <div className="grid grid-cols-1 gap-4">
               {sortedEstoque.map((p) => {
                 const qtd = p.quantidadeAtual || 0;
@@ -513,6 +515,22 @@ export const ProdutosModule: React.FC = () => {
                 );
               })}
             </div>
+
+            {/* Historico de movimentacoes: migrado de EstoqueModule.tsx para
+                aqui, junto do estoque REAL (o antigo mostrava um historico
+                correto ao lado de quantidades que ninguem mais atualiza). */}
+            <div className="mt-2">
+              <div className="mb-3">
+                <h2 className="text-xs font-extrabold uppercase text-[var(--color-pastry-chocolate)]">
+                  Histórico de Movimentações
+                </h2>
+                <p className="text-[10.5px] mt-1" style={{ color: '#7A6E80' }}>
+                  Rastreie todas as consumições, devoluções e reposições automáticas de estoque
+                </p>
+              </div>
+              <StockMovementsHistory />
+            </div>
+            </>
           ) : (
             <div className="grid grid-cols-1 gap-3">
               {sortedEstoque.map((p) => (
