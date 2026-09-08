@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useEstoque } from '../context/EstoqueContext';
+import { useProdutos } from '../context/ProdutosContext';
 import { ArrowDown, ArrowUp, RotateCcw, TrendingUp, X, History } from 'lucide-react';
-import type { MovimentoEstoque } from '../context/EstoqueContext';
+import type { MovimentoEstoque } from '../context/ProdutosContext';
 
 /**
  * Historico de movimentacoes do estoque.
  *
- * Le da tabela `estoque_movimentos` pelo EstoqueContext. Antes lia
+ * Le da tabela `estoque_movimentos` pelo ProdutosContext (movido de
+ * EstoqueContext no passo 1 da limpeza do sistema Estoque legado — ver
+ * docs/limpeza-estoque-legado.md). Antes lia
  * `carula_stock_movements` do localStorage — o historico do estoque SOMBRA — e
  * ficava logo abaixo dos cards da aba Estoque, que ja mostravam o estoque real
  * do Supabase. As duas metades da mesma tela falavam de estoques diferentes: os
@@ -135,7 +137,7 @@ const FullHistoryModal: React.FC<{ movimentos: MovimentoEstoque[]; onClose: () =
 };
 
 export const StockMovementsHistory: React.FC = () => {
-  const { movimentos } = useEstoque();
+  const { movimentos } = useProdutos();
   const [modalAberto, setModalAberto] = useState(false);
 
   const visiveis = movimentos.slice(0, INLINE_LIMIT);

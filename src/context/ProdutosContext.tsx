@@ -14,6 +14,20 @@ import { useEstoque, ResultadoBaixa } from './EstoqueContext';
  * Estoque dentro de Produtos, ou o autocomplete de insumo em Fichas).
  */
 
+/** Uma linha da tabela `estoque_movimentos`, no formato do app. */
+export interface MovimentoEstoque {
+  id: string;
+  estoqueId: string | null;
+  produtoId: string | null;
+  itemNome: string;
+  tipo: 'consumo' | 'devolucao' | 'entrada';
+  quantidade: number;
+  unidade: string;
+  transacaoId?: string;
+  descricao: string;
+  createdAt: number;
+}
+
 interface SupabaseProduto {
   id: number;
   usuaria_id: string;
@@ -32,9 +46,12 @@ interface SupabaseProduto {
 
 interface ProdutosContextType {
   produtos: Produto[];
+  movimentos: MovimentoEstoque[];
   isLoading: boolean;
   error: string | null;
   fetchProdutos: () => Promise<void>;
+  /** Historico de estoque_movimentos — mesma tabela usada pelo consumo/devolucao abaixo. */
+  fetchMovimentos: () => Promise<void>;
   addProduto: (data: Omit<Produto, 'id'>) => Promise<Produto>;
   updateProduto: (id: number, data: Omit<Produto, 'id'>) => Promise<Produto>;
   deleteProduto: (id: number) => Promise<void>;
@@ -80,18 +97,58 @@ export const ProdutosProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // So para o ramo LEGADO de devolverPedido (movimentos gravados contra a
   // tabela estoque antes desta ligacao existir). Disponivel porque
   // EstoqueProvider e ancestral deste provider na arvore (ver App.tsx).
-  const { estoque, fetchEstoque, fetchMovimentos } = useEstoque();
+  const { estoque, fetchEstoque } = useEstoque();
   const [produtos, setProdutos] = useState<Produto[]>([]);
+  const [movimentos, setMovimentos] = useState<MovimentoEstoque[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) {
       setProdutos([]);
+      setMovimentos([]);
       return;
     }
     fetchProdutos();
+    fetchMovimentos();
   }, [user]);
+
+  /**
+   * Historico de estoque_movimentos, movido de [[EstoqueContext]] (passo 1 da
+   * limpeza do sistema Estoque legado — ver docs/limpeza-estoque-legado.md):
+   * a tabela e escrita pelo consumo/devolucao NOVOS (abaixo, via produto_id)
+   * e tambem guarda o rastro antigo (via estoque_id), entao o historico
+   * exibido em Produtos > Estoque precisa dos dois. Sem filtro por coluna:
+   * um movimento so preenche uma das duas, nunca as duas.
+   */
+  const fetchMovimentos = async () => {
+    if (!user) return;
+    const { data, error: err } = await supabase
+      .from('estoque_movimentos')
+      .select('*')
+      .eq('usuaria_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(200);
+
+    if (err) {
+      console.error('Error fetching movimentos:', err);
+      return;
+    }
+    setMovimentos(
+      (data || []).map((m: any) => ({
+        id: String(m.id),
+        estoqueId: m.estoque_id ? String(m.estoque_id) : null,
+        produtoId: m.produto_id ? String(m.produto_id) : null,
+        itemNome: m.item_nome,
+        tipo: m.tipo,
+        quantidade: Number(m.quantidade),
+        unidade: m.unidade,
+        transacaoId: m.transacao_id || undefined,
+        descricao: m.descricao,
+        createdAt: new Date(m.created_at).getTime(),
+      }))
+    );
+  };
 
   const fetchProdutos = async () => {
     if (!user) return;
@@ -379,9 +436,11 @@ export const ProdutosProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     <ProdutosContext.Provider
       value={{
         produtos,
+        movimentos,
         isLoading,
         error,
         fetchProdutos,
+        fetchMovimentos,
         addProduto,
         updateProduto,
         deleteProduto,
