@@ -43,6 +43,7 @@ import { HistoryModule } from './components/HistoryModule';
 import { WeeklyClosingModule } from './components/WeeklyClosingModule';
 import { BalancesAndExpensesModule } from './components/BalancesAndExpensesModule';
 import { EstoqueModule } from './components/EstoqueModule';
+import { ProdutosModule } from './components/ProdutosModule';
 import { FichasTecnicasModule } from './components/FichasTecnicasModule';
 import { CustomersModule } from './components/CustomersModule';
 import { TransactionFormModal } from './components/TransactionFormModal';
@@ -56,6 +57,7 @@ import { CustomersProvider } from './context/CustomersContext';
 import { FichasTecnicasProvider } from './context/FichasTecnicasContext';
 import { CostsProvider } from './context/CostsContext';
 import { EstoqueProvider } from './context/EstoqueContext';
+import { ProdutosProvider } from './context/ProdutosContext';
 import { FinancialOnboardingGate } from './components/onboarding/FinancialOnboardingGate';
 
 function AppContent() {
@@ -460,6 +462,10 @@ function AppContent() {
           <EstoqueModule />
         )}
 
+        {activeTab === 'produtos' && (
+          <ProdutosModule />
+        )}
+
         {activeTab === 'fichas' && (
           <FichasTecnicasModule
             onAddTransaction={async (txData) => {
@@ -621,9 +627,11 @@ export default function App() {
                     o dado que decide o bloqueio (onboardingCompletoEm). */}
                 <FinancialOnboardingGate>
                   <EstoqueProvider>
-                    <TransacoesProvider>
-                      <AppContent />
-                    </TransacoesProvider>
+                    <ProdutosProvider>
+                      <TransacoesProvider>
+                        <AppContent />
+                      </TransacoesProvider>
+                    </ProdutosProvider>
                   </EstoqueProvider>
                 </FinancialOnboardingGate>
               </CostsProvider>
