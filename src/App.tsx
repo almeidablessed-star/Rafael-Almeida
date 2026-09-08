@@ -42,7 +42,6 @@ import { CostsModule } from './components/CostsModule';
 import { HistoryModule } from './components/HistoryModule';
 import { WeeklyClosingModule } from './components/WeeklyClosingModule';
 import { BalancesAndExpensesModule } from './components/BalancesAndExpensesModule';
-import { EstoqueModule } from './components/EstoqueModule';
 import { ProdutosModule } from './components/ProdutosModule';
 import { FichasTecnicasModule } from './components/FichasTecnicasModule';
 import { CustomersModule } from './components/CustomersModule';
@@ -56,7 +55,6 @@ import { CurrencyProvider } from './context/CurrencyContext';
 import { CustomersProvider } from './context/CustomersContext';
 import { FichasTecnicasProvider } from './context/FichasTecnicasContext';
 import { CostsProvider } from './context/CostsContext';
-import { EstoqueProvider } from './context/EstoqueContext';
 import { ProdutosProvider } from './context/ProdutosContext';
 import { FinancialOnboardingGate } from './components/onboarding/FinancialOnboardingGate';
 
@@ -77,6 +75,13 @@ function AppContent() {
     if (saved === 'saldos') {
       localStorage.setItem('carula_activeTab', 'compras');
       return 'compras';
+    }
+    // Aba "Estoque" saiu do rodape (substituida pelo filtro Estoque dentro
+    // de Produtos): quem tinha essa aba salva como ultima aberta cairia numa
+    // tela em branco, ja que nenhum branch de activeTab casa mais com ela.
+    if (saved === 'estoque') {
+      localStorage.setItem('carula_activeTab', 'produtos');
+      return 'produtos';
     }
     return saved || 'dashboard';
   });
@@ -461,10 +466,6 @@ function AppContent() {
           />
         )}
 
-        {activeTab === 'estoque' && (
-          <EstoqueModule />
-        )}
-
         {activeTab === 'produtos' && (
           <ProdutosModule
             transactions={transactions}
@@ -634,13 +635,11 @@ export default function App() {
                     aqui, e nao em ProtectedRoute, porque so o CostsProvider tem
                     o dado que decide o bloqueio (onboardingCompletoEm). */}
                 <FinancialOnboardingGate>
-                  <EstoqueProvider>
-                    <ProdutosProvider>
-                      <TransacoesProvider>
-                        <AppContent />
-                      </TransacoesProvider>
-                    </ProdutosProvider>
-                  </EstoqueProvider>
+                  <ProdutosProvider>
+                    <TransacoesProvider>
+                      <AppContent />
+                    </TransacoesProvider>
+                  </ProdutosProvider>
                 </FinancialOnboardingGate>
               </CostsProvider>
             </FichasTecnicasProvider>

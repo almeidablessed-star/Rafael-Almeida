@@ -3,7 +3,6 @@ import { FichaTecnica, IngredientUsage, Transaction, TamanhoOpcao, StockItem, Pr
 import { formatCurrency } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
 import { useFichasTecnicas } from '../context/FichasTecnicasContext';
-import { useEstoque } from '../context/EstoqueContext';
 import { useProdutos } from '../context/ProdutosContext';
 import { useCosts } from '../context/CostsContext';
 import { calcularEstruturaFinanceira, calcularPrecoSugeridoProduto, somarDespesasEmpresa } from '../utils/financialEngine';
@@ -130,10 +129,6 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 }) => {
   const { formatCurrency: formatMoney } = useCurrency();
   const { fichas, isLoading: isLoadingFichas, error: fichasError, addFicha, updateFicha, deleteFicha, restoreFicha, fetchFichaPhoto } = useFichasTecnicas();
-  const { estoque } = useEstoque();
-  // Fonte de verdade nova para custo/vinculo de insumo (spec Modulo Produtos).
-  // `estoque` continua importado so pelo que ainda nao foi religado nesta
-  // etapa (baixa de estoque na venda, por exemplo).
   const { produtos, addProduto, custoPorUnidade } = useProdutos();
 
   const produtosParaAutocomplete = useMemo<StockItem[]>(() => produtos.map((p) => ({

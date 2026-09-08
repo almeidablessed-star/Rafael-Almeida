@@ -194,7 +194,7 @@ export interface Transaction {
 
 export type TimePeriod = 'hoje' | 'semana' | 'mes' | 'ano' | 'tudo' | 'personalizado';
 
-export type TabType = 'dashboard' | 'pedidos' | 'fichas' | 'clientes' | 'estoque' | 'produtos' | 'compras' | 'semana' | 'vendas' | 'reposicao' | 'custos' | 'historico';
+export type TabType = 'dashboard' | 'pedidos' | 'fichas' | 'clientes' | 'produtos' | 'compras' | 'semana' | 'vendas' | 'reposicao' | 'custos' | 'historico';
 
 export interface BakeryPreset {
   id: string;

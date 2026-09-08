@@ -30,14 +30,6 @@ const IconClientes = (props: { stroke: string; strokeWidth: number }) => (
   </svg>
 );
 
-const IconEstoque = (props: { stroke: string; strokeWidth: number }) => (
-  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" {...props} strokeLinejoin="round">
-    <rect x="3" y="10" width="8" height="7" rx="1.2"/>
-    <rect x="13" y="10" width="8" height="7" rx="1.2"/>
-    <rect x="8" y="3" width="8" height="6" rx="1.2"/>
-  </svg>
-);
-
 const IconProdutos = (props: { stroke: string; strokeWidth: number }) => (
   <svg width="19" height="19" viewBox="0 0 24 24" fill="none" {...props} strokeLinecap="round" strokeLinejoin="round">
     <path d="M12 2 3 7v10l9 5 9-5V7z"/>
@@ -72,7 +64,6 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) 
     { id: 'pedidos' as TabType, label: 'Pedidos', icon: IconPedidos },
     { id: 'fichas' as TabType, label: 'Fichas', icon: IconFichas },
     { id: 'clientes' as TabType, label: 'Clientes', icon: IconClientes },
-    { id: 'estoque' as TabType, label: 'Estoque', icon: IconEstoque },
     { id: 'produtos' as TabType, label: 'Produtos', icon: IconProdutos },
     { id: 'compras' as TabType, label: 'Compras', icon: IconCompras },
     { id: 'custos' as TabType, label: 'Minha Empresa', icon: IconCustos },
