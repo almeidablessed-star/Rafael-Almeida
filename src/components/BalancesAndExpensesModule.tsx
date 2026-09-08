@@ -7,8 +7,9 @@ import { StockItemAutocomplete } from './StockItemAutocomplete';
 import { formatCurrency, formatDateBr, getTodayIso } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
 import { useFichasTecnicas } from '../context/FichasTecnicasContext';
-import { useEstoque } from '../context/EstoqueContext';
-import { convertQuantity, convertCostPerUnit } from '../utils/units';
+import { useProdutos } from '../context/ProdutosContext';
+import { normalizeName } from '../utils/fichaMatcher';
+import { convertQuantity } from '../utils/units';
 import {
   Wallet,
   ShoppingBag,
@@ -43,7 +44,23 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
   const { formatCurrency: formatMoney } = useCurrency();
   const { fichas } = useFichasTecnicas();
   const balances = calculateWeeklyBalances(transactions, fichas);
-  const { estoque, addEstoque, updateEstoque, registrarEntrada } = useEstoque();
+  // Compras agora referencia o catalogo Produtos (spec Modulo Produtos, secao
+  // 2.2) em vez de Estoque diretamente. `estoque`/`registrarEntrada` nao sao
+  // mais chamados aqui — o rastro de entrada por compra fica na propria
+  // transacao (`produto_id`), sem duplicar num `estoque_movimentos` que agora
+  // pertence a um sistema paralelo em fase de aposentadoria.
+  const { produtos, addProduto, updateProduto, custoPorUnidade } = useProdutos();
+
+  const produtosParaAutocomplete: StockItem[] = produtos.map((p) => ({
+    id: String(p.id),
+    name: p.nome,
+    quantity: p.quantidadeAtual || 0,
+    unit: p.unidadeEmbalagem,
+    minThreshold: p.nivelMinimo || 0,
+    minThresholdUnit: p.nivelMinimoUnidade || p.unidadeEmbalagem,
+    costPerUnit: custoPorUnidade(p),
+    fullQuantity: p.quantidadeReferencia || 0,
+  }));
 
   // Form state for quick expense logging
   const [description, setDescription] = useState('');
@@ -75,9 +92,9 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
     }
   }, [transactions]);
 
-  const findExistingItem = (itemName: string): StockItem | undefined => {
-    const normalized = itemName.toLowerCase().trim();
-    return estoque.find(item => item.name.toLowerCase().trim() === normalized);
+  const findExistingProduto = (itemName: string) => {
+    const alvo = normalizeName(itemName);
+    return produtos.find((p) => normalizeName(p.nome) === alvo);
   };
 
   // A conversao mora em utils/units.ts. A copia que existia aqui mapeava todas
@@ -100,68 +117,72 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
       return;
     }
 
-    // Register stock item if quantity provided
+    // Referencia (ou cria) o Produto do catalogo. So ATUALIZA quantidade
+    // quando o produto tem `controlaEstoque` ativado — itens de referencia de
+    // preco (ex: fruta fresca) recebem so o preco atualizado.
+    let produtoIdParaTransacao: number | undefined;
+
     if (hasItemQty) {
       try {
         const itemNameFromDescription = description.trim();
-        const existing = findExistingItem(itemNameFromDescription);
-
-        // Calcular preço unitário: valor pago / quantidade comprada
-        const costPerUnitCalculated = valNum / itemQtyNum;
+        const existing = findExistingProduto(itemNameFromDescription);
 
         if (existing) {
-          const convertedQty = convertQuantity(itemQtyNum, itemUnit, existing.unit);
+          produtoIdParaTransacao = existing.id;
 
-          if (convertedQty === null) {
-            // Comprar 2 L de um item cadastrado em gramas nao tem conversao
-            // possivel. Somar assim mesmo corromperia o saldo em silencio.
-            alert(
-              `⚠️ "${existing.name}" está cadastrado em "${existing.unit}" e você informou "${itemUnit}".\n\n` +
-                `Essas unidades não se convertem. A despesa foi registrada, mas o estoque não foi alterado.\n\n` +
-                `Ajuste a unidade na aba Estoque ou informe a compra na mesma unidade do cadastro.`
-            );
+          if (existing.controlaEstoque) {
+            // Converte o SALDO JA EXISTENTE para a unidade desta compra — nao
+            // o contrario. Assim `quantidadeEmbalagem`/`unidadeEmbalagem`
+            // gravados sao exatamente os desta compra ("1kg por R$60"), sem
+            // normalizar para "1 unidade base" e perder a embalagem real que
+            // a usuaria realmente compra.
+            const saldoConvertido = convertQuantity(existing.quantidadeAtual || 0, existing.unidadeEmbalagem, itemUnit);
+
+            if (saldoConvertido === null) {
+              // Comprar 2 L de um item cadastrado em gramas nao tem conversao
+              // possivel. Somar assim mesmo corromperia o saldo em silencio.
+              alert(
+                `⚠️ "${existing.nome}" está cadastrado em "${existing.unidadeEmbalagem}" e você informou "${itemUnit}".\n\n` +
+                  `Essas unidades não se convertem. A despesa foi registrada, mas o estoque não foi alterado.\n\n` +
+                  `Ajuste a unidade na aba Produtos ou informe a compra na mesma unidade do cadastro.`
+              );
+            } else {
+              await updateProduto(existing.id, {
+                ...existing,
+                quantidadeAtual: saldoConvertido + itemQtyNum,
+                precoPago: valNum,
+                quantidadeEmbalagem: itemQtyNum,
+                unidadeEmbalagem: itemUnit,
+              });
+            }
           } else {
-            const custoNaUnidadeDoEstoque =
-              convertCostPerUnit(costPerUnitCalculated, itemUnit, existing.unit) ?? existing.costPerUnit;
-
-            await updateEstoque(existing.id, {
+            // Sem controle de estoque: so atualiza o preco de referencia, no
+            // mesmo formato desta compra (ex: "R$15 a bandeja de 500g").
+            await updateProduto(existing.id, {
               ...existing,
-              quantity: existing.quantity + convertedQty,
-              costPerUnit: custoNaUnidadeDoEstoque,
-            });
-
-            await registrarEntrada({
-              estoqueId: existing.id,
-              itemNome: existing.name,
-              quantidade: convertedQty,
-              unidade: existing.unit,
-              descricao: `Compra: ${itemNameFromDescription} (${itemQtyNum}${itemUnit} por ${formatMoney(valNum)})`,
+              precoPago: valNum,
+              quantidadeEmbalagem: itemQtyNum,
+              unidadeEmbalagem: itemUnit,
             });
           }
         } else {
-          const novo = await addEstoque({
-            name: itemNameFromDescription,
-            quantity: itemQtyNum,
-            unit: itemUnit,
-            minThreshold: 0,
-            minThresholdUnit: itemUnit,
-            costPerUnit: costPerUnitCalculated,
-            // Ignorado por addEstoque, que grava a propria quantidade como
-            // baseline de "cheio". So aqui pra satisfazer o tipo StockItem.
-            fullQuantity: itemQtyNum,
+          const novo = await addProduto({
+            nome: itemNameFromDescription,
+            categoria: null,
+            precoPago: valNum,
+            quantidadeEmbalagem: itemQtyNum,
+            unidadeEmbalagem: itemUnit,
+            controlaEstoque: true,
+            quantidadeAtual: itemQtyNum,
+            quantidadeReferencia: null,
+            nivelMinimo: 0,
+            nivelMinimoUnidade: itemUnit,
           });
-
-          await registrarEntrada({
-            estoqueId: novo.id,
-            itemNome: novo.name,
-            quantidade: itemQtyNum,
-            unidade: itemUnit,
-            descricao: `Compra: ${itemNameFromDescription} (${itemQtyNum}${itemUnit} por ${formatMoney(valNum)}) — item criado`,
-          });
+          produtoIdParaTransacao = novo.id;
         }
       } catch (err) {
-        console.error('Erro ao atualizar estoque:', err);
-        alert('Erro ao registrar item no estoque. Despesa registrada, mas verifique o estoque.');
+        console.error('Erro ao atualizar produto:', err);
+        alert('Erro ao registrar item no catálogo de Produtos. Despesa registrada, mas verifique em Produtos.');
       }
     }
 
@@ -174,6 +195,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
       date: date || getTodayIso(),
       paymentStatus: 'pago',
       notes: `Compra registrada em ${category === 'reposicao' ? 'Reposição de Insumos' : 'Investimento'}${hasItemQty ? ` - Item: ${description.trim()} (${itemQtyNum}${itemUnit})` : ''}`,
+      produtoId: produtoIdParaTransacao,
     });
 
     // Reset form
@@ -335,7 +357,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
               value={description}
               onChange={setDescription}
               onSelect={() => {}}
-              stockItems={estoque}
+              stockItems={produtosParaAutocomplete}
               isEnabled={itemQuantity.trim().length > 0}
               placeholder={itemQuantity ? "Nome do item (ex: Farinha, Açúcar, Caixa, Pote)" : "Ex: 2 sacos de farinha, 2 formas e bicos"}
             />
