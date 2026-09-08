@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { FichaTecnica, IngredientUsage, Transaction, TamanhoOpcao } from '../types';
+import { FichaTecnica, IngredientUsage, Transaction, TamanhoOpcao, StockItem, Produto } from '../types';
 import { formatCurrency } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
 import { useFichasTecnicas } from '../context/FichasTecnicasContext';
 import { useEstoque } from '../context/EstoqueContext';
+import { useProdutos } from '../context/ProdutosContext';
 import { useCosts } from '../context/CostsContext';
 import { calcularEstruturaFinanceira, calcularPrecoSugeridoProduto, somarDespesasEmpresa } from '../utils/financialEngine';
+import { normalizeName } from '../utils/fichaMatcher';
 import { useUndo } from '../hooks/useUndo';
 import { StockItemAutocomplete } from './StockItemAutocomplete';
 import { compressImageFile } from '../utils/imageCompression';
@@ -129,6 +131,21 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   const { formatCurrency: formatMoney } = useCurrency();
   const { fichas, isLoading: isLoadingFichas, error: fichasError, addFicha, updateFicha, deleteFicha, restoreFicha, fetchFichaPhoto } = useFichasTecnicas();
   const { estoque } = useEstoque();
+  // Fonte de verdade nova para custo/vinculo de insumo (spec Modulo Produtos).
+  // `estoque` continua importado so pelo que ainda nao foi religado nesta
+  // etapa (baixa de estoque na venda, por exemplo).
+  const { produtos, addProduto, custoPorUnidade } = useProdutos();
+
+  const produtosParaAutocomplete = useMemo<StockItem[]>(() => produtos.map((p) => ({
+    id: String(p.id),
+    name: p.nome,
+    quantity: p.quantidadeAtual || 0,
+    unit: p.unidadeEmbalagem,
+    minThreshold: p.nivelMinimo || 0,
+    minThresholdUnit: p.nivelMinimoUnidade || p.unidadeEmbalagem,
+    costPerUnit: custoPorUnidade(p),
+    fullQuantity: p.quantidadeReferencia || 0,
+  })), [produtos, custoPorUnidade]);
 
   // Tarifa sugerida, vinda de Custos Administrativos. Só PREENCHE tamanhos
   // novos; cada tamanho continua editável, porque a hora varia por bolo — um
@@ -393,21 +410,33 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   ): IngredientUsage => {
     const updated = { ...ing, [field]: val };
 
-    // Nome ou UNIDADE: o custo vem do Estoque e depende dos dois.
+    // Nome ou UNIDADE: o custo vem do catalogo Produtos e depende dos dois.
     //
     // A unidade estava de fora, e o efeito passava despercebido: cadastrar
     // "leite 100 ml" e depois trocar para "g" mantinha o custo por ml. O numero
     // continuava plausivel na tela, so que errado — e alimentava a conta aberta
     // e o preco do bolo.
+    //
+    // Casamento por nome NORMALIZADO (mesma logica de normalizeName usada no
+    // vinculo em massa das fichas existentes), nao mais texto exato — "Leite"
+    // e "leite" ou "Leite " precisam casar com o mesmo Produto.
     if (field === 'name' || field === 'unit') {
       const nome = field === 'name' ? String(val) : ing.name;
       const unidade = field === 'unit' ? String(val) : ing.unit;
-      const stockItem = estoque.find(item => item.name.toLowerCase() === (nome || '').toLowerCase());
+      const alvo = normalizeName(nome || '');
+      const produto = alvo ? produtos.find((p) => normalizeName(p.nome) === alvo) : undefined;
 
-      if (stockItem && stockItem.costPerUnit > 0) {
-        const convertedCost = convertCostToTargetUnit(stockItem.costPerUnit, stockItem.unit, unidade);
+      if (produto) {
+        const custoBase = custoPorUnidade(produto);
+        const convertedCost = convertCostToTargetUnit(custoBase, produto.unidadeEmbalagem, unidade);
         updated.unitCost = convertedCost;
         updated.totalCost = (Number(ing.quantity) || 0) * convertedCost;
+        updated.produtoId = produto.id;
+      } else if (field === 'name') {
+        // Nome mudou e nao bate mais com nenhum produto: solta o vinculo
+        // antigo, senao o custo continuaria vindo de um produto que nao e
+        // mais este insumo.
+        updated.produtoId = undefined;
       }
     }
 
@@ -471,6 +500,89 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
           : t
       )
     );
+  };
+
+  // --- Cadastro rapido de Produto, direto do insumo da ficha (spec Modulo
+  // Produtos, secao 3: "fluxo guiado"). Abre um mini-formulario SEM navegar
+  // pra outra aba, e ao salvar vincula o produtoId no proprio insumo que
+  // estava sendo editado — a usuaria continua exatamente de onde parou.
+
+  const [criandoProdutoInsumo, setCriandoProdutoInsumo] = useState<{ tamanhoId: string; insumoId: string } | null>(null);
+  const [novoProdutoNome, setNovoProdutoNome] = useState('');
+  const [novoProdutoCategoria, setNovoProdutoCategoria] = useState('');
+  const [novoProdutoPreco, setNovoProdutoPreco] = useState('');
+  const [novoProdutoQtdEmbalagem, setNovoProdutoQtdEmbalagem] = useState('');
+  const [novoProdutoUnidade, setNovoProdutoUnidade] = useState<Produto['unidadeEmbalagem']>('g');
+  const [novoProdutoControlaEstoque, setNovoProdutoControlaEstoque] = useState(true);
+  const [novoProdutoQtdAtual, setNovoProdutoQtdAtual] = useState('');
+  const [salvandoNovoProduto, setSalvandoNovoProduto] = useState(false);
+
+  const handleAbrirCriarProduto = (tamanhoId: string, insumoId: string, nomeSugerido: string) => {
+    setCriandoProdutoInsumo({ tamanhoId, insumoId });
+    setNovoProdutoNome(nomeSugerido);
+    setNovoProdutoCategoria('');
+    setNovoProdutoPreco('');
+    setNovoProdutoQtdEmbalagem('');
+    setNovoProdutoUnidade('g');
+    setNovoProdutoControlaEstoque(true);
+    setNovoProdutoQtdAtual('');
+  };
+
+  const handleSalvarNovoProdutoInline = async () => {
+    if (!criandoProdutoInsumo || !novoProdutoNome.trim()) return;
+    setSalvandoNovoProduto(true);
+    try {
+      const precoNum = parseFloat(novoProdutoPreco.replace(',', '.')) || 0;
+      const qtdEmbNum = parseFloat(novoProdutoQtdEmbalagem.replace(',', '.')) || 1;
+      const qtdAtualNum = parseFloat(novoProdutoQtdAtual.replace(',', '.')) || 0;
+
+      const produto = await addProduto({
+        nome: novoProdutoNome.trim(),
+        categoria: novoProdutoCategoria.trim() || null,
+        precoPago: precoNum,
+        quantidadeEmbalagem: qtdEmbNum,
+        unidadeEmbalagem: novoProdutoUnidade,
+        controlaEstoque: novoProdutoControlaEstoque,
+        quantidadeAtual: novoProdutoControlaEstoque ? qtdAtualNum : null,
+        quantidadeReferencia: null,
+        nivelMinimo: novoProdutoControlaEstoque ? 0 : null,
+        nivelMinimoUnidade: novoProdutoControlaEstoque ? novoProdutoUnidade : null,
+      });
+
+      // Nao basta reaplicar o casamento por nome (aplicarEdicaoDeInsumo): o
+      // `produtos` fechado neste componente ainda nao tem o item recem-criado
+      // no momento em que o `await` acima resolve. Gravamos direto os campos
+      // que o casamento normal preencheria.
+      const { tamanhoId, insumoId } = criandoProdutoInsumo;
+      const custoBase = custoPorUnidade(produto);
+      setTamanhos((prev) =>
+        prev.map((t) =>
+          t.id === tamanhoId
+            ? {
+                ...t,
+                ingredients: t.ingredients.map((ing) =>
+                  ing.id === insumoId
+                    ? {
+                        ...ing,
+                        name: produto.nome,
+                        unit: produto.unidadeEmbalagem,
+                        produtoId: produto.id,
+                        unitCost: custoBase,
+                        totalCost: (Number(ing.quantity) || 0) * custoBase,
+                      }
+                    : ing
+                ),
+              }
+            : t
+        )
+      );
+
+      setCriandoProdutoInsumo(null);
+    } catch (err) {
+      alert((err as any).message || 'Erro ao criar produto');
+    } finally {
+      setSalvandoNovoProduto(false);
+    }
   };
 
   /**
@@ -1226,8 +1338,36 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                           <StockItemAutocomplete
                             value={ing.name}
                             onChange={(val) => handleUpdateInsumoTamanho(tamanho.id, ing.id, 'name', val)}
-                            onSelect={() => {}}
-                            stockItems={estoque}
+                            onSelect={(item) => {
+                              // Selecionou uma sugestao: vincula por ID direto,
+                              // sem depender do casamento por nome rodar de
+                              // novo (mais robusto que so onChange).
+                              const produto = produtos.find((p) => String(p.id) === item.id);
+                              if (!produto) return;
+                              const custoBase = custoPorUnidade(produto);
+                              setTamanhos((prev) =>
+                                prev.map((t) =>
+                                  t.id === tamanho.id
+                                    ? {
+                                        ...t,
+                                        ingredients: t.ingredients.map((i2) =>
+                                          i2.id === ing.id
+                                            ? {
+                                                ...i2,
+                                                name: produto.nome,
+                                                unit: produto.unidadeEmbalagem,
+                                                produtoId: produto.id,
+                                                unitCost: custoBase,
+                                                totalCost: (Number(i2.quantity) || 0) * custoBase,
+                                              }
+                                            : i2
+                                        ),
+                                      }
+                                    : t
+                                )
+                              );
+                            }}
+                            stockItems={produtosParaAutocomplete}
                             isEnabled={true}
                             placeholder="Ingrediente (ex: Cacau)"
                           />
@@ -1275,6 +1415,120 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
+
+                        {/* FLUXO GUIADO (spec Modulo Produtos, secao 3): nome
+                            digitado nao bate com nenhum Produto do catalogo.
+                            So aparece quando ha nome E nao ha produtoId — ou
+                            seja, o casamento por nome em aplicarEdicaoDeInsumo
+                            ja tentou e nao achou nada. */}
+                        {ing.name.trim() !== '' && !ing.produtoId && criandoProdutoInsumo?.insumoId !== ing.id && (
+                          <div className="col-span-12 -mt-1">
+                            <button
+                              type="button"
+                              onClick={() => handleAbrirCriarProduto(tamanho.id, ing.id, ing.name)}
+                              className="text-[10px] font-bold text-[#6E3F72] hover:underline text-left"
+                            >
+                              "{ing.name}" não está cadastrado ainda — adicionar agora?
+                            </button>
+                          </div>
+                        )}
+
+                        {criandoProdutoInsumo?.tamanhoId === tamanho.id && criandoProdutoInsumo?.insumoId === ing.id && (
+                          <div className="col-span-12 bg-[#F6F2F5] rounded-lg border border-[#E6E1DB] p-3 space-y-2 mt-1 animate-slideUp">
+                            <p className="text-[11px] font-bold" style={{ color: '#241B2B' }}>Cadastrar novo produto</p>
+
+                            <input
+                              type="text"
+                              placeholder="Nome"
+                              value={novoProdutoNome}
+                              onChange={(e) => setNovoProdutoNome(e.target.value)}
+                              className="w-full px-2.5 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs"
+                            />
+                            <input
+                              type="text"
+                              list="categorias-sugeridas-ficha"
+                              placeholder="Categoria (opcional)"
+                              value={novoProdutoCategoria}
+                              onChange={(e) => setNovoProdutoCategoria(e.target.value)}
+                              className="w-full px-2.5 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs"
+                            />
+                            <datalist id="categorias-sugeridas-ficha">
+                              <option value="Massa" />
+                              <option value="Recheio" />
+                              <option value="Cobertura" />
+                              <option value="Decoração" />
+                              <option value="Embalagem" />
+                            </datalist>
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                inputMode="decimal"
+                                placeholder="Preço pago"
+                                value={novoProdutoPreco}
+                                onChange={(e) => setNovoProdutoPreco(e.target.value)}
+                                className="flex-1 px-2.5 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs"
+                              />
+                              <input
+                                type="text"
+                                inputMode="decimal"
+                                placeholder="Qtd. embalagem"
+                                value={novoProdutoQtdEmbalagem}
+                                onChange={(e) => setNovoProdutoQtdEmbalagem(e.target.value)}
+                                className="flex-1 px-2.5 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs"
+                              />
+                              <select
+                                value={novoProdutoUnidade}
+                                onChange={(e) => setNovoProdutoUnidade(e.target.value as any)}
+                                className="px-2 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold"
+                              >
+                                <option value="g">g</option>
+                                <option value="kg">kg</option>
+                                <option value="ml">ml</option>
+                                <option value="L">L</option>
+                                <option value="un">un</option>
+                                <option value="pacote">pacote</option>
+                              </select>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <label className="text-[10px]" style={{ color: '#7A6E80' }}>Controlar estoque deste produto?</label>
+                              <button
+                                type="button"
+                                onClick={() => setNovoProdutoControlaEstoque((v) => !v)}
+                                style={{ width: '34px', height: '18px', borderRadius: '9px', border: 'none', cursor: 'pointer', position: 'relative', background: novoProdutoControlaEstoque ? '#6E3F72' : '#E6E1DB', flexShrink: 0 }}
+                              >
+                                <span style={{ position: 'absolute', top: '2px', left: novoProdutoControlaEstoque ? '18px' : '2px', width: '14px', height: '14px', borderRadius: '50%', background: 'white', transition: 'left 0.2s' }} />
+                              </button>
+                            </div>
+                            {novoProdutoControlaEstoque && (
+                              <input
+                                type="text"
+                                inputMode="decimal"
+                                placeholder="Quantidade atual em estoque"
+                                value={novoProdutoQtdAtual}
+                                onChange={(e) => setNovoProdutoQtdAtual(e.target.value)}
+                                className="w-full px-2.5 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs"
+                              />
+                            )}
+                            <div className="flex justify-end gap-2 pt-1">
+                              <button
+                                type="button"
+                                onClick={() => setCriandoProdutoInsumo(null)}
+                                className="px-3 py-1.5 rounded-lg bg-white border border-[#E6E1DB] text-[11px] font-bold text-neutral-700"
+                              >
+                                Cancelar
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleSalvarNovoProdutoInline}
+                                disabled={salvandoNovoProduto || !novoProdutoNome.trim()}
+                                className="px-3 py-1.5 rounded-lg text-white text-[11px] font-bold disabled:opacity-50"
+                                style={{ background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)' }}
+                              >
+                                {salvandoNovoProduto ? 'Salvando...' : 'Salvar e usar'}
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
