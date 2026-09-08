@@ -51,6 +51,7 @@ interface SupabaseTransacao {
   breakdown: any;
   ficha_itens: any;
   insumos_consumidos: any;
+  produto_id: number | null;
   created_at: string;
 }
 
@@ -98,6 +99,7 @@ const mapSupabaseToTransaction = (d: SupabaseTransacao): Transaction => {
     // criaria duas fontes para o mesmo vinculo, que podem divergir.
     fichaId: fichaItems[0]?.fichaId,
     consumedIngredients: Array.isArray(d.insumos_consumidos) ? d.insumos_consumidos : [],
+    produtoId: d.produto_id ?? undefined,
     createdAt: new Date(d.created_at).getTime(),
   };
 };
@@ -134,6 +136,7 @@ const mapTransactionToSupabase = (tx: Omit<Transaction, 'id' | 'createdAt'>) => 
   breakdown: tx.breakdown ?? null,
   ficha_itens: tx.fichaItems || [],
   insumos_consumidos: tx.consumedIngredients || [],
+  produto_id: tx.produtoId ?? null,
 });
 
 interface TransacoesContextType {

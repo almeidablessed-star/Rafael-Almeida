@@ -188,11 +188,13 @@ export interface Transaction {
   fichaItems?: FichaOrderItem[]; // Todas as fichas do pedido, com a qtd de cada item
   breakdown?: SaleBreakdown; // Composicao financeira congelada no lancamento
   consumedIngredients?: ConsumedIngredient[]; // Ingredients automatically consumed from this sale
+  /** Produto do catalogo que esta compra (reposicao) abastece. So faz sentido em transacoes tipo 'reposicao'. */
+  produtoId?: number;
 }
 
 export type TimePeriod = 'hoje' | 'semana' | 'mes' | 'ano' | 'tudo' | 'personalizado';
 
-export type TabType = 'dashboard' | 'pedidos' | 'fichas' | 'clientes' | 'estoque' | 'compras' | 'semana' | 'vendas' | 'reposicao' | 'custos' | 'historico';
+export type TabType = 'dashboard' | 'pedidos' | 'fichas' | 'clientes' | 'estoque' | 'produtos' | 'compras' | 'semana' | 'vendas' | 'reposicao' | 'custos' | 'historico';
 
 export interface BakeryPreset {
   id: string;
@@ -222,11 +224,40 @@ export interface StockItem {
   fullQuantity: number;
 }
 
+/**
+ * Catalogo unico de tudo que a confeitaria usa (ingrediente, embalagem,
+ * decoracao). Substitui o casamento por NOME DE TEXTO entre Fichas, Estoque
+ * e Compras por referencia real por ID (`produtoId` em [[IngredientUsage]],
+ * `produto_id` em transacoes de compra).
+ *
+ * `costPerUnit` NAO existe como campo: e sempre `precoPago / quantidadeEmbalagem`,
+ * calculado na hora de exibir — nunca persistido, para nao repetir o erro da
+ * antiga coluna fantasma `administrative_costs.total`.
+ */
+export interface Produto {
+  id: number;
+  nome: string;
+  /** Livre — sugestoes na UI (Massa, Recheio, Cobertura, Decoracao, Embalagem), sem lista fixa no banco. */
+  categoria: string | null;
+  precoPago: number;
+  quantidadeEmbalagem: number;
+  unidadeEmbalagem: 'g' | 'kg' | 'ml' | 'L' | 'un' | 'pacote';
+  /** false = produto so existe como referencia de preco/conversao (ex: fruta fresca comprada na hora), sem quantidade controlada. */
+  controlaEstoque: boolean;
+  /** So fazem sentido quando controlaEstoque = true. */
+  quantidadeAtual: number | null;
+  quantidadeReferencia: number | null;
+  nivelMinimo: number | null;
+  nivelMinimoUnidade: ('g' | 'kg' | 'ml' | 'L' | 'un' | 'pacote') | null;
+}
+
 export interface IngredientUsage {
   id: string;
   name: string;
   quantity: number;
   unit: 'g' | 'kg' | 'ml' | 'L' | 'un' | 'pacote';
+  /** Vinculo por ID com o catalogo Produtos. Opcional: insumos antigos podem ainda nao estar vinculados. */
+  produtoId?: number;
   unitCost: number;
   totalCost: number;
 }
