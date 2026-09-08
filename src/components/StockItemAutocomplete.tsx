@@ -82,8 +82,13 @@ export const StockItemAutocomplete: React.FC<StockItemAutocompleteProps> = ({
       const spaceBelow = window.innerHeight - rect.bottom;
       const spaceAbove = rect.top;
 
-      // Se há mais espaço acima ou espaço abaixo é insuficiente, abre para cima
-      if (spaceAbove > spaceBelow && spaceAbove > dropdownHeight) {
+      // So abre para cima quando embaixo REALMENTE nao cabe. Comparar so
+      // "espaco acima vs espaco abaixo" (versao antiga) virava 'above' toda
+      // vez que a lista estava perto do topo da tela, mesmo com espaco de
+      // sobra embaixo — a lista nascia sobrepondo o cabecalho "Insumos deste
+      // tamanho" ali em cima, ilegivel e dificil de clicar (o insumo ficava
+      // "grudado" atras do proprio rotulo da secao).
+      if (spaceBelow < dropdownHeight && spaceAbove > spaceBelow) {
         setDropdownPosition('above');
       } else {
         setDropdownPosition('below');

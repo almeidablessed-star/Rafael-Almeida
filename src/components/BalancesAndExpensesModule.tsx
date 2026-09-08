@@ -71,7 +71,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
 
   // Stock item state (optional)
   const [itemQuantity, setItemQuantity] = useState('');
-  const [itemUnit, setItemUnit] = useState<'g' | 'kg' | 'ml' | 'L' | 'un' | 'pacote'>('un');
+  const [itemUnit, setItemUnit] = useState<'g' | 'kg' | 'ml' | 'L' | 'un' | 'pacote'>('g');
 
   // History filtering
   const [selectedFilter, setSelectedFilter] = useState<'todos' | 'reposicao' | 'investimento'>('todos');
@@ -203,7 +203,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
     setAmount('');
     setDate(getTodayIso());
     setItemQuantity('');
-    setItemUnit('un');
+    setItemUnit('g');
     setShowSuccessToast(true);
     setTimeout(() => setShowSuccessToast(false), 3000);
   };

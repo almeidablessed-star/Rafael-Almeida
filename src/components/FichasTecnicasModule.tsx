@@ -322,6 +322,34 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     return calculada > 0 ? calculada : parseFloat((t.maoDeObraCost || '').replace(',', '.')) || 0;
   };
 
+  /**
+   * Custo administrativo e investimento de um tamanho: fatia do preco de
+   * venda, do mesmo tamanho percentual configurado em "Minha Empresa"
+   * (estruturaFinanceira.custosPercent e investmentTargetPercent) — a mesma
+   * fonte usada no preco sugerido, nunca uma conta separada.
+   *
+   * Antes eram dois campos de texto que a confeiteira preenchia no chute, um
+   * por tamanho, sem nenhuma ligacao com a estrutura financeira que ela ja
+   * configurou. Sem meta valida ou sem preco preenchido ainda, devolve o
+   * valor que ja estava gravado — mesma regra de preservacao da mao de obra,
+   * para nao zerar uma ficha antiga so por abrir e salvar de novo.
+   */
+  const calcularCustoAdmAutomatico = (t: { preco: string; custoCost: string }) => {
+    const preco = parseFloat((t.preco || '').replace(',', '.')) || 0;
+    if (estruturaFinanceira?.valido && preco > 0) {
+      return preco * (estruturaFinanceira.custosPercent / 100);
+    }
+    return parseFloat((t.custoCost || '').replace(',', '.')) || 0;
+  };
+
+  const calcularInvestimentoAutomatico = (t: { preco: string; investimentoCost: string }) => {
+    const preco = parseFloat((t.preco || '').replace(',', '.')) || 0;
+    if (estruturaFinanceira?.valido && administrativeCosts && preco > 0) {
+      return preco * (administrativeCosts.investmentTargetPercent / 100);
+    }
+    return parseFloat((t.investimentoCost || '').replace(',', '.')) || 0;
+  };
+
   const handleOpenAdd = () => {
     setName('');
     setCategory(selectedCategory);
@@ -684,8 +712,8 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         maoDeObraCost: maoDeObraCalculada > 0
           ? maoDeObraCalculada
           : parseFloat(t.maoDeObraCost) || 0,
-        custoCost: parseFloat(t.custoCost) || 0,
-        investimentoCost: parseFloat(t.investimentoCost) || 0,
+        custoCost: calcularCustoAdmAutomatico(t),
+        investimentoCost: calcularInvestimentoAutomatico(t),
       };
     });
 
@@ -1266,36 +1294,41 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                     </div>
                   </div>
 
+                  {/* Custo administrativo e investimento: CALCULADOS, nao mais
+                      digitados. Vem da mesma % configurada em "Minha Empresa"
+                      (ver calcularCustoAdmAutomatico/calcularInvestimentoAutomatico)
+                      — a confeiteira nao faz conta nenhuma aqui. */}
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div>
                       <label className="block text-[10px] font-bold text-[var(--color-pastry-chocolate)] mb-1">
-                        Custo ($)
+                        Custo Adm.
                       </label>
-                      <input
-                        type="text"
-                        inputMode="decimal"
-                        placeholder="0"
-                        value={tamanho.custoCost}
-                        onChange={(e) => handleUpdateTamanho(tamanho.id, 'custoCost', e.target.value)}
-                        className="w-full px-2 py-1.5 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold text-center"
-                        style={{ fontFamily: "'Manrope', sans-serif" }}
-                      />
+                      <div
+                        className="w-full px-2 py-1.5 rounded-lg text-xs font-bold text-center"
+                        style={{ background: '#F6F2F5', color: '#3A2350', fontFamily: "'Manrope', sans-serif" }}
+                        title="% de Custos configurada em Minha Empresa, sobre o preço deste tamanho"
+                      >
+                        {formatMoney(calcularCustoAdmAutomatico(tamanho))}
+                      </div>
                     </div>
                     <div>
                       <label className="block text-[10px] font-bold text-[var(--color-pastry-chocolate)] mb-1">
-                        Investimento ($)
+                        Investimento
                       </label>
-                      <input
-                        type="text"
-                        inputMode="decimal"
-                        placeholder="0"
-                        value={tamanho.investimentoCost}
-                        onChange={(e) => handleUpdateTamanho(tamanho.id, 'investimentoCost', e.target.value)}
-                        className="w-full px-2 py-1.5 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold text-center"
-                        style={{ fontFamily: "'Manrope', sans-serif" }}
-                      />
+                      <div
+                        className="w-full px-2 py-1.5 rounded-lg text-xs font-bold text-center"
+                        style={{ background: '#F6F2F5', color: '#3A2350', fontFamily: "'Manrope', sans-serif" }}
+                        title="% de Investimento configurada em Minha Empresa, sobre o preço deste tamanho"
+                      >
+                        {formatMoney(calcularInvestimentoAutomatico(tamanho))}
+                      </div>
                     </div>
                   </div>
+                  {!estruturaFinanceira?.valido && (
+                    <p className="text-[10px]" style={{ color: '#9A8FA0' }}>
+                      Configure as metas em Minha Empresa para calcular custo e investimento automaticamente.
+                    </p>
+                  )}
 
                   {/* INSUMOS DESTE TAMANHO */}
                   <div className="pt-2 border-t border-[var(--color-pastry-light-pink)]/30 space-y-2">
@@ -1531,6 +1564,22 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         )}
                       </div>
                     ))}
+
+                    {/* Segundo atalho para "Adicionar", logo apos o ultimo
+                        insumo ja cadastrado — quem esta cadastrando uma lista
+                        longa nao precisa rolar de volta ao topo do bloco a
+                        cada novo insumo. O botao do cabecalho continua ali,
+                        para quem prefere ele ou para a lista ainda vazia. */}
+                    {tamanho.ingredients.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => handleAddInsumoTamanho(tamanho.id)}
+                        className="w-full text-[10px] font-bold text-[var(--color-pastry-chocolate)] bg-white border border-dashed border-[var(--color-pastry-light-pink)] rounded-lg py-1.5 flex items-center justify-center gap-1 hover:bg-[var(--color-pastry-cream)] active:scale-95 transition cursor-pointer"
+                      >
+                        <PlusCircle className="w-3.5 h-3.5 text-[var(--color-pastry-light-pink)]" />
+                        <span>Adicionar insumo</span>
+                      </button>
+                    )}
                   </div>
 
                   {/* A CONTA ABERTA — de onde vem cada real deste tamanho.
@@ -1546,8 +1595,8 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                       tamanho.ingredients.reduce((s, i) => s + (Number(i.totalCost) || 0), 0) +
                       repoNum;
                     const mdo = calcularMaoDeObra(tamanho);
-                    const cus = parseFloat((tamanho.custoCost || '').replace(',', '.')) || 0;
-                    const inv = parseFloat((tamanho.investimentoCost || '').replace(',', '.')) || 0;
+                    const cus = calcularCustoAdmAutomatico(tamanho);
+                    const inv = calcularInvestimentoAutomatico(tamanho);
                     const custoTotal = insumos + mdo + cus + inv;
                     const preco = parseFloat((tamanho.preco || '').replace(',', '.')) || 0;
                     const margem = preco - custoTotal;
