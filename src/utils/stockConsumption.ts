@@ -49,6 +49,24 @@ export interface PlanoBaixa {
 }
 
 /**
+ * O que aconteceu numa baixa de pedido.
+ *
+ * `problemas` nao e erro: e a lista de insumos que a ficha pede e o estoque nao
+ * conseguiu atender (nao cadastrado, ou unidade incompativel). O pedido foi
+ * registrado; estes insumos apenas nao baixaram. Quem chama precisa MOSTRAR
+ * isso — engolir era o que fazia o estoque derreter em silencio.
+ *
+ * Movido de EstoqueContext.tsx para aqui (passo 2 da limpeza do sistema
+ * Estoque legado — ver docs/limpeza-estoque-legado.md): e o formato de
+ * retorno tanto da baixa antiga quanto da baixa nova em ProdutosContext.tsx,
+ * entao pertence ao motor de consumo, nao a um contexto especifico.
+ */
+export interface ResultadoBaixa {
+  baixados: { itemNome: string; quantidade: number; unidade: string }[];
+  problemas: ProblemaBaixa[];
+}
+
+/**
  * Monta o plano de baixa de um pedido inteiro.
  *
  * `items` sao os produtos vendidos com sua quantidade ("2x Bolo Matilda").

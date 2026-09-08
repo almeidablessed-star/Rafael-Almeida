@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from './AuthContext';
 import { StockItem, FichaTecnica } from '../types';
-import { planejarBaixa, ProblemaBaixa } from '../utils/stockConsumption';
+import { planejarBaixa, ResultadoBaixa } from '../utils/stockConsumption';
 
 /**
  * Fonte unica do estoque, compartilhada por todas as telas.
@@ -51,18 +51,10 @@ export interface MovimentoEstoque {
   createdAt: number;
 }
 
-/**
- * O que aconteceu numa baixa de pedido.
- *
- * `problemas` nao e erro: e a lista de insumos que a ficha pede e o estoque nao
- * conseguiu atender (nao cadastrado, ou unidade incompativel). O pedido foi
- * registrado; estes insumos apenas nao baixaram. Quem chama precisa MOSTRAR
- * isso — engolir era o que fazia o estoque derreter em silencio.
- */
-export interface ResultadoBaixa {
-  baixados: { itemNome: string; quantidade: number; unidade: string }[];
-  problemas: ProblemaBaixa[];
-}
+// `ResultadoBaixa` mudou para stockConsumption.ts (passo 2 da limpeza do
+// sistema Estoque legado): e o formato de retorno tanto desta baixa antiga
+// quanto da baixa nova em ProdutosContext.tsx, entao pertence ao motor de
+// consumo, nao a um contexto especifico.
 
 interface EstoqueContextType {
   estoque: StockItem[];
