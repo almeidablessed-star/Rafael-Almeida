@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Transaction, SummaryTotals, TransactionType, TimePeriod } from '../types';
 import { formatCurrency, formatDateBr } from '../utils/formatters';
-import { calculateWeeklyBalances, calcularMetaSemanal, calcularEstruturaFinanceira, somarDespesasEmpresa } from '../utils/financialEngine';
+import { calculateWeeklyBalances, calcularMetaSemanal, calcularEstruturaFinanceira, somarDespesasEmpresa, avaliarSaudeFinanceiraProdutos } from '../utils/financialEngine';
 import { useCosts } from '../context/CostsContext';
 import { ResumoDistribuicaoCard } from './ResumoDistribuicaoCard';
 import { ANIMATION_DURATIONS, ANIMATION_EASING } from '../lib/animation-tokens';
@@ -25,6 +25,9 @@ import {
   Clock,
   Smartphone,
   Download,
+  ChevronDown,
+  ChevronUp,
+  ShieldCheck,
 } from 'lucide-react';
 
 interface DashboardProps {
@@ -82,6 +85,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
         administrativeCosts.profitTargetPercent
       )
     : null;
+
+  // Selo de saude financeira: os precos hoje cadastrados nos produtos cobrem
+  // a estrutura definida acima? Mesmo motor de calculo, agregado por conta
+  // inteira (ver financialEngine.ts para a regra completa das faixas).
+  const saudeFinanceira = avaliarSaudeFinanceiraProdutos(fichas, administrativeCosts);
+  const [saudeExpandida, setSaudeExpandida] = useState(false);
 
   // Calculate profit margin percentage (simplified calculation)
   const totalIn = balances.totalPaidSales || 0;
@@ -488,6 +497,110 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   : `Faltam ${formatMoney(meta.faltaFaturar)} para cobrir as contas da semana.`}
               </p>
             </div>
+          )}
+        </div>
+
+        {/* 3b2. SELO DE SAUDE FINANCEIRA DOS PRODUTOS — os precos hoje
+             cadastrados cobrem a estrutura definida em Minha Empresa? Fica
+             logo depois da Meta da Semana porque as duas respondem a mesma
+             pergunta de fundo ("da pra viver disso?"), uma pelo caixa e outra
+             pelo preco de cada produto (Fase 4, item 1 do spec original). */}
+        <div className="space-y-3 w-full mt-6">
+          <div>
+            <h3 className="font-serif-display text-[23px]" style={{ color: '#241B2B' }}>
+              Saúde Financeira dos Produtos
+            </h3>
+            <p className="text-[11px]" style={{ color: '#7A6E80', marginTop: '2px' }}>
+              Seus preços cobrem a estrutura que você definiu em Minha Empresa?
+            </p>
+          </div>
+
+          {!saudeFinanceira.avaliavel ? (
+            <button
+              onClick={() => onNavigateToTab(!estruturaFinanceira?.valido ? 'custos' : 'fichas')}
+              className="w-full text-left rounded-2xl p-4 transition-all active:scale-98"
+              style={{ background: '#F1EBF2', border: '1px dashed #D9CCDB' }}
+            >
+              <p className="text-[12px] font-bold" style={{ color: '#5A3F7F' }}>
+                Ainda não dá pra avaliar
+              </p>
+              <p className="text-[11px] mt-1" style={{ color: '#9A8FA0' }}>
+                {!estruturaFinanceira?.valido
+                  ? 'Configure suas metas em Minha Empresa para ver se seus preços cobrem sua estrutura financeira. Toque para preencher.'
+                  : 'Cadastre o preço e os insumos de pelo menos um tamanho nas suas fichas técnicas. Toque para abrir Fichas Técnicas.'}
+              </p>
+            </button>
+          ) : (
+            (() => {
+              const cores = {
+                verde: { texto: '#2E7D51', fundo: '#EEF8F1', borda: '#C9E9D4', label: 'Tudo em dia' },
+                amarelo: { texto: '#8A6D1F', fundo: '#FFF8E7', borda: '#E8D9A8', label: 'Atenção' },
+                vermelho: { texto: '#C4626F', fundo: '#FDF4F5', borda: '#F0C8CD', label: 'Preços baixos' },
+              } as const;
+              const c = cores[saudeFinanceira.nivel as 'verde' | 'amarelo' | 'vermelho'];
+              const temItens = saudeFinanceira.abaixoDaMeta.length > 0;
+
+              return (
+                <div
+                  className="rounded-2xl overflow-hidden"
+                  style={{ background: 'white', boxShadow: '0 6px 18px rgba(58,35,80,.08)', border: '1px solid #EDE6EF' }}
+                >
+                  <button
+                    onClick={() => temItens && setSaudeExpandida((v) => !v)}
+                    className="w-full text-left p-4 flex items-center gap-3"
+                    style={{ cursor: temItens ? 'pointer' : 'default' }}
+                  >
+                    <div
+                      className="w-10 h-10 rounded-[14px] flex items-center justify-center flex-shrink-0"
+                      style={{ background: c.fundo, color: c.texto }}
+                    >
+                      <ShieldCheck className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-bold" style={{ color: c.texto, fontFamily: "'Manrope', sans-serif" }}>
+                        {c.label}
+                      </p>
+                      <p className="text-[11px]" style={{ color: '#7A6E80' }}>
+                        {temItens
+                          ? `${saudeFinanceira.abaixoDaMeta.length} de ${saudeFinanceira.totalAvaliados} produtos vendendo abaixo do necessário`
+                          : `${saudeFinanceira.totalAvaliados} produto${saudeFinanceira.totalAvaliados === 1 ? '' : 's'} avaliado${saudeFinanceira.totalAvaliados === 1 ? '' : 's'}, todos cobrindo a meta`}
+                      </p>
+                    </div>
+                    {temItens && (
+                      saudeExpandida
+                        ? <ChevronUp className="w-4 h-4 flex-shrink-0" style={{ color: '#9A8FA0' }} />
+                        : <ChevronDown className="w-4 h-4 flex-shrink-0" style={{ color: '#9A8FA0' }} />
+                    )}
+                  </button>
+
+                  {temItens && saudeExpandida && (
+                    <div className="border-t" style={{ borderColor: '#EDE6EF' }}>
+                      <div className="divide-y" style={{ borderColor: '#F1EBF2' }}>
+                        {saudeFinanceira.abaixoDaMeta.map((item) => (
+                          <div key={`${item.fichaId}-${item.tamanhoId}`} className="px-4 py-2.5 flex items-center justify-between gap-2">
+                            <div className="min-w-0">
+                              <p className="text-[12px] font-bold truncate" style={{ color: '#241B2B' }}>
+                                {item.fichaName} <span style={{ color: '#9A8FA0', fontWeight: 400 }}>({item.tamanhoDescricao})</span>
+                              </p>
+                            </div>
+                            <span className="text-[11px] font-bold flex-shrink-0" style={{ color: '#C4626F' }}>
+                              −{formatMoney(item.diferenca)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                      <button
+                        onClick={() => onNavigateToTab('fichas')}
+                        className="w-full py-3 text-[12px] font-bold transition-colors"
+                        style={{ color: '#5A3F7F', borderTop: '1px solid #EDE6EF' }}
+                      >
+                        Ver em Fichas Técnicas
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })()
           )}
         </div>
 

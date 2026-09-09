@@ -1,6 +1,7 @@
-import { Transaction, TimePeriod, SummaryTotals, FichaTecnica, DespesaEmpresa } from '../types';
+import { Transaction, TimePeriod, SummaryTotals, FichaTecnica, DespesaEmpresa, AdministrativeCosts } from '../types';
 import { getTodayIso, formatDateBr } from './formatters';
 import { getCurrentWeekMonday, getCurrentWeekSunday, filterTransactionsByWeek } from './weeklyArchiveUtils';
+import { custoInsumosDoTamanho } from './fichaInsumos';
 
 /**
  * Motor unico de calculo financeiro do Carula.
@@ -1145,5 +1146,130 @@ export const calcularPrecoSugeridoProduto = (
     precoMinimoPorEstrutura,
     precoSugerido,
     percentMaoDeObraDisponivel,
+  };
+};
+
+// ============================================================================
+// Selo de saude financeira dos produtos (Fase 4, item 1 do spec original)
+// ============================================================================
+
+/** Um tamanho vendido abaixo do preco que a estrutura financeira da conta exige. */
+export interface ProdutoAbaixoDaMeta {
+  fichaId: string;
+  fichaName: string;
+  tamanhoId: string;
+  tamanhoDescricao: string;
+  preco: number;
+  precoSugerido: number;
+  /** precoSugerido - preco. Sempre positivo (e o motivo de estar nesta lista). */
+  diferenca: number;
+}
+
+export interface SaudeFinanceiraProdutos {
+  /**
+   * false quando a estrutura financeira ainda nao foi configurada (Minha
+   * Empresa) ou nenhum tamanho tem preco E cmv cadastrados o suficiente para
+   * comparar. Selo deve ficar neutro nesse caso, nunca vermelho — falta de
+   * dado nao e a mesma coisa que preco baixo.
+   */
+  avaliavel: boolean;
+  /** Quantos tamanhos entraram na conta (preco > 0 e CMV > 0). */
+  totalAvaliados: number;
+  abaixoDaMeta: ProdutoAbaixoDaMeta[];
+  percentAbaixo: number;
+  nivel: 'neutro' | 'verde' | 'amarelo' | 'vermelho';
+}
+
+/**
+ * Avalia se os precos hoje praticados nos produtos cadastrados cobrem a
+ * estrutura financeira definida em Minha Empresa. Mesmo motor usado dentro de
+ * cada Ficha Tecnica (`calcularPrecoSugeridoProduto`) — aqui so agrega o
+ * resultado por conta inteira, sem recalcular nada com formula propria.
+ *
+ * Cada TAMANHO e avaliado separadamente, nao a ficha inteira: e o tamanho que
+ * tem preco proprio, e um bolo pode ter um tamanho saudavel e outro no
+ * prejuizo ao mesmo tempo.
+ *
+ * Um tamanho sem CMV cadastrado (nenhum insumo vinculado) e IGNORADO, nao
+ * contado como problema — ele so nao entra na conta, porque sem CMV o motor
+ * nao tem o que comparar. Penalizar pela ausencia de cadastro confundiria
+ * "preco baixo" com "ficha incompleta", dois problemas diferentes.
+ *
+ * Faixas (duas linhas de corte, sem faixa intermediaria orfa):
+ *   verde   = 0% dos avaliados abaixo da meta
+ *   amarelo = ate 50% abaixo da meta
+ *   vermelho = mais da metade abaixo da meta
+ */
+export const avaliarSaudeFinanceiraProdutos = (
+  fichas: FichaTecnica[],
+  administrativeCosts: AdministrativeCosts | null
+): SaudeFinanceiraProdutos => {
+  const neutro: SaudeFinanceiraProdutos = {
+    avaliavel: false,
+    totalAvaliados: 0,
+    abaixoDaMeta: [],
+    percentAbaixo: 0,
+    nivel: 'neutro',
+  };
+
+  if (!administrativeCosts) return neutro;
+
+  const estrutura = calcularEstruturaFinanceira(
+    administrativeCosts.monthlyIncomeTarget,
+    somarDespesasEmpresa(administrativeCosts.despesas || []),
+    administrativeCosts.cmvTargetPercent,
+    administrativeCosts.investmentTargetPercent,
+    administrativeCosts.profitTargetPercent
+  );
+
+  if (!estrutura.valido) return neutro;
+
+  const abaixoDaMeta: ProdutoAbaixoDaMeta[] = [];
+  let totalAvaliados = 0;
+
+  fichas.forEach((ficha) => {
+    (ficha.tamanhos || []).forEach((tamanho) => {
+      const preco = Number(tamanho.preco) || 0;
+      if (preco <= 0) return;
+
+      const cmv = custoInsumosDoTamanho(ficha, tamanho.id) + (Number(ficha.reposicaoCost) || 0);
+      if (cmv <= 0) return;
+
+      totalAvaliados += 1;
+
+      const { precoSugerido } = calcularPrecoSugeridoProduto(
+        cmv,
+        Number(tamanho.horasTrabalho) || 0,
+        Number(tamanho.valorHora) || 0,
+        administrativeCosts.cmvTargetPercent,
+        estrutura
+      );
+
+      if (preco < precoSugerido) {
+        abaixoDaMeta.push({
+          fichaId: ficha.id,
+          fichaName: ficha.name,
+          tamanhoId: tamanho.id,
+          tamanhoDescricao: tamanho.descricao,
+          preco,
+          precoSugerido,
+          diferenca: precoSugerido - preco,
+        });
+      }
+    });
+  });
+
+  if (totalAvaliados === 0) return neutro;
+
+  const percentAbaixo = (abaixoDaMeta.length / totalAvaliados) * 100;
+  const nivel: SaudeFinanceiraProdutos['nivel'] =
+    percentAbaixo === 0 ? 'verde' : percentAbaixo <= 50 ? 'amarelo' : 'vermelho';
+
+  return {
+    avaliavel: true,
+    totalAvaliados,
+    abaixoDaMeta,
+    percentAbaixo,
+    nivel,
   };
 };
