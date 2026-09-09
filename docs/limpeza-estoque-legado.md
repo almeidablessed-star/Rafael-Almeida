@@ -4,21 +4,19 @@
 > estoque, compras e histórico de movimentações. Executado em etapas
 > separadas, cada uma commitada e testada ao vivo antes da próxima.
 
-## Status (atualizado em 2026-09-08)
+## Status (atualizado em 2026-09-08 — limpeza concluída)
 
 | Passo | O quê | Status |
 |---|---|---|
 | 1 | Mover `movimentos`/`fetchMovimentos`/`MovimentoEstoque` para `ProdutosContext` (B2) | ✅ Feito — commit `97a8458` |
 | 2 | Mover `ResultadoBaixa` para `stockConsumption.ts` + resolver a dependência de `useEstoque` no ramo legado de `devolverPedido` (B1) | ✅ Feito — commit `97407ff`. **Escolhida a abordagem (b)** (reescrever o ramo legado para consultar `estoque` direto via `supabase`, por id) em vez da (a) (backfill `estoque_id`→`produto_id`): mais simples, zero risco de dado, sem precisar de migration. O ramo legado continua existindo em `ProdutosContext.tsx`, só não depende mais do contexto. |
-| 3+4+5 (fundidos) | Remover `EstoqueProvider` da árvore + deletar `EstoqueContext.tsx` (B3) + deletar `EstoqueModule.tsx`/limpar linha morta em `FichasTecnicasModule.tsx` (A) + remover aba de `BottomNav.tsx`/`types.ts` + redirect de localStorage `'estoque'→'produtos'` (B4) | ✅ Feito — commit pendente de push nesta sessão. Fundidos numa etapa só porque `EstoqueModule.tsx` ainda usava `useEstoque()` de verdade (CRUD funcional, não código morto) — remover só o provider teria quebrado essa tela em runtime. |
-| 6 | Migration final: dropar a FK `estoque_movimentos.estoque_id → estoque(id)` e então `DROP TABLE public.estoque`, mantendo `estoque_movimentos` e a coluna `estoque_id` como histórico | ⏳ Pendente — único passo que falta |
+| 3+4+5 (fundidos) | Remover `EstoqueProvider` da árvore + deletar `EstoqueContext.tsx` (B3) + deletar `EstoqueModule.tsx`/limpar linha morta em `FichasTecnicasModule.tsx` (A) + remover aba de `BottomNav.tsx`/`types.ts` + redirect de localStorage `'estoque'→'produtos'` (B4) | ✅ Feito — commit `b58fe96`. Fundidos numa etapa só porque `EstoqueModule.tsx` ainda usava `useEstoque()` de verdade (CRUD funcional, não código morto) — remover só o provider teria quebrado essa tela em runtime. |
+| 5.1 (achado na varredura final) | `ProdutosContext.tsx`: ramo legado de `devolverPedido` (`else if (m.estoque_id)`) ainda lia/escrevia `public.estoque` diretamente — resíduo da reescrita do passo 2, que só removeu a dependência do `EstoqueContext` mas não antecipou que a tabela seria dropada | ✅ Feito — commit `8f8a12a`. Mantida só a gravação da linha de histórico em `estoque_movimentos`; testado ao vivo (pedido sintético #50 com `estoque_id` legado) confirmando devolução gravada com `estoque_id: null` e `estoque.quantidade_atual` intocado. |
+| 6 | Migration final: dropar a FK `estoque_movimentos_estoque_id_fkey` e então `DROP TABLE public.estoque`, mantendo `estoque_movimentos` e a coluna `estoque_id` como histórico | ✅ Feito em 2026-09-08. Backup em `public._backup_20260908_estoque` (RLS habilitado, sem policy). Testado ao vivo pós-drop: app carrega sem erro, venda + cancelamento de "Bolo joaquim" funciona ponta a ponta. |
 
-Depois do passo 3+4+5, a única coisa do sistema antigo que ainda existe é a
-**tabela** `public.estoque` em si (sem nenhum código no app lendo ou
-escrevendo nela) e a coluna `estoque_movimentos.estoque_id` (histórico
-somente-leitura, exibido no Histórico de Movimentações ao lado dos
-movimentos novos). O passo 6 é puramente de banco de dados — remove a
-tabela e a constraint, sem tocar em código.
+A limpeza do sistema Estoque legado está concluída. Não existe mais tabela
+`public.estoque` nem qualquer código lendo/escrevendo nela — só o backup
+datado, guardado por segurança.
 
 ## Contexto
 
@@ -126,18 +124,28 @@ branch de `activeTab` casa mais).
 | `planejarBaixa` / `ProblemaBaixa` | `src/utils/stockConsumption.ts` | Usado pelo motor NOVO (`ProdutosContext.tsx`) e por `App.tsx`. |
 | Migrations históricas | `20260830_estoque_movimentos.sql`, `20260907_produtos.sql` (backfill `FROM public.estoque`) | Arquivos históricos, nunca editar/apagar. O backfill de `20260907_produtos.sql` depende de `public.estoque` existir — se a tabela for dropada, essa migration não roda mais do zero num banco limpo. Planejar a remoção da tabela como uma migration nova (Migration B, já prevista desde `20260907_produtos.sql`). |
 
-## Único passo pendente: migration final (passo 6)
+## Passo 6 (concluído): migration final
 
-Dropar a FK `estoque_movimentos.estoque_id → estoque(id)` e então
-`DROP TABLE public.estoque`, mantendo `estoque_movimentos` e a coluna
-`estoque_id` como histórico somente-leitura (os movimentos antigos
-continuam aparecendo no Histórico de Movimentações, só sem a constraint
-apontando para uma tabela que não existe mais).
+Executado em 2026-09-08, em três partes, revisadas linha por linha antes de
+rodar:
 
-Antes de rodar, vale confirmar mais uma vez (mesma cautela dos passos
-anteriores): nenhum código no app lê ou escreve `estoque` diretamente — uma
-busca por `.from('estoque')` no repositório deve dar zero resultados fora
-de arquivos de migration histórica.
+```sql
+-- 1. Backup completo da tabela estoque
+CREATE TABLE IF NOT EXISTS public._backup_20260908_estoque AS TABLE public.estoque;
+ALTER TABLE public._backup_20260908_estoque ENABLE ROW LEVEL SECURITY;
 
-Como sempre: SQL mostrado para revisão antes de aplicar, nunca direto em
-produção sem aprovação explícita.
+-- 2. Remove a FK (a coluna estoque_id em si não é removida — os dados
+--    históricos ficam, só deixam de ser uma referência válida)
+ALTER TABLE public.estoque_movimentos
+  DROP CONSTRAINT estoque_movimentos_estoque_id_fkey;
+
+-- 3. Drop da tabela, só depois da FK removida
+DROP TABLE public.estoque;
+```
+
+Antes de rodar, confirmada mais uma vez (mesma cautela dos passos
+anteriores) uma varredura de `.from('estoque')` no repositório — zero
+resultados fora de migrations históricas — e corrigido o resíduo encontrado
+no passo 5.1 acima. Testado ao vivo depois do drop: app carrega sem erro
+(console limpo em aba nova), 7 abas no rodapé, e um ciclo completo de
+venda + cancelamento de "Bolo joaquim" funciona normalmente.
