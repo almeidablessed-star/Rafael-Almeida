@@ -41,7 +41,6 @@ import { RestockModule } from './components/RestockModule';
 import { CostsModule } from './components/CostsModule';
 import { HistoryModule } from './components/HistoryModule';
 import { WeeklyClosingModule } from './components/WeeklyClosingModule';
-import { BalancesAndExpensesModule } from './components/BalancesAndExpensesModule';
 import { ProdutosModule } from './components/ProdutosModule';
 import { FichasTecnicasModule } from './components/FichasTecnicasModule';
 import { CustomersModule } from './components/CustomersModule';
@@ -72,14 +71,11 @@ function AppContent() {
   } = useTransacoes();
   const [activeTab, setActiveTab] = useState<TabType>(() => {
     const saved = localStorage.getItem('carula_activeTab') as TabType | null;
-    if (saved === 'saldos') {
-      localStorage.setItem('carula_activeTab', 'compras');
-      return 'compras';
-    }
-    // Aba "Estoque" saiu do rodape (substituida pelo filtro Estoque dentro
-    // de Produtos): quem tinha essa aba salva como ultima aberta cairia numa
-    // tela em branco, ja que nenhum branch de activeTab casa mais com ela.
-    if (saved === 'estoque') {
+    // Abas "Saldos" (renomeada para "Compras") e depois "Compras" e "Estoque"
+    // sairam do rodape (substituidas pelos filtros dentro de Produtos): quem
+    // tinha alguma delas salva como ultima aberta cairia numa tela em branco,
+    // ja que nenhum branch de activeTab casa mais com esses valores.
+    if (saved === 'saldos' || saved === 'compras' || saved === 'estoque') {
       localStorage.setItem('carula_activeTab', 'produtos');
       return 'produtos';
     }
@@ -150,7 +146,6 @@ function AppContent() {
     setIsFormModalOpen(true);
   };
 
-  /** Compartilhado entre a aba Compras (rodape) e Produtos > Compras (embutida). */
   const handleAddCompra = async (txData: Omit<Transaction, 'id' | 'createdAt'>) => {
     try {
       await addTransacao(txData);
@@ -454,15 +449,6 @@ function AppContent() {
             onEditTransaction={handleOpenEditModal}
             onDeleteTransaction={handleRequestDelete}
             onTogglePaymentStatus={handleTogglePaymentStatus}
-          />
-        )}
-
-        {activeTab === 'compras' && (
-          <BalancesAndExpensesModule
-            transactions={transactions}
-            onAddTransaction={handleAddCompra}
-            onEditTransaction={handleOpenEditModal}
-            onDeleteTransaction={handleRequestDelete}
           />
         )}
 

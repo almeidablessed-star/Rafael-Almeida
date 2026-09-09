@@ -38,14 +38,6 @@ const IconProdutos = (props: { stroke: string; strokeWidth: number }) => (
   </svg>
 );
 
-const IconCompras = (props: { stroke: string; strokeWidth: number }) => (
-  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" {...props} strokeLinecap="round" strokeLinejoin="round">
-    <path d="M2 3h2.4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 7H6.2"/>
-    <circle cx="9.5" cy="21" r="1.3" fill={props.stroke} stroke="none"/>
-    <circle cx="18" cy="21" r="1.3" fill={props.stroke} stroke="none"/>
-  </svg>
-);
-
 const IconCustos = (props: { stroke: string; strokeWidth: number }) => (
   <svg width="19" height="19" viewBox="0 0 24 24" fill="none" {...props} strokeLinecap="round" strokeLinejoin="round">
     <line x1="12" y1="2" x2="12" y2="22"/>
@@ -65,7 +57,6 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) 
     { id: 'fichas' as TabType, label: 'Fichas', icon: IconFichas },
     { id: 'clientes' as TabType, label: 'Clientes', icon: IconClientes },
     { id: 'produtos' as TabType, label: 'Produtos', icon: IconProdutos },
-    { id: 'compras' as TabType, label: 'Compras', icon: IconCompras },
     { id: 'custos' as TabType, label: 'Minha Empresa', icon: IconCustos },
   ];
 
