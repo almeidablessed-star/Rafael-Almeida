@@ -47,6 +47,7 @@ import { CustomersModule } from './components/CustomersModule';
 import { TransactionFormModal } from './components/TransactionFormModal';
 import { DeleteConfirmModal } from './components/DeleteConfirmModal';
 import { PwaInstallModal } from './components/PwaInstallModal';
+import { GlossaryModal } from './components/GlossaryModal';
 import { BackupModal } from './components/BackupModal';
 import { ProfileModal } from './components/ProfileModal';
 import { LoginModal } from './components/LoginModal';
@@ -98,6 +99,7 @@ function AppContent() {
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isGlossaryModalOpen, setIsGlossaryModalOpen] = useState(false);
 
   // Undo state
   const { saveForUndo, getUndoData, hasUndo } = useUndo();
@@ -422,6 +424,7 @@ function AppContent() {
             onTogglePaymentStatus={handleTogglePaymentStatus}
             onOpenPwaModal={() => setIsPwaModalOpen(true)}
             onOpenBackupModal={() => setIsBackupModalOpen(true)}
+            onOpenGlossaryModal={() => setIsGlossaryModalOpen(true)}
             onOpenProfileModal={() => {
               if (user) {
                 setIsProfileModalOpen(true);
@@ -553,6 +556,12 @@ function AppContent() {
       <PwaInstallModal
         isOpen={isPwaModalOpen}
         onClose={() => setIsPwaModalOpen(false)}
+      />
+
+      {/* Glossario dos termos financeiros (Fase 4, item 2) */}
+      <GlossaryModal
+        isOpen={isGlossaryModalOpen}
+        onClose={() => setIsGlossaryModalOpen(false)}
       />
 
       {/* Backup and Data Management Modal */}

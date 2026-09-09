@@ -28,6 +28,7 @@ import {
   ChevronDown,
   ChevronUp,
   ShieldCheck,
+  HelpCircle,
 } from 'lucide-react';
 
 interface DashboardProps {
@@ -44,6 +45,7 @@ interface DashboardProps {
   onOpenPwaModal?: () => void;
   onOpenBackupModal?: () => void;
   onOpenProfileModal?: () => void;
+  onOpenGlossaryModal?: () => void;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({
@@ -60,6 +62,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onOpenPwaModal,
   onOpenBackupModal,
   onOpenProfileModal,
+  onOpenGlossaryModal,
 }) => {
   const { formatCurrency: formatMoney } = useCurrency();
   const { fichas } = useFichasTecnicas();
@@ -183,6 +186,24 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 title="Baixar Dados"
               >
                 <Download className="w-4 h-4" />
+              </button>
+              <button
+                onClick={onOpenGlossaryModal}
+                className="w-8 h-8 rounded-[11px] text-white flex items-center justify-center"
+                style={{
+                  background: 'rgba(255,255,255,.16)',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.25s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(255,255,255,.3)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(255,255,255,.16)';
+                }}
+                title="Glossário"
+              >
+                <HelpCircle className="w-4 h-4" />
               </button>
             </div>
           </div>
