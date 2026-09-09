@@ -361,12 +361,15 @@ export const ProdutosProvider: React.FC<{ children: React.ReactNode }> = ({ chil
    * tambem, em vez de so em EstoqueContext: um unico cancelamento devolve
    * tudo, mesmo que o pedido tenha itens dos dois mundos.
    *
-   * O ramo `estoque_id` le e escreve a tabela `estoque` direto via `supabase`,
-   * sem depender de [[EstoqueContext]] (passo 2 da limpeza do sistema Estoque
-   * legado — ver docs/limpeza-estoque-legado.md, bloco B1): este contexto nao
-   * precisa mais de `useEstoque()` para nada. Ler o saldo fresco do banco em
-   * vez do array compartilhado tambem evita um saldo desatualizado se aquele
-   * contexto nao tiver sido recarregado desde a ultima escrita.
+   * O ramo `estoque_id` NAO le nem escreve mais a tabela `estoque` (passo
+   * preparatorio para a migration final que vai dropa-la — ver
+   * docs/limpeza-estoque-legado.md, passo 6): atualizar aquele saldo nao tem
+   * efeito visivel nenhum desde que EstoqueModule.tsx foi removido, e
+   * continuar consultando a tabela so criaria uma dependencia de codigo que
+   * quebraria (em silencio, sem lancar erro — so deixando de gravar a
+   * devolucao) no dia em que ela deixasse de existir. So grava a linha de
+   * devolucao no historico, para a tela continuar mostrando o par
+   * consumo/devolucao corretamente.
    */
   const devolverPedido = async (transacaoId: string) => {
     if (!user) throw new Error('User not authenticated');
@@ -402,23 +405,8 @@ export const ProdutosProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           descricao: `Devolução: ${m.item_nome} (Pedido #${numeroCurto(transacaoId)} cancelado)`,
         });
       } else if (m.estoque_id) {
-        const { data: itemAtual, error: errItem } = await supabase
-          .from('estoque')
-          .select('quantidade_atual')
-          .eq('id', m.estoque_id)
-          .eq('usuaria_id', user.id)
-          .maybeSingle();
-        if (errItem || !itemAtual) continue; // insumo apagado do estoque: nao ha onde devolver
-
-        await supabase
-          .from('estoque')
-          .update({ quantidade_atual: Number(itemAtual.quantidade_atual) + Number(m.quantidade) })
-          .eq('id', m.estoque_id)
-          .eq('usuaria_id', user.id);
-
         await supabase.from('estoque_movimentos').insert({
           usuaria_id: user.id,
-          estoque_id: m.estoque_id,
           item_nome: m.item_nome,
           tipo: 'devolucao',
           quantidade: m.quantidade,
