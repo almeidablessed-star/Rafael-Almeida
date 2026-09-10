@@ -48,77 +48,101 @@ export const SetupProfilePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center p-6 bg-gradient-to-b from-[#F5F5F5] to-white">
-      <div className="w-full max-w-md">
-        <div className="mb-12 flex justify-center">
+    <div className="min-h-screen bg-[#EDE7DC]">
+      {/* Cabecalho gradiente — mesmo padrao do topo do onboarding financeiro
+          e do Dashboard, em vez do cinza generico que esta tela usava
+          sozinha (unica pagina fora do padrao visual validado do app). */}
+      <div
+        className="text-white relative overflow-hidden"
+        style={{
+          background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
+          padding: '20px',
+          paddingTop: 'calc(20px + env(safe-area-inset-top, 0px))',
+          paddingBottom: '28px',
+          boxShadow: '0 30px 70px rgba(58,35,80,0.26)',
+          borderRadius: '0px 0px 32px 32px',
+        }}
+      >
+        <div className="flex justify-center mb-3">
           <CarulaLogo />
         </div>
-
-        <h1 className="text-3xl font-bold text-center mb-2">Bem-vinda(o)! 🎉</h1>
-        <p className="text-center text-gray-600 mb-8">Vamos completar seu perfil</p>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="relative">
-            <User className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Seu nome"
-              value={nome}
-              onChange={(e) => setNome(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] bg-white"
-              disabled={isLoading}
-              required
-            />
-          </div>
-
-          <div className="relative">
-            <Store className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Nome da sua confeitaria"
-              value={nomeConfeitaria}
-              onChange={(e) => setNomeConfeitaria(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] bg-white"
-              disabled={isLoading}
-              required
-            />
-          </div>
-
-          <div className="relative">
-            <DollarSign className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" />
-            <select
-              value={moeda}
-              onChange={(e) => setMoeda(e.target.value as 'BRL' | 'USD')}
-              className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] bg-white cursor-pointer"
-              disabled={isLoading}
-            >
-              <option value="BRL">Real Brasileiro (R$)</option>
-              <option value="USD">Dólar Americano ($)</option>
-            </select>
-          </div>
-
-          {error && (
-            <div className="p-3 rounded-lg bg-red-50 border border-red-200">
-              <p className="text-sm text-red-600">{error}</p>
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full py-3 rounded-xl font-semibold text-white flex items-center justify-center gap-2 transition-all disabled:opacity-50"
-            style={{
-              background: isLoading ? '#C0C0C0' : 'linear-gradient(135deg, #6E3F72 0%, #3A2350 100%)',
-            }}
-          >
-            {isLoading ? 'Configurando...' : 'Começar'}
-            {!isLoading && <ArrowRight className="w-4 h-4" />}
-          </button>
-        </form>
-
-        <p className="text-center text-xs text-gray-500 mt-8">
-          Você pode alterar essas informações no seu perfil depois
+        <div className="font-serif-display text-[26px] text-white text-center leading-[1.2]">
+          Bem-vinda(o)! 🎉
+        </div>
+        <p className="text-center text-[12px] text-white/75 mt-1" style={{ fontFamily: "'Manrope', sans-serif" }}>
+          Vamos completar seu perfil
         </p>
+      </div>
+
+      {/* Card de conteudo — mesmo card claro do onboarding */}
+      <div className="max-w-sm mx-auto px-4 -mt-4 relative z-10 pb-10">
+        <div
+          className="bg-[#F6F2F5] rounded-2xl p-5"
+          style={{ boxShadow: '0 8px 20px rgba(58,35,80,0.09)' }}
+        >
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div className="relative">
+              <User className="absolute left-4 top-3.5 w-5 h-5" style={{ color: '#9A8FA0' }} />
+              <input
+                type="text"
+                placeholder="Seu nome"
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 bg-white border border-[#E6E1DB] rounded-xl text-base font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72]"
+                disabled={isLoading}
+                required
+              />
+            </div>
+
+            <div className="relative">
+              <Store className="absolute left-4 top-3.5 w-5 h-5" style={{ color: '#9A8FA0' }} />
+              <input
+                type="text"
+                placeholder="Nome da sua confeitaria"
+                value={nomeConfeitaria}
+                onChange={(e) => setNomeConfeitaria(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 bg-white border border-[#E6E1DB] rounded-xl text-base font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72]"
+                disabled={isLoading}
+                required
+              />
+            </div>
+
+            <div className="relative">
+              <DollarSign className="absolute left-4 top-3.5 w-5 h-5" style={{ color: '#9A8FA0' }} />
+              <select
+                value={moeda}
+                onChange={(e) => setMoeda(e.target.value as 'BRL' | 'USD')}
+                className="w-full pl-12 pr-4 py-3 bg-white border border-[#E6E1DB] rounded-xl text-base font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] cursor-pointer"
+                disabled={isLoading}
+              >
+                <option value="BRL">Real Brasileiro (R$)</option>
+                <option value="USD">Dólar Americano ($)</option>
+              </select>
+            </div>
+
+            {error && (
+              <div className="p-3 rounded-xl bg-[#FDF4F5] border border-[rgba(196,98,111,.35)]">
+                <p className="text-[12px] text-[#C4626F]" style={{ fontFamily: "'Manrope', sans-serif" }}>{error}</p>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full py-3.5 rounded-2xl text-white text-sm font-bold active:scale-98 transition-all flex items-center justify-center gap-2 hover:brightness-110 disabled:opacity-50"
+              style={{
+                background: isLoading ? '#C0C0C0' : 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)',
+              }}
+            >
+              {isLoading ? 'Configurando...' : 'Começar'}
+              {!isLoading && <ArrowRight className="w-4 h-4" />}
+            </button>
+          </form>
+
+          <p className="text-center text-[11px] mt-5" style={{ color: '#9A8FA0', fontFamily: "'Manrope', sans-serif" }}>
+            Você pode alterar essas informações no seu perfil depois
+          </p>
+        </div>
       </div>
     </div>
   );
