@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+﻿import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { FichaTecnica, IngredientUsage, Transaction, TamanhoOpcao, StockItem, Produto } from '../types';
 import { formatCurrency } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
@@ -167,6 +167,11 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   const { saveForUndo, getUndoData } = useUndo();
   const [selectedCategory, setSelectedCategory] = useState<'bolos' | 'doces' | 'salgados' | 'saudaveis' | 'kids'>('bolos');
   const [isCreating, setIsCreating] = useState(false);
+  // PREVIEW do formulario em 3 passos (Identificacao/Insumos/Preco) — ver
+  // "Ficha Tecnica - Opcoes.dc.html". Reseta pra 1 sempre que o formulario
+  // abre (handleOpenAdd/handleOpenEdit), pra nunca abrir num passo do meio.
+  const [formStep, setFormStep] = useState<1 | 2 | 3>(1);
+  const stepFormRef = useRef<HTMLFormElement>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deletingFicha, setDeletingFicha] = useState<FichaTecnica | null>(null);
   const [showUndoToast, setShowUndoToast] = useState(false);
@@ -361,6 +366,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     ]);
     setEditingId(null);
     setIsCreating(true);
+    setFormStep(1);
   };
 
   const handleOpenEdit = async (ficha: FichaTecnica) => {
@@ -406,6 +412,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 
     setEditingId(ficha.id);
     setIsCreating(true);
+    setFormStep(1);
 
     if (!ficha.imageUrl) {
       const imageUrl = await fetchFichaPhoto(ficha.id);
@@ -897,899 +904,712 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         </div>
       )}
 
-      {/* Category Tabs Bar - Flex wrap with 2 lines */}
-      <div
-        className="flex flex-wrap gap-[7px] bg-white rounded-[20px] p-[10px]"
-        style={{
-          boxShadow: '0 6px 16px rgba(58,35,80,.07)',
-        }}
-      >
-        {/* Bolos (Selected) */}
-        <span
-          onClick={() => setSelectedCategory('bolos')}
-          className="flex-shrink-0 cursor-pointer transition-all"
-          style={{
-            fontSize: '10.5px',
-            fontWeight: selectedCategory === 'bolos' ? 800 : 700,
-            color: selectedCategory === 'bolos' ? '#FFFFFF' : '#5B4A6B',
-            background: selectedCategory === 'bolos' ? 'linear-gradient(140deg,#6E3F72,#A85E86)' : '#FFFFFF',
-            borderBottom: selectedCategory === 'bolos' ? '2px solid transparent' : '2px solid #E3D8E5',
-            padding: '8px 12px',
-            borderRadius: '12px 12px 4px 4px',
-            boxShadow: selectedCategory === 'bolos' ? '0 8px 16px rgba(110,63,114,.32)' : 'none',
-          }}
-          onMouseEnter={(e) => {
-            if (selectedCategory !== 'bolos') {
-              e.currentTarget.style.transform = 'translateY(-4px)';
-              e.currentTarget.style.boxShadow = '0 10px 18px rgba(58,35,80,.16)';
-            }
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            if (selectedCategory !== 'bolos') {
-              e.currentTarget.style.boxShadow = 'none';
-            }
-          }}
-        >
-          🎂 Bolos
-        </span>
-
-        {/* Doces & Sobremesas */}
-        <span
-          onClick={() => setSelectedCategory('doces')}
-          className="flex-shrink-0 cursor-pointer transition-all"
-          style={{
-            fontSize: '10.5px',
-            fontWeight: selectedCategory === 'doces' ? 700 : 600,
-            color: selectedCategory === 'doces' ? '#FFFFFF' : '#5B4A6B',
-            background: selectedCategory === 'doces' ? 'linear-gradient(140deg,#6E3F72,#A85E86)' : '#FFFFFF',
-            borderBottom: selectedCategory === 'doces' ? '2px solid transparent' : '2px solid #E3D8E5',
-            padding: '8px 12px',
-            borderRadius: '12px 12px 4px 4px',
-            boxShadow: selectedCategory === 'doces' ? '0 8px 16px rgba(110,63,114,.32)' : 'none',
-          }}
-          onMouseEnter={(e) => {
-            if (selectedCategory !== 'doces') {
-              e.currentTarget.style.transform = 'translateY(-4px)';
-              e.currentTarget.style.boxShadow = '0 10px 18px rgba(58,35,80,.16)';
-            }
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            if (selectedCategory !== 'doces') {
-              e.currentTarget.style.boxShadow = 'none';
-            }
-          }}
-        >
-          🧁 Doces & Sobremesas
-        </span>
-
-        {/* Salgados */}
-        <span
-          onClick={() => setSelectedCategory('salgados')}
-          className="flex-shrink-0 cursor-pointer transition-all"
-          style={{
-            fontSize: '10.5px',
-            fontWeight: selectedCategory === 'salgados' ? 700 : 600,
-            color: selectedCategory === 'salgados' ? '#FFFFFF' : '#5B4A6B',
-            background: selectedCategory === 'salgados' ? 'linear-gradient(140deg,#6E3F72,#A85E86)' : '#FFFFFF',
-            borderBottom: selectedCategory === 'salgados' ? '2px solid transparent' : '2px solid #E3D8E5',
-            padding: '8px 12px',
-            borderRadius: '12px 12px 4px 4px',
-            boxShadow: selectedCategory === 'salgados' ? '0 8px 16px rgba(110,63,114,.32)' : 'none',
-          }}
-          onMouseEnter={(e) => {
-            if (selectedCategory !== 'salgados') {
-              e.currentTarget.style.transform = 'translateY(-4px)';
-              e.currentTarget.style.boxShadow = '0 10px 18px rgba(58,35,80,.16)';
-            }
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            if (selectedCategory !== 'salgados') {
-              e.currentTarget.style.boxShadow = 'none';
-            }
-          }}
-        >
-          🥟 Salgados
-        </span>
-
-        {/* Saudáveis & Fit */}
-        <span
-          onClick={() => setSelectedCategory('saudaveis')}
-          className="flex-shrink-0 cursor-pointer transition-all"
-          style={{
-            fontSize: '10.5px',
-            fontWeight: selectedCategory === 'saudaveis' ? 700 : 600,
-            color: selectedCategory === 'saudaveis' ? '#FFFFFF' : '#5B4A6B',
-            background: selectedCategory === 'saudaveis' ? 'linear-gradient(140deg,#6E3F72,#A85E86)' : '#FFFFFF',
-            borderBottom: selectedCategory === 'saudaveis' ? '2px solid transparent' : '2px solid #E3D8E5',
-            padding: '8px 12px',
-            borderRadius: '12px 12px 4px 4px',
-            boxShadow: selectedCategory === 'saudaveis' ? '0 8px 16px rgba(110,63,114,.32)' : 'none',
-          }}
-          onMouseEnter={(e) => {
-            if (selectedCategory !== 'saudaveis') {
-              e.currentTarget.style.transform = 'translateY(-4px)';
-              e.currentTarget.style.boxShadow = '0 10px 18px rgba(58,35,80,.16)';
-            }
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            if (selectedCategory !== 'saudaveis') {
-              e.currentTarget.style.boxShadow = 'none';
-            }
-          }}
-        >
-          🥗 Saudáveis & Fit
-        </span>
-
-        {/* Kids Friendly */}
-        <span
-          onClick={() => setSelectedCategory('kids')}
-          className="flex-shrink-0 cursor-pointer transition-all"
-          style={{
-            fontSize: '10.5px',
-            fontWeight: selectedCategory === 'kids' ? 700 : 600,
-            color: selectedCategory === 'kids' ? '#FFFFFF' : '#5B4A6B',
-            background: selectedCategory === 'kids' ? 'linear-gradient(140deg,#6E3F72,#A85E86)' : '#FFFFFF',
-            borderBottom: selectedCategory === 'kids' ? '2px solid transparent' : '2px solid #E3D8E5',
-            padding: '8px 12px',
-            borderRadius: '12px 12px 4px 4px',
-            boxShadow: selectedCategory === 'kids' ? '0 8px 16px rgba(110,63,114,.32)' : 'none',
-          }}
-          onMouseEnter={(e) => {
-            if (selectedCategory !== 'kids') {
-              e.currentTarget.style.transform = 'translateY(-4px)';
-              e.currentTarget.style.boxShadow = '0 10px 18px rgba(58,35,80,.16)';
-            }
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            if (selectedCategory !== 'kids') {
-              e.currentTarget.style.boxShadow = 'none';
-            }
-          }}
-        >
-          🧸 Kids Friendly
-        </span>
+      {/* Category chips — ver "Fichas - Aba.dc.html". Layout novo (pilula
+          com contador), mesmas categorias/labels/contagens reais de sempre —
+          antes eram 5 blocos quase identicos repetidos a mao, um por
+          categoria. */}
+      <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+        {(Object.keys(CATEGORY_LABELS) as Array<keyof typeof CATEGORY_LABELS>).map((key) => {
+          const cat = CATEGORY_LABELS[key];
+          const isActive = selectedCategory === key;
+          const count = fichas.filter((f) => f.category === key).length;
+          return (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setSelectedCategory(key as typeof selectedCategory)}
+              className="flex-shrink-0 whitespace-nowrap flex items-center gap-1.5 cursor-pointer transition-all"
+              style={{
+                fontSize: '13px',
+                fontWeight: 600,
+                padding: '9px 14px',
+                borderRadius: '999px',
+                color: isActive ? '#FFFFFF' : '#3A2350',
+                background: isActive ? '#3A2350' : '#FFFFFF',
+                border: `1px solid ${isActive ? '#3A2350' : 'rgba(58,35,80,0.12)'}`,
+                boxShadow: isActive ? '0 8px 16px rgba(58,35,80,0.3)' : '0 2px 4px rgba(58,35,80,0.08)',
+              }}
+              onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.borderColor = '#A85E86'; }}
+              onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.borderColor = 'rgba(58,35,80,0.12)'; }}
+            >
+              <span>{cat.icon} {cat.label}</span>
+              <span style={{ fontSize: '11px', fontWeight: 700, opacity: 0.65 }}>{count}</span>
+            </button>
+          );
+        })}
       </div>
 
-      {/* Editor Modal / Form
-          O corpo segue o mesmo tratamento do formulario de Pedidos: fundo claro
-          #F6F2F5 com os campos brancos por cima. Antes era branco sobre branco,
-          sem separacao entre o formulario e os campos — o que deixava a tela
-          chapada em comparacao com a de Pedidos. */}
+      {/* Formulario de criar/editar ficha, reestruturado em 3 passos — ver
+          "Ficha Tecnica - Opcoes.dc.html" e o plano aprovado. Os 3 passos
+          ficam sempre montados no DOM (visibilidade por `display`, nao por
+          desmontar) para a validacao nativa "required" do Passo 1 continuar
+          funcionando mesmo se a usuaria for direto pro Passo 3 e clicar
+          Salvar. */}
       {isCreating && (
-        <form onSubmit={handleSaveFicha} className="rounded-[32px] p-5 sm:p-6 border-2 border-[var(--color-pastry-light-pink)] shadow-xl space-y-4 animate-slideUp" style={{ background: '#F6F2F5' }}>
-          <div style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)', borderRadius: '20px 20px 0 0', padding: '20px', margin: '-20px -20px 16px -20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <h3 style={{ fontFamily: "'Instrument Serif', serif", fontSize: '20px', fontWeight: 'bold', color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-              <Sparkles className="w-5 h-5 text-[#F5B9C6]" />
-              {editingId ? 'Editar Ficha Técnica' : 'Criar Nova Ficha Técnica'}
-            </h3>
-            <button
-              type="button"
-              onClick={() => setIsCreating(false)}
-              className="p-1.5 rounded-full hover:bg-white/20 text-white transition"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Bloco em cartao branco, como as secoes do formulario de Pedido:
-              o corpo claro fica atras e cada grupo ganha borda e sombra. */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 bg-white p-4 rounded-xl border border-[#E6E1DB] shadow-card">
-            <div>
-              <label className="block text-xs font-bold text-[var(--color-pastry-chocolate)] mb-1" style={{ fontFamily: "'Manrope', sans-serif" }}>
-                Nome do Pedido *
-              </label>
-              <input
-                type="text"
-                required
-                placeholder="Ex: Bolo Vulcão Ninho com Nutella"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#F3E9F3] text-xs font-bold text-[var(--color-pastry-chocolate)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)]"
-                style={{ fontFamily: "'Manrope', sans-serif" }}
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-[var(--color-pastry-chocolate)] mb-1" style={{ fontFamily: "'Manrope', sans-serif" }}>
-                Categoria *
-              </label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value as any)}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#F3E9F3] text-xs font-extrabold text-[var(--color-pastry-chocolate)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)] bg-white"
-                style={{ fontFamily: "'Manrope', sans-serif" }}
-              >
-                <option value="bolos">🎂 Bolos & Massas</option>
-                <option value="doces">🧁 Doces & Sobremesas</option>
-                <option value="salgados">🥟 Salgados & Lanches</option>
-                <option value="saudaveis">🥗 Saudáveis & Fit</option>
-                <option value="kids">🧸 Kids Friendly</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-[var(--color-pastry-chocolate)] mb-1" style={{ fontFamily: "'Manrope', sans-serif" }}>
-                Rendimento *
-              </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <input
-                  type="text"
-                  required
-                  placeholder="Ex: 10 ou 500"
-                  value={yieldInfo}
-                  onChange={(e) => setYieldInfo(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#F3E9F3] text-xs font-bold text-[var(--color-pastry-chocolate)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)]"
-                style={{ fontFamily: "'Manrope', sans-serif" }}
-                />
-
-                <select
-                  value={selectedYieldUnit}
-                  onChange={(e) => handleApplyYieldUnit(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#F3E9F3] text-xs font-extrabold text-[var(--color-pastry-chocolate)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)] bg-white cursor-pointer"
-                style={{ fontFamily: "'Manrope', sans-serif" }}
-                >
-                  <option value="fatias">🍰 Fatias</option>
-                  <option value="gramas">⚖️ Gramas (g)</option>
-                  <option value="unidades">📦 Unidades</option>
-                  <option value="ml">🥛 ML</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-[var(--color-pastry-chocolate)] mb-1" style={{ fontFamily: "'Manrope', sans-serif" }}>
-                Foto
-              </label>
-              <div className="flex items-center gap-2.5">
-                {imageUrl ? (
-                  <div className="relative w-11 h-11 rounded-xl border-2 border-[var(--color-pastry-light-pink)] overflow-hidden shrink-0 shadow-card group">
-                    <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => setImageUrl('')}
-                      className="absolute top-0 right-0 bg-semantic-error-600 text-white p-0.5 rounded-bl text-[9px] font-black hover:bg-semantic-error-700 transition cursor-pointer"
-                      title="Remover Foto"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="w-11 h-11 rounded-xl bg-[var(--color-pastry-cream)] border border-[var(--color-pastry-light-pink)]/50 flex items-center justify-center shrink-0 text-[var(--color-pastry-chocolate)]/40">
-                    <ImageIcon className="w-5 h-5" />
-                  </div>
-                )}
-
-                <label className="flex-1 px-4 py-2.5 bg-[var(--color-pastry-chocolate)] hover:bg-black text-[var(--color-pastry-pink)] rounded-xl text-xs font-bold cursor-pointer text-center shadow-card transition-all active:scale-95 flex items-center justify-center gap-2">
-                  <Upload className="w-4 h-4 text-[var(--color-pastry-pink)]" />
-                  <span>Escolher Foto</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        setImageUrl(await compressImageFile(file));
-                      }
-                    }}
-                    className="hidden"
-                  />
-                </label>
-              </div>
-            </div>
-          </div>
-
-          {/* A lista de ingredientes saiu daqui e foi para DENTRO de cada
-              tamanho: um bolo de 10 fatias e um de 30 nao consomem o mesmo,
-              e uma lista unica fazia a baixa de estoque debitar a mesma
-              quantidade para qualquer tamanho vendido. Manter tambem uma
-              lista no nivel da ficha colocaria duas listas concorrentes na
-              mesma tela. Ver [[insumosDoTamanho]]. */}
-
-
-          {/* TAMANHOS E PREÇOS */}
-          <div className="bg-white p-4 rounded-xl border border-[#E6E1DB] shadow-card space-y-3">
+        <div
+          className="rounded-[24px] overflow-hidden flex flex-col animate-slideUp"
+          style={{ background: '#FFFFFF', boxShadow: '0 30px 70px rgba(58,35,80,0.26)' }}
+        >
+          {/* Cabecalho gradiente com navegacao de passos */}
+          <div
+            style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 55%, #A85E86 100%)' }}
+            className="px-5 pt-[18px] pb-4 flex flex-col gap-3.5 flex-shrink-0"
+          >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-extrabold uppercase text-[var(--color-pastry-chocolate)]">
-                Tamanhos & Preços ({tamanhos.length})
+              <span className="font-serif-display text-white" style={{ fontSize: '23px' }}>
+                {editingId ? 'Editar Ficha Técnica' : 'Criar Nova Ficha Técnica'}
               </span>
-              {/* Some ao atingir o teto, em vez de ficar visivel e nao fazer
-                  nada — um botao que nao responde parece defeito. */}
-              {tamanhos.length < MAX_TAMANHOS && (
-                <button
-                  type="button"
-                  onClick={handleAddTamanho}
-                  className="text-xs font-bold text-white bg-[#3A2350] hover:bg-[#6E3F72] rounded-full pl-2 pr-3 py-1.5 flex items-center gap-1 active:scale-95 transition cursor-pointer"
-                >
-                  <PlusCircle className="w-4 h-4" />
-                  <span>Adicionar</span>
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => setIsCreating(false)}
+                className="w-8 h-8 rounded-[10px] bg-white/15 hover:bg-white/25 flex items-center justify-center text-white transition-colors flex-shrink-0"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
-
-            {/* Cada tamanho e um painel interno em tom claro sobre o cartao
-                branco — a mesma leitura dos blocos aninhados do Pedido, em que
-                o de dentro e mais suave que o de fora, e nao branco sobre
-                branco. */}
-            <div className="space-y-2">
-              {tamanhos.map((tamanho, index) => (
-                <div key={tamanho.id} className="bg-[#F6F2F5]/90 p-2.5 rounded-xl border border-[#E6E1DB] space-y-2">
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div>
-                      <label className="block text-[10px] font-bold text-[var(--color-pastry-chocolate)] mb-1">
-                        Descrição
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Ex: 1, 2, 3"
-                        value={tamanho.descricao}
-                        onChange={(e) => handleUpdateTamanho(tamanho.id, 'descricao', e.target.value)}
-                        className="w-full px-2 py-1.5 bg-white border border-[#E6E1DB] rounded-lg text-xs font-semibold"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-bold text-[var(--color-pastry-chocolate)] mb-1">
-                        Preço ($)
-                      </label>
-                      <input
-                        type="text"
-                        inputMode="decimal"
-                        placeholder="0.00"
-                        value={tamanho.preco}
-                        onChange={(e) => handleUpdateTamanho(tamanho.id, 'preco', e.target.value)}
-                        className="w-full px-2 py-1.5 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold text-center"
-                        style={{ fontFamily: "'Manrope', sans-serif" }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* MÃO DE OBRA — horas x tarifa.
-                      Era um valor em reais digitado direto. Agora ela informa
-                      quanto tempo o bolo leva e quanto cobra pela hora NESTE
-                      bolo (um decorado vale mais por hora que um simples), e o
-                      app faz a conta. */}
-                  <div className="grid grid-cols-3 gap-2 text-xs items-end">
-                    <div>
-                      <label className="block text-[10px] font-bold text-[var(--color-pastry-chocolate)] mb-1">
-                        Horas
-                      </label>
-                      <input
-                        type="text"
-                        inputMode="decimal"
-                        placeholder="0"
-                        value={tamanho.horasTrabalho}
-                        onChange={(e) => handleUpdateTamanho(tamanho.id, 'horasTrabalho', e.target.value)}
-                        className="w-full px-2 py-1.5 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold text-center"
-                        style={{ fontFamily: "'Manrope', sans-serif" }}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-bold text-[var(--color-pastry-chocolate)] mb-1">
-                        $ / hora
-                      </label>
-                      <input
-                        type="text"
-                        inputMode="decimal"
-                        placeholder="0"
-                        value={tamanho.valorHora}
-                        onChange={(e) => handleUpdateTamanho(tamanho.id, 'valorHora', e.target.value)}
-                        className="w-full px-2 py-1.5 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold text-center"
-                        style={{ fontFamily: "'Manrope', sans-serif" }}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-bold text-[var(--color-pastry-chocolate)] mb-1">
-                        Mão de Obra
-                      </label>
-                      <div
-                        className="w-full px-2 py-1.5 rounded-lg text-xs font-bold text-center"
-                        style={{ background: '#F6F2F5', color: '#3A2350', fontFamily: "'Manrope', sans-serif" }}
-                        title="Horas × valor da hora"
-                      >
-                        {formatMoney(calcularMaoDeObra(tamanho))}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Custo administrativo e investimento: CALCULADOS, nao mais
-                      digitados. Vem da mesma % configurada em "Minha Empresa"
-                      (ver calcularCustoAdmAutomatico/calcularInvestimentoAutomatico)
-                      — a confeiteira nao faz conta nenhuma aqui. */}
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div>
-                      <label className="block text-[10px] font-bold text-[var(--color-pastry-chocolate)] mb-1">
-                        Custo Adm.
-                      </label>
-                      <div
-                        className="w-full px-2 py-1.5 rounded-lg text-xs font-bold text-center"
-                        style={{ background: '#F6F2F5', color: '#3A2350', fontFamily: "'Manrope', sans-serif" }}
-                        title="% de Custos configurada em Minha Empresa, sobre o preço deste tamanho"
-                      >
-                        {formatMoney(calcularCustoAdmAutomatico(tamanho))}
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-bold text-[var(--color-pastry-chocolate)] mb-1">
-                        Investimento
-                      </label>
-                      <div
-                        className="w-full px-2 py-1.5 rounded-lg text-xs font-bold text-center"
-                        style={{ background: '#F6F2F5', color: '#3A2350', fontFamily: "'Manrope', sans-serif" }}
-                        title="% de Investimento configurada em Minha Empresa, sobre o preço deste tamanho"
-                      >
-                        {formatMoney(calcularInvestimentoAutomatico(tamanho))}
-                      </div>
-                    </div>
-                  </div>
-                  {!estruturaFinanceira?.valido && (
-                    <p className="text-[10px]" style={{ color: '#9A8FA0' }}>
-                      Configure as metas em Minha Empresa para calcular custo e investimento automaticamente.
-                    </p>
-                  )}
-
-                  {/* INSUMOS DESTE TAMANHO */}
-                  <div className="pt-2 border-t border-[var(--color-pastry-light-pink)]/30 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-extrabold uppercase text-[var(--color-pastry-chocolate)]">
-                        Insumos deste tamanho ({tamanho.ingredients.length})
-                      </span>
-                      <div className="flex items-center gap-2">
-                        {index > 0 && (
-                          <button
-                            type="button"
-                            onClick={() => handleCopiarInsumosDoAnterior(tamanho.id)}
-                            className="text-[10px] font-bold text-[var(--color-pastry-chocolate)] bg-[var(--color-pastry-light-pink)]/25 border border-[var(--color-pastry-light-pink)] rounded-full px-2 py-1 flex items-center gap-1 hover:bg-[var(--color-pastry-light-pink)]/40 active:scale-95 transition cursor-pointer"
-                            title="Copiar a lista do tamanho anterior para ajustar as quantidades"
-                          >
-                            <Copy className="w-3 h-3" />
-                            <span>Copiar anterior</span>
-                          </button>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => handleAddInsumoTamanho(tamanho.id)}
-                          className="text-[10px] font-bold text-[var(--color-pastry-chocolate)] hover:underline flex items-center gap-1 cursor-pointer"
-                        >
-                          <PlusCircle className="w-3.5 h-3.5 text-[var(--color-pastry-light-pink)]" />
-                          <span>Adicionar</span>
-                        </button>
-                      </div>
-                    </div>
-
-                    {tamanho.ingredients.length === 0 && (
-                      <p className="text-[10px]" style={{ color: '#9A8FA0' }}>
-                        Sem insumos neste tamanho — ele não vai baixar estoque.
-                      </p>
-                    )}
-
-                    {tamanho.ingredients.map((ing) => (
-                      <div key={ing.id} className="bg-white p-2 rounded-lg border border-[var(--color-pastry-light-pink)]/30 grid grid-cols-12 gap-1.5 text-xs">
-                        <div className="col-span-12">
-                          <StockItemAutocomplete
-                            value={ing.name}
-                            onChange={(val) => handleUpdateInsumoTamanho(tamanho.id, ing.id, 'name', val)}
-                            onSelect={(item) => {
-                              // Selecionou uma sugestao: vincula por ID direto,
-                              // sem depender do casamento por nome rodar de
-                              // novo (mais robusto que so onChange).
-                              //
-                              // Preserva a unidade que a linha ja tinha (o
-                              // seletor ao lado da quantidade) e converte o
-                              // custo do Produto pra ela — mesma regra de
-                              // aplicarEdicaoDeInsumo. Sobrescrever a unidade
-                              // pela do Produto, como antes, virava "200 g"
-                              // em "200 kg" quando o Produto era cadastrado em
-                              // kg: mesma quantidade, unidade 1000x maior,
-                              // custo inflado 1000x sem nenhum aviso — e este
-                              // e o caminho mais usado no dia a dia pra
-                              // vincular um insumo a um Produto existente.
-                              const produto = produtos.find((p) => String(p.id) === item.id);
-                              if (!produto) return;
-                              const custoBase = custoPorUnidade(produto);
-                              setTamanhos((prev) =>
-                                prev.map((t) =>
-                                  t.id === tamanho.id
-                                    ? {
-                                        ...t,
-                                        ingredients: t.ingredients.map((i2) => {
-                                          if (i2.id !== ing.id) return i2;
-                                          const convertedCost = convertCostToTargetUnit(custoBase, produto.unidadeEmbalagem, i2.unit);
-                                          return {
-                                            ...i2,
-                                            name: produto.nome,
-                                            produtoId: produto.id,
-                                            unitCost: convertedCost,
-                                            totalCost: (Number(i2.quantity) || 0) * convertedCost,
-                                          };
-                                        }),
-                                      }
-                                    : t
-                                )
-                              );
-                            }}
-                            stockItems={produtosParaAutocomplete}
-                            isEnabled={true}
-                            placeholder="Ingrediente (ex: Cacau)"
-                          />
-                        </div>
-                        <div className="col-span-4">
-                          {/* Insumo novo nasce com quantidade 0, e o 0 aparecia
-                              digitado no campo: escrever 200 dava 0200. Zero
-                              vira campo vazio, com "Qtd" de dica. */}
-                          <input
-                            type="number"
-                            placeholder="Qtd"
-                            value={ing.quantity || ''}
-                            onChange={(e) => handleUpdateInsumoTamanho(tamanho.id, ing.id, 'quantity', e.target.value)}
-                            className="w-full px-1.5 py-1 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold text-center"
-                            style={{ fontFamily: "'Manrope', sans-serif" }}
-                          />
-                        </div>
-                        <div className="col-span-3">
-                          <select
-                            value={ing.unit}
-                            onChange={(e) => handleUpdateInsumoTamanho(tamanho.id, ing.id, 'unit', e.target.value)}
-                            className="w-full px-1 py-1 bg-white border border-[#E6E1DB] rounded-lg text-[10px] font-bold"
-                            style={{ fontFamily: "'Manrope', sans-serif" }}
-                          >
-                            <option value="g">g</option>
-                            <option value="ml">ml</option>
-                            <option value="un">un</option>
-                            <option value="kg">kg</option>
-                            <option value="L">L</option>
-                            <option value="pacote">pacote</option>
-                          </select>
-                        </div>
-                        <div className="col-span-4 text-right flex flex-col justify-center">
-                          <span className="text-[9px] text-neutral-500 block">Custo</span>
-                          <span className="font-black text-[11px] text-[var(--color-pastry-chocolate)]">
-                            {formatMoney(ing.totalCost || 0)}
-                          </span>
-                        </div>
-                        <div className="col-span-1 flex justify-end items-center">
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveInsumoTamanho(tamanho.id, ing.id)}
-                            className="p-0.5 text-neutral-400 hover:text-semantic-error-600 cursor-pointer"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-
-                        {/* FLUXO GUIADO (spec Modulo Produtos, secao 3): nome
-                            digitado nao bate com nenhum Produto do catalogo.
-                            So aparece quando ha nome E nao ha produtoId — ou
-                            seja, o casamento por nome em aplicarEdicaoDeInsumo
-                            ja tentou e nao achou nada. */}
-                        {ing.name.trim() !== '' && !ing.produtoId && criandoProdutoInsumo?.insumoId !== ing.id && (
-                          <div className="col-span-12 -mt-1">
-                            <button
-                              type="button"
-                              onClick={() => handleAbrirCriarProduto(tamanho.id, ing.id, ing.name)}
-                              className="text-[10px] font-bold text-[#6E3F72] hover:underline text-left"
-                            >
-                              "{ing.name}" não está cadastrado ainda — adicionar agora?
-                            </button>
-                          </div>
-                        )}
-
-                        {criandoProdutoInsumo?.tamanhoId === tamanho.id && criandoProdutoInsumo?.insumoId === ing.id && (
-                          <div className="col-span-12 bg-[#F6F2F5] rounded-lg border border-[#E6E1DB] p-3 space-y-2 mt-1 animate-slideUp">
-                            <p className="text-[11px] font-bold" style={{ color: '#241B2B' }}>Cadastrar novo produto</p>
-
-                            <input
-                              type="text"
-                              placeholder="Nome"
-                              value={novoProdutoNome}
-                              onChange={(e) => setNovoProdutoNome(e.target.value)}
-                              className="w-full px-2.5 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs"
-                            />
-                            <input
-                              type="text"
-                              list="categorias-sugeridas-ficha"
-                              placeholder="Categoria (opcional)"
-                              value={novoProdutoCategoria}
-                              onChange={(e) => setNovoProdutoCategoria(e.target.value)}
-                              className="w-full px-2.5 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs"
-                            />
-                            <datalist id="categorias-sugeridas-ficha">
-                              <option value="Massa" />
-                              <option value="Recheio" />
-                              <option value="Cobertura" />
-                              <option value="Decoração" />
-                              <option value="Embalagem" />
-                            </datalist>
-                            <div className="flex gap-2">
-                              <input
-                                type="text"
-                                inputMode="decimal"
-                                placeholder="Preço pago"
-                                value={novoProdutoPreco}
-                                onChange={(e) => setNovoProdutoPreco(e.target.value)}
-                                className="flex-1 px-2.5 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs"
-                              />
-                              <input
-                                type="text"
-                                inputMode="decimal"
-                                placeholder="Qtd. embalagem"
-                                value={novoProdutoQtdEmbalagem}
-                                onChange={(e) => setNovoProdutoQtdEmbalagem(e.target.value)}
-                                className="flex-1 px-2.5 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs"
-                              />
-                              <select
-                                value={novoProdutoUnidade}
-                                onChange={(e) => setNovoProdutoUnidade(e.target.value as any)}
-                                className="px-2 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold"
-                              >
-                                <option value="g">g</option>
-                                <option value="kg">kg</option>
-                                <option value="ml">ml</option>
-                                <option value="L">L</option>
-                                <option value="un">un</option>
-                                <option value="pacote">pacote</option>
-                              </select>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <label className="text-[10px]" style={{ color: '#7A6E80' }}>Controlar estoque deste produto?</label>
-                              <button
-                                type="button"
-                                onClick={() => setNovoProdutoControlaEstoque((v) => !v)}
-                                style={{ width: '34px', height: '18px', borderRadius: '9px', border: 'none', cursor: 'pointer', position: 'relative', background: novoProdutoControlaEstoque ? '#6E3F72' : '#E6E1DB', flexShrink: 0 }}
-                              >
-                                <span style={{ position: 'absolute', top: '2px', left: novoProdutoControlaEstoque ? '18px' : '2px', width: '14px', height: '14px', borderRadius: '50%', background: 'white', transition: 'left 0.2s' }} />
-                              </button>
-                            </div>
-                            {novoProdutoControlaEstoque && (
-                              <input
-                                type="text"
-                                inputMode="decimal"
-                                placeholder="Quantidade atual em estoque"
-                                value={novoProdutoQtdAtual}
-                                onChange={(e) => setNovoProdutoQtdAtual(e.target.value)}
-                                className="w-full px-2.5 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs"
-                              />
-                            )}
-                            <div className="flex justify-end gap-2 pt-1">
-                              <button
-                                type="button"
-                                onClick={() => setCriandoProdutoInsumo(null)}
-                                className="px-3 py-1.5 rounded-lg bg-white border border-[#E6E1DB] text-[11px] font-bold text-neutral-700"
-                              >
-                                Cancelar
-                              </button>
-                              <button
-                                type="button"
-                                onClick={handleSalvarNovoProdutoInline}
-                                disabled={salvandoNovoProduto || !novoProdutoNome.trim()}
-                                className="px-3 py-1.5 rounded-lg text-white text-[11px] font-bold disabled:opacity-50"
-                                style={{ background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)' }}
-                              >
-                                {salvandoNovoProduto ? 'Salvando...' : 'Salvar e usar'}
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-
-                    {/* Segundo atalho para "Adicionar", logo apos o ultimo
-                        insumo ja cadastrado — quem esta cadastrando uma lista
-                        longa nao precisa rolar de volta ao topo do bloco a
-                        cada novo insumo. O botao do cabecalho continua ali,
-                        para quem prefere ele ou para a lista ainda vazia. */}
-                    {tamanho.ingredients.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => handleAddInsumoTamanho(tamanho.id)}
-                        className="w-full text-[10px] font-bold text-[var(--color-pastry-chocolate)] bg-white border border-dashed border-[var(--color-pastry-light-pink)] rounded-lg py-1.5 flex items-center justify-center gap-1 hover:bg-[var(--color-pastry-cream)] active:scale-95 transition cursor-pointer"
-                      >
-                        <PlusCircle className="w-3.5 h-3.5 text-[var(--color-pastry-light-pink)]" />
-                        <span>Adicionar insumo</span>
-                      </button>
-                    )}
-                  </div>
-
-                  {/* A CONTA ABERTA — de onde vem cada real deste tamanho.
-                      Os quatro numeros ja existiam espalhados pelo formulario,
-                      mas nada os somava nem comparava com o preco: dava para
-                      cadastrar um bolo que custa mais do que vende sem nada na
-                      tela avisar. Custo fixo NAO entra aqui de proposito — ele
-                      vive na meta semanal do Inicio, porque ratear por bolo
-                      exigiria supor um volume mensal que ninguem sabe. */}
-                  {(() => {
-                    // Insumos DESTE tamanho, nao mais uma soma unica da ficha.
-                    const insumos =
-                      tamanho.ingredients.reduce((s, i) => s + (Number(i.totalCost) || 0), 0) +
-                      repoNum;
-                    const mdo = calcularMaoDeObra(tamanho);
-                    const cus = calcularCustoAdmAutomatico(tamanho);
-                    const inv = calcularInvestimentoAutomatico(tamanho);
-                    const custoTotal = insumos + mdo + cus + inv;
-                    const preco = parseFloat((tamanho.preco || '').replace(',', '.')) || 0;
-                    const margem = preco - custoTotal;
-                    const margemPct = preco > 0 ? (margem / preco) * 100 : 0;
-                    const noPrejuizo = preco > 0 && margem < 0;
-
-                    // Preco calculado pelo motor unico (spec Parte 2, item 26:
-                    // "preco atual x preco calculado"). `insumos` daqui em
-                    // cima E o CMV deste tamanho — mesmo numero, sem calcular
-                    // de novo. So aparece com metas validas e CMV do produto
-                    // preenchido: sem isso o engine nao tem o que comparar.
-                    const horasNum = parseFloat((tamanho.horasTrabalho || '').replace(',', '.')) || 0;
-                    const tarifaNum = parseFloat((tamanho.valorHora || '').replace(',', '.')) || 0;
-                    const precoCalculado =
-                      administrativeCosts && estruturaFinanceira?.valido && insumos > 0
-                        ? calcularPrecoSugeridoProduto(
-                            insumos,
-                            horasNum,
-                            tarifaNum,
-                            administrativeCosts.cmvTargetPercent,
-                            estruturaFinanceira
-                          )
-                        : null;
-                    const abaixoDaMeta = precoCalculado != null && preco > 0 && preco < precoCalculado.precoSugerido;
-
-                    return (
-                      <div
-                        className="rounded-lg px-2.5 py-2 text-[10px] space-y-1"
-                        style={{ background: '#FAF7FA', border: '1px solid #F3E9F3' }}
-                      >
-                        <div className="flex justify-between" style={{ color: '#7A6E80' }}>
-                          <span>Insumos</span><span>{formatMoney(insumos)}</span>
-                        </div>
-                        <div className="flex justify-between" style={{ color: '#7A6E80' }}>
-                          <span>Mão de obra</span><span>{formatMoney(mdo)}</span>
-                        </div>
-                        <div className="flex justify-between" style={{ color: '#7A6E80' }}>
-                          <span>Custo + investimento</span><span>{formatMoney(cus + inv)}</span>
-                        </div>
-                        <div
-                          className="flex justify-between font-bold pt-1"
-                          style={{ borderTop: '1px solid #EDE6EF', color: '#3A2350' }}
-                        >
-                          <span>Custo total</span><span>{formatMoney(custoTotal)}</span>
-                        </div>
-                        <div className="flex justify-between font-bold" style={{ color: '#3A2350' }}>
-                          <span>Preço</span><span>{formatMoney(preco)}</span>
-                        </div>
-                        <div
-                          className="flex justify-between font-bold"
-                          style={{ color: noPrejuizo ? '#C4626F' : '#4CAF7D' }}
-                        >
-                          <span>{noPrejuizo ? '⚠️ Prejuízo' : 'Sobra'}</span>
-                          <span>
-                            {formatMoney(margem)}
-                            {preco > 0 && ` (${margemPct.toFixed(0)}%)`}
-                          </span>
-                        </div>
-                        {noPrejuizo && (
-                          <p style={{ color: '#C4626F', lineHeight: 1.4 }}>
-                            Este tamanho custa mais do que você cobra por ele.
-                          </p>
-                        )}
-                        {precoCalculado && (
-                          <div className="pt-1" style={{ borderTop: '1px solid #EDE6EF' }}>
-                            <div className="flex justify-between" style={{ color: '#7A6E80' }}>
-                              <span>Preço atual</span><span>{preco > 0 ? formatMoney(preco) : '—'}</span>
-                            </div>
-                            <div className="flex justify-between font-bold" style={{ color: '#3A2350' }}>
-                              <span>Preço calculado</span><span>{formatMoney(precoCalculado.precoSugerido)}</span>
-                            </div>
-                            {preco > 0 && (
-                              <p style={{ color: abaixoDaMeta ? '#C4626F' : '#4CAF7D', lineHeight: 1.4, marginTop: '2px' }}>
-                                {abaixoDaMeta
-                                  ? `⚠️ Abaixo da meta em ${formatMoney(precoCalculado.precoSugerido - preco)}`
-                                  : '✓ Na meta ou acima'}
-                              </p>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })()}
-
-                  {tamanhos.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveTamanho(tamanho.id)}
-                      className="w-full text-xs font-bold text-semantic-error-600 hover:bg-semantic-error-50 py-1 rounded cursor-pointer transition"
-                    >
-                      <Trash2 className="w-3.5 h-3.5 inline mr-1" />
-                      Remover
-                    </button>
-                  )}
-                </div>
+            <div className="flex gap-2">
+              {([
+                { n: 1 as const, label: 'Identificação' },
+                { n: 2 as const, label: 'Insumos' },
+                { n: 3 as const, label: 'Preço' },
+              ]).map((s) => (
+                <button
+                  key={s.n}
+                  type="button"
+                  onClick={() => setFormStep(s.n)}
+                  className="flex-1 flex flex-col gap-1.5 cursor-pointer"
+                >
+                  <div style={{ height: '3px', borderRadius: '2px', background: formStep >= s.n ? '#F5B9C6' : 'rgba(255,255,255,0.25)' }} />
+                  <span style={{ fontSize: '11px', fontWeight: 600, color: formStep === s.n ? '#fff' : 'rgba(255,255,255,0.6)' }}>
+                    {s.n} · {s.label}
+                  </span>
+                </button>
               ))}
             </div>
           </div>
 
-          {/* Aviso de preco que nao acompanha o tamanho. Nao bloqueia o
-              salvamento — ver a nota em `avisosDePreco`. */}
-          {avisosDePreco.length > 0 && (
-            <div
-              className="p-3.5 rounded-xl border animate-fadeIn"
-              style={{ background: '#FFF6E8', borderColor: '#F0D2A0' }}
-              role="status"
-            >
-              <div className="flex items-start gap-2.5">
-                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" style={{ color: '#B27A16' }} />
-                <div>
-                  <p
-                    className="text-xs font-bold mb-1"
-                    style={{ color: '#7A5310', fontFamily: "'Manrope', sans-serif" }}
-                  >
-                    Confira os preços por tamanho
-                  </p>
-                  <ul className="space-y-0.5">
-                    {avisosDePreco.map((aviso) => (
-                      <li
-                        key={aviso}
-                        className="text-[11px] leading-relaxed"
-                        style={{ color: '#7A5310', fontFamily: "'Manrope', sans-serif" }}
+          {/* Corpo com rolagem */}
+          <div className="flex-1 overflow-y-auto p-[18px]" style={{ background: '#F6F2F5', maxHeight: '65vh' }}>
+            <form id="form-ficha-stepped" ref={stepFormRef} onSubmit={handleSaveFicha}>
+
+              {/* PASSO 1 — IDENTIFICAÇÃO */}
+              <div data-step={1} style={{ display: formStep === 1 ? 'flex' : 'none', flexDirection: 'column', gap: '14px' }}>
+                <div className="text-[13px]" style={{ color: '#7A6E80' }}>Comece pelo básico da receita.</div>
+
+                <div className="bg-white rounded-2xl p-[18px] flex flex-col gap-3.5" style={{ boxShadow: '0 8px 20px rgba(58,35,80,.09)' }}>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Nome do pedido *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Ex: Bolo Vulcão Ninho com Nutella"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="border rounded-[10px] px-3 py-3 text-[15px]"
+                      style={{ borderColor: 'rgba(58,35,80,0.14)', background: '#FAF7FA' }}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Categoria *</label>
+                    <select
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value as any)}
+                      className="border rounded-[10px] px-3 py-3 text-[15px] font-bold"
+                      style={{ borderColor: 'rgba(58,35,80,0.14)', background: '#FAF7FA' }}
+                    >
+                      <option value="bolos">🎂 Bolos & Massas</option>
+                      <option value="doces">🧁 Doces & Sobremesas</option>
+                      <option value="salgados">🥟 Salgados & Lanches</option>
+                      <option value="saudaveis">🥗 Saudáveis & Fit</option>
+                      <option value="kids">🧸 Kids Friendly</option>
+                    </select>
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Rendimento *</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        required
+                        placeholder="Ex: 10 ou 500"
+                        value={yieldInfo}
+                        onChange={(e) => setYieldInfo(e.target.value)}
+                        className="flex-1 min-w-0 border rounded-[10px] px-3 py-3 text-[15px]"
+                        style={{ borderColor: 'rgba(58,35,80,0.14)', background: '#FAF7FA' }}
+                      />
+                      <select
+                        value={selectedYieldUnit}
+                        onChange={(e) => handleApplyYieldUnit(e.target.value)}
+                        className="flex-1 min-w-0 border rounded-[10px] px-3 py-3 text-[15px] font-bold cursor-pointer"
+                        style={{ borderColor: 'rgba(58,35,80,0.14)', background: '#FAF7FA' }}
                       >
-                        {aviso}
-                      </li>
-                    ))}
-                  </ul>
-                  <p
-                    className="text-[11px] mt-1.5"
-                    style={{ color: '#9A7430', fontFamily: "'Manrope', sans-serif" }}
-                  >
-                    Se for de propósito, pode salvar normalmente.
-                  </p>
+                        <option value="fatias">🍰 Fatias</option>
+                        <option value="gramas">⚖️ Gramas (g)</option>
+                        <option value="unidades">📦 Unidades</option>
+                        <option value="ml">🥛 ML</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Foto</label>
+                    {imageUrl ? (
+                      <div className="flex items-center gap-3">
+                        <div className="relative w-11 h-11 rounded-xl overflow-hidden flex-shrink-0" style={{ border: '2px solid #F3E9F3' }}>
+                          <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setImageUrl('')}
+                          className="text-xs font-bold"
+                          style={{ color: '#C4626F' }}
+                        >
+                          Remover foto
+                        </button>
+                      </div>
+                    ) : (
+                      <label
+                        className="flex items-center gap-3 border border-dashed rounded-xl p-3 cursor-pointer transition-colors"
+                        style={{ borderColor: 'rgba(58,35,80,0.22)', background: '#FAF7FA' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#A85E86'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(58,35,80,0.22)'; }}
+                      >
+                        <div className="w-11 h-11 rounded-[10px] flex items-center justify-center text-xl flex-shrink-0" style={{ background: '#F3E9F3' }}>🍰</div>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-semibold" style={{ color: '#3A2350' }}>Escolher foto</span>
+                          <span className="text-xs" style={{ color: '#7A6E80' }}>PNG ou JPG, até 5 MB</span>
+                        </div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (file) setImageUrl(await compressImageFile(file));
+                          }}
+                          className="hidden"
+                        />
+                      </label>
+                    )}
+                  </div>
+                </div>
+
+                {/* Tamanhos — decisao estrutural (quantos tamanhos esta ficha
+                    tem), separada do CONTEUDO de cada um (insumos no Passo 2,
+                    preco no Passo 3). O mockup nao mostra isso porque a ficha
+                    de exemplo dele so tem 1 tamanho; o formulario real
+                    suporta varios. */}
+                <div className="bg-white rounded-2xl p-4 flex flex-col gap-3" style={{ boxShadow: '0 8px 20px rgba(58,35,80,.09)' }}>
+                  <div className="flex items-center justify-between">
+                    <div className="font-serif-display text-lg" style={{ color: '#3A2350' }}>
+                      Tamanhos ({tamanhos.length})
+                    </div>
+                    {tamanhos.length < MAX_TAMANHOS && (
+                      <button
+                        type="button"
+                        onClick={handleAddTamanho}
+                        className="text-xs font-bold cursor-pointer"
+                        style={{ color: '#6E3F72' }}
+                      >
+                        + Adicionar
+                      </button>
+                    )}
+                  </div>
+                  {tamanhos.map((tamanho) => (
+                    <div key={tamanho.id} className="flex items-center gap-2.5">
+                      <input
+                        type="text"
+                        placeholder="Ex: 20 cm, 1, 2"
+                        value={tamanho.descricao}
+                        onChange={(e) => handleUpdateTamanho(tamanho.id, 'descricao', e.target.value)}
+                        className="flex-1 min-w-0 border rounded-[10px] px-3 py-2.5 text-sm font-semibold"
+                        style={{ borderColor: 'rgba(58,35,80,0.14)', background: '#FAF7FA' }}
+                      />
+                      {tamanhos.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveTamanho(tamanho.id)}
+                          className="text-xs font-bold flex-shrink-0"
+                          style={{ color: '#C4626F' }}
+                        >
+                          Remover
+                        </button>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
-            </div>
-          )}
 
-          {/* Aqui ficava o bloco "Sugestao de Preco de Venda", em barra escura
-              com o valor em destaque. Removido a pedido: nao foi pedido, nao
-              batia com o resto do app, e o numero que exibia era o
-              `reposicaoCost` da ficha — nao uma sugestao de preco de venda,
-              apesar do rotulo. A conta que importa (custo x preco x sobra) ja
-              aparece dentro de cada tamanho, onde a decisao e tomada. */}
+              {/* PASSO 2 — INSUMOS (um bloco por tamanho, todos empilhados —
+                  nao um seletor, pra nao perder a visao simultanea que ja
+                  existe hoje) */}
+              <div data-step={2} style={{ display: formStep === 2 ? 'flex' : 'none', flexDirection: 'column', gap: '14px' }}>
+                {tamanhos.map((tamanho, index) => (
+                  <div key={tamanho.id} className="flex flex-col gap-3">
+                    <div className="text-[13px]" style={{ color: '#7A6E80' }}>
+                      Tamanho <strong style={{ color: '#241B2B' }}>{tamanho.descricao || '(sem nome)'}</strong> · {tamanho.ingredients.length} insumo{tamanho.ingredients.length === 1 ? '' : 's'}
+                    </div>
 
-          {/* Salvar em roxo solido, Cancelar em branco com borda.
-              Cores literais pelo mesmo motivo do bloco de preco acima: o
-              `bg-[var(--color-pastry-chocolate)]` que estava aqui resolvia para
-              vazio, entao o botao aparecia SEM cor de fundo — nao era a cor
-              errada, era a ausencia dela. */}
-          <div className="flex items-center justify-end gap-2 pt-2">
+                    <div className="bg-white rounded-2xl p-2 flex flex-col" style={{ boxShadow: '0 8px 20px rgba(58,35,80,.09)' }}>
+                      {tamanho.ingredients.length === 0 && (
+                        <p className="text-xs px-2 pt-2" style={{ color: '#9A8FA0' }}>
+                          Sem insumos neste tamanho — ele não vai baixar estoque.
+                        </p>
+                      )}
+                      {tamanho.ingredients.map((ing) => (
+                        <div key={ing.id} className="p-2 grid grid-cols-12 gap-1.5 text-xs border-b" style={{ borderColor: 'rgba(58,35,80,0.07)' }}>
+                          <div className="col-span-12">
+                            <StockItemAutocomplete
+                              value={ing.name}
+                              onChange={(val) => handleUpdateInsumoTamanho(tamanho.id, ing.id, 'name', val)}
+                              onSelect={(item) => {
+                                const produto = produtos.find((p) => String(p.id) === item.id);
+                                if (!produto) return;
+                                const custoBase = custoPorUnidade(produto);
+                                setTamanhos((prev) =>
+                                  prev.map((t) =>
+                                    t.id === tamanho.id
+                                      ? {
+                                          ...t,
+                                          ingredients: t.ingredients.map((i2) => {
+                                            if (i2.id !== ing.id) return i2;
+                                            const convertedCost = convertCostToTargetUnit(custoBase, produto.unidadeEmbalagem, i2.unit);
+                                            return {
+                                              ...i2,
+                                              name: produto.nome,
+                                              produtoId: produto.id,
+                                              unitCost: convertedCost,
+                                              totalCost: (Number(i2.quantity) || 0) * convertedCost,
+                                            };
+                                          }),
+                                        }
+                                      : t
+                                  )
+                                );
+                              }}
+                              stockItems={produtosParaAutocomplete}
+                              isEnabled={true}
+                              placeholder="Ingrediente (ex: Cacau)"
+                            />
+                          </div>
+                          <div className="col-span-4">
+                            <input
+                              type="number"
+                              placeholder="Qtd"
+                              value={ing.quantity || ''}
+                              onChange={(e) => handleUpdateInsumoTamanho(tamanho.id, ing.id, 'quantity', e.target.value)}
+                              className="w-full px-1.5 py-1 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold text-center"
+                              style={{ fontFamily: "'Manrope', sans-serif" }}
+                            />
+                          </div>
+                          <div className="col-span-3">
+                            <select
+                              value={ing.unit}
+                              onChange={(e) => handleUpdateInsumoTamanho(tamanho.id, ing.id, 'unit', e.target.value)}
+                              className="w-full px-1 py-1 bg-white border border-[#E6E1DB] rounded-lg text-[10px] font-bold"
+                              style={{ fontFamily: "'Manrope', sans-serif" }}
+                            >
+                              <option value="g">g</option>
+                              <option value="ml">ml</option>
+                              <option value="un">un</option>
+                              <option value="kg">kg</option>
+                              <option value="L">L</option>
+                              <option value="pacote">pacote</option>
+                            </select>
+                          </div>
+                          <div className="col-span-4 text-right flex flex-col justify-center">
+                            <span className="text-[9px] text-neutral-500 block">Custo</span>
+                            <span className="font-black text-[11px]" style={{ color: '#3A2350' }}>
+                              {formatMoney(ing.totalCost || 0)}
+                            </span>
+                          </div>
+                          <div className="col-span-1 flex justify-end items-center">
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveInsumoTamanho(tamanho.id, ing.id)}
+                              className="p-0.5 text-neutral-400 hover:text-semantic-error-600 cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+
+                          {ing.name.trim() !== '' && !ing.produtoId && criandoProdutoInsumo?.insumoId !== ing.id && (
+                            <div className="col-span-12 -mt-1">
+                              <button
+                                type="button"
+                                onClick={() => handleAbrirCriarProduto(tamanho.id, ing.id, ing.name)}
+                                className="text-[10px] font-bold hover:underline text-left"
+                                style={{ color: '#6E3F72' }}
+                              >
+                                "{ing.name}" não está cadastrado ainda — adicionar agora?
+                              </button>
+                            </div>
+                          )}
+
+                          {criandoProdutoInsumo?.tamanhoId === tamanho.id && criandoProdutoInsumo?.insumoId === ing.id && (
+                            <div className="col-span-12 rounded-lg border p-3 space-y-2 mt-1 animate-slideUp" style={{ background: '#F6F2F5', borderColor: '#E6E1DB' }}>
+                              <p className="text-[11px] font-bold" style={{ color: '#241B2B' }}>Cadastrar novo produto</p>
+                              <input
+                                type="text"
+                                placeholder="Nome"
+                                value={novoProdutoNome}
+                                onChange={(e) => setNovoProdutoNome(e.target.value)}
+                                className="w-full px-2.5 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs"
+                              />
+                              <input
+                                type="text"
+                                list="categorias-sugeridas-ficha-v2"
+                                placeholder="Categoria (opcional)"
+                                value={novoProdutoCategoria}
+                                onChange={(e) => setNovoProdutoCategoria(e.target.value)}
+                                className="w-full px-2.5 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs"
+                              />
+                              <datalist id="categorias-sugeridas-ficha-v2">
+                                <option value="Massa" />
+                                <option value="Recheio" />
+                                <option value="Cobertura" />
+                                <option value="Decoração" />
+                                <option value="Embalagem" />
+                              </datalist>
+                              <div className="flex gap-2">
+                                <input
+                                  type="text"
+                                  inputMode="decimal"
+                                  placeholder="Preço pago"
+                                  value={novoProdutoPreco}
+                                  onChange={(e) => setNovoProdutoPreco(e.target.value)}
+                                  className="flex-1 px-2.5 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs"
+                                />
+                                <input
+                                  type="text"
+                                  inputMode="decimal"
+                                  placeholder="Qtd. embalagem"
+                                  value={novoProdutoQtdEmbalagem}
+                                  onChange={(e) => setNovoProdutoQtdEmbalagem(e.target.value)}
+                                  className="flex-1 px-2.5 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs"
+                                />
+                                <select
+                                  value={novoProdutoUnidade}
+                                  onChange={(e) => setNovoProdutoUnidade(e.target.value as any)}
+                                  className="px-2 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold"
+                                >
+                                  <option value="g">g</option>
+                                  <option value="kg">kg</option>
+                                  <option value="ml">ml</option>
+                                  <option value="L">L</option>
+                                  <option value="un">un</option>
+                                  <option value="pacote">pacote</option>
+                                </select>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <label className="text-[10px]" style={{ color: '#7A6E80' }}>Controlar estoque deste produto?</label>
+                                <button
+                                  type="button"
+                                  onClick={() => setNovoProdutoControlaEstoque((v) => !v)}
+                                  style={{ width: '34px', height: '18px', borderRadius: '9px', border: 'none', cursor: 'pointer', position: 'relative', background: novoProdutoControlaEstoque ? '#6E3F72' : '#E6E1DB', flexShrink: 0 }}
+                                >
+                                  <span style={{ position: 'absolute', top: '2px', left: novoProdutoControlaEstoque ? '18px' : '2px', width: '14px', height: '14px', borderRadius: '50%', background: 'white', transition: 'left 0.2s' }} />
+                                </button>
+                              </div>
+                              {novoProdutoControlaEstoque && (
+                                <input
+                                  type="text"
+                                  inputMode="decimal"
+                                  placeholder="Quantidade atual em estoque"
+                                  value={novoProdutoQtdAtual}
+                                  onChange={(e) => setNovoProdutoQtdAtual(e.target.value)}
+                                  className="w-full px-2.5 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs"
+                                />
+                              )}
+                              <div className="flex justify-end gap-2 pt-1">
+                                <button
+                                  type="button"
+                                  onClick={() => setCriandoProdutoInsumo(null)}
+                                  className="px-3 py-1.5 rounded-lg bg-white border border-[#E6E1DB] text-[11px] font-bold text-neutral-700"
+                                >
+                                  Cancelar
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={handleSalvarNovoProdutoInline}
+                                  disabled={salvandoNovoProduto || !novoProdutoNome.trim()}
+                                  className="px-3 py-1.5 rounded-lg text-white text-[11px] font-bold disabled:opacity-50"
+                                  style={{ background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)' }}
+                                >
+                                  {salvandoNovoProduto ? 'Salvando...' : 'Salvar e usar'}
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                      <div className="p-2 flex items-center justify-between gap-2">
+                        {index > 0 ? (
+                          <button
+                            type="button"
+                            onClick={() => handleCopiarInsumosDoAnterior(tamanho.id)}
+                            className="text-xs font-bold flex items-center gap-1 cursor-pointer"
+                            style={{ color: '#6E3F72' }}
+                          >
+                            <Copy className="w-3 h-3" />
+                            Copiar anterior
+                          </button>
+                        ) : <span />}
+                        <button
+                          type="button"
+                          onClick={() => handleAddInsumoTamanho(tamanho.id)}
+                          className="text-xs font-bold cursor-pointer"
+                          style={{ color: '#6E3F72' }}
+                        >
+                          + Adicionar insumo
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="bg-white rounded-2xl p-4 grid grid-cols-2 gap-3" style={{ boxShadow: '0 8px 20px rgba(58,35,80,.09)' }}>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Horas</label>
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          placeholder="0"
+                          value={tamanho.horasTrabalho}
+                          onChange={(e) => handleUpdateTamanho(tamanho.id, 'horasTrabalho', e.target.value)}
+                          className="border rounded-[10px] px-2.5 py-2.5 text-sm font-bold text-right"
+                          style={{ borderColor: 'rgba(58,35,80,0.14)', background: '#FAF7FA' }}
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>R$ / hora</label>
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          placeholder="0"
+                          value={tamanho.valorHora}
+                          onChange={(e) => handleUpdateTamanho(tamanho.id, 'valorHora', e.target.value)}
+                          className="border rounded-[10px] px-2.5 py-2.5 text-sm font-bold text-right"
+                          style={{ borderColor: 'rgba(58,35,80,0.14)', background: '#FAF7FA' }}
+                        />
+                      </div>
+                      <div className="col-span-2 flex items-center justify-between rounded-[10px] px-3 py-2.5" style={{ background: '#F3E9F3' }}>
+                        <span className="text-xs font-semibold" style={{ color: '#6E3F72' }}>Mão de obra</span>
+                        <span className="text-sm font-bold" style={{ color: '#3A2350' }}>{formatMoney(calcularMaoDeObra(tamanho))}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* PASSO 3 — PREÇO (um bloco por tamanho, mesma quebra ja
+                  implementada hoje: Insumos / Mao de obra / Custo+investimento
+                  / Custo total / Sobra ou Prejuizo / Preco calculado) */}
+              <div data-step={3} style={{ display: formStep === 3 ? 'flex' : 'none', flexDirection: 'column', gap: '14px' }}>
+                {tamanhos.map((tamanho) => {
+                  const insumos =
+                    tamanho.ingredients.reduce((s, i) => s + (Number(i.totalCost) || 0), 0) + repoNum;
+                  const mdo = calcularMaoDeObra(tamanho);
+                  const cus = calcularCustoAdmAutomatico(tamanho);
+                  const inv = calcularInvestimentoAutomatico(tamanho);
+                  const custoTotal = insumos + mdo + cus + inv;
+                  const preco = parseFloat((tamanho.preco || '').replace(',', '.')) || 0;
+                  const margem = preco - custoTotal;
+                  const margemPct = preco > 0 ? (margem / preco) * 100 : 0;
+                  const noPrejuizo = preco > 0 && margem < 0;
+                  const horasNum = parseFloat((tamanho.horasTrabalho || '').replace(',', '.')) || 0;
+                  const tarifaNum = parseFloat((tamanho.valorHora || '').replace(',', '.')) || 0;
+                  const precoCalculado =
+                    administrativeCosts && estruturaFinanceira?.valido && insumos > 0
+                      ? calcularPrecoSugeridoProduto(insumos, horasNum, tarifaNum, administrativeCosts.cmvTargetPercent, estruturaFinanceira)
+                      : null;
+                  const abaixoDaMeta = precoCalculado != null && preco > 0 && preco < precoCalculado.precoSugerido;
+
+                  return (
+                    <div key={tamanho.id} className="flex flex-col gap-3">
+                      <div className="text-[13px]" style={{ color: '#7A6E80' }}>
+                        Tamanho <strong style={{ color: '#241B2B' }}>{tamanho.descricao || '(sem nome)'}</strong>
+                      </div>
+
+                      <div className="bg-white rounded-2xl p-[18px] flex flex-col gap-3" style={{ boxShadow: '0 8px 20px rgba(58,35,80,.09)' }}>
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Preço de venda (R$)</label>
+                          <input
+                            type="text"
+                            inputMode="decimal"
+                            placeholder="0,00"
+                            value={tamanho.preco}
+                            onChange={(e) => handleUpdateTamanho(tamanho.id, 'preco', e.target.value)}
+                            className="border rounded-[10px] px-3.5 py-3.5 text-xl font-bold text-right"
+                            style={{ borderColor: 'rgba(58,35,80,0.14)', background: '#FAF7FA', color: '#3A2350' }}
+                          />
+                        </div>
+
+                        {!estruturaFinanceira?.valido && (
+                          <p className="text-xs" style={{ color: '#9A8FA0' }}>
+                            Configure as metas em Minha Empresa para calcular custo e investimento automaticamente.
+                          </p>
+                        )}
+
+                        <div className="rounded-lg px-3 py-2.5 text-xs space-y-1" style={{ background: '#FAF7FA', border: '1px solid #F3E9F3' }}>
+                          <div className="flex justify-between" style={{ color: '#7A6E80' }}>
+                            <span>Insumos</span><span>{formatMoney(insumos)}</span>
+                          </div>
+                          <div className="flex justify-between" style={{ color: '#7A6E80' }}>
+                            <span>Mão de obra</span><span>{formatMoney(mdo)}</span>
+                          </div>
+                          <div className="flex justify-between" style={{ color: '#7A6E80' }}>
+                            <span>Custo + investimento</span><span>{formatMoney(cus + inv)}</span>
+                          </div>
+                          <div className="flex justify-between font-bold pt-1" style={{ borderTop: '1px solid #EDE6EF', color: '#3A2350' }}>
+                            <span>Custo total</span><span>{formatMoney(custoTotal)}</span>
+                          </div>
+                          <div className="flex justify-between font-bold" style={{ color: noPrejuizo ? '#C4626F' : '#4CAF7D' }}>
+                            <span>{noPrejuizo ? '⚠️ Prejuízo' : 'Sobra'}</span>
+                            <span>{formatMoney(margem)}{preco > 0 && ` (${margemPct.toFixed(0)}%)`}</span>
+                          </div>
+                          {noPrejuizo && (
+                            <p style={{ color: '#C4626F', lineHeight: 1.4 }}>Este tamanho custa mais do que você cobra por ele.</p>
+                          )}
+                          {precoCalculado && (
+                            <div className="pt-1" style={{ borderTop: '1px solid #EDE6EF' }}>
+                              <div className="flex justify-between" style={{ color: '#7A6E80' }}>
+                                <span>Preço atual</span><span>{preco > 0 ? formatMoney(preco) : '—'}</span>
+                              </div>
+                              <div className="flex justify-between font-bold" style={{ color: '#3A2350' }}>
+                                <span>Preço calculado</span><span>{formatMoney(precoCalculado.precoSugerido)}</span>
+                              </div>
+                              {preco > 0 && (
+                                <p style={{ color: abaixoDaMeta ? '#C4626F' : '#4CAF7D', lineHeight: 1.4, marginTop: '2px' }}>
+                                  {abaixoDaMeta
+                                    ? `⚠️ Abaixo da meta em ${formatMoney(precoCalculado.precoSugerido - preco)}`
+                                    : '✓ Na meta ou acima'}
+                                </p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {avisosDePreco.length > 0 && (
+                  <div className="p-3.5 rounded-xl border animate-fadeIn" style={{ background: '#FFF6E8', borderColor: '#F0D2A0' }} role="status">
+                    <div className="flex items-start gap-2.5">
+                      <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" style={{ color: '#B27A16' }} />
+                      <div>
+                        <p className="text-xs font-bold mb-1" style={{ color: '#7A5310', fontFamily: "'Manrope', sans-serif" }}>
+                          Confira os preços por tamanho
+                        </p>
+                        <ul className="space-y-0.5">
+                          {avisosDePreco.map((aviso) => (
+                            <li key={aviso} className="text-[11px] leading-relaxed" style={{ color: '#7A5310', fontFamily: "'Manrope', sans-serif" }}>
+                              {aviso}
+                            </li>
+                          ))}
+                        </ul>
+                        <p className="text-[11px] mt-1.5" style={{ color: '#9A7430', fontFamily: "'Manrope', sans-serif" }}>
+                          Se for de propósito, pode salvar normalmente.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </form>
+          </div>
+
+          {/* Rodape fixo */}
+          <div
+            className="flex-shrink-0 bg-white flex gap-2.5 items-center justify-between p-4"
+            style={{ borderTop: '1px solid rgba(58,35,80,0.08)' }}
+          >
             <button
               type="button"
-              onClick={() => setIsCreating(false)}
-              className="px-4 py-2.5 rounded-xl bg-white border border-[#E6E1DB] text-xs font-bold text-neutral-700 hover:bg-neutral-50 shadow-card cursor-pointer transition-all active:scale-95"
+              onClick={() => (formStep === 1 ? setIsCreating(false) : setFormStep((s) => (s - 1) as 1 | 2 | 3))}
+              className="px-[18px] py-3 rounded-[10px] text-sm font-semibold transition-colors"
+              style={{ border: '1px solid rgba(58,35,80,0.16)', color: '#3A2350' }}
             >
-              Cancelar
+              {formStep === 1 ? 'Cancelar' : 'Voltar'}
             </button>
-            <button
-              type="submit"
-              className="px-5 py-2.5 rounded-xl bg-[#6E3F72] hover:bg-[#5A3560] text-white font-bold text-xs shadow-card flex items-center gap-1.5 cursor-pointer transition-all active:scale-95"
-            >
-              <Check className="w-4 h-4 stroke-[2.5]" />
-              Salvar Ficha Técnica
-            </button>
+            {formStep < 3 ? (
+              <button
+                type="button"
+                onClick={() => setFormStep((s) => (s + 1) as 1 | 2 | 3)}
+                className="flex-1 text-center py-3 rounded-[10px] text-white text-sm font-semibold transition-colors"
+                style={{ background: '#3A2350', boxShadow: '0 10px 20px rgba(58,35,80,.3)' }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = '#6E3F72'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = '#3A2350'; }}
+              >
+                Continuar
+              </button>
+            ) : (
+              <button
+                type="submit"
+                form="form-ficha-stepped"
+                className="flex-1 text-center py-3 rounded-[10px] text-white text-sm font-semibold flex items-center justify-center gap-1.5 transition-colors"
+                style={{ background: '#3A2350', boxShadow: '0 10px 20px rgba(58,35,80,.3)' }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = '#6E3F72'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = '#3A2350'; }}
+                onClick={(e) => {
+                  const form = stepFormRef.current;
+                  if (!form || form.checkValidity()) return;
+                  e.preventDefault();
+                  const invalidField = form.querySelector<HTMLElement>(':invalid');
+                  const invalidStepEl = invalidField?.closest<HTMLElement>('[data-step]');
+                  const invalidStep = invalidStepEl ? (Number(invalidStepEl.dataset.step) as 1 | 2 | 3) : 1;
+                  setFormStep(invalidStep);
+                  requestAnimationFrame(() => form.reportValidity());
+                }}
+              >
+                <Check className="w-4 h-4 stroke-[2.5]" />
+                Salvar ficha técnica
+              </button>
+            )}
           </div>
-        </form>
+        </div>
       )}
 
       {/* FICHAS CARDS LIST - SEGUINDO FIELMENTE O DESIGN DE REFERÊNCIA */}
       <div className="space-y-3">
         {filteredFichas.length === 0 ? (
-          <div className="p-8 rounded-[32px] bg-white border border-dashed border-[var(--color-pastry-light-pink)]/50 text-center space-y-3">
-            <BookOpen className="w-10 h-10 text-[var(--color-pastry-chocolate)]/40 mx-auto" />
-            <p className="text-xs text-[var(--color-pastry-chocolate)]/70 font-semibold">
-              Nenhuma ficha técnica cadastrada neste setor.
-            </p>
-            <button
-              onClick={handleOpenAdd}
-              className="px-4 py-2 rounded-full bg-[var(--color-pastry-chocolate)] text-[var(--color-pastry-pink)] text-xs font-bold transition active:scale-95 cursor-pointer"
+          <div
+            className="flex flex-col items-center gap-3 text-center"
+            style={{
+              background: '#fff',
+              border: '1px solid rgba(58,35,80,0.1)',
+              borderRadius: '20px',
+              boxShadow: '0 8px 20px rgba(58,35,80,.09)',
+              padding: '40px 20px',
+            }}
+          >
+            <div
+              className="flex items-center justify-center"
+              style={{ width: '64px', height: '64px', borderRadius: '20px', background: '#F3E9F3' }}
             >
-              + Adicionar Primeira Ficha
+              <BookOpen className="w-[30px] h-[30px]" style={{ color: '#6E3F72' }} strokeWidth={2} />
+            </div>
+            <div className="font-serif-display" style={{ fontSize: '22px', color: '#3A2350' }}>
+              Nenhuma ficha em {CATEGORY_LABELS[selectedCategory].label} ainda
+            </div>
+            <div className="text-sm" style={{ color: '#7A6E80', maxWidth: '380px' }}>
+              Cadastre a receita uma vez e o Carula calcula custo, mão de obra e preço sugerido de cada tamanho.
+            </div>
+            <button
+              type="button"
+              onClick={handleOpenAdd}
+              className="transition-colors"
+              style={{
+                marginTop: '8px',
+                background: '#3A2350',
+                color: '#fff',
+                fontSize: '14px',
+                fontWeight: 600,
+                padding: '13px 22px',
+                borderRadius: '11px',
+                cursor: 'pointer',
+                boxShadow: '0 10px 20px rgba(58,35,80,.3)',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = '#6E3F72'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = '#3A2350'; }}
+            >
+              Adicionar primeira ficha
             </button>
           </div>
         ) : (
