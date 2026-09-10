@@ -15,8 +15,6 @@ import {
   Calendar,
   Heart,
   MapPin,
-  Building,
-  FileText,
   MessageCircle,
   Edit3,
   Trash2,
@@ -26,7 +24,6 @@ import {
   CheckCircle2,
   X,
   Globe,
-  PlusCircle,
   Camera,
   Gift,
   Cake,
@@ -654,221 +651,239 @@ export const CustomersModule: React.FC = () => {
       </div>
 
       {/* CLIENT FORM MODAL */}
-      {isFormOpen && (
-        <div style={{ paddingLeft: '18px', paddingRight: '18px' }} className="mb-4">
-          {/* Mesma casca do formulario de Pedido: canto mais redondo, sombra
-              de destaque e borda neutra da paleta, no lugar do rosa avulso. */}
-          <div className="bg-[#F6F2F5] rounded-xl overflow-hidden shadow-highlight border border-[#E6E1DB] animate-fadeIn">
-          {/* GRADIENT HEADER */}
-          {/* O mesmo gradiente do cabecalho do Pedido: tres paradas em 155deg,
-              no lugar do degrade horizontal de duas cores. */}
-          <div
-            style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)' }}
-            className="px-4 sm:px-5 py-3 sm:py-4 flex items-center justify-between"
+      {isFormOpen && createPortal(
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-neutral-900/80 backdrop-blur-xs p-0 sm:p-4" role="dialog" aria-modal="true">
+          <form
+            onSubmit={handleSave}
+            className="w-full h-full sm:h-auto sm:max-w-[430px] sm:max-h-[90vh] bg-[#F6F2F5] sm:rounded-[24px] overflow-hidden flex flex-col"
+            style={{ boxShadow: '0 30px 70px rgba(58,35,80,0.26)' }}
           >
-            <h3 className="font-brand font-black text-sm sm:text-base text-white flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-[#F5B9C6]" />
-              {editingId ? 'Editar Cadastro da(o) Cliente' : 'Cadastrar Nova(o) Cliente'}
-            </h3>
-            <button
-              type="button"
-              onClick={() => setIsFormOpen(false)}
-              className="text-xs text-white/70 hover:text-white font-bold px-2 py-1 transition-colors"
+            {/* Cabecalho gradiente — mesmo padrao validado do resto do app */}
+            <div
+              style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 55%, #A85E86 100%)' }}
+              className="px-[18px] pt-[18px] pb-5 flex flex-col gap-4 flex-shrink-0"
             >
-              Cancelar
-            </button>
-          </div>
-
-        {/* Corpo em tom claro, como o do Pedido: os blocos brancos por cima e
-            que criam a separacao. Antes era branco sobre branco. */}
-        <form
-          onSubmit={handleSave}
-          className="bg-[#F6F2F5] p-4 sm:p-5 space-y-4"
-        >
-          {formError && (
-            <div className="p-3 rounded-lg bg-red-50 border border-red-200">
-              <p className="text-sm text-red-600">{formError}</p>
-            </div>
-          )}
-
-          {/* CUSTOMER PHOTO UPLOAD */}
-          <div className="flex items-center gap-4 rounded-xl p-4 border border-[#E6E1DB] shadow-card" style={{background: 'linear-gradient(135deg, rgba(160,100,130,0.55) 0%, rgba(245,185,198,0.10) 100%)'}}>
-            <div className="w-16 h-16 rounded-full border-2 border-[var(--color-accent-gold)] bg-white text-[var(--color-neutral-charcoal)] flex items-center justify-center overflow-hidden shrink-0 shadow-card relative">
-              {photoUrl ? (
-                <img src={photoUrl} alt="Preview" className="w-full h-full object-cover" />
-              ) : (
-                <User className="w-8 h-8 text-[var(--color-accent-gold)]" />
-              )}
-            </div>
-            <div>
-              <label htmlFor="photo-upload" className="block text-xs font-black text-[var(--color-neutral-charcoal)] mb-2 flex items-center gap-1.5 cursor-pointer">
-                <Camera className="w-4 h-4 text-[var(--color-accent-gold)]" /> Foto da(o) Cliente
-              </label>
-              <label
-                htmlFor="photo-upload"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--color-accent-gold)] text-[var(--color-neutral-charcoal)] hover:bg-[var(--color-accent-gold)]/90 active:scale-95 rounded-lg text-xs font-bold cursor-pointer transition-all shadow-sm"
-              >
-                <Camera className="w-3.5 h-3.5" />
-                <span>{photoUrl ? 'Alterar Foto' : 'Escolher Foto'}</span>
-              </label>
-              <input
-                id="photo-upload"
-                type="file"
-                accept="image/*"
-                onChange={handlePhotoUpload}
-                className="hidden"
-              />
-            </div>
-          </div>
-
-          {/* Bloco em cartao branco sobre o corpo claro — o mesmo recurso que
-              separa as secoes no formulario de Pedido. */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-white p-4 rounded-xl border border-[#E6E1DB] shadow-card">
-            <div>
-              <label className="block text-xs font-black text-[var(--color-neutral-charcoal)] mb-2 flex items-center gap-1.5">
-                👤 <span>Nome da(o) Cliente *</span>
-              </label>
-              <input
-                type="text"
-                required
-                placeholder="Ex: Camila Santos"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-black text-[var(--color-neutral-charcoal)] mb-2 flex items-center gap-1.5">
-                <Phone className="w-4 h-4 text-[var(--color-accent-gold)]" /> <span>Telefone / WhatsApp *</span>
-              </label>
-              <input
-                type="text"
-                required
-                placeholder="Ex: (781) 420-6892"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full px-4 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
-              />
-            </div>
-
-            <div className="sm:col-span-2">
-              <label className="block text-xs font-black text-[var(--color-neutral-charcoal)] mb-2 flex items-center gap-1.5">
-                <Calendar className="w-4 h-4 text-[var(--color-neutral-charcoal)]" /> <span>Data do Aniversário da(o) Cliente</span>
-              </label>
-              <input
-                type="date"
-                value={eventDate}
-                onChange={(e) => setEventDate(e.target.value)}
-                className="w-full px-4 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
-              />
-            </div>
-          </div>
-
-          {/* ADDITIONAL COMMEMORATIVE DATES */}
-          <div className="space-y-2 bg-white p-4 rounded-xl border border-[#E6E1DB] shadow-card">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-black text-[var(--color-neutral-charcoal)] flex items-center gap-1">
-                <PlusCircle className="w-3.5 h-3.5 text-[var(--color-accent-gold)]" />
-                Datas Comemorativas
-              </label>
-              <button
-                type="button"
-                onClick={handleAddExtraEventField}
-                className="px-2.5 py-1 bg-[var(--color-pastry-lavender)] hover:bg-[var(--color-pastry-lavender)]/80 text-[var(--color-neutral-charcoal)] rounded-lg text-[10px] font-extrabold flex items-center gap-1 cursor-pointer"
-              >
-                <Plus className="w-3 h-3" /> Adicionar Data
-              </button>
-            </div>
-
-            {additionalEvents.map((ev) => (
-              <div key={ev.id} className="flex items-center gap-3 bg-[var(--color-neutral-hero)] p-2 rounded-xl border border-[var(--color-accent-gold)]/40">
-                <input
-                  type="text"
-                  placeholder="Nome da data comemorativa"
-                  value={ev.title}
-                  onChange={(e) => handleUpdateExtraEvent(ev.id, 'title', e.target.value)}
-                  className="flex-1 px-3 py-1.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-[var(--color-neutral-charcoal)]"
-                />
-                <input
-                  type="date"
-                  value={ev.date}
-                  onChange={(e) => handleUpdateExtraEvent(ev.id, 'date', e.target.value)}
-                  className="px-3 py-1.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-[var(--color-neutral-charcoal)]"
-                />
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-[10px] font-bold tracking-[0.16em] uppercase text-white/65">Clientes</span>
+                  <span className="font-serif-display text-2xl leading-tight text-white">
+                    {editingId ? 'Editar Cadastro' : 'Nova(o) Cliente'}
+                  </span>
+                </div>
                 <button
                   type="button"
-                  onClick={() => handleRemoveExtraEvent(ev.id)}
-                  className="p-1 text-[var(--color-neutral-charcoal)]/40 hover:text-semantic-error cursor-pointer"
+                  onClick={() => setIsFormOpen(false)}
+                  className="w-8 h-8 rounded-[10px] bg-white/15 hover:bg-white/25 flex items-center justify-center text-white transition-colors flex-shrink-0"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 bg-white p-4 rounded-xl border border-[#E6E1DB] shadow-card">
-            <div>
-              <label className="block text-xs font-black text-[var(--color-neutral-charcoal)] mb-1 flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5 text-[var(--color-accent-gold)]" /> Endereço de Entrega
-              </label>
-              <input
-                type="text"
-                placeholder="Ex: 103 Cabot St"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                className="w-full px-3.5 py-2 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-[var(--color-neutral-charcoal)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)]"
-              />
+              <div className="flex items-center gap-3.5">
+                <div
+                  className="w-16 h-16 rounded-[20px] flex items-center justify-center flex-shrink-0 overflow-hidden"
+                  style={{ background: 'rgba(245,185,198,0.25)', border: '2px solid rgba(255,255,255,0.35)' }}
+                >
+                  {photoUrl ? (
+                    <img src={photoUrl} alt="Preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <User className="w-[26px] h-[26px]" style={{ color: '#F5B9C6' }} />
+                  )}
+                </div>
+                <div className="flex flex-col gap-1.5 min-w-0">
+                  <span className="text-[15px] font-bold text-white truncate">{name || 'Nova(o) cliente'}</span>
+                  <label
+                    htmlFor="photo-upload"
+                    className="inline-flex items-center gap-1.5 self-start bg-white/15 hover:bg-white/30 text-white text-xs font-semibold px-3 py-2 rounded-[9px] cursor-pointer transition-colors"
+                  >
+                    <Camera className="w-3.5 h-3.5" />
+                    <span>{photoUrl ? 'Alterar foto' : 'Escolher foto'}</span>
+                  </label>
+                  <input
+                    id="photo-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhotoUpload}
+                    className="hidden"
+                  />
+                </div>
+              </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-black text-[var(--color-neutral-charcoal)] mb-1 flex items-center gap-1">
-                <Building className="w-3.5 h-3.5 text-[var(--color-neutral-charcoal)]" /> Cidade
-              </label>
-              <input
-                type="text"
-                placeholder="Ex: Beverly, Boston, Somerville..."
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className="w-full px-3.5 py-2 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-[var(--color-neutral-charcoal)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)]"
-              />
+            {/* Corpo com rolagem */}
+            <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
+              {formError && (
+                <div className="p-3 rounded-lg bg-red-50 border border-red-200">
+                  <p className="text-sm text-red-600">{formError}</p>
+                </div>
+              )}
+
+              <div className="bg-white rounded-2xl p-4 flex flex-col gap-3.5" style={{ boxShadow: '0 8px 20px rgba(58,35,80,.09)' }}>
+                <div className="font-serif-display text-lg" style={{ color: '#3A2350' }}>Contato</div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Nome da(o) cliente *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Ex: Camila Santos"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="border rounded-[10px] px-3 py-3 text-[15px]"
+                    style={{ borderColor: 'rgba(58,35,80,0.14)', background: '#FAF7FA' }}
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Telefone / WhatsApp *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Ex: (781) 420-6892"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="border rounded-[10px] px-3 py-3 text-[15px]"
+                    style={{ borderColor: 'rgba(58,35,80,0.14)', background: '#FAF7FA' }}
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Aniversário</label>
+                  <input
+                    type="date"
+                    value={eventDate}
+                    onChange={(e) => setEventDate(e.target.value)}
+                    className="border rounded-[10px] px-3 py-3 text-[15px]"
+                    style={{ borderColor: 'rgba(58,35,80,0.14)', background: '#FAF7FA', color: '#241B2B' }}
+                  />
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl p-4 flex flex-col gap-3" style={{ boxShadow: '0 8px 20px rgba(58,35,80,.09)' }}>
+                <div className="flex items-center justify-between gap-2.5">
+                  <div className="font-serif-display text-lg" style={{ color: '#3A2350' }}>Datas comemorativas</div>
+                  <button
+                    type="button"
+                    onClick={handleAddExtraEventField}
+                    className="text-xs font-bold cursor-pointer"
+                    style={{ color: '#6E3F72' }}
+                  >
+                    + Adicionar
+                  </button>
+                </div>
+                {additionalEvents.length === 0 ? (
+                  <button
+                    type="button"
+                    onClick={handleAddExtraEventField}
+                    className="border border-dashed rounded-xl p-3.5 text-center text-[13px] transition-colors"
+                    style={{ borderColor: 'rgba(58,35,80,0.25)', color: '#7A6E80' }}
+                  >
+                    Nenhuma data ainda — toque para adicionar
+                  </button>
+                ) : (
+                  additionalEvents.map((ev) => (
+                    <div
+                      key={ev.id}
+                      className="flex items-center gap-2.5 rounded-xl p-2.5"
+                      style={{ background: '#FAF7FA', border: '1px solid rgba(58,35,80,0.08)' }}
+                    >
+                      <div
+                        className="w-[34px] h-[34px] rounded-[10px] flex items-center justify-center flex-shrink-0"
+                        style={{ background: '#F0E2C8' }}
+                      >
+                        <Calendar className="w-4 h-4" style={{ color: '#B08D57' }} />
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Nome da data comemorativa"
+                        value={ev.title}
+                        onChange={(e) => handleUpdateExtraEvent(ev.id, 'title', e.target.value)}
+                        className="flex-1 min-w-0 text-sm font-semibold bg-transparent focus:outline-none"
+                      />
+                      <input
+                        type="date"
+                        value={ev.date}
+                        onChange={(e) => handleUpdateExtraEvent(ev.id, 'date', e.target.value)}
+                        className="text-xs font-semibold bg-transparent focus:outline-none"
+                        style={{ color: '#A096A6' }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveExtraEvent(ev.id)}
+                        className="text-xs flex-shrink-0 transition-colors"
+                        style={{ color: '#A096A6' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.color = '#C4626F'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.color = '#A096A6'; }}
+                      >
+                        Remover
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <div className="bg-white rounded-2xl p-4 flex flex-col gap-3.5" style={{ boxShadow: '0 8px 20px rgba(58,35,80,.09)' }}>
+                <div className="font-serif-display text-lg" style={{ color: '#3A2350' }}>Entrega</div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Endereço</label>
+                  <input
+                    type="text"
+                    placeholder="Ex: 103 Cabot St"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    className="border rounded-[10px] px-3 py-3 text-[15px]"
+                    style={{ borderColor: 'rgba(58,35,80,0.14)', background: '#FAF7FA' }}
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Cidade</label>
+                  <input
+                    type="text"
+                    placeholder="Ex: Beverly, Boston, Somerville..."
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    className="border rounded-[10px] px-3 py-3 text-[15px]"
+                    style={{ borderColor: 'rgba(58,35,80,0.14)', background: '#FAF7FA' }}
+                  />
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl p-4 flex flex-col gap-2" style={{ boxShadow: '0 8px 20px rgba(58,35,80,.09)' }}>
+                <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Observações</label>
+                <textarea
+                  rows={3}
+                  placeholder="Prefere entrega à tarde, alergia a nozes…"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  className="border rounded-[10px] px-3 py-3 text-sm resize-none leading-relaxed"
+                  style={{ borderColor: 'rgba(58,35,80,0.14)', background: '#FAF7FA' }}
+                />
+              </div>
             </div>
-          </div>
 
-          <div className="bg-white p-4 rounded-xl border border-[#E6E1DB] shadow-card">
-            <label className="block text-xs font-black text-[var(--color-neutral-charcoal)] mb-1 flex items-center gap-1">
-              <FileText className="w-3.5 h-3.5 text-[var(--color-neutral-charcoal)]/60" /> Observações
-            </label>
-            <textarea
-              rows={2}
-              placeholder="Observações..."
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="w-full px-3.5 py-2 bg-white border border-[#E6E1DB] rounded-xl text-xs font-medium text-[var(--color-neutral-charcoal)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)]"
-            />
-          </div>
-
-          <div className="flex justify-end gap-2 pt-2 border-t border-[var(--color-neutral-hero)]">
-            <button
-              type="button"
-              onClick={() => setIsFormOpen(false)}
-              className="px-4 py-2 rounded-xl bg-white border border-[#E6E1DB] text-neutral-700 font-bold text-xs hover:bg-neutral-50 shadow-card active:scale-95 transition-all duration-normal"
+            {/* Rodape fixo */}
+            <div
+              className="flex-shrink-0 bg-white flex gap-2.5 p-4"
+              style={{ borderTop: '1px solid rgba(58,35,80,0.08)', boxShadow: '0 -8px 24px rgba(58,35,80,0.07)' }}
             >
-              Cancelar
-            </button>
-            {/* Roxo da marca, como os botoes de acao do Pedido, no lugar do
-                dourado — que era o unico ponto de ouro do formulario. */}
-            <button
-              type="submit"
-              disabled={isSaving}
-              className="px-5 py-2 rounded-xl bg-[#6E3F72] hover:bg-[#5A3560] text-white font-brand font-bold text-xs shadow-card active:scale-95 transition-all duration-normal disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {isSaving ? 'Salvando...' : 'Salvar Cadastro'}
-            </button>
-          </div>
-        </form>
-          </div>
-        </div>
+              <button
+                type="button"
+                onClick={() => setIsFormOpen(false)}
+                className="px-[18px] py-3.5 rounded-[11px] text-sm font-semibold transition-colors"
+                style={{ border: '1px solid rgba(58,35,80,0.16)', color: '#3A2350' }}
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={isSaving}
+                className="flex-1 text-center py-3.5 rounded-[11px] text-white text-sm font-semibold transition-colors disabled:opacity-60"
+                style={{ background: '#3A2350', boxShadow: '0 10px 20px rgba(58,35,80,.3)' }}
+                onMouseEnter={(e) => { if (!isSaving) e.currentTarget.style.background = '#6E3F72'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = '#3A2350'; }}
+              >
+                {isSaving ? 'Salvando...' : 'Salvar cadastro'}
+              </button>
+            </div>
+          </form>
+        </div>,
+        document.body
       )}
 
       {/* CUSTOMERS LIST */}
