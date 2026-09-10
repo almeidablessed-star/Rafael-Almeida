@@ -336,6 +336,7 @@ export interface FichaTecnica {
   name: string;
   category: 'bolos' | 'doces' | 'salgados' | 'saudaveis' | 'kids';
   imageUrl?: string;
+  yieldInfo?: string; // Rendimento da receita (ex: "10 fatias")
   tamanhos: TamanhoOpcao[]; // Lista de tamanhos com preços
   ingredients: IngredientUsage[];
   reposicaoCost: number;

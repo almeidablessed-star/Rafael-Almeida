@@ -29,6 +29,7 @@ interface SupabaseFichaTecnica {
   nome_produto: string;
   categoria: string;
   foto_url?: string;
+  rendimento?: string | null;
   tamanhos: Array<{
     id: string;
     descricao: string;
@@ -87,6 +88,7 @@ const mapSupabaseToFicha = (data: SupabaseFichaTecnica): FichaTecnica => {
     name: data.nome_produto,
     category: normalizedCategory as any,
     imageUrl: data.foto_url,
+    yieldInfo: data.rendimento || undefined,
     tamanhos: tamanhos,
     ingredients: data.insumos || [],
     reposicaoCost: data.reposicao,
@@ -101,6 +103,7 @@ const mapFichaToSupabase = (ficha: Omit<FichaTecnica, 'id' | 'createdAt'>) => ({
   nome_produto: ficha.name,
   categoria: ficha.category,
   foto_url: ficha.imageUrl || null,
+  rendimento: ficha.yieldInfo || null,
   tamanhos: (ficha.tamanhos || []).map(t => ({
     id: t.id,
     descricao: t.descricao,
@@ -151,7 +154,7 @@ export const FichasTecnicasProvider: React.FC<{ children: React.ReactNode }> = (
 
       const { data, error: fetchError } = await supabase
         .from('fichas_tecnicas')
-        .select('id,usuaria_id,nome_produto,categoria,tamanhos,insumos,mao_de_obra,custo,reposicao,investimento,created_at')
+        .select('id,usuaria_id,nome_produto,categoria,rendimento,tamanhos,insumos,mao_de_obra,custo,reposicao,investimento,created_at')
         .eq('usuaria_id', user.id)
         .order('created_at', { ascending: false });
 

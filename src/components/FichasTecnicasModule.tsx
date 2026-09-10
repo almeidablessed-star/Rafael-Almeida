@@ -367,7 +367,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     setName(ficha.name);
     setCategory(ficha.category);
     setImageUrl(ficha.imageUrl || '');
-    setYieldInfo(getYieldInfoCompat(ficha));
+    setYieldInfo(ficha.yieldInfo || getYieldInfoCompat(ficha));
     setIngredients(ficha.ingredients || []);
     setReposicaoCost((ficha.reposicaoCost || 0).toString());
 
@@ -721,6 +721,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
       name: name.trim(),
       category,
       imageUrl: imageUrl.trim() || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&auto=format&fit=crop&q=80',
+      yieldInfo: yieldInfo.trim() || undefined,
       tamanhos: tamanhosData,
       // A lista da FICHA vira um espelho do primeiro tamanho. A lista que vale
       // e a de cada tamanho; esta so atende quem ainda le o campo antigo (a
