@@ -6,7 +6,6 @@ import { getCurrentWeekMonday, getCurrentWeekSunday, filterTransactionsByWeek } 
 import { QuotePdfModal } from './QuotePdfModal';
 import {
   ShoppingBag,
-  PlusCircle,
   Search,
   Printer,
   CheckCircle2,
@@ -297,16 +296,46 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
       {/* Orders List */}
       <div className="space-y-2.5">
         {filteredSales.length === 0 ? (
-          <div className="p-8 rounded-xl bg-white text-center border border-[#E6E1DB] space-y-2">
-            <ShoppingBag className="w-8 h-8 text-[var(--color-ink)]/30 mx-auto" />
-            <p className="text-xs text-[var(--color-ink)]/70 font-medium">
-              Nenhum pedido encontrado.
-            </p>
-            <button
-              onClick={() => onOpenAddModal('venda')}
-              className="px-4 py-2 bg-[#6E3F72] text-white text-xs font-medium rounded-full inline-flex items-center gap-1.5 cursor-pointer hover:bg-[#5A2F5E] transition-colors"
+          <div
+            className="flex flex-col items-center gap-2.5 text-center"
+            style={{
+              background: '#fff',
+              border: '1px solid rgba(58,35,80,0.1)',
+              borderRadius: '20px',
+              boxShadow: '0 8px 20px rgba(58,35,80,.09)',
+              padding: '40px 20px',
+            }}
+          >
+            <div
+              className="flex items-center justify-center"
+              style={{ width: '64px', height: '64px', borderRadius: '20px', background: '#F3E9F3' }}
             >
-              <PlusCircle className="w-3.5 h-3.5" />
+              <ShoppingBag className="w-[30px] h-[30px]" style={{ color: '#6E3F72' }} strokeWidth={2} />
+            </div>
+            <div className="font-serif-display" style={{ fontSize: '22px', color: '#3A2350' }}>
+              Nenhum pedido encontrado
+            </div>
+            <div className="text-sm" style={{ color: '#7A6E80', maxWidth: '280px' }}>
+              Lance seu primeiro pedido para começar a vender.
+            </div>
+            <button
+              type="button"
+              onClick={() => onOpenAddModal('venda')}
+              className="transition-colors"
+              style={{
+                marginTop: '8px',
+                background: '#3A2350',
+                color: '#fff',
+                fontSize: '14px',
+                fontWeight: 600,
+                padding: '13px 22px',
+                borderRadius: '11px',
+                cursor: 'pointer',
+                boxShadow: '0 10px 20px rgba(58,35,80,.3)',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = '#6E3F72'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = '#3A2350'; }}
+            >
               Lançar Novo Pedido
             </button>
           </div>
