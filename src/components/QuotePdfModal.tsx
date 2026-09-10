@@ -36,6 +36,88 @@ import {
   Trash2,
 } from 'lucide-react';
 
+/**
+ * CSS do Google Fonts (Instrument Serif + Manrope) com os arquivos de fonte
+ * embutidos como base64, para a captura de PDF via html-to-image.
+ *
+ * A autodetecao de fontes da propria biblioteca (`getFontEmbedCSS`) le
+ * `document.styleSheets[...].cssRules` de toda folha carregada — inclusive a
+ * do Google Fonts, um `<link>` sem `crossorigin`, cuja leitura o navegador
+ * bloqueia por seguranca (SecurityError, sempre no console em toda geracao
+ * de PDF). Nao e so ruido: a mesma autodetecao tambem falha em EMBUTIR
+ * "Instrument Serif" (nome com espaco) mesmo quando o erro nao aparece —
+ * confirmado inspecionando o CSS que ela realmente gera, que so contem
+ * "Manrope" (nome de uma palavra so). O titulo do orcamento saia impresso
+ * com a serifada padrao do navegador, nao a fonte real.
+ *
+ * A correcao busca o MESMO endpoint via `fetch()` direto, em vez de ler o
+ * `<link>` — o Google libera CORS para o fetch do texto do CSS (a restricao
+ * e so sobre ler `.cssRules` de uma stylesheet ja carregada), baixa cada
+ * arquivo de fonte referenciado e o embute como `data:` URI. O resultado e
+ * passado pronto pra `toPng()` via `fontEmbedCSS`, que pula a autodetecao
+ * da biblioteca por completo — sem o erro de CORS, com as duas fontes
+ * embutidas corretamente.
+ *
+ * Buscado uma unica vez e reaproveitado nas geracoes seguintes: as fontes
+ * nao mudam durante a sessao, e cada geracao ja faz duas capturas (o
+ * "aquecimento" do iOS Safari, ver `handleDownloadPdf`).
+ */
+const GOOGLE_FONTS_CSS_URL =
+  "https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;600;700;800&display=swap";
+
+let cachedFontEmbedCss: Promise<string> | null = null;
+
+const blobToDataUrl = (blob: Blob): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+
+const buildFontEmbedCss = async (): Promise<string> => {
+  const cssText = await fetch(GOOGLE_FONTS_CSS_URL).then((r) => r.text());
+  const fontFaceBlocks = cssText.match(/@font-face\s*{[^}]+}/g) || [];
+
+  const embeddedBlocks = await Promise.all(
+    fontFaceBlocks.map(async (block) => {
+      const urlMatch = block.match(/url\((https:\/\/[^)]+)\)/);
+      if (!urlMatch) return block;
+      const fontUrl = urlMatch[1];
+      try {
+        const fontBlob = await fetch(fontUrl).then((r) => r.blob());
+        const dataUrl = await blobToDataUrl(fontBlob);
+        return block.replace(fontUrl, dataUrl);
+      } catch (err) {
+        // Uma fonte que falhou no embed cai pro fallback do proprio
+        // font-family (`, serif` / `, sans-serif`) — igual ao que ja
+        // acontecia antes desta correcao, so que agora so pra essa fonte
+        // especifica, nao pra todas.
+        console.error('Falha ao embutir fonte no PDF:', fontUrl, err);
+        return block;
+      }
+    })
+  );
+
+  return embeddedBlocks.join('\n');
+};
+
+/** Memoizado a nivel de modulo: buscado uma vez, reaproveitado em toda geracao de PDF desta sessao de pagina. */
+const getFontEmbedCssCached = (): Promise<string> => {
+  if (!cachedFontEmbedCss) {
+    cachedFontEmbedCss = buildFontEmbedCss().catch((err) => {
+      // Falhou buscar/montar de vez — nao guarda a falha em cache, deixa a
+      // proxima geracao tentar de novo. `undefined` como CSS efetivamente
+      // volta pro comportamento antigo (autodetecao da biblioteca) so
+      // desta vez.
+      cachedFontEmbedCss = null;
+      console.error('Falha ao montar CSS de fontes embutidas para o PDF:', err);
+      return '';
+    });
+  }
+  return cachedFontEmbedCss;
+};
+
 interface QuotePdfModalProps {
   transaction: Omit<Transaction, 'id' | 'createdAt'> | Transaction;
   onClose: () => void;
@@ -369,10 +451,15 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
         //
         // O PDF nao e mais um A4 exato, e isso e intencional: e um arquivo para
         // enviar ao cliente, nao para imprimir.
+        // Fontes embutidas por nos, nao pela autodetecao da biblioteca — ver
+        // o comentario em `buildFontEmbedCss` no topo do arquivo.
+        const fontEmbedCSS = await getFontEmbedCssCached();
+
         const capturaFolha = {
           cacheBust: true,
           pixelRatio: 2,
           backgroundColor: '#FFFFFF',
+          fontEmbedCSS,
         };
 
         // iOS Safari has known issue: first toPng() call often returns blank, second succeeds
