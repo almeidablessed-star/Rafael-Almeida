@@ -172,6 +172,22 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   // abre (handleOpenAdd/handleOpenEdit), pra nunca abrir num passo do meio.
   const [formStep, setFormStep] = useState<1 | 2 | 3>(1);
   const stepFormRef = useRef<HTMLFormElement>(null);
+
+  /**
+   * Guarda de duplo-clique no botao primario do rodape.
+   *
+   * "Continuar" e "Salvar ficha tecnica" ocupam a mesma posicao no rodape
+   * fixo — mesmo risco confirmado e corrigido no formulario de Pedido
+   * (TransactionFormModal.tsx): um duplo-clique/duplo-toque real faz o
+   * primeiro clique avancar de passo e o segundo cair em cima do botao que
+   * acabou de trocar de lugar por baixo do dedo, submetendo a ficha antes da
+   * hora. Aplicado aqui preventivamente, mesmo sem relato ainda.
+   */
+  const fichaLastStepChangeRef = useRef<number>(0);
+  useEffect(() => {
+    fichaLastStepChangeRef.current = performance.now();
+  }, [formStep]);
+  const fichaStepChangeIsFresh = () => performance.now() - fichaLastStepChangeRef.current < 400;
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deletingFicha, setDeletingFicha] = useState<FichaTecnica | null>(null);
   const [showUndoToast, setShowUndoToast] = useState(false);
@@ -1531,7 +1547,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
             {formStep < 3 ? (
               <button
                 type="button"
-                onClick={() => setFormStep((s) => (s + 1) as 1 | 2 | 3)}
+                onClick={() => {
+                  if (fichaStepChangeIsFresh()) return;
+                  setFormStep((s) => (s + 1) as 1 | 2 | 3);
+                }}
                 className="flex-1 text-center py-3 rounded-[10px] text-white text-sm font-semibold transition-colors"
                 style={{ background: '#3A2350', boxShadow: '0 10px 20px rgba(58,35,80,.3)' }}
                 onMouseEnter={(e) => { e.currentTarget.style.background = '#6E3F72'; }}
@@ -1548,6 +1567,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                 onMouseEnter={(e) => { e.currentTarget.style.background = '#6E3F72'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = '#3A2350'; }}
                 onClick={(e) => {
+                  if (fichaStepChangeIsFresh()) {
+                    e.preventDefault();
+                    return;
+                  }
                   const form = stepFormRef.current;
                   if (!form || form.checkValidity()) return;
                   e.preventDefault();
