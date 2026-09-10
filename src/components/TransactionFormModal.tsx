@@ -485,7 +485,16 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       const unitMaodeobra = tamanho.maoDeObraCost ?? matchingFicha.maoDeObraCost;
       const unitCusto = tamanho.custoCost ?? matchingFicha.custoCost;
       const unitInvestimento = tamanho.investimentoCost ?? matchingFicha.investimentoCost;
-      const unitReposicao = matchingFicha.reposicaoCost;
+      // Reposicao nao e um campo gravado por tamanho — e a soma do custo dos
+      // insumos DESTE tamanho, o mesmo calculo que o card da lista de Fichas
+      // Tecnicas ja usa (ver FichasTecnicasModule.tsx, `repoTotal`). Ler
+      // `matchingFicha.reposicaoCost` aqui lia um campo legado no nivel da
+      // ficha que o formulario de Ficha Tecnica em 3 passos parou de
+      // atualizar — ficava sempre 0, mesmo com insumos de custo real.
+      const unitReposicao = (tamanho.ingredients || []).reduce(
+        (sum, ing) => sum + (ing.totalCost || 0),
+        0
+      );
 
       return {
         name: matchingFicha.name,
