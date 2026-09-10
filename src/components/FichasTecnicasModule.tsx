@@ -575,7 +575,13 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
       // Nao basta reaplicar o casamento por nome (aplicarEdicaoDeInsumo): o
       // `produtos` fechado neste componente ainda nao tem o item recem-criado
       // no momento em que o `await` acima resolve. Gravamos direto os campos
-      // que o casamento normal preencheria.
+      // que o casamento normal preencheria — inclusive a conversao de
+      // unidade: a linha do insumo mantem a unidade que a usuaria ja tinha
+      // escolhido (o seletor ao lado da quantidade), e o custo do Produto e
+      // que se converte para ela. Antes este bloco sobrescrevia a unidade do
+      // insumo pela unidade de embalagem do Produto sem converter a
+      // quantidade — "200 g" virava "200 kg" quando o Produto era cadastrado
+      // em kg, inflando o custo em 1000x.
       const { tamanhoId, insumoId } = criandoProdutoInsumo;
       const custoBase = custoPorUnidade(produto);
       setTamanhos((prev) =>
@@ -583,18 +589,17 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
           t.id === tamanhoId
             ? {
                 ...t,
-                ingredients: t.ingredients.map((ing) =>
-                  ing.id === insumoId
-                    ? {
-                        ...ing,
-                        name: produto.nome,
-                        unit: produto.unidadeEmbalagem,
-                        produtoId: produto.id,
-                        unitCost: custoBase,
-                        totalCost: (Number(ing.quantity) || 0) * custoBase,
-                      }
-                    : ing
-                ),
+                ingredients: t.ingredients.map((ing) => {
+                  if (ing.id !== insumoId) return ing;
+                  const convertedCost = convertCostToTargetUnit(custoBase, produto.unidadeEmbalagem, ing.unit);
+                  return {
+                    ...ing,
+                    name: produto.nome,
+                    produtoId: produto.id,
+                    unitCost: convertedCost,
+                    totalCost: (Number(ing.quantity) || 0) * convertedCost,
+                  };
+                }),
               }
             : t
         )
@@ -1370,6 +1375,17 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                               // Selecionou uma sugestao: vincula por ID direto,
                               // sem depender do casamento por nome rodar de
                               // novo (mais robusto que so onChange).
+                              //
+                              // Preserva a unidade que a linha ja tinha (o
+                              // seletor ao lado da quantidade) e converte o
+                              // custo do Produto pra ela — mesma regra de
+                              // aplicarEdicaoDeInsumo. Sobrescrever a unidade
+                              // pela do Produto, como antes, virava "200 g"
+                              // em "200 kg" quando o Produto era cadastrado em
+                              // kg: mesma quantidade, unidade 1000x maior,
+                              // custo inflado 1000x sem nenhum aviso — e este
+                              // e o caminho mais usado no dia a dia pra
+                              // vincular um insumo a um Produto existente.
                               const produto = produtos.find((p) => String(p.id) === item.id);
                               if (!produto) return;
                               const custoBase = custoPorUnidade(produto);
@@ -1378,18 +1394,17 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                                   t.id === tamanho.id
                                     ? {
                                         ...t,
-                                        ingredients: t.ingredients.map((i2) =>
-                                          i2.id === ing.id
-                                            ? {
-                                                ...i2,
-                                                name: produto.nome,
-                                                unit: produto.unidadeEmbalagem,
-                                                produtoId: produto.id,
-                                                unitCost: custoBase,
-                                                totalCost: (Number(i2.quantity) || 0) * custoBase,
-                                              }
-                                            : i2
-                                        ),
+                                        ingredients: t.ingredients.map((i2) => {
+                                          if (i2.id !== ing.id) return i2;
+                                          const convertedCost = convertCostToTargetUnit(custoBase, produto.unidadeEmbalagem, i2.unit);
+                                          return {
+                                            ...i2,
+                                            name: produto.nome,
+                                            produtoId: produto.id,
+                                            unitCost: convertedCost,
+                                            totalCost: (Number(i2.quantity) || 0) * convertedCost,
+                                          };
+                                        }),
                                       }
                                     : t
                                 )

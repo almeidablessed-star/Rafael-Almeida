@@ -371,10 +371,10 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                     </label>
                     <input
                       type="text" disabled
-                      value={custoPorUnidade({
+                      value={`${custoPorUnidade({
                         precoPago: parseFloat(precoPago.replace(',', '.')) || 0,
                         quantidadeEmbalagem: parseFloat(quantidadeEmbalagem.replace(',', '.')) || 1,
-                      }).toFixed(4)}
+                      }).toFixed(4)}/${unidadeEmbalagem}`}
                       className="w-full px-3 py-2.5 bg-neutral-100 border border-[#E6E1DB] rounded-xl text-xs font-normal text-neutral-400 focus:outline-none transition-all cursor-not-allowed"
                     />
                   </div>
@@ -580,7 +580,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                       )}
                     </div>
                     <p className="text-[11px] mt-1" style={{ color: '#7A6E80' }}>
-                      R$ {p.precoPago.toFixed(2)} / {p.quantidadeEmbalagem} {p.unidadeEmbalagem} · custo unitário R$ {custoPorUnidade(p).toFixed(4)}
+                      R$ {p.precoPago.toFixed(2)} / {p.quantidadeEmbalagem} {p.unidadeEmbalagem} · custo unitário R$ {custoPorUnidade(p).toFixed(4)}/{p.unidadeEmbalagem}
                     </p>
                   </div>
                   <div className="flex items-center gap-1 flex-shrink-0">
