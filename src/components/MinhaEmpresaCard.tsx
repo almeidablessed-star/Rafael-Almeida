@@ -165,15 +165,15 @@ export const MinhaEmpresaCard: React.FC = () => {
           <div className="grid grid-cols-2 gap-2">
             <div className="bg-white rounded-xl p-3 border border-[#E6E1DB]">
               <p className="text-[9px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>Recebimento desejado</p>
-              <p className="text-[13px] font-bold mt-1" style={{ color: '#241B2B' }}>{formatCurrency(monthlyIncomeTarget)}/mês</p>
+              <p className="text-[13px] font-bold mt-1" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>{formatCurrency(monthlyIncomeTarget)}/mês</p>
             </div>
             <div className="bg-white rounded-xl p-3 border border-[#E6E1DB]">
               <p className="text-[9px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>Valor da hora</p>
-              <p className="text-[13px] font-bold mt-1" style={{ color: '#241B2B' }}>{formatCurrency(horaTrabalho)}/hora</p>
+              <p className="text-[13px] font-bold mt-1" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>{formatCurrency(horaTrabalho)}/hora</p>
             </div>
             <div className="col-span-2 bg-white rounded-xl p-3 border border-[#E6E1DB]">
               <p className="text-[9px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>Meta de horas (referência, não obrigação)</p>
-              <p className="text-[12px] font-bold mt-1" style={{ color: '#241B2B' }}>
+              <p className="text-[12px] font-bold mt-1" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>
                 {workingDaysPerWeek} dias/semana · {metaHoras.horasPorMes.toFixed(1)}h/mês → {metaHoras.horasPorSemana.toFixed(1)}h/semana → {metaHoras.horasPorDia.toFixed(1)}h/dia
               </p>
             </div>
@@ -210,7 +210,7 @@ export const MinhaEmpresaCard: React.FC = () => {
       <div className={secaoCard}>
         <div className="flex items-center justify-between">
           <h3 className={secaoTitulo} style={{ color: '#241B2B' }}>Despesas do Negócio</h3>
-          <span className="text-[12px] font-bold" style={{ color: '#241B2B' }}>{formatCurrency(despesasMensais)}</span>
+          <span className="text-[12px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>{formatCurrency(despesasMensais)}</span>
         </div>
         <CampoComAjuda microcopy="Aluguel, luz, internet... custos fixos, independente de quanto você vende. O que já está no custo do produto não entra aqui de novo." />
         <div className="space-y-2">
@@ -256,15 +256,15 @@ export const MinhaEmpresaCard: React.FC = () => {
           <div className="grid grid-cols-3 gap-2">
             <div className="bg-white rounded-xl p-3 border border-[#E6E1DB] text-center">
               <p className="text-[9px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>CMV</p>
-              <p className="text-[14px] font-bold mt-1" style={{ color: '#241B2B' }}>{cmvTargetPercent}%</p>
+              <p className="text-[14px] font-bold mt-1" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>{cmvTargetPercent}%</p>
             </div>
             <div className="bg-white rounded-xl p-3 border border-[#E6E1DB] text-center">
               <p className="text-[9px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>Investimento</p>
-              <p className="text-[14px] font-bold mt-1" style={{ color: '#241B2B' }}>{investmentTargetPercent}%</p>
+              <p className="text-[14px] font-bold mt-1" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>{investmentTargetPercent}%</p>
             </div>
             <div className="bg-white rounded-xl p-3 border border-[#E6E1DB] text-center">
               <p className="text-[9px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>Lucro</p>
-              <p className="text-[14px] font-bold mt-1" style={{ color: '#241B2B' }}>{profitTargetPercent}%</p>
+              <p className="text-[14px] font-bold mt-1" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>{profitTargetPercent}%</p>
             </div>
           </div>
         ) : (
