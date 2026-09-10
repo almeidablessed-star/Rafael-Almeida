@@ -136,6 +136,25 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
     if (isOpen) setPedidoFormStep(1);
   }, [isOpen]);
 
+  /**
+   * Guarda de duplo-clique no botao primario do rodape.
+   *
+   * "Continuar" (Passo 2) e "Confirmar e gravar" (Passo 3) ocupam a MESMA
+   * posicao na tela — um clique duplo/toque duplo rapido (o segundo chegando
+   * uns 100-300ms depois do primeiro, bem dentro do intervalo normal de um
+   * duplo-clique humano) faz o primeiro clique avancar de passo e o SEGUNDO
+   * cair em cima do botao que acabou de trocar de lugar por baixo do dedo,
+   * submetendo o pedido com os campos do Passo 3 ainda no valor padrao —
+   * bug real que gravou pedidos reais com status/forma de pagamento nunca
+   * escolhidos pela usuaria. Qualquer clique no botao primario dentro deste
+   * intervalo apos uma troca de passo e ignorado.
+   */
+  const pedidoLastStepChangeRef = useRef<number>(0);
+  useEffect(() => {
+    pedidoLastStepChangeRef.current = performance.now();
+  }, [pedidoFormStep]);
+  const pedidoStepChangeIsFresh = () => performance.now() - pedidoLastStepChangeRef.current < 400;
+
   // Sales Order State (when type === 'venda')
   const [customerName, setCustomerName] = useState<string>('');
   const [customerPhone, setCustomerPhone] = useState<string>('');
@@ -1826,7 +1845,10 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
             {pedidoFormStep < 3 ? (
               <button
                 type="button"
-                onClick={() => setPedidoFormStep((s) => (s + 1) as 1 | 2 | 3)}
+                onClick={() => {
+                  if (pedidoStepChangeIsFresh()) return;
+                  setPedidoFormStep((s) => (s + 1) as 1 | 2 | 3);
+                }}
                 style={{ flex: 1, textAlign: 'center', padding: '14px 20px', borderRadius: '11px', background: '#3A2350', color: '#fff', fontSize: '14px', fontWeight: 600, cursor: 'pointer', border: 'none', boxShadow: '0 10px 20px rgba(58,35,80,0.3)' }}
                 onMouseEnter={(e) => { e.currentTarget.style.background = '#6E3F72'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = '#3A2350'; }}
@@ -1842,6 +1864,10 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                 onMouseEnter={(e) => { if (!isSaving) e.currentTarget.style.background = '#6E3F72'; }}
                 onMouseLeave={(e) => { if (!isSaving) e.currentTarget.style.background = '#3A2350'; }}
                 onClick={(e) => {
+                  if (pedidoStepChangeIsFresh()) {
+                    e.preventDefault();
+                    return;
+                  }
                   const form = pedidoFormRef.current;
                   if (!form || form.checkValidity()) return;
                   e.preventDefault();
