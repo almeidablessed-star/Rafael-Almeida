@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import {
   Transaction,
@@ -26,11 +26,7 @@ import {
   Minus,
   Check,
   Sparkles,
-  Cake,
   Trash2,
-  PlusCircle,
-  Truck,
-  PackagePlus,
   ShoppingBag,
   DollarSign,
   Info,
@@ -125,6 +121,20 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   const [type, setType] = useState<TransactionType>(initialType);
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+
+  // Formulario de "Lancar Novo Pedido" em 3 passos (Cliente/Produtos/
+  // Pagamento) — ver "Pedido - Novo.dc.html". So se aplica quando
+  // type === 'venda'; os demais tipos (compra/custo/mao de obra) continuam
+  // no formulario de sempre.
+  const [pedidoFormStep, setPedidoFormStep] = useState<1 | 2 | 3>(1);
+  const pedidoFormRef = useRef<HTMLFormElement>(null);
+
+  // Sempre que o modal abre para um pedido novo, comeca no Passo 1 — do
+  // contrario reabrir apos fechar no Passo 3 deixaria o passo anterior
+  // grudado, como quase aconteceu com o formulario de Ficha Tecnica.
+  useEffect(() => {
+    if (isOpen) setPedidoFormStep(1);
+  }, [isOpen]);
 
   // Sales Order State (when type === 'venda')
   const [customerName, setCustomerName] = useState<string>('');
@@ -876,8 +886,8 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
     <div className="fixed inset-0 z-[99999] flex items-end sm:items-center justify-center bg-neutral-900/80 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto" role="dialog" aria-modal="true">
       <div className="w-full max-w-xl bg-[#F6F2F5] rounded-t-xl sm:rounded-xl shadow-highlight overflow-hidden max-h-[92vh] flex flex-col animate-slideUp" aria-labelledby="transactionModalTitle">
         {/* Modal Header */}
-        <div style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)' }} className="px-5 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)', padding: type === 'venda' ? '18px 20px 16px' : undefined }} className={type === 'venda' ? 'flex flex-col gap-3.5' : 'px-5 py-4 flex items-center justify-between'}>
+          <div className="flex items-center justify-between gap-3">
             <span id="transactionModalTitle" style={{ fontFamily: "'Instrument Serif', serif", fontSize: '18px', color: 'white' }}>
               {editingTransaction
                 ? 'Editar Lançamento'
@@ -885,17 +895,45 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                 ? '🎂 Lançar Novo Pedido'
                 : `Novo Registro: ${typeDetails.label}`}
             </span>
+            <button
+              onClick={onClose}
+              className="w-8 h-8 rounded-full bg-white/80 hover:bg-white text-[#3A2350] flex items-center justify-center transition-colors shrink-0"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/80 hover:bg-white text-[#3A2350] flex items-center justify-center transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
+
+          {type === 'venda' && (
+            <div style={{ display: 'flex', gap: '8px' }}>
+              {([
+                { n: 1 as const, label: '1 · Cliente' },
+                { n: 2 as const, label: '2 · Produtos' },
+                { n: 3 as const, label: '3 · Pagamento' },
+              ]).map((s) => (
+                <button
+                  key={s.n}
+                  type="button"
+                  onClick={() => setPedidoFormStep(s.n)}
+                  style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                >
+                  <div style={{ height: '3px', borderRadius: '2px', background: pedidoFormStep >= s.n ? '#F5B9C6' : 'rgba(255,255,255,0.25)' }} />
+                  <span style={{ fontSize: '11px', fontWeight: 600, color: pedidoFormStep === s.n ? '#fff' : 'rgba(255,255,255,0.6)', textAlign: 'left' }}>
+                    {s.label}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Modal Body */}
-        <form onSubmit={handleSubmit} style={{ fontFamily: "'Manrope', sans-serif" }} className="p-5 overflow-y-auto space-y-4 flex-1 stagger-children">
+        <form
+          id="pedido-form"
+          ref={pedidoFormRef}
+          onSubmit={handleSubmit}
+          style={{ fontFamily: "'Manrope', sans-serif" }}
+          className="p-5 overflow-y-auto space-y-4 flex-1 stagger-children"
+        >
           {/* Aqui ficava o seletor "Tipo do Lançamento", com Venda / Pedido,
               Estoque / Compra e Custo / Invest.
 
@@ -911,36 +949,34 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
               tipo cai aqui pelo `editingTransaction`. O tipo agora vem sempre
               de quem abriu o modal, que e o unico que sabe o contexto. */}
 
-          {/* ========================================= */}
-          {/* SALES ORDER FORM (WHEN type === 'venda')  */}
-          {/* ========================================= */}
+          {/* ================================================== */}
+          {/* SALES ORDER FORM, 3 PASSOS — ver "Pedido - Novo.dc.html" */}
+          {/* Os 3 passos ficam sempre montados (display, nao desmontagem) */}
+          {/* — mesma prevencao aplicada em Ficha Tecnica: campos required */}
+          {/* escondidos num passo nao-ativo ficam nao-focaveis, e sem o    */}
+          {/* handler validity-aware do botao "Confirmar" o submit falharia */}
+          {/* silenciosamente. */}
+          {/* ================================================== */}
           {type === 'venda' && (
             <div className="space-y-4">
-              {/* CUSTOMER & QUOTE DETAILS CARD */}
-              <div className="bg-[#F6F2F5]/90 p-4 rounded-xl border border-[#E6E1DB] shadow-card space-y-3">
-                <div className="flex items-center justify-between border-b border-[#E6E1DB]/80 pb-2">
-                  <label className="text-xs font-black uppercase tracking-wider text-[#3A2350] flex items-center gap-1.5">
-                    👤 Dados da(o) Cliente & Orçamento
-                  </label>
+              {/* PASSO 1 — CLIENTE */}
+              <div data-step={1} style={{ display: pedidoFormStep === 1 ? 'flex' : 'none', flexDirection: 'column', gap: '14px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+                  <span style={{ fontSize: '13px', color: '#7A6E80' }}>Dados da(o) cliente</span>
                   <button
                     type="button"
                     onClick={() => setShowPdfQuoteModal(true)}
-                    className="px-3 py-1 bg-[#6E3F72] hover:bg-[#5A3560] text-white rounded-xl text-xs font-bold shadow-card flex items-center gap-1 transition-all active:scale-95"
-                    title="Gerar e imprimir folha fofa de orçamento em PDF"
+                    style={{ display: 'flex', alignItems: 'center', gap: '7px', border: '1px solid rgba(58,35,80,0.16)', borderRadius: '9px', padding: '8px 12px', fontSize: '12px', fontWeight: 600, color: '#3A2350', background: 'none', cursor: 'pointer' }}
                   >
                     <Printer className="w-3.5 h-3.5" />
-                    <span>Gerar PDF Orçamento</span>
+                    <span>Gerar orçamento</span>
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {/* O campo de nome e tambem a busca: digitar filtra as
-                      clientes cadastradas em tempo real, e escolher uma
-                      preenche o restante do formulario. Substituiu um <select>
-                      separado que listava todas sem filtrar. */}
+                <div style={{ background: '#fff', borderRadius: '16px', boxShadow: '0 8px 20px rgba(58,35,80,0.09)', padding: '18px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
                   <div className="relative" ref={customerBoxRef}>
-                    <label style={{ fontFamily: "'Manrope', sans-serif" }} className="block text-[11px] font-bold text-neutral-800 mb-1">
-                      Nome da(o) Cliente *
+                    <label style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '6px' }}>
+                      Nome da(o) cliente
                     </label>
                     <input
                       type="text"
@@ -953,323 +989,238 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       }}
                       onFocus={() => setShowCustomerList(true)}
                       onKeyDown={handleCustomerKeyDown}
-                      // Desliga o autocomplete do navegador: ele desenharia sua
-                      // propria lista por cima da nossa.
                       autoComplete="off"
                       role="combobox"
-                      aria-expanded={showCustomerList && matchingCustomers.length > 0}
-                      aria-autocomplete="list"
+                      aria-expanded={showCustomerList}
                       aria-controls="lista-clientes"
-                      className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
+                      style={{ width: '100%', border: '1px solid rgba(58,35,80,0.14)', borderRadius: '10px', padding: '12px', fontSize: '15px', background: '#FAF7FA' }}
                     />
-
                     {showCustomerList && matchingCustomers.length > 0 && (
-                      <div className="absolute z-30 left-0 right-0 mt-1">
-                        <div className="relative">
-                      <ul
-                        id="lista-clientes"
-                        role="listbox"
-                        ref={customerListRef}
-                        onScroll={updateCustomerScrollHint}
-                        // Altura travada em 4 itens (4 x 47px medidos). O limite
-                        // e por altura, nao por contagem: uma cliente sem
-                        // telefone rende um item mais baixo, e o que precisa ser
-                        // garantido e que a caixa nunca cresca — com 5 ou com
-                        // 500 cadastradas ela ocupa o mesmo espaco.
-                        // Sem py-*: padding vertical faria a 5a linha assomar
-                        // por alguns pixels e sujar o corte.
-                        className="max-h-[188px] overflow-y-auto bg-white border border-[#E6E1DB] rounded-xl shadow-lg"
-                      >
-                        {matchingCustomers.map((c, i) => (
-                          <li key={c.id} role="option" aria-selected={i === highlightedCustomer}>
-                            <button
-                              type="button"
-                              // onMouseDown, nao onClick: o blur do input dispara
-                              // antes do click e fecharia a lista, engolindo a
-                              // escolha. mousedown chega primeiro.
-                              onMouseDown={(e) => {
-                                e.preventDefault();
-                                applyCustomer(c);
-                              }}
-                              onMouseEnter={() => setHighlightedCustomer(i)}
-                              className={`w-full text-left px-3 py-2 flex items-center gap-2 transition-colors ${
-                                i === highlightedCustomer ? 'bg-pink-100' : 'hover:bg-pink-50'
-                              }`}
-                            >
-                              {c.photoUrl ? (
-                                <img
-                                  src={c.photoUrl}
-                                  alt=""
-                                  className="w-6 h-6 rounded-full object-cover shrink-0"
-                                />
-                              ) : (
-                                <span className="w-6 h-6 rounded-full bg-pink-200 text-pink-900 text-[10px] font-black flex items-center justify-center shrink-0">
-                                  {c.name.charAt(0).toUpperCase()}
-                                </span>
-                              )}
-                              <span className="min-w-0">
-                                <span className="block text-xs font-bold text-neutral-900 truncate">
-                                  {c.name}
-                                </span>
-                                {c.phone && (
-                                  <span className="block text-[10px] text-neutral-600 truncate">
-                                    {c.phone}
+                      <div className="absolute z-20 mt-1 w-full">
+                        <ul
+                          id="lista-clientes"
+                          role="listbox"
+                          ref={customerListRef}
+                          onScroll={updateCustomerScrollHint}
+                          className="max-h-[188px] overflow-y-auto bg-white border border-[#E6E1DB] rounded-xl shadow-lg"
+                        >
+                          {matchingCustomers.map((c, i) => (
+                            <li key={c.id} role="option" aria-selected={i === highlightedCustomer}>
+                              <button
+                                type="button"
+                                onMouseDown={(e) => {
+                                  e.preventDefault();
+                                  applyCustomer(c);
+                                }}
+                                onMouseEnter={() => setHighlightedCustomer(i)}
+                                className={`w-full text-left px-3 py-2 flex items-center gap-2 transition-colors ${
+                                  i === highlightedCustomer ? 'bg-pink-100' : 'hover:bg-pink-50'
+                                }`}
+                              >
+                                {c.photoUrl ? (
+                                  <img src={c.photoUrl} alt="" className="w-6 h-6 rounded-full object-cover shrink-0" />
+                                ) : (
+                                  <span className="w-6 h-6 rounded-full bg-pink-200 text-pink-900 text-[10px] font-black flex items-center justify-center shrink-0">
+                                    {c.name.charAt(0).toUpperCase()}
                                   </span>
                                 )}
-                              </span>
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-
-                          {/* Esmaecimento no rodape da caixa, so quando ainda
-                              ha item abaixo do corte. Some ao chegar no fim do
-                              scroll, entao nunca mente dizendo que continua.
-                              pointer-events-none e essencial: sem isso a faixa
-                              engoliria o clique no ultimo item visivel. */}
-                          {hasMoreCustomersBelow && (
-                            <div
-                              aria-hidden="true"
-                              className="pointer-events-none absolute bottom-0 left-0 right-0 h-7 rounded-b-xl bg-gradient-to-t from-white via-white/80 to-transparent"
-                            />
-                          )}
-                        </div>
+                                <span className="min-w-0">
+                                  <span className="block text-xs font-bold text-neutral-900 truncate">{c.name}</span>
+                                  {c.phone && (
+                                    <span className="block text-[10px] text-neutral-600 truncate">{c.phone}</span>
+                                  )}
+                                </span>
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                        {hasMoreCustomersBelow && (
+                          <div
+                            aria-hidden="true"
+                            className="pointer-events-none absolute bottom-0 left-0 right-0 h-7 rounded-b-xl bg-gradient-to-t from-white via-white/80 to-transparent"
+                          />
+                        )}
                       </div>
                     )}
                   </div>
 
-                  <div>
-                    <label className="block text-[11px] font-bold text-neutral-800 mb-1 flex items-center gap-1">
-                      <Phone className="w-3 h-3 text-pink-600" /> Telefone / WhatsApp
-                    </label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <label style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80' }}>Telefone / WhatsApp</label>
                     <input
                       type="text"
-                      placeholder="Ex: (781) 420-6892"
+                      placeholder="(781) 420-6892"
                       value={customerPhone}
                       onChange={(e) => setCustomerPhone(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
+                      style={{ border: '1px solid rgba(58,35,80,0.14)', borderRadius: '10px', padding: '12px', fontSize: '15px', background: '#FAF7FA' }}
                     />
                   </div>
 
-
-                  <div>
-                    <label className="block text-[11px] font-bold text-neutral-800 mb-1 flex items-center gap-1">
-                      <MapPin className="w-3 h-3 text-semantic-warning-600" /> Endereço de Entrega
-                    </label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <label style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80' }}>Endereço de entrega</label>
                     <input
                       type="text"
-                      placeholder="Ex: 103 Cabot St, Beverly..."
+                      placeholder="Ex: 103 Cabot St, Beverly"
                       value={deliveryAddress}
                       onChange={(e) => setDeliveryAddress(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
+                      style={{ border: '1px solid rgba(58,35,80,0.14)', borderRadius: '10px', padding: '12px', fontSize: '15px', background: '#FAF7FA' }}
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-[11px] font-bold text-neutral-800 mb-1 flex items-center gap-1">
-                      <Clock className="w-3 h-3 text-semantic-info-600" /> Horário de Entrega / Retirada
-                    </label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <label style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80' }}>Horário de entrega / retirada</label>
                     <input
                       type="time"
                       value={deliveryTime}
                       onChange={(e) => setDeliveryTime(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
+                      style={{ border: '1px solid rgba(58,35,80,0.14)', borderRadius: '10px', padding: '12px', fontSize: '15px', background: '#FAF7FA', color: '#241B2B' }}
                     />
                   </div>
-                </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[11px] font-bold text-neutral-800 mb-1 flex items-center gap-1">
-                      <FileText className="w-3 h-3 text-pink-600" /> Observações do Pedido
-                    </label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <label style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80' }}>Observações do pedido</label>
                     <input
                       type="text"
                       placeholder="Ex: Cliente escolheu folhas amarelas..."
                       value={observations}
                       onChange={(e) => setObservations(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-xl text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72]"
+                      style={{ border: '1px solid rgba(58,35,80,0.14)', borderRadius: '10px', padding: '12px', fontSize: '15px', background: '#FAF7FA' }}
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-[11px] font-bold text-neutral-800 mb-1 flex items-center gap-1">
-                      <Camera className="w-3 h-3 text-pink-600" /> Foto de Inspiração do Cliente
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <label style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80' }}>Foto de inspiração</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (file) setInspirationImage(await compressImageFile(file));
+                      }}
+                      className="hidden"
+                      id="inspiration-upload-input-stepped"
+                    />
+                    <label
+                      htmlFor="inspiration-upload-input-stepped"
+                      style={{ display: 'flex', alignItems: 'center', gap: '12px', border: '1px dashed rgba(58,35,80,0.22)', borderRadius: '12px', padding: '12px', background: '#FAF7FA', cursor: 'pointer' }}
+                    >
+                      <div style={{ width: '44px', height: '44px', borderRadius: '10px', background: '#F3E9F3', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <ImageIcon className="w-5 h-5" style={{ color: '#6E3F72' }} strokeWidth={2} />
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ fontSize: '14px', fontWeight: 600, color: '#3A2350' }}>
+                          {inspirationImage ? 'Trocar foto' : 'Carregar foto'}
+                        </span>
+                        <span style={{ fontSize: '12px', color: '#7A6E80' }}>Referência enviada pela cliente</span>
+                      </div>
                     </label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={async (e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            setInspirationImage(await compressImageFile(file));
-                          }
-                        }}
-                        className="hidden"
-                        id="inspiration-upload-input"
-                      />
-                      <label
-                        htmlFor="inspiration-upload-input"
-                        className="flex-1 py-2 px-3 bg-pink-100 hover:bg-pink-200 text-pink-900 font-bold text-xs rounded-xl cursor-pointer transition-all flex items-center justify-center gap-1.5 border border-[#E6E1DB] text-center"
-                      >
-                        <Upload className="w-3.5 h-3.5 text-pink-700" />
-                        <span className="truncate">{inspirationImage ? 'Trocar Foto' : 'Carregar Foto'}</span>
-                      </label>
-                      {inspirationImage && (
-                        <div className="relative w-9 h-9 rounded-xl overflow-hidden border border-[#E6E1DB] shrink-0">
-                          <img src={inspirationImage} alt="Inspiração" className="w-full h-full object-cover" />
-                          <button
-                            type="button"
-                            onClick={() => setInspirationImage('')}
-                            className="absolute top-0 right-0 bg-semantic-error-600 text-white p-0.5"
-                            title="Remover foto"
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                        </div>
-                      )}
-                    </div>
+                    {inspirationImage && (
+                      <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-[#E6E1DB] shrink-0">
+                        <img src={inspirationImage} alt="Inspiração" className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => setInspirationImage('')}
+                          className="absolute top-0 right-0 bg-semantic-error-600 text-white p-0.5"
+                          title="Remover foto"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
 
-              {/* ORDER ITEMS LIST */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-black uppercase tracking-wider text-pink-900 flex items-center gap-1.5">
-                    <Cake className="w-4 h-4 text-pink-600" />
-                    Produtos do Pedido ({orderItems.length})
-                  </label>
-                  <span className="text-[10px] text-neutral-500 font-semibold">
-                    Valores preenchidos automaticamente
+              {/* PASSO 2 — PRODUTOS */}
+              <div data-step={2} style={{ display: pedidoFormStep === 2 ? 'flex' : 'none', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+                  <span style={{ fontSize: '13px', color: '#7A6E80' }}>
+                    {orderItems.length === 1 ? '1 item no pedido' : `${orderItems.length} itens no pedido`}
                   </span>
+                  <span style={{ fontSize: '11px', color: '#A096A6' }}>Valores preenchidos automaticamente</span>
                 </div>
 
                 {orderItems.map((item, index) => {
                   const bd = itemsBreakdownList[index];
-                  // Get available sizes from the matched ficha in fichas
                   const matchingFicha = fichas.find(f => normalizeName(f.name) === normalizeName(item.productName));
-                  // Identificado por `id` e rotulado por `descricao` — os dois
-                  // campos que a ficha realmente preenche. Antes usava
-                  // `quantidade`, indefinida em todas as fichas, o que gerava
-                  // tres botoes "0 cm" indistinguiveis (e com key duplicada).
                   const availableOptions = matchingFicha
-                    ? matchingFicha.tamanhos.map((t) => ({
-                        id: t.id,
-                        label: t.descricao || 'Tamanho',
-                        venda: t.preco,
-                      }))
+                    ? matchingFicha.tamanhos.map((t) => ({ id: t.id, label: t.descricao || 'Tamanho', venda: t.preco }))
                     : [];
 
                   return (
-                    <div
-                      key={item.id}
-                      className="bg-pink-50/50 p-3.5 rounded-lg border border-[#E6E1DB]/90 shadow-card space-y-3 relative"
-                    >
-                      {/* Item Header & Delete */}
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-black text-pink-900 flex items-center gap-1.5">
-                          <span className="w-5 h-5 rounded-full bg-pink-500 text-white text-[11px] font-bold flex items-center justify-center">
-                            {index + 1}
-                          </span>
-                          Item #{index + 1}
-                        </span>
-
+                    <div key={item.id} style={{ background: '#fff', borderRadius: '16px', boxShadow: '0 8px 20px rgba(58,35,80,0.09)', padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{ width: '24px', height: '24px', borderRadius: '8px', background: '#3A2350', color: '#fff', fontSize: '12px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          {index + 1}
+                        </div>
+                        <span style={{ fontSize: '14px', fontWeight: 700, color: '#3A2350' }}>Item {index + 1}</span>
                         {orderItems.length > 1 && (
                           <button
                             type="button"
                             onClick={() => handleRemoveItem(item.id)}
-                            className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-xl transition-all"
-                            title="Remover este item"
+                            style={{ marginLeft: 'auto', fontSize: '12px', color: '#C9C0CD', background: 'none', border: 'none', cursor: 'pointer' }}
                           >
-                            <Trash2 className="w-4 h-4" />
+                            Remover
                           </button>
                         )}
                       </div>
 
-                      {/* 1. SELECT PRODUCT DROPDOWN */}
-                      <div>
-                        <label className="block text-[11px] font-bold text-neutral-700 mb-1">
-                          Escolha o Produto *
-                        </label>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <label style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80' }}>Escolha o produto *</label>
                         {fichas.length === 0 ? (
-                          <div className="w-full px-3 py-3 bg-neutral-50 border border-neutral-300 rounded-xl text-xs font-medium text-neutral-600">
+                          <div style={{ padding: '12px', background: '#FAF7FA', border: '1px solid rgba(58,35,80,0.14)', borderRadius: '10px', fontSize: '12px', color: '#7A6E80' }}>
                             ⚠️ Nenhum produto cadastrado ainda. Cadastre produtos na aba <strong>Fichas Técnicas</strong>.
                           </div>
                         ) : (
                           <select
+                            required
                             value={item.productName}
                             onChange={(e) => handleUpdateItemProduct(item.id, e.target.value)}
-                            className="w-full px-3 py-2.5 bg-white border border-neutral-300 rounded-xl text-xs font-extrabold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
+                            style={{ border: '1px solid rgba(58,35,80,0.14)', borderRadius: '10px', padding: '12px', fontSize: '15px', background: '#FAF7FA' }}
                           >
-                            {/* Sem este placeholder, um `value` fora da lista faz
-                                o navegador exibir a primeira opcao enquanto o
-                                estado segue vazio — a tela mostrava um bolo
-                                escolhido e o pedido saia por R$ 0,00. */}
                             <option value="">Selecione o produto…</option>
                             {cakeNamesList.map((name) => (
-                              <option key={name} value={name}>
-                                {name}
-                              </option>
+                              <option key={name} value={name}>{name}</option>
                             ))}
                             <optgroup label="✨ Outro">
-                              <option value="Outro / Personalizado">
-                                ✨ Outro / Personalizado
-                              </option>
+                              <option value="Outro / Personalizado">✨ Outro / Personalizado</option>
                             </optgroup>
                           </select>
                         )}
                       </div>
 
-                      {/* Custom input fields if 'Outro / Personalizado' */}
                       {item.productName === 'Outro / Personalizado' ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                           <div>
-                            <label className="block text-[10px] font-bold text-neutral-700 mb-1">
-                              Nome / Descrição do Item
+                            <label style={{ fontSize: '11px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '4px' }}>
+                              Nome / Descrição do item
                             </label>
                             <input
                               type="text"
                               required
                               placeholder="Ex: Bolo Especial Morango"
                               value={item.customDescription || ''}
-                              onChange={(e) =>
-                                handleUpdateCustomField(
-                                  item.id,
-                                  'customDescription',
-                                  e.target.value
-                                )
-                              }
-                              className="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-pink-400 input-mobile-safe"
+                              onChange={(e) => handleUpdateCustomField(item.id, 'customDescription', e.target.value)}
+                              style={{ width: '100%', border: '1px solid rgba(58,35,80,0.14)', borderRadius: '10px', padding: '10px', fontSize: '13px', background: '#FAF7FA' }}
                             />
                           </div>
-
                           <div>
-                            <label className="block text-[10px] font-bold text-neutral-700 mb-1">
-                              Preço de Venda ($)
+                            <label style={{ fontSize: '11px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '4px' }}>
+                              Preço de venda ($)
                             </label>
                             <input
                               type="text"
                               inputMode="decimal"
                               placeholder="0.00"
                               value={item.customUnitValue || ''}
-                              onChange={(e) =>
-                                handleUpdateCustomField(
-                                  item.id,
-                                  'customUnitValue',
-                                  e.target.value
-                                )
-                              }
-                              className="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-pink-400 input-mobile-safe"
+                              onChange={(e) => handleUpdateCustomField(item.id, 'customUnitValue', e.target.value)}
+                              style={{ width: '100%', border: '1px solid rgba(58,35,80,0.14)', borderRadius: '10px', padding: '10px', fontSize: '13px', background: '#FAF7FA' }}
                             />
                           </div>
                         </div>
                       ) : (
-                        /* 2. SELECT SIZE / SLICES */
                         <div>
-                          <label className="block text-[11px] font-bold text-neutral-700 mb-1.5">
-                            Tamanho / Medida
+                          <label style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '6px' }}>
+                            Tamanho / medida
                           </label>
                           <div className="flex flex-wrap gap-1.5">
                             {availableOptions.map((opt) => (
@@ -1277,11 +1228,16 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                                 key={opt.id}
                                 type="button"
                                 onClick={() => handleUpdateItemTamanho(item.id, opt.id)}
-                                className={`py-1.5 px-3 rounded-xl text-xs font-bold transition-all border ${
-                                  item.selectedTamanhoId === opt.id
-                                    ? 'bg-[#6E3F72] text-white border-pink-600 shadow-card'
-                                    : 'bg-white text-neutral-700 border-neutral-200 hover:bg-pink-50'
-                                }`}
+                                style={{
+                                  padding: '7px 14px',
+                                  borderRadius: '9px',
+                                  fontSize: '12px',
+                                  fontWeight: 700,
+                                  cursor: 'pointer',
+                                  border: item.selectedTamanhoId === opt.id ? '1px solid #3A2350' : '1px solid rgba(58,35,80,0.16)',
+                                  background: item.selectedTamanhoId === opt.id ? '#3A2350' : '#fff',
+                                  color: item.selectedTamanhoId === opt.id ? '#fff' : '#3A2350',
+                                }}
                               >
                                 {opt.label} ({formatCurrency(opt.venda)})
                               </button>
@@ -1290,140 +1246,94 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                         </div>
                       )}
 
-                      {/* QUANTITY & AUTO-FILLED BREAKDOWN PREVIEW */}
-                      <div className="pt-3 border-t border-[#E6E1DB]/80 flex flex-wrap items-center justify-between gap-3">
-                        {/* Quantity Counter */}
-                        <div className="flex items-center gap-1">
-                          <span className="text-[11px] font-bold text-neutral-600">Qtd:</span>
-                          <div className="flex items-center bg-white border border-neutral-300 rounded-xl overflow-hidden p-0.5">
+                      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '12px', paddingTop: '12px', borderTop: '1px solid rgba(58,35,80,0.08)' }}>
+                        <div>
+                          <span style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '6px' }}>Quantidade</span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <button
                               type="button"
                               onClick={() => handleUpdateItemQuantity(item.id, item.quantity - 1)}
-                              className="w-7 h-7 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-700 flex items-center justify-center font-bold"
+                              style={{ width: '36px', height: '36px', borderRadius: '10px', border: '1px solid rgba(58,35,80,0.16)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', fontWeight: 700, color: '#3A2350', background: '#fff', cursor: 'pointer' }}
                             >
-                              <Minus className="w-3.5 h-3.5" />
+                              −
                             </button>
-                            <span className="w-8 text-center font-extrabold text-xs text-neutral-900">
-                              {item.quantity}
-                            </span>
+                            <span style={{ minWidth: '24px', textAlign: 'center', fontSize: '15px', fontWeight: 700 }}>{item.quantity}</span>
                             <button
                               type="button"
                               onClick={() => handleUpdateItemQuantity(item.id, item.quantity + 1)}
-                              className="w-7 h-7 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-700 flex items-center justify-center font-bold"
+                              style={{ width: '36px', height: '36px', borderRadius: '10px', border: '1px solid rgba(58,35,80,0.16)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', fontWeight: 700, color: '#3A2350', background: '#fff', cursor: 'pointer' }}
                             >
-                              <Plus className="w-3.5 h-3.5" />
+                              +
                             </button>
                           </div>
                         </div>
-
-                        {/* Calculated Item Total Badge */}
-                        <div className="text-right">
-                          <span className="text-[10px] text-neutral-500 font-bold block">
-                            Subtotal do Item
-                          </span>
-                          <span className="text-sm font-black text-semantic-success-700">
-                            {formatCurrency(bd.totalVenda)}
-                          </span>
+                        <div style={{ textAlign: 'right' }}>
+                          <span style={{ fontSize: '11px', color: '#7A6E80', display: 'block' }}>Subtotal do item</span>
+                          <span style={{ fontSize: '18px', fontWeight: 700, color: '#3A2350' }}>{formatCurrency(bd.totalVenda)}</span>
                         </div>
                       </div>
 
-                      {/* Small Auto-Fill Cost Breakdown Pills */}
-                      <div className="bg-white p-2 rounded-xl border border-pink-100 text-[10px] grid grid-cols-4 gap-2 text-center font-semibold text-neutral-600">
-                        <div title="Reposição de Insumos">
-                          <span className="block text-semantic-warning-700 font-bold">Reposição</span>
-                          <span className="font-extrabold text-neutral-900">
-                            {formatCurrency(bd.totalReposicao)}
-                          </span>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: '8px' }}>
+                        <div style={{ background: '#F6F2F5', borderRadius: '10px', padding: '9px 11px' }}>
+                          <span style={{ fontSize: '11px', color: '#7A6E80', display: 'block' }}>Reposição</span>
+                          <span style={{ fontSize: '13px', fontWeight: 700 }}>{formatCurrency(bd.totalReposicao)}</span>
                         </div>
-                        <div title="Mão de Obra (Seu Salário)">
-                          <span className="block text-semantic-info-700 font-bold">Mão Obra</span>
-                          <span className="font-extrabold text-neutral-900">
-                            {formatCurrency(bd.totalMaodeobra)}
-                          </span>
+                        <div style={{ background: '#F6F2F5', borderRadius: '10px', padding: '9px 11px' }}>
+                          <span style={{ fontSize: '11px', color: '#7A6E80', display: 'block' }}>Mão de obra</span>
+                          <span style={{ fontSize: '13px', fontWeight: 700, color: '#7E4F9E' }}>{formatCurrency(bd.totalMaodeobra)}</span>
                         </div>
-                        <div title="Custos Operacionais">
-                          <span className="block text-rose-700 font-bold">Custo</span>
-                          <span className="font-extrabold text-neutral-900">
-                            {formatCurrency(bd.totalCusto)}
-                          </span>
+                        <div style={{ background: '#F6F2F5', borderRadius: '10px', padding: '9px 11px' }}>
+                          <span style={{ fontSize: '11px', color: '#7A6E80', display: 'block' }}>Custo</span>
+                          <span style={{ fontSize: '13px', fontWeight: 700 }}>{formatCurrency(bd.totalCusto)}</span>
                         </div>
-                        <div title="Caixa de Investimento">
-                          <span className="block text-blue-700 font-bold">Invest.</span>
-                          <span className="font-extrabold text-neutral-900">
-                            {formatCurrency(bd.totalInvestimento)}
-                          </span>
+                        <div style={{ background: '#F6F2F5', borderRadius: '10px', padding: '9px 11px' }}>
+                          <span style={{ fontSize: '11px', color: '#7A6E80', display: 'block' }}>Investimento</span>
+                          <span style={{ fontSize: '13px', fontWeight: 700 }}>{formatCurrency(bd.totalInvestimento)}</span>
                         </div>
                       </div>
 
-                      {/* Item avulso sem catalogo de onde tirar a media: os
-                          custos acima sao zero porque nao ha o que estimar, e
-                          o lucro aparenta ser o valor inteiro. Dizer isso e
-                          melhor do que deixar a tela sugerir margem total. */}
-                      {item.productName === 'Outro / Personalizado' &&
-                        !proporcoesDoCatalogo && (
-                          <p className="text-[10px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5">
-                            ⚠️ Sem fichas técnicas cadastradas, não dá para estimar
-                            os custos deste item. Os valores acima ficam zerados.
-                          </p>
-                        )}
+                      {item.productName === 'Outro / Personalizado' && !proporcoesDoCatalogo && (
+                        <p className="text-[10px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5">
+                          ⚠️ Sem fichas técnicas cadastradas, não dá para estimar os custos deste item. Os valores acima ficam zerados.
+                        </p>
+                      )}
                     </div>
                   );
                 })}
 
-                {/* 5. ADD ANOTHER ITEM BUTTON */}
                 <button
                   type="button"
                   onClick={handleAddItem}
-                  className="w-full py-2.5 px-4 bg-pink-50 hover:bg-pink-100 text-pink-800 font-brand font-bold text-xs rounded-lg border-2 border-dashed border-[#E6E1DB] transition-all flex items-center justify-center gap-2 active:scale-98 shadow-card"
+                  style={{ border: '1px dashed rgba(58,35,80,0.25)', borderRadius: '12px', padding: '14px', textAlign: 'center', fontSize: '13px', fontWeight: 600, color: '#6E3F72', background: 'none', cursor: 'pointer' }}
                 >
-                  <PlusCircle className="w-4 h-4 text-pink-600 stroke-[2.5]" />
                   + Adicionar outro item ao mesmo pedido
                 </button>
-              </div>
 
-              {/* DELIVERY OPTION */}
-              <div className="pt-2 border-t border-neutral-200 space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-neutral-700 uppercase tracking-wide flex items-center gap-1.5">
-                    <Truck className="w-4 h-4 text-pink-600" />
-                    Entrega (Delivery)?
-                  </label>
-                  <div className="flex bg-neutral-100 p-0.5 rounded-xl border border-neutral-200">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setHasDelivery(false);
-                        setDeliveryMiles('');
-                      }}
-                      className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                        !hasDelivery
-                          ? 'bg-neutral-700 text-white shadow-card'
-                          : 'text-neutral-600 hover:text-neutral-900'
-                      }`}
-                    >
-                      Não
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setHasDelivery(true)}
-                      className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                        hasDelivery
-                          ? 'bg-[#6E3F72] text-white shadow-card'
-                          : 'text-neutral-600 hover:text-neutral-900'
-                      }`}
-                    >
-                      Sim
-                    </button>
+                <div style={{ background: '#fff', borderRadius: '16px', boxShadow: '0 8px 20px rgba(58,35,80,0.09)', padding: '6px 16px', display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '13px 0', borderBottom: '1px solid rgba(58,35,80,0.07)' }}>
+                    <span style={{ fontSize: '14px', fontWeight: 600 }}>Entrega (delivery)</span>
+                    <div style={{ display: 'flex', background: '#F1ECF2', borderRadius: '9px', padding: '3px' }}>
+                      <button
+                        type="button"
+                        onClick={() => { setHasDelivery(false); setDeliveryMiles(''); }}
+                        style={{ padding: '7px 14px', borderRadius: '7px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', border: 'none', background: !hasDelivery ? '#3A2350' : 'transparent', color: !hasDelivery ? '#fff' : '#7A6E80' }}
+                      >
+                        Não
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setHasDelivery(true)}
+                        style={{ padding: '7px 14px', borderRadius: '7px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', border: 'none', background: hasDelivery ? '#3A2350' : 'transparent', color: hasDelivery ? '#fff' : '#7A6E80' }}
+                      >
+                        Sim
+                      </button>
+                    </div>
                   </div>
-                </div>
 
-                {hasDelivery && (
-                  <div className="bg-pink-50/70 p-3 rounded-xl border border-[#E6E1DB] space-y-2 animate-fadeIn">
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex-1">
-                        <label className="block text-[11px] font-bold text-neutral-700 mb-1">
-                          Quantidade de Milhas
-                        </label>
+                  {hasDelivery && (
+                    <div style={{ padding: '13px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', borderBottom: '1px solid rgba(58,35,80,0.07)' }}>
+                      <div style={{ flex: 1 }}>
+                        <label style={{ fontSize: '11px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '4px' }}>Quantidade de milhas</label>
                         <div className="relative">
                           <input
                             type="number"
@@ -1432,310 +1342,233 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                             value={deliveryMiles}
                             onChange={(e) => setDeliveryMiles(e.target.value)}
                             placeholder="Ex: 5"
-                            className="w-full pl-3 pr-16 py-2 bg-white border border-neutral-300 rounded-lg text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72]"
+                            style={{ width: '100%', border: '1px solid rgba(58,35,80,0.14)', borderRadius: '10px', padding: '10px 60px 10px 12px', fontSize: '13px', background: '#FAF7FA' }}
                           />
-                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-neutral-500 font-bold">
-                            milhas
-                          </span>
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-[#7A6E80] font-bold">milhas</span>
                         </div>
                       </div>
-
-                      <div className="text-right shrink-0 pt-3">
-                        <span className="text-[10px] text-neutral-500 block font-bold">
-                          Taxa ($1.50/mi)
-                        </span>
-                        <span className="text-sm font-black text-pink-700">
-                          {formatCurrency(deliveryFee)}
-                        </span>
+                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                        <span style={{ fontSize: '10px', color: '#7A6E80', display: 'block' }}>Taxa ($1.50/mi)</span>
+                        <span style={{ fontSize: '14px', fontWeight: 700, color: '#3A2350' }}>{formatCurrency(deliveryFee)}</span>
                       </div>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
 
-              {/* ADICIONAIS OPTION */}
-              <div className="pt-2 border-t border-neutral-200 space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-neutral-700 uppercase tracking-wide flex items-center gap-1.5">
-                    <PackagePlus className="w-4 h-4 text-semantic-info-600" />
-                    Adicionais (Flores, Velas, Topos)?
-                  </label>
-                  <div className="flex bg-neutral-100 p-0.5 rounded-xl border border-neutral-200">
-                    <button
-                      type="button"
-                      onClick={() => handleToggleAddons(false)}
-                      className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                        !hasAddons
-                          ? 'bg-neutral-700 text-white shadow-card'
-                          : 'text-neutral-600 hover:text-neutral-900'
-                      }`}
-                    >
-                      Não
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleToggleAddons(true)}
-                      className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                        hasAddons
-                          ? 'bg-purple-600 text-white shadow-card'
-                          : 'text-neutral-600 hover:text-neutral-900'
-                      }`}
-                    >
-                      Sim
-                    </button>
-                  </div>
-                </div>
-
-                {hasAddons && (
-                  <div className="bg-semantic-info-50/70 p-3 rounded-xl border border-semantic-info-200 space-y-2.5 animate-fadeIn">
-                    {addons.map((addon, index) => (
-                      <div
-                        key={addon.id}
-                        className="bg-white p-2.5 rounded-xl border border-semantic-info-200/80 shadow-card space-y-2"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="text-[11px] font-extrabold text-semantic-info-900">
-                            🌸 Adicional #{index + 1}
-                          </span>
-                          {addons.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveAddonItem(addon.id)}
-                              className="p-1 text-slate-400 hover:text-rose-600 transition rounded-lg"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                          <div>
-                            <label className="block text-[10px] font-bold text-neutral-700 mb-0.5">
-                              Descrição
-                            </label>
-                            <input
-                              type="text"
-                              value={addon.description}
-                              onChange={(e) =>
-                                handleUpdateAddon(addon.id, 'description', e.target.value)
-                              }
-                              placeholder="Ex: Topo em acrílico"
-                              className="w-full px-2.5 py-1.5 bg-neutral-50 border border-neutral-300 rounded-lg text-xs font-medium focus:outline-none focus:ring-1 focus:ring-semantic-info-500"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-[10px] font-bold text-neutral-700 mb-0.5">
-                              Valor ($)
-                            </label>
-                            <input
-                              type="number"
-                              min="0"
-                              step="0.5"
-                              value={addon.value}
-                              onChange={(e) =>
-                                handleUpdateAddon(addon.id, 'value', e.target.value)
-                              }
-                              placeholder="0.00"
-                              className="w-full px-2.5 py-1.5 bg-neutral-50 border border-neutral-300 rounded-lg text-xs font-bold text-neutral-900 focus:outline-none focus:ring-1 focus:ring-semantic-info-500"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-
-                    <button
-                      type="button"
-                      onClick={handleAddAddonItem}
-                      className="w-full py-1.5 px-3 bg-white text-semantic-info-700 font-bold text-xs rounded-xl border border-dashed border-semantic-info-300 transition flex items-center justify-center gap-1"
-                    >
-                      <PlusCircle className="w-3.5 h-3.5 text-semantic-info-600" />
-                      + Adicionar outro adicional
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* PAYMENT STATUS & METHOD & DATE */}
-              <div className="pt-2 border-t border-neutral-200 space-y-3">
-                {/* Status Toggle */}
-                <div>
-                  <label className="block text-xs font-bold text-neutral-700 mb-1.5">
-                    Status do Pagamento *
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setPaymentStatus('pendente')}
-                      className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition-all text-left flex items-center justify-between ${
-                        paymentStatus === 'pendente'
-                          ? 'bg-amber-500 text-white border-amber-500 shadow-card'
-                          : 'bg-amber-50 text-amber-900 border-amber-200 hover:bg-amber-100'
-                      }`}
-                    >
-                      <span>⏳ Pendente (A Receber)</span>
-                      {paymentStatus === 'pendente' && <Check className="w-3.5 h-3.5" />}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPaymentStatus('pago')}
-                      className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition-all text-left flex items-center justify-between ${
-                        paymentStatus === 'pago'
-                          ? 'bg-emerald-600 text-white border-emerald-600 shadow-card'
-                          : 'bg-emerald-50 text-emerald-900 border-emerald-200 hover:bg-emerald-100'
-                      }`}
-                    >
-                      <span>✅ Pago (Recebido)</span>
-                      {paymentStatus === 'pago' && <Check className="w-3.5 h-3.5" />}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Payment Method */}
-                <div>
-                  <label className="block text-xs font-bold text-neutral-700 mb-1.5">
-                    Forma de Pagamento *
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      { id: 'zelle', label: '⚡ Zelle' },
-                      { id: 'cash', label: '💵 Cash (Dinheiro)' },
-                    ].map((item) => (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '13px 0' }}>
+                    <span style={{ fontSize: '14px', fontWeight: 600 }}>Adicionais (flores, velas, topos)</span>
+                    <div style={{ display: 'flex', background: '#F1ECF2', borderRadius: '9px', padding: '3px' }}>
                       <button
-                        key={item.id}
                         type="button"
-                        onClick={() => setPaymentMethod(item.id as PaymentMethod)}
-                        className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all text-left flex items-center justify-between ${
-                          paymentMethod === item.id
-                            ? 'bg-emerald-500 text-white border-emerald-500 shadow-card'
-                            : 'bg-neutral-50 text-neutral-700 border-neutral-200 hover:bg-neutral-100'
+                        onClick={() => handleToggleAddons(false)}
+                        style={{ padding: '7px 14px', borderRadius: '7px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', border: 'none', background: !hasAddons ? '#3A2350' : 'transparent', color: !hasAddons ? '#fff' : '#7A6E80' }}
+                      >
+                        Não
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleToggleAddons(true)}
+                        style={{ padding: '7px 14px', borderRadius: '7px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', border: 'none', background: hasAddons ? '#3A2350' : 'transparent', color: hasAddons ? '#fff' : '#7A6E80' }}
+                      >
+                        Sim
+                      </button>
+                    </div>
+                  </div>
+
+                  {hasAddons && (
+                    <div className="pb-3 space-y-2.5">
+                      {addons.map((addon, index) => (
+                        <div key={addon.id} style={{ background: '#FAF7FA', border: '1px solid rgba(58,35,80,0.1)', borderRadius: '12px', padding: '10px' }} className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span style={{ fontSize: '11px', fontWeight: 700, color: '#6E3F72' }}>🌸 Adicional #{index + 1}</span>
+                            {addons.length > 1 && (
+                              <button type="button" onClick={() => handleRemoveAddonItem(addon.id)} className="p-1 text-slate-400 hover:text-rose-600 transition rounded-lg">
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <div>
+                              <label style={{ fontSize: '10px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '3px' }}>Descrição</label>
+                              <input
+                                type="text"
+                                value={addon.description}
+                                onChange={(e) => handleUpdateAddon(addon.id, 'description', e.target.value)}
+                                placeholder="Ex: Topo em acrílico"
+                                style={{ width: '100%', border: '1px solid rgba(58,35,80,0.14)', borderRadius: '9px', padding: '8px', fontSize: '12px', background: '#fff' }}
+                              />
+                            </div>
+                            <div>
+                              <label style={{ fontSize: '10px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '3px' }}>Valor ($)</label>
+                              <input
+                                type="number"
+                                min="0"
+                                step="0.5"
+                                value={addon.value}
+                                onChange={(e) => handleUpdateAddon(addon.id, 'value', e.target.value)}
+                                placeholder="0.00"
+                                style={{ width: '100%', border: '1px solid rgba(58,35,80,0.14)', borderRadius: '9px', padding: '8px', fontSize: '12px', background: '#fff' }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={handleAddAddonItem}
+                        style={{ width: '100%', padding: '8px 12px', background: '#fff', color: '#6E3F72', fontWeight: 700, fontSize: '12px', borderRadius: '10px', border: '1px dashed rgba(110,63,114,0.4)', cursor: 'pointer' }}
+                      >
+                        + Adicionar outro adicional
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* PASSO 3 — PAGAMENTO */}
+              <div data-step={3} style={{ display: pedidoFormStep === 3 ? 'flex' : 'none', flexDirection: 'column', gap: '14px' }}>
+                <div style={{ background: '#fff', borderRadius: '16px', boxShadow: '0 8px 20px rgba(58,35,80,0.09)', padding: '18px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div>
+                    <label style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '8px' }}>Status do pagamento *</label>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: '8px' }}>
+                      <button
+                        type="button"
+                        onClick={() => setPaymentStatus('pendente')}
+                        className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition-all text-left flex items-center justify-between ${
+                          paymentStatus === 'pendente'
+                            ? 'bg-amber-500 text-white border-amber-500 shadow-card'
+                            : 'bg-amber-50 text-amber-900 border-amber-200 hover:bg-amber-100'
                         }`}
                       >
-                        <span>{item.label}</span>
-                        {paymentMethod === item.id && <Check className="w-3.5 h-3.5" />}
+                        <span>⏳ Pendente (a receber)</span>
+                        {paymentStatus === 'pendente' && <Check className="w-3.5 h-3.5" />}
                       </button>
-                    ))}
+                      <button
+                        type="button"
+                        onClick={() => setPaymentStatus('pago')}
+                        className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition-all text-left flex items-center justify-between ${
+                          paymentStatus === 'pago'
+                            ? 'bg-emerald-600 text-white border-emerald-600 shadow-card'
+                            : 'bg-emerald-50 text-emerald-900 border-emerald-200 hover:bg-emerald-100'
+                        }`}
+                      >
+                        <span>✅ Pago (recebido)</span>
+                        {paymentStatus === 'pago' && <Check className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
                   </div>
-                </div>
 
-                {/* Data da entrega.
-                    Ligado a `eventDate`, e nao a `date`: e `eventDate` que vira
-                    a data gravada do pedido (ver o `date:` na montagem da
-                    transacao). Este campo escrevia em `date`, que era
-                    descartado no salvamento — a confeiteira escolhia o dia,
-                    via o campo mudar, e o pedido caia noutra data. */}
-                <div>
-                  <label className="block text-xs font-bold text-neutral-700 mb-1">
-                    Data da Entrega
-                  </label>
-                  <input
-                    type="date"
-                    required
-                    value={eventDate}
-                    onChange={(e) => {
-                      setEventDate(e.target.value);
-                      // Escolha explicita: a partir daqui a data cadastrada da
-                      // cliente nao sobrescreve mais.
-                      setEventDateTouched(true);
-                    }}
-                    className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-300 rounded-lg text-sm font-medium text-neutral-800 focus:outline-none focus:ring-2 focus:ring-pink-400"
-                  />
-                </div>
-
-                {/* Optional Notes */}
-                <div>
-                  <label className="block text-xs font-bold text-neutral-700 mb-1">
-                    Observações / Anotações do Cliente (Opcional)
-                  </label>
-                  <input
-                    type="text"
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Ex: Entregar às 15h, sem glacê no topo..."
-                    className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-300 rounded-lg text-sm font-medium text-neutral-800 focus:outline-none focus:ring-2 focus:ring-pink-400"
-                  />
-                </div>
-              </div>
-
-              {/* GRAND TOTAL ORDER SUMMARY CARD */}
-              <div className="bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-white rounded-xl p-4 shadow-sm space-y-3">
-                <div className="flex items-center justify-between border-b border-white/10 pb-2">
                   <div>
-                    <span className="text-[10px] text-semantic-info-300 font-bold uppercase tracking-wider block">
-                      Total Consolidado do Pedido
-                    </span>
-                    <span className="font-marca text-3xl font-black text-emerald-400">
-                      {formatCurrency(grandTotalSalePrice)}
-                    </span>
+                    <label style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '8px' }}>Forma de pagamento *</label>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: '8px' }}>
+                      {[
+                        { id: 'zelle', label: '⚡ Zelle' },
+                        { id: 'cash', label: '💵 Cash (dinheiro)' },
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => setPaymentMethod(item.id as PaymentMethod)}
+                          className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all text-left flex items-center justify-between ${
+                            paymentMethod === item.id
+                              ? 'bg-emerald-500 text-white border-emerald-500 shadow-card'
+                              : 'bg-neutral-50 text-neutral-700 border-neutral-200 hover:bg-neutral-100'
+                          }`}
+                        >
+                          <span>{item.label}</span>
+                          {paymentMethod === item.id && <Check className="w-3.5 h-3.5" />}
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
-                  <div className="text-right text-[11px] text-slate-300 font-medium">
-                    <div>{orderItems.length} {orderItems.length === 1 ? 'item' : 'itens'} no pedido</div>
-                    {hasDelivery && deliveryFee > 0 && (
-                      <div className="text-pink-300">+ Entrega: {formatCurrency(deliveryFee)}</div>
-                    )}
-                    {totalAddonsValue > 0 && (
-                      <div className="text-semantic-info-300">+ Adic.: {formatCurrency(totalAddonsValue)}</div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Combined Divisions */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-center text-[10px]">
-                  <div className="bg-white/10 p-2 rounded-xl">
-                    <span className="text-amber-300 font-bold block">Reposição</span>
-                    <span className="font-extrabold">{formatCurrency(totalItemsReposicao)}</span>
-                  </div>
-                  <div className="bg-white/10 p-2 rounded-xl">
-                    <span className="text-semantic-info-300 font-bold block">Mão de Obra</span>
-                    <span className="font-extrabold">{formatCurrency(totalItemsMaodeobra)}</span>
-                  </div>
-                  <div className="bg-white/10 p-2 rounded-xl">
-                    <span className="text-rose-300 font-bold block">Custos</span>
-                    <span className="font-extrabold">{formatCurrency(totalItemsCusto)}</span>
-                  </div>
-                  <div className="bg-white/10 p-2 rounded-xl">
-                    <span className="text-blue-300 font-bold block">Investimento</span>
-                    <span className="font-extrabold">{formatCurrency(totalItemsInvestimento)}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Signal Value (only for vendas) */}
-              {type === 'venda' && (
-                <div>
-                  <label className="block text-xs font-bold text-neutral-700 mb-1 flex items-center justify-between">
-                    <span>Valor do Sinal/Entrada Pago (Opcional)</span>
-                    <span className="text-[11px] font-medium text-neutral-500">{totalValue ? `Máx: $${totalValue}` : '-'}</span>
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-bold text-emerald-600 text-lg">
-                      $
-                    </span>
+                  <div>
+                    <label style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '6px' }}>Data da entrega</label>
                     <input
-                      type="text"
-                      inputMode="decimal"
-                      placeholder="Deixe em branco = valor total pago"
-                      value={signalValue}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        if (val === '') {
-                          setSignalValue(val);
-                        } else if (totalValue) {
-                          const numVal = parseFloat(val.replace(',', '.'));
-                          const totalNum = parseFloat(totalValue.replace(',', '.')) || 0;
-                          if (numVal <= totalNum) {
-                            setSignalValue(val);
-                          }
-                        } else {
-                          setSignalValue(val);
-                        }
-                      }}
-                      className="w-full pl-9 pr-3.5 py-2.5 text-sm bg-emerald-50/30 border border-emerald-300 rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                      type="date"
+                      required
+                      value={eventDate}
+                      onChange={(e) => { setEventDate(e.target.value); setEventDateTouched(true); }}
+                      style={{ width: '100%', border: '1px solid rgba(58,35,80,0.14)', borderRadius: '10px', padding: '12px', fontSize: '15px', background: '#FAF7FA', color: '#241B2B' }}
                     />
                   </div>
+
+                  <div>
+                    <label style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '6px' }}>Observações / anotações do cliente</label>
+                    <textarea
+                      rows={3}
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      placeholder="Ex: entregar às 15h, sem glacê no topo…"
+                      style={{ width: '100%', border: '1px solid rgba(58,35,80,0.14)', borderRadius: '10px', padding: '12px', fontSize: '14px', background: '#FAF7FA', resize: 'none', lineHeight: 1.5 }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                      <span>Valor do sinal / entrada</span>
+                      <span style={{ fontSize: '11px', fontWeight: 500, color: '#A096A6' }}>{totalValue ? `Máx: $${totalValue}` : '-'}</span>
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-bold text-emerald-600 text-lg">$</span>
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        placeholder="Deixe em branco = valor total pago"
+                        value={signalValue}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === '') {
+                            setSignalValue(val);
+                          } else if (totalValue) {
+                            const numVal = parseFloat(val.replace(',', '.'));
+                            const totalNum = parseFloat(totalValue.replace(',', '.')) || 0;
+                            if (numVal <= totalNum) setSignalValue(val);
+                          } else {
+                            setSignalValue(val);
+                          }
+                        }}
+                        style={{ width: '100%', border: '1px solid rgba(58,35,80,0.14)', borderRadius: '10px', padding: '12px 12px 12px 30px', fontSize: '15px', background: '#FAF7FA' }}
+                      />
+                    </div>
+                  </div>
                 </div>
-              )}
+
+                <div style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 55%, #A85E86 100%)', borderRadius: '16px', padding: '18px', display: 'flex', flexDirection: 'column', gap: '14px', boxShadow: '0 20px 36px rgba(58,35,80,0.18)' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '10px' }}>
+                    <div>
+                      <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.65)', display: 'block' }}>
+                        Total do pedido
+                      </span>
+                      <span style={{ fontFamily: "'Instrument Serif', serif", fontSize: '32px', lineHeight: 1, color: '#fff' }}>
+                        {formatCurrency(grandTotalSalePrice)}
+                      </span>
+                    </div>
+                    <div style={{ textAlign: 'right', fontSize: '12px', color: 'rgba(255,255,255,0.7)' }}>
+                      <div>{orderItems.length} {orderItems.length === 1 ? 'item' : 'itens'} no pedido</div>
+                      {hasDelivery && deliveryFee > 0 && <div>+ Entrega: {formatCurrency(deliveryFee)}</div>}
+                      {totalAddonsValue > 0 && <div>+ Adic.: {formatCurrency(totalAddonsValue)}</div>}
+                    </div>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: '8px' }}>
+                    <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '10px', padding: '9px 11px' }}>
+                      <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', display: 'block' }}>Reposição</span>
+                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>{formatCurrency(totalItemsReposicao)}</span>
+                    </div>
+                    <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '10px', padding: '9px 11px' }}>
+                      <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', display: 'block' }}>Mão de obra</span>
+                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>{formatCurrency(totalItemsMaodeobra)}</span>
+                    </div>
+                    <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '10px', padding: '9px 11px' }}>
+                      <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', display: 'block' }}>Custos</span>
+                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>{formatCurrency(totalItemsCusto)}</span>
+                    </div>
+                    <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '10px', padding: '9px 11px' }}>
+                      <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', display: 'block' }}>Investimento</span>
+                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>{formatCurrency(totalItemsInvestimento)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
@@ -1949,31 +1782,91 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
             </div>
           )}
 
-          {/* Submit Button */}
-          <div className="pt-2">
-            <button
-              type="submit"
-              disabled={isSaving}
-              className={`w-full py-4 rounded-lg text-white font-brand text-base font-bold shadow-highlight shadow-pink-200 active:scale-98 transition-all flex items-center justify-center gap-2 ${
-                isSaving
-                  ? 'bg-gradient-to-r from-pink-400 to-rose-400 opacity-75 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600'
-              }`}
-            >
-              {isSaving ? (
-                <>
-                  <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full" />
-                  Salvando...
-                </>
-              ) : (
-                <>
-                  <Check className="w-5 h-5 stroke-[2.5]" />
-                  {editingTransaction ? 'Salvar Alterações' : 'Confirmar e Gravar'}
-                </>
-              )}
-            </button>
-          </div>
+          {/* Submit Button (demais tipos de lancamento — venda usa o footer fixo abaixo) */}
+          {type !== 'venda' && (
+            <div className="pt-2">
+              <button
+                type="submit"
+                disabled={isSaving}
+                className={`w-full py-4 rounded-lg text-white font-brand text-base font-bold shadow-highlight shadow-pink-200 active:scale-98 transition-all flex items-center justify-center gap-2 ${
+                  isSaving
+                    ? 'bg-gradient-to-r from-pink-400 to-rose-400 opacity-75 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600'
+                }`}
+              >
+                {isSaving ? (
+                  <>
+                    <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full" />
+                    Salvando...
+                  </>
+                ) : (
+                  <>
+                    <Check className="w-5 h-5 stroke-[2.5]" />
+                    {editingTransaction ? 'Salvar Alterações' : 'Confirmar e Gravar'}
+                  </>
+                )}
+              </button>
+            </div>
+          )}
         </form>
+
+        {/* Footer fixo do formulario em 3 passos — fora da area de scroll,
+            mesmo padrao ja usado em Ficha Tecnica. O botao de submit final
+            referencia o form pelo id (form="pedido-form") mesmo estando fora
+            dele. */}
+        {type === 'venda' && (
+          <div style={{ background: '#fff', borderTop: '1px solid rgba(58,35,80,0.08)', padding: '14px 16px 18px', display: 'flex', gap: '10px', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 -8px 24px rgba(58,35,80,0.07)' }} className="flex-shrink-0">
+            <button
+              type="button"
+              onClick={() => (pedidoFormStep === 1 ? onClose() : setPedidoFormStep((s) => (s - 1) as 1 | 2 | 3))}
+              style={{ padding: '14px 18px', borderRadius: '11px', border: '1px solid rgba(58,35,80,0.16)', fontSize: '14px', fontWeight: 600, color: '#3A2350', background: 'none', cursor: 'pointer' }}
+            >
+              {pedidoFormStep === 1 ? 'Cancelar' : 'Voltar'}
+            </button>
+            {pedidoFormStep < 3 ? (
+              <button
+                type="button"
+                onClick={() => setPedidoFormStep((s) => (s + 1) as 1 | 2 | 3)}
+                style={{ flex: 1, textAlign: 'center', padding: '14px 20px', borderRadius: '11px', background: '#3A2350', color: '#fff', fontSize: '14px', fontWeight: 600, cursor: 'pointer', border: 'none', boxShadow: '0 10px 20px rgba(58,35,80,0.3)' }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = '#6E3F72'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = '#3A2350'; }}
+              >
+                Continuar
+              </button>
+            ) : (
+              <button
+                type="submit"
+                form="pedido-form"
+                disabled={isSaving}
+                style={{ flex: 1, textAlign: 'center', padding: '14px 20px', borderRadius: '11px', background: '#3A2350', color: '#fff', fontSize: '14px', fontWeight: 600, cursor: isSaving ? 'not-allowed' : 'pointer', border: 'none', boxShadow: '0 10px 20px rgba(58,35,80,0.3)', opacity: isSaving ? 0.75 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                onMouseEnter={(e) => { if (!isSaving) e.currentTarget.style.background = '#6E3F72'; }}
+                onMouseLeave={(e) => { if (!isSaving) e.currentTarget.style.background = '#3A2350'; }}
+                onClick={(e) => {
+                  const form = pedidoFormRef.current;
+                  if (!form || form.checkValidity()) return;
+                  e.preventDefault();
+                  const invalidField = form.querySelector<HTMLElement>(':invalid');
+                  const invalidStepEl = invalidField?.closest<HTMLElement>('[data-step]');
+                  const invalidStep = invalidStepEl ? (Number(invalidStepEl.dataset.step) as 1 | 2 | 3) : 1;
+                  setPedidoFormStep(invalidStep);
+                  requestAnimationFrame(() => form.reportValidity());
+                }}
+              >
+                {isSaving ? (
+                  <>
+                    <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+                    Salvando...
+                  </>
+                ) : (
+                  <>
+                    <Check className="w-4 h-4 stroke-[2.5]" />
+                    {editingTransaction ? 'Salvar alterações' : 'Confirmar e gravar'}
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Success Toast */}
