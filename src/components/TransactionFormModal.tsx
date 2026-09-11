@@ -333,7 +333,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
 
   // Delivery State
   const [hasDelivery, setHasDelivery] = useState<boolean>(false);
-  const [deliveryMiles, setDeliveryMiles] = useState<string>('');
+  const [deliveryFeeInput, setDeliveryFeeInput] = useState<string>('');
 
   // Adicionais State
   const [hasAddons, setHasAddons] = useState<boolean>(false);
@@ -449,7 +449,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       // Default sales items
       setOrderItems([criarItemVazio('1')]);
       setHasDelivery(false);
-      setDeliveryMiles('');
+      setDeliveryFeeInput('');
       setHasAddons(false);
       setAddons([{ id: '1', description: '', value: '', hasCost: false, costValue: '' }]);
 
@@ -567,8 +567,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   const totalItemsInvestimento = itemsBreakdownList.reduce((sum, b) => sum + b.totalInvestimento, 0);
 
   // Delivery Calculations
-  const numericMiles = hasDelivery ? parseFloat(deliveryMiles.replace(',', '.')) || 0 : 0;
-  const deliveryFee = hasDelivery ? numericMiles * 1.5 : 0;
+  const deliveryFee = hasDelivery ? parseFloat(deliveryFeeInput.replace(',', '.')) || 0 : 0;
 
   // Addons Calculations
   const validAddons = hasAddons
@@ -755,7 +754,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
 
       let descStr = descParts.join(' + ');
       if (hasDelivery && deliveryFee > 0) {
-        descStr += ` + Entrega (${numericMiles} mi)`;
+        descStr += ` + Entrega`;
       }
       if (validAddons.length > 0) {
         const addonsNames = validAddons
@@ -772,7 +771,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       )}, Investimento ${formatCurrency(totalItemsInvestimento)}.`;
 
       if (hasDelivery && deliveryFee > 0) {
-        notesStr += ` Taxa de Entrega: ${formatCurrency(deliveryFee)} (${numericMiles} milhas).`;
+        notesStr += ` Taxa de Entrega: ${formatCurrency(deliveryFee)}.`;
       }
 
       if (validAddons.length > 0) {
@@ -1334,7 +1333,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                     <div style={{ display: 'flex', background: '#F1ECF2', borderRadius: '9px', padding: '3px' }}>
                       <button
                         type="button"
-                        onClick={() => { setHasDelivery(false); setDeliveryMiles(''); }}
+                        onClick={() => { setHasDelivery(false); setDeliveryFeeInput(''); }}
                         style={{ padding: '7px 14px', borderRadius: '7px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', border: 'none', background: !hasDelivery ? '#3A2350' : 'transparent', color: !hasDelivery ? '#fff' : '#7A6E80' }}
                       >
                         Não
@@ -1350,25 +1349,18 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                   </div>
 
                   {hasDelivery && (
-                    <div style={{ padding: '13px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', borderBottom: '1px solid rgba(58,35,80,0.07)' }}>
-                      <div style={{ flex: 1 }}>
-                        <label style={{ fontSize: '11px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '4px' }}>Quantidade de milhas</label>
-                        <div className="relative">
-                          <input
-                            type="number"
-                            min="0"
-                            step="0.1"
-                            value={deliveryMiles}
-                            onChange={(e) => setDeliveryMiles(e.target.value)}
-                            placeholder="Ex: 5"
-                            style={{ width: '100%', border: '1px solid rgba(58,35,80,0.14)', borderRadius: '10px', padding: '10px 60px 10px 12px', fontSize: '13px', background: '#FAF7FA' }}
-                          />
-                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-[#7A6E80] font-bold">milhas</span>
-                        </div>
-                      </div>
-                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                        <span style={{ fontSize: '10px', color: '#7A6E80', display: 'block' }}>Taxa ($1.50/mi)</span>
-                        <span style={{ fontSize: '14px', fontWeight: 700, color: '#3A2350' }}>{formatCurrency(deliveryFee)}</span>
+                    <div style={{ padding: '13px 0', borderBottom: '1px solid rgba(58,35,80,0.07)' }}>
+                      <label style={{ fontSize: '11px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '4px' }}>Taxa de entrega (R$)</label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[13px] text-[#7A6E80] font-bold">R$</span>
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          value={deliveryFeeInput}
+                          onChange={(e) => setDeliveryFeeInput(e.target.value)}
+                          placeholder="0,00"
+                          style={{ width: '100%', border: '1px solid rgba(58,35,80,0.14)', borderRadius: '10px', padding: '10px 12px 10px 34px', fontSize: '13px', background: '#FAF7FA' }}
+                        />
                       </div>
                     </div>
                   )}
