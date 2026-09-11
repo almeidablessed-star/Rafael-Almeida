@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Produto, Transaction } from '../types';
 import { useProdutos } from '../context/ProdutosContext';
+import { formatQuantity } from '../utils/formatters';
 import { StockMovementsHistory } from './StockMovementsHistory';
 import { BalancesAndExpensesModule } from './BalancesAndExpensesModule';
 import {
@@ -147,7 +148,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
     setQuantidadeEmbalagem(String(p.quantidadeEmbalagem));
     setUnidadeEmbalagem(p.unidadeEmbalagem);
     setControlaEstoque(p.controlaEstoque);
-    setQuantidadeAtual(p.quantidadeAtual != null ? String(p.quantidadeAtual) : '');
+    setQuantidadeAtual(p.quantidadeAtual != null ? String(Math.round(p.quantidadeAtual * 100) / 100).replace('.', ',') : '');
     setNivelMinimo(p.nivelMinimo != null ? String(p.nivelMinimo) : '');
     setNivelMinimoUnidade(p.nivelMinimoUnidade || 'g');
     setEditingId(p.id);
@@ -612,7 +613,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
 
                       <div className="flex items-center justify-between gap-2 mt-0.5">
                         <div style={{ fontSize: '13px', fontWeight: 800, color: '#241B2B', background: '#F6F2F5', border: '1px solid rgba(36,27,43,.08)', borderRadius: '12px', padding: '7px 14px', whiteSpace: 'nowrap' }}>
-                          {qtd} <span style={{ fontSize: '10px', fontWeight: 600, color: '#8A7E90' }}>{p.unidadeEmbalagem}</span>
+                          {formatQuantity(qtd)} <span style={{ fontSize: '10px', fontWeight: 600, color: '#8A7E90' }}>{p.unidadeEmbalagem}</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <button onClick={() => handleOpenEdit(p)} className="hover:bg-[#EFE6F0] transition-colors" style={{ width: '28px', height: '28px', borderRadius: '9px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

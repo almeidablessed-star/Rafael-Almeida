@@ -20,6 +20,18 @@ export const formatCurrency = (value: number, currency: 'BRL' | 'USD' = 'BRL'): 
   }
 };
 
+// Corrige exibicao de imprecisao de ponto flutuante (ex: "-0.8999999999999999")
+// sem alterar o valor real armazenado — arredonda so para mostrar na tela,
+// mantendo casas decimais apenas quando o valor nao e um numero inteiro.
+export const formatQuantity = (value: number): string => {
+  if (isNaN(value)) return '0';
+  const rounded = Math.round(value * 100) / 100;
+  return rounded.toLocaleString('pt-BR', {
+    minimumFractionDigits: Number.isInteger(rounded) ? 0 : 2,
+    maximumFractionDigits: 2,
+  });
+};
+
 export const parseCurrencyInput = (input: string): number => {
   // Removes $, spaces, commas, replaces comma with dot
   const clean = input.replace(/[^\d,.-]/g, '').replace(/,/g, '.');

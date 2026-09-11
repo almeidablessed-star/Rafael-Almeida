@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useProdutos } from '../context/ProdutosContext';
 import { ArrowDown, ArrowUp, RotateCcw, TrendingUp, X, History } from 'lucide-react';
 import type { MovimentoEstoque } from '../context/ProdutosContext';
+import { formatQuantity } from '../utils/formatters';
 
 /**
  * Historico de movimentacoes do estoque.
@@ -70,8 +71,7 @@ const formatarData = (timestamp: number) =>
   new Date(timestamp).toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' });
 
 // Numeros longos de conversao ("0.20000000000000004 kg") nao ajudam ninguem.
-const formatarQuantidade = (valor: number) =>
-  Number(valor.toFixed(3)).toLocaleString('pt-BR');
+const formatarQuantidade = formatQuantity;
 
 const MovementRow: React.FC<{ mov: MovimentoEstoque }> = ({ mov }) => (
   <div className={`p-3.5 ${cor(mov.tipo)}`}>
