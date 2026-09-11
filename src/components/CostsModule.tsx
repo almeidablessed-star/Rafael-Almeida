@@ -133,6 +133,23 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
             investimento/mao de obra) e continua igual. */}
         <div style={{ borderTop: '1px dashed #E6E1DB', margin: '4px 0' }} />
 
+        {/* Intro explicativa — pedido do Rafael em 2026-09-11: a secao tem
+            funcao real (unica forma de registrar gasto avulso, alimenta o
+            desconto de Saldos no Inicio), mas ninguem entendia pra que
+            servia nem em que ela difere do Resumo/Distribuicao logo acima.
+            Mesmo tom curto e direto do microcopy de onboarding
+            (CampoComAjuda), cores literais em vez de var(--color-brand-*)
+            porque essas variaveis nao existem em runtime (ver memoria
+            carula-variaveis-css-orfas). */}
+        <div>
+          <h4 style={{ fontSize: '11px', fontWeight: 800, color: '#241B2B', margin: '0 0 3px', fontFamily: "'Manrope', sans-serif" }}>
+            Gastos avulsos
+          </h4>
+          <p style={{ fontSize: '10.5px', color: '#7A6E80', margin: 0, lineHeight: 1.45, fontFamily: "'Manrope', sans-serif" }}>
+            O resumo acima é sua meta planejada. Aqui embaixo você registra o que realmente gastou fora de uma venda — comprou um equipamento (investimento), pagou alguém avulso (mão de obra) ou teve um custo extra. Esse valor é descontado do seu saldo real lá no Início.
+          </p>
+        </div>
+
         {/* Summary Cards - 3 columns */}
         <div style={{
           display: 'grid',
@@ -325,6 +342,9 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
               <Receipt style={{ width: '20px', height: '20px', color: '#E6E1DB', margin: '0 auto 8px' }} />
               <p style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--color-brand-900)', margin: 0 }}>
                 Nenhum registro
+              </p>
+              <p style={{ fontSize: '9.5px', color: '#7A6E80', margin: '4px 0 0', fontFamily: "'Manrope', sans-serif" }}>
+                Toque em "{activeTab === 'maodeobra' ? 'Nova Mão de Obra' : 'Novo Custo / Investimento'}" acima pra registrar seu primeiro gasto avulso.
               </p>
             </div>
           ) : (
