@@ -1,7 +1,11 @@
-# Pendência cosmética: aba "Minha Empresa" no rodapé — nome grande demais e ícone de cifrão
+# RESOLVIDO: aba "Minha Empresa" no rodapé — nome grande demais e ícone de cifrão
 
 > Registrado em 2026-09-12, mesmo padrão dos outros `docs/bug-*.md` desta
 > pasta (pendências cosméticas/baixa prioridade, sem correção imediata).
+> **Resolvido no mesmo dia**, commit `ebed852` — rótulo virou "Empresa" e o
+> ícone virou uma maleta (depois de comparar variações de prédio e de
+> gráfico com o Rafael, ele preferiu a maleta). Texto abaixo preservado como
+> registro do problema original.
 
 ## Sintoma
 
