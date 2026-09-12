@@ -40,8 +40,9 @@ const IconProdutos = (props: { stroke: string; strokeWidth: number }) => (
 
 const IconCustos = (props: { stroke: string; strokeWidth: number }) => (
   <svg width="19" height="19" viewBox="0 0 24 24" fill="none" {...props} strokeLinecap="round" strokeLinejoin="round">
-    <line x1="12" y1="2" x2="12" y2="22"/>
-    <path d="M17 6H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+    <path d="M4 8h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/>
+    <path d="M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/>
+    <path d="M3 13h18"/>
   </svg>
 );
 
@@ -57,7 +58,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) 
     { id: 'fichas' as TabType, label: 'Fichas', icon: IconFichas },
     { id: 'clientes' as TabType, label: 'Clientes', icon: IconClientes },
     { id: 'produtos' as TabType, label: 'Produtos', icon: IconProdutos },
-    { id: 'custos' as TabType, label: 'Minha Empresa', icon: IconCustos },
+    { id: 'custos' as TabType, label: 'Empresa', icon: IconCustos },
   ];
 
   return (
