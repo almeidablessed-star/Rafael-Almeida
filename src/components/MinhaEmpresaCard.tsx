@@ -214,24 +214,37 @@ export const MinhaEmpresaCard: React.FC = () => {
         </div>
         <CampoComAjuda microcopy="Aluguel, luz, internet... custos fixos, independente de quanto você vende. O que já está no custo do produto não entra aqui de novo." />
         <div className="space-y-2">
-          {despesas.map((d, i) => (
+          {despesas.map((d, i) => {
+            const exemploRateio = d.nome && d.valor
+              ? `Você informou ${formatCurrency(d.valor)} de ${d.nome.trim()}. Se só uma parte é do negócio, ajuste esse número — por exemplo, 50 significa que ${formatCurrency(d.valor * 0.5)} entram como custo real da confeitaria.`
+              : undefined;
+            return (
             <div key={d.id ?? `novo-${i}`} className="p-3 rounded-xl border border-[#E6E1DB] bg-white space-y-2">
               <input type="text" placeholder="Nome da despesa" value={d.nome} onChange={(e) => atualizarDespesa(i, 'nome', e.target.value)}
+                style={{ fontFamily: "'Manrope', sans-serif" }}
                 className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe" />
-              <div className="flex gap-2 items-center">
-                <input type="number" placeholder="Valor" value={d.valor || ''} onChange={(e) => atualizarDespesa(i, 'valor', Number(e.target.value))}
-                  className="flex-1 px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe" />
-                <input type="number" placeholder="% negócio" value={d.percentualRateio} onChange={(e) => atualizarDespesa(i, 'percentualRateio', Number(e.target.value))}
-                  className="w-24 px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe" />
+              <div className="flex gap-2 items-end">
+                <div className="flex-1">
+                  <label className="text-[9px] font-bold block mb-1" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>Valor (R$)</label>
+                  <input type="number" placeholder="0" value={d.valor || ''} onChange={(e) => atualizarDespesa(i, 'valor', Number(e.target.value))}
+                    style={{ fontFamily: "'Manrope', sans-serif" }}
+                    className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe" />
+                </div>
+                <div className="w-24">
+                  <label className="text-[9px] font-bold block mb-1" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>% do negócio</label>
+                  <input type="number" placeholder="100" value={d.percentualRateio} onChange={(e) => atualizarDespesa(i, 'percentualRateio', Number(e.target.value))}
+                    style={{ fontFamily: "'Manrope', sans-serif" }}
+                    className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe" />
+                </div>
                 <button onClick={() => removerDespesa(i)} className="w-8 h-8 flex-shrink-0 rounded-full bg-[#FDF4F5] text-[#C4626F] flex items-center justify-center text-xs font-bold" aria-label="Remover despesa">×</button>
               </div>
-              {d.percentualRateio < 100 && (
-                <p className="text-[10px]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
-                  Se essa despesa também é usada na sua vida pessoal, aqui vale só a parte da confeitaria.
-                </p>
-              )}
+              <CampoComAjuda
+                microcopy="Se essa despesa também é usada na sua vida pessoal, informe aqui só a parte que é do negócio. Deixe 100 se ela é toda da confeitaria."
+                exemploDinamico={exemploRateio}
+              />
             </div>
-          ))}
+            );
+          })}
         </div>
         <button onClick={adicionarDespesa} className="w-full py-2.5 rounded-xl border border-dashed border-[#E6E1DB] text-[12px] font-bold text-[#6E3F72] hover:bg-white transition-all">
           + Adicionar despesa
