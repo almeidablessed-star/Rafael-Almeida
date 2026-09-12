@@ -19,7 +19,7 @@ import {
 } from '../data/presetData';
 import { getTodayIso, formatCurrency, getTransactionTypeDetails } from '../utils/formatters';
 import { buildFichaItems, normalizeName } from '../utils/fichaMatcher';
-import { calculateProportionalBreakdown, derivarProporcoes } from '../utils/financialEngine';
+import { calculateProportionalBreakdown, derivarProporcoes, parseSaleDetail } from '../utils/financialEngine';
 import {
   X,
   Plus,
@@ -381,6 +381,19 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
         setDeliveryAddress(editingTransaction.deliveryAddress || '');
         setObservations(editingTransaction.observations || '');
         setInspirationImage(editingTransaction.inspirationImage || '');
+        // A taxa de entrega nao tem coluna propria — vive dentro de
+        // `breakdown`/`notes`. parseSaleDetail ja sabe ler dos dois lugares
+        // (breakdown pra pedidos novos, regex em notes pra pedidos antigos
+        // sem breakdown) e e a MESMA fonte que o Dashboard usa, entao nao
+        // duplicamos logica de parsing aqui.
+        const deliveryDetail = parseSaleDetail(editingTransaction).delivery;
+        if (deliveryDetail > 0) {
+          setHasDelivery(true);
+          setDeliveryFeeInput(String(deliveryDetail).replace('.', ','));
+        } else {
+          setHasDelivery(false);
+          setDeliveryFeeInput('');
+        }
         // Look up if existing description matches a ficha name
         const matchedFicha = fichas.find((ficha) =>
           (editingTransaction.description || '').toLowerCase().includes(ficha.name.toLowerCase())

@@ -1,9 +1,16 @@
-# Bug pendente: editar um pedido com entrega não restaura o toggle "Entrega"
+# RESOLVIDO: editar um pedido com entrega não restaura o toggle "Entrega"
 
 > Encontrado em 2026-09-11/12, durante o teste ao vivo da troca do cálculo de
 > entrega por milha para valor manual (mesmo formato de registro usado para o
 > CORS em docs/investigacao-cors-transacoes-movimentos.md e para as outras
 > pendências cosméticas/baixa prioridade nesta pasta).
+> **Resolvido em 2026-09-12** — `TransactionFormModal.tsx` agora reaproveita
+> `parseSaleDetail` (já exportado por `financialEngine.ts`) pra reler
+> `breakdown.delivery` (ou, em pedidos antigos sem `breakdown`, o fallback por
+> regex que a mesma função já fazia) e pré-popular `hasDelivery`/
+> `deliveryFeeInput` ao editar. Testado ao vivo nos dois cenários (pedido com
+> entrega restaurando certo, pedido sem entrega continuando "Não"). Texto
+> abaixo preservado como registro do problema original.
 
 ## Sintoma
 
