@@ -6,7 +6,7 @@ export interface UserProfile {
   id: string;
   nome: string;
   nome_confeitaria: string;
-  moeda: 'USD' | 'BRL';
+  moeda: 'USD' | 'BRL' | 'EUR';
   foto_url?: string;
   // Contato da confeitaria, exibido no orcamento. Opcionais e possivelmente
   // vazios: perfil incompleto sai EM BRANCO na folha, nunca com valor padrao.
@@ -30,7 +30,7 @@ interface AuthContextType {
   endAuthTransition: () => void;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, nomeConfeitaria?: string) => Promise<void>;
-  setupProfile: (nome: string, nome_confeitaria: string, moeda: 'USD' | 'BRL') => Promise<void>;
+  setupProfile: (nome: string, nome_confeitaria: string, moeda: 'USD' | 'BRL' | 'EUR') => Promise<void>;
   // Rele o perfil do banco. Sem isso, editar o perfil so aparece na folha de
   // orcamento depois de recarregar a pagina, porque o contexto guarda a copia
   // lida no login.
@@ -318,7 +318,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const setupProfile = async (
     nome: string,
     nome_confeitaria: string,
-    moeda: 'USD' | 'BRL'
+    moeda: 'USD' | 'BRL' | 'EUR'
   ) => {
     if (!user) throw new Error('No user found');
 

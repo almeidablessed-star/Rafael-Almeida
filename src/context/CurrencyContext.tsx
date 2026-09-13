@@ -1,7 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { formatCurrency as baseFormat } from '../utils/formatters';
 
-type Currency = 'BRL' | 'USD';
+export type Currency = 'BRL' | 'USD' | 'EUR';
+
+const SIMBOLO_POR_MOEDA: Record<Currency, string> = {
+  BRL: 'R$',
+  USD: '$',
+  EUR: '€',
+};
 
 interface CurrencyContextType {
   currency: Currency;
@@ -17,7 +23,7 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   useEffect(() => {
     const stored = localStorage.getItem('carula_currency');
-    if (stored === 'USD' || stored === 'BRL') {
+    if (stored === 'USD' || stored === 'BRL' || stored === 'EUR') {
       setCurrencyState(stored);
     }
   }, []);
@@ -27,7 +33,7 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     localStorage.setItem('carula_currency', newCurrency);
   };
 
-  const symbol = currency === 'BRL' ? 'R$' : '$';
+  const symbol = SIMBOLO_POR_MOEDA[currency];
 
   const formatCurrency = useCallback((value: number) => {
     return baseFormat(value, currency);

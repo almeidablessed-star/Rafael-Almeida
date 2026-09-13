@@ -22,6 +22,23 @@ import { CampoComAjuda } from './CampoComAjuda';
 
 const TOTAL_PASSOS = 8;
 
+const PASSO4_DESPESAS_REDESIGN_HABILITADO = true;
+
+/**
+ * Categorias mais comuns de despesa fixa de confeitaria caseira, pra nao
+ * comecar o passo 4 com a lista vazia. So entra em jogo quando a conta ainda
+ * nao tem nenhuma despesa salva (`administrativeCosts.despesas` vazio) — ver
+ * o efeito de carga inicial abaixo. Valores zerados, so os nomes vem prontos;
+ * a pessoa edita, remove ou adiciona outras normalmente.
+ */
+const DESPESAS_PADRAO: DespesaEmpresa[] = [
+  { nome: 'Aluguel', valor: 0, percentualRateio: 100, ordem: 0 },
+  { nome: 'Energia', valor: 0, percentualRateio: 100, ordem: 1 },
+  { nome: 'Água', valor: 0, percentualRateio: 100, ordem: 2 },
+  { nome: 'Internet', valor: 0, percentualRateio: 100, ordem: 3 },
+  { nome: 'Gás', valor: 0, percentualRateio: 100, ordem: 4 },
+];
+
 const inputClass =
   'w-full px-4 py-3 bg-white border border-[#E6E1DB] rounded-xl text-base font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe';
 const labelClass = 'font-serif-display text-[22px] leading-[1.25]';
@@ -55,7 +72,11 @@ export const EmpresaOnboardingFlow: React.FC = () => {
     setMonthlyIncomeTarget(administrativeCosts.monthlyIncomeTarget);
     setHoraTrabalho(administrativeCosts.horaTrabalho);
     setWorkingDaysPerWeek(administrativeCosts.workingDaysPerWeek);
-    setDespesas(administrativeCosts.despesas);
+    setDespesas(
+      PASSO4_DESPESAS_REDESIGN_HABILITADO && administrativeCosts.despesas.length === 0
+        ? DESPESAS_PADRAO
+        : administrativeCosts.despesas
+    );
     setCmvTargetPercent(administrativeCosts.cmvTargetPercent);
     setInvestmentTargetPercent(administrativeCosts.investmentTargetPercent);
     setProfitTargetPercent(administrativeCosts.profitTargetPercent);
@@ -278,45 +299,109 @@ export const EmpresaOnboardingFlow: React.FC = () => {
               <h2 className={labelClass} style={{ color: '#241B2B' }}>Despesas mensais do negócio</h2>
               <CampoComAjuda microcopy="Aluguel, luz, internet... custos fixos, independente de quanto você vende. O que já está no custo do produto (embalagem, insumos) não entra aqui de novo." />
               <div className="space-y-2">
-                {despesas.map((d, i) => (
-                  <div key={d.id ?? `novo-${i}`} className="p-3 rounded-xl border border-[#E6E1DB] bg-white space-y-2">
-                    <input
-                      type="text"
-                      placeholder="Nome da despesa"
-                      value={d.nome}
-                      onChange={(e) => atualizarDespesa(i, 'nome', e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
-                    />
-                    <div className="flex gap-2 items-center">
+                {despesas.map((d, i) => {
+                  if (!PASSO4_DESPESAS_REDESIGN_HABILITADO) {
+                    return (
+                      <div key={d.id ?? `novo-${i}`} className="p-3 rounded-xl border border-[#E6E1DB] bg-white space-y-2">
+                        <input
+                          type="text"
+                          placeholder="Nome da despesa"
+                          value={d.nome}
+                          onChange={(e) => atualizarDespesa(i, 'nome', e.target.value)}
+                          className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
+                        />
+                        <div className="flex gap-2 items-center">
+                          <input
+                            type="number"
+                            placeholder="Valor"
+                            value={d.valor || ''}
+                            onChange={(e) => atualizarDespesa(i, 'valor', Number(e.target.value))}
+                            className="flex-1 px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
+                          />
+                          <input
+                            type="number"
+                            placeholder="% negócio"
+                            value={d.percentualRateio}
+                            onChange={(e) => atualizarDespesa(i, 'percentualRateio', Number(e.target.value))}
+                            className="w-24 px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
+                          />
+                          <button
+                            onClick={() => removerDespesa(i)}
+                            className="w-8 h-8 flex-shrink-0 rounded-full bg-[#FDF4F5] text-[#C4626F] flex items-center justify-center text-xs font-bold"
+                            aria-label="Remover despesa"
+                          >
+                            ×
+                          </button>
+                        </div>
+                        {d.percentualRateio < 100 && (
+                          <p className="text-[10px]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
+                            Se essa despesa também é usada na sua vida pessoal, aqui vale só a parte da confeitaria.
+                          </p>
+                        )}
+                      </div>
+                    );
+                  }
+
+                  // Mesmo layout de MinhaEmpresaCard.tsx (secao "Despesas do
+                  // Negocio" pos-onboarding): labels "Valor (R$)"/"% do
+                  // negocio" + CampoComAjuda com exemplo dinamico por item.
+                  // O wrapper <div className="flex-1"> em vez do <input> reto
+                  // como filho do flex tambem e o que evita o vazamento do
+                  // campo pra fora do card (bug so visivel aqui, onde o
+                  // container e mais estreito que em Minha Empresa).
+                  const exemploRateio = d.nome && d.valor
+                    ? `Você informou ${formatCurrency(d.valor)} de ${d.nome.trim()}. Se só uma parte é do negócio, ajuste esse número — por exemplo, 50 significa que ${formatCurrency(d.valor * 0.5)} entram como custo real da confeitaria.`
+                    : undefined;
+
+                  return (
+                    <div key={d.id ?? `novo-${i}`} className="p-3 rounded-xl border border-[#E6E1DB] bg-white space-y-2">
                       <input
-                        type="number"
-                        placeholder="Valor"
-                        value={d.valor || ''}
-                        onChange={(e) => atualizarDespesa(i, 'valor', Number(e.target.value))}
-                        className="flex-1 px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
+                        type="text"
+                        placeholder="Nome da despesa"
+                        value={d.nome}
+                        onChange={(e) => atualizarDespesa(i, 'nome', e.target.value)}
+                        className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
                       />
-                      <input
-                        type="number"
-                        placeholder="% negócio"
-                        value={d.percentualRateio}
-                        onChange={(e) => atualizarDespesa(i, 'percentualRateio', Number(e.target.value))}
-                        className="w-24 px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
+                      <div className="flex gap-2 items-end">
+                        <div className="flex-1 min-w-0">
+                          <label className="text-[9px] font-bold block mb-1" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
+                            Valor (R$)
+                          </label>
+                          <input
+                            type="number"
+                            placeholder="0"
+                            value={d.valor || ''}
+                            onChange={(e) => atualizarDespesa(i, 'valor', Number(e.target.value))}
+                            className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
+                          />
+                        </div>
+                        <div className="w-24 flex-shrink-0">
+                          <label className="text-[9px] font-bold block mb-1" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
+                            % do negócio
+                          </label>
+                          <input
+                            type="number"
+                            placeholder="100"
+                            value={d.percentualRateio}
+                            onChange={(e) => atualizarDespesa(i, 'percentualRateio', Number(e.target.value))}
+                            className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
+                          />
+                        </div>
+                        <button
+                          onClick={() => removerDespesa(i)}
+                          className="w-8 h-8 flex-shrink-0 rounded-full bg-[#FDF4F5] text-[#C4626F] flex items-center justify-center text-xs font-bold"
+                          aria-label="Remover despesa"
+                        >
+                          ×
+                        </button>
+                      </div>
+                      <CampoComAjuda
+                        microcopy="Se essa despesa também é usada na sua vida pessoal, informe aqui só a parte que é do negócio. Deixe 100 se ela é toda da confeitaria."
+                        exemploDinamico={exemploRateio}
                       />
-                      <button
-                        onClick={() => removerDespesa(i)}
-                        className="w-8 h-8 flex-shrink-0 rounded-full bg-[#FDF4F5] text-[#C4626F] flex items-center justify-center text-xs font-bold"
-                        aria-label="Remover despesa"
-                      >
-                        ×
-                      </button>
                     </div>
-                    {d.percentualRateio < 100 && (
-                      <p className="text-[10px]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
-                        Se essa despesa também é usada na sua vida pessoal, aqui vale só a parte da confeitaria.
-                      </p>
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
               <button
                 onClick={adicionarDespesa}

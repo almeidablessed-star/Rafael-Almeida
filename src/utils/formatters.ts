@@ -1,23 +1,26 @@
 import { PaymentMethod, TransactionType, LaborPeriod, CostCategory } from '../types';
 
-export const formatCurrency = (value: number, currency: 'BRL' | 'USD' = 'BRL'): string => {
-  if (isNaN(value)) return currency === 'BRL' ? 'R$ 0,00' : '$ 0.00';
+const LOCALE_POR_MOEDA: Record<'BRL' | 'USD' | 'EUR', string> = {
+  BRL: 'pt-BR',
+  USD: 'en-US',
+  EUR: 'pt-PT',
+};
 
-  if (currency === 'BRL') {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
-  } else {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
-  }
+const SIMBOLO_FALLBACK_POR_MOEDA: Record<'BRL' | 'USD' | 'EUR', string> = {
+  BRL: 'R$ 0,00',
+  USD: '$ 0.00',
+  EUR: '€ 0,00',
+};
+
+export const formatCurrency = (value: number, currency: 'BRL' | 'USD' | 'EUR' = 'BRL'): string => {
+  if (isNaN(value)) return SIMBOLO_FALLBACK_POR_MOEDA[currency];
+
+  return new Intl.NumberFormat(LOCALE_POR_MOEDA[currency], {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
 };
 
 // Corrige exibicao de imprecisao de ponto flutuante (ex: "-0.8999999999999999")

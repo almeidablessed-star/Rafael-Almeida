@@ -33,7 +33,7 @@ interface ProfileData {
   email: string;
   address: string;
   instagram: string;
-  currency: 'BRL' | 'USD';
+  currency: 'BRL' | 'USD' | 'EUR';
   laborPeriod: LaborPeriod;
 }
 
@@ -249,8 +249,9 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
       >
         {/* Currency Selector & Labor Period - Minimal */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginBottom: '20px' }}>
-          <button
-            onClick={() => setCurrency(currency === 'BRL' ? 'USD' : 'BRL')}
+          <select
+            value={currency}
+            onChange={(e) => setCurrency(e.target.value as 'BRL' | 'USD' | 'EUR')}
             style={{
               background: 'none',
               border: 'none',
@@ -260,22 +261,20 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
               fontWeight: 600,
               color: '#7A6E80',
               cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
               transition: 'color 0.2s ease',
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.color = '#3A2350';
+              (e.currentTarget as HTMLSelectElement).style.color = '#3A2350';
             }}
             onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.color = '#7A6E80';
+              (e.currentTarget as HTMLSelectElement).style.color = '#7A6E80';
             }}
-            title={`Clique para alternar para ${currency === 'BRL' ? 'USD' : 'BRL'}`}
+            title="Moeda de exibição"
           >
-            {currency}
-            <span style={{ fontSize: '10px', lineHeight: 1 }}>▼</span>
-          </button>
+            <option value="BRL">BRL — R$</option>
+            <option value="USD">USD — $</option>
+            <option value="EUR">EUR — €</option>
+          </select>
 
           {/* Labor Period Selector */}
           <select

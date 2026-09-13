@@ -13,7 +13,7 @@ export const SetupProfilePage: React.FC = () => {
   const [nomeConfeitaria, setNomeConfeitaria] = useState(
     () => (user?.user_metadata?.nome_confeitaria as string | undefined) || ''
   );
-  const [moeda, setMoeda] = useState<'BRL' | 'USD'>('BRL');
+  const [moeda, setMoeda] = useState<'BRL' | 'USD' | 'EUR'>('BRL');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -117,6 +117,7 @@ export const SetupProfilePage: React.FC = () => {
               >
                 <option value="BRL">Real Brasileiro (R$)</option>
                 <option value="USD">Dólar Americano ($)</option>
+                <option value="EUR">Euro (€)</option>
               </select>
             </div>
 
