@@ -154,6 +154,79 @@ inicializacao no codigo em si — ja foram duas tentativas de forca bruta
 (9 recargas simples + 32 recargas com padroes variados de navegacao/troca de
 aba/abrir-fechar modal), ambas com zero erro.
 
+## Atualizacao 2026-09-12 (mais tarde): reproduzido organicamente, endpoint novo
+
+Durante o teste ao vivo de uma feature sem relacao (calendario "Agenda de
+Pedidos"), com `window.__fetchLog` ainda ativo, o erro apareceu de novo — nao
+buscado de proposito, apareceu durante uso normal (varios cliques de
+navegacao e criacao de uma ficha tecnica de teste, com a aba aberta por um
+tempo enquanto eu investigava outra coisa no meio do caminho).
+
+**Desta vez em `fichas_tecnicas` (POST, criar ficha), nao em
+`transacoes`/`estoque_movimentos`** — primeiro endpoint diferente visto com
+esse sintoma:
+
+```
+idx 18: START t=213736.9ms fichas_tecnicas → ERROR "Failed to fetch"
+        (console: "Access to fetch at '.../fichas_tecnicas?...' from origin
+        'http://localhost:3000' has been blocked by CORS policy: No
+        'Access-Control-Allow-Origin' header is present")
+idx 19: START t=228067.7ms fichas_tecnicas → END status=201 ok=true
+        (mesmo POST, re-tentado ~14s depois, sucesso imediato)
+```
+
+Padrao identico ao ja documentado: falha uma vez, sucesso instantaneo ao
+tentar de novo, mesmo token/mesma sessao.
+
+### Analise do gap e por que a hipotese de token fica descartada
+
+`window.__fetchLog` mostra as duas ULTIMAS chamadas bem-sucedidas antes da
+falha em `startMs ≈ 1062-1063ms` (os GETs iniciais de `fichas_tecnicas`, nos
+primeiros ~1s de vida da aba). Depois disso, **nenhuma chamada ao Supabase
+por 212 segundos** (ate `213736.9ms`, quando o POST falhou). Nesse
+intervalo a aba nao estava ociosa do lado do usuario — houve bastante
+interacao (tentativas de abrir modal, preencher campos, navegar entre
+passos), so que nada disso gerou trafego de rede ate o clique final de
+salvar. Ou seja: **ociosidade de rede com o servidor, mesmo com uso ativo
+da interface**.
+
+Decodificando o JWT do header `Authorization` (mesmo em idx 18 e idx 19):
+`iat=1789256425`, `exp=1789260025` (1h de validade, padrao Supabase). O
+ponto decisivo: **os dois fetches — o que falhou e o que teve sucesso 14s
+depois — usam o token IDENTICO** (mesmo `tokenTail`, mesmo `iat`/`exp`). Se
+fosse expiracao ou rotacao de token, a segunda tentativa teria falhado
+tambem (ou usado um token diferente apos refresh). Como o mesmo token
+funcionou perfeitamente na tentativa seguinte, **a causa nao esta no
+token/autenticacao** — ele estava valido nos dois momentos.
+
+### Hipotese revisada: conexao ociosa derrubada, nao token
+
+Com o token descartado, a hipotese mais especifica agora e de **camada de
+rede**: uma conexao (socket/keep-alive) que fica ociosa por tempo demais
+(aqui, ~212s sem nenhuma chamada aquele dominio) e e derrubada pelo
+navegador, pelo SO, ou por algum proxy/firewall no caminho, sem o cliente
+perceber. A primeira tentativa depois desse intervalo tenta reusar essa
+conexao morta, falha na camada de rede antes de qualquer resposta chegar
+— e o Chrome reporta esse tipo de falha (sem resposta HTTP nenhuma) como
+bloqueio de CORS, mesmo nao sendo CORS de verdade. A tentativa seguinte
+abre conexao nova e funciona na hora.
+
+Essa hipotese explica tudo observado ate aqui sem contradicao:
+- Sempre falha so na PRIMEIRA tentativa depois de um intervalo sem trafego,
+  nunca na repeticao imediata (conexao nova = sucesso).
+- Nao reproduziu em nenhuma das duas rodadas de forca bruta por recarga
+  (41 recargas ao todo) — recarregar sempre cria conexoes novas, nunca da
+  tempo de uma ficar ociosa o suficiente pra ser derrubada.
+- Explica por que `transacoes`/`estoque_movimentos` falhavam no boot
+  original: se a aba anterior (ou outra aba/processo) tiver deixado uma
+  conexao ociosa que o SO reciclou, o primeiro fetch de uma aba nova pode
+  herdar esse socket já morto.
+
+**Ainda nao comprovado** — e uma hipotese mais afiada que as anteriores,
+nao uma causa confirmada. Precisaria de instrumentacao adicional (nivel de
+`fetch`/rede, nao so JS) pra confirmar que e de fato um socket reciclado, o
+que foge do alcance de `window.fetch` puro.
+
 ## Estrategia a partir de 2026-09-12: pausar a forca bruta, aguardar reproducao organica
 
 Decisao do Rafael: nao vale mais dedicar tempo ativo tentando forcar a

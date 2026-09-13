@@ -36,8 +36,6 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
   const { formatCurrency: formatMoney } = useCurrency();
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [selectedDateStr, setSelectedDateStr] = useState<string | null>(null);
-  const [showWithOrdersFilter, setShowWithOrdersFilter] = useState(false);
-  const [showFreeFilter, setShowFreeFilter] = useState(false);
   const [detailsDayStr, setDetailsDayStr] = useState<string | null>(null);
   const [confirmEmptyDayStr, setConfirmEmptyDayStr] = useState<string | null>(null);
 
@@ -164,18 +162,19 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
             const hasOrders = dayOrders.length > 0;
             const isToday = dayStr === todayStr;
 
-            // Determinar cor baseado nos filtros ativos
-            let bgColor = '#F6F2F5';
-            let textColor = '#241B2B';
-            let boxShadowStyle = 'none';
-            let fontWeightStyle = 400;
+            // Roxo (tem pedido) e verde (livre) aparecem sempre juntos —
+            // nao ha mais toggle escondendo uma cor de cada vez.
+            let bgColor: string;
+            let textColor: string;
+            let boxShadowStyle: string;
+            let fontWeightStyle: number;
 
-            if (hasOrders && showWithOrdersFilter) {
+            if (hasOrders) {
               bgColor = 'linear-gradient(150deg, #8F5A9C, #C4626F)';
               textColor = '#FFFFFF';
               boxShadowStyle = '0 6px 14px rgba(143,90,156,0.34)';
               fontWeightStyle = 800;
-            } else if (!hasOrders && showFreeFilter) {
+            } else {
               bgColor = '#B4E7B4';
               textColor = '#1B5E1B';
               boxShadowStyle = '0 6px 14px rgba(76,175,80,0.34)';
@@ -235,23 +234,15 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
           <span style={{ color: 'var(--color-ink-soft)', fontSize: '10px', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>Hoje</span>
         </div>
 
-        <button
-          onClick={() => setShowWithOrdersFilter(!showWithOrdersFilter)}
-          className="flex items-center gap-2 cursor-pointer transition-opacity hover:opacity-100"
-          style={{ opacity: showWithOrdersFilter ? 1 : 0.6 }}
-        >
+        <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded" style={{ background: 'linear-gradient(150deg, #8F5A9C, #C4626F)' }} />
           <span style={{ color: 'var(--color-ink-soft)', fontSize: '10px', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>Com Pedido</span>
-        </button>
+        </div>
 
-        <button
-          onClick={() => setShowFreeFilter(!showFreeFilter)}
-          className="flex items-center gap-2 cursor-pointer transition-opacity hover:opacity-100"
-          style={{ opacity: showFreeFilter ? 1 : 0.6 }}
-        >
+        <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded" style={{ background: '#B4E7B4' }} />
           <span style={{ color: 'var(--color-ink-soft)', fontSize: '10px', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>Livre</span>
-        </button>
+        </div>
       </div>
 
       {/* Modal: Detalhes dos Pedidos do Dia */}
