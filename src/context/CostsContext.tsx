@@ -24,6 +24,8 @@ interface CostsContextType {
   salvarDespesas: (despesas: DespesaEmpresa[]) => Promise<DespesaEmpresa[]>;
   /** Marca o onboarding financeiro como concluido — unico campo que libera o resto do app (ver [[FinancialOnboardingGate]]). */
   concluirOnboarding: () => Promise<void>;
+  /** Marca o tour guiado de primeiros passos como visto (concluido ou pulado) — idempotente, ver [[TourPrimeirosPassos]]. */
+  marcarTourVisto: () => Promise<void>;
   /** Edicao pos-onboarding (aba "Minha Empresa"): mesmo upsert parcial de `salvarPassoOnboarding`, mas sem mexer no passo, e registrando o antes/depois em `configuracao_empresa_historico` (spec Parte 2, item 29). */
   salvarConfiguracaoEmpresa: (campos: CamposOnboarding) => Promise<void>;
 }
@@ -96,6 +98,7 @@ export const CostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     despesas,
     onboardingPassoAtual: data?.onboarding_financeiro_passo_atual || 1,
     onboardingCompletoEm: data?.onboarding_financeiro_completo_em || null,
+    tourPrimeirosPassosVistoEm: data?.tour_primeiros_passos_visto_em || null,
   });
 
   const fetchCosts = async () => {
@@ -299,6 +302,24 @@ export const CostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setAdministrativeCosts((atual) => (atual ? { ...atual, onboardingCompletoEm: agora } : atual));
   };
 
+  /**
+   * Idempotente: se ja tiver sido visto, nao regrava (evita apagar a data
+   * original quando chamada de novo por uma revisao manual do tour, ver
+   * [[TourPrimeirosPassos]]).
+   */
+  const marcarTourVisto = async () => {
+    if (!user) throw new Error('User not authenticated');
+    if (administrativeCosts?.tourPrimeirosPassosVistoEm) return;
+
+    const agora = new Date().toISOString();
+    const { error: saveError } = await supabase
+      .from('administrative_costs')
+      .upsert({ usuaria_id: user.id, tour_primeiros_passos_visto_em: agora }, { onConflict: 'usuaria_id' });
+    if (saveError) throw saveError;
+
+    setAdministrativeCosts((atual) => (atual ? { ...atual, tourPrimeirosPassosVistoEm: agora } : atual));
+  };
+
   useEffect(() => {
     if (user) {
       fetchCosts();
@@ -317,6 +338,7 @@ export const CostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       salvarPassoOnboarding,
       salvarDespesas,
       concluirOnboarding,
+      marcarTourVisto,
       salvarConfiguracaoEmpresa,
     }}>
       {children}

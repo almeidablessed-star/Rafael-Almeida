@@ -10,6 +10,8 @@ interface ProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
   onLogout?: () => void;
+  /** Reabre o tour guiado de primeiros passos (Produtos -> Fichas -> Pedidos). Ausente enquanto a feature estiver atras de flag. */
+  onIniciarTour?: () => void;
 }
 
 interface ProfileData {
@@ -35,7 +37,7 @@ interface ProfileData {
   laborPeriod: LaborPeriod;
 }
 
-export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onLogout }) => {
+export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onLogout, onIniciarTour }) => {
   const { currency, setCurrency } = useCurrency();
   const { user, userProfile, refreshUserProfile, fetchUserPhoto } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -720,9 +722,38 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
           </div>
         )}
 
+        {/* Rever tour de primeiros passos - Discrete */}
+        {onIniciarTour && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px', paddingTop: '8px', borderTop: '1px solid #F0E8F2' }}>
+            <button
+              onClick={onIniciarTour}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: '6px 12px',
+                fontFamily: "'Manrope', sans-serif",
+                fontSize: '12px',
+                fontWeight: 600,
+                color: '#6E3F72',
+                cursor: 'pointer',
+                transition: 'color 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.color = '#3A2350';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.color = '#6E3F72';
+              }}
+              title="Rever o tour guiado de primeiros passos"
+            >
+              Rever tour de primeiros passos
+            </button>
+          </div>
+        )}
+
         {/* Logout Button - Discrete */}
         {onLogout && (
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px', paddingTop: '8px', borderTop: '1px solid #F0E8F2' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px', paddingTop: onIniciarTour ? '0' : '8px', borderTop: onIniciarTour ? 'none' : '1px solid #F0E8F2' }}>
             <button
               onClick={onLogout}
               style={{

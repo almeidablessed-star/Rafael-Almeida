@@ -53,6 +53,9 @@ export interface AdministrativeCosts {
 
   /** NULL enquanto o onboarding financeiro nao foi concluido. E este campo, e nenhum outro, que decide se o app libera o resto das telas (ver [[FinancialOnboardingGate]]). */
   onboardingCompletoEm: string | null;
+
+  /** NULL enquanto o tour guiado de primeiros passos (Produtos -> Fichas -> Pedidos) ainda nao foi visto nem pulado. Ver [[TourPrimeirosPassos]]. */
+  tourPrimeirosPassosVistoEm: string | null;
 }
 
 /**

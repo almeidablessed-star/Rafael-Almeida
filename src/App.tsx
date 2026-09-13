@@ -54,13 +54,17 @@ import { LoginModal } from './components/LoginModal';
 import { CurrencyProvider } from './context/CurrencyContext';
 import { CustomersProvider } from './context/CustomersContext';
 import { FichasTecnicasProvider } from './context/FichasTecnicasContext';
-import { CostsProvider } from './context/CostsContext';
+import { CostsProvider, useCosts } from './context/CostsContext';
 import { ProdutosProvider } from './context/ProdutosContext';
 import { FinancialOnboardingGate } from './components/onboarding/FinancialOnboardingGate';
+import { TourPrimeirosPassos } from './components/onboarding/TourPrimeirosPassos';
+
+const TOUR_PRIMEIROS_PASSOS_HABILITADO = true;
 
 function AppContent() {
   const { isResetPasswordRequired, isOtpVerificationRequired, user, userProfile, logout } = useAuth();
   const { fichas } = useFichasTecnicas();
+  const { administrativeCosts, marcarTourVisto } = useCosts();
   const { consumirParaPedido, devolverPedido } = useProdutos();
   const {
     transacoes: transactions,
@@ -100,6 +104,8 @@ function AppContent() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isGlossaryModalOpen, setIsGlossaryModalOpen] = useState(false);
+  const [tourAtivo, setTourAtivo] = useState(false);
+  const [tabAntesDoTour, setTabAntesDoTour] = useState<TabType | null>(null);
 
   // Undo state
   const { saveForUndo, getUndoData, hasUndo } = useUndo();
@@ -112,6 +118,37 @@ function AppContent() {
   useEffect(() => {
     localStorage.setItem('carula_activeTab', activeTab);
   }, [activeTab]);
+
+  // Dispara o tour de primeiros passos uma unica vez, na primeira entrada no
+  // app depois do onboarding financeiro (AppContent so monta com o onboarding
+  // ja concluido, ver FinancialOnboardingGate em App()). Nunca mais aparece
+  // sozinho depois de visto ou pulado (tourPrimeirosPassosVistoEm != null).
+  useEffect(() => {
+    if (!TOUR_PRIMEIROS_PASSOS_HABILITADO) return;
+    if (tourAtivo) return;
+    if (!administrativeCosts || administrativeCosts.tourPrimeirosPassosVistoEm) return;
+
+    setTabAntesDoTour(activeTab);
+    setTourAtivo(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [administrativeCosts?.tourPrimeirosPassosVistoEm]);
+
+  const handleIniciarTourManualmente = () => {
+    setIsProfileModalOpen(false);
+    setTabAntesDoTour(activeTab);
+    setTourAtivo(true);
+  };
+
+  const handleFinalizarTour = () => {
+    setTourAtivo(false);
+    if (tabAntesDoTour) {
+      setActiveTab(tabAntesDoTour);
+      setTabAntesDoTour(null);
+    }
+    marcarTourVisto().catch((err) => {
+      console.error('Erro ao marcar tour como visto:', err);
+    });
+  };
 
   // Filtered transactions & financial metrics
   const filteredTransactions = filterTransactionsByPeriod(
@@ -588,7 +625,16 @@ function AppContent() {
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
         onLogout={handleLogout}
+        onIniciarTour={TOUR_PRIMEIROS_PASSOS_HABILITADO ? handleIniciarTourManualmente : undefined}
       />
+
+      {/* Tour guiado de primeiros passos (Produtos -> Fichas -> Pedidos) */}
+      {TOUR_PRIMEIROS_PASSOS_HABILITADO && tourAtivo && (
+        <TourPrimeirosPassos
+          onNavigateToTab={setActiveTab}
+          onFinish={handleFinalizarTour}
+        />
+      )}
 
       {/* Undo Toast */}
       {showUndoToast && (

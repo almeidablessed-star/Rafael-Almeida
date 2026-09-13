@@ -88,6 +88,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) 
           return (
             <button
               key={tab.id}
+              data-tour-id={tab.id}
               onClick={() => onTabChange(tab.id)}
               aria-current={isActive ? 'page' : undefined}
               style={{
