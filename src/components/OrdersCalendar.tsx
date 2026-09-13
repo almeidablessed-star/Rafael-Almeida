@@ -1,5 +1,5 @@
 ﻿import React, { useState } from 'react';
-import { Transaction } from '../types';
+import { Transaction, Customer } from '../types';
 import { formatCurrency, formatDateBr } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
 import {
@@ -18,6 +18,7 @@ import {
 
 interface OrdersCalendarProps {
   transactions: Transaction[];
+  customers?: Customer[];
   onOpenAddModal?: () => void;
   onOpenAddModalWithDate?: (date: string) => void;
   onEditTransaction?: (tx: Transaction) => void;
@@ -27,6 +28,7 @@ interface OrdersCalendarProps {
 
 export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
   transactions,
+  customers = [],
   onOpenAddModal,
   onOpenAddModalWithDate,
   onEditTransaction,
@@ -97,6 +99,30 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
   const displayTransactions = selectedDateStr
     ? salesByDate[selectedDateStr] || []
     : monthSales;
+
+  // Datas comemorativas de clientes que caem no mes exibido. Aniversario e
+  // sempre recorrente — compara so dia/mes, igual o resto do app ja faz
+  // (formatDayMonthOnly ignora o ano ao mostrar, entao a comparacao aqui
+  // segue a mesma regra pra nao contradizer o que a tela de Clientes exibe).
+  interface MonthEvent {
+    day: number;
+    title: string;
+    customerName: string;
+  }
+  const monthEvents: MonthEvent[] = [];
+  customers.forEach((c) => {
+    const addIfInMonth = (dateStr: string | undefined, title: string) => {
+      if (!dateStr) return;
+      const [, m, d] = dateStr.split('-').map(Number);
+      if (m !== month + 1 || !d) return;
+      monthEvents.push({ day: d, title, customerName: c.name });
+    };
+    addIfInMonth(c.eventDate, c.recurringEventTitle || 'Aniversário');
+    (c.additionalEvents || []).forEach((ev) => {
+      if (ev.date && ev.title) addIfInMonth(ev.date, ev.title);
+    });
+  });
+  monthEvents.sort((a, b) => a.day - b.day);
 
   return (
     <div className="bg-white rounded-[22px] p-6 shadow-card space-y-4">
@@ -244,6 +270,29 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
           <span style={{ color: 'var(--color-ink-soft)', fontSize: '10px', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>Livre</span>
         </div>
       </div>
+
+      {/* Datas Comemorativas do mes exibido — mesmo card, secao a mais.
+          Recalcula sozinho ao trocar de mes porque usa a mesma variavel
+          `month` do grid acima. Sem estado vazio dedicado: se nao ha nada
+          no mes, a secao so nao aparece. */}
+      {monthEvents.length > 0 && (
+        <div className="pt-4 border-t space-y-2">
+          <h4 className="text-xs uppercase tracking-widest" style={{ color: 'var(--color-ink-soft)', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
+            Datas Comemorativas do Mês
+          </h4>
+          <div className="space-y-1.5">
+            {monthEvents.map((ev, i) => (
+              <div key={i} className="flex items-baseline gap-1.5 text-xs">
+                <span style={{ color: '#6E3F72', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
+                  {String(ev.day).padStart(2, '0')}/{String(month + 1).padStart(2, '0')}
+                </span>
+                <span style={{ color: '#D3C9D6' }}>—</span>
+                <span style={{ color: '#241B2B' }}>{ev.title} {ev.customerName}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Modal: Detalhes dos Pedidos do Dia */}
       {detailsDayStr && (

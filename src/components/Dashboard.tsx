@@ -7,6 +7,7 @@ import { ResumoDistribuicaoCard } from './ResumoDistribuicaoCard';
 import { ANIMATION_DURATIONS, ANIMATION_EASING } from '../lib/animation-tokens';
 import { useCurrency } from '../context/CurrencyContext';
 import { useFichasTecnicas } from '../context/FichasTecnicasContext';
+import { useCustomers } from '../context/CustomersContext';
 import { OrdersCalendar } from './OrdersCalendar';
 import { AvatarProfile } from './AvatarProfile';
 import {
@@ -66,6 +67,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 }) => {
   const { formatCurrency: formatMoney } = useCurrency();
   const { fichas } = useFichasTecnicas();
+  const { customers } = useCustomers();
   const transactionsList = allTransactions.length > 0 ? allTransactions : (recentTransactions || []);
   const balances = calculateWeeklyBalances(transactionsList, fichas);
 
@@ -676,6 +678,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <div className="mt-6">
           <OrdersCalendar
             transactions={transactionsList}
+            customers={customers}
             onOpenAddModal={() => onOpenAddModal('venda')}
             onOpenAddModalWithDate={onOpenAddModalWithDate}
           />
