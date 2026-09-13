@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from './AuthContext';
-import { Customer } from '../types';
+import { Customer, CustomerEvent } from '../types';
 
 /**
  * Fonte unica das clientes, compartilhada por todas as telas.
@@ -37,6 +37,7 @@ interface SupabaseCustomer {
   notes?: string;
   eventDate?: string;
   recurringEventTitle?: string;
+  additionalEvents?: CustomerEvent[] | null;
   created_at: string;
 }
 
@@ -61,6 +62,7 @@ const mapSupabaseToCustomer = (data: SupabaseCustomer): Customer => ({
   photoUrl: data.photoUrl,
   eventDate: data.eventDate,
   recurringEventTitle: data.recurringEventTitle,
+  additionalEvents: data.additionalEvents || undefined,
   address: data.endereco,
   city: data.city,
   notes: data.notes,
@@ -73,6 +75,7 @@ const mapCustomerToSupabase = (customer: Omit<Customer, 'id' | 'createdAt'>) => 
   photoUrl: customer.photoUrl || null,
   eventDate: customer.eventDate || null,
   recurringEventTitle: customer.recurringEventTitle || null,
+  additionalEvents: customer.additionalEvents || [],
   endereco: customer.address || null,
   city: customer.city || null,
   notes: customer.notes || null,
@@ -85,6 +88,8 @@ export const CustomersProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // TEMPORARIO — ver docs/investigacao-cors-transacoes-movimentos.md
+    console.log(`[ctxlog] CustomersContext effect FIRED t=${((window as any).__fetchT0 ? performance.now() - (window as any).__fetchT0 : performance.now()).toFixed(1)}ms user=${user?.id ?? 'null'}`);
     if (!user) {
       // Logout limpa a lista: sem isto, as clientes da conta anterior
       // continuariam em memoria para quem entrasse depois.
@@ -103,7 +108,7 @@ export const CustomersProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
       const { data, error: fetchError } = await supabase
         .from('clientes')
-        .select('id,usuaria_id,nome,telefone,endereco,city,notes,eventDate,recurringEventTitle,created_at')
+        .select('id,usuaria_id,nome,telefone,endereco,city,notes,eventDate,recurringEventTitle,additionalEvents,created_at')
         .eq('usuaria_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -217,7 +222,7 @@ export const CustomersProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           {
             id: parseInt(customer.id),
             usuaria_id: user.id,
-            ...mapCustomerToSupabase({ name: customer.name, phone: customer.phone, photoUrl: customer.photoUrl, eventDate: customer.eventDate, recurringEventTitle: customer.recurringEventTitle, address: customer.address, city: customer.city, notes: customer.notes }),
+            ...mapCustomerToSupabase({ name: customer.name, phone: customer.phone, photoUrl: customer.photoUrl, eventDate: customer.eventDate, recurringEventTitle: customer.recurringEventTitle, additionalEvents: customer.additionalEvents, address: customer.address, city: customer.city, notes: customer.notes }),
           },
         ])
         .select()
