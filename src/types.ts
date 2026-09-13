@@ -56,6 +56,9 @@ export interface AdministrativeCosts {
 
   /** NULL enquanto o tour guiado de primeiros passos (Produtos -> Fichas -> Pedidos) ainda nao foi visto nem pulado. Ver [[TourPrimeirosPassos]]. */
   tourPrimeirosPassosVistoEm: string | null;
+
+  /** NULL enquanto o checklist de primeiros passos (produto + ficha + pedido) ainda nao foi completado. Ver [[PrimeirosPassosChecklist]]. */
+  primeirosPassosCompletosEm: string | null;
 }
 
 /**

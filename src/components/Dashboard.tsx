@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Transaction, SummaryTotals, TransactionType, TimePeriod } from '../types';
 import { formatCurrency, formatDateBr } from '../utils/formatters';
 import { calculateWeeklyBalances, calcularMetaSemanal, calcularEstruturaFinanceira, somarDespesasEmpresa, avaliarSaudeFinanceiraProdutos } from '../utils/financialEngine';
@@ -8,7 +8,10 @@ import { ANIMATION_DURATIONS, ANIMATION_EASING } from '../lib/animation-tokens';
 import { useCurrency } from '../context/CurrencyContext';
 import { useFichasTecnicas } from '../context/FichasTecnicasContext';
 import { useCustomers } from '../context/CustomersContext';
+import { useProdutos } from '../context/ProdutosContext';
+import { useTransacoes } from '../context/TransacoesContext';
 import { OrdersCalendar } from './OrdersCalendar';
+import { PrimeirosPassosChecklist } from './onboarding/PrimeirosPassosChecklist';
 import { AvatarProfile } from './AvatarProfile';
 import {
   Wallet,
@@ -31,6 +34,8 @@ import {
   ShieldCheck,
   HelpCircle,
 } from 'lucide-react';
+
+const CHECKLIST_PRIMEIROS_PASSOS_HABILITADO = true;
 
 interface DashboardProps {
   summary: SummaryTotals;
@@ -66,16 +71,47 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onOpenGlossaryModal,
 }) => {
   const { formatCurrency: formatMoney } = useCurrency();
-  const { fichas } = useFichasTecnicas();
+  const { fichas, isLoading: fichasLoading } = useFichasTecnicas();
   const { customers } = useCustomers();
+  const { produtos, isLoading: produtosLoading } = useProdutos();
+  const { isLoading: transacoesLoading } = useTransacoes();
   const transactionsList = allTransactions.length > 0 ? allTransactions : (recentTransactions || []);
   const balances = calculateWeeklyBalances(transactionsList, fichas);
 
   // Mesma fonte que "Minha Empresa": faturamento necessario + distribuicao,
   // calculados uma unica vez pelo engine (spec Parte 5, Teste 10 — os
   // numeros aqui e na aba Minha Empresa tem que ser sempre identicos).
-  const { administrativeCosts } = useCosts();
+  const { administrativeCosts, marcarPrimeirosPassosCompletos } = useCosts();
   const despesasMensais = somarDespesasEmpresa(administrativeCosts?.despesas || []);
+
+  // Checklist de primeiros passos (produto + ficha + pedido): so decide o que
+  // mostrar depois que os 3 contexts terminarem de carregar, senao um item ja
+  // cumprido pode "piscar" como pendente por uma fracao de segundo. So aparece
+  // depois que o tour guiado ja foi visto/pulado (tourPrimeirosPassosVistoEm),
+  // e nunca mais depois de completo (primeirosPassosCompletosEm), mesmo que a
+  // usuaria apague os dados que completaram o checklist.
+  const dadosPrimeirosPassosProntos = !produtosLoading && !fichasLoading && !transacoesLoading;
+  const produtoCadastrado = produtos.length > 0;
+  const fichaCriada = fichas.length > 0;
+  const pedidoLancado = allTransactions.some((t) => t.type === 'venda');
+  const primeirosPassosCompletos = produtoCadastrado && fichaCriada && pedidoLancado;
+
+  useEffect(() => {
+    if (!CHECKLIST_PRIMEIROS_PASSOS_HABILITADO) return;
+    if (!dadosPrimeirosPassosProntos) return;
+    if (!primeirosPassosCompletos) return;
+    if (!administrativeCosts || administrativeCosts.primeirosPassosCompletosEm) return;
+    marcarPrimeirosPassosCompletos().catch((err) => {
+      console.error('Erro ao marcar primeiros passos como completos:', err);
+    });
+  }, [dadosPrimeirosPassosProntos, primeirosPassosCompletos, administrativeCosts?.primeirosPassosCompletosEm]);
+
+  const mostrarChecklistPrimeirosPassos =
+    CHECKLIST_PRIMEIROS_PASSOS_HABILITADO &&
+    dadosPrimeirosPassosProntos &&
+    !!administrativeCosts?.tourPrimeirosPassosVistoEm &&
+    !administrativeCosts?.primeirosPassosCompletosEm &&
+    !primeirosPassosCompletos;
   const estruturaFinanceira = administrativeCosts
     ? calcularEstruturaFinanceira(
         administrativeCosts.monthlyIncomeTarget,
@@ -340,6 +376,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
             background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent)',
           }} />
         </button>
+
+        {/* 2b. CHECKLIST DE PRIMEIROS PASSOS - some sozinho quando completo */}
+        {mostrarChecklistPrimeirosPassos && (
+          <PrimeirosPassosChecklist
+            produtoCadastrado={produtoCadastrado}
+            fichaCriada={fichaCriada}
+            pedidoLancado={pedidoLancado}
+            onNavigateToTab={onNavigateToTab}
+            onOpenAddModal={onOpenAddModal}
+          />
+        )}
 
         {/* 3. SALDOS & DIVISÃO DOS PEDIDOS - 3 Medidores */}
         <div className="space-y-3 w-full">

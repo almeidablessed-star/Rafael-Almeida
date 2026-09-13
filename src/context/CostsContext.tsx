@@ -26,6 +26,8 @@ interface CostsContextType {
   concluirOnboarding: () => Promise<void>;
   /** Marca o tour guiado de primeiros passos como visto (concluido ou pulado) — idempotente, ver [[TourPrimeirosPassos]]. */
   marcarTourVisto: () => Promise<void>;
+  /** Marca o checklist de primeiros passos (produto + ficha + pedido) como completo — idempotente, ver [[PrimeirosPassosChecklist]]. */
+  marcarPrimeirosPassosCompletos: () => Promise<void>;
   /** Edicao pos-onboarding (aba "Minha Empresa"): mesmo upsert parcial de `salvarPassoOnboarding`, mas sem mexer no passo, e registrando o antes/depois em `configuracao_empresa_historico` (spec Parte 2, item 29). */
   salvarConfiguracaoEmpresa: (campos: CamposOnboarding) => Promise<void>;
 }
@@ -99,6 +101,7 @@ export const CostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     onboardingPassoAtual: data?.onboarding_financeiro_passo_atual || 1,
     onboardingCompletoEm: data?.onboarding_financeiro_completo_em || null,
     tourPrimeirosPassosVistoEm: data?.tour_primeiros_passos_visto_em || null,
+    primeirosPassosCompletosEm: data?.primeiros_passos_completos_em || null,
   });
 
   const fetchCosts = async () => {
@@ -320,6 +323,25 @@ export const CostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setAdministrativeCosts((atual) => (atual ? { ...atual, tourPrimeirosPassosVistoEm: agora } : atual));
   };
 
+  /**
+   * Idempotente: se ja tiver sido completado, nao regrava — o card some para
+   * sempre a partir dai, mesmo que a usuaria apague depois os
+   * produtos/fichas/pedidos que completaram o checklist (ver
+   * [[PrimeirosPassosChecklist]]).
+   */
+  const marcarPrimeirosPassosCompletos = async () => {
+    if (!user) throw new Error('User not authenticated');
+    if (administrativeCosts?.primeirosPassosCompletosEm) return;
+
+    const agora = new Date().toISOString();
+    const { error: saveError } = await supabase
+      .from('administrative_costs')
+      .upsert({ usuaria_id: user.id, primeiros_passos_completos_em: agora }, { onConflict: 'usuaria_id' });
+    if (saveError) throw saveError;
+
+    setAdministrativeCosts((atual) => (atual ? { ...atual, primeirosPassosCompletosEm: agora } : atual));
+  };
+
   useEffect(() => {
     if (user) {
       fetchCosts();
@@ -339,6 +361,7 @@ export const CostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       salvarDespesas,
       concluirOnboarding,
       marcarTourVisto,
+      marcarPrimeirosPassosCompletos,
       salvarConfiguracaoEmpresa,
     }}>
       {children}
