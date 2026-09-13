@@ -69,16 +69,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const transactionsList = allTransactions.length > 0 ? allTransactions : (recentTransactions || []);
   const balances = calculateWeeklyBalances(transactionsList, fichas);
 
-  // Meta usa TODAS as transacoes, nao a lista filtrada pelo seletor de periodo:
-  // "custo fixo da semana" e sempre a semana corrente, mesmo com a tela
-  // mostrando o mes ou o ano.
-  const { administrativeCosts } = useCosts();
-  const despesasMensais = somarDespesasEmpresa(administrativeCosts?.despesas || []);
-  const meta = calcularMetaSemanal(despesasMensais, allTransactions || []);
-
   // Mesma fonte que "Minha Empresa": faturamento necessario + distribuicao,
   // calculados uma unica vez pelo engine (spec Parte 5, Teste 10 — os
   // numeros aqui e na aba Minha Empresa tem que ser sempre identicos).
+  const { administrativeCosts } = useCosts();
+  const despesasMensais = somarDespesasEmpresa(administrativeCosts?.despesas || []);
   const estruturaFinanceira = administrativeCosts
     ? calcularEstruturaFinanceira(
         administrativeCosts.monthlyIncomeTarget,
@@ -88,6 +83,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
         administrativeCosts.profitTargetPercent
       )
     : null;
+
+  // Meta usa TODAS as transacoes, nao a lista filtrada pelo seletor de periodo:
+  // a meta da semana e sempre a semana corrente, mesmo com a tela mostrando o
+  // mes ou o ano. Deriva da MESMA estrutura acima — nunca so das despesas —
+  // pra "Precisa faturar" refletir a meta completa (despesas + recebimento
+  // pessoal + CMV + investimento + lucro), nao so a fatia de custos fixos.
+  const meta = calcularMetaSemanal(estruturaFinanceira, allTransactions || []);
 
   // Selo de saude financeira: os precos hoje cadastrados nos produtos cobrem
   // a estrutura definida acima? Mesmo motor de calculo, agregado por conta
@@ -450,31 +452,34 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </p>
         </div>
 
-        {/* 3b. META SEMANAL PARA COBRIR OS CUSTOS FIXOS
+        {/* 3b. META SEMANAL COMPLETA (despesas + recebimento pessoal + CMV +
+             investimento + lucro — a mesma `faturamentoNecessario` do card
+             "Resumo & Distribuicao" abaixo, so que fatiada por semana).
              Fica logo abaixo dos saldos porque responde a pergunta seguinte:
-             "entrou tanto — mas da pra pagar as contas?" */}
+             "entrou tanto — mas da pra bater a meta toda?" */}
         <div className="space-y-3 w-full mt-6">
           <div>
             <h3 className="font-serif-display text-[23px]" style={{ color: '#241B2B' }}>
               Meta da Semana
             </h3>
             <p className="text-[11px]" style={{ color: '#7A6E80', marginTop: '2px' }}>
-              Quanto precisa entrar só para cobrir os custos fixos
+              Quanto precisa entrar pra cobrir tudo — negócio e você
             </p>
           </div>
 
-          {!meta.temCustoCadastrado ? (
+          {!meta.temEstruturaValida ? (
             <button
               onClick={() => onNavigateToTab('custos')}
               className="w-full text-left rounded-2xl p-4 transition-all active:scale-98"
               style={{ background: '#FFF8E7', border: '1px dashed #E8D9A8' }}
             >
               <p className="text-[12px] font-bold" style={{ color: '#8A6D1F' }}>
-                Cadastre seus custos fixos
+                Configure sua estrutura financeira
               </p>
               <p className="text-[11px] mt-1" style={{ color: '#9A8FA0' }}>
-                Aluguel, energia, gás, internet… Sem eles não dá para saber quanto
-                você precisa vender por semana. Toque para preencher.
+                Recebimento desejado, despesas e metas de CMV/investimento/lucro
+                em Minha Empresa. Sem isso não dá para saber quanto você precisa
+                vender por semana. Toque para preencher.
               </p>
             </button>
           ) : (
@@ -488,7 +493,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     {formatMoney(meta.necessarioPorSemana)}
                   </p>
                   <p className="text-[10px]" style={{ color: '#9A8FA0' }}>
-                    por semana · {formatMoney(meta.custoFixoMensal)}/mês em custos fixos
+                    por semana · {formatMoney(meta.faturamentoNecessarioMensal)}/mês pra bater sua meta completa
                   </p>
                 </div>
                 <div className="text-right">
@@ -514,9 +519,41 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
               <p className="text-[11px] mt-2" style={{ color: meta.metaAtingida ? '#4CAF7D' : '#7A6E80', fontWeight: meta.metaAtingida ? 700 : 400 }}>
                 {meta.metaAtingida
-                  ? '✓ Custos fixos cobertos. O que entrar agora é lucro.'
-                  : `Faltam ${formatMoney(meta.faltaFaturar)} para cobrir as contas da semana.`}
+                  ? '✓ Meta completa da semana batida! O que entrar além disso é resultado extra.'
+                  : `Faltam ${formatMoney(meta.faltaFaturar)} para cobrir tudo essa semana.`}
               </p>
+
+              {/* Camada motivacional: a fatia dentro da meta acima que e "sua"
+                  — o recebimento desejado que ela mesma definiu. Roxo igual
+                  ao medidor "Mão de Obra" do card de cima, de proposito —
+                  mesmo conceito, mesma cor, sem inventar token novo. */}
+              <div className="mt-3 pt-3" style={{ borderTop: '1px dashed #EDE6EF' }}>
+                <p className="text-[9px] uppercase tracking-[0.05em]" style={{ color: '#7E4F9E', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
+                  💜 Sua fatia pessoal
+                </p>
+                <p className="text-[11px] mt-1" style={{ color: '#7A6E80', lineHeight: 1.4 }}>
+                  Disso, <strong style={{ color: '#241B2B' }}>{formatMoney(meta.metaPessoalSemana)}</strong> por
+                  semana é seu — o que você decidiu receber pelo seu trabalho.
+                  Até agora já garantiu <strong style={{ color: '#241B2B' }}>{formatMoney(meta.jaGarantidoPessoal)}</strong>.
+                </p>
+
+                <div className="mt-2 h-1.5 w-full rounded-full overflow-hidden" style={{ background: '#F1EBF2' }}>
+                  <div
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${Math.round(meta.progressoPessoal * 100)}%`,
+                      background: meta.metaPessoalAtingida ? '#4CAF7D' : '#7E4F9E',
+                      transition: 'width 420ms cubic-bezier(0.22, 1, 0.36, 1)',
+                    }}
+                  />
+                </div>
+
+                <p className="text-[10.5px] mt-1.5" style={{ color: meta.metaPessoalAtingida ? '#4CAF7D' : '#9A8FA0', fontWeight: meta.metaPessoalAtingida ? 700 : 400 }}>
+                  {meta.metaPessoalAtingida
+                    ? '✓ Sua meta pessoal da semana já foi garantida!'
+                    : `Faltam ${formatMoney(meta.faltaPessoal)} para bater sua meta pessoal essa semana.`}
+                </p>
+              </div>
             </div>
           )}
         </div>

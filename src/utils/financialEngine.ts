@@ -835,21 +835,25 @@ export function calculateWeeklyBalances(transactions: Transaction[], fichas: Fic
 // ============================================================================
 
 /**
- * Quanto a confeitaria precisa faturar por semana so para cobrir os custos
- * fixos — e quanto ja faturou nesta semana.
+ * Quanto a confeitaria precisa faturar por semana para bater a meta COMPLETA
+ * (despesas + recebimento pessoal + CMV + investimento + lucro, a mesma
+ * `faturamentoNecessario` de `calcularEstruturaFinanceira`) — e quanto ja
+ * faturou nesta semana. Antes so olhava despesas fixas, deixando de fora
+ * exatamente o "salario" que a usuaria definiu que quer receber e o restante
+ * da estrutura, que ja aparecem calculados no card "Resumo & Distribuicao"
+ * logo abaixo (spec: as duas telas devem sempre bater com o mesmo numero).
  *
- * Os custos administrativos sao MENSAIS (aluguel, energia, internet...). A
- * conversao usa 12 meses / 52 semanas, e nao "dividir por 4": o mes tem em
- * media 4,35 semanas, e a diferenca nao e detalhe. Num custo fixo de R$ 2.000,
- * dividir por 4 daria uma meta de R$ 500 e um rombo de cerca de R$ 350 por mes,
- * justamente no numero que existe para evitar rombo.
+ * A conversao mes -> semana usa 12 meses / 52 semanas, e nao "dividir por 4":
+ * o mes tem em media 4,35 semanas, e a diferenca nao e detalhe. Num valor
+ * mensal de R$ 2.000, dividir por 4 daria uma meta de R$ 500 e um rombo de
+ * cerca de R$ 350 por mes, justamente no numero que existe para evitar rombo.
  */
 const SEMANAS_POR_MES = 52 / 12; // ≈ 4,3333
 
 export interface MetaSemanal {
-  /** Soma das despesas mensais. */
-  custoFixoMensal: number;
-  /** Quanto precisa entrar por semana so para empatar com os fixos. */
+  /** Faturamento necessario mensal COMPLETO (estrutura inteira, nao so despesas). */
+  faturamentoNecessarioMensal: number;
+  /** Quanto precisa entrar por semana para bater a meta completa. */
   necessarioPorSemana: number;
   /** Vendas PAGAS da semana corrente (segunda a domingo). */
   faturadoNaSemana: number;
@@ -859,23 +863,34 @@ export interface MetaSemanal {
   progresso: number;
   /** A meta foi atingida ou superada. */
   metaAtingida: boolean;
-  /** Sem custo fixo cadastrado nao ha meta: a tela deve convidar a preencher. */
-  temCustoCadastrado: boolean;
+  /** Sem estrutura financeira valida cadastrada nao ha meta: a tela deve convidar a preencher. */
+  temEstruturaValida: boolean;
+
+  /**
+   * Fatia pessoal dentro da meta semanal (spec: "seu salario", o
+   * `recebimentoDesejado` que a usuaria mesma definiu em Minha Empresa).
+   * Camada motivacional — sempre derivada da MESMA estrutura, nunca de uma
+   * fonte de calculo diferente.
+   */
+  metaPessoalSemana: number;
+  /** Estimativa proporcional: fatia pessoal aplicada sobre o que ja faturou na semana. */
+  jaGarantidoPessoal: number;
+  faltaPessoal: number;
+  progressoPessoal: number;
+  metaPessoalAtingida: boolean;
 }
 
 /**
- * `custoFixoMensal` vem de fora, ja somado (`somarDespesasEmpresa`), em vez
- * de receber `AdministrativeCosts` e ler `.total` daqui de dentro. Motivo: a
- * migration 20260906 congelou as 7 colunas fixas antigas — nada mais escreve
- * nelas apos a aba "Minha Empresa" passar a usar `despesas_empresa`. Ler
- * `.total` continuaria funcionando sem erro, so devolveria sempre o mesmo
- * numero antigo, silenciosamente errado a cada despesa editada.
+ * `estrutura` vem de `calcularEstruturaFinanceira` — a MESMA chamada que
+ * alimenta o card "Resumo & Distribuicao", nunca recalculada aqui por conta
+ * propria (spec Parte 5, item 1: uma unica fonte de verdade).
  */
 export const calcularMetaSemanal = (
-  custoFixoMensal: number,
+  estrutura: EstruturaFinanceira | null,
   transacoes: Transaction[]
 ): MetaSemanal => {
-  const necessarioPorSemana = custoFixoMensal / SEMANAS_POR_MES;
+  const faturamentoNecessarioMensal = estrutura?.valido ? estrutura.faturamentoNecessario : 0;
+  const necessarioPorSemana = faturamentoNecessarioMensal / SEMANAS_POR_MES;
 
   const { startIso, endIso } = getWeekRange();
 
@@ -894,8 +909,19 @@ export const calcularMetaSemanal = (
 
   const faltaFaturar = Math.max(0, necessarioPorSemana - faturadoNaSemana);
 
+  // Fatia pessoal: mesma proporcao que "recebimentoDesejado" representa no
+  // faturamento necessario mensal (maoDeObraPercent), aplicada sobre o que
+  // ja entrou nesta semana. Proposital nao usar o saldo real de Mao de Obra
+  // do card "Saldos & Divisao" (balances.maodeobra) — aquele numero vem do
+  // breakdown de cada venda individual e ja desconta saques avulsos; misturar
+  // as duas fontes na mesma frase confundiria mais do que ajudaria.
+  const maoDeObraPercent = estrutura?.valido ? estrutura.maoDeObraPercent : 0;
+  const metaPessoalSemana = estrutura?.valido ? estrutura.maoDeObraAmount / SEMANAS_POR_MES : 0;
+  const jaGarantidoPessoal = faturadoNaSemana * (maoDeObraPercent / 100);
+  const faltaPessoal = Math.max(0, metaPessoalSemana - jaGarantidoPessoal);
+
   return {
-    custoFixoMensal,
+    faturamentoNecessarioMensal,
     necessarioPorSemana,
     faturadoNaSemana,
     faltaFaturar,
@@ -903,7 +929,14 @@ export const calcularMetaSemanal = (
       ? Math.min(1, faturadoNaSemana / necessarioPorSemana)
       : 0,
     metaAtingida: necessarioPorSemana > 0 && faturadoNaSemana >= necessarioPorSemana,
-    temCustoCadastrado: custoFixoMensal > 0,
+    temEstruturaValida: necessarioPorSemana > 0,
+    metaPessoalSemana,
+    jaGarantidoPessoal,
+    faltaPessoal,
+    progressoPessoal: metaPessoalSemana > 0
+      ? Math.min(1, jaGarantidoPessoal / metaPessoalSemana)
+      : 0,
+    metaPessoalAtingida: metaPessoalSemana > 0 && jaGarantidoPessoal >= metaPessoalSemana,
   };
 };
 
