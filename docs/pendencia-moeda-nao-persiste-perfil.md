@@ -1,9 +1,18 @@
-# PENDENTE: seletor de moeda do Perfil não persiste em `usuarias.moeda`
+# RESOLVIDO: seletor de moeda do Perfil não persiste em `usuarias.moeda`
 
 > Registrado em 2026-09-13, mesmo padrão dos outros `docs/bug-*.md` /
 > `docs/pendencia-*.md` desta pasta (achado colateral durante outra tarefa —
 > adicionar Euro como terceira opção de moeda —, fora do escopo pedido
 > naquele momento, então só documentado, sem correção).
+>
+> **Resolvido no mesmo dia**, em `src/context/CurrencyContext.tsx`: o
+> contexto passou a usar `useAuth()` para ler/gravar `usuarias.moeda`. Banco
+> é a fonte de verdade — `localStorage` virou só um cache de leitura
+> instantânea (evita a tela nascer em BRL por uma fração de segundo antes do
+> perfil carregar), nunca decide sozinho. Testado ao vivo: trocar moeda,
+> reload completo, e até limpar o `localStorage` manualmente — nos três
+> casos a moeda certa veio do banco. Texto abaixo preservado como registro
+> do problema original.
 
 ## Sintoma
 
