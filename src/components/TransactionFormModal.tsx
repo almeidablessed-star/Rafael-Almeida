@@ -44,6 +44,8 @@ import {
 import confetti from 'canvas-confetti';
 import { compressImageFile } from '../utils/imageCompression';
 
+const NOVO_REGISTRO_REDESIGN_HABILITADO = true;
+
 export interface OrderItemState {
   id: string;
   productName: string;
@@ -1613,7 +1615,224 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
           {/* ============================================== */}
           {/* NON-SALE GENERIC FORM (type !== 'venda')       */}
           {/* ============================================== */}
-          {type !== 'venda' && (
+          {type !== 'venda' && NOVO_REGISTRO_REDESIGN_HABILITADO && (
+            <div className="space-y-4">
+              {/* Atalhos Rapidos */}
+              <div>
+                <label className="block text-xs font-bold mb-1.5" style={{ color: '#7A6E80', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                  Atalhos Rápidos
+                </label>
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
+                  {getPresetsForCurrentType().map((preset) => (
+                    <button
+                      key={preset.id}
+                      type="button"
+                      onClick={() => applyPreset(preset)}
+                      className="whitespace-nowrap active:scale-95 transition-all"
+                      style={{ padding: '7px 12px', borderRadius: '10px', background: 'transparent', border: '1px solid #E6E1DB', color: '#6E3F72', fontSize: '12px', fontWeight: 700 }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = '#F6F2F5'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                    >
+                      + {preset.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Descricao */}
+              <div>
+                <label className="block text-xs font-bold mb-1" style={{ color: '#3A2350' }}>
+                  Descrição do Item <span style={{ color: '#C4626F' }}>*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder={
+                    type === 'reposicao'
+                      ? 'Ex: Farinha de Trigo 5kg'
+                      : type === 'maodeobra'
+                      ? 'Ex: Diária de Ajudante'
+                      : 'Ex: Conta de Luz / Batedeira'
+                  }
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="w-full focus:outline-none"
+                  style={{ padding: '11px 14px', fontSize: '14px', background: '#fff', border: '1px solid #E6E1DB', borderRadius: '10px', color: '#241B2B', fontWeight: 600 }}
+                />
+              </div>
+
+              {/* Quantidade e Valor Unitario */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold mb-1" style={{ color: '#3A2350' }}>
+                    Quantidade
+                  </label>
+                  <div className="flex items-center justify-between gap-2" style={{ padding: '4px', border: '1px solid #E6E1DB', borderRadius: '10px', background: '#fff' }}>
+                    <button
+                      type="button"
+                      onClick={() => handleQuantityChange(quantity - 1)}
+                      className="flex items-center justify-center transition-all active:scale-95"
+                      style={{ width: '32px', height: '32px', border: 'none', borderRadius: '8px', background: '#F6F2F5', color: '#3A2350' }}
+                    >
+                      <Minus className="w-3.5 h-3.5" strokeWidth={2.4} />
+                    </button>
+                    <input
+                      type="number"
+                      min="1"
+                      value={quantity}
+                      onChange={(e) => handleQuantityChange(parseInt(e.target.value) || 1)}
+                      className="w-full text-center bg-transparent focus:outline-none"
+                      style={{ fontSize: '16px', fontWeight: 700, color: '#241B2B' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleQuantityChange(quantity + 1)}
+                      className="flex items-center justify-center transition-all active:scale-95"
+                      style={{ width: '32px', height: '32px', border: 'none', borderRadius: '8px', background: '#F6F2F5', color: '#3A2350' }}
+                    >
+                      <Plus className="w-3.5 h-3.5" strokeWidth={2.4} />
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold mb-1" style={{ color: '#3A2350' }}>
+                    Valor Unitário ($)
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="0,00"
+                    value={unitValue}
+                    onChange={(e) => handleUnitValueChange(e.target.value)}
+                    className="w-full focus:outline-none"
+                    style={{ padding: '11px 14px', fontSize: '14px', background: '#fff', border: '1px solid #E6E1DB', borderRadius: '10px', color: '#241B2B', fontWeight: 600 }}
+                  />
+                </div>
+              </div>
+
+              {/* Valor Total */}
+              <div>
+                <div className="flex items-baseline justify-between mb-1">
+                  <label className="text-xs font-bold" style={{ color: '#3A2350' }}>
+                    Valor Total ($) <span style={{ color: '#C4626F' }}>*</span>
+                  </label>
+                  <span className="text-[11px] font-medium" style={{ color: '#6E3F72' }}>Auto-calculado</span>
+                </div>
+                <div className="flex items-center gap-2.5" style={{ padding: '14px 16px', borderRadius: '12px', background: '#F3E9F3' }}>
+                  <span className="font-serif-display" style={{ fontSize: '18px', fontWeight: 700, color: '#6E3F72' }}>$</span>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    required
+                    placeholder="0,00"
+                    value={totalValue}
+                    onChange={(e) => handleTotalValueChange(e.target.value)}
+                    className="w-full font-serif-display bg-transparent focus:outline-none"
+                    style={{ fontSize: '32px', fontWeight: 700, lineHeight: 1.2, letterSpacing: '-0.5px', color: '#3A2350' }}
+                  />
+                </div>
+              </div>
+
+              {/* Data */}
+              <div>
+                <label className="block text-xs font-bold mb-1" style={{ color: '#3A2350' }}>
+                  Data do Lançamento
+                </label>
+                <input
+                  type="date"
+                  required
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="w-full focus:outline-none"
+                  style={{ padding: '11px 14px', fontSize: '14px', background: '#fff', border: '1px solid #E6E1DB', borderRadius: '10px', color: '#241B2B', fontWeight: 600 }}
+                />
+              </div>
+
+              {/* Campos especificos */}
+              {type === 'reposicao' && (
+                <div>
+                  <label className="block text-xs font-bold mb-1" style={{ color: '#3A2350' }}>
+                    Fornecedor / Loja (Opcional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ex: Atacadão, Mercado Central, Embalagens & Cia"
+                    value={supplier}
+                    onChange={(e) => setSupplier(e.target.value)}
+                    className="w-full focus:outline-none"
+                    style={{ padding: '11px 14px', fontSize: '14px', background: '#fff', border: '1px solid #E6E1DB', borderRadius: '10px', color: '#241B2B', fontWeight: 600 }}
+                  />
+                </div>
+              )}
+
+              {type === 'maodeobra' && (
+                <div>
+                  <label className="block text-xs font-bold mb-1.5" style={{ color: '#3A2350' }}>
+                    Período de Referência
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { id: 'diaria', label: 'Diária' },
+                      { id: 'semanal', label: 'Semanal' },
+                      { id: 'mensal', label: 'Mensal' },
+                      { id: 'encomenda', label: 'Por Encomenda' },
+                    ].map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => setLaborPeriod(item.id as LaborPeriod)}
+                        className="transition-all"
+                        style={
+                          laborPeriod === item.id
+                            ? { padding: '9px 12px', borderRadius: '10px', border: 'none', fontSize: '12px', fontWeight: 700, background: '#3A2350', color: '#fff', boxShadow: '0 6px 14px rgba(58,35,80,.25)' }
+                            : { padding: '9px 12px', borderRadius: '10px', border: 'none', fontSize: '12px', fontWeight: 700, background: 'transparent', color: '#6E3F72' }
+                        }
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {(type === 'custo' || type === 'investimento') && (
+                <div>
+                  <label className="block text-xs font-bold mb-1.5" style={{ color: '#3A2350' }}>
+                    Categoria de Despesa
+                  </label>
+                  <div className="grid grid-cols-3 gap-1.5" style={{ padding: '4px', borderRadius: '12px', background: '#F6F2F5' }}>
+                    {[
+                      { id: 'fixo', label: 'Custo Fixo 🏢' },
+                      { id: 'variavel', label: 'Custo Variável ⚡' },
+                      { id: 'investimento', label: 'Investimento 🚀' },
+                    ].map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => {
+                          const c = item.id as CostCategory;
+                          setCostCategory(c);
+                          if (c === 'investimento') setType('investimento');
+                          else setType('custo');
+                        }}
+                        className="text-center transition-all"
+                        style={
+                          costCategory === item.id
+                            ? { padding: '9px 6px', border: 'none', borderRadius: '8px', fontSize: '11px', fontWeight: 700, background: '#3A2350', color: '#fff', boxShadow: '0 6px 14px rgba(58,35,80,.25)' }
+                            : { padding: '9px 6px', border: 'none', borderRadius: '8px', fontSize: '11px', fontWeight: 700, background: 'transparent', color: '#6E3F72' }
+                        }
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {type !== 'venda' && !NOVO_REGISTRO_REDESIGN_HABILITADO && (
             <div className="space-y-4">
               {/* Quick Bakery Presets */}
               <div>
@@ -1826,11 +2045,25 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
               <button
                 type="submit"
                 disabled={isSaving}
-                className={`w-full py-4 rounded-lg text-white font-brand text-base font-bold shadow-highlight shadow-pink-200 active:scale-98 transition-all flex items-center justify-center gap-2 ${
+                className={NOVO_REGISTRO_REDESIGN_HABILITADO ? 'w-full transition-all active:scale-98 flex items-center justify-center gap-2' : `w-full py-4 rounded-lg text-white font-brand text-base font-bold shadow-highlight shadow-pink-200 active:scale-98 transition-all flex items-center justify-center gap-2 ${
                   isSaving
                     ? 'bg-gradient-to-r from-pink-400 to-rose-400 opacity-75 cursor-not-allowed'
                     : 'bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600'
                 }`}
+                style={NOVO_REGISTRO_REDESIGN_HABILITADO ? {
+                  padding: '14px 20px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  color: '#fff',
+                  fontSize: '15px',
+                  fontWeight: 700,
+                  cursor: isSaving ? 'not-allowed' : 'pointer',
+                  background: '#3A2350',
+                  boxShadow: '0 10px 20px rgba(58,35,80,.3)',
+                  opacity: isSaving ? 0.75 : 1,
+                } : undefined}
+                onMouseEnter={NOVO_REGISTRO_REDESIGN_HABILITADO ? (e) => { if (!isSaving) e.currentTarget.style.background = '#6E3F72'; } : undefined}
+                onMouseLeave={NOVO_REGISTRO_REDESIGN_HABILITADO ? (e) => { e.currentTarget.style.background = '#3A2350'; } : undefined}
               >
                 {isSaving ? (
                   <>

@@ -896,14 +896,55 @@ export const CustomersModule: React.FC = () => {
         }}
       >
         {filteredCustomers.length === 0 ? (
-          <div className="p-8 rounded-xl bg-white border border-dashed border-[var(--color-accent-gold)]/40 text-center space-y-2">
-            <Users className="w-10 h-10 text-[var(--color-neutral-charcoal)]/30 mx-auto" />
-            <p className="text-xs text-[var(--color-neutral-charcoal)]/60 font-medium">
+          <div
+            className="flex flex-col items-center gap-2.5 text-center"
+            style={{
+              background: '#fff',
+              border: '1px solid rgba(58,35,80,0.1)',
+              borderRadius: '20px',
+              boxShadow: '0 8px 20px rgba(58,35,80,.09)',
+              padding: '40px 20px',
+            }}
+          >
+            <div
+              className="flex items-center justify-center"
+              style={{ width: '64px', height: '64px', borderRadius: '20px', background: '#F3E9F3' }}
+            >
+              <Users className="w-[30px] h-[30px]" style={{ color: '#6E3F72' }} strokeWidth={2} />
+            </div>
+            <div className="font-serif-display" style={{ fontSize: '22px', color: '#3A2350' }}>
               {/* Sem parenteses aqui: "Nenhuma(o) cliente encontrada(o)" tinha
                   dois numa frase de quatro palavras. Falar do RESULTADO, e nao
                   da pessoa, sai neutro sem custar legibilidade. */}
-              Nenhum resultado encontrado.
-            </p>
+              {customers.length === 0 ? 'Nenhum cliente por aqui ainda' : 'Nenhum resultado encontrado'}
+            </div>
+            <div className="text-sm" style={{ color: '#7A6E80', maxWidth: '280px' }}>
+              {customers.length === 0
+                ? 'Cadastre sua primeira cliente e acompanhe os pedidos dela em um só lugar.'
+                : 'Tente buscar por outro nome, telefone ou cidade.'}
+            </div>
+            {customers.length === 0 && (
+              <button
+                type="button"
+                onClick={handleOpenAdd}
+                className="transition-colors"
+                style={{
+                  marginTop: '8px',
+                  background: '#3A2350',
+                  color: '#fff',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  padding: '13px 22px',
+                  borderRadius: '11px',
+                  cursor: 'pointer',
+                  boxShadow: '0 10px 20px rgba(58,35,80,.3)',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = '#6E3F72'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = '#3A2350'; }}
+              >
+                Cadastrar primeiro cliente
+              </button>
+            )}
           </div>
         ) : (
           filteredCustomers.map((c) => {
