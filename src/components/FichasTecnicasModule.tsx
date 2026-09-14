@@ -1546,6 +1546,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
             </button>
             {formStep < 3 ? (
               <button
+                key="ficha-continuar"
                 type="button"
                 onClick={() => {
                   if (fichaStepChangeIsFresh()) return;
@@ -1560,6 +1561,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
               </button>
             ) : (
               <button
+                key="ficha-confirmar"
                 type="submit"
                 form="form-ficha-stepped"
                 className="flex-1 text-center py-3 rounded-[10px] text-white text-sm font-semibold flex items-center justify-center gap-1.5 transition-colors"

@@ -232,7 +232,7 @@ export const MinhaEmpresaCard: React.FC = () => {
                 </div>
                 <div className="w-24">
                   <label className="text-[9px] font-bold block mb-1" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>% do negócio</label>
-                  <input type="number" placeholder="100" value={d.percentualRateio} onChange={(e) => atualizarDespesa(i, 'percentualRateio', Number(e.target.value))}
+                  <input type="number" placeholder="100" value={d.percentualRateio || ''} onChange={(e) => atualizarDespesa(i, 'percentualRateio', Number(e.target.value))}
                     style={{ fontFamily: "'Manrope', sans-serif" }}
                     className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe" />
                 </div>

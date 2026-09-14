@@ -382,7 +382,7 @@ export const EmpresaOnboardingFlow: React.FC = () => {
                           <input
                             type="number"
                             placeholder="100"
-                            value={d.percentualRateio}
+                            value={d.percentualRateio || ''}
                             onChange={(e) => atualizarDespesa(i, 'percentualRateio', Number(e.target.value))}
                             className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
                           />

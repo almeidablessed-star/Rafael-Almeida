@@ -566,7 +566,12 @@ ${transaction.observations ? `📝 *Observações:* ${transaction.observations}`
 
 💰 *VALOR TOTAL DO PEDIDO:* ${formatCurrency(transaction.totalValue)}
 ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transaction.signalValue)}\n📋 *Restante a Pagar na Entrega:* ${formatCurrency(transaction.totalValue - transaction.signalValue)}` : ''}
-💳 *Pagamento:* ${transaction.paymentMethod === 'cash' ? '💵 Cash (Dinheiro)' : '⚡ Zelle'}
+💳 *Pagamento:* ${
+  transaction.paymentMethod === 'cash' ? '💵 Cash (Dinheiro)'
+  : transaction.paymentMethod === 'pix' ? '💸 Pix'
+  : transaction.paymentMethod === 'zelle' ? '⚡ Zelle'
+  : 'A combinar'
+}
 
 💖 _${sellerName ? `Obrigada(o) por escolher a ${sellerName}!` : 'Obrigada(o) pela preferência!'} Feito com amor._ ✨
     `.trim();

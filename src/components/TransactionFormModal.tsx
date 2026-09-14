@@ -148,6 +148,19 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
    * bug real que gravou pedidos reais com status/forma de pagamento nunca
    * escolhidos pela usuaria. Qualquer clique no botao primario dentro deste
    * intervalo apos uma troca de passo e ignorado.
+   *
+   * Causa RAIZ separada, achada em 2026-09-14: os dois botoes (Continuar
+   * type="button" e Confirmar type="submit") ficavam num ternario SEM `key`,
+   * na mesma posicao da arvore. Sem `key` distinta, o React reaproveita o
+   * MESMO no DOM em vez de desmontar/remontar, so mutando `type`/onClick/
+   * texto. Clique e "evento discreto" no React 18 (atualizacao de estado
+   * aplicada de forma sincrona dentro do proprio despacho do clique) — a
+   * troca de type="button" para type="submit" acontecia ENQUANTO o clique
+   * original ainda estava sendo processado pelo navegador, que aplicava a
+   * acao padrao do botao com base no `type` JA MUTADO, submetendo o
+   * formulario sem nenhum segundo clique. Corrigido com `key` distinta em
+   * cada ramo (forca remontagem de verdade). Esta guarda de 400ms continua
+   * valendo como segunda camada, para o caso do duplo-clique humano genuino.
    */
   const pedidoLastStepChangeRef = useRef<number>(0);
   useEffect(() => {
@@ -1486,6 +1499,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: '8px' }}>
                       {[
                         { id: 'zelle', label: '⚡ Zelle' },
+                        { id: 'pix', label: '💸 Pix' },
                         { id: 'cash', label: '💵 Cash (dinheiro)' },
                       ].map((item) => (
                         <button
@@ -1849,6 +1863,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
             </button>
             {pedidoFormStep < 3 ? (
               <button
+                key="pedido-continuar"
                 type="button"
                 onClick={() => {
                   if (pedidoStepChangeIsFresh()) return;
@@ -1862,6 +1877,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
               </button>
             ) : (
               <button
+                key="pedido-confirmar"
                 type="submit"
                 form="pedido-form"
                 disabled={isSaving}
