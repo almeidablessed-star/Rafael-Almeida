@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Transaction, CostCategory } from '../types';
 import { formatCurrency, formatDateBr, getCostCategoryLabel, getLaborPeriodLabel } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
-import { Receipt, Sparkles, Search, Calendar, Trash2, Edit3, Tag, Users, PlusCircle } from 'lucide-react';
+import { Receipt, Sparkles, Search, Calendar, Trash2, Edit3, Tag, Users, PlusCircle, ArrowRight } from 'lucide-react';
 import { MinhaEmpresaCard } from './MinhaEmpresaCard';
 
 interface CostsModuleProps {
@@ -154,76 +154,55 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '6px',
+          gap: '8px',
         }}>
-          <div style={{
-            background: 'white',
-            borderRadius: '4px',
-            padding: '8px',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-            border: '1px solid #E6E1DB',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px' }}>
-              <Receipt style={{ width: '12px', height: '12px', color: 'var(--color-brand-700)' }} />
-              <span style={{
-                fontSize: '8px',
-                fontWeight: 'bold',
-                textTransform: 'uppercase',
-                color: 'var(--color-brand-700)',
-              }}>
-                Custos
+          {[
+            { mark: 'C', label: 'Custos', value: formatMoney(totalCustos) },
+            { mark: 'I', label: 'Investimentos', value: formatMoney(totalInvestimentos) },
+            { mark: 'M', label: 'Mão de Obra', value: formatMoney(totalLabor) },
+          ].map((st) => (
+            <div key={st.mark} style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px',
+              padding: '12px',
+              background: '#fff',
+              borderRadius: '12px',
+              boxShadow: '0 8px 20px rgba(58,35,80,.09)',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6px' }}>
+                <span style={{
+                  display: 'flex',
+                  flexShrink: 0,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '20px',
+                  height: '20px',
+                  borderRadius: '6px',
+                  background: '#F3E9F3',
+                  color: '#6E3F72',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  fontFamily: "'Instrument Serif', serif",
+                }}>
+                  {st.mark}
+                </span>
+                <span style={{
+                  fontSize: '9px',
+                  fontWeight: 700,
+                  lineHeight: 1.3,
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                  color: '#7A6E80',
+                }}>
+                  {st.label}
+                </span>
+              </div>
+              <span className="font-serif-display" style={{ fontSize: '18px', lineHeight: 1.2, color: '#3A2350' }}>
+                {st.value}
               </span>
             </div>
-            <p style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--color-brand-900)', margin: 0 }}>
-              {formatMoney(totalCustos)}
-            </p>
-          </div>
-
-          <div style={{
-            background: 'white',
-            borderRadius: '4px',
-            padding: '8px',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-            border: '1px solid #E6E1DB',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px' }}>
-              <Sparkles style={{ width: '12px', height: '12px', color: 'var(--color-brand-700)' }} />
-              <span style={{
-                fontSize: '8px',
-                fontWeight: 'bold',
-                textTransform: 'uppercase',
-                color: 'var(--color-brand-700)',
-              }}>
-                Investimentos
-              </span>
-            </div>
-            <p style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--color-brand-900)', margin: 0 }}>
-              {formatMoney(totalInvestimentos)}
-            </p>
-          </div>
-
-          <div style={{
-            background: 'white',
-            borderRadius: '4px',
-            padding: '8px',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-            border: '1px solid #E6E1DB',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px' }}>
-              <Users style={{ width: '12px', height: '12px', color: 'var(--color-brand-700)' }} />
-              <span style={{
-                fontSize: '8px',
-                fontWeight: 'bold',
-                textTransform: 'uppercase',
-                color: 'var(--color-brand-700)',
-              }}>
-                Mão de Obra
-              </span>
-            </div>
-            <p style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--color-brand-900)', margin: 0 }}>
-              {formatMoney(totalLabor)}
-            </p>
-          </div>
+          ))}
         </div>
 
         {/* Action Button */}
@@ -231,42 +210,42 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
           onClick={() => onOpenAddModal(activeTab === 'maodeobra' ? 'maodeobra' : 'custo')}
           style={{
             width: '100%',
-            background: 'white',
+            background: '#fff',
             border: '1px solid #E6E1DB',
-            borderRadius: '4px',
-            padding: '8px 10px',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+            borderRadius: '12px',
+            padding: '14px 16px',
+            boxShadow: '0 8px 20px rgba(58,35,80,.09)',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            gap: '8px',
+            gap: '12px',
+            textAlign: 'left',
             transition: 'all 0.2s',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = 'var(--color-brand-700)';
+            e.currentTarget.style.background = '#FAF7FA';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.borderColor = '#E6E1DB';
+            e.currentTarget.style.background = '#fff';
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <PlusCircle style={{ width: '14px', height: '14px', color: 'var(--color-brand-900)' }} />
-            <span style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--color-brand-900)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <PlusCircle style={{ width: '20px', height: '20px', color: '#3A2350' }} strokeWidth={2} />
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#3A2350', fontFamily: "'Manrope', sans-serif" }}>
               {activeTab === 'maodeobra' ? 'Nova Mão de Obra' : 'Novo Custo / Investimento'}
             </span>
           </div>
-          <span style={{ color: 'var(--color-brand-700)', fontSize: '12px' }}>→</span>
+          <ArrowRight style={{ width: '18px', height: '18px', color: '#7A6E80', flexShrink: 0 }} strokeWidth={2} />
         </button>
 
         {/* Filter Tabs */}
         <div style={{
           display: 'flex',
-          gap: '3px',
-          background: 'white',
-          borderRadius: '4px',
-          padding: '3px',
-          border: '1px solid #E6E1DB',
+          gap: '4px',
+          background: '#F6F2F5',
+          borderRadius: '12px',
+          padding: '4px',
           overflowX: 'auto',
         }}>
           {[
@@ -279,15 +258,19 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
               style={{
-                padding: '4px 8px',
-                fontSize: '9px',
-                fontWeight: 'bold',
-                borderRadius: '3px',
+                flex: '1 1 0%',
+                minWidth: 0,
+                padding: '9px 6px',
+                fontSize: '11px',
+                fontWeight: 700,
+                borderRadius: '8px',
                 border: 'none',
                 cursor: 'pointer',
-                background: activeTab === tab.id ? 'var(--color-brand-900)' : 'transparent',
-                color: activeTab === tab.id ? 'white' : 'var(--color-brand-700)',
+                background: activeTab === tab.id ? '#3A2350' : 'transparent',
+                color: activeTab === tab.id ? '#fff' : '#6E3F72',
+                boxShadow: activeTab === tab.id ? '0 8px 16px rgba(58,35,80,0.3)' : 'none',
                 whiteSpace: 'nowrap',
+                fontFamily: "'Manrope', sans-serif",
                 transition: 'all 0.2s',
               }}
             >
@@ -299,31 +282,31 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
         {/* Search Bar */}
         <div style={{ position: 'relative' }}>
           <Search style={{
-            width: '11px',
-            height: '11px',
+            width: '14px',
+            height: '14px',
             position: 'absolute',
-            left: '8px',
+            left: '14px',
             top: '50%',
             transform: 'translateY(-50%)',
-            color: 'var(--color-brand-700)',
+            color: '#A096A6',
           }} />
           <input
             type="text"
-            placeholder="Buscar..."
+            placeholder="Buscar lançamento"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{
               width: '100%',
-              paddingLeft: '26px',
-              paddingRight: '10px',
-              paddingTop: '6px',
-              paddingBottom: '6px',
-              background: 'white',
+              padding: '11px 12px 11px 34px',
+              background: '#fff',
               border: '1px solid #E6E1DB',
-              borderRadius: '4px',
-              fontSize: '10px',
-              boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+              borderRadius: '12px',
+              fontSize: '13px',
+              color: '#241B2B',
+              fontFamily: "'Manrope', sans-serif",
+              boxShadow: '0 6px 14px rgba(58,35,80,.07)',
               boxSizing: 'border-box',
+              outline: 'none',
             }}
           />
         </div>
@@ -331,21 +314,28 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
         {/* Items List */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {filteredItems.length === 0 ? (
-            <div style={{
-              background: 'white',
-              borderRadius: '6px',
-              padding: '20px',
-              textAlign: 'center',
-              border: '1px solid #E6E1DB',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-            }}>
-              <Receipt style={{ width: '20px', height: '20px', color: '#E6E1DB', margin: '0 auto 8px' }} />
-              <p style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--color-brand-900)', margin: 0 }}>
-                Nenhum registro
-              </p>
-              <p style={{ fontSize: '9.5px', color: '#7A6E80', margin: '4px 0 0', fontFamily: "'Manrope', sans-serif" }}>
-                Toque em "{activeTab === 'maodeobra' ? 'Nova Mão de Obra' : 'Novo Custo / Investimento'}" acima pra registrar seu primeiro gasto avulso.
-              </p>
+            <div
+              className="flex flex-col items-center gap-2.5 text-center"
+              style={{
+                background: '#fff',
+                border: '1.5px dashed #E6E1DB',
+                borderRadius: '16px',
+                boxShadow: '0 8px 20px rgba(58,35,80,.09)',
+                padding: '32px 20px',
+              }}
+            >
+              <div
+                className="flex items-center justify-center"
+                style={{ width: '56px', height: '56px', borderRadius: '16px', background: '#F3E9F3' }}
+              >
+                <Receipt className="w-[26px] h-[26px]" style={{ color: '#6E3F72' }} strokeWidth={2} />
+              </div>
+              <div className="font-serif-display" style={{ fontSize: '16px', color: '#3A2350' }}>
+                Nenhum registro ainda
+              </div>
+              <div className="text-sm" style={{ color: '#7A6E80', maxWidth: '280px' }}>
+                Toque em "{activeTab === 'maodeobra' ? 'Nova Mão de Obra' : 'Novo Custo / Investimento'}" acima para registrar seu primeiro gasto avulso.
+              </div>
             </div>
           ) : (
             filteredItems.map((item) => (
