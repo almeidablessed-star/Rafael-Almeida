@@ -219,29 +219,36 @@ export const MinhaEmpresaCard: React.FC = () => {
               ? `Você informou ${formatCurrency(d.valor)} de ${d.nome.trim()}. Se só uma parte é do negócio, ajuste esse número — por exemplo, 50 significa que ${formatCurrency(d.valor * 0.5)} entram como custo real da confeitaria.`
               : undefined;
             return (
-            <div key={d.id ?? `novo-${i}`} className="p-3 rounded-xl border border-[#E6E1DB] bg-white space-y-2">
-              <input type="text" placeholder="Nome da despesa" value={d.nome} onChange={(e) => atualizarDespesa(i, 'nome', e.target.value)}
-                style={{ fontFamily: "'Manrope', sans-serif" }}
-                className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe" />
-              <div className="flex gap-2 items-end">
-                <div className="flex-1">
-                  <label className="text-[9px] font-bold block mb-1" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>Valor (R$)</label>
-                  <input type="number" placeholder="0" value={d.valor || ''} onChange={(e) => atualizarDespesa(i, 'valor', Number(e.target.value))}
-                    style={{ fontFamily: "'Manrope', sans-serif" }}
-                    className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe" />
+            <div key={d.id ?? `novo-${i}`} className="rounded-xl border border-[#E6E1DB] bg-white overflow-hidden shadow-[0_8px_20px_rgba(58,35,80,.09)] hover:shadow-[0_20px_36px_rgba(58,35,80,.18)] hover:-translate-y-[3px] focus-within:shadow-[0_20px_36px_rgba(58,35,80,.18)] focus-within:-translate-y-[3px] transition-all duration-200">
+              <div style={{ height: '3px', background: 'linear-gradient(90deg, #A85E86, #6E3F72)' }} />
+              <div className="p-3 space-y-2">
+                <input type="text" placeholder="Nome da despesa" value={d.nome} onChange={(e) => atualizarDespesa(i, 'nome', e.target.value)}
+                  style={{ fontFamily: "'Manrope', sans-serif" }}
+                  className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe" />
+                <div className="flex gap-2 items-end">
+                  <div className="flex-1">
+                    <label className="text-[9px] font-bold block mb-1" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>Valor (R$)</label>
+                    <input type="number" placeholder="0" value={d.valor || ''} onChange={(e) => atualizarDespesa(i, 'valor', Number(e.target.value))}
+                      style={{ fontFamily: "'Manrope', sans-serif" }}
+                      className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe" />
+                  </div>
+                  <div className="w-24">
+                    <label className="text-[9px] font-bold block mb-1" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>% do negócio</label>
+                    <input type="number" placeholder="100" value={d.percentualRateio || ''} onChange={(e) => atualizarDespesa(i, 'percentualRateio', Number(e.target.value))}
+                      style={{ fontFamily: "'Manrope', sans-serif" }}
+                      className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe" />
+                  </div>
+                  <div className="flex-shrink-0">
+                    <span className="text-[9px] font-bold block mb-1 text-right" style={{ color: '#A85E86', fontFamily: "'Manrope', sans-serif" }}>Excluir</span>
+                    <button onClick={() => removerDespesa(i)} className="w-8 h-8 rounded-full bg-[#FDF4F5] text-[#C4626F] flex items-center justify-center text-xs font-bold" aria-label="Remover despesa">×</button>
+                  </div>
                 </div>
-                <div className="w-24">
-                  <label className="text-[9px] font-bold block mb-1" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>% do negócio</label>
-                  <input type="number" placeholder="100" value={d.percentualRateio || ''} onChange={(e) => atualizarDespesa(i, 'percentualRateio', Number(e.target.value))}
-                    style={{ fontFamily: "'Manrope', sans-serif" }}
-                    className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe" />
-                </div>
-                <button onClick={() => removerDespesa(i)} className="w-8 h-8 flex-shrink-0 rounded-full bg-[#FDF4F5] text-[#C4626F] flex items-center justify-center text-xs font-bold" aria-label="Remover despesa">×</button>
+                <CampoComAjuda
+                  variant="card"
+                  microcopy="Se essa despesa também é usada na sua vida pessoal, informe aqui só a parte que é do negócio. Deixe 100 se ela é toda da confeitaria."
+                  exemploDinamico={exemploRateio}
+                />
               </div>
-              <CampoComAjuda
-                microcopy="Se essa despesa também é usada na sua vida pessoal, informe aqui só a parte que é do negócio. Deixe 100 se ela é toda da confeitaria."
-                exemploDinamico={exemploRateio}
-              />
             </div>
             );
           })}
