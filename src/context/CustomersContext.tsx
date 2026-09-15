@@ -88,8 +88,6 @@ export const CustomersProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // TEMPORARIO — ver docs/investigacao-cors-transacoes-movimentos.md
-    console.log(`[ctxlog] CustomersContext effect FIRED t=${((window as any).__fetchT0 ? performance.now() - (window as any).__fetchT0 : performance.now()).toFixed(1)}ms user=${user?.id ?? 'null'}`);
     if (!user) {
       // Logout limpa a lista: sem isto, as clientes da conta anterior
       // continuariam em memoria para quem entrasse depois.
