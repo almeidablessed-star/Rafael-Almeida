@@ -7,26 +7,34 @@ interface PrimeirosPassosChecklistProps {
   fichaCriada: boolean;
   pedidoLancado: boolean;
   onNavigateToTab: (tab: TabType) => void;
+  /** Abre Produtos ja no filtro Compras — mesmo caminho ensinado no tour guiado (ver `abaInicial` em ProdutosModule.tsx). */
+  onNavigateToProdutosCompras: () => void;
   onOpenAddModal: (type: TransactionType) => void;
 }
 
 /**
  * Card do Dashboard que lista os 3 passos reais que faltam pra usuaria comecar
- * a usar o app de verdade (produto -> ficha -> pedido). Complementa o tour
+ * a usar o app de verdade (compra -> ficha -> pedido). Complementa o tour
  * guiado ([[TourPrimeirosPassos]]): o tour aponta pros icones uma vez, este
  * card fica de pe ate a acao de verdade acontecer. Some sozinho quando os 3
  * estiverem completos — quem decide SE ele aparece (gate por
  * tourPrimeirosPassosVistoEm e primeirosPassosCompletosEm) e o componente pai.
+ *
+ * O item 1 ensina "registrar uma compra", nao "cadastrar um produto": lancar
+ * uma compra ja cria o produto automaticamente (com estoque e financeiro
+ * corretos), entao a condicao de conclusao continua sendo `produtoCadastrado`
+ * (produtos.length > 0) — so mudou o texto e o destino do botao "Ir".
  */
 export const PrimeirosPassosChecklist: React.FC<PrimeirosPassosChecklistProps> = ({
   produtoCadastrado,
   fichaCriada,
   pedidoLancado,
   onNavigateToTab,
+  onNavigateToProdutosCompras,
   onOpenAddModal,
 }) => {
   const itens = [
-    { label: 'Cadastre seu primeiro produto', completo: produtoCadastrado, onIr: () => onNavigateToTab('produtos') },
+    { label: 'Registre sua primeira compra', completo: produtoCadastrado, onIr: onNavigateToProdutosCompras },
     { label: 'Crie sua primeira ficha técnica', completo: fichaCriada, onIr: () => onNavigateToTab('fichas') },
     { label: 'Lance seu primeiro pedido', completo: pedidoLancado, onIr: () => onOpenAddModal('venda') },
   ];

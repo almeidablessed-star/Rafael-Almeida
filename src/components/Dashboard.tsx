@@ -45,6 +45,7 @@ interface DashboardProps {
   onOpenAddModal: (type: TransactionType) => void;
   onOpenAddModalWithDate?: (date: string) => void;
   onNavigateToTab: (tabName: any) => void;
+  onNavigateToProdutosCompras: () => void;
   onEditTransaction?: (tx: Transaction) => void;
   onDeleteTransaction?: (tx: Transaction) => void;
   onTogglePaymentStatus?: (tx: Transaction) => void;
@@ -62,6 +63,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onOpenAddModal,
   onOpenAddModalWithDate,
   onNavigateToTab,
+  onNavigateToProdutosCompras,
   onEditTransaction,
   onDeleteTransaction,
   onTogglePaymentStatus,
@@ -384,6 +386,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             fichaCriada={fichaCriada}
             pedidoLancado={pedidoLancado}
             onNavigateToTab={onNavigateToTab}
+            onNavigateToProdutosCompras={onNavigateToProdutosCompras}
             onOpenAddModal={onOpenAddModal}
           />
         )}

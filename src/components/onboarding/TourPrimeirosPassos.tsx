@@ -5,10 +5,16 @@ import { TabType } from '../../types';
 interface PassoTour {
   tab: TabType;
   texto: string;
+  /** So o passo Produtos usa: pede pro ProdutosModule abrir direto no filtro Compras (ver `abaInicial` em ProdutosModule.tsx), em vez do default "Todos os Produtos". */
+  abaProdutos?: 'compras';
 }
 
 const PASSOS: PassoTour[] = [
-  { tab: 'produtos', texto: 'Aqui você cadastra os ingredientes e materiais que usa nos seus produtos.' },
+  {
+    tab: 'produtos',
+    texto: 'Já comprou algo pra usar nos seus bolos? Lance aqui — o produto e o estoque são criados automaticamente.',
+    abaProdutos: 'compras',
+  },
   { tab: 'fichas', texto: 'Aqui você monta a receita de cada produto, usando os itens que cadastrou.' },
   { tab: 'pedidos', texto: 'Aqui você lança as vendas, usando as fichas que criou.' },
   { tab: 'dashboard', texto: 'Aqui você acompanha sua meta da semana e sua saúde financeira.' },
@@ -24,6 +30,8 @@ interface Retangulo {
 interface TourPrimeirosPassosProps {
   /** Navega a aba real do app para o passo atual, para a pessoa ver a tela de verdade atras do balao. */
   onNavigateToTab: (tab: TabType) => void;
+  /** Chamado junto com a navegacao quando o passo atual pede um filtro especifico dentro de Produtos (ver `abaProdutos` em PassoTour). */
+  onSolicitarAbaProdutos?: (aba: 'compras') => void;
   /** Chamado ao concluir o ultimo passo OU ao pular a qualquer momento. Deve marcar como visto e fechar o tour. */
   onFinish: () => void;
 }
@@ -31,11 +39,15 @@ interface TourPrimeirosPassosProps {
 /**
  * Tour guiado de 4 passos apontando para os icones do rodape, na ordem
  * pedagogica Produtos -> Fichas -> Pedidos -> Inicio (que NAO e a ordem
- * visual do rodape). Sem lib externa: o "spotlight" e so um box-shadow
+ * visual do rodape). O passo Produtos aponta pro mesmo icone de sempre, mas
+ * pede pro ProdutosModule abrir ja no filtro Compras — lancar uma compra cria
+ * o produto, com estoque e financeiro corretos, numa acao so, em vez de
+ * ensinar o cadastro direto (que so cria uma referencia de custo, sem
+ * estoque nem compra real). Sem lib externa: o "spotlight" e so um box-shadow
  * gigante no recorte do icone, e o balao usa os mesmos tokens de cor/fonte
  * do resto do app.
  */
-export const TourPrimeirosPassos: React.FC<TourPrimeirosPassosProps> = ({ onNavigateToTab, onFinish }) => {
+export const TourPrimeirosPassos: React.FC<TourPrimeirosPassosProps> = ({ onNavigateToTab, onSolicitarAbaProdutos, onFinish }) => {
   const [passoAtual, setPassoAtual] = useState(0);
   const [rect, setRect] = useState<Retangulo | null>(null);
 
@@ -44,6 +56,8 @@ export const TourPrimeirosPassos: React.FC<TourPrimeirosPassosProps> = ({ onNavi
 
   useEffect(() => {
     onNavigateToTab(passo.tab);
+    if (passo.abaProdutos) onSolicitarAbaProdutos?.(passo.abaProdutos);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [passoAtual]);
 
   useLayoutEffect(() => {

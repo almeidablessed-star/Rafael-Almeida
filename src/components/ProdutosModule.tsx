@@ -96,6 +96,15 @@ interface ProdutosModuleProps {
   onAddTransaction: (txData: Omit<Transaction, 'id' | 'createdAt'>) => void;
   onEditTransaction: (tx: Transaction) => void;
   onDeleteTransaction: (tx: Transaction) => void;
+  /**
+   * Pedido externo (tour guiado, checklist de primeiros passos) pra abrir
+   * direto no filtro Compras, em vez do default "Todos os Produtos". So um
+   * "sinal" de uma via: ao ser consumido, avisa o pai via
+   * `onAbaInicialConsumida` pra ele limpar o pedido — senao uma visita manual
+   * futura a esta aba continuaria "grudada" em Compras.
+   */
+  abaInicial?: 'compras';
+  onAbaInicialConsumida?: () => void;
 }
 
 export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
@@ -103,9 +112,19 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
   onAddTransaction,
   onEditTransaction,
   onDeleteTransaction,
+  abaInicial,
+  onAbaInicialConsumida,
 }) => {
   const { produtos, addProduto, updateProduto, deleteProduto, custoPorUnidade } = useProdutos();
   const [aba, setAba] = useState<'todos' | 'estoque' | 'compras'>('todos');
+
+  useEffect(() => {
+    if (abaInicial) {
+      setAba(abaInicial);
+      onAbaInicialConsumida?.();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [abaInicial]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);

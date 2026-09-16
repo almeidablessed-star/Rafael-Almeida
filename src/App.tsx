@@ -106,6 +106,12 @@ function AppContent() {
   const [isGlossaryModalOpen, setIsGlossaryModalOpen] = useState(false);
   const [tourAtivo, setTourAtivo] = useState(false);
   const [tabAntesDoTour, setTabAntesDoTour] = useState<TabType | null>(null);
+  // Pedido de uma via pro ProdutosModule abrir ja no filtro Compras (tour
+  // guiado ou checklist de primeiros passos) — ver `abaInicial` em
+  // ProdutosModule.tsx. Limpo assim que consumido, ou defensivamente ao
+  // fechar o tour, senao uma visita manual futura a Produtos ficaria
+  // "grudada" em Compras.
+  const [produtosAbaSolicitada, setProdutosAbaSolicitada] = useState<'compras' | undefined>(undefined);
 
   // Undo state
   const { saveForUndo, getUndoData, hasUndo } = useUndo();
@@ -145,9 +151,15 @@ function AppContent() {
       setActiveTab(tabAntesDoTour);
       setTabAntesDoTour(null);
     }
+    setProdutosAbaSolicitada(undefined);
     marcarTourVisto().catch((err) => {
       console.error('Erro ao marcar tour como visto:', err);
     });
+  };
+
+  const handleSolicitarProdutosCompras = () => {
+    setActiveTab('produtos');
+    setProdutosAbaSolicitada('compras');
   };
 
   // Filtered transactions & financial metrics
@@ -456,6 +468,7 @@ function AppContent() {
               handleOpenAddModal('venda');
             }}
             onNavigateToTab={(tab) => setActiveTab(tab)}
+            onNavigateToProdutosCompras={handleSolicitarProdutosCompras}
             onEditTransaction={handleOpenEditModal}
             onDeleteTransaction={handleRequestDelete}
             onTogglePaymentStatus={handleTogglePaymentStatus}
@@ -498,6 +511,8 @@ function AppContent() {
             onAddTransaction={handleAddCompra}
             onEditTransaction={handleOpenEditModal}
             onDeleteTransaction={handleRequestDelete}
+            abaInicial={produtosAbaSolicitada}
+            onAbaInicialConsumida={() => setProdutosAbaSolicitada(undefined)}
           />
         )}
 
@@ -632,6 +647,7 @@ function AppContent() {
       {TOUR_PRIMEIROS_PASSOS_HABILITADO && tourAtivo && (
         <TourPrimeirosPassos
           onNavigateToTab={setActiveTab}
+          onSolicitarAbaProdutos={setProdutosAbaSolicitada}
           onFinish={handleFinalizarTour}
         />
       )}
