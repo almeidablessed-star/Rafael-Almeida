@@ -33,9 +33,17 @@ export const CampoComAjuda: React.FC<{
   if (variant === 'card') {
     return (
       <div className="mt-1.5">
-        <div className="flex items-start gap-2 p-2.5 rounded-xl bg-[#F3E9F3]">
-          {botaoAjuda}
-          <p className="text-[11px] flex-1" style={{ color: '#5A4E63', fontFamily: "'Manrope', sans-serif" }}>
+        <div className="flex items-start gap-2.5 rounded-xl bg-[#F3E9F3]" style={{ padding: '12px 14px' }}>
+          <button
+            type="button"
+            onClick={() => setAberto((v) => !v)}
+            aria-label="Ver exemplo com os números da sua conta"
+            className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white transition-transform active:scale-90"
+            style={{ background: '#3A2350' }}
+          >
+            ?
+          </button>
+          <p className="text-[13px] flex-1" style={{ color: '#6E3F72', lineHeight: 1.5, fontFamily: "'Manrope', sans-serif" }}>
             {microcopy}
           </p>
         </div>

@@ -30,6 +30,9 @@ const botaoSecundario =
   'px-4 py-2.5 rounded-xl bg-white border border-[#E6E1DB] text-xs font-bold text-neutral-700 hover:bg-neutral-50 transition-all active:scale-95 disabled:opacity-50';
 const secaoTitulo = 'font-serif-display text-[18px] leading-tight';
 const secaoCard = 'bg-[#F6F2F5] rounded-2xl p-4 space-y-3';
+/** Cor de destaque no topo de cada card de despesa, alternando por posicao —
+ * so decorativo, nao representa categoria nenhuma. */
+const DESPESA_ACCENTS = ['#A85E86', '#7E4F9E', '#B08D57', '#A9D8B8', '#6E3F72'];
 
 export const MinhaEmpresaCard: React.FC = () => {
   const { administrativeCosts, salvarConfiguracaoEmpresa, salvarDespesas, error } = useCosts();
@@ -219,28 +222,41 @@ export const MinhaEmpresaCard: React.FC = () => {
               ? `Você informou ${formatCurrency(d.valor)} de ${d.nome.trim()}. Se só uma parte é do negócio, ajuste esse número — por exemplo, 50 significa que ${formatCurrency(d.valor * 0.5)} entram como custo real da confeitaria.`
               : undefined;
             return (
-            <div key={d.id ?? `novo-${i}`} className="rounded-xl border border-[#E6E1DB] bg-white overflow-hidden shadow-[0_8px_20px_rgba(58,35,80,.09)] hover:shadow-[0_20px_36px_rgba(58,35,80,.18)] hover:-translate-y-[3px] focus-within:shadow-[0_20px_36px_rgba(58,35,80,.18)] focus-within:-translate-y-[3px] transition-all duration-200">
-              <div style={{ height: '3px', background: 'linear-gradient(90deg, #A85E86, #6E3F72)' }} />
+            <div
+              key={d.id ?? `novo-${i}`}
+              className="overflow-hidden shadow-[0_8px_20px_rgba(58,35,80,.09)] hover:shadow-[0_20px_36px_rgba(58,35,80,.18)] hover:-translate-y-[3px] focus-within:shadow-[0_20px_36px_rgba(58,35,80,.18)] focus-within:-translate-y-[3px] transition-all duration-200"
+              style={{ borderRadius: '16px', background: '#FFFFFF', border: '1px solid rgba(58,35,80,0.08)' }}
+            >
+              <div style={{ height: '4px', background: DESPESA_ACCENTS[i % DESPESA_ACCENTS.length] }} />
               <div className="p-3 space-y-2">
                 <input type="text" placeholder="Nome da despesa" value={d.nome} onChange={(e) => atualizarDespesa(i, 'nome', e.target.value)}
-                  style={{ fontFamily: "'Manrope', sans-serif" }}
-                  className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe" />
+                  style={{ fontFamily: "'Manrope', sans-serif", fontSize: '17px', fontWeight: 600, padding: '12px 14px', borderRadius: '10px', border: '1px solid rgba(58,35,80,0.14)' }}
+                  className="w-full bg-white focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe" />
                 <div className="flex gap-2 items-end">
                   <div className="flex-1">
-                    <label className="text-[9px] font-bold block mb-1" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>Valor (R$)</label>
+                    <label className="text-xs font-semibold block mb-1" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>Valor (R$)</label>
                     <input type="number" placeholder="0" value={d.valor || ''} onChange={(e) => atualizarDespesa(i, 'valor', Number(e.target.value))}
-                      style={{ fontFamily: "'Manrope', sans-serif" }}
-                      className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe" />
+                      style={{ fontFamily: "'Manrope', sans-serif", fontSize: '16px', fontWeight: 600, padding: '11px 13px', borderRadius: '10px', border: '1px solid rgba(58,35,80,0.14)', background: '#FAF7FA', fontVariantNumeric: 'tabular-nums' }}
+                      className="w-full focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe" />
                   </div>
                   <div className="w-24">
-                    <label className="text-[9px] font-bold block mb-1" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>% do negócio</label>
+                    <label className="text-xs font-semibold block mb-1" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>% do negócio</label>
                     <input type="number" placeholder="100" value={d.percentualRateio || ''} onChange={(e) => atualizarDespesa(i, 'percentualRateio', Number(e.target.value))}
-                      style={{ fontFamily: "'Manrope', sans-serif" }}
-                      className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe" />
+                      style={{ fontFamily: "'Manrope', sans-serif", fontSize: '16px', fontWeight: 600, padding: '11px 13px', borderRadius: '10px', border: '1px solid rgba(58,35,80,0.14)', background: '#FAF7FA', fontVariantNumeric: 'tabular-nums' }}
+                      className="w-full focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe" />
                   </div>
                   <div className="flex-shrink-0">
-                    <span className="text-[9px] font-bold block mb-1 text-right" style={{ color: '#A85E86', fontFamily: "'Manrope', sans-serif" }}>Excluir</span>
-                    <button onClick={() => removerDespesa(i)} className="w-8 h-8 rounded-full bg-[#FDF4F5] text-[#C4626F] flex items-center justify-center text-xs font-bold" aria-label="Remover despesa">×</button>
+                    <span className="text-[10px] font-semibold block mb-1 text-right" style={{ color: '#A96A78', letterSpacing: '0.02em', fontFamily: "'Manrope', sans-serif" }}>Excluir</span>
+                    <button
+                      onClick={() => removerDespesa(i)}
+                      aria-label="Remover despesa"
+                      className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all active:scale-95"
+                      style={{ border: '1px solid rgba(196,98,111,0.28)', background: '#FDEFF2', color: '#C4626F', boxShadow: '0 2px 6px rgba(196,98,111,0.12)' }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = '#F5B9C6'; e.currentTarget.style.color = '#6E2231'; e.currentTarget.style.boxShadow = '0 10px 20px rgba(196,98,111,0.26)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = '#FDEFF2'; e.currentTarget.style.color = '#C4626F'; e.currentTarget.style.boxShadow = '0 2px 6px rgba(196,98,111,0.12)'; }}
+                    >
+                      ×
+                    </button>
                   </div>
                 </div>
                 <CampoComAjuda

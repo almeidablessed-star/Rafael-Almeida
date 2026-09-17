@@ -7,7 +7,6 @@ import { useProdutos } from '../context/ProdutosContext';
 import { useCosts } from '../context/CostsContext';
 import { calcularEstruturaFinanceira, calcularPrecoSugeridoProduto, somarDespesasEmpresa } from '../utils/financialEngine';
 import { normalizeName } from '../utils/fichaMatcher';
-import { useUndo } from '../hooks/useUndo';
 import { StockItemAutocomplete } from './StockItemAutocomplete';
 import { compressImageFile } from '../utils/imageCompression';
 import { GenericDeleteConfirmModal } from './GenericDeleteConfirmModal';
@@ -128,7 +127,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   onNavigateToTab,
 }) => {
   const { formatCurrency: formatMoney } = useCurrency();
-  const { fichas, isLoading: isLoadingFichas, error: fichasError, addFicha, updateFicha, deleteFicha, restoreFicha, fetchFichaPhoto } = useFichasTecnicas();
+  const { fichas, isLoading: isLoadingFichas, error: fichasError, addFicha, updateFicha, deleteFicha, fetchFichaPhoto } = useFichasTecnicas();
   const { produtos, addProduto, custoPorUnidade } = useProdutos();
 
   const produtosParaAutocomplete = useMemo<StockItem[]>(() => produtos.map((p) => ({
@@ -164,7 +163,6 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         administrativeCosts.profitTargetPercent
       )
     : null;
-  const { saveForUndo, getUndoData } = useUndo();
   const [selectedCategory, setSelectedCategory] = useState<'bolos' | 'doces' | 'salgados' | 'saudaveis' | 'kids'>('bolos');
   const [isCreating, setIsCreating] = useState(false);
   // PREVIEW do formulario em 3 passos (Identificacao/Insumos/Preco) — ver
@@ -191,7 +189,21 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [confirmandoAvancarSemInsumos, setConfirmandoAvancarSemInsumos] = useState(false);
   const [deletingFicha, setDeletingFicha] = useState<FichaTecnica | null>(null);
-  const [showUndoToast, setShowUndoToast] = useState(false);
+
+  /**
+   * Exclusao de ficha com desfazer de verdade: ao confirmar, a ficha some da
+   * lista na hora (via `pendingDeleteFicha`, filtrada no render) mas o DELETE
+   * so e enviado ao Supabase 10s depois (`pendingDeleteRef.timeoutId`).
+   * "Desfazer" dentro da janela cancela o timer sem nunca ter tocado o banco.
+   *
+   * O ref (nao so o state) existe porque o cleanup de unmount abaixo precisa
+   * ler o valor mais atual num closure que so roda uma vez (troca de aba
+   * desmonta este componente e mataria um setTimeout guardado so em state) —
+   * ao desmontar com uma exclusao pendente, finaliza o delete real na hora em
+   * vez de deixar o timer morrer e a ficha reaparecer "fantasma" depois.
+   */
+  const [pendingDeleteFicha, setPendingDeleteFicha] = useState<FichaTecnica | null>(null);
+  const pendingDeleteRef = useRef<{ ficha: FichaTecnica; timeoutId: ReturnType<typeof setTimeout> } | null>(null);
   const [expandedFichaId, setExpandedFichaId] = useState<string | null>(null);
   const [launchSuccessMsg, setLaunchSuccessMsg] = useState<string | null>(null);
   const [expandedTamanhosId, setExpandedTamanhosId] = useState<string | null>(null);
@@ -774,33 +786,60 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     setDeletingFicha(ficha);
   };
 
-  const handleConfirmDelete = async (id: string) => {
-    const fichaToDelete = fichas.find(f => f.id === id);
-    if (!fichaToDelete) return;
+  /** Dispara o DELETE real no Supabase. Chamado 10s depois de confirmar (se
+   * ninguem desfizer) ou na hora, se a tela for desmontada antes disso. */
+  const finalizarExclusaoPendente = async () => {
+    const pending = pendingDeleteRef.current;
+    if (!pending) return;
+    pendingDeleteRef.current = null;
 
     try {
-      saveForUndo({ type: 'ficha', data: fichaToDelete });
-      await deleteFicha(id);
-      setShowUndoToast(true);
-      setTimeout(() => setShowUndoToast(false), 10000);
+      await deleteFicha(pending.ficha.id);
     } catch (err: any) {
-      console.error('Erro ao deletar:', err);
+      console.error('Erro ao deletar ficha técnica:', err);
       alert('Erro ao deletar ficha técnica: ' + (err.message || JSON.stringify(err)));
+    } finally {
+      setPendingDeleteFicha(null);
     }
   };
 
-  const handleUndo = async () => {
-    const undoData = getUndoData();
-    if (undoData && undoData.type === 'ficha') {
-      try {
-        await restoreFicha(undoData.data);
-        setShowUndoToast(false);
-      } catch (err: any) {
-        console.error('Erro ao restaurar:', err);
-        alert('Erro ao restaurar ficha técnica: ' + (err.message || JSON.stringify(err)));
-      }
-    }
+  const handleConfirmDelete = (id: string) => {
+    const fichaToDelete = fichas.find((f) => f.id === id);
+    if (!fichaToDelete) return;
+
+    const timeoutId = setTimeout(() => {
+      finalizarExclusaoPendente();
+    }, 10000);
+
+    pendingDeleteRef.current = { ficha: fichaToDelete, timeoutId };
+    setPendingDeleteFicha(fichaToDelete);
   };
+
+  const handleUndo = () => {
+    const pending = pendingDeleteRef.current;
+    if (!pending) return;
+    clearTimeout(pending.timeoutId);
+    pendingDeleteRef.current = null;
+    setPendingDeleteFicha(null);
+  };
+
+  // Se a tela de Fichas for desmontada (troca de aba) com uma exclusao
+  // pendente, finaliza o delete real na hora em vez de deixar o timer
+  // morrer junto — sem isso a ficha ficaria fora da lista pra sempre sem
+  // nunca ter sido excluida de verdade do banco.
+  useEffect(() => {
+    return () => {
+      const pending = pendingDeleteRef.current;
+      if (pending) {
+        clearTimeout(pending.timeoutId);
+        pendingDeleteRef.current = null;
+        deleteFicha(pending.ficha.id).catch((err) => {
+          console.error('Erro ao finalizar exclusão pendente de ficha ao sair da tela:', err);
+        });
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleDuplicate = async (fichaToDup: FichaTecnica) => {
     try {
@@ -843,7 +882,11 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     setTimeout(() => setLaunchSuccessMsg(null), 4000);
   };
 
-  const filteredFichas = fichas.filter((f) => f.category === selectedCategory);
+  // Some da lista (e da contagem por categoria, abaixo) assim que a exclusao
+  // e confirmada, mesmo o DELETE real so acontecendo 10s depois — ver
+  // `pendingDeleteFicha`.
+  const fichasVisiveis = pendingDeleteFicha ? fichas.filter((f) => f.id !== pendingDeleteFicha.id) : fichas;
+  const filteredFichas = fichasVisiveis.filter((f) => f.category === selectedCategory);
 
   return (
     <div className="space-y-0 pb-12 animate-fadeIn" style={{ background: '#F6F2F5', minHeight: '100vh' }}>
@@ -929,7 +972,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         {(Object.keys(CATEGORY_LABELS) as Array<keyof typeof CATEGORY_LABELS>).map((key) => {
           const cat = CATEGORY_LABELS[key];
           const isActive = selectedCategory === key;
-          const count = fichas.filter((f) => f.category === key).length;
+          const count = fichasVisiveis.filter((f) => f.category === key).length;
           return (
             <button
               key={key}
@@ -2127,17 +2170,33 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         }}
       />
 
-      {/* Undo Toast */}
-      {showUndoToast && (
-        <div className="fixed bottom-24 left-1/2 transform -translate-x-1/2 rounded-2xl p-4 z-40 flex items-center gap-3 shadow-lg" style={{ background: 'linear-gradient(135deg, #6E3F72 0%, #3A2350 100%)' }}>
-          <span className="text-sm font-bold text-white">✓ Ficha deletada</span>
-          <button
-            onClick={handleUndo}
-            className="px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-95 hover:shadow-md"
-            style={{ background: '#F5B9C6', color: '#3A2350' }}
+      {/* Toast de exclusao pendente: some no topo enquanto os 10s de
+          "Desfazer" ainda estao correndo (ver `pendingDeleteFicha`). */}
+      {pendingDeleteFicha && (
+        <div className="fixed left-1/2 -translate-x-1/2 z-50" style={{ top: '20px' }}>
+          <div
+            className="flex items-center gap-3.5 animate-fadeIn"
+            style={{ padding: '10px 12px 10px 18px', borderRadius: '999px', background: '#3A2350', boxShadow: '0 20px 36px rgba(58,35,80,0.26)' }}
           >
-            ↩️ Desfazer
-          </button>
+            <span className="flex items-center gap-2 text-sm font-bold text-white whitespace-nowrap">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#A9D8B8" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+              Ficha deletada
+            </span>
+            <button
+              type="button"
+              onClick={handleUndo}
+              className="flex items-center gap-1.5 text-xs font-bold transition-all active:scale-95"
+              style={{ padding: '8px 14px', borderRadius: '999px', border: 'none', background: '#F5B9C6', color: '#6E2231', cursor: 'pointer' }}
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M9 14 4 9l5-5" />
+                <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5 5.5 5.5 0 0 1-5.5 5.5H11" />
+              </svg>
+              Desfazer
+            </button>
+          </div>
         </div>
       )}
       </div>
