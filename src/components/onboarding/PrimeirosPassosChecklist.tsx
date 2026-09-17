@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check } from 'lucide-react';
+import { Check, ArrowRight } from 'lucide-react';
 import { TabType, TransactionType } from '../../types';
 
 interface PrimeirosPassosChecklistProps {
@@ -41,19 +41,40 @@ export const PrimeirosPassosChecklist: React.FC<PrimeirosPassosChecklistProps> =
 
   if (itens.every((item) => item.completo)) return null;
 
+  const feitos = itens.filter((item) => item.completo).length;
+  const percentualConcluido = Math.round((feitos / itens.length) * 100);
+
   return (
     <div
-      className="w-full rounded-[22px] p-4"
+      className="w-full rounded-[22px] overflow-hidden"
       style={{ background: 'white', boxShadow: '0 8px 20px rgba(58,35,80,0.08)' }}
     >
-      <h3 className="font-serif-display text-[19px]" style={{ color: '#241B2B' }}>
-        Primeiros passos
-      </h3>
-      <p className="text-[11px]" style={{ color: '#7A6E80', marginTop: '2px', marginBottom: '6px' }}>
-        Conclua estes 3 passos para começar a usar o Carula de verdade.
-      </p>
+      <div style={{ height: '4px', background: 'linear-gradient(90deg, #3A2350, #6E3F72 55%, #A85E86)' }} />
 
-      <div className="divide-y" style={{ borderColor: '#F1EBF2' }}>
+      <div className="p-4">
+        <div className="flex items-baseline justify-between gap-3">
+          <h3 className="font-serif-display text-[19px]" style={{ color: '#241B2B' }}>
+            Primeiros passos
+          </h3>
+          <span
+            className="text-[11px] font-bold uppercase flex-shrink-0"
+            style={{ color: '#A85E86', letterSpacing: '0.1em', fontVariantNumeric: 'tabular-nums' }}
+          >
+            {feitos}/{itens.length} feitos
+          </span>
+        </div>
+        <p className="text-[11px]" style={{ color: '#7A6E80', marginTop: '2px', marginBottom: '14px' }}>
+          Conclua estes 3 passos para começar a usar o Carula de verdade.
+        </p>
+        <div className="rounded-full overflow-hidden" style={{ height: '6px', background: '#F1EBF2' }}>
+          <div
+            className="h-full rounded-full transition-all duration-300"
+            style={{ width: `${percentualConcluido}%`, background: '#A85E86' }}
+          />
+        </div>
+      </div>
+
+      <div className="px-4 pb-4 flex flex-col">
         {itens.map((item) => (
           <div key={item.label} className="flex items-center gap-3 py-3">
             <div
@@ -80,10 +101,23 @@ export const PrimeirosPassosChecklist: React.FC<PrimeirosPassosChecklistProps> =
             {!item.completo && (
               <button
                 onClick={item.onIr}
-                className="text-[12px] font-bold flex-shrink-0"
-                style={{ color: '#5A3F7F', background: 'none', border: 'none', cursor: 'pointer' }}
+                className="flex items-center gap-1.5 text-[12.5px] font-bold flex-shrink-0"
+                style={{
+                  color: '#3A2350',
+                  background: '#F3E9F3',
+                  border: 'none',
+                  borderRadius: '999px',
+                  padding: '7px 8px 7px 14px',
+                  cursor: 'pointer',
+                }}
               >
-                Ir →
+                Ir
+                <span
+                  className="w-[22px] h-[22px] rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{ background: '#FFFFFF', boxShadow: '0 1px 3px rgba(58,35,80,0.18)' }}
+                >
+                  <ArrowRight className="w-3.5 h-3.5" style={{ color: '#3A2350' }} strokeWidth={2.4} />
+                </span>
               </button>
             )}
           </div>
