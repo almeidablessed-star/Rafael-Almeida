@@ -2173,7 +2173,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
       {/* Toast de exclusao pendente: some no topo enquanto os 10s de
           "Desfazer" ainda estao correndo (ver `pendingDeleteFicha`). */}
       {pendingDeleteFicha && (
-        <div className="fixed left-1/2 -translate-x-1/2 z-50" style={{ top: '20px' }}>
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50">
           <div
             className="flex items-center gap-3.5 animate-fadeIn"
             style={{ padding: '10px 12px 10px 18px', borderRadius: '999px', background: '#3A2350', boxShadow: '0 20px 36px rgba(58,35,80,0.26)' }}
