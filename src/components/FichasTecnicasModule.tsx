@@ -189,6 +189,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   }, [formStep]);
   const fichaStepChangeIsFresh = () => performance.now() - fichaLastStepChangeRef.current < 400;
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [confirmandoAvancarSemInsumos, setConfirmandoAvancarSemInsumos] = useState(false);
   const [deletingFicha, setDeletingFicha] = useState<FichaTecnica | null>(null);
   const [showUndoToast, setShowUndoToast] = useState(false);
   const [expandedFichaId, setExpandedFichaId] = useState<string | null>(null);
@@ -992,7 +993,16 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                 <button
                   key={s.n}
                   type="button"
-                  onClick={() => setFormStep(s.n)}
+                  onClick={() => {
+                    // Pular direto pro Passo 3 pelo indicador tambem contorna
+                    // o aviso de insumos, do mesmo jeito que o botao
+                    // "Continuar" contornava antes de ganhar a checagem.
+                    if (s.n === 3 && formStep < 3 && tamanhos.some((t) => t.ingredients.length === 0)) {
+                      setConfirmandoAvancarSemInsumos(true);
+                      return;
+                    }
+                    setFormStep(s.n);
+                  }}
                   className="flex-1 flex flex-col gap-1.5 cursor-pointer"
                 >
                   <div style={{ height: '3px', borderRadius: '2px', background: formStep >= s.n ? '#F5B9C6' : 'rgba(255,255,255,0.25)' }} />
@@ -1165,9 +1175,16 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 
                     <div className="bg-white rounded-2xl p-2 flex flex-col" style={{ boxShadow: '0 8px 20px rgba(58,35,80,.09)' }}>
                       {tamanho.ingredients.length === 0 && (
-                        <p className="text-xs px-2 pt-2" style={{ color: '#9A8FA0' }}>
-                          Sem insumos neste tamanho — ele não vai baixar estoque.
-                        </p>
+                        <div
+                          className="m-2 p-3 rounded-xl border flex items-start gap-2"
+                          style={{ background: '#FFF6E8', borderColor: '#F0D2A0' }}
+                          role="status"
+                        >
+                          <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" style={{ color: '#B27A16' }} />
+                          <p className="text-xs font-semibold" style={{ color: '#7A5310' }}>
+                            Sem insumos neste tamanho — ele não vai calcular custo real (CMV) nem baixar estoque.
+                          </p>
+                        </div>
                       )}
                       {tamanho.ingredients.map((ing) => (
                         <div key={ing.id} className="p-2 grid grid-cols-12 gap-1.5 text-xs border-b" style={{ borderColor: 'rgba(58,35,80,0.07)' }}>
@@ -1371,10 +1388,13 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         <button
                           type="button"
                           onClick={() => handleAddInsumoTamanho(tamanho.id)}
-                          className="text-xs font-bold cursor-pointer"
-                          style={{ color: '#6E3F72' }}
+                          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-[10px] text-xs font-bold cursor-pointer transition-colors"
+                          style={{ border: '1.5px solid #6E3F72', color: '#6E3F72', background: 'white' }}
+                          onMouseEnter={(e) => { e.currentTarget.style.background = '#F6F2F5'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.background = 'white'; }}
                         >
-                          + Adicionar insumo
+                          <Plus className="w-3.5 h-3.5" strokeWidth={3} />
+                          Adicionar insumo
                         </button>
                       </div>
                     </div>
@@ -1550,6 +1570,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                 type="button"
                 onClick={() => {
                   if (fichaStepChangeIsFresh()) return;
+                  if (formStep === 2 && tamanhos.some((t) => t.ingredients.length === 0)) {
+                    setConfirmandoAvancarSemInsumos(true);
+                    return;
+                  }
                   setFormStep((s) => (s + 1) as 1 | 2 | 3);
                 }}
                 className="flex-1 text-center py-3 rounded-[10px] text-white text-sm font-semibold transition-colors"
@@ -1587,6 +1611,54 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                 Salvar ficha técnica
               </button>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Confirmacao ao tentar avancar do Passo 2 (Insumos) com algum tamanho
+          zerado: nao bloqueia (pode ser proposital, ex: item so de
+          referencia de preco), so garante que a decisao foi consciente —
+          sem isso a ficha calcula CMV como zero em silencio. */}
+      {confirmandoAvancarSemInsumos && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/60 backdrop-blur-xs p-4 animate-fadeIn" role="dialog" aria-modal="true">
+          <div className="w-full max-w-sm bg-white rounded-xl shadow-highlight overflow-hidden animate-scaleUp">
+            <div className="p-5 text-center">
+              <div
+                className="w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-3"
+                style={{ background: '#FFF6E8', color: '#B27A16' }}
+              >
+                <AlertTriangle className="w-6 h-6" />
+              </div>
+
+              <h3 className="font-brand font-bold text-base text-neutral-900 mb-1">
+                Continuar sem insumos?
+              </h3>
+
+              <p className="text-xs text-neutral-600 mb-4">
+                Essa ficha não vai calcular custo real (CMV). Pode ser proposital (ex: item só de referência de preço) — se não for, volte e adicione os insumos.
+              </p>
+
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setConfirmandoAvancarSemInsumos(false)}
+                  className="py-2.5 px-4 bg-white border border-[#E6E1DB] text-neutral-700 font-bold text-xs rounded-xl hover:bg-neutral-50 shadow-card transition-all active:scale-95"
+                >
+                  Voltar e adicionar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setConfirmandoAvancarSemInsumos(false);
+                    setFormStep(3);
+                  }}
+                  className="py-2.5 px-4 text-white font-bold text-xs rounded-xl shadow-sm transition-all active:scale-95"
+                  style={{ background: '#3A2350' }}
+                >
+                  Continuar assim
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
