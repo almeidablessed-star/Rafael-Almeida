@@ -929,8 +929,17 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[99999] flex items-end sm:items-center justify-center bg-neutral-900/80 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto" role="dialog" aria-modal="true">
-      <div className="w-full max-w-xl bg-[#F6F2F5] rounded-t-xl sm:rounded-xl shadow-highlight overflow-hidden max-h-[92vh] flex flex-col animate-slideUp" aria-labelledby="transactionModalTitle">
+    <div
+      className="fixed inset-0 z-[99999] flex items-end sm:items-center justify-center bg-neutral-900/80 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto"
+      role="dialog"
+      aria-modal="true"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-xl bg-[#F6F2F5] rounded-t-xl sm:rounded-xl shadow-highlight overflow-hidden max-h-[92vh] flex flex-col animate-slideUp"
+        aria-labelledby="transactionModalTitle"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Modal Header */}
         <div style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)', padding: type === 'venda' ? '18px 20px 16px' : undefined }} className={type === 'venda' ? 'flex flex-col gap-3.5' : 'px-5 py-4 flex items-center justify-between'}>
           <div className="flex items-center justify-between gap-3">

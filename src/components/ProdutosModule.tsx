@@ -277,12 +277,16 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
             paddingLeft: 'calc(20px + max(0px, env(safe-area-inset-left)))', paddingRight: 'calc(20px + max(0px, env(safe-area-inset-right)))',
           }}
         >
-          {/* Abas Todos / Estoque / Compras */}
+          {/* Abas Todos / Estoque / Compras. Fecha o formulario de Novo/Editar
+              Produto ao trocar de aba: ele so era escondido ao ir pra Compras
+              (aba !== 'compras'), entao trocar entre Todos/Estoque com o
+              formulario aberto deixava a lista de baixo (ja correta) escondida
+              atras dele — parecia que o filtro nao tinha funcionado. */}
           <div style={{ display: 'flex', gap: '3px', background: 'white', borderRadius: '14px', padding: '3px', boxShadow: '0 6px 14px rgba(58,35,80,.07)' }}>
             {[{ id: 'todos', label: 'Todos os Produtos' }, { id: 'estoque', label: 'Estoque' }, { id: 'compras', label: 'Compras' }].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setAba(tab.id as any)}
+                onClick={() => { setAba(tab.id as any); setIsAdding(false); }}
                 style={{
                   flex: 1, padding: '8px', fontSize: '11px', fontWeight: 800, borderRadius: '11px', border: 'none', cursor: 'pointer',
                   background: aba === tab.id ? '#3A2350' : 'transparent',

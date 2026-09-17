@@ -125,6 +125,16 @@ function AppContent() {
     localStorage.setItem('carula_activeTab', activeTab);
   }, [activeTab]);
 
+  // Fecha o modal de transacao ao trocar de aba: ele e um overlay fixed
+  // inset-0 z-[99999] renderizado via portal, sem nenhuma ligacao com
+  // activeTab — sem isto, trocar de aba com o modal aberto so muda o
+  // conteudo por baixo, que continua invisivel atras do overlay (parece que
+  // o app travou; so remontar o App do zero, saindo e voltando, "resolvia").
+  useEffect(() => {
+    setIsFormModalOpen(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
+
   // Dispara o tour de primeiros passos uma unica vez, na primeira entrada no
   // app depois do onboarding financeiro (AppContent so monta com o onboarding
   // ja concluido, ver FinancialOnboardingGate em App()). Nunca mais aparece
