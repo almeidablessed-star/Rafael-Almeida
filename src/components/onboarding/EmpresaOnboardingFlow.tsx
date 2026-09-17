@@ -8,16 +8,21 @@ import {
   calcularMetaHoras,
   somarDespesasEmpresa,
 } from '../../utils/financialEngine';
-import { CarulaLogo } from '../CarulaLogo';
 import { CampoComAjuda } from './CampoComAjuda';
 
 /**
  * Onboarding financeiro obrigatorio (spec "Minha Empresa", Parte 3), com o
  * visual validado do app (Parte 1): mesmo gradiente/cards/tipografia/sombras
- * ja usados em Dashboard.tsx e TransactionFormModal.tsx. Nenhum token novo —
- * o card com raio 40px citado na referencia do spec nao existe em nenhuma
- * tela real do app (o maior card real e rounded-2xl com a mesma sombra
- * grande); por isso este componente segue o codigo real, nao a referencia.
+ * ja usados em Dashboard.tsx e TransactionFormModal.tsx.
+ *
+ * Cabecalho + card de conteudo copiam AO PE DA LETRA a tecnica de recorte de
+ * FichasTecnicasModule.tsx (mesmo wrapper `overflow-hidden` + `marginBottom:
+ * -100px`/`paddingBottom: 100px`, cabecalho SEM nenhum border-radius proprio,
+ * conteudo full-bleed com `marginTop: -70px` e `borderRadius: '28px 28px 0
+ * 0'`). Uma tentativa anterior (cabecalho com radius proprio + card flutuante
+ * inset) nao ficou boa — o cabecalho nao pode ter radius nenhum: e o
+ * conteudo por cima, com seu proprio radius e a sobreposicao generosa, que
+ * "recorta" a curva. Ver FichasTecnicasModule.tsx para a referencia exata.
  */
 
 const TOTAL_PASSOS = 8;
@@ -165,27 +170,39 @@ export const EmpresaOnboardingFlow: React.FC = () => {
     : undefined;
 
   return (
-    <div className="min-h-screen bg-[#EDE7DC]">
-      {/* Cabecalho gradiente — mesmo padrao do topo do Dashboard */}
+    <div
+      className="overflow-hidden shadow-card"
+      style={{
+        boxShadow: '0 30px 70px rgba(58,35,80,.26)',
+        background: '#F6F2F5',
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        marginBottom: '-100px',
+        paddingBottom: '100px',
+      }}
+    >
+      {/* Cabecalho gradiente — SEM nenhum border-radius proprio (ver comentario
+          do topo do arquivo: e o conteudo por cima que recorta a curva). */}
       <div
-        className="text-white relative overflow-hidden"
+        className="text-white relative"
         style={{
           background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
           padding: '20px',
           paddingTop: 'calc(20px + env(safe-area-inset-top, 0px))',
-          paddingBottom: '28px',
-          boxShadow: '0 30px 70px rgba(58,35,80,0.26)',
-          borderRadius: '0px 0px 32px 32px',
+          paddingBottom: '120px',
         }}
       >
         <div className="flex justify-center mb-3">
-          <CarulaLogo />
+          <span className="font-serif-display text-white" style={{ fontSize: '22px', letterSpacing: '0.06em' }}>
+            CARULA
+          </span>
         </div>
         <div className="font-serif-display text-[26px] text-white text-center leading-[1.2]">
           Vamos montar sua estrutura financeira
         </div>
         <p className="text-center text-[12px] text-white/75 mt-1" style={{ fontFamily: "'Manrope', sans-serif" }}>
-          Isso ajuda a saber quanto você precisa faturar — não só o que cobrar por bolo
+          Isso ajuda a saber quanto você precisa faturar — não só o que cobrar por bolo.
         </p>
 
         {/* Indicador de progresso */}
@@ -196,6 +213,12 @@ export const EmpresaOnboardingFlow: React.FC = () => {
               style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}
             >
               Passo {passo} de {TOTAL_PASSOS}
+            </span>
+            <span
+              className="text-[10px] text-white/75"
+              style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}
+            >
+              {Math.round((passo / TOTAL_PASSOS) * 100)}%
             </span>
           </div>
           <div className="h-1.5 rounded-full bg-white/20 overflow-hidden">
@@ -210,12 +233,31 @@ export const EmpresaOnboardingFlow: React.FC = () => {
         </div>
       </div>
 
-      {/* Card de conteudo do passo */}
-      <div className="max-w-sm mx-auto px-4 -mt-4 relative z-10 pb-10">
+      {/* Conteudo full-bleed — mesma tecnica de FichasTecnicasModule.tsx:
+          marginTop negativo maior que qualquer radius envolvido, radius so
+          nos cantos superiores, escapando o max-width do pai via margin
+          left/right calc(-50vw + 50%) e devolvendo o respiro com padding. */}
+      <div
+        className="flex flex-col gap-4"
+        style={{
+          marginTop: '-70px',
+          background: '#FFFFFF',
+          borderRadius: '28px 28px 0 0',
+          position: 'relative',
+          padding: '20px',
+          marginLeft: 'calc(-50vw + 50%)',
+          marginRight: 'calc(-50vw + 50%)',
+          paddingLeft: 'calc(20px + max(0px, env(safe-area-inset-left)))',
+          paddingRight: 'calc(20px + max(0px, env(safe-area-inset-right)))',
+        }}
+      >
+        <div className="max-w-sm mx-auto w-full flex flex-col gap-4">
         <div
-          className="bg-[#F6F2F5] rounded-2xl p-5"
-          style={{ boxShadow: '0 8px 20px rgba(58,35,80,0.09)' }}
+          className="bg-white overflow-hidden"
+          style={{ borderRadius: '28px', border: '1px solid rgba(58,35,80,0.08)', boxShadow: '0 8px 20px rgba(58,35,80,0.09)' }}
         >
+          <div style={{ height: '4px', background: '#A85E86' }} />
+          <div className="p-5">
           {erro && (
             <div className="mb-3 p-2.5 rounded-xl bg-[#FDF4F5] border border-[rgba(196,98,111,.35)] text-[12px] text-[#C4626F]" style={{ fontFamily: "'Manrope', sans-serif" }}>
               {erro}
@@ -226,13 +268,27 @@ export const EmpresaOnboardingFlow: React.FC = () => {
             <div className="space-y-3">
               <h2 className={labelClass} style={{ color: '#241B2B' }}>Quanto você quer receber por mês pelo seu trabalho?</h2>
               <CampoComAjuda microcopy="É quanto você quer receber pelo seu trabalho — nunca o lucro da empresa. São coisas diferentes." />
-              <input
-                type="number"
-                className={inputClass}
-                value={monthlyIncomeTarget || ''}
-                onChange={(e) => setMonthlyIncomeTarget(Number(e.target.value))}
-                placeholder="0"
-              />
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
+                  Pró-labore mensal
+                </label>
+                <div className="flex items-stretch overflow-hidden" style={{ borderRadius: '8px', border: '1px solid rgba(58,35,80,0.14)', background: '#FFFFFF' }}>
+                  <span
+                    className="flex items-center px-3 flex-shrink-0"
+                    style={{ background: '#F3E9F3', fontSize: '14px', fontWeight: 600, color: '#3A2350', fontFamily: "'Manrope', sans-serif" }}
+                  >
+                    R$
+                  </span>
+                  <input
+                    type="number"
+                    value={monthlyIncomeTarget || ''}
+                    onChange={(e) => setMonthlyIncomeTarget(Number(e.target.value))}
+                    placeholder="0"
+                    className="flex-1 min-w-0 focus:outline-none"
+                    style={{ padding: '10px 12px', border: 'none', background: 'transparent', fontSize: '14px', color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}
+                  />
+                </div>
+              </div>
               <div className="pt-2">
                 <button className={botaoPrimario} style={{ background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)', boxShadow: '0 10px 24px rgba(58,35,80,.35)' }} onClick={() => avancar({ monthlyIncomeTarget })} disabled={salvando}>
                   Avançar
@@ -551,6 +607,22 @@ export const EmpresaOnboardingFlow: React.FC = () => {
               </div>
             </div>
           )}
+          </div>
+        </div>
+
+        {passo === 1 && (
+          <div className="p-3.5 rounded-xl flex items-start gap-2.5" style={{ background: '#F3E9F3' }}>
+            <span
+              className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
+              style={{ background: '#3A2350', color: '#FFFFFF', fontSize: '12px', fontWeight: 700 }}
+            >
+              ?
+            </span>
+            <p className="text-[12.5px] leading-relaxed m-0" style={{ color: '#6E3F72', fontFamily: "'Manrope', sans-serif" }}>
+              Sem ideia do valor? Pense no que você precisa receber para viver tranquila — dá pra ajustar depois.
+            </p>
+          </div>
+        )}
         </div>
       </div>
     </div>
