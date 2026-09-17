@@ -55,7 +55,7 @@ const botaoSecundario =
 export const EmpresaOnboardingFlow: React.FC = () => {
   const { administrativeCosts, salvarPassoOnboarding, salvarDespesas, concluirOnboarding } = useCosts();
   const { fichas } = useFichasTecnicas();
-  const { formatCurrency } = useCurrency();
+  const { formatCurrency, symbol } = useCurrency();
 
   const [passo, setPasso] = useState(1);
   const [carregouInicial, setCarregouInicial] = useState(false);
@@ -277,7 +277,7 @@ export const EmpresaOnboardingFlow: React.FC = () => {
                     className="flex items-center px-3 flex-shrink-0"
                     style={{ background: '#F3E9F3', fontSize: '14px', fontWeight: 600, color: '#3A2350', fontFamily: "'Manrope', sans-serif" }}
                   >
-                    R$
+                    {symbol}
                   </span>
                   <input
                     type="number"
@@ -421,7 +421,7 @@ export const EmpresaOnboardingFlow: React.FC = () => {
                       <div className="flex gap-2 items-end">
                         <div className="flex-1 min-w-0">
                           <label className="text-[9px] font-bold block mb-1" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
-                            Valor (R$)
+                            Valor ({symbol})
                           </label>
                           <input
                             type="number"
