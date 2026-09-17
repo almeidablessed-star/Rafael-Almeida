@@ -250,16 +250,23 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
           className="px-5 flex flex-col gap-2"
           style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)', paddingTop: '24px', paddingBottom: '90px' }}
         >
+          {/* `visibility: hidden` (nao renderizacao condicional) para o badge
+              sempre ocupar o mesmo espaco no cabecalho: escondendo o elemento
+              via `&&` em vez disso, o container encolhia sem o badge (Todos/
+              Compras) e crescia com ele (Estoque com item critico), num
+              "pulo" perceptivel de layout ao trocar de aba. */}
           <div className="flex items-center justify-end gap-2.5">
-            {aba === 'estoque' && lowStockCount > 0 && (
-              <span
-                className="inline-flex items-center gap-1 text-[9px] font-extrabold uppercase px-2.5 py-1 rounded-full whitespace-nowrap shrink-0"
-                style={{ background: '#C4626F', color: '#FFF8F6' }}
-              >
-                <AlertTriangle className="w-2.5 h-2.5" style={{ strokeWidth: 2.5 }} />
-                {lowStockCount} {lowStockCount === 1 ? 'Estoque Baixo' : 'Estoques Baixos'}
-              </span>
-            )}
+            <span
+              className="inline-flex items-center gap-1 text-[9px] font-extrabold uppercase px-2.5 py-1 rounded-full whitespace-nowrap shrink-0"
+              style={{
+                background: '#C4626F',
+                color: '#FFF8F6',
+                visibility: aba === 'estoque' && lowStockCount > 0 ? 'visible' : 'hidden',
+              }}
+            >
+              <AlertTriangle className="w-2.5 h-2.5" style={{ strokeWidth: 2.5 }} />
+              {lowStockCount || 0} {lowStockCount === 1 ? 'Estoque Baixo' : 'Estoques Baixos'}
+            </span>
           </div>
           <span className="text-white leading-tight" style={{ fontFamily: "'Instrument Serif', serif", fontSize: '29px', lineHeight: '1.1' }}>
             Produtos
