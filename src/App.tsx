@@ -108,9 +108,10 @@ function AppContent() {
   const [tabAntesDoTour, setTabAntesDoTour] = useState<TabType | null>(null);
   // Pedido de uma via pro ProdutosModule abrir ja no filtro Compras (tour
   // guiado ou checklist de primeiros passos) — ver `abaInicial` em
-  // ProdutosModule.tsx. Limpo assim que consumido, ou defensivamente ao
-  // fechar o tour, senao uma visita manual futura a Produtos ficaria
-  // "grudada" em Compras.
+  // ProdutosModule.tsx. So e limpo quando a tela de Produtos efetivamente
+  // consome o pedido (`onAbaInicialConsumida`) — nunca por outro passo do
+  // tour nem ao fechar o tour, senao a intencao do Passo 1 se perde antes de
+  // a pessoa chegar em Produtos pelo checklist.
   const [produtosAbaSolicitada, setProdutosAbaSolicitada] = useState<'compras' | undefined>(undefined);
 
   // Undo state
@@ -161,7 +162,12 @@ function AppContent() {
       setActiveTab(tabAntesDoTour);
       setTabAntesDoTour(null);
     }
-    setProdutosAbaSolicitada(undefined);
+    // Nao mexer em produtosAbaSolicitada aqui: ele so deve ser limpo quando a
+    // pessoa efetivamente chegar em Produtos e a tela consumir o pedido (ver
+    // onAbaInicialConsumida). Um reset aqui apagava a intencao "abrir em
+    // Compras" guardada no Passo 1 antes dela ser usada — por exemplo quando
+    // a pessoa termina o tour (que acaba no Passo 4/Inicio) e so depois vai
+    // pra Produtos pelo checklist.
     marcarTourVisto().catch((err) => {
       console.error('Erro ao marcar tour como visto:', err);
     });

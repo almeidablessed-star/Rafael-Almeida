@@ -51,3 +51,12 @@ hoje — é código morto. A tela de Compras que a usuária realmente usa é o
   rota `activeTab === 'reposicao'` em `App.tsx` devem ser removidos de vez
   (código morto, sem navegação que os alcance) — fora do escopo deste
   registro, só deixando anotado.
+
+## Achado adicional (2026-09-17): símbolo de moeda hardcoded
+
+O label "Valor Gasto (R$)" (`BalancesAndExpensesModule.tsx:368`) tem o `R$`
+fixo no texto, em vez de vir do `CurrencyContext` (`useCurrency().symbol`) —
+mesma classe de bug já corrigida no onboarding financeiro (Passo 1 e Passo 4
+de `EmpresaOnboardingFlow.tsx`, commit `e48aa24`). Como este arquivo já tem
+redesign visual pendente acima, faz sentido resolver os dois juntos quando
+essa pendência for endereçada, em vez de mexer no arquivo duas vezes.
