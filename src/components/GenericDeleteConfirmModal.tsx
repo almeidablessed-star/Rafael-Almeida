@@ -3,7 +3,7 @@ import { AlertTriangle, Trash2 } from 'lucide-react';
 
 interface GenericDeleteConfirmModalProps {
   isOpen: boolean;
-  itemType: 'transaction' | 'customer' | 'ficha';
+  itemType: 'transaction' | 'customer' | 'ficha' | 'produto';
   itemName?: string;
   itemDetails?: { label: string; value: string }[];
   onClose: () => void;
@@ -24,6 +24,7 @@ export const GenericDeleteConfirmModal: React.FC<GenericDeleteConfirmModalProps>
     transaction: 'Lançamento',
     customer: 'Cliente',
     ficha: 'Ficha Técnica',
+    produto: 'Produto',
   };
 
   return (

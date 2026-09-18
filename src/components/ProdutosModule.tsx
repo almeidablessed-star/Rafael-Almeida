@@ -4,6 +4,8 @@ import { useProdutos } from '../context/ProdutosContext';
 import { formatQuantity } from '../utils/formatters';
 import { StockMovementsHistory } from './StockMovementsHistory';
 import { BalancesAndExpensesModule } from './BalancesAndExpensesModule';
+import { GenericDeleteConfirmModal } from './GenericDeleteConfirmModal';
+import { useDelayedDelete } from '../hooks/useDelayedDelete';
 import {
   Package,
   Plus,
@@ -115,8 +117,30 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
   abaInicial,
   onAbaInicialConsumida,
 }) => {
-  const { produtos, addProduto, updateProduto, deleteProduto, custoPorUnidade } = useProdutos();
+  const { produtos: produtosDoContexto, addProduto, updateProduto, deleteProduto, custoPorUnidade } = useProdutos();
   const [aba, setAba] = useState<'todos' | 'estoque' | 'compras'>('todos');
+
+  const [deletingProduto, setDeletingProduto] = useState<Produto | null>(null);
+  const {
+    pending: pendingDeleteProduto,
+    requestDelete: requestDeleteProduto,
+    cancelDelete: cancelDeleteProduto,
+  } = useDelayedDelete<Produto>({
+    deleteFn: async (produto) => {
+      try {
+        await deleteProduto(produto.id);
+      } catch (err: any) {
+        alert(`⚠️ Não foi possível excluir o produto:\n\n${err?.message || err}`);
+      }
+    },
+  });
+
+  // Tira o produto pendente da lista na hora (mesmo padrao de
+  // `fichasVisiveis` em FichasTecnicasModule.tsx) — o DELETE real so vai pro
+  // banco 10s depois, ver useDelayedDelete.
+  const produtos = pendingDeleteProduto
+    ? produtosDoContexto.filter((p) => p.id !== pendingDeleteProduto.id)
+    : produtosDoContexto;
 
   useEffect(() => {
     if (abaInicial) {
@@ -209,14 +233,8 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (confirm('Deseja excluir este produto do catálogo?')) {
-      try {
-        await deleteProduto(id);
-      } catch (err) {
-        setFormError((err as any).message || 'Erro ao excluir produto');
-      }
-    }
+  const handleDelete = (produto: Produto) => {
+    setDeletingProduto(produto);
   };
 
   const handleQuickAdjustThreshold = async (p: Produto, delta: number) => {
@@ -649,7 +667,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                           <button onClick={() => handleOpenEdit(p)} className="hover:bg-[#EFE6F0] transition-colors" style={{ width: '28px', height: '28px', borderRadius: '9px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Edit3 className="w-3.5 h-3.5" style={{ color: '#7A6E80', strokeWidth: 2 }} />
                           </button>
-                          <button onClick={() => handleDelete(p.id)} className="hover:bg-[#FBE9EC] transition-colors" style={{ width: '28px', height: '28px', borderRadius: '9px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <button onClick={() => handleDelete(p)} className="hover:bg-[#FBE9EC] transition-colors" style={{ width: '28px', height: '28px', borderRadius: '9px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Trash2 className="w-3.5 h-3.5" style={{ color: '#C4626F', strokeWidth: 2 }} />
                           </button>
                         </div>
@@ -701,7 +719,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                     <button onClick={() => handleOpenEdit(p)} className="hover:bg-[#EFE6F0] transition-colors" style={{ width: '28px', height: '28px', borderRadius: '9px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <Edit3 className="w-3.5 h-3.5" style={{ color: '#7A6E80', strokeWidth: 2 }} />
                     </button>
-                    <button onClick={() => handleDelete(p.id)} className="hover:bg-[#FBE9EC] transition-colors" style={{ width: '28px', height: '28px', borderRadius: '9px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <button onClick={() => handleDelete(p)} className="hover:bg-[#FBE9EC] transition-colors" style={{ width: '28px', height: '28px', borderRadius: '9px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <Trash2 className="w-3.5 h-3.5" style={{ color: '#C4626F', strokeWidth: 2 }} />
                     </button>
                   </div>
@@ -713,6 +731,52 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
           )}
         </div>
       </div>
+
+      <GenericDeleteConfirmModal
+        isOpen={!!deletingProduto}
+        itemType="produto"
+        itemName={deletingProduto?.nome}
+        itemDetails={[
+          { label: '💰', value: `R$ ${deletingProduto?.precoPago.toFixed(2)}` },
+        ]}
+        onClose={() => setDeletingProduto(null)}
+        onConfirmDelete={() => {
+          if (deletingProduto) {
+            requestDeleteProduto(deletingProduto);
+            setDeletingProduto(null);
+          }
+        }}
+      />
+
+      {/* Toast de exclusao pendente: some enquanto os 10s de "Desfazer"
+          ainda estao correndo (ver `pendingDeleteProduto`). */}
+      {pendingDeleteProduto && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50">
+          <div
+            className="flex items-center gap-3.5 animate-fadeIn"
+            style={{ padding: '10px 12px 10px 18px', borderRadius: '999px', background: '#3A2350', boxShadow: '0 20px 36px rgba(58,35,80,0.26)' }}
+          >
+            <span className="flex items-center gap-2 text-sm font-bold text-white whitespace-nowrap">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#A9D8B8" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+              Produto deletado
+            </span>
+            <button
+              type="button"
+              onClick={cancelDeleteProduto}
+              className="flex items-center gap-1.5 text-xs font-bold transition-all active:scale-95"
+              style={{ padding: '8px 14px', borderRadius: '999px', border: 'none', background: '#F5B9C6', color: '#6E2231', cursor: 'pointer' }}
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M9 14 4 9l5-5" />
+                <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5 5.5 5.5 0 0 1-5.5 5.5H11" />
+              </svg>
+              Desfazer
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
