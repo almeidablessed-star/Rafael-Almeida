@@ -4,6 +4,10 @@ import { AlertTriangle, Trash2 } from 'lucide-react';
 interface GenericDeleteConfirmModalProps {
   isOpen: boolean;
   itemType: 'transaction' | 'customer' | 'ficha' | 'produto';
+  /** Sobrescreve o titulo padrao "Excluir {tipo}?" — usado por transacao, que
+   * distingue "Excluir Pedido?" de "Excluir Lançamento?" conforme o tipo
+   * (venda ou nao). */
+  titleOverride?: string;
   itemName?: string;
   itemDetails?: { label: string; value: string }[];
   onClose: () => void;
@@ -13,6 +17,7 @@ interface GenericDeleteConfirmModalProps {
 export const GenericDeleteConfirmModal: React.FC<GenericDeleteConfirmModalProps> = ({
   isOpen,
   itemType,
+  titleOverride,
   itemName,
   itemDetails = [],
   onClose,
@@ -48,7 +53,7 @@ export const GenericDeleteConfirmModal: React.FC<GenericDeleteConfirmModalProps>
               className="text-center"
               style={{ margin: 0, fontFamily: "'Instrument Serif', Georgia, serif", fontWeight: 400, fontSize: '27px', lineHeight: 1.15, color: '#3A2350' }}
             >
-              Excluir {typeLabels[itemType]}?
+              {titleOverride ?? `Excluir ${typeLabels[itemType]}?`}
             </h3>
 
             {itemName && (

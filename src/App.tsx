@@ -9,8 +9,8 @@ import {
   FichaTecnica,
 } from './types';
 import { filterTransactionsByPeriod, calculateSummary } from './utils/financialEngine';
-import { getTodayIso } from './utils/formatters';
-import { useUndo } from './hooks/useUndo';
+import { getTodayIso, formatCurrency, formatDateBr } from './utils/formatters';
+import { useDelayedDelete } from './hooks/useDelayedDelete';
 import { useFichasTecnicas } from './context/FichasTecnicasContext';
 import { useProdutos } from './context/ProdutosContext';
 import { useTransacoes } from './context/TransacoesContext';
@@ -45,7 +45,7 @@ import { ProdutosModule } from './components/ProdutosModule';
 import { FichasTecnicasModule } from './components/FichasTecnicasModule';
 import { CustomersModule } from './components/CustomersModule';
 import { TransactionFormModal } from './components/TransactionFormModal';
-import { DeleteConfirmModal } from './components/DeleteConfirmModal';
+import { GenericDeleteConfirmModal } from './components/GenericDeleteConfirmModal';
 import { PwaInstallModal } from './components/PwaInstallModal';
 import { GlossaryModal } from './components/GlossaryModal';
 import { BackupModal } from './components/BackupModal';
@@ -114,9 +114,43 @@ function AppContent() {
   // a pessoa chegar em Produtos pelo checklist.
   const [produtosAbaSolicitada, setProdutosAbaSolicitada] = useState<'compras' | undefined>(undefined);
 
-  // Undo state
-  const { saveForUndo, getUndoData, hasUndo } = useUndo();
-  const [showUndoToast, setShowUndoToast] = useState(false);
+  // Exclusao de transacao (pedido/compra/despesa) com delay real de 10s —
+  // ver useDelayedDelete. "Desfazer" cancela o timeout sem nunca ter tocado
+  // o banco, entao nao precisa recriar a transacao nem reconsumir estoque:
+  // se for venda, so devolve o estoque quando o delete de fato acontecer.
+  const {
+    pending: pendingDeleteTransacao,
+    requestDelete: requestDeleteTransacao,
+    cancelDelete: cancelDeleteTransacao,
+  } = useDelayedDelete<Transaction>({
+    deleteFn: async (tx) => {
+      // A DEVOLUCAO VEM ANTES DA EXCLUSAO, e a ordem importa.
+      //
+      // `estoque_movimentos.transacao_id` e chave estrangeira com ON DELETE
+      // SET NULL. Apagar a transacao primeiro zera esse vinculo, e o
+      // estorno — que procura os movimentos justamente por ele — nao
+      // acharia mais nada para devolver. Os insumos ficariam baixados para
+      // sempre, em silencio.
+      if (tx.type === 'venda') {
+        try {
+          await devolverPedido(tx.id);
+        } catch (err: any) {
+          alert(
+            `⚠️ Os insumos não voltaram ao estoque:\n\n${err?.message || err}\n\n` +
+              `O pedido NÃO foi excluído, para o estorno poder ser refeito. ` +
+              `Confira a aba Produtos e tente de novo.`
+          );
+          return;
+        }
+      }
+
+      try {
+        await deleteTransacao(tx.id);
+      } catch (err: any) {
+        alert(`⚠️ Não foi possível excluir o pedido:\n\n${err?.message || err}`);
+      }
+    },
+  });
 
   // As transacoes chegam do TransacoesProvider, que busca ao logar. Nao ha mais
   // carga na montagem nem estado local: o provider e a fonte.
@@ -178,9 +212,19 @@ function AppContent() {
     setProdutosAbaSolicitada('compras');
   };
 
+  // Tira a transacao pendente de exclusao de toda tela/total na hora (mesmo
+  // padrao de `fichasVisiveis`/`produtos` em FichasTecnicasModule.tsx e
+  // ProdutosModule.tsx) — o DELETE real so vai pro banco 10s depois, ver
+  // useDelayedDelete. Filtrado aqui na fonte, e nao em cada modulo filho,
+  // para os totais (Dashboard, Custos, Compras) tambem refletirem a
+  // ausencia na hora, nao so a lista visual de uma tela especifica.
+  const transacoesVisiveis = pendingDeleteTransacao
+    ? transactions.filter((t) => t.id !== pendingDeleteTransacao.id)
+    : transactions;
+
   // Filtered transactions & financial metrics
   const filteredTransactions = filterTransactionsByPeriod(
-    transactions,
+    transacoesVisiveis,
     period,
     customStartDate,
     customEndDate
@@ -362,69 +406,10 @@ function AppContent() {
     }
   };
 
-  const handleConfirmDelete = async (id: string) => {
-    // Save for undo before deleting
-    const toDelete = transactions.find(t => t.id === id);
-    if (toDelete) {
-      saveForUndo(toDelete);
-      setShowUndoToast(true);
-      // Auto-hide toast after 10 seconds
-      setTimeout(() => setShowUndoToast(false), 10000);
-    }
-
-    setDeletingTransaction(null);
-
-    // A DEVOLUCAO VEM ANTES DA EXCLUSAO, e a ordem importa.
-    //
-    // `estoque_movimentos.transacao_id` e chave estrangeira com ON DELETE SET
-    // NULL. Apagar a transacao primeiro zera esse vinculo, e o estorno — que
-    // procura os movimentos justamente por ele — nao acharia mais nada para
-    // devolver. Os insumos ficariam baixados para sempre, em silencio.
-    if (toDelete?.type === 'venda') {
-      try {
-        await devolverPedido(id);
-      } catch (err: any) {
-        alert(
-          `⚠️ Os insumos não voltaram ao estoque:\n\n${err?.message || err}\n\n` +
-            `O pedido NÃO foi excluído, para o estorno poder ser refeito. ` +
-            `Confira a aba Produtos e tente de novo.`
-        );
-        return;
-      }
-    }
-
-    try {
-      await deleteTransacao(id);
-    } catch (err: any) {
-      alert(`⚠️ Não foi possível excluir o pedido:\n\n${err?.message || err}`);
-    }
-  };
-
-  const handleUndo = async () => {
-    const undoTx = getUndoData();
-    if (!undoTx) return;
-
-    // Recriada com id novo; a baixa e refeita sob esse id para o rastro no
-    // estoque continuar apontando para o pedido que existe de fato.
-    let recriada: Transaction;
-    try {
-      recriada = await addTransacao(undoTx);
-    } catch (err: any) {
-      alert(`⚠️ Não foi possível restaurar o pedido:\n\n${err?.message || err}`);
-      return;
-    }
-
-    setShowUndoToast(false);
-
-    if (recriada.type === 'venda') {
-      try {
-        const itens = resolverItensDoPedido(recriada.fichaItems);
-        if (itens.length > 0) {
-          await consumirParaPedido(itens, recriada.id);
-        }
-      } catch (err: any) {
-        alert(`⚠️ Pedido restaurado, mas a baixa de estoque falhou:\n\n${err?.message || err}`);
-      }
+  const handleConfirmDelete = () => {
+    if (deletingTransaction) {
+      requestDeleteTransacao(deletingTransaction);
+      setDeletingTransaction(null);
     }
   };
 
@@ -477,7 +462,7 @@ function AppContent() {
             summary={summary}
             period={period}
             recentTransactions={filteredTransactions}
-            allTransactions={transactions}
+            allTransactions={transacoesVisiveis}
             onOpenAddModal={handleOpenAddModal}
             onOpenAddModalWithDate={(date) => {
               setPrefilledDate(date);
@@ -503,7 +488,7 @@ function AppContent() {
 
         {activeTab === 'pedidos' && (
           <OrdersModule
-            transactions={transactions}
+            transactions={transacoesVisiveis}
             onOpenAddModal={(type) => handleOpenAddModal(type || 'venda')}
             onEditTransaction={handleOpenEditModal}
             onDeleteTransaction={handleRequestDelete}
@@ -513,7 +498,7 @@ function AppContent() {
 
         {activeTab === 'semana' && (
           <WeeklyClosingModule
-            transactions={transactions}
+            transactions={transacoesVisiveis}
             onOpenAddModal={() => handleOpenAddModal('venda')}
             onEditTransaction={handleOpenEditModal}
             onDeleteTransaction={handleRequestDelete}
@@ -523,7 +508,7 @@ function AppContent() {
 
         {activeTab === 'produtos' && (
           <ProdutosModule
-            transactions={transactions}
+            transactions={transacoesVisiveis}
             onAddTransaction={handleAddCompra}
             onEditTransaction={handleOpenEditModal}
             onDeleteTransaction={handleRequestDelete}
@@ -612,10 +597,18 @@ function AppContent() {
         }}
       />
 
-      {/* Custom Delete Confirmation Modal */}
-      <DeleteConfirmModal
+      {/* Delete Confirmation Modal */}
+      <GenericDeleteConfirmModal
         isOpen={!!deletingTransaction}
-        transaction={deletingTransaction}
+        itemType="transaction"
+        titleOverride={deletingTransaction?.type === 'venda' ? 'Excluir Pedido?' : 'Excluir Lançamento?'}
+        itemDetails={[
+          ...(deletingTransaction?.type === 'venda' && deletingTransaction?.customerName
+            ? [{ label: '👤', value: deletingTransaction.customerName.toUpperCase() }]
+            : []),
+          { label: '💰', value: formatCurrency(deletingTransaction?.totalValue || 0) },
+          { label: '📅', value: deletingTransaction ? formatDateBr(deletingTransaction.date) : '' },
+        ]}
         onClose={() => setDeletingTransaction(null)}
         onConfirmDelete={handleConfirmDelete}
       />
@@ -668,17 +661,33 @@ function AppContent() {
         />
       )}
 
-      {/* Undo Toast */}
-      {showUndoToast && (
-        <div className="fixed bottom-24 left-1/2 transform -translate-x-1/2 rounded-2xl p-4 z-40 flex items-center gap-3 shadow-lg" style={{ background: 'linear-gradient(135deg, #6E3F72 0%, #3A2350 100%)', animation: 'fadeIn 0.3s ease-out', fontFamily: "'Manrope', sans-serif" }}>
-          <span className="text-sm font-bold text-white">✓ Pedido deletado</span>
-          <button
-            onClick={handleUndo}
-            className="px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-95 hover:shadow-md"
-            style={{ background: '#F5B9C6', color: '#3A2350', fontFamily: "'Manrope', sans-serif" }}
+      {/* Toast de exclusao pendente: some enquanto os 10s de "Desfazer" ainda
+          estao correndo (ver `pendingDeleteTransacao`). */}
+      {pendingDeleteTransacao && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50">
+          <div
+            className="flex items-center gap-3.5 animate-fadeIn"
+            style={{ padding: '10px 12px 10px 18px', borderRadius: '999px', background: '#3A2350', boxShadow: '0 20px 36px rgba(58,35,80,0.26)' }}
           >
-            ↩️ Desfazer
-          </button>
+            <span className="flex items-center gap-2 text-sm font-bold text-white whitespace-nowrap">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#A9D8B8" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+              {pendingDeleteTransacao.type === 'venda' ? 'Pedido deletado' : 'Lançamento deletado'}
+            </span>
+            <button
+              type="button"
+              onClick={cancelDeleteTransacao}
+              className="flex items-center gap-1.5 text-xs font-bold transition-all active:scale-95"
+              style={{ padding: '8px 14px', borderRadius: '999px', border: 'none', background: '#F5B9C6', color: '#6E2231', cursor: 'pointer' }}
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M9 14 4 9l5-5" />
+                <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5 5.5 5.5 0 0 1-5.5 5.5H11" />
+              </svg>
+              Desfazer
+            </button>
+          </div>
         </div>
       )}
 
