@@ -76,22 +76,25 @@ export const PrimeirosPassosChecklist: React.FC<PrimeirosPassosChecklistProps> =
 
       <div className="px-4 pb-4 flex flex-col">
         {itens.map((item) => (
-          <div key={item.label} className="flex items-center gap-3 py-3">
+          <div
+            key={item.label}
+            className="flex items-center gap-3 py-3 px-2.5 rounded-xl"
+            style={{ background: item.completo ? '#F2FAF5' : 'transparent' }}
+          >
             <div
               className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
               style={{
-                background: item.completo ? '#EEF8F1' : '#F1EBF2',
+                background: item.completo ? '#2E7D51' : '#F1EBF2',
                 border: item.completo ? 'none' : '1px solid #D9CCDB',
               }}
             >
-              {item.completo && <Check className="w-4 h-4" style={{ color: '#2E7D51' }} strokeWidth={3} />}
+              {item.completo && <Check className="w-4 h-4" style={{ color: '#FFFFFF' }} strokeWidth={3} />}
             </div>
 
             <span
               className="flex-1 text-[13px] font-bold"
               style={{
-                color: item.completo ? '#9A8FA0' : '#241B2B',
-                textDecoration: item.completo ? 'line-through' : 'none',
+                color: item.completo ? '#7A6E80' : '#241B2B',
                 fontFamily: "'Manrope', sans-serif",
               }}
             >
