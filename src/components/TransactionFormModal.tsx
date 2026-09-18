@@ -11,13 +11,14 @@ import {
   FichaTecnica,
 } from '../types';
 import { useCustomers } from '../context/CustomersContext';
+import { useCurrency } from '../context/CurrencyContext';
 import { QuotePdfModal } from './QuotePdfModal';
 import {
   INGREDIENT_PRESETS,
   LABOR_PRESETS,
   COST_PRESETS,
 } from '../data/presetData';
-import { getTodayIso, formatCurrency, getTransactionTypeDetails } from '../utils/formatters';
+import { getTodayIso, getTransactionTypeDetails } from '../utils/formatters';
 import { buildFichaItems, normalizeName } from '../utils/fichaMatcher';
 import { calculateProportionalBreakdown, derivarProporcoes, parseSaleDetail } from '../utils/financialEngine';
 import {
@@ -119,6 +120,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   // Clientes vem do Supabase (tabela `clientes`), a mesma fonte que a aba
   // Clientes grava via useCustomers.
   const { customers: storedCustomers, fetchCustomerPhoto } = useCustomers();
+  const { formatCurrency: formatMoney, symbol: currencySymbol } = useCurrency();
 
   const [type, setType] = useState<TransactionType>(initialType);
   const [isSaving, setIsSaving] = useState(false);
@@ -792,21 +794,21 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       }
 
       // Build Order Notes for automatic calculation parsing
-      let notesStr = `Breakdown: Reposição ${formatCurrency(
+      let notesStr = `Breakdown: Reposição ${formatMoney(
         totalItemsReposicao
-      )}, Mão de Obra ${formatCurrency(totalItemsMaodeobra)}, Custos ${formatCurrency(
+      )}, Mão de Obra ${formatMoney(totalItemsMaodeobra)}, Custos ${formatMoney(
         totalItemsCusto
-      )}, Investimento ${formatCurrency(totalItemsInvestimento)}.`;
+      )}, Investimento ${formatMoney(totalItemsInvestimento)}.`;
 
       if (hasDelivery && deliveryFee > 0) {
-        notesStr += ` Taxa de Entrega: ${formatCurrency(deliveryFee)}.`;
+        notesStr += ` Taxa de Entrega: ${formatMoney(deliveryFee)}.`;
       }
 
       if (validAddons.length > 0) {
         const details = validAddons
           .map(
             (a) =>
-              `${a.description.trim() || 'Adicional'}: ${formatCurrency(
+              `${a.description.trim() || 'Adicional'}: ${formatMoney(
                 parseFloat(a.value.replace(',', '.')) || 0
               )}`
           )
@@ -1260,7 +1262,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                           </div>
                           <div>
                             <label style={{ fontSize: '11px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '4px' }}>
-                              Preço de venda ($)
+                              Preço de venda ({currencySymbol})
                             </label>
                             <input
                               type="text"
@@ -1294,7 +1296,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                                   color: item.selectedTamanhoId === opt.id ? '#fff' : '#3A2350',
                                 }}
                               >
-                                {opt.label} ({formatCurrency(opt.venda)})
+                                {opt.label} ({formatMoney(opt.venda)})
                               </button>
                             ))}
                           </div>
@@ -1324,26 +1326,26 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                         </div>
                         <div style={{ textAlign: 'right' }}>
                           <span style={{ fontSize: '11px', color: '#7A6E80', display: 'block' }}>Subtotal do item</span>
-                          <span style={{ fontSize: '18px', fontWeight: 700, color: '#3A2350' }}>{formatCurrency(bd.totalVenda)}</span>
+                          <span style={{ fontSize: '18px', fontWeight: 700, color: '#3A2350' }}>{formatMoney(bd.totalVenda)}</span>
                         </div>
                       </div>
 
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: '8px' }}>
                         <div style={{ background: '#F6F2F5', borderRadius: '10px', padding: '9px 11px' }}>
                           <span style={{ fontSize: '11px', color: '#7A6E80', display: 'block' }}>Reposição</span>
-                          <span style={{ fontSize: '13px', fontWeight: 700 }}>{formatCurrency(bd.totalReposicao)}</span>
+                          <span style={{ fontSize: '13px', fontWeight: 700 }}>{formatMoney(bd.totalReposicao)}</span>
                         </div>
                         <div style={{ background: '#F6F2F5', borderRadius: '10px', padding: '9px 11px' }}>
                           <span style={{ fontSize: '11px', color: '#7A6E80', display: 'block' }}>Mão de obra</span>
-                          <span style={{ fontSize: '13px', fontWeight: 700, color: '#7E4F9E' }}>{formatCurrency(bd.totalMaodeobra)}</span>
+                          <span style={{ fontSize: '13px', fontWeight: 700, color: '#7E4F9E' }}>{formatMoney(bd.totalMaodeobra)}</span>
                         </div>
                         <div style={{ background: '#F6F2F5', borderRadius: '10px', padding: '9px 11px' }}>
                           <span style={{ fontSize: '11px', color: '#7A6E80', display: 'block' }}>Custo</span>
-                          <span style={{ fontSize: '13px', fontWeight: 700 }}>{formatCurrency(bd.totalCusto)}</span>
+                          <span style={{ fontSize: '13px', fontWeight: 700 }}>{formatMoney(bd.totalCusto)}</span>
                         </div>
                         <div style={{ background: '#F6F2F5', borderRadius: '10px', padding: '9px 11px' }}>
                           <span style={{ fontSize: '11px', color: '#7A6E80', display: 'block' }}>Investimento</span>
-                          <span style={{ fontSize: '13px', fontWeight: 700 }}>{formatCurrency(bd.totalInvestimento)}</span>
+                          <span style={{ fontSize: '13px', fontWeight: 700 }}>{formatMoney(bd.totalInvestimento)}</span>
                         </div>
                       </div>
 
@@ -1387,9 +1389,9 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
 
                   {hasDelivery && (
                     <div style={{ padding: '13px 0', borderBottom: '1px solid rgba(58,35,80,0.07)' }}>
-                      <label style={{ fontSize: '11px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '4px' }}>Taxa de entrega (R$)</label>
+                      <label style={{ fontSize: '11px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '4px' }}>Taxa de entrega ({currencySymbol})</label>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[13px] text-[#7A6E80] font-bold">R$</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[13px] text-[#7A6E80] font-bold">{currencySymbol}</span>
                         <input
                           type="text"
                           inputMode="decimal"
@@ -1446,7 +1448,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                               />
                             </div>
                             <div>
-                              <label style={{ fontSize: '10px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '3px' }}>Valor ($)</label>
+                              <label style={{ fontSize: '10px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '3px' }}>Valor ({currencySymbol})</label>
                               <input
                                 type="number"
                                 min="0"
@@ -1555,10 +1557,10 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                   <div>
                     <label style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
                       <span>Valor do sinal / entrada</span>
-                      <span style={{ fontSize: '11px', fontWeight: 500, color: '#A096A6' }}>{totalValue ? `Máx: $${totalValue}` : '-'}</span>
+                      <span style={{ fontSize: '11px', fontWeight: 500, color: '#A096A6' }}>{totalValue ? `Máx: ${currencySymbol}${totalValue}` : '-'}</span>
                     </label>
                     <div className="relative">
-                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-bold text-emerald-600 text-lg">$</span>
+                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-bold text-emerald-600 text-lg">{currencySymbol}</span>
                       <input
                         type="text"
                         inputMode="decimal"
@@ -1589,31 +1591,31 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                         Total do pedido
                       </span>
                       <span style={{ fontFamily: "'Instrument Serif', serif", fontSize: '32px', lineHeight: 1, color: '#fff' }}>
-                        {formatCurrency(grandTotalSalePrice)}
+                        {formatMoney(grandTotalSalePrice)}
                       </span>
                     </div>
                     <div style={{ textAlign: 'right', fontSize: '12px', color: 'rgba(255,255,255,0.7)' }}>
                       <div>{orderItems.length} {orderItems.length === 1 ? 'item' : 'itens'} no pedido</div>
-                      {hasDelivery && deliveryFee > 0 && <div>+ Entrega: {formatCurrency(deliveryFee)}</div>}
-                      {totalAddonsValue > 0 && <div>+ Adic.: {formatCurrency(totalAddonsValue)}</div>}
+                      {hasDelivery && deliveryFee > 0 && <div>+ Entrega: {formatMoney(deliveryFee)}</div>}
+                      {totalAddonsValue > 0 && <div>+ Adic.: {formatMoney(totalAddonsValue)}</div>}
                     </div>
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: '8px' }}>
                     <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '10px', padding: '9px 11px' }}>
                       <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', display: 'block' }}>Reposição</span>
-                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>{formatCurrency(totalItemsReposicao)}</span>
+                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>{formatMoney(totalItemsReposicao)}</span>
                     </div>
                     <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '10px', padding: '9px 11px' }}>
                       <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', display: 'block' }}>Mão de obra</span>
-                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>{formatCurrency(totalItemsMaodeobra)}</span>
+                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>{formatMoney(totalItemsMaodeobra)}</span>
                     </div>
                     <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '10px', padding: '9px 11px' }}>
                       <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', display: 'block' }}>Custos</span>
-                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>{formatCurrency(totalItemsCusto)}</span>
+                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>{formatMoney(totalItemsCusto)}</span>
                     </div>
                     <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '10px', padding: '9px 11px' }}>
                       <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', display: 'block' }}>Investimento</span>
-                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>{formatCurrency(totalItemsInvestimento)}</span>
+                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>{formatMoney(totalItemsInvestimento)}</span>
                     </div>
                   </div>
                 </div>
@@ -1706,7 +1708,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
 
                 <div>
                   <label className="block text-xs font-bold mb-1" style={{ color: '#3A2350' }}>
-                    Valor Unitário ($)
+                    Valor Unitário ({currencySymbol})
                   </label>
                   <input
                     type="text"
@@ -1724,12 +1726,12 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
               <div>
                 <div className="flex items-baseline justify-between mb-1">
                   <label className="text-xs font-bold" style={{ color: '#3A2350' }}>
-                    Valor Total ($) <span style={{ color: '#C4626F' }}>*</span>
+                    Valor Total ({currencySymbol}) <span style={{ color: '#C4626F' }}>*</span>
                   </label>
                   <span className="text-[11px] font-medium" style={{ color: '#6E3F72' }}>Auto-calculado</span>
                 </div>
                 <div className="flex items-center gap-2.5" style={{ padding: '14px 16px', borderRadius: '12px', background: '#F3E9F3' }}>
-                  <span className="font-serif-display" style={{ fontSize: '18px', fontWeight: 700, color: '#6E3F72' }}>$</span>
+                  <span className="font-serif-display" style={{ fontSize: '18px', fontWeight: 700, color: '#6E3F72' }}>{currencySymbol}</span>
                   <input
                     type="text"
                     inputMode="decimal"
@@ -1919,7 +1921,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                 {/* Unit Value */}
                 <div>
                   <label className="block text-xs font-bold text-neutral-700 mb-1">
-                    Valor Unitário ($)
+                    Valor Unitário ({currencySymbol})
                   </label>
                   <input
                     type="text"
@@ -1935,12 +1937,12 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
               {/* Total Value */}
               <div>
                 <label className="block text-xs font-bold text-neutral-800 mb-1 flex items-center justify-between">
-                  <span>Valor Total ($) *</span>
+                  <span>Valor Total ({currencySymbol}) *</span>
                   <span className="text-[11px] font-medium text-neutral-500">Auto-calculado</span>
                 </label>
                 <div className="relative">
                   <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-bold text-pink-600 text-lg">
-                    $
+                    {currencySymbol}
                   </span>
                   <input
                     type="text"
