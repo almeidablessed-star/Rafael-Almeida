@@ -4,7 +4,7 @@ import { Customer, CustomerEvent } from '../types';
 import { formatDateBr, formatDayMonthOnly } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
 import { useCustomers } from '../context/CustomersContext';
-import { useUndo } from '../hooks/useUndo';
+import { useDelayedDelete } from '../hooks/useDelayedDelete';
 import { compressImageFile } from '../utils/imageCompression';
 import { GenericDeleteConfirmModal } from './GenericDeleteConfirmModal';
 import {
@@ -200,13 +200,31 @@ const DEFAULT_CUSTOMERS: Customer[] = [
 
 
 export const CustomersModule: React.FC = () => {
-  const { customers, isLoading: isLoadingCustomers, error: customersError, addCustomer, updateCustomer, deleteCustomer, restoreCustomer, fetchCustomerPhoto } = useCustomers();
-  const { saveForUndo, getUndoData } = useUndo();
+  const { customers: customersDoContexto, isLoading: isLoadingCustomers, error: customersError, addCustomer, updateCustomer, deleteCustomer, fetchCustomerPhoto } = useCustomers();
   const [searchTerm, setSearchTerm] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deletingCustomer, setDeletingCustomer] = useState<Customer | null>(null);
-  const [showUndoToast, setShowUndoToast] = useState(false);
+  const {
+    pending: pendingDeleteCustomer,
+    requestDelete: requestDeleteCustomer,
+    cancelDelete: cancelDeleteCustomer,
+  } = useDelayedDelete<Customer>({
+    deleteFn: async (customer) => {
+      try {
+        await deleteCustomer(customer.id);
+      } catch (err: any) {
+        setFormError(err.message || 'Erro ao deletar cliente');
+      }
+    },
+  });
+
+  // Tira o cliente pendente da lista na hora (mesmo padrao de
+  // `fichasVisiveis`/`produtos`/`transacoesVisiveis`) — o DELETE real so vai
+  // pro banco 10s depois, ver useDelayedDelete.
+  const customers = pendingDeleteCustomer
+    ? customersDoContexto.filter((c) => c.id !== pendingDeleteCustomer.id)
+    : customersDoContexto;
 
   // Form states
   const [name, setName] = useState('');
@@ -323,29 +341,10 @@ export const CustomersModule: React.FC = () => {
     setDeletingCustomer(customer);
   };
 
-  const handleConfirmDelete = async (id: string) => {
-    const customerToDelete = customers.find(c => c.id === id);
-    if (!customerToDelete) return;
-
-    try {
-      saveForUndo({ type: 'customer', data: customerToDelete });
-      await deleteCustomer(id);
-      setShowUndoToast(true);
-      setTimeout(() => setShowUndoToast(false), 10000);
-    } catch (err: any) {
-      setFormError(err.message || 'Erro ao deletar cliente');
-    }
-  };
-
-  const handleUndo = async () => {
-    const undoData = getUndoData();
-    if (undoData && undoData.type === 'customer') {
-      try {
-        await restoreCustomer(undoData.data);
-        setShowUndoToast(false);
-      } catch (err: any) {
-        setFormError(err.message || 'Erro ao restaurar cliente');
-      }
+  const handleConfirmDelete = () => {
+    if (deletingCustomer) {
+      requestDeleteCustomer(deletingCustomer);
+      setDeletingCustomer(null);
     }
   };
 
@@ -1534,25 +1533,36 @@ export const CustomersModule: React.FC = () => {
           { label: '📱', value: deletingCustomer?.phone || 'N/A' },
         ]}
         onClose={() => setDeletingCustomer(null)}
-        onConfirmDelete={() => {
-          if (deletingCustomer) {
-            handleConfirmDelete(deletingCustomer.id);
-            setDeletingCustomer(null);
-          }
-        }}
+        onConfirmDelete={handleConfirmDelete}
       />
 
-      {/* Undo Toast */}
-      {showUndoToast && (
-        <div className="fixed bottom-24 left-1/2 transform -translate-x-1/2 rounded-2xl p-4 z-40 flex items-center gap-3 shadow-lg" style={{ background: 'linear-gradient(135deg, #6E3F72 0%, #3A2350 100%)' }}>
-          <span className="text-sm font-bold text-white">✓ Cliente deletado</span>
-          <button
-            onClick={handleUndo}
-            className="px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-95 hover:shadow-md"
-            style={{ background: '#F5B9C6', color: '#3A2350' }}
+      {/* Toast de exclusao pendente: some enquanto os 10s de "Desfazer" ainda
+          estao correndo (ver `pendingDeleteCustomer`). */}
+      {pendingDeleteCustomer && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50">
+          <div
+            className="flex items-center gap-3.5 animate-fadeIn"
+            style={{ padding: '10px 12px 10px 18px', borderRadius: '999px', background: '#3A2350', boxShadow: '0 20px 36px rgba(58,35,80,0.26)' }}
           >
-            ↩️ Desfazer
-          </button>
+            <span className="flex items-center gap-2 text-sm font-bold text-white whitespace-nowrap">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#A9D8B8" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+              Cliente deletado
+            </span>
+            <button
+              type="button"
+              onClick={cancelDeleteCustomer}
+              className="flex items-center gap-1.5 text-xs font-bold transition-all active:scale-95"
+              style={{ padding: '8px 14px', borderRadius: '999px', border: 'none', background: '#F5B9C6', color: '#6E2231', cursor: 'pointer' }}
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M9 14 4 9l5-5" />
+                <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5 5.5 5.5 0 0 1-5.5 5.5H11" />
+              </svg>
+              Desfazer
+            </button>
+          </div>
         </div>
       )}
     </div>
