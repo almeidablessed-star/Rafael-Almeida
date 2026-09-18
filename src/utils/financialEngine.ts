@@ -1,7 +1,20 @@
 import { Transaction, TimePeriod, SummaryTotals, FichaTecnica, DespesaEmpresa, AdministrativeCosts } from '../types';
 import { getTodayIso, formatDateBr } from './formatters';
-import { getCurrentWeekMonday, getCurrentWeekSunday, filterTransactionsByWeek } from './weeklyArchiveUtils';
+import { getCurrentWeekMonday, getCurrentWeekSunday } from './weeklyArchiveUtils';
 import { custoInsumosDoTamanho } from './fichaInsumos';
+
+/**
+ * Converte `createdAt` (timestamp em ms) para data local `YYYY-MM-DD`, no
+ * mesmo formato usado por `tx.date`/`startIso`/`endIso` — para comparar
+ * "quando o pedido foi lancado" com o range de uma semana.
+ */
+function createdAtToLocalIso(createdAt: number): string {
+  const d = new Date(createdAt);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 
 /**
  * Motor unico de calculo financeiro do Carula.
@@ -722,7 +735,16 @@ export interface SystemBalances {
 export function calculateWeeklyBalances(transactions: Transaction[], fichas: FichaTecnica[] = []): SystemBalances {
   const startDate = getCurrentWeekMonday();
   const endDate = getCurrentWeekSunday();
-  const weeklyTransactions = filterTransactionsByWeek(transactions, startDate, endDate);
+  // Filtra por data de LANCAMENTO (createdAt), nao pela data de entrega
+  // (tx.date) escolhida no pedido — o Dashboard mostra "como estou indo essa
+  // semana" em vendas fechadas, nao um calendario de entregas futuras. O
+  // arquivamento semanal (weeklyArchiveUtils.filterTransactionsByWeek)
+  // continua usando tx.date de proposito: seu propósito é outro.
+  const weeklyTransactions = transactions.filter((tx) => {
+    if (!tx.createdAt) return false;
+    const lancadoEm = createdAtToLocalIso(tx.createdAt);
+    return lancadoEm >= startDate && lancadoEm <= endDate;
+  });
 
   // Inline balances calculation for current week
   let reposicaoInflow = 0;
@@ -900,7 +922,9 @@ export const calcularMetaSemanal = (
   const faturadoNaSemana = transacoes.reduce((soma, tx) => {
     if (tx.type !== 'venda') return soma;
     if (tx.paymentStatus === 'pendente') return soma;
-    if (!tx.date || tx.date < startIso || tx.date > endIso) return soma;
+    if (!tx.createdAt) return soma;
+    const lancadoEm = createdAtToLocalIso(tx.createdAt);
+    if (lancadoEm < startIso || lancadoEm > endIso) return soma;
 
     // Com sinal, so o que foi efetivamente pago entra.
     const pago = tx.signalValue != null ? Number(tx.signalValue) : Number(tx.totalValue);
