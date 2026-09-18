@@ -7,6 +7,7 @@ import { useProdutos } from '../context/ProdutosContext';
 import { useCosts } from '../context/CostsContext';
 import { calcularEstruturaFinanceira, calcularPrecoSugeridoProduto, somarDespesasEmpresa } from '../utils/financialEngine';
 import { normalizeName } from '../utils/fichaMatcher';
+import { areUnitsCompatible } from '../utils/units';
 import { StockItemAutocomplete } from './StockItemAutocomplete';
 import { compressImageFile } from '../utils/imageCompression';
 import { GenericDeleteConfirmModal } from './GenericDeleteConfirmModal';
@@ -69,6 +70,12 @@ const getCustoParaTamanho = (tamanho: TamanhoOpcao, fichaGlobal: number) => {
 const getInvestimentoParaTamanho = (tamanho: TamanhoOpcao, fichaGlobal: number) => {
   return tamanho.investimentoCost !== undefined ? tamanho.investimentoCost : fichaGlobal;
 };
+
+// Unidades disponíveis no seletor de insumo. Opções incompatíveis com a
+// unidade de compra do produto vinculado ficam desabilitadas (não somem —
+// senão a usuária nao entenderia por que uma unidade "existente" cadastrada
+// antes some da lista).
+const UNIDADES_INSUMO = ['g', 'ml', 'un', 'kg', 'L', 'pacote'] as const;
 
 // Conversão de unidades para cálculo de custo correto
 const convertCostToTargetUnit = (
@@ -481,11 +488,19 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     // e "leite" ou "Leite " precisam casar com o mesmo Produto.
     if (field === 'name' || field === 'unit') {
       const nome = field === 'name' ? String(val) : ing.name;
-      const unidade = field === 'unit' ? String(val) : ing.unit;
+      let unidade = field === 'unit' ? String(val) : ing.unit;
       const alvo = normalizeName(nome || '');
       const produto = alvo ? produtos.find((p) => normalizeName(p.nome) === alvo) : undefined;
 
       if (produto) {
+        // Trocar de produto (via nome) pode deixar a unidade antiga presa e
+        // incompatível com a nova compra (ficha em "kg" casando agora com um
+        // produto vendido em "L") — sem isso o <select> ficaria filtrado mas
+        // o valor ja selecionado continuaria escondido e errado.
+        if (!areUnitsCompatible(produto.unidadeEmbalagem, unidade)) {
+          unidade = produto.unidadeEmbalagem;
+          updated.unit = unidade as IngredientUsage['unit'];
+        }
         const custoBase = custoPorUnidade(produto);
         const convertedCost = convertCostToTargetUnit(custoBase, produto.unidadeEmbalagem, unidade);
         updated.unitCost = convertedCost;
@@ -627,11 +642,15 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                 ...t,
                 ingredients: t.ingredients.map((ing) => {
                   if (ing.id !== insumoId) return ing;
-                  const convertedCost = convertCostToTargetUnit(custoBase, produto.unidadeEmbalagem, ing.unit);
+                  const unidade = areUnitsCompatible(produto.unidadeEmbalagem, ing.unit)
+                    ? ing.unit
+                    : produto.unidadeEmbalagem;
+                  const convertedCost = convertCostToTargetUnit(custoBase, produto.unidadeEmbalagem, unidade);
                   return {
                     ...ing,
                     name: produto.nome,
                     produtoId: produto.id,
+                    unit: unidade,
                     unitCost: convertedCost,
                     totalCost: (Number(ing.quantity) || 0) * convertedCost,
                   };
@@ -1246,11 +1265,18 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                                           ...t,
                                           ingredients: t.ingredients.map((i2) => {
                                             if (i2.id !== ing.id) return i2;
-                                            const convertedCost = convertCostToTargetUnit(custoBase, produto.unidadeEmbalagem, i2.unit);
+                                            // Mesma guarda de aplicarEdicaoDeInsumo: trocar o produto
+                                            // vinculado pode deixar a unidade escolhida antes incompatível
+                                            // com a nova compra.
+                                            const unidade = areUnitsCompatible(produto.unidadeEmbalagem, i2.unit)
+                                              ? i2.unit
+                                              : produto.unidadeEmbalagem;
+                                            const convertedCost = convertCostToTargetUnit(custoBase, produto.unidadeEmbalagem, unidade);
                                             return {
                                               ...i2,
                                               name: produto.nome,
                                               produtoId: produto.id,
+                                              unit: unidade,
                                               unitCost: convertedCost,
                                               totalCost: (Number(i2.quantity) || 0) * convertedCost,
                                             };
@@ -1276,19 +1302,27 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                             />
                           </div>
                           <div className="col-span-3">
-                            <select
-                              value={ing.unit}
-                              onChange={(e) => handleUpdateInsumoTamanho(tamanho.id, ing.id, 'unit', e.target.value)}
-                              className="w-full px-1 py-1 bg-white border border-[#E6E1DB] rounded-lg text-[10px] font-bold"
-                              style={{ fontFamily: "'Manrope', sans-serif" }}
-                            >
-                              <option value="g">g</option>
-                              <option value="ml">ml</option>
-                              <option value="un">un</option>
-                              <option value="kg">kg</option>
-                              <option value="L">L</option>
-                              <option value="pacote">pacote</option>
-                            </select>
+                            {(() => {
+                              const produtoVinculado = ing.produtoId ? produtos.find((p) => p.id === ing.produtoId) : undefined;
+                              return (
+                                <select
+                                  value={ing.unit}
+                                  onChange={(e) => handleUpdateInsumoTamanho(tamanho.id, ing.id, 'unit', e.target.value)}
+                                  className="w-full px-1 py-1 bg-white border border-[#E6E1DB] rounded-lg text-[10px] font-bold"
+                                  style={{ fontFamily: "'Manrope', sans-serif" }}
+                                >
+                                  {UNIDADES_INSUMO.map((u) => (
+                                    <option
+                                      key={u}
+                                      value={u}
+                                      disabled={!!produtoVinculado && !areUnitsCompatible(produtoVinculado.unidadeEmbalagem, u)}
+                                    >
+                                      {u}
+                                    </option>
+                                  ))}
+                                </select>
+                              );
+                            })()}
                           </div>
                           <div className="col-span-4 text-right flex flex-col justify-center">
                             <span className="text-[9px] text-neutral-500 block">Custo</span>
