@@ -51,7 +51,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
   onDeleteTransaction,
   embedded = false,
 }) => {
-  const { formatCurrency: formatMoney } = useCurrency();
+  const { formatCurrency: formatMoney, symbol } = useCurrency();
   const { fichas } = useFichasTecnicas();
   const balances = calculateWeeklyBalances(transactions, fichas);
   // Compras agora referencia o catalogo Produtos (spec Modulo Produtos, secao
@@ -286,8 +286,8 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
             </span>
           </div>
           {showSuccessToast && (
-            <span className="bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)] font-bold text-xs px-3 py-1 rounded-full flex items-center gap-1 animate-fadeIn">
-              <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-primary)]" />
+            <span className="bg-[#F3E9F3] text-[#6E3F72] border border-[#6E3F72] font-bold text-xs px-3 py-1 rounded-full flex items-center gap-1 animate-fadeIn">
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#6E3F72]" />
               Despesa lançada!
             </span>
           )}
@@ -365,11 +365,11 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
           <div style={{ display: 'flex', gap: '9px' }}>
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
               <label style={{ fontSize: '10.5px', fontWeight: 800, color: '#5B4A6B', fontFamily: "'Manrope', sans-serif" }}>
-                Valor Gasto (R$)
+                Valor Gasto ({symbol})
               </label>
               <div style={{ position: 'relative' }}>
                 <span style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', fontSize: '11px', fontWeight: 800, color: '#5B4A6B', fontFamily: "'Manrope', sans-serif", pointerEvents: 'none' }}>
-                  R$
+                  {symbol}
                 </span>
                 <input
                   type="text"
@@ -552,11 +552,16 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
         )}
 
         {filteredExpenses.length === 0 ? (
-          <div className="text-center py-8 px-4 bg-[var(--color-surface)]/50 rounded-lg border border-dashed border-[#E6E1DB]">
-            <Package className="w-8 h-8 text-[#E6E1DB] mx-auto mb-2" />
-            <p className="text-xs text-[#E6E1DB] font-medium">
-              Nenhuma compra registrada nesta categoria.
-            </p>
+          <div className="flex flex-col items-center gap-2.5 text-center" style={{ padding: '28px 20px' }}>
+            <div className="flex items-center justify-center" style={{ width: '56px', height: '56px', borderRadius: '18px', background: '#F3E9F3' }}>
+              <Package className="w-6 h-6" style={{ color: '#6E3F72' }} strokeWidth={2} />
+            </div>
+            <span className="font-serif-display" style={{ fontSize: '18px', color: '#3A2350' }}>
+              Nenhuma compra registrada
+            </span>
+            <span style={{ fontSize: '12px', color: '#7A6E80', maxWidth: '260px', fontFamily: "'Manrope', sans-serif" }}>
+              Nenhum lançamento encontrado nesta categoria.
+            </span>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '9px' }}>

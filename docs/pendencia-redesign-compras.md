@@ -1,4 +1,4 @@
-# PENDENTE: formulário de Compras fora do padrão visual validado
+# RESOLVIDO (2026-09-18): formulário de Compras fora do padrão visual validado
 
 > Registrado em 2026-09-14, mesmo padrão dos outros `docs/bug-*.md` /
 > `docs/pendencia-*.md` desta pasta (achado colateral durante o redesign de
@@ -60,3 +60,39 @@ mesma classe de bug já corrigida no onboarding financeiro (Passo 1 e Passo 4
 de `EmpresaOnboardingFlow.tsx`, commit `e48aa24`). Como este arquivo já tem
 redesign visual pendente acima, faz sentido resolver os dois juntos quando
 essa pendência for endereçada, em vez de mexer no arquivo duas vezes.
+
+## Resolução (2026-09-18)
+
+Investigação ao vivo (conta de teste `rdealmeida590@gmail.com`, moeda
+configurada em USD) confirmou, além do já mapeado acima, dois problemas
+concretos que não apareciam claros só lendo o doc:
+
+- **Toast "Despesa lançada!" sem estilo nenhum** — usava
+  `var(--color-primary)`, uma variável que não existe em `src/index.css` (o
+  arquivo que de fato é importado pelo app); só existe no `index.css.css`
+  órfão. O badge renderizava sem fundo, sem borda e com texto na cor padrão
+  do navegador.
+- **Estado vazio "Nenhuma compra registrada nesta categoria" ilegível** —
+  ícone e texto na cor `#E6E1DB` (o mesmo tom usado pra borda), contraste
+  baixíssimo sobre o fundo claro — na prática, quase invisível.
+
+Os três problemas (toast, estado vazio, símbolo de moeda) foram corrigidos em
+`BalancesAndExpensesModule.tsx`:
+
+- Toast: tokens trocados por `#F3E9F3` (fundo) / `#6E3F72` (borda, ícone,
+  texto) — mesma dupla já usada nos badges de categoria mais abaixo no
+  próprio arquivo.
+- Estado vazio: redesenhado seguindo a estrutura já validada em
+  `CustomersModule.tsx`/`OrdersModule.tsx` (badge de ícone 56px arredondado
+  `#F3E9F3` com `Package` em `#6E3F72`, título serif `#3A2350`, texto de
+  apoio `#7A6E80`).
+- Moeda: label e prefixo do campo "Valor Gasto" agora usam
+  `useCurrency().symbol` em vez de `R$` fixo.
+
+Testado ao vivo na conta de teste: lançada uma compra real pra confirmar o
+toast, conferido visualmente, e removida em seguida (delete com delay de
+10s, confirmado que o saldo voltou a `$0.00` após reload — a remoção foi
+persistida no banco, não só otimista no cliente).
+
+Nada de lógica de submit/validação, cálculo de saldo ou vínculo com Produtos
+foi alterado — só o visual e os dois bugs de token/moeda.
