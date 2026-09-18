@@ -9,7 +9,7 @@ import {
   FichaTecnica,
 } from './types';
 import { filterTransactionsByPeriod, calculateSummary } from './utils/financialEngine';
-import { getTodayIso, formatCurrency, formatDateBr } from './utils/formatters';
+import { getTodayIso, formatDateBr } from './utils/formatters';
 import { useDelayedDelete } from './hooks/useDelayedDelete';
 import { useFichasTecnicas } from './context/FichasTecnicasContext';
 import { useProdutos } from './context/ProdutosContext';
@@ -51,7 +51,7 @@ import { GlossaryModal } from './components/GlossaryModal';
 import { BackupModal } from './components/BackupModal';
 import { ProfileModal } from './components/ProfileModal';
 import { LoginModal } from './components/LoginModal';
-import { CurrencyProvider } from './context/CurrencyContext';
+import { CurrencyProvider, useCurrency } from './context/CurrencyContext';
 import { CustomersProvider } from './context/CustomersContext';
 import { FichasTecnicasProvider } from './context/FichasTecnicasContext';
 import { CostsProvider, useCosts } from './context/CostsContext';
@@ -63,6 +63,7 @@ const TOUR_PRIMEIROS_PASSOS_HABILITADO = true;
 
 function AppContent() {
   const { isResetPasswordRequired, isOtpVerificationRequired, user, userProfile, logout } = useAuth();
+  const { formatCurrency } = useCurrency();
   const { fichas } = useFichasTecnicas();
   const { administrativeCosts, marcarTourVisto } = useCosts();
   const { consumirParaPedido, devolverPedido } = useProdutos();
