@@ -51,6 +51,26 @@ const getColorBasedOnThreshold = (
   return { stroke: '#C4626F', text: '#C4626F', background: '#FFEBEE' };
 };
 
+/**
+ * Percentual do anel de estoque — mesma base de calculo (quantity vs
+ * minThreshold) e os MESMOS cortes de `getColorBasedOnThreshold` (slack de
+ * 25/50/75%), para o numero e a cor sempre contarem a mesma historia. Antes
+ * comparava quantidadeAtual com quantidadeReferencia (o ultimo "estoque
+ * cheio" de reabastecimento) — uma base sem nenhuma relacao com o alerta
+ * minimo, entao o anel podia ficar laranja/vermelho com o numero preso em
+ * 100%.
+ *
+ * Reta unica: 0 -> 0%, minThreshold -> 25%, 1.25x -> 50% (cor vira laranja),
+ * 1.5x -> 75% (cor vira verde claro), 1.75x -> 100%, capado (cor vira verde
+ * forte).
+ */
+const getPercentageBasedOnThreshold = (quantity: number, minThreshold: number): number => {
+  if (minThreshold <= 0) return quantity > 0 ? 100 : 0;
+  if (quantity < minThreshold) return Math.max(0, (quantity / minThreshold) * 25);
+  const slack = ((quantity - minThreshold) / minThreshold) * 100;
+  return Math.min(100, 25 + slack);
+};
+
 const getStatusLabel = (quantity: number, minThreshold: number): string => {
   if (quantity < minThreshold) return 'Crítico';
   if (minThreshold <= 0) return quantity > 0 ? 'Alto' : 'Crítico';
@@ -605,9 +625,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                 // antes de decidir critico/alto (ver normalizeToCommonUnit).
                 const qtdNormalizada = normalizeToCommonUnit(qtd, p.unidadeEmbalagem, p.nivelMinimoUnidade || p.unidadeEmbalagem);
                 const colors = getColorBasedOnThreshold(qtdNormalizada, min);
-                const displayPercentage = p.quantidadeReferencia && p.quantidadeReferencia > 0
-                  ? Math.min(100, Math.max(0, (qtd / p.quantidadeReferencia) * 100))
-                  : (qtd > 0 ? 100 : 0);
+                const displayPercentage = getPercentageBasedOnThreshold(qtdNormalizada, min);
                 const isCritical = qtdNormalizada < min || (min <= 0 && qtdNormalizada <= 0);
 
                 return (
