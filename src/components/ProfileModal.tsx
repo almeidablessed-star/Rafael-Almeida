@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { X, Camera, Edit2, Clock } from 'lucide-react';
-import { LaborPeriod } from '../types';
 import { useCurrency } from '../context/CurrencyContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -34,7 +33,6 @@ interface ProfileData {
   address: string;
   instagram: string;
   currency: 'BRL' | 'USD' | 'EUR';
-  laborPeriod: LaborPeriod;
 }
 
 export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onLogout, onIniciarTour }) => {
@@ -57,7 +55,6 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
       address: userProfile?.endereco || '',
       instagram: userProfile?.instagram || '',
       currency: userProfile?.moeda || 'BRL',
-      laborPeriod: (userProfile?.laborPeriod as LaborPeriod) || 'mensal',
     };
   });
 
@@ -75,7 +72,6 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
       address: userProfile?.endereco || '',
       instagram: userProfile?.instagram || '',
       currency: userProfile?.moeda || 'BRL',
-      laborPeriod: (userProfile?.laborPeriod as LaborPeriod) || 'mensal',
     });
   }, [isOpen, userProfile, user]);
 
@@ -179,7 +175,6 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
           telefone: orNull(profileData.phone),
           endereco: orNull(profileData.address),
           instagram: orNull(profileData.instagram),
-          labor_period: profileData.laborPeriod,
         })
         .eq('id', user.id);
 
@@ -247,7 +242,14 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Currency Selector & Labor Period - Minimal */}
+        {/* Currency Selector - Minimal.
+            O seletor de Período de Referência que ficava ao lado saiu daqui:
+            nao afetava nenhum calculo (Meta da Semana, Dashboard, CMV — nada),
+            so pre-marcava o campo "Período de Referência" do formulario de
+            Lançar Despesa (Custo/Mão de Obra) por conveniência. Esse campo
+            continua existindo normalmente la, so nao vem mais pre-selecionado
+            a partir do Perfil — usa o mesmo padrao "Diária" que o formulario
+            ja usava quando nada era pre-preenchido. */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginBottom: '20px' }}>
           <select
             value={currency}
@@ -274,36 +276,6 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
             <option value="BRL">BRL — R$</option>
             <option value="USD">USD — $</option>
             <option value="EUR">EUR — €</option>
-          </select>
-
-          {/* Labor Period Selector */}
-          <select
-            value={profileData.laborPeriod}
-            onChange={(e) => setProfileData(prev => ({ ...prev, laborPeriod: e.target.value as LaborPeriod }))}
-            style={{
-              background: 'none',
-              border: 'none',
-              padding: '4px 8px',
-              fontFamily: "'Manrope', sans-serif",
-              fontSize: '13px',
-              fontWeight: 600,
-              color: '#7A6E80',
-              cursor: 'pointer',
-              transition: 'color 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLSelectElement).style.color = '#3A2350';
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLSelectElement).style.color = '#7A6E80';
-            }}
-            title="Período de referência para cálculos"
-          >
-            <option value="diaria">Diária</option>
-            <option value="semanal">Semanal</option>
-            <option value="mensal">Mensal</option>
-            <option value="anual">Anual</option>
-            <option value="encomenda">Por Encomenda</option>
           </select>
         </div>
 

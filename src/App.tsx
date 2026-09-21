@@ -98,7 +98,6 @@ function AppContent() {
   const [formInitialType, setFormInitialType] = useState<TransactionType>('venda');
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [prefilledDate, setPrefilledDate] = useState<string | null>(null);
-  const [prefilledLaborPeriod, setPrefilledLaborPeriod] = useState<any>(null);
   const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null);
   const [isPwaModalOpen, setIsPwaModalOpen] = useState(false);
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
@@ -243,12 +242,6 @@ function AppContent() {
 
     setFormInitialType(type);
     setEditingTransaction(null);
-    // Pré-preencher com o período de referência do usuário para custos/mão de obra
-    if ((type === 'custo' || type === 'maodeobra') && userProfile?.laborPeriod) {
-      setPrefilledLaborPeriod(userProfile.laborPeriod);
-    } else {
-      setPrefilledLaborPeriod(null);
-    }
     setIsFormModalOpen(true);
   };
 
@@ -584,17 +577,14 @@ function AppContent() {
         initialType={formInitialType}
         editingTransaction={editingTransaction}
         prefilledDate={prefilledDate}
-        prefilledLaborPeriod={prefilledLaborPeriod}
         fichas={fichas}
         onClose={() => {
           setIsFormModalOpen(false);
           setPrefilledDate(null);
-          setPrefilledLaborPeriod(null);
         }}
         onSave={(tx, editingId) => {
           handleSaveTransaction(tx, editingId);
           setPrefilledDate(null);
-          setPrefilledLaborPeriod(null);
         }}
       />
 

@@ -101,7 +101,6 @@ interface TransactionFormModalProps {
   initialType: TransactionType;
   editingTransaction?: Transaction | null;
   prefilledDate?: string | null;
-  prefilledLaborPeriod?: LaborPeriod | null;
   fichas: FichaTecnica[]; // Fichas já carregadas do contexto App
   onClose: () => void;
   onSave: (tx: Omit<Transaction, 'id' | 'createdAt'>, editingId?: string) => void;
@@ -112,7 +111,6 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   initialType,
   editingTransaction,
   prefilledDate,
-  prefilledLaborPeriod,
   fichas,
   onClose,
   onSave,
@@ -456,7 +454,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       setPaymentMethod('zelle');
       setPaymentStatus('pago');
       setSupplier('');
-      setLaborPeriod(prefilledLaborPeriod || 'diaria');
+      setLaborPeriod('diaria');
       setCostCategory(initialType === 'investimento' ? 'investimento' : 'fixo');
       setNotes('');
       setCustomerName('');
