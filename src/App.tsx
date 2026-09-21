@@ -120,7 +120,7 @@ function AppContent() {
   // o banco, entao nao precisa recriar a transacao nem reconsumir estoque:
   // se for venda, so devolve o estoque quando o delete de fato acontecer.
   const {
-    pending: pendingDeleteTransacao,
+    pendingItems: pendingDeleteTransacoes,
     requestDelete: requestDeleteTransacao,
     cancelDelete: cancelDeleteTransacao,
   } = useDelayedDelete<Transaction>({
@@ -219,8 +219,8 @@ function AppContent() {
   // useDelayedDelete. Filtrado aqui na fonte, e nao em cada modulo filho,
   // para os totais (Dashboard, Custos, Compras) tambem refletirem a
   // ausencia na hora, nao so a lista visual de uma tela especifica.
-  const transacoesVisiveis = pendingDeleteTransacao
-    ? transactions.filter((t) => t.id !== pendingDeleteTransacao.id)
+  const transacoesVisiveis = pendingDeleteTransacoes.length > 0
+    ? transactions.filter((t) => !pendingDeleteTransacoes.some((pend) => pend.id === t.id))
     : transactions;
 
   // Filtered transactions & financial metrics
@@ -662,10 +662,16 @@ function AppContent() {
         />
       )}
 
-      {/* Toast de exclusao pendente: some enquanto os 10s de "Desfazer" ainda
-          estao correndo (ver `pendingDeleteTransacao`). */}
-      {pendingDeleteTransacao && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50">
+      {/* Toast de exclusao pendente: um por item, empilhados — cada um some
+          quando os 10s de "Desfazer" DELE completarem (ver
+          `pendingDeleteTransacoes`). Mais de um pode estar visivel ao mesmo
+          tempo se a usuaria excluir varios itens em sequencia rapida. */}
+      {pendingDeleteTransacoes.map((tx, index) => (
+        <div
+          key={tx.id}
+          className="fixed left-1/2 -translate-x-1/2 z-50"
+          style={{ bottom: `${96 + index * 56}px` }}
+        >
           <div
             className="flex items-center gap-3.5 animate-fadeIn"
             style={{ padding: '10px 12px 10px 18px', borderRadius: '999px', background: '#3A2350', boxShadow: '0 20px 36px rgba(58,35,80,0.26)' }}
@@ -674,11 +680,11 @@ function AppContent() {
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#A9D8B8" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M20 6 9 17l-5-5" />
               </svg>
-              {pendingDeleteTransacao.type === 'venda' ? 'Pedido deletado' : 'Lançamento deletado'}
+              {tx.type === 'venda' ? 'Pedido deletado' : 'Lançamento deletado'}
             </span>
             <button
               type="button"
-              onClick={cancelDeleteTransacao}
+              onClick={() => cancelDeleteTransacao(tx.id)}
               className="flex items-center gap-1.5 text-xs font-bold transition-all active:scale-95"
               style={{ padding: '8px 14px', borderRadius: '999px', border: 'none', background: '#F5B9C6', color: '#6E2231', cursor: 'pointer' }}
             >
@@ -690,7 +696,7 @@ function AppContent() {
             </button>
           </div>
         </div>
-      )}
+      ))}
 
       </div>
   );

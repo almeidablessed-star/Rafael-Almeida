@@ -206,7 +206,7 @@ export const CustomersModule: React.FC = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deletingCustomer, setDeletingCustomer] = useState<Customer | null>(null);
   const {
-    pending: pendingDeleteCustomer,
+    pendingItems: pendingDeleteCustomers,
     requestDelete: requestDeleteCustomer,
     cancelDelete: cancelDeleteCustomer,
   } = useDelayedDelete<Customer>({
@@ -219,11 +219,12 @@ export const CustomersModule: React.FC = () => {
     },
   });
 
-  // Tira o cliente pendente da lista na hora (mesmo padrao de
+  // Tira os clientes pendentes da lista na hora (mesmo padrao de
   // `fichasVisiveis`/`produtos`/`transacoesVisiveis`) — o DELETE real so vai
-  // pro banco 10s depois, ver useDelayedDelete.
-  const customers = pendingDeleteCustomer
-    ? customersDoContexto.filter((c) => c.id !== pendingDeleteCustomer.id)
+  // pro banco 10s depois, ver useDelayedDelete. Mais de um pode estar
+  // pendente ao mesmo tempo.
+  const customers = pendingDeleteCustomers.length > 0
+    ? customersDoContexto.filter((c) => !pendingDeleteCustomers.some((pend) => pend.id === c.id))
     : customersDoContexto;
 
   // Form states
@@ -1536,10 +1537,16 @@ export const CustomersModule: React.FC = () => {
         onConfirmDelete={handleConfirmDelete}
       />
 
-      {/* Toast de exclusao pendente: some enquanto os 10s de "Desfazer" ainda
-          estao correndo (ver `pendingDeleteCustomer`). */}
-      {pendingDeleteCustomer && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50">
+      {/* Toast de exclusao pendente: um por item, empilhados — cada um some
+          quando os 10s de "Desfazer" DELE completarem (ver
+          `pendingDeleteCustomers`). Mais de um pode estar visivel ao mesmo
+          tempo se a usuaria excluir varios itens em sequencia rapida. */}
+      {pendingDeleteCustomers.map((customer, index) => (
+        <div
+          key={customer.id}
+          className="fixed left-1/2 -translate-x-1/2 z-50"
+          style={{ bottom: `${96 + index * 56}px` }}
+        >
           <div
             className="flex items-center gap-3.5 animate-fadeIn"
             style={{ padding: '10px 12px 10px 18px', borderRadius: '999px', background: '#3A2350', boxShadow: '0 20px 36px rgba(58,35,80,0.26)' }}
@@ -1552,7 +1559,7 @@ export const CustomersModule: React.FC = () => {
             </span>
             <button
               type="button"
-              onClick={cancelDeleteCustomer}
+              onClick={() => cancelDeleteCustomer(customer.id)}
               className="flex items-center gap-1.5 text-xs font-bold transition-all active:scale-95"
               style={{ padding: '8px 14px', borderRadius: '999px', border: 'none', background: '#F5B9C6', color: '#6E2231', cursor: 'pointer' }}
             >
@@ -1564,7 +1571,7 @@ export const CustomersModule: React.FC = () => {
             </button>
           </div>
         </div>
-      )}
+      ))}
     </div>
   );
 };

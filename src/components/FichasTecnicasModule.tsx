@@ -11,6 +11,7 @@ import { areUnitsCompatible } from '../utils/units';
 import { StockItemAutocomplete } from './StockItemAutocomplete';
 import { compressImageFile } from '../utils/imageCompression';
 import { GenericDeleteConfirmModal } from './GenericDeleteConfirmModal';
+import { useDelayedDelete } from '../hooks/useDelayedDelete';
 import {
   BookOpen,
   Plus,
@@ -199,18 +200,33 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 
   /**
    * Exclusao de ficha com desfazer de verdade: ao confirmar, a ficha some da
-   * lista na hora (via `pendingDeleteFicha`, filtrada no render) mas o DELETE
-   * so e enviado ao Supabase 10s depois (`pendingDeleteRef.timeoutId`).
-   * "Desfazer" dentro da janela cancela o timer sem nunca ter tocado o banco.
+   * lista na hora (via `pendingDeleteFichas`, filtrada no render) mas o
+   * DELETE so e enviado ao Supabase 10s depois. "Desfazer" dentro da janela
+   * cancela o timer sem nunca ter tocado o banco.
    *
-   * O ref (nao so o state) existe porque o cleanup de unmount abaixo precisa
-   * ler o valor mais atual num closure que so roda uma vez (troca de aba
-   * desmonta este componente e mataria um setTimeout guardado so em state) —
-   * ao desmontar com uma exclusao pendente, finaliza o delete real na hora em
-   * vez de deixar o timer morrer e a ficha reaparecer "fantasma" depois.
+   * Usa o hook compartilhado (`useDelayedDelete`, tambem usado em Produtos,
+   * Transacoes e Clientes) em vez de uma implementacao local — esta tela foi
+   * onde o padrao nasceu, mas a versao local guardava so UMA exclusao
+   * pendente por vez; excluir uma segunda ficha antes dos 10s da primeira
+   * sobrescrevia o timer sem cancela-lo, deletando a ficha errada cedo demais
+   * e nunca de fato excluindo a primeira. O hook compartilhado ja foi
+   * corrigido pra suportar varias pendentes ao mesmo tempo, cada uma com seu
+   * proprio timer.
    */
-  const [pendingDeleteFicha, setPendingDeleteFicha] = useState<FichaTecnica | null>(null);
-  const pendingDeleteRef = useRef<{ ficha: FichaTecnica; timeoutId: ReturnType<typeof setTimeout> } | null>(null);
+  const {
+    pendingItems: pendingDeleteFichas,
+    requestDelete: requestDeleteFicha,
+    cancelDelete: cancelDeleteFicha,
+  } = useDelayedDelete<FichaTecnica>({
+    deleteFn: async (ficha) => {
+      try {
+        await deleteFicha(ficha.id);
+      } catch (err: any) {
+        console.error('Erro ao deletar ficha técnica:', err);
+        alert('Erro ao deletar ficha técnica: ' + (err.message || JSON.stringify(err)));
+      }
+    },
+  });
   const [expandedFichaId, setExpandedFichaId] = useState<string | null>(null);
   const [launchSuccessMsg, setLaunchSuccessMsg] = useState<string | null>(null);
   const [expandedTamanhosId, setExpandedTamanhosId] = useState<string | null>(null);
@@ -805,60 +821,11 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     setDeletingFicha(ficha);
   };
 
-  /** Dispara o DELETE real no Supabase. Chamado 10s depois de confirmar (se
-   * ninguem desfizer) ou na hora, se a tela for desmontada antes disso. */
-  const finalizarExclusaoPendente = async () => {
-    const pending = pendingDeleteRef.current;
-    if (!pending) return;
-    pendingDeleteRef.current = null;
-
-    try {
-      await deleteFicha(pending.ficha.id);
-    } catch (err: any) {
-      console.error('Erro ao deletar ficha técnica:', err);
-      alert('Erro ao deletar ficha técnica: ' + (err.message || JSON.stringify(err)));
-    } finally {
-      setPendingDeleteFicha(null);
-    }
-  };
-
   const handleConfirmDelete = (id: string) => {
     const fichaToDelete = fichas.find((f) => f.id === id);
     if (!fichaToDelete) return;
-
-    const timeoutId = setTimeout(() => {
-      finalizarExclusaoPendente();
-    }, 10000);
-
-    pendingDeleteRef.current = { ficha: fichaToDelete, timeoutId };
-    setPendingDeleteFicha(fichaToDelete);
+    requestDeleteFicha(fichaToDelete);
   };
-
-  const handleUndo = () => {
-    const pending = pendingDeleteRef.current;
-    if (!pending) return;
-    clearTimeout(pending.timeoutId);
-    pendingDeleteRef.current = null;
-    setPendingDeleteFicha(null);
-  };
-
-  // Se a tela de Fichas for desmontada (troca de aba) com uma exclusao
-  // pendente, finaliza o delete real na hora em vez de deixar o timer
-  // morrer junto — sem isso a ficha ficaria fora da lista pra sempre sem
-  // nunca ter sido excluida de verdade do banco.
-  useEffect(() => {
-    return () => {
-      const pending = pendingDeleteRef.current;
-      if (pending) {
-        clearTimeout(pending.timeoutId);
-        pendingDeleteRef.current = null;
-        deleteFicha(pending.ficha.id).catch((err) => {
-          console.error('Erro ao finalizar exclusão pendente de ficha ao sair da tela:', err);
-        });
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const handleDuplicate = async (fichaToDup: FichaTecnica) => {
     try {
@@ -903,8 +870,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 
   // Some da lista (e da contagem por categoria, abaixo) assim que a exclusao
   // e confirmada, mesmo o DELETE real so acontecendo 10s depois — ver
-  // `pendingDeleteFicha`.
-  const fichasVisiveis = pendingDeleteFicha ? fichas.filter((f) => f.id !== pendingDeleteFicha.id) : fichas;
+  // `pendingDeleteFichas`. Mais de uma pode estar pendente ao mesmo tempo.
+  const fichasVisiveis = pendingDeleteFichas.length > 0
+    ? fichas.filter((f) => !pendingDeleteFichas.some((pend) => pend.id === f.id))
+    : fichas;
   const filteredFichas = fichasVisiveis.filter((f) => f.category === selectedCategory);
 
   return (
@@ -2204,10 +2173,16 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         }}
       />
 
-      {/* Toast de exclusao pendente: some no topo enquanto os 10s de
-          "Desfazer" ainda estao correndo (ver `pendingDeleteFicha`). */}
-      {pendingDeleteFicha && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50">
+      {/* Toast de exclusao pendente: um por item, empilhados — cada um some
+          quando os 10s de "Desfazer" DELE completarem (ver
+          `pendingDeleteFichas`). Mais de um pode estar visivel ao mesmo
+          tempo se a usuaria excluir varias fichas em sequencia rapida. */}
+      {pendingDeleteFichas.map((ficha, index) => (
+        <div
+          key={ficha.id}
+          className="fixed left-1/2 -translate-x-1/2 z-50"
+          style={{ bottom: `${96 + index * 56}px` }}
+        >
           <div
             className="flex items-center gap-3.5 animate-fadeIn"
             style={{ padding: '10px 12px 10px 18px', borderRadius: '999px', background: '#3A2350', boxShadow: '0 20px 36px rgba(58,35,80,0.26)' }}
@@ -2220,7 +2195,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
             </span>
             <button
               type="button"
-              onClick={handleUndo}
+              onClick={() => cancelDeleteFicha(ficha.id)}
               className="flex items-center gap-1.5 text-xs font-bold transition-all active:scale-95"
               style={{ padding: '8px 14px', borderRadius: '999px', border: 'none', background: '#F5B9C6', color: '#6E2231', cursor: 'pointer' }}
             >
@@ -2232,7 +2207,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
             </button>
           </div>
         </div>
-      )}
+      ))}
       </div>
     </div>
   );

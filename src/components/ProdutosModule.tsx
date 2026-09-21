@@ -142,7 +142,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
 
   const [deletingProduto, setDeletingProduto] = useState<Produto | null>(null);
   const {
-    pending: pendingDeleteProduto,
+    pendingItems: pendingDeleteProdutos,
     requestDelete: requestDeleteProduto,
     cancelDelete: cancelDeleteProduto,
   } = useDelayedDelete<Produto>({
@@ -155,11 +155,13 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
     },
   });
 
-  // Tira o produto pendente da lista na hora (mesmo padrao de
+  // Tira os produtos pendentes da lista na hora (mesmo padrao de
   // `fichasVisiveis` em FichasTecnicasModule.tsx) — o DELETE real so vai pro
-  // banco 10s depois, ver useDelayedDelete.
-  const produtos = pendingDeleteProduto
-    ? produtosDoContexto.filter((p) => p.id !== pendingDeleteProduto.id)
+  // banco 10s depois, ver useDelayedDelete. Mais de um pode estar pendente ao
+  // mesmo tempo (excluir dois itens em sequencia rapida), entao filtra pelo
+  // conjunto inteiro, nao so o ultimo.
+  const produtos = pendingDeleteProdutos.length > 0
+    ? produtosDoContexto.filter((p) => !pendingDeleteProdutos.some((pend) => pend.id === p.id))
     : produtosDoContexto;
 
   useEffect(() => {
@@ -766,10 +768,16 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
         }}
       />
 
-      {/* Toast de exclusao pendente: some enquanto os 10s de "Desfazer"
-          ainda estao correndo (ver `pendingDeleteProduto`). */}
-      {pendingDeleteProduto && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50">
+      {/* Toast de exclusao pendente: um por item, empilhados — cada um some
+          quando os 10s de "Desfazer" DELE completarem (ver
+          `pendingDeleteProdutos`). Mais de um pode estar visivel ao mesmo
+          tempo se a usuaria excluir varios itens em sequencia rapida. */}
+      {pendingDeleteProdutos.map((produto, index) => (
+        <div
+          key={produto.id}
+          className="fixed left-1/2 -translate-x-1/2 z-50"
+          style={{ bottom: `${96 + index * 56}px` }}
+        >
           <div
             className="flex items-center gap-3.5 animate-fadeIn"
             style={{ padding: '10px 12px 10px 18px', borderRadius: '999px', background: '#3A2350', boxShadow: '0 20px 36px rgba(58,35,80,0.26)' }}
@@ -782,7 +790,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
             </span>
             <button
               type="button"
-              onClick={cancelDeleteProduto}
+              onClick={() => cancelDeleteProduto(produto.id)}
               className="flex items-center gap-1.5 text-xs font-bold transition-all active:scale-95"
               style={{ padding: '8px 14px', borderRadius: '999px', border: 'none', background: '#F5B9C6', color: '#6E2231', cursor: 'pointer' }}
             >
@@ -794,7 +802,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
             </button>
           </div>
         </div>
-      )}
+      ))}
     </div>
   );
 };

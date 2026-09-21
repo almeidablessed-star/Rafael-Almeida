@@ -9,68 +9,84 @@ interface UseDelayedDeleteOptions<T> {
 /**
  * Generaliza o padrao de exclusao com "Desfazer" real, criado originalmente
  * em FichasTecnicasModule.tsx: a exclusao aparece pra usuaria na hora (via
- * `pending`, pra ela tirar o item da lista visivel), mas o DELETE de verdade
- * so vai pro banco depois de `delayMs`. `cancelDelete` cancela o timeout sem
- * nunca ter tocado o banco — ao contrario de um "desfazer" que recria o
- * registro (com id novo), aqui o registro nunca deixou de existir enquanto
- * pendente, entao vinculos por id (ex: ficha tecnica -> produtoId) nunca
- * quebram se a usuaria desfizer a tempo.
+ * `pendingItems`, pra ela tirar o item da lista visivel), mas o DELETE de
+ * verdade so vai pro banco depois de `delayMs`. `cancelDelete(id)` cancela o
+ * timeout sem nunca ter tocado o banco — ao contrario de um "desfazer" que
+ * recria o registro (com id novo), aqui o registro nunca deixou de existir
+ * enquanto pendente, entao vinculos por id (ex: ficha tecnica -> produtoId)
+ * nunca quebram se a usuaria desfizer a tempo.
+ *
+ * Guarda os pendentes num Map por id, nao um unico item — excluir B antes do
+ * timer de A completar nao pode apagar o rastro de A. A versao anterior
+ * guardava so "o" pendente (`T | null`): a segunda chamada de
+ * `requestDelete` sobrescrevia o ponteiro do timer de A sem cancela-lo, e
+ * quando o timer de A disparava ele lia o ponteiro ja trocado pra B —
+ * deletando B cedo demais e nunca de fato deletando A (que so tinha sumido
+ * da tela, nao do banco). Cada item agora tem seu proprio timer e sua propria
+ * entrada, entao dois (ou mais) podem estar pendentes ao mesmo tempo sem um
+ * atropelar o outro.
  */
 export function useDelayedDelete<T extends { id: string | number }>({
   deleteFn,
   delayMs = 10000,
 }: UseDelayedDeleteOptions<T>) {
-  const [pending, setPending] = useState<T | null>(null);
-  const pendingRef = useRef<{ item: T; timeoutId: ReturnType<typeof setTimeout> } | null>(null);
+  const [pendingItems, setPendingItems] = useState<T[]>([]);
+  const pendingRef = useRef<Map<string | number, { item: T; timeoutId: ReturnType<typeof setTimeout> }>>(new Map());
 
-  const finalize = useCallback(async () => {
-    const current = pendingRef.current;
-    if (!current) return;
-    pendingRef.current = null;
-    try {
-      await deleteFn(current.item);
-    } finally {
-      setPending(null);
-    }
+  const removeFromState = (id: string | number) => {
+    setPendingItems((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const finalize = useCallback(
+    async (id: string | number) => {
+      const current = pendingRef.current.get(id);
+      if (!current) return;
+      pendingRef.current.delete(id);
+      try {
+        await deleteFn(current.item);
+      } finally {
+        removeFromState(id);
+      }
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [deleteFn]);
+    [deleteFn]
+  );
 
   const requestDelete = useCallback(
     (item: T) => {
       const timeoutId = setTimeout(() => {
-        finalize();
+        finalize(item.id);
       }, delayMs);
-      pendingRef.current = { item, timeoutId };
-      setPending(item);
+      pendingRef.current.set(item.id, { item, timeoutId });
+      setPendingItems((prev) => [...prev, item]);
     },
     [delayMs, finalize]
   );
 
-  const cancelDelete = useCallback(() => {
-    const current = pendingRef.current;
+  const cancelDelete = useCallback((id: string | number) => {
+    const current = pendingRef.current.get(id);
     if (!current) return;
     clearTimeout(current.timeoutId);
-    pendingRef.current = null;
-    setPending(null);
+    pendingRef.current.delete(id);
+    removeFromState(id);
   }, []);
 
-  // Se a tela for desmontada (troca de aba) com uma exclusao pendente,
-  // finaliza o delete real na hora em vez de deixar o timer morrer junto —
-  // senao o item ficaria fora da lista pra sempre sem nunca ter sido
-  // excluido de verdade do banco.
+  // Se a tela for desmontada (troca de aba) com exclusoes pendentes, finaliza
+  // o delete real de cada uma na hora em vez de deixar os timers morrerem
+  // junto — senao os itens ficariam fora da lista pra sempre sem nunca terem
+  // sido excluidos de verdade do banco.
   useEffect(() => {
     return () => {
-      const current = pendingRef.current;
-      if (current) {
+      pendingRef.current.forEach((current) => {
         clearTimeout(current.timeoutId);
-        pendingRef.current = null;
         deleteFn(current.item).catch((err) => {
           console.error('Erro ao finalizar exclusão pendente ao desmontar:', err);
         });
-      }
+      });
+      pendingRef.current.clear();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return { pending, requestDelete, cancelDelete };
+  return { pendingItems, requestDelete, cancelDelete };
 }
