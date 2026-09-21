@@ -12,6 +12,7 @@ import { StockItemAutocomplete } from './StockItemAutocomplete';
 import { compressImageFile } from '../utils/imageCompression';
 import { GenericDeleteConfirmModal } from './GenericDeleteConfirmModal';
 import { useDelayedDelete } from '../hooks/useDelayedDelete';
+import { CampoComAjuda } from './onboarding/CampoComAjuda';
 import {
   BookOpen,
   Plus,
@@ -1083,6 +1084,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Rendimento *</label>
+                    <CampoComAjuda microcopy="Quantas porções esse tamanho rende — em fatias, gramas, unidades ou ml, o que fizer mais sentido pro seu produto. É só uma referência pra você e pra cliente; não entra na conta do custo." />
                     <div className="flex gap-2">
                       <input
                         type="text"
@@ -1169,6 +1171,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                       </button>
                     )}
                   </div>
+                  <CampoComAjuda microcopy="Se o mesmo bolo sai em mais de um tamanho (P/M/G, por exemplo), adicione todos aqui em vez de criar uma ficha nova pra cada um. Os insumos continuam os mesmos — só a quantidade de cada um muda por tamanho, no Passo 2." />
                   {tamanhos.map((tamanho) => (
                     <div key={tamanho.id} className="flex items-center gap-2.5">
                       <input
