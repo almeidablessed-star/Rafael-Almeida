@@ -285,8 +285,36 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
     const imageHeightStates: Array<{ elem: Element; maxHeight: string }> = [];
     const containerStates: Array<{ elem: Element; maxHeight: string }> = [];
 
+    /**
+     * `#quote-pdf-document` agora rola dentro de uma altura limitada (o modal
+     * ganhou `max-h-[92vh]` para nao cortar o scroll nem esconder o botao de
+     * fechar — ver o card em volta dele). Isso quer dizer que so a parte
+     * visivel (client-height) existe de fato na tela; o resto do conteudo so
+     * aparece ao rolar.
+     *
+     * `toPng()` fotografa o elemento do jeito que ele esta renderizado — se
+     * ele so mede a altura visivel, a foto (e o PDF gerado a partir dela) sai
+     * cortada onde a rolagem parava, mesmo com o conteudo inteiro presente no
+     * DOM. Por isso a folha e temporariamente esticada para a altura natural
+     * dela (removendo o limite e a rolagem) soh durante a captura, e devolvida
+     * ao normal logo depois.
+     */
+    const docElemOriginalStyle = {
+      overflow: docElem.style.overflow,
+      flex: docElem.style.flex,
+      minHeight: docElem.style.minHeight,
+      maxHeight: docElem.style.maxHeight,
+      height: docElem.style.height,
+    };
+
     /** Devolve a folha ao estado normal. Roda no sucesso e no erro. */
     const restaurarEstilos = () => {
+      docElem.style.overflow = docElemOriginalStyle.overflow;
+      docElem.style.flex = docElemOriginalStyle.flex;
+      docElem.style.minHeight = docElemOriginalStyle.minHeight;
+      docElem.style.maxHeight = docElemOriginalStyle.maxHeight;
+      docElem.style.height = docElemOriginalStyle.height;
+
       overflowStates.forEach(({ elem, overflow }) => {
         (elem as HTMLElement).style.overflow = overflow;
       });
@@ -315,6 +343,16 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
 
     try {
       setIsGeneratingPdf(true);
+
+      // Estica a folha para a altura natural dela antes de mais nada — ver o
+      // comentario em `docElemOriginalStyle` acima. Precisa acontecer antes do
+      // carregamento das imagens porque o layout (e a posicao delas) muda com
+      // a rolagem removida.
+      docElem.style.setProperty('overflow', 'visible', 'important');
+      docElem.style.setProperty('flex', 'none', 'important');
+      docElem.style.setProperty('min-height', '0', 'important');
+      docElem.style.setProperty('max-height', 'none', 'important');
+      docElem.style.setProperty('height', 'auto', 'important');
 
       // Wait for all images to load before generating PDF
       const images = docElem.querySelectorAll('img');
@@ -665,7 +703,7 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
         }
       `}</style>
 
-      <div className="bg-white rounded-xl max-w-2xl w-full shadow-highlight overflow-hidden flex flex-col print:shadow-none print:rounded-none border-2 border-pink-200 relative" aria-label="Orçamento PDF">
+      <div className="bg-white rounded-xl max-w-2xl w-full shadow-highlight overflow-hidden flex flex-col max-h-[92vh] print:shadow-none print:rounded-none print:max-h-none border-2 border-pink-200 relative" aria-label="Orçamento PDF">
 
         {/* STICKY TOP CONTROL BAR - ALWAYS VISIBLE & CLEAR ON ALL DEVICES */}
         <div className="p-2.5 sm:p-3 bg-gradient-to-r from-[#3A2350] to-[#A85E86] text-white flex items-center justify-between gap-2 no-print shrink-0 sticky top-0 z-50 border-b border-white/10 shadow-sm">
@@ -719,7 +757,7 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
         {/* PRINTABLE DOCUMENT BODY */}
         <div
           id="quote-pdf-document"
-          className="p-1 sm:p-1.5 overflow-y-auto space-y-1 sm:space-y-2 bg-[#F6F2F5] text-[#241B2B] print:p-1 print:bg-white"
+          className="p-1 sm:p-1.5 flex-1 min-h-0 overflow-y-auto space-y-1 sm:space-y-2 bg-[#F6F2F5] text-[#241B2B] print:p-1 print:bg-white print:overflow-visible print:flex-none"
         >
           {activeTab === 'cliente' ? (
             /* ======================================================== */
