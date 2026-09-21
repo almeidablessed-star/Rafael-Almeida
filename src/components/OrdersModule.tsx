@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Transaction, TransactionType } from '../types';
 import { formatCurrency, formatDateBr } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
-import { getCurrentWeekMonday, getCurrentWeekSunday, filterTransactionsByWeek } from '../utils/weeklyArchiveUtils';
 import { QuotePdfModal } from './QuotePdfModal';
 import {
   ShoppingBag,

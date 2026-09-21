@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Transaction, TransactionType, WeeklyArchive, StockItem } from '../types';
+import React, { useState } from 'react';
+import { Transaction, TransactionType, StockItem } from '../types';
 import { calculateWeeklyBalances } from '../utils/financialEngine';
-import { getWeeklyArchives, hasNewWeekStarted, archiveCurrentWeek } from '../utils/weeklyArchiveUtils';
 import { WeeklyHistoryCard } from './WeeklyHistoryCard';
 import { StockItemAutocomplete } from './StockItemAutocomplete';
 import { formatCurrency, formatDateBr, getTodayIso } from '../utils/formatters';
@@ -87,20 +86,6 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
   const [selectedFilter, setSelectedFilter] = useState<'todos' | 'reposicao' | 'investimento'>('todos');
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Weekly archives
-  const [archives, setArchives] = useState<WeeklyArchive[]>(getWeeklyArchives());
-
-  // Auto-archive when new week starts
-  useEffect(() => {
-    const lastArchiveDate = localStorage.getItem('carula_last_archive_date');
-    if (hasNewWeekStarted(lastArchiveDate)) {
-      const archive = archiveCurrentWeek(transactions);
-      if (archive) {
-        setArchives(getWeeklyArchives());
-        localStorage.setItem('carula_last_archive_date', new Date().toISOString());
-      }
-    }
-  }, [transactions]);
 
   const findExistingProduto = (itemName: string) => {
     const alvo = normalizeName(itemName);
@@ -669,7 +654,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
 
       {/* Weekly History Card */}
       <div style={{ marginTop: '20px' }}>
-        <WeeklyHistoryCard archives={archives} />
+        <WeeklyHistoryCard transactions={transactions} />
       </div>
     </>
   );

@@ -1,10 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { WeeklyArchive } from '../types';
+import { Transaction } from '../types';
 import { formatCurrency, formatDateBr } from '../utils/formatters';
-import { getArchivesByYearMonth, getArchiveYears, getArchiveMonthsByYear } from '../utils/weeklyArchiveUtils';
+import { getWeeklySummariesByYearMonth, getHistoryYears, getHistoryMonthsByYear } from '../utils/weeklyArchiveUtils';
 
 interface WeeklyHistoryCardProps {
-  archives: WeeklyArchive[];
+  transactions: Transaction[];
 }
 
 const monthNames = [
@@ -69,22 +69,37 @@ const SimpleSelect: React.FC<{ value: number; onChange: (val: number) => void; o
   );
 };
 
-export const WeeklyHistoryCard: React.FC<WeeklyHistoryCardProps> = ({ archives }) => {
-  const years = useMemo(() => getArchiveYears(), []);
+export const WeeklyHistoryCard: React.FC<WeeklyHistoryCardProps> = ({ transactions }) => {
+  const years = useMemo(() => getHistoryYears(transactions), [transactions]);
   const currentYear = new Date().getFullYear();
-  const selectedYear = years.length > 0 ? years[0] : currentYear;
 
-  const [filterYear, setFilterYear] = useState(selectedYear);
-  const months = useMemo(() => getArchiveMonthsByYear(filterYear), [filterYear]);
+  const [filterYear, setFilterYear] = useState(years.length > 0 ? years[0] : currentYear);
+  const months = useMemo(() => getHistoryMonthsByYear(transactions, filterYear), [transactions, filterYear]);
   const [filterMonth, setFilterMonth] = useState(months.length > 0 ? months[0] : 1);
 
-  const filteredArchives = useMemo(() => {
-    return getArchivesByYearMonth(filterYear, filterMonth).sort((a, b) => {
-      return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
-    });
-  }, [filterYear, filterMonth]);
+  // `transactions` chega assincronamente do Supabase — no primeiro render
+  // (ou logo apos a usuaria lancar a primeira compra/venda) `years`/`months`
+  // ainda pode estar vazio ou desatualizado em relacao ao `useState` inicial
+  // acima, que so roda uma vez. Sem isto, o ano/mes selecionado ficava preso
+  // no valor do primeiro render mesmo depois dos dados chegarem.
+  React.useEffect(() => {
+    if (years.length > 0 && !years.includes(filterYear)) {
+      setFilterYear(years[0]);
+    }
+  }, [years, filterYear]);
 
-  const hasData = filteredArchives.length > 0;
+  React.useEffect(() => {
+    if (months.length > 0 && !months.includes(filterMonth)) {
+      setFilterMonth(months[0]);
+    }
+  }, [months, filterMonth]);
+
+  const filteredSummaries = useMemo(
+    () => getWeeklySummariesByYearMonth(transactions, filterYear, filterMonth),
+    [transactions, filterYear, filterMonth]
+  );
+
+  const hasData = filteredSummaries.length > 0;
 
   return (
     <div
@@ -135,7 +150,7 @@ export const WeeklyHistoryCard: React.FC<WeeklyHistoryCardProps> = ({ archives }
           value={filterYear}
           onChange={(newYear) => {
             setFilterYear(newYear);
-            const newMonths = getArchiveMonthsByYear(newYear);
+            const newMonths = getHistoryMonthsByYear(transactions, newYear);
             setFilterMonth(newMonths.length > 0 ? newMonths[0] : 1);
           }}
           options={years.map((year) => ({
@@ -164,9 +179,9 @@ export const WeeklyHistoryCard: React.FC<WeeklyHistoryCardProps> = ({ archives }
             gap: '9px',
           }}
         >
-          {filteredArchives.map((archive) => (
+          {filteredSummaries.map((summary) => (
             <div
-              key={archive.id}
+              key={summary.id}
               style={{
                 padding: '12px',
                 background: '#FAF7FA',
@@ -193,7 +208,7 @@ export const WeeklyHistoryCard: React.FC<WeeklyHistoryCardProps> = ({ archives }
                   marginBottom: '6px',
                 }}
               >
-                Semana {archive.weekNumber}: {formatDateBr(archive.startDate)} - {formatDateBr(archive.endDate)}
+                Semana {summary.weekNumber}: {formatDateBr(summary.startDate)} - {formatDateBr(summary.endDate)}
               </div>
 
               {/* Valores */}
@@ -215,7 +230,7 @@ export const WeeklyHistoryCard: React.FC<WeeklyHistoryCardProps> = ({ archives }
                   }}
                 >
                   <span>Lucro Líquido:</span>
-                  <span>{formatCurrency(archive.lucroLiquido)}</span>
+                  <span>{formatCurrency(summary.lucroLiquido)}</span>
                 </div>
                 <div
                   style={{
@@ -225,7 +240,7 @@ export const WeeklyHistoryCard: React.FC<WeeklyHistoryCardProps> = ({ archives }
                   }}
                 >
                   <span>Vendas Pagas:</span>
-                  <span>{formatCurrency(archive.vendidas)}</span>
+                  <span>{formatCurrency(summary.vendidas)}</span>
                 </div>
                 <div
                   style={{
@@ -235,7 +250,7 @@ export const WeeklyHistoryCard: React.FC<WeeklyHistoryCardProps> = ({ archives }
                   }}
                 >
                   <span>Saídas:</span>
-                  <span>{formatCurrency(archive.saldos)}</span>
+                  <span>{formatCurrency(summary.saldos)}</span>
                 </div>
                 <div
                   style={{
@@ -245,7 +260,7 @@ export const WeeklyHistoryCard: React.FC<WeeklyHistoryCardProps> = ({ archives }
                   }}
                 >
                   <span>A Receber:</span>
-                  <span>{formatCurrency(archive.aReceber)}</span>
+                  <span>{formatCurrency(summary.aReceber)}</span>
                 </div>
               </div>
 
@@ -260,7 +275,7 @@ export const WeeklyHistoryCard: React.FC<WeeklyHistoryCardProps> = ({ archives }
                   fontFamily: "'Manrope', sans-serif",
                 }}
               >
-                {archive.transactionCount} transações
+                {summary.transactionCount} transações
               </div>
             </div>
           ))}

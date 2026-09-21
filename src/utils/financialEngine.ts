@@ -1,20 +1,7 @@
 import { Transaction, TimePeriod, SummaryTotals, FichaTecnica, DespesaEmpresa, AdministrativeCosts } from '../types';
 import { getTodayIso, formatDateBr } from './formatters';
-import { getCurrentWeekMonday, getCurrentWeekSunday } from './weeklyArchiveUtils';
+import { getCurrentWeekMonday, getCurrentWeekSunday, createdAtToLocalIso } from './weeklyArchiveUtils';
 import { custoInsumosDoTamanho } from './fichaInsumos';
-
-/**
- * Converte `createdAt` (timestamp em ms) para data local `YYYY-MM-DD`, no
- * mesmo formato usado por `tx.date`/`startIso`/`endIso` — para comparar
- * "quando o pedido foi lancado" com o range de uma semana.
- */
-function createdAtToLocalIso(createdAt: number): string {
-  const d = new Date(createdAt);
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
 
 /**
  * Motor unico de calculo financeiro do Carula.
@@ -738,8 +725,8 @@ export function calculateWeeklyBalances(transactions: Transaction[], fichas: Fic
   // Filtra por data de LANCAMENTO (createdAt), nao pela data de entrega
   // (tx.date) escolhida no pedido — o Dashboard mostra "como estou indo essa
   // semana" em vendas fechadas, nao um calendario de entregas futuras. O
-  // arquivamento semanal (weeklyArchiveUtils.filterTransactionsByWeek)
-  // continua usando tx.date de proposito: seu propósito é outro.
+  // histórico semanal da aba Compras (weeklyArchiveUtils.filterTransactionsByWeek)
+  // usa o mesmo criterio, pelo mesmo motivo.
   const weeklyTransactions = transactions.filter((tx) => {
     if (!tx.createdAt) return false;
     const lancadoEm = createdAtToLocalIso(tx.createdAt);

@@ -365,14 +365,18 @@ export interface SummaryTotals {
   totalTransactionsCount: number;
 }
 
-export interface WeeklyArchive {
+/**
+ * Resumo de uma semana (segunda a domingo) para o card de Histórico da aba
+ * Compras — sempre recalculado na hora a partir de `transactions`
+ * (Supabase), nunca persistido. Ver `weeklyArchiveUtils.getWeeklySummariesByYearMonth`.
+ */
+export interface WeeklySummary {
   id: string;
   year: number;
   month: number;
   weekNumber: number;
   startDate: string; // YYYY-MM-DD (segunda-feira)
   endDate: string; // YYYY-MM-DD (domingo)
-  archivedAt: string; // ISO string
   lucroLiquido: number;
   vendidas: number;
   saldos: number;
