@@ -380,10 +380,13 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
             </div>
           </div>
 
-          {/* Quantidade e Unidade para Estoque (Opcional) */}
+          {/* Quantidade e Unidade da compra atual (Opcional) — o rotulo
+              antigo ("...no Estoque") lia como se perguntasse o que ja
+              tinha em estoque; e o oposto: e o quanto foi comprado AGORA,
+              somado ao estoque existente daquele item. */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', paddingTop: '8px', borderTop: '1px solid rgba(36,27,43,.08)' }}>
             <label style={{ fontSize: '9.5px', fontWeight: 800, color: '#5B4A6B', fontFamily: "'Manrope', sans-serif", letterSpacing: '0.05em' }}>
-              📦 Quantidade e Unidade no Estoque (Opcional)
+              📦 Quantidade Comprada (Opcional)
             </label>
             <div style={{ display: 'flex', gap: '8px' }}>
               <input
