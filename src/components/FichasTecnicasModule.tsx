@@ -1216,7 +1216,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         >
                           <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" style={{ color: '#B27A16' }} />
                           <p className="text-xs font-semibold" style={{ color: '#7A5310' }}>
-                            Sem insumos neste tamanho — ele não vai calcular custo real (CMV) nem baixar estoque.
+                            Sem insumos — não vai calcular custo real (CMV) nem baixar estoque.
                           </p>
                         </div>
                       )}
