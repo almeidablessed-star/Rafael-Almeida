@@ -1953,17 +1953,25 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         lineHeight: 1,
                       }}
                     >
-                      <span
-                        style={{
-                          fontSize: '8px',
-                          fontWeight: 800,
-                          color: '#8A7E90',
-                          letterSpacing: '.03em',
-                          fontFamily: "'Manrope', sans-serif",
-                        }}
-                      >
-                        SUGESTÃO
-                      </span>
+                      {/* "SUGESTÃO" so faz sentido antes do preco ser
+                          confirmado (Passo 3, ainda uma proposta de calculo).
+                          Depois que a ficha e salva com preco > 0, esse ja e
+                          o preco real do bolo — manter a palavra aqui dava a
+                          entender que a confeiteira nunca tinha decidido o
+                          preco de venda. */}
+                      {!tamanhoSelecionado.preco && (
+                        <span
+                          style={{
+                            fontSize: '8px',
+                            fontWeight: 800,
+                            color: '#8A7E90',
+                            letterSpacing: '.03em',
+                            fontFamily: "'Manrope', sans-serif",
+                          }}
+                        >
+                          SUGESTÃO
+                        </span>
+                      )}
                       <span
                         style={{
                           fontSize: '11px',
