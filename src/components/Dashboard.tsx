@@ -285,8 +285,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
           </div>
 
+          {/* Explica o recorte semanal: sem isto, a tela zerada toda
+              segunda-feira parecia um bug pra quem abria o app sem saber que
+              os totais (exceto "A receber") reiniciam a cada semana. */}
+          <p className="text-[10px] mt-2.5 text-center" style={{ color: 'rgba(255,255,255,0.55)', fontFamily: "'Manrope', sans-serif", lineHeight: 1.4 }}>
+            Números da semana atual (seg–dom) · reinicia toda segunda · "A receber" mostra tudo pendente, de qualquer época
+          </p>
+
           {/* Spacer - maintains layout spacing */}
-          <div style={{ height: '44px' }} />
+          <div style={{ height: '32px' }} />
         </div>
 
         {/* "Carula Confeitaria" Title - Centered on screen, floating */}
