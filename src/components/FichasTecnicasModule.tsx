@@ -1520,8 +1520,8 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                             placeholder="0,00"
                             value={tamanho.preco}
                             onChange={(e) => handleUpdateTamanho(tamanho.id, 'preco', e.target.value)}
-                            className="border rounded-[10px] px-3.5 py-3.5 text-xl font-bold text-right"
-                            style={{ borderColor: 'rgba(58,35,80,0.14)', background: '#FAF7FA', color: '#3A2350' }}
+                            className="rounded-xl px-4 py-3.5 text-2xl font-bold text-right"
+                            style={{ border: '2px solid #3A2350', background: '#FAF7FA', color: '#241B2B', boxShadow: '0 0 0 3px rgba(58,35,80,0.10)' }}
                           />
                         </div>
 
@@ -1539,13 +1539,16 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                             <span>Mão de obra</span><span>{formatMoney(mdo)}</span>
                           </div>
                           <div className="flex justify-between" style={{ color: '#7A6E80' }}>
-                            <span>Custo + investimento</span><span>{formatMoney(cus + inv)}</span>
+                            <span>Despesas fixas</span><span>{formatMoney(cus)}</span>
+                          </div>
+                          <div className="flex justify-between" style={{ color: '#7A6E80' }}>
+                            <span>Investimento</span><span>{formatMoney(inv)}</span>
                           </div>
                           <div className="flex justify-between font-bold pt-1" style={{ borderTop: '1px solid #EDE6EF', color: '#3A2350' }}>
                             <span>Custo total</span><span>{formatMoney(custoTotal)}</span>
                           </div>
                           <div className="flex justify-between font-bold" style={{ color: noPrejuizo ? '#C4626F' : '#4CAF7D' }}>
-                            <span>{noPrejuizo ? '⚠️ Prejuízo' : 'Sobra'}</span>
+                            <span>{noPrejuizo ? '⚠️ Prejuízo' : 'Lucro neste preço'}</span>
                             <span>{formatMoney(margem)}{preco > 0 && ` (${margemPct.toFixed(0)}%)`}</span>
                           </div>
                           {noPrejuizo && (
@@ -1557,14 +1560,23 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                                 <span>Preço atual</span><span>{preco > 0 ? formatMoney(preco) : '—'}</span>
                               </div>
                               <div className="flex justify-between font-bold" style={{ color: '#3A2350' }}>
-                                <span>Preço calculado</span><span>{formatMoney(precoCalculado.precoSugerido)}</span>
+                                <span>Preço sugerido</span><span>{formatMoney(precoCalculado.precoSugerido)}</span>
                               </div>
                               {preco > 0 && (
-                                <p style={{ color: abaixoDaMeta ? '#C4626F' : '#4CAF7D', lineHeight: 1.4, marginTop: '2px' }}>
-                                  {abaixoDaMeta
-                                    ? `⚠️ Abaixo da meta em ${formatMoney(precoCalculado.precoSugerido - preco)}`
-                                    : '✓ Na meta ou acima'}
-                                </p>
+                                abaixoDaMeta ? (
+                                  <div style={{ marginTop: '4px' }}>
+                                    <span
+                                      className="inline-flex items-center rounded-full bg-red-100 text-red-700 font-bold"
+                                      style={{ fontSize: '11px', padding: '4px 10px', lineHeight: 1.4 }}
+                                    >
+                                      Abaixo do preço sugerido em {formatMoney(precoCalculado.precoSugerido - preco)}
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <p style={{ color: '#4CAF7D', lineHeight: 1.4, marginTop: '2px' }}>
+                                    ✓ Esse preço já cobre a meta sugerida
+                                  </p>
+                                )
                               )}
                             </div>
                           )}
