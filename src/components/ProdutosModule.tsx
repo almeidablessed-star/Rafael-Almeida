@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Produto, Transaction } from '../types';
 import { useProdutos } from '../context/ProdutosContext';
 import { formatQuantity } from '../utils/formatters';
@@ -6,6 +6,7 @@ import { StockMovementsHistory } from './StockMovementsHistory';
 import { BalancesAndExpensesModule } from './BalancesAndExpensesModule';
 import { GenericDeleteConfirmModal } from './GenericDeleteConfirmModal';
 import { useDelayedDelete } from '../hooks/useDelayedDelete';
+import { FieldValidationError } from './FieldValidationError';
 import {
   Package,
   Plus,
@@ -175,6 +176,9 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formError, setFormError] = useState('');
+  const produtoFormRef = useRef<HTMLFormElement>(null);
+  /** Id do campo obrigatorio vazio, pra mostrar o card de erro custom no lugar do balao nativo do navegador. */
+  const [invalidFieldId, setInvalidFieldId] = useState<string | null>(null);
 
   const [nome, setNome] = useState('');
   const [categoria, setCategoria] = useState('');
@@ -204,6 +208,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
   const handleOpenAdd = () => {
     setEditingId(null);
     setIsAdding(true);
+    setInvalidFieldId(null);
   };
 
   const handleOpenEdit = (p: Produto) => {
@@ -218,10 +223,23 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
     setNivelMinimoUnidade(p.nivelMinimoUnidade || 'g');
     setEditingId(p.id);
     setIsAdding(true);
+    setInvalidFieldId(null);
   };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Substitui o balao de validacao nativo do navegador (form ganhou
+    // `noValidate`) — mesmo padrao usado em Ficha Tecnica, Pedido e Compras.
+    const form = produtoFormRef.current;
+    if (form && !form.checkValidity()) {
+      const invalidField = form.querySelector<HTMLElement>(':invalid');
+      setInvalidFieldId(invalidField?.id || null);
+      requestAnimationFrame(() => invalidField?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+      return;
+    }
+    setInvalidFieldId(null);
+
     if (!nome.trim()) return;
     setFormError('');
 
@@ -390,14 +408,20 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                 </button>
               </div>
 
-              <form onSubmit={handleSave} className="bg-[#F6F2F5] p-4 sm:p-5 space-y-4">
+              <form ref={produtoFormRef} onSubmit={handleSave} noValidate className="bg-[#F6F2F5] p-4 sm:p-5 space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white p-4 rounded-xl border border-[#E6E1DB] shadow-card">
                   <div className="sm:col-span-2">
                     <label className="block text-xs font-bold text-neutral-900 mb-1.5">Nome do Produto *</label>
                     <input
-                      type="text" required placeholder="Farinha de Trigo" value={nome} onChange={(e) => setNome(e.target.value)}
+                      id="produto-nome"
+                      type="text" required placeholder="Farinha de Trigo" value={nome}
+                      onChange={(e) => {
+                        setNome(e.target.value);
+                        if (invalidFieldId === 'produto-nome') setInvalidFieldId(null);
+                      }}
                       className="w-full px-3 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
                     />
+                    {invalidFieldId === 'produto-nome' && <FieldValidationError />}
                   </div>
 
                   <div className="sm:col-span-2">
@@ -415,16 +439,27 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                   <div>
                     <label className="block text-xs font-bold text-neutral-900 mb-1.5">Preço pago *</label>
                     <input
-                      type="text" inputMode="decimal" required placeholder="8.00" value={precoPago} onChange={(e) => setPrecoPago(e.target.value)}
+                      id="produto-preco"
+                      type="text" inputMode="decimal" required placeholder="8.00" value={precoPago}
+                      onChange={(e) => {
+                        setPrecoPago(e.target.value);
+                        if (invalidFieldId === 'produto-preco') setInvalidFieldId(null);
+                      }}
                       className="w-full px-3 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
                     />
+                    {invalidFieldId === 'produto-preco' && <FieldValidationError />}
                   </div>
 
                   <div>
                     <label className="block text-xs font-bold text-neutral-900 mb-1.5">Quantidade da embalagem *</label>
                     <div className="flex gap-2">
                       <input
-                        type="text" inputMode="decimal" required placeholder="1000" value={quantidadeEmbalagem} onChange={(e) => setQuantidadeEmbalagem(e.target.value)}
+                        id="produto-quantidade-embalagem"
+                        type="text" inputMode="decimal" required placeholder="1000" value={quantidadeEmbalagem}
+                        onChange={(e) => {
+                          setQuantidadeEmbalagem(e.target.value);
+                          if (invalidFieldId === 'produto-quantidade-embalagem') setInvalidFieldId(null);
+                        }}
                         className="flex-1 px-3 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
                       />
                       <select
@@ -434,6 +469,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                         {UNIDADES.map((u) => <option key={u} value={u}>{u}</option>)}
                       </select>
                     </div>
+                    {invalidFieldId === 'produto-quantidade-embalagem' && <FieldValidationError />}
                   </div>
 
                   <div className="sm:col-span-2">

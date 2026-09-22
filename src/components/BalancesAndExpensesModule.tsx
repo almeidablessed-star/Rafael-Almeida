@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Transaction, TransactionType, StockItem } from '../types';
 import { calculateWeeklyBalances } from '../utils/financialEngine';
 import { WeeklyHistoryCard } from './WeeklyHistoryCard';
+import { FieldValidationError } from './FieldValidationError';
 import { StockItemAutocomplete } from './StockItemAutocomplete';
 import { formatCurrency, formatDateBr, getTodayIso } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
@@ -77,6 +78,9 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(getTodayIso());
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const expenseFormRef = useRef<HTMLFormElement>(null);
+  /** Id do campo obrigatorio vazio, pra mostrar o card de erro custom no lugar do balao nativo do navegador. */
+  const [invalidFieldId, setInvalidFieldId] = useState<string | null>(null);
 
   // Stock item state (optional)
   const [itemQuantity, setItemQuantity] = useState('');
@@ -98,6 +102,18 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
 
   const handleSaveExpense = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Substitui o balao de validacao nativo do navegador (form ganhou
+    // `noValidate`) — mesmo padrao usado em Ficha Tecnica e Pedido.
+    const form = expenseFormRef.current;
+    if (form && !form.checkValidity()) {
+      const invalidField = form.querySelector<HTMLElement>(':invalid');
+      setInvalidFieldId(invalidField?.id || null);
+      requestAnimationFrame(() => invalidField?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+      return;
+    }
+    setInvalidFieldId(null);
+
     const valNum = parseFloat(amount.replace(',', '.'));
     if (!description.trim() || isNaN(valNum) || valNum <= 0) {
       return;
@@ -278,7 +294,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
           )}
         </div>
 
-        <form onSubmit={handleSaveExpense} style={{ display: 'flex', flexDirection: 'column', gap: '13px' }}>
+        <form ref={expenseFormRef} onSubmit={handleSaveExpense} noValidate style={{ display: 'flex', flexDirection: 'column', gap: '13px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
             <label style={{ fontSize: '10.5px', fontWeight: 800, color: '#5B4A6B', fontFamily: "'Manrope', sans-serif" }}>
               O que você comprou? (Descrição)
@@ -357,26 +373,36 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
                   {symbol}
                 </span>
                 <input
+                  id="compra-valor"
                   type="text"
                   value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
+                  onChange={(e) => {
+                    setAmount(e.target.value);
+                    if (invalidFieldId === 'compra-valor') setInvalidFieldId(null);
+                  }}
                   placeholder="0,00"
                   style={{ paddingLeft: '32px', paddingRight: '13px', paddingTop: '11px', paddingBottom: '11px', background: '#FAF7FA', border: '1px solid rgba(36,27,43,.08)', borderRadius: '14px', fontSize: '11px', color: '#241B2B', fontFamily: "'Manrope', sans-serif", width: '100%', boxSizing: 'border-box' }}
                   required
                 />
               </div>
+              {invalidFieldId === 'compra-valor' && <FieldValidationError />}
             </div>
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
               <label style={{ fontSize: '10.5px', fontWeight: 800, color: '#5B4A6B', fontFamily: "'Manrope', sans-serif" }}>
                 Data da Compra
               </label>
               <input
+                id="compra-data"
                 type="date"
                 value={date}
-                onChange={(e) => setDate(e.target.value)}
+                onChange={(e) => {
+                  setDate(e.target.value);
+                  if (invalidFieldId === 'compra-data') setInvalidFieldId(null);
+                }}
                 style={{ padding: '11px 13px', background: '#FAF7FA', border: '1px solid rgba(36,27,43,.08)', borderRadius: '14px', fontSize: '11px', color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}
                 required
               />
+              {invalidFieldId === 'compra-data' && <FieldValidationError />}
             </div>
           </div>
 

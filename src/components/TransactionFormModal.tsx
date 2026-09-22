@@ -13,6 +13,7 @@ import {
 import { useCustomers } from '../context/CustomersContext';
 import { useCurrency } from '../context/CurrencyContext';
 import { QuotePdfModal } from './QuotePdfModal';
+import { FieldValidationError } from './FieldValidationError';
 import {
   INGREDIENT_PRESETS,
   LABOR_PRESETS,
@@ -130,12 +131,17 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   // no formulario de sempre.
   const [pedidoFormStep, setPedidoFormStep] = useState<1 | 2 | 3>(1);
   const pedidoFormRef = useRef<HTMLFormElement>(null);
+  /** Id do campo obrigatorio vazio, pra mostrar o card de erro custom no lugar do balao nativo do navegador. */
+  const [invalidFieldId, setInvalidFieldId] = useState<string | null>(null);
 
   // Sempre que o modal abre para um pedido novo, comeca no Passo 1 — do
   // contrario reabrir apos fechar no Passo 3 deixaria o passo anterior
   // grudado, como quase aconteceu com o formulario de Ficha Tecnica.
   useEffect(() => {
-    if (isOpen) setPedidoFormStep(1);
+    if (isOpen) {
+      setPedidoFormStep(1);
+      setInvalidFieldId(null);
+    }
   }, [isOpen]);
 
   /**
@@ -751,6 +757,24 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   // --- Form Submit ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Substitui o balao de validacao nativo do navegador (form ganhou
+    // `noValidate`): acha o primeiro campo obrigatorio vazio pela propria
+    // API do DOM, pula pro passo dele (fluxo de venda, com 3 passos) e mostra
+    // o card de erro customizado no lugar. Cobre tanto o botao "Confirmar e
+    // Gravar" (tipos que nao sao venda) quanto o submit do passo 3 da venda.
+    const form = pedidoFormRef.current;
+    if (form && !form.checkValidity()) {
+      const invalidField = form.querySelector<HTMLElement>(':invalid');
+      const invalidStepEl = invalidField?.closest<HTMLElement>('[data-step]');
+      const invalidStep = invalidStepEl ? (Number(invalidStepEl.dataset.step) as 1 | 2 | 3) : 1;
+      setPedidoFormStep(invalidStep);
+      setInvalidFieldId(invalidField?.id || null);
+      requestAnimationFrame(() => invalidField?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+      return;
+    }
+    setInvalidFieldId(null);
+
     setIsSaving(true);
 
     try {
@@ -986,6 +1010,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
           id="pedido-form"
           ref={pedidoFormRef}
           onSubmit={handleSubmit}
+          noValidate
           style={{ fontFamily: "'Manrope', sans-serif" }}
           className="p-5 overflow-y-auto space-y-4 flex-1 stagger-children"
         >
@@ -1227,9 +1252,13 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                           </div>
                         ) : (
                           <select
+                            id={`pedido-produto-${item.id}`}
                             required
                             value={item.productName}
-                            onChange={(e) => handleUpdateItemProduct(item.id, e.target.value)}
+                            onChange={(e) => {
+                              handleUpdateItemProduct(item.id, e.target.value);
+                              if (invalidFieldId === `pedido-produto-${item.id}`) setInvalidFieldId(null);
+                            }}
                             style={{ border: '1px solid rgba(58,35,80,0.14)', borderRadius: '10px', padding: '12px', fontSize: '15px', background: '#FAF7FA' }}
                           >
                             <option value="">Selecione o produto…</option>
@@ -1241,6 +1270,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                             </optgroup>
                           </select>
                         )}
+                        {invalidFieldId === `pedido-produto-${item.id}` && <FieldValidationError />}
                       </div>
 
                       {item.productName === 'Outro / Personalizado' ? (
@@ -1250,13 +1280,18 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                               Nome / Descrição do item
                             </label>
                             <input
+                              id={`pedido-desc-item-${item.id}`}
                               type="text"
                               required
                               placeholder="Ex: Bolo Especial Morango"
                               value={item.customDescription || ''}
-                              onChange={(e) => handleUpdateCustomField(item.id, 'customDescription', e.target.value)}
+                              onChange={(e) => {
+                                handleUpdateCustomField(item.id, 'customDescription', e.target.value);
+                                if (invalidFieldId === `pedido-desc-item-${item.id}`) setInvalidFieldId(null);
+                              }}
                               style={{ width: '100%', border: '1px solid rgba(58,35,80,0.14)', borderRadius: '10px', padding: '10px', fontSize: '13px', background: '#FAF7FA' }}
                             />
+                            {invalidFieldId === `pedido-desc-item-${item.id}` && <FieldValidationError />}
                           </div>
                           <div>
                             <label style={{ fontSize: '11px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '4px' }}>
@@ -1533,12 +1568,18 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                   <div>
                     <label style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '6px' }}>Data da entrega</label>
                     <input
+                      id="pedido-data-entrega"
                       type="date"
                       required
                       value={eventDate}
-                      onChange={(e) => { setEventDate(e.target.value); setEventDateTouched(true); }}
+                      onChange={(e) => {
+                        setEventDate(e.target.value);
+                        setEventDateTouched(true);
+                        if (invalidFieldId === 'pedido-data-entrega') setInvalidFieldId(null);
+                      }}
                       style={{ width: '100%', border: '1px solid rgba(58,35,80,0.14)', borderRadius: '10px', padding: '12px', fontSize: '15px', background: '#FAF7FA', color: '#241B2B' }}
                     />
+                    {invalidFieldId === 'pedido-data-entrega' && <FieldValidationError />}
                   </div>
 
                   <div>
@@ -1654,6 +1695,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                   Descrição do Item <span style={{ color: '#C4626F' }}>*</span>
                 </label>
                 <input
+                  id="despesa-descricao"
                   type="text"
                   required
                   placeholder={
@@ -1664,10 +1706,14 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       : 'Ex: Conta de Luz / Batedeira'
                   }
                   value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  onChange={(e) => {
+                    setDescription(e.target.value);
+                    if (invalidFieldId === 'despesa-descricao') setInvalidFieldId(null);
+                  }}
                   className="w-full focus:outline-none"
                   style={{ padding: '11px 14px', fontSize: '14px', background: '#fff', border: '1px solid #E6E1DB', borderRadius: '10px', color: '#241B2B', fontWeight: 600 }}
                 />
+                {invalidFieldId === 'despesa-descricao' && <FieldValidationError />}
               </div>
 
               {/* Quantidade e Valor Unitario */}
@@ -1731,16 +1777,21 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                 <div className="flex items-center gap-2.5" style={{ padding: '14px 16px', borderRadius: '12px', background: '#F3E9F3' }}>
                   <span className="font-serif-display" style={{ fontSize: '18px', fontWeight: 700, color: '#6E3F72' }}>{currencySymbol}</span>
                   <input
+                    id="despesa-valor-total"
                     type="text"
                     inputMode="decimal"
                     required
                     placeholder="0,00"
                     value={totalValue}
-                    onChange={(e) => handleTotalValueChange(e.target.value)}
+                    onChange={(e) => {
+                      handleTotalValueChange(e.target.value);
+                      if (invalidFieldId === 'despesa-valor-total') setInvalidFieldId(null);
+                    }}
                     className="w-full font-serif-display bg-transparent focus:outline-none"
                     style={{ fontSize: '32px', fontWeight: 700, lineHeight: 1.2, letterSpacing: '-0.5px', color: '#3A2350' }}
                   />
                 </div>
+                {invalidFieldId === 'despesa-valor-total' && <FieldValidationError />}
               </div>
 
               {/* Data */}
@@ -1749,13 +1800,18 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                   Data do Lançamento
                 </label>
                 <input
+                  id="despesa-data"
                   type="date"
                   required
                   value={date}
-                  onChange={(e) => setDate(e.target.value)}
+                  onChange={(e) => {
+                    setDate(e.target.value);
+                    if (invalidFieldId === 'despesa-data') setInvalidFieldId(null);
+                  }}
                   className="w-full focus:outline-none"
                   style={{ padding: '11px 14px', fontSize: '14px', background: '#fff', border: '1px solid #E6E1DB', borderRadius: '10px', color: '#241B2B', fontWeight: 600 }}
                 />
+                {invalidFieldId === 'despesa-data' && <FieldValidationError />}
               </div>
 
               {/* Campos especificos */}
@@ -2131,14 +2187,9 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                     e.preventDefault();
                     return;
                   }
-                  const form = pedidoFormRef.current;
-                  if (!form || form.checkValidity()) return;
-                  e.preventDefault();
-                  const invalidField = form.querySelector<HTMLElement>(':invalid');
-                  const invalidStepEl = invalidField?.closest<HTMLElement>('[data-step]');
-                  const invalidStep = invalidStepEl ? (Number(invalidStepEl.dataset.step) as 1 | 2 | 3) : 1;
-                  setPedidoFormStep(invalidStep);
-                  requestAnimationFrame(() => form.reportValidity());
+                  // Validacao real (checkValidity + achar o campo invalido)
+                  // agora mora no topo de handleSubmit — cobre este botao e o
+                  // "Confirmar e Gravar" dos demais tipos com a mesma logica.
                 }}
               >
                 {isSaving ? (

@@ -13,6 +13,7 @@ import { compressImageFile } from '../utils/imageCompression';
 import { GenericDeleteConfirmModal } from './GenericDeleteConfirmModal';
 import { useDelayedDelete } from '../hooks/useDelayedDelete';
 import { CampoComAjuda } from './onboarding/CampoComAjuda';
+import { FieldValidationError } from './FieldValidationError';
 import {
   BookOpen,
   Plus,
@@ -179,6 +180,8 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   // abre (handleOpenAdd/handleOpenEdit), pra nunca abrir num passo do meio.
   const [formStep, setFormStep] = useState<1 | 2 | 3>(1);
   const stepFormRef = useRef<HTMLFormElement>(null);
+  /** Id do campo obrigatorio vazio, pra mostrar o card de erro custom no lugar do balao nativo do navegador. */
+  const [invalidFieldId, setInvalidFieldId] = useState<string | null>(null);
 
   /**
    * Guarda de duplo-clique no botao primario do rodape.
@@ -418,6 +421,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
       { id: 'ts-1', descricao: '1', preco: '', horasTrabalho: '', valorHora: tarifaSugerida, ingredients: [], maoDeObraCost: '', custoCost: '', investimentoCost: '' },
     ]);
     setEditingId(null);
+    setInvalidFieldId(null);
     setIsCreating(true);
     setFormStep(1);
   };
@@ -466,6 +470,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     setEditingId(ficha.id);
     setIsCreating(true);
     setFormStep(1);
+    setInvalidFieldId(null);
 
     if (!ficha.imageUrl) {
       const imageUrl = await fetchFichaPhoto(ficha.id);
@@ -1048,7 +1053,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 
           {/* Corpo com rolagem */}
           <div className="flex-1 overflow-y-auto p-[18px]" style={{ background: '#F6F2F5', maxHeight: '65vh' }}>
-            <form id="form-ficha-stepped" ref={stepFormRef} onSubmit={handleSaveFicha}>
+            <form id="form-ficha-stepped" ref={stepFormRef} onSubmit={handleSaveFicha} noValidate>
 
               {/* PASSO 1 — IDENTIFICAÇÃO */}
               <div data-step={1} style={{ display: formStep === 1 ? 'flex' : 'none', flexDirection: 'column', gap: '14px' }}>
@@ -1058,14 +1063,19 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Nome do pedido *</label>
                     <input
+                      id="ficha-nome"
                       type="text"
                       required
                       placeholder="Ex: Bolo Vulcão Ninho com Nutella"
                       value={name}
-                      onChange={(e) => setName(e.target.value)}
+                      onChange={(e) => {
+                        setName(e.target.value);
+                        if (invalidFieldId === 'ficha-nome') setInvalidFieldId(null);
+                      }}
                       className="border rounded-[10px] px-3 py-3 text-[15px]"
                       style={{ borderColor: 'rgba(58,35,80,0.14)', background: '#FAF7FA' }}
                     />
+                    {invalidFieldId === 'ficha-nome' && <FieldValidationError />}
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Categoria *</label>
@@ -1087,11 +1097,15 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                     <CampoComAjuda microcopy="Quantas porções esse tamanho rende — em fatias, gramas, unidades ou ml, o que fizer mais sentido pro seu produto. É só uma referência pra você e pra cliente; não entra na conta do custo." />
                     <div className="flex gap-2">
                       <input
+                        id="ficha-rendimento"
                         type="text"
                         required
                         placeholder="Ex: 10 ou 500"
                         value={yieldInfo}
-                        onChange={(e) => setYieldInfo(e.target.value)}
+                        onChange={(e) => {
+                          setYieldInfo(e.target.value);
+                          if (invalidFieldId === 'ficha-rendimento') setInvalidFieldId(null);
+                        }}
                         className="flex-1 min-w-0 border rounded-[10px] px-3 py-3 text-[15px]"
                         style={{ borderColor: 'rgba(58,35,80,0.14)', background: '#FAF7FA' }}
                       />
@@ -1107,6 +1121,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         <option value="ml">🥛 ML</option>
                       </select>
                     </div>
+                    {invalidFieldId === 'ficha-rendimento' && <FieldValidationError />}
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Foto</label>
@@ -1659,13 +1674,17 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                     return;
                   }
                   const form = stepFormRef.current;
-                  if (!form || form.checkValidity()) return;
+                  if (!form || form.checkValidity()) {
+                    setInvalidFieldId(null);
+                    return;
+                  }
                   e.preventDefault();
                   const invalidField = form.querySelector<HTMLElement>(':invalid');
                   const invalidStepEl = invalidField?.closest<HTMLElement>('[data-step]');
                   const invalidStep = invalidStepEl ? (Number(invalidStepEl.dataset.step) as 1 | 2 | 3) : 1;
                   setFormStep(invalidStep);
-                  requestAnimationFrame(() => form.reportValidity());
+                  setInvalidFieldId(invalidField?.id || null);
+                  requestAnimationFrame(() => invalidField?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
                 }}
               >
                 <Check className="w-4 h-4 stroke-[2.5]" />

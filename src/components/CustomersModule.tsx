@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Customer, CustomerEvent } from '../types';
 import { formatDateBr, formatDayMonthOnly } from '../utils/formatters';
@@ -7,6 +7,7 @@ import { useCustomers } from '../context/CustomersContext';
 import { useDelayedDelete } from '../hooks/useDelayedDelete';
 import { compressImageFile } from '../utils/imageCompression';
 import { GenericDeleteConfirmModal } from './GenericDeleteConfirmModal';
+import { FieldValidationError } from './FieldValidationError';
 import {
   Users,
   Plus,
@@ -228,6 +229,9 @@ export const CustomersModule: React.FC = () => {
     : customersDoContexto;
 
   // Form states
+  const customerFormRef = useRef<HTMLFormElement>(null);
+  /** Id do campo obrigatorio vazio, pra mostrar o card de erro custom no lugar do balao nativo do navegador. */
+  const [invalidFieldId, setInvalidFieldId] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [photoUrl, setPhotoUrl] = useState('');
@@ -256,6 +260,7 @@ export const CustomersModule: React.FC = () => {
     setCity('');
     setNotes('');
     setIsFormOpen(true);
+    setInvalidFieldId(null);
   };
 
   const handleOpenEdit = async (c: Customer) => {
@@ -270,6 +275,7 @@ export const CustomersModule: React.FC = () => {
     setCity(c.city || '');
     setNotes(c.notes || '');
     setIsFormOpen(true);
+    setInvalidFieldId(null);
 
     if (!c.photoUrl) {
       const photo = await fetchCustomerPhoto(c.id);
@@ -303,6 +309,18 @@ export const CustomersModule: React.FC = () => {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Substitui o balao de validacao nativo do navegador (form ganhou
+    // `noValidate`) — mesmo padrao usado em Ficha Tecnica, Pedido e Compras.
+    const form = customerFormRef.current;
+    if (form && !form.checkValidity()) {
+      const invalidField = form.querySelector<HTMLElement>(':invalid');
+      setInvalidFieldId(invalidField?.id || null);
+      requestAnimationFrame(() => invalidField?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+      return;
+    }
+    setInvalidFieldId(null);
+
     if (!name.trim()) return;
 
     setFormError('');
@@ -654,7 +672,9 @@ export const CustomersModule: React.FC = () => {
       {isFormOpen && createPortal(
         <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-neutral-900/80 backdrop-blur-xs p-0 sm:p-4" role="dialog" aria-modal="true">
           <form
+            ref={customerFormRef}
             onSubmit={handleSave}
+            noValidate
             className="w-full h-full sm:h-auto sm:max-w-[430px] sm:max-h-[90vh] bg-[#F6F2F5] sm:rounded-[24px] overflow-hidden flex flex-col"
             style={{ boxShadow: '0 30px 70px rgba(58,35,80,0.26)' }}
           >
@@ -722,26 +742,36 @@ export const CustomersModule: React.FC = () => {
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Nome da(o) cliente *</label>
                   <input
+                    id="cliente-nome"
                     type="text"
                     required
                     placeholder="Ex: Camila Santos"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(e) => {
+                      setName(e.target.value);
+                      if (invalidFieldId === 'cliente-nome') setInvalidFieldId(null);
+                    }}
                     className="border rounded-[10px] px-3 py-3 text-[15px]"
                     style={{ borderColor: 'rgba(58,35,80,0.14)', background: '#FAF7FA' }}
                   />
+                  {invalidFieldId === 'cliente-nome' && <FieldValidationError />}
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Telefone / WhatsApp *</label>
                   <input
+                    id="cliente-telefone"
                     type="text"
                     required
                     placeholder="Ex: (781) 420-6892"
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+                    onChange={(e) => {
+                      setPhone(e.target.value);
+                      if (invalidFieldId === 'cliente-telefone') setInvalidFieldId(null);
+                    }}
                     className="border rounded-[10px] px-3 py-3 text-[15px]"
                     style={{ borderColor: 'rgba(58,35,80,0.14)', background: '#FAF7FA' }}
                   />
+                  {invalidFieldId === 'cliente-telefone' && <FieldValidationError />}
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Aniversário</label>
