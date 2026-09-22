@@ -293,7 +293,7 @@ export const CustomersModule: React.FC = () => {
   const handleAddExtraEventField = () => {
     setAdditionalEvents((prev) => [
       ...prev,
-      { id: Date.now().toString(), title: 'Aniversário do Filho(a)', date: '', type: 'personal' },
+      { id: Date.now().toString(), title: '', date: '', type: 'personal' },
     ]);
   };
 
@@ -1316,6 +1316,25 @@ export const CustomersModule: React.FC = () => {
                                 >
                                   {ev.title}
                                 </span>
+                                {ev.isHoliday && (
+                                  <span
+                                    style={{
+                                      fontSize: '8.5px',
+                                      fontWeight: 800,
+                                      color: '#B08D57',
+                                      background: '#F0E2C8',
+                                      padding: '1px 6px',
+                                      borderRadius: '999px',
+                                      textTransform: 'uppercase',
+                                      letterSpacing: '.03em',
+                                      whiteSpace: 'nowrap',
+                                      flexShrink: 0,
+                                      fontFamily: "'Manrope', sans-serif",
+                                    }}
+                                  >
+                                    Feriado
+                                  </span>
+                                )}
                               </div>
                               <p
                                 style={{
