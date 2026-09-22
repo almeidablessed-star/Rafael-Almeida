@@ -148,14 +148,23 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   // Calcular porcentuais por categoria — antes tentava acessar fields que nao existem
   // Agora calcula a partir dos valores reais do objeto CategoryBalance
+  //
+  // Limitado a [0, 100]: currentBalance nunca excede accumulatedInflow (gasto
+  // nao e negativo), entao o teto e so protecao defensiva — o piso de 0 e o
+  // que importa. Quando uma compra da semana supera o quanto foi ganho em
+  // vendas (ex: repor estoque em lote numa semana de venda fraca),
+  // currentBalance fica negativo e dividir por um accumulatedInflow pequeno
+  // gerava percentuais absurdos tipo -4900%. O valor em dinheiro (negativo)
+  // continua visivel abaixo do gauge — so o anel/numero fica sempre coerente.
+  const clampPercent = (value: number) => Math.max(0, Math.min(100, value));
   const reposicaoPercent = balances.reposicao.accumulatedInflow > 0
-    ? Math.round((balances.reposicao.currentBalance / balances.reposicao.accumulatedInflow) * 100)
+    ? clampPercent(Math.round((balances.reposicao.currentBalance / balances.reposicao.accumulatedInflow) * 100))
     : 0;
   const laborPercent = balances.maodeobra.accumulatedInflow > 0
-    ? Math.round((balances.maodeobra.currentBalance / balances.maodeobra.accumulatedInflow) * 100)
+    ? clampPercent(Math.round((balances.maodeobra.currentBalance / balances.maodeobra.accumulatedInflow) * 100))
     : 0;
   const costsPercent = balances.custoEInvestimento.accumulatedInflow > 0
-    ? Math.round((balances.custoEInvestimento.currentBalance / balances.custoEInvestimento.accumulatedInflow) * 100)
+    ? clampPercent(Math.round((balances.custoEInvestimento.currentBalance / balances.custoEInvestimento.accumulatedInflow) * 100))
     : 0;
 
   return (
