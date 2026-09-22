@@ -1373,7 +1373,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                           <span style={{ fontSize: '13px', fontWeight: 700, color: '#7E4F9E' }}>{formatMoney(bd.totalMaodeobra)}</span>
                         </div>
                         <div style={{ background: '#F6F2F5', borderRadius: '10px', padding: '9px 11px' }}>
-                          <span style={{ fontSize: '11px', color: '#7A6E80', display: 'block' }}>Custo</span>
+                          <span style={{ fontSize: '11px', color: '#7A6E80', display: 'block' }}>Despesas</span>
                           <span style={{ fontSize: '13px', fontWeight: 700 }}>{formatMoney(bd.totalCusto)}</span>
                         </div>
                         <div style={{ background: '#F6F2F5', borderRadius: '10px', padding: '9px 11px' }}>
@@ -1649,7 +1649,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>{formatMoney(totalItemsMaodeobra)}</span>
                     </div>
                     <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '10px', padding: '9px 11px' }}>
-                      <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', display: 'block' }}>Custos</span>
+                      <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', display: 'block' }}>Despesas</span>
                       <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>{formatMoney(totalItemsCusto)}</span>
                     </div>
                     <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '10px', padding: '9px 11px' }}>
