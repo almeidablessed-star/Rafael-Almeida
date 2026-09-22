@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Produto, Transaction } from '../types';
 import { useProdutos } from '../context/ProdutosContext';
 import { formatQuantity } from '../utils/formatters';
+import { capitalizeFirstLetter } from '../utils/textCase';
 import { StockMovementsHistory } from './StockMovementsHistory';
 import { BalancesAndExpensesModule } from './BalancesAndExpensesModule';
 import { GenericDeleteConfirmModal } from './GenericDeleteConfirmModal';
@@ -425,7 +426,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                       id="produto-nome"
                       type="text" required placeholder="Farinha de Trigo" value={nome}
                       onChange={(e) => {
-                        setNome(e.target.value);
+                        setNome(capitalizeFirstLetter(e.target.value));
                         if (invalidFieldId === 'produto-nome') setInvalidFieldId(null);
                       }}
                       className="w-full px-3 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"

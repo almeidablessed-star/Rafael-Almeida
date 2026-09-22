@@ -7,6 +7,7 @@ import { useProdutos } from '../context/ProdutosContext';
 import { useCosts } from '../context/CostsContext';
 import { calcularEstruturaFinanceira, calcularPrecoSugeridoProduto, somarDespesasEmpresa } from '../utils/financialEngine';
 import { normalizeName } from '../utils/fichaMatcher';
+import { capitalizeFirstLetter } from '../utils/textCase';
 import { areUnitsCompatible } from '../utils/units';
 import { StockItemAutocomplete } from './StockItemAutocomplete';
 import { compressImageFile } from '../utils/imageCompression';
@@ -1072,7 +1073,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                       placeholder="Ex: Bolo Vulcão Ninho com Nutella"
                       value={name}
                       onChange={(e) => {
-                        setName(e.target.value);
+                        setName(capitalizeFirstLetter(e.target.value));
                         if (invalidFieldId === 'ficha-nome') setInvalidFieldId(null);
                       }}
                       className="border rounded-[10px] px-3 py-3 text-[15px]"
@@ -1243,7 +1244,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                           <div className="col-span-12">
                             <StockItemAutocomplete
                               value={ing.name}
-                              onChange={(val) => handleUpdateInsumoTamanho(tamanho.id, ing.id, 'name', val)}
+                              onChange={(val) => handleUpdateInsumoTamanho(tamanho.id, ing.id, 'name', capitalizeFirstLetter(val))}
                               onSelect={(item) => {
                                 const produto = produtos.find((p) => String(p.id) === item.id);
                                 if (!produto) return;

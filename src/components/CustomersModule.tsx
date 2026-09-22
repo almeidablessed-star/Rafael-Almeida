@@ -6,6 +6,7 @@ import { useCurrency } from '../context/CurrencyContext';
 import { useCustomers } from '../context/CustomersContext';
 import { useDelayedDelete } from '../hooks/useDelayedDelete';
 import { compressImageFile } from '../utils/imageCompression';
+import { capitalizeFirstLetter } from '../utils/textCase';
 import { GenericDeleteConfirmModal } from './GenericDeleteConfirmModal';
 import { FieldValidationError } from './FieldValidationError';
 import {
@@ -751,7 +752,7 @@ export const CustomersModule: React.FC = () => {
                     placeholder="Ex: Camila Santos"
                     value={name}
                     onChange={(e) => {
-                      setName(e.target.value);
+                      setName(capitalizeFirstLetter(e.target.value));
                       if (invalidFieldId === 'cliente-nome') setInvalidFieldId(null);
                     }}
                     className="border rounded-[10px] px-3 py-3 text-[15px]"

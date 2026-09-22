@@ -21,6 +21,7 @@ import {
 } from '../data/presetData';
 import { getTodayIso, getTransactionTypeDetails } from '../utils/formatters';
 import { buildFichaItems, normalizeName } from '../utils/fichaMatcher';
+import { capitalizeFirstLetter } from '../utils/textCase';
 import { calculateProportionalBreakdown, derivarProporcoes, parseSaleDetail } from '../utils/financialEngine';
 import {
   X,
@@ -1063,7 +1064,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       placeholder="Ex: Camila Santos..."
                       value={customerName}
                       onChange={(e) => {
-                        setCustomerName(e.target.value);
+                        setCustomerName(capitalizeFirstLetter(e.target.value));
                         setShowCustomerList(true);
                         setHighlightedCustomer(-1);
                       }}
@@ -1286,7 +1287,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                               placeholder="Ex: Bolo Especial Morango"
                               value={item.customDescription || ''}
                               onChange={(e) => {
-                                handleUpdateCustomField(item.id, 'customDescription', e.target.value);
+                                handleUpdateCustomField(item.id, 'customDescription', capitalizeFirstLetter(e.target.value));
                                 if (invalidFieldId === `pedido-desc-item-${item.id}`) setInvalidFieldId(null);
                               }}
                               style={{ width: '100%', border: '1px solid rgba(58,35,80,0.14)', borderRadius: '10px', padding: '10px', fontSize: '13px', background: '#FAF7FA' }}
@@ -1824,7 +1825,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                     type="text"
                     placeholder="Ex: Atacadão, Mercado Central, Embalagens & Cia"
                     value={supplier}
-                    onChange={(e) => setSupplier(e.target.value)}
+                    onChange={(e) => setSupplier(capitalizeFirstLetter(e.target.value))}
                     className="w-full focus:outline-none"
                     style={{ padding: '11px 14px', fontSize: '14px', background: '#fff', border: '1px solid #E6E1DB', borderRadius: '10px', color: '#241B2B', fontWeight: 600 }}
                   />
@@ -2034,7 +2035,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                     type="text"
                     placeholder="Ex: Atacadão, Mercado Central, Embalagens & Cia"
                     value={supplier}
-                    onChange={(e) => setSupplier(e.target.value)}
+                    onChange={(e) => setSupplier(capitalizeFirstLetter(e.target.value))}
                     className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-300 rounded-lg text-sm font-medium text-neutral-800 focus:outline-none focus:ring-2 focus:ring-pink-400"
                   />
                 </div>

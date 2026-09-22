@@ -4,6 +4,7 @@ import { useCurrency } from '../context/CurrencyContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { compressImageFile } from '../utils/imageCompression';
+import { capitalizeFirstLetter } from '../utils/textCase';
 
 const CURRENCY_OPTIONS: { value: 'BRL' | 'USD' | 'EUR'; label: string }[] = [
   { value: 'BRL', label: 'BRL – R$' },
@@ -522,7 +523,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
             <input
               type="text"
               value={profileData.businessName}
-              onChange={(e) => handleChange('businessName', e.target.value)}
+              onChange={(e) => handleChange('businessName', capitalizeFirstLetter(e.target.value))}
               placeholder="Ex.: Bliss Bakery"
               style={{
                 width: '100%',
@@ -574,7 +575,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
             <input
               type="text"
               value={profileData.name}
-              onChange={(e) => handleChange('name', e.target.value)}
+              onChange={(e) => handleChange('name', capitalizeFirstLetter(e.target.value))}
               placeholder="Digite seu nome"
               style={{
                 width: '100%',

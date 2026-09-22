@@ -5,6 +5,7 @@ import { getStoredUserProfile, saveStoredUserProfile } from '../utils/userProfil
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { compressImageFile } from '../utils/imageCompression';
+import { capitalizeFirstLetter } from '../utils/textCase';
 import {
   User,
   X,
@@ -184,7 +185,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 type="text"
                 required
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => setName(capitalizeFirstLetter(e.target.value))}
                 placeholder="Ex: Carula Cake Confeitaria"
                 className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500"
               />
