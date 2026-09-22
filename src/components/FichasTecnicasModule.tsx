@@ -5,7 +5,7 @@ import { useCurrency } from '../context/CurrencyContext';
 import { useFichasTecnicas } from '../context/FichasTecnicasContext';
 import { useProdutos } from '../context/ProdutosContext';
 import { useCosts } from '../context/CostsContext';
-import { calcularEstruturaFinanceira, calcularPrecoSugeridoProduto, somarDespesasEmpresa } from '../utils/financialEngine';
+import { calcularEstruturaFinanceira, calcularPrecoSugeridoProduto, somarDespesasEmpresa, fichaDesatualizada } from '../utils/financialEngine';
 import { normalizeName } from '../utils/fichaMatcher';
 import { capitalizeFirstLetter } from '../utils/textCase';
 import { areUnitsCompatible } from '../utils/units';
@@ -156,7 +156,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   // novos; cada tamanho continua editável, porque a hora varia por bolo — um
   // decorado vale mais que um simples. Ficha ja salva nunca e alterada por
   // mudanca nesta sugestao.
-  const { administrativeCosts } = useCosts();
+  const { administrativeCosts, ultimaMudancaMetas } = useCosts();
   const tarifaSugerida = administrativeCosts?.horaTrabalho
     ? String(administrativeCosts.horaTrabalho)
     : '';
@@ -1505,6 +1505,22 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   implementada hoje: Insumos / Mao de obra / Custo+investimento
                   / Custo total / Sobra ou Prejuizo / Preco calculado) */}
               <div data-step={3} style={{ display: formStep === 3 ? 'flex' : 'none', flexDirection: 'column', gap: '14px' }}>
+                {editingId && fichaDesatualizada(
+                  fichas.find((f) => f.id === editingId) || { updatedAt: undefined },
+                  ultimaMudancaMetas
+                ) && (
+                  <div
+                    className="rounded-2xl p-3.5 flex items-start gap-2.5"
+                    style={{ background: '#FBF0DD', border: '1px solid rgba(178,122,22,0.25)' }}
+                  >
+                    <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" style={{ color: '#B27A16' }} />
+                    <p className="text-xs font-semibold" style={{ color: '#7A5310' }}>
+                      As metas da empresa (CMV/Investimento/Despesas) mudaram desde que essa ficha foi
+                      salva pela última vez. O preço calculado abaixo pode não refletir mais a meta
+                      atual — revise se quiser atualizar.
+                    </p>
+                  </div>
+                )}
                 {tamanhos.map((tamanho) => {
                   const insumos =
                     tamanho.ingredients.reduce((s, i) => s + (Number(i.totalCost) || 0), 0) + repoNum;
@@ -1848,16 +1864,39 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   {/* ESQUERDA: TÍTULO E FATIAS */}
                   <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '7px' }}>
                     {/* TÍTULO */}
-                    <span
-                      style={{
-                        fontFamily: "'Instrument Serif', serif",
-                        fontSize: '21px',
-                        color: '#241B2B',
-                        lineHeight: 1.15,
-                      }}
-                    >
-                      {ficha.name}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                      <span
+                        style={{
+                          fontFamily: "'Instrument Serif', serif",
+                          fontSize: '21px',
+                          color: '#241B2B',
+                          lineHeight: 1.15,
+                        }}
+                      >
+                        {ficha.name}
+                      </span>
+                      {fichaDesatualizada(ficha, ultimaMudancaMetas) && (
+                        <span
+                          title="As metas da empresa (CMV/Investimento/Despesas) mudaram desde que essa ficha foi salva pela última vez — o preço calculado pode não refletir mais a meta atual."
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '3px',
+                            fontSize: '9px',
+                            fontWeight: 800,
+                            color: '#B27A16',
+                            background: '#FBF0DD',
+                            padding: '3px 7px',
+                            borderRadius: '999px',
+                            fontFamily: "'Manrope', sans-serif",
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          <AlertTriangle className="w-3 h-3" />
+                          Metas mudaram
+                        </span>
+                      )}
+                    </div>
                     {/* FILEIRA DE BOTÕES DE TAMANHO - SEMPRE VISÍVEL */}
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignSelf: 'flex-start' }}>
                       {ficha.tamanhos && ficha.tamanhos.length > 0 ? (

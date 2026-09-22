@@ -350,6 +350,10 @@ export interface FichaTecnica {
   custoCost: number;
   investimentoCost: number;
   createdAt?: number;
+  /** Ultima vez que a ficha foi salva (criacao ou edicao) — usado para
+   * detectar se as metas da empresa mudaram DEPOIS que essa ficha foi salva
+   * pela ultima vez (ver [[fichaDesatualizada]] em financialEngine.ts). */
+  updatedAt?: number;
 }
 
 export interface SummaryTotals {

@@ -14,6 +14,12 @@ export type CamposOnboarding = Partial<
 
 interface CostsContextType {
   administrativeCosts: AdministrativeCosts | null;
+  /** Timestamp (ms) da mudanca de meta mais recente registrada em
+   * `configuracao_empresa_historico`, ou null se nunca houve edicao pos-
+   * onboarding. Usado pra avisar quando uma ficha tecnica ja salva ficou
+   * desatualizada em relacao as metas atuais — ver `fichaDesatualizada` em
+   * financialEngine.ts. */
+  ultimaMudancaMetas: number | null;
   isLoading: boolean;
   error: string | null;
   saveCosts: (costs: AdministrativeCosts) => Promise<void>;
@@ -76,6 +82,7 @@ const CAMPOS_ONBOARDING_PARA_COLUNA: Record<keyof CamposOnboarding, string> = {
 export const CostsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const [administrativeCosts, setAdministrativeCosts] = useState<AdministrativeCosts | null>(null);
+  const [ultimaMudancaMetas, setUltimaMudancaMetas] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -111,9 +118,19 @@ export const CostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setIsLoading(true);
       setError(null);
 
-      const [{ data, error: fetchError }, { data: despesasData, error: despesasError }] = await Promise.all([
+      const [{ data, error: fetchError }, { data: despesasData, error: despesasError }, { data: historicoData, error: historicoError }] = await Promise.all([
         supabase.from('administrative_costs').select('*').eq('usuaria_id', user.id).single(),
         supabase.from('despesas_empresa').select('*').eq('usuaria_id', user.id).order('ordem', { ascending: true }),
+        // So a mudanca mais recente importa aqui — usada para avisar quando
+        // uma ficha tecnica ja salva ficou desatualizada em relacao as metas
+        // atuais (ver fichaDesatualizada em financialEngine.ts).
+        supabase
+          .from('configuracao_empresa_historico')
+          .select('changed_at')
+          .eq('usuaria_id', user.id)
+          .order('changed_at', { ascending: false })
+          .limit(1)
+          .maybeSingle(),
       ]);
 
       if (fetchError && fetchError.code !== 'PGRST116') {
@@ -122,9 +139,13 @@ export const CostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (despesasError) {
         throw despesasError;
       }
+      if (historicoError) {
+        throw historicoError;
+      }
 
       const despesas = (despesasData || []).map(mapDespesaFromDb);
       setAdministrativeCosts(montarAdministrativeCosts(data, despesas));
+      setUltimaMudancaMetas(historicoData ? new Date(historicoData.changed_at).getTime() : null);
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar custos');
       console.error('Error fetching costs:', err);
@@ -290,7 +311,13 @@ export const CostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     // Historico e best-effort: uma falha aqui nao pode desfazer um save que
     // ja aconteceu, so fica sem registro daquela alteracao especifica.
     const { error: historicoError } = await supabase.from('configuracao_empresa_historico').insert(historico);
-    if (historicoError) console.error('Erro ao registrar historico:', historicoError);
+    if (historicoError) {
+      console.error('Erro ao registrar historico:', historicoError);
+    } else {
+      // Atualiza na hora, sem esperar o proximo fetchCosts — e o que faz o
+      // aviso de "ficha desatualizada" aparecer imediatamente apos salvar.
+      setUltimaMudancaMetas(Date.now());
+    }
   };
 
   const concluirOnboarding = async () => {
@@ -353,6 +380,7 @@ export const CostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   return (
     <CostsContext.Provider value={{
       administrativeCosts,
+      ultimaMudancaMetas,
       isLoading,
       error,
       saveCosts,

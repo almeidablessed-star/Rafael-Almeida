@@ -47,6 +47,26 @@ export interface ProporcoesMedias {
  * Retorna `null` quando nao ha nada de onde derivar. Quem chama precisa tratar:
  * inventar um numero aqui seria repetir o defeito que esta funcao corrige.
  */
+/**
+ * Uma ficha tecnica ja salva fica "desatualizada" quando as metas da empresa
+ * (CMV/Investimento/Despesas, em Minha Empresa) mudaram DEPOIS da ultima vez
+ * que a ficha foi salva — o preco calculado na tela pode nao refletir mais a
+ * meta atual. Deliberadamente NAO recalcula nada (mudaria um preco ja
+ * combinado com a cliente): so sinaliza, pra quem usa decidir se revisita a
+ * ficha.
+ *
+ * `ultimaMudancaMetas` vem de `configuracao_empresa_historico`, que so
+ * registra edicoes feitas DEPOIS do onboarding (ver `salvarConfiguracaoEmpresa`
+ * em CostsContext.tsx) — de proposito: os valores escolhidos durante o
+ * onboarding guiado nao contam como "mudanca" para uma ficha criada logo
+ * depois dele.
+ */
+export const fichaDesatualizada = (
+  ficha: Pick<FichaTecnica, 'updatedAt'>,
+  ultimaMudancaMetas: number | null
+): boolean =>
+  ficha.updatedAt != null && ultimaMudancaMetas != null && ficha.updatedAt < ultimaMudancaMetas;
+
 export const derivarProporcoes = (fichas: FichaTecnica[]): ProporcoesMedias | null => {
   const amostras: { rep: number; mdo: number; cus: number; inv: number }[] = [];
 

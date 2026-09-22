@@ -48,6 +48,7 @@ interface SupabaseFichaTecnica {
   reposicao: number;
   investimento: number;
   created_at: string;
+  updated_at: string;
 }
 
 interface FichasTecnicasContextType {
@@ -96,6 +97,10 @@ const mapSupabaseToFicha = (data: SupabaseFichaTecnica): FichaTecnica => {
     custoCost: data.custo,
     investimentoCost: data.investimento,
     createdAt: new Date(data.created_at).getTime(),
+    // Coluna nova (migration 20260922) — ficha buscada antes dela existir no
+    // banco simplesmente nao traz o campo, e o fallback pro created_at evita
+    // undefined em vez de quebrar a comparacao de "ficha desatualizada".
+    updatedAt: data.updated_at ? new Date(data.updated_at).getTime() : new Date(data.created_at).getTime(),
   };
 };
 
@@ -154,7 +159,7 @@ export const FichasTecnicasProvider: React.FC<{ children: React.ReactNode }> = (
 
       const { data, error: fetchError } = await supabase
         .from('fichas_tecnicas')
-        .select('id,usuaria_id,nome_produto,categoria,rendimento,tamanhos,insumos,mao_de_obra,custo,reposicao,investimento,created_at')
+        .select('id,usuaria_id,nome_produto,categoria,rendimento,tamanhos,insumos,mao_de_obra,custo,reposicao,investimento,created_at,updated_at')
         .eq('usuaria_id', user.id)
         .order('created_at', { ascending: false });
 
