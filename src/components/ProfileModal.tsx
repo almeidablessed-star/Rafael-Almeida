@@ -5,6 +5,12 @@ import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { compressImageFile } from '../utils/imageCompression';
 
+const CURRENCY_OPTIONS: { value: 'BRL' | 'USD' | 'EUR'; label: string }[] = [
+  { value: 'BRL', label: 'BRL – R$' },
+  { value: 'USD', label: 'USD – $' },
+  { value: 'EUR', label: 'EUR – €' },
+];
+
 interface ProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -41,6 +47,21 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isCurrencyOpen, setIsCurrencyOpen] = useState(false);
+  const currencyBoxRef = useRef<HTMLDivElement>(null);
+
+  /** Fecha o dropdown de moeda ao clicar fora — mesmo padrao ja usado no
+   * autocomplete de cliente do formulario de Pedido. */
+  useEffect(() => {
+    if (!isCurrencyOpen) return;
+    const onDocClick = (e: MouseEvent) => {
+      if (currencyBoxRef.current && !currencyBoxRef.current.contains(e.target as Node)) {
+        setIsCurrencyOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onDocClick);
+    return () => document.removeEventListener('mousedown', onDocClick);
+  }, [isCurrencyOpen]);
 
   const [profileData, setProfileData] = useState<ProfileData>(() => {
     return {
@@ -250,33 +271,86 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
             continua existindo normalmente la, so nao vem mais pre-selecionado
             a partir do Perfil — usa o mesmo padrao "Diária" que o formulario
             ja usava quando nada era pre-preenchido. */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginBottom: '20px' }}>
-          <select
-            value={currency}
-            onChange={(e) => setCurrency(e.target.value as 'BRL' | 'USD' | 'EUR')}
-            style={{
-              background: 'none',
-              border: 'none',
-              padding: '4px 8px',
-              fontFamily: "'Manrope', sans-serif",
-              fontSize: '13px',
-              fontWeight: 600,
-              color: '#7A6E80',
-              cursor: 'pointer',
-              transition: 'color 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLSelectElement).style.color = '#3A2350';
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLSelectElement).style.color = '#7A6E80';
-            }}
-            title="Moeda de exibição"
-          >
-            <option value="BRL">BRL — R$</option>
-            <option value="USD">USD — $</option>
-            <option value="EUR">EUR — €</option>
-          </select>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+          <div className="relative" ref={currencyBoxRef} style={{ width: '160px', fontFamily: "'Manrope', sans-serif" }}>
+            <button
+              type="button"
+              onClick={() => setIsCurrencyOpen((v) => !v)}
+              title="Moeda de exibição"
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '10px',
+                background: '#FFFFFF',
+                border: '1px solid rgba(58,35,80,0.14)',
+                borderRadius: '12px',
+                padding: '10px 13px',
+                fontSize: '14px',
+                fontWeight: 600,
+                color: '#241B2B',
+                cursor: 'pointer',
+              }}
+            >
+              <span>{CURRENCY_OPTIONS.find((o) => o.value === currency)?.label}</span>
+              <span style={{ fontSize: '10px', color: '#7A6E80' }}>▼</span>
+            </button>
+
+            {isCurrencyOpen && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 'calc(100% + 6px)',
+                  left: 0,
+                  right: 0,
+                  zIndex: 10,
+                  background: '#FFFFFF',
+                  border: '1px solid #E6E1DB',
+                  borderRadius: '12px',
+                  padding: '6px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '2px',
+                  boxShadow: '0 20px 36px rgba(58,35,80,0.18)',
+                }}
+              >
+                {CURRENCY_OPTIONS.map((opt) => {
+                  const isSelected = opt.value === currency;
+                  return (
+                    <div
+                      key={opt.value}
+                      onClick={() => {
+                        setCurrency(opt.value);
+                        setIsCurrencyOpen(false);
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '10px 11px',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        background: isSelected ? '#3A2350' : 'transparent',
+                        color: isSelected ? '#FFFFFF' : '#241B2B',
+                        fontSize: '14px',
+                        fontWeight: isSelected ? 700 : 500,
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isSelected) e.currentTarget.style.background = '#F3E9F3';
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isSelected) e.currentTarget.style.background = 'transparent';
+                      }}
+                    >
+                      <span>{opt.label}</span>
+                      {isSelected && <span style={{ fontSize: '12px', color: '#F5B9C6' }}>✓</span>}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Header */}
