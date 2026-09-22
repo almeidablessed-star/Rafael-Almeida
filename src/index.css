@@ -96,22 +96,21 @@
   100% { transform: translateX(220%); }
 }
 
-/* O Safari no iOS tinge a status bar a partir de uma cor SOLIDA de fundo —
-   prefere o body, e cai para o html quando o body tem gradiente (ele nao
-   consegue amostrar gradiente). Como o body daqui e gradiente, quem manda e
-   esta linha.
-   #462958 e a cor medida no MEIO da borda superior do card. A borda e uma
-   rampa (#3A2350 na esquerda -> #523060 na direita); o valor do centro e o
-   que minimiza a emenda visivel. Nao usar #3A2350: e a ponta mais escura da
-   rampa e aparece como uma faixa chapada e escura.
-   Tambem cobre o rubber-band do overscroll no PWA instalado. */
+/* `html` e quem pinta a area de overscroll/rubber-band (tem prioridade sobre
+   o background do `body` para o "canvas" da pagina) — por isso precisa da
+   MESMA cor de fundo usada atras dos cards no resto do app (--color-surface),
+   nao um tom escuro do header. Antes era #462958 (roxo escuro, pra combinar
+   com o header no PWA instalado via tint de status bar do Safari), mas isso
+   aparecia como um flash rosa/roxo ao rolar alem do topo/fim em toda tela
+   comum — a maioria das telas nao e o header, e sim o fundo claro atras dos
+   cards. */
 html {
-  background-color: #462958;
+  background-color: #F6F2F5;
 }
 
 body {
   margin: 0;
-  background: linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%);
+  background: #F6F2F5;
   font-family: 'Plus Jakarta Sans', 'Manrope', sans-serif;
   font-variant-numeric: lining-nums tabular-nums;
   color: var(--car-text-900);
