@@ -97,6 +97,23 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
   }, [isOpen, userProfile, user]);
 
   /**
+   * Trava o scroll do body enquanto o modal esta aberto.
+   *
+   * Overlay e card sao dois `position: fixed` irmaos, cada um com seu
+   * proprio overflow. Sem travar o body, ao rolar o card ate o limite
+   * (topo/fundo) o gesto de toque "vaza" e rola a pagina por tras primeiro
+   * — scroll chaining classico do Safari mobile.
+   */
+  useEffect(() => {
+    if (!isOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isOpen]);
+
+  /**
    * Busca a foto sob demanda ao abrir o modal.
    *
    * `fetchUserProfile` nao traz `foto_url` — ver a nota em [[QuotePdfModal]].
@@ -260,6 +277,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
           boxShadow: '0 20px 60px rgba(58, 35, 80, 0.2)',
           maxHeight: '85vh',
           overflow: 'auto',
+          overscrollBehavior: 'contain',
         }}
         onClick={(e) => e.stopPropagation()}
       >
