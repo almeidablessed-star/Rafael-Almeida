@@ -1316,10 +1316,13 @@ export const CustomersModule: React.FC = () => {
                                     // false) ganham marca-texto pra saltar aos olhos na lista —
                                     // os feriados padrao do sistema ficam sem marcacao alguma.
                                     ...(!ev.isHoliday && {
-                                      background: '#FDEFF2',
+                                      background: '#F5B9C6',
                                       borderRadius: '4px',
                                       padding: '1px 5px',
-                                      margin: '-1px -5px',
+                                      // So a margem direita e compensada (negativa) — a
+                                      // esquerda fica sem compensar, abrindo um respiro
+                                      // entre o icone (Cake/Gift) e o marca-texto.
+                                      margin: '-1px -5px -1px 0',
                                     }),
                                   }}
                                 >
