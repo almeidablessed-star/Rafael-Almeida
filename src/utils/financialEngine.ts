@@ -717,6 +717,31 @@ export interface SystemBalances {
 // abaixo.
 
 /**
+ * Soma tudo que ainda esta pendente de recebimento, em QUALQUER semana —
+ * ao contrario do resto de `calculateWeeklyBalances`, este total nao reseta
+ * toda segunda-feira: e dinheiro real que a cliente ainda deve, nao uma
+ * metrica de "como foi esta semana". Mesma regra ja usada no total de
+ * pendentes da aba Pedidos (`OrdersModule`): soma o valor cheio de vendas
+ * com `paymentStatus === 'pendente'` e o saldo restante (`totalValue -
+ * signalValue`) de vendas pagas parcialmente com sinal.
+ */
+export function calcularTotalAReceberGeral(transactions: Transaction[]): number {
+  return transactions.reduce((soma, tx) => {
+    if (tx.type !== 'venda') return soma;
+    const val = Number(tx.totalValue) || 0;
+
+    if (tx.paymentStatus === 'pendente') {
+      return soma + val;
+    }
+    if (tx.signalValue) {
+      const restante = val - Number(tx.signalValue);
+      return soma + restante;
+    }
+    return soma;
+  }, 0);
+}
+
+/**
  * Calculate balances for the current week only (Monday to Sunday)
  */
 export function calculateWeeklyBalances(transactions: Transaction[], fichas: FichaTecnica[] = []): SystemBalances {

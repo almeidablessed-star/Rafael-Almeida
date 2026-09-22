@@ -1,23 +1,35 @@
 import { Transaction, WeeklySummary } from '../types';
 
 /**
- * Get the Monday of the current week
+ * Data de hoje em ISO LOCAL (`YYYY-MM-DD`), sem passar por `toISOString()`
+ * (que converte pra UTC e pode cair no dia errado — ver nota em `getWeekMonday`).
+ */
+const hojeLocalIso = (): string => {
+  const hoje = new Date();
+  return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
+};
+
+/**
+ * Get the Monday of the current week.
+ *
+ * Delega para `getWeekMonday`, que ja resolve pela data LOCAL (sem o
+ * `.toISOString()` que causava o mesmo deslocamento de fuso corrigido ali).
+ * A versao anterior desta funcao repetia o bug: construia a segunda-feira
+ * mantendo a HORA atual (nao zerada) e so depois convertia com
+ * `.toISOString()` — pra fusos atras de UTC (ex: EUA, UTC-4/-5), isso
+ * empurrava a data um dia pra frente sempre que a hora local caia entre
+ * ~20h e meia-noite, excluindo lancamentos legitimos de hoje da janela da
+ * semana.
  */
 export function getCurrentWeekMonday(): string {
-  const today = new Date();
-  const dayOfWeek = today.getDay();
-  const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
-  const monday = new Date(today.setDate(diff));
-  return monday.toISOString().split('T')[0];
+  return getWeekMonday(hojeLocalIso());
 }
 
 /**
- * Get the Sunday of the current week
+ * Get the Sunday of the current week. Mesmo motivo de `getCurrentWeekMonday`.
  */
 export function getCurrentWeekSunday(): string {
-  const monday = new Date(getCurrentWeekMonday());
-  const sunday = new Date(monday.getTime() + 6 * 24 * 60 * 60 * 1000);
-  return sunday.toISOString().split('T')[0];
+  return getWeekSunday(hojeLocalIso());
 }
 
 /**

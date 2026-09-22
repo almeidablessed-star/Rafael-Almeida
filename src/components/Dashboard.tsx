@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Transaction, SummaryTotals, TransactionType, TimePeriod } from '../types';
 import { formatCurrency, formatDateBr } from '../utils/formatters';
-import { calculateWeeklyBalances, calcularMetaSemanal, calcularEstruturaFinanceira, somarDespesasEmpresa, avaliarSaudeFinanceiraProdutos } from '../utils/financialEngine';
+import { calculateWeeklyBalances, calcularTotalAReceberGeral, calcularMetaSemanal, calcularEstruturaFinanceira, somarDespesasEmpresa, avaliarSaudeFinanceiraProdutos } from '../utils/financialEngine';
 import { useCosts } from '../context/CostsContext';
 import { ResumoDistribuicaoCard } from './ResumoDistribuicaoCard';
 import { ANIMATION_DURATIONS, ANIMATION_EASING } from '../lib/animation-tokens';
@@ -79,6 +79,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const { isLoading: transacoesLoading } = useTransacoes();
   const transactionsList = allTransactions.length > 0 ? allTransactions : (recentTransactions || []);
   const balances = calculateWeeklyBalances(transactionsList, fichas);
+  // Excecao ao recorte semanal do restante do card: saldo pendente e dinheiro
+  // real que a cliente ainda deve, nao deve sumir so porque a semana virou.
+  const totalAReceberGeral = calcularTotalAReceberGeral(transactionsList);
 
   // Mesma fonte que "Minha Empresa": faturamento necessario + distribuicao,
   // calculados uma unica vez pelo engine (spec Parte 5, Teste 10 — os
@@ -277,7 +280,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="flex-1 rounded-[16px] p-3 text-center" style={{ background: 'rgba(228,217,195,0.28)' }}>
               <div className="text-[9px] uppercase tracking-[0.06em]" style={{ color: '#F0E2C8', fontFamily: "'Manrope', sans-serif", fontWeight: 700 }}>⏳ A RECEBER</div>
               <div className="text-white mt-1" style={{ fontSize: '15px', lineHeight: 1, fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
-                {formatMoney(balances.totalAReceber || 0)}
+                {formatMoney(totalAReceberGeral || 0)}
               </div>
             </div>
           </div>
