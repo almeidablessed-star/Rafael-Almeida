@@ -550,6 +550,9 @@ export const CustomersModule: React.FC = () => {
           flexDirection: 'column',
           marginBottom: '-100px',
           paddingBottom: '100px',
+          // Sangra para cima cobrindo a safe area, mesmo padrao do header do
+          // Dashboard — ver comentario em OrdersModule.tsx.
+          marginTop: 'calc(0px - env(safe-area-inset-top, 0px))',
         }}
       >
         {/* Header with Title only */}
@@ -558,7 +561,7 @@ export const CustomersModule: React.FC = () => {
           style={{
             background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
             borderRadius: '0px 0px 0px 0px',
-            paddingTop: '40px',
+            paddingTop: 'calc(40px + env(safe-area-inset-top, 0px))',
             paddingBottom: '120px',
           }}
         >

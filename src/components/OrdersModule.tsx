@@ -85,6 +85,12 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
           background: '#F6F2F5',
           marginBottom: '-70px',
           paddingBottom: '70px',
+          // Sangra para cima cobrindo a safe area, mesmo padrao do header do
+          // Dashboard: o cabecalho roxo (primeiro filho, sem gap) preenche
+          // esse espaco extra com o proprio paddingTop compensado, entao o
+          // roxo vai ate a borda da tela no PWA instalado em vez de deixar a
+          // safe area com o fundo claro por baixo.
+          marginTop: 'calc(0px - env(safe-area-inset-top, 0px))',
         }}
       >
         {/* Header roxo: titulo+selo, total em vendas (texto, sem grafico) e
@@ -97,7 +103,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
           className="px-5 flex flex-col gap-4"
           style={{
             background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
-            paddingTop: '24px',
+            paddingTop: 'calc(24px + env(safe-area-inset-top, 0px))',
             paddingBottom: '44px',
           }}
         >

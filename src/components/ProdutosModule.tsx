@@ -303,10 +303,19 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
 
   return (
     <div className="pb-12 animate-fadeIn" style={{ background: '#FAF7FA' }}>
-      <div className="overflow-hidden shadow-card" style={{ boxShadow: '0 30px 70px rgba(58,35,80,.26)', fontFamily: "'Manrope', sans-serif" }}>
+      <div
+        className="overflow-hidden shadow-card"
+        style={{
+          boxShadow: '0 30px 70px rgba(58,35,80,.26)',
+          fontFamily: "'Manrope', sans-serif",
+          // Sangra para cima cobrindo a safe area, mesmo padrao do header do
+          // Dashboard — ver comentario em OrdersModule.tsx.
+          marginTop: 'calc(0px - env(safe-area-inset-top, 0px))',
+        }}
+      >
         <div
           className="px-5 flex flex-col gap-2"
-          style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)', paddingTop: '24px', paddingBottom: '90px' }}
+          style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)', paddingTop: 'calc(24px + env(safe-area-inset-top, 0px))', paddingBottom: '90px' }}
         >
           {/* `visibility: hidden` (nao renderizacao condicional) para o badge
               sempre ocupar o mesmo espaco no cabecalho: escondendo o elemento
