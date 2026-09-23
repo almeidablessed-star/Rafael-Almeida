@@ -167,6 +167,19 @@ export const Dashboard: React.FC<DashboardProps> = ({
     ? clampPercent(Math.round((balances.custoEInvestimento.currentBalance / balances.custoEInvestimento.accumulatedInflow) * 100))
     : 0;
 
+  // Como o saldo de "Custo+Inv" acima soma Despesas e Investimento numa
+  // pilha so, a legenda abaixo do gauge precisa dividi-lo de volta em dois —
+  // usava um /2 fixo (sempre 50/50), ignorando que a proporcao real entre as
+  // duas metas (custosPercent vs investmentTargetPercent, de Minha Empresa)
+  // quase nunca e igual. Cai em 50/50 so quando a estrutura ainda nao esta
+  // configurada (onboarding incompleto) — mesmo fallback que o resto do card.
+  const despesasPercentMeta = estruturaFinanceira?.valido ? estruturaFinanceira.custosPercent : 0;
+  const investimentoPercentMeta = estruturaFinanceira?.valido ? estruturaFinanceira.investmentTargetPercent : 0;
+  const somaPercentMeta = despesasPercentMeta + investimentoPercentMeta;
+  const despesasShare = somaPercentMeta > 0 ? despesasPercentMeta / somaPercentMeta : 0.5;
+  const investimentoShare = somaPercentMeta > 0 ? investimentoPercentMeta / somaPercentMeta : 0.5;
+  const saldoCustoEInvestimento = balances.custoEInvestimento.currentBalance || 0;
+
   return (
     <div className="space-y-0 pb-8 animate-fadeIn">
 
@@ -517,9 +530,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
           </div>
 
-          {/* Note about cost division */}
+          {/* Divisao real do saldo combinado, na mesma proporcao das metas
+              configuradas em Minha Empresa — nao mais um /2 fixo. */}
           <p className="text-[10px]" style={{ color: '#9A8FA0' }}>
-            50% Custo ({formatMoney((balances.custoEInvestimento.currentBalance || 0) / 2)}) / 50% Invest.
+            {Math.round(despesasShare * 100)}% Despesas ({formatMoney(saldoCustoEInvestimento * despesasShare)}) / {Math.round(investimentoShare * 100)}% Investimento ({formatMoney(saldoCustoEInvestimento * investimentoShare)})
           </p>
         </div>
 

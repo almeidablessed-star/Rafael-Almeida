@@ -715,10 +715,7 @@ export interface SystemBalances {
   reposicao: CategoryBalance;
   maodeobra: CategoryBalance;
   investimento: CategoryBalance;
-  custoEInvestimento: CategoryBalance & {
-    custoHalf: number;
-    investimentoHalf: number;
-  };
+  custoEInvestimento: CategoryBalance;
   paidSalesCount: number;
   totalExpensesCount: number;
   totalPaidSales: number;
@@ -873,8 +870,6 @@ export function calculateWeeklyBalances(transactions: Transaction[], fichas: Fic
       totalSpent: combinedSpent,
       currentBalance: saldoCombined,
       isNegative: saldoCombined < 0,
-      custoHalf: saldoCombined / 2,
-      investimentoHalf: saldoCombined / 2,
     },
     paidSalesCount,
     totalExpensesCount,
