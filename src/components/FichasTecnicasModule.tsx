@@ -8,7 +8,7 @@ import { useCosts } from '../context/CostsContext';
 import { calcularEstruturaFinanceira, calcularPrecoSugeridoProduto, somarDespesasEmpresa, fichaDesatualizada } from '../utils/financialEngine';
 import { normalizeName } from '../utils/fichaMatcher';
 import { capitalizeFirstLetter } from '../utils/textCase';
-import { areUnitsCompatible } from '../utils/units';
+import { areUnitsCompatible, convertCostPerUnit } from '../utils/units';
 import { StockItemAutocomplete } from './StockItemAutocomplete';
 import { compressImageFile } from '../utils/imageCompression';
 import { GenericDeleteConfirmModal } from './GenericDeleteConfirmModal';
@@ -80,33 +80,6 @@ const getInvestimentoParaTamanho = (tamanho: TamanhoOpcao, fichaGlobal: number) 
 // senão a usuária nao entenderia por que uma unidade "existente" cadastrada
 // antes some da lista).
 const UNIDADES_INSUMO = ['g', 'ml', 'un', 'kg', 'L', 'pacote'] as const;
-
-// Conversão de unidades para cálculo de custo correto
-const convertCostToTargetUnit = (
-  costPerUnit: number,
-  fromUnit: string,
-  toUnit: string
-): number => {
-  // Mapear unidades para gramas/ml como base
-  const toBase: { [key: string]: number } = {
-    'g': 1,
-    'kg': 1000,
-    'ml': 1,
-    'L': 1000,
-    'un': 1,
-    'pacote': 1,
-  };
-
-  const fromBase = toBase[fromUnit] || 1;
-  const toBase_ = toBase[toUnit] || 1;
-
-  // Converter o custo: se o custo é por "from", converter para "to"
-  // Exemplo: R$ 10/kg para grama
-  // fromBase = 1000 (1kg = 1000g), toBase_ = 1 (1g = 1g)
-  // R$ 10/kg = R$ 10 por 1000g = R$ 0,01 por 1g
-  // Fórmula: costPerUnit × (toBase_ / fromBase) = 10 × (1 / 1000) = 0,01 ✅
-  return costPerUnit * (toBase_ / fromBase);
-};
 
 // DEFAULT_FICHAS, getStoredFichas e saveStoredFichas foram removidos: eram uma
 // ficha de exemplo ("Bolo Vulcao Ninho com Nutella") mais leitura e escrita em
@@ -525,7 +498,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
           updated.unit = unidade as IngredientUsage['unit'];
         }
         const custoBase = custoPorUnidade(produto);
-        const convertedCost = convertCostToTargetUnit(custoBase, produto.unidadeEmbalagem, unidade);
+        // `unidade` acima ja foi forcada a ser compativel com
+        // `produto.unidadeEmbalagem` (mesma guarda de `areUnitsCompatible`) —
+        // o `?? custoBase` e so defensivo, nunca deveria disparar na pratica.
+        const convertedCost = convertCostPerUnit(custoBase, produto.unidadeEmbalagem, unidade) ?? custoBase;
         updated.unitCost = convertedCost;
         updated.totalCost = (Number(ing.quantity) || 0) * convertedCost;
         updated.produtoId = produto.id;
@@ -668,7 +644,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   const unidade = areUnitsCompatible(produto.unidadeEmbalagem, ing.unit)
                     ? ing.unit
                     : produto.unidadeEmbalagem;
-                  const convertedCost = convertCostToTargetUnit(custoBase, produto.unidadeEmbalagem, unidade);
+                  // `unidade` acima ja foi forcada a ser compativel com
+                  // `produto.unidadeEmbalagem` (mesma guarda de `areUnitsCompatible`) —
+                  // o `?? custoBase` e so defensivo, nunca deveria disparar na pratica.
+                  const convertedCost = convertCostPerUnit(custoBase, produto.unidadeEmbalagem, unidade) ?? custoBase;
                   return {
                     ...ing,
                     name: produto.nome,
@@ -1262,7 +1241,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                                             const unidade = areUnitsCompatible(produto.unidadeEmbalagem, i2.unit)
                                               ? i2.unit
                                               : produto.unidadeEmbalagem;
-                                            const convertedCost = convertCostToTargetUnit(custoBase, produto.unidadeEmbalagem, unidade);
+                                            // `unidade` acima ja foi forcada a ser compativel com
+                                            // `produto.unidadeEmbalagem` (mesma guarda de `areUnitsCompatible`) —
+                                            // o `?? custoBase` e so defensivo, nunca deveria disparar na pratica.
+                                            const convertedCost = convertCostPerUnit(custoBase, produto.unidadeEmbalagem, unidade) ?? custoBase;
                                             return {
                                               ...i2,
                                               name: produto.nome,
