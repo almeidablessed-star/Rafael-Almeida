@@ -409,8 +409,12 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Force image elements to be visible and ensure they have dimensions
-      // Temporarily remove overflow-hidden from image containers to allow html-to-image to capture them
-      const overflowElements = docElem.querySelectorAll('[class*="overflow-hidden"]');
+      // Temporarily remove overflow-hidden from image containers to allow html-to-image to capture them.
+      // Exclui `.inspiration-image-container`: o overflow-hidden dele nao serve pra evitar corte
+      // de altura (isso e resolvido separadamente abaixo, zerando o max-height) — serve pra
+      // ARREDONDAR a foto de referencia (border-radius + overflow-hidden). Removido daqui, a foto
+      // saia quadrada no PDF mesmo aparecendo redonda na tela.
+      const overflowElements = docElem.querySelectorAll('[class*="overflow-hidden"]:not(.inspiration-image-container)');
       overflowElements.forEach(elem => {
         const currentOverflow = window.getComputedStyle(elem).overflow;
         overflowStates.push({ elem, overflow: currentOverflow });
@@ -444,10 +448,12 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
         const currentMaxHeight = containerElement.style.maxHeight;
         containerStates.push({ elem: container, maxHeight: currentMaxHeight });
 
-        // Force container to show all content
+        // Force container to show all content. `overflow` fica INTOCADO de proposito
+        // (continua `hidden`, do CSS original) — e o que arredonda a foto de referencia;
+        // com o max-height zerado abaixo, nao ha mais altura pra cortar, entao manter o
+        // overflow-hidden so arredonda, nao corta nada.
         containerElement.style.setProperty('max-height', 'none', 'important');
         containerElement.style.setProperty('height', 'auto', 'important');
-        containerElement.style.setProperty('overflow', 'visible', 'important');
         containerElement.style.setProperty('min-height', '100px', 'important');
 
       });
