@@ -137,7 +137,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   onAddTransaction,
   onNavigateToTab,
 }) => {
-  const { formatCurrency: formatMoney } = useCurrency();
+  const { formatCurrency: formatMoney, symbol } = useCurrency();
   const { fichas, isLoading: isLoadingFichas, error: fichasError, addFicha, updateFicha, deleteFicha, fetchFichaPhoto } = useFichasTecnicas();
   const { produtos, addProduto, custoPorUnidade } = useProdutos();
 
@@ -1481,7 +1481,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         />
                       </div>
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>R$ / hora</label>
+                        <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>{symbol} / hora</label>
                         <input
                           type="text"
                           inputMode="decimal"
@@ -1548,7 +1548,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 
                       <div className="bg-white rounded-2xl p-[18px] flex flex-col gap-3" style={{ boxShadow: '0 8px 20px rgba(58,35,80,.09)' }}>
                         <div className="flex flex-col gap-1.5">
-                          <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Preço de venda (R$)</label>
+                          <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Preço de venda ({symbol})</label>
                           <input
                             type="text"
                             inputMode="decimal"

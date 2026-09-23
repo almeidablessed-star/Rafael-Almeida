@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Transaction, TransactionType } from '../types';
+import { useCurrency } from '../context/CurrencyContext';
 import {
   formatCurrency,
   formatDateBr,
@@ -36,6 +37,7 @@ export const HistoryModule: React.FC<HistoryModuleProps> = ({
   onDeleteTransaction,
   onTogglePaymentStatus,
 }) => {
+  const { symbol } = useCurrency();
   const [selectedType, setSelectedType] = useState<string>('todos');
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -69,7 +71,7 @@ export const HistoryModule: React.FC<HistoryModuleProps> = ({
       return;
     }
 
-    const headers = ['Data', 'Tipo', 'Descrição', 'Quantidade', 'Valor Total (R$)', 'Detalhe/Fornecedor'];
+    const headers = ['Data', 'Tipo', 'Descrição', 'Quantidade', `Valor Total (${symbol})`, 'Detalhe/Fornecedor'];
     const rows = filteredTransactions.map((t) => [
       formatDateBr(t.date),
       getTransactionTypeDetails(t.type).label,

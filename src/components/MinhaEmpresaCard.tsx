@@ -36,7 +36,7 @@ const DESPESA_ACCENTS = ['#A85E86', '#7E4F9E', '#B08D57', '#A9D8B8', '#6E3F72'];
 
 export const MinhaEmpresaCard: React.FC = () => {
   const { administrativeCosts, salvarConfiguracaoEmpresa, salvarDespesas, error } = useCosts();
-  const { formatCurrency } = useCurrency();
+  const { formatCurrency, symbol } = useCurrency();
 
   const [carregouInicial, setCarregouInicial] = useState(false);
 
@@ -234,7 +234,7 @@ export const MinhaEmpresaCard: React.FC = () => {
                   className="w-full bg-white focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe" />
                 <div className="flex gap-2 items-end">
                   <div className="flex-1">
-                    <label className="text-xs font-semibold block mb-1" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>Valor (R$)</label>
+                    <label className="text-xs font-semibold block mb-1" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>Valor ({symbol})</label>
                     <input type="number" placeholder="0" value={d.valor || ''} onChange={(e) => atualizarDespesa(i, 'valor', Number(e.target.value))}
                       style={{ fontFamily: "'Manrope', sans-serif", fontSize: '16px', fontWeight: 600, padding: '11px 13px', borderRadius: '10px', border: '1px solid rgba(58,35,80,0.14)', background: '#FAF7FA', fontVariantNumeric: 'tabular-nums' }}
                       className="w-full focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe" />

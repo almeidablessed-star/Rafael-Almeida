@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Produto, Transaction } from '../types';
 import { useProdutos } from '../context/ProdutosContext';
 import { formatQuantity } from '../utils/formatters';
+import { useCurrency } from '../context/CurrencyContext';
 import { capitalizeFirstLetter } from '../utils/textCase';
 import { StockMovementsHistory } from './StockMovementsHistory';
 import { BalancesAndExpensesModule } from './BalancesAndExpensesModule';
@@ -140,6 +141,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
   onAbaInicialConsumida,
 }) => {
   const { produtos: produtosDoContexto, addProduto, updateProduto, deleteProduto, custoPorUnidade } = useProdutos();
+  const { formatCurrency, symbol } = useCurrency();
   const [aba, setAba] = useState<'todos' | 'estoque' | 'compras'>('todos');
 
   const [deletingProduto, setDeletingProduto] = useState<Produto | null>(null);
@@ -778,7 +780,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                       )}
                     </div>
                     <p className="text-[11px] mt-1" style={{ color: '#7A6E80' }}>
-                      R$ {p.precoPago.toFixed(2)} / {p.quantidadeEmbalagem} {p.unidadeEmbalagem} · custo unitário R$ {custoPorUnidade(p).toFixed(4)}/{p.unidadeEmbalagem}
+                      {formatCurrency(p.precoPago)} / {p.quantidadeEmbalagem} {p.unidadeEmbalagem} · custo unitário {symbol} {custoPorUnidade(p).toFixed(4)}/{p.unidadeEmbalagem}
                     </p>
                   </div>
                   <div className="flex items-center gap-1 flex-shrink-0">
@@ -803,7 +805,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
         itemType="produto"
         itemName={deletingProduto?.nome}
         itemDetails={[
-          { label: '💰', value: `R$ ${deletingProduto?.precoPago.toFixed(2)}` },
+          { label: '💰', value: formatCurrency(deletingProduto?.precoPago || 0) },
         ]}
         onClose={() => setDeletingProduto(null)}
         onConfirmDelete={() => {
