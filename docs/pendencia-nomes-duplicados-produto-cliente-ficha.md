@@ -1,10 +1,24 @@
-# PENDENTE: checagem de nomes duplicados ao criar Produto/Cliente/Ficha
+# RESOLVIDO: checagem de nomes duplicados ao criar Produto/Cliente/Ficha
 
 > Registrado em 2026-09-22, achado durante o mapeamento da pendência de
 > capitalização automática de nomes (item "grupo capitalização/busca" da
 > lista de polimento desta sessão) — fora do escopo daquela tarefa (que era
 > só capitalizar a primeira letra ao digitar), então só documentado aqui,
 > sem correção.
+
+## Resolução (2026-09-25)
+
+Implementado exatamente como as perguntas abaixo previam precisar de decisão
+do Rafael: **Produto e Ficha Técnica avisam, mas não bloqueiam** — ao criar ou
+renomear um item para um nome que já existe (comparação via `normalizeName()`,
+a mesma função descrita neste doc), aparece um aviso com duas opções: usar o
+item já cadastrado (abre a edição dele) ou seguir criando a duplicata mesmo
+assim. **Cliente ficou de fora, sem nenhuma checagem** — decisão confirmada de
+que nomes de pessoas repetem legitimamente e a checagem atrapalharia mais do
+que ajudaria. Novo componente `src/components/DuplicateNameWarningModal.tsx`,
+reaproveitando o padrão visual do `GenericDeleteConfirmModal.tsx`. Testado ao
+vivo (criação e rename, nos dois módulos) antes do deploy. Commit final
+`520edef`, em produção.
 
 ## Contexto
 
