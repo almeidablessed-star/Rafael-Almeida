@@ -1005,7 +1005,21 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
                     <img
                       src={inspirationImage}
                       alt="Foto de Referência do Cliente"
-                      className="w-full h-auto max-h-[150px] sm:max-h-none object-contain rounded-xl shadow-card inspiration-image"
+                      /*
+                       * `max-w-[50%]` reduz a foto a metade da largura do card,
+                       * na tela E no PDF.
+                       *
+                       * Vale para o PDF sem nenhuma mudanca em `handleDownloadPdf`
+                       * porque aquele codigo forca `width: 100% !important` mas
+                       * nunca toca em `max-width` — e em CSS `max-width` vence
+                       * `width`, !important ou nao. Medido: 558x744 antes,
+                       * 279x372 depois, identico nos dois caminhos.
+                       *
+                       * A proporcao fica intacta: so a largura e limitada, e o
+                       * `h-auto` deixa a altura acompanhar. O container e
+                       * `flex justify-center`, entao a foto menor fica centrada.
+                       */
+                      className="w-full max-w-[50%] h-auto max-h-[150px] sm:max-h-none object-contain rounded-xl shadow-card inspiration-image"
                     />
                   </div>
                 </div>
