@@ -492,7 +492,18 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
       // de altura (isso e resolvido separadamente abaixo, zerando o max-height) — serve pra
       // ARREDONDAR a foto de referencia (border-radius + overflow-hidden). Removido daqui, a foto
       // saia quadrada no PDF mesmo aparecendo redonda na tela.
-      const overflowElements = docElem.querySelectorAll('[class*="overflow-hidden"]:not(.inspiration-image-container)');
+      //
+      // `.rounded-photo-container` (o retrato da cliente e a foto da confeitaria) sai pelo
+      // mesmo motivo, e o caso e ainda mais claro: a imagem la dentro e exatamente do tamanho
+      // da caixa (`w-full h-full`), entao nao existe nada transbordando para ser cortado — o
+      // overflow-hidden dali SO arredonda. Com ele removido, a foto preenchia os cantos e as
+      // duas saiam quadradas no PDF, com a borda arredondada desenhada por baixo.
+      //
+      // Marque com essa classe qualquer foto nova que dependa de border-radius +
+      // overflow-hidden, em vez de acrescentar mais um `:not()` aqui a cada vez.
+      const overflowElements = docElem.querySelectorAll(
+        '[class*="overflow-hidden"]:not(.inspiration-image-container):not(.rounded-photo-container)'
+      );
       overflowElements.forEach(elem => {
         const currentOverflow = window.getComputedStyle(elem).overflow;
         overflowStates.push({ elem, overflow: currentOverflow });
@@ -852,7 +863,13 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
               <div className="bg-gradient-to-r from-[#3A2350] to-[#A85E86] rounded-lg p-3.5 text-white shadow-card border border-white/20 print:border-neutral-300 print:bg-white print:text-neutral-900 print-avoid-break">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-lg bg-white border-2 border-[var(--color-pastry-light-pink)] shadow-card flex items-center justify-center overflow-hidden shrink-0">
+                    {/* `rounded-photo-container` marca as fotos que sao arredondadas
+                        por border-radius + overflow-hidden. A classe existe so para
+                        estas caixas ficarem FORA da remocao generica de
+                        overflow-hidden feita antes da captura do PDF — ver o
+                        comentario no seletor, em `handleDownloadPdf`. Sem ela os 8px
+                        de arredondamento somem e a foto sai quadrada no PDF. */}
+                    <div className="w-12 h-12 rounded-lg bg-white border-2 border-[var(--color-pastry-light-pink)] shadow-card flex items-center justify-center overflow-hidden shrink-0 rounded-photo-container">
                       {sellerPhotoUrl ? (
                         <img
                           src={sellerPhotoUrl}
@@ -894,7 +911,9 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
                     👤 Dados da(o) Cliente Especial
                   </h4>
                   <div className="flex items-center gap-2.5">
-                    <div className="w-11 h-11 rounded-full border-2 border-[var(--color-pastry-light-pink)] overflow-hidden bg-[var(--color-pastry-pink)]/30 flex items-center justify-center shrink-0 shadow-card">
+                    {/* Mesma marcacao da foto da confeitaria acima: sem ela o
+                        retrato sai QUADRADO no PDF, redondo apenas na tela. */}
+                    <div className="w-11 h-11 rounded-full border-2 border-[var(--color-pastry-light-pink)] overflow-hidden bg-[var(--color-pastry-pink)]/30 flex items-center justify-center shrink-0 shadow-card rounded-photo-container">
                       {custPhoto ? (
                         <img
                           src={custPhoto}
