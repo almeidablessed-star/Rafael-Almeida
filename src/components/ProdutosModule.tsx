@@ -7,8 +7,10 @@ import { capitalizeFirstLetter } from '../utils/textCase';
 import { StockMovementsHistory } from './StockMovementsHistory';
 import { BalancesAndExpensesModule } from './BalancesAndExpensesModule';
 import { GenericDeleteConfirmModal } from './GenericDeleteConfirmModal';
+import { DuplicateNameWarningModal } from './DuplicateNameWarningModal';
 import { useDelayedDelete } from '../hooks/useDelayedDelete';
 import { FieldValidationError } from './FieldValidationError';
+import { normalizeName } from '../utils/fichaMatcher';
 import {
   Package,
   Plus,
@@ -193,6 +195,10 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
   const [nivelMinimo, setNivelMinimo] = useState('');
   const [nivelMinimoUnidade, setNivelMinimoUnidade] = useState<Produto['unidadeEmbalagem']>('g');
 
+  /** Produto duplicado achado ao salvar (criar ou renomear) — guarda os dados
+   * prontos pra salvar, pra "Criar mesmo assim" nao precisar remontar tudo. */
+  const [duplicateWarning, setDuplicateWarning] = useState<{ data: Omit<Produto, 'id'>; existing: Produto } | null>(null);
+
   useEffect(() => {
     if (!isAdding) {
       setNome('');
@@ -264,6 +270,22 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
       nivelMinimoUnidade: controlaEstoque ? nivelMinimoUnidade : null,
     };
 
+    // Mesmo nome (ignorando maiuscula/minuscula, acento e pontuacao — ver
+    // normalizeName) de outro produto ja cadastrado: pra criacao ou pra
+    // renomear um existente pra um nome que ja e de outro. Decisao de produto:
+    // avisa mas nao bloqueia, ver docs/pendencia-nomes-duplicados-produto-cliente-ficha.md.
+    const duplicado = produtosDoContexto.find(
+      (p) => p.id !== editingId && normalizeName(p.nome) === normalizeName(data.nome)
+    );
+    if (duplicado) {
+      setDuplicateWarning({ data, existing: duplicado });
+      return;
+    }
+
+    await performSave(data);
+  };
+
+  const performSave = async (data: Omit<Produto, 'id'>) => {
     try {
       if (editingId) {
         await updateProduto(editingId, data);
@@ -271,6 +293,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
         await addProduto(data);
       }
       setIsAdding(false);
+      setDuplicateWarning(null);
     } catch (err) {
       setFormError((err as any).message || 'Erro ao salvar produto');
     }
@@ -813,6 +836,20 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
             requestDeleteProduto(deletingProduto);
             setDeletingProduto(null);
           }
+        }}
+      />
+
+      <DuplicateNameWarningModal
+        isOpen={!!duplicateWarning}
+        itemType="produto"
+        nome={duplicateWarning?.data.nome || ''}
+        onClose={() => setDuplicateWarning(null)}
+        onCriarMesmoAssim={() => {
+          if (duplicateWarning) performSave(duplicateWarning.data);
+        }}
+        onUsarExistente={() => {
+          if (duplicateWarning) handleOpenEdit(duplicateWarning.existing);
+          setDuplicateWarning(null);
         }}
       />
 

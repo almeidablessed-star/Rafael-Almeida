@@ -12,6 +12,7 @@ import { areUnitsCompatible, convertCostPerUnit } from '../utils/units';
 import { StockItemAutocomplete } from './StockItemAutocomplete';
 import { compressImageFile } from '../utils/imageCompression';
 import { GenericDeleteConfirmModal } from './GenericDeleteConfirmModal';
+import { DuplicateNameWarningModal } from './DuplicateNameWarningModal';
 import { useDelayedDelete } from '../hooks/useDelayedDelete';
 import { CampoComAjuda } from './onboarding/CampoComAjuda';
 import { FieldValidationError } from './FieldValidationError';
@@ -175,6 +176,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [confirmandoAvancarSemInsumos, setConfirmandoAvancarSemInsumos] = useState(false);
   const [deletingFicha, setDeletingFicha] = useState<FichaTecnica | null>(null);
+
+  /** Ficha duplicada achada ao salvar (criar ou renomear) — guarda os dados
+   * prontos pra salvar, pra "Criar mesmo assim" nao precisar remontar tudo. */
+  const [duplicateWarning, setDuplicateWarning] = useState<{ data: Omit<FichaTecnica, 'id' | 'createdAt'>; existing: FichaTecnica } | null>(null);
 
   /**
    * Exclusao de ficha com desfazer de verdade: ao confirmar, a ficha some da
@@ -790,6 +795,23 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
       investimentoCost: parseFloat(investimentoCost) || 0,
     };
 
+    // Mesmo nome (ignorando maiuscula/minuscula, acento e pontuacao — ver
+    // normalizeName) de outra ficha ja cadastrada: pra criacao ou pra
+    // renomear uma existente pra um nome que ja e de outra. Decisao de
+    // produto: avisa mas nao bloqueia, ver
+    // docs/pendencia-nomes-duplicados-produto-cliente-ficha.md.
+    const duplicada = fichas.find(
+      (f) => f.id !== editingId && normalizeName(f.name) === normalizeName(fichaData.name)
+    );
+    if (duplicada) {
+      setDuplicateWarning({ data: fichaData, existing: duplicada });
+      return;
+    }
+
+    await performSaveFicha(fichaData);
+  };
+
+  const performSaveFicha = async (fichaData: Omit<FichaTecnica, 'id' | 'createdAt'>) => {
     try {
       if (editingId) {
         await updateFicha(editingId, fichaData);
@@ -798,6 +820,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
       }
       setIsCreating(false);
       setEditingId(null);
+      setDuplicateWarning(null);
     } catch (err) {
       alert('Erro ao salvar ficha técnica: ' + (err as any).message);
     }
@@ -2237,6 +2260,20 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
             handleConfirmDelete(deletingFicha.id);
             setDeletingFicha(null);
           }
+        }}
+      />
+
+      <DuplicateNameWarningModal
+        isOpen={!!duplicateWarning}
+        itemType="ficha"
+        nome={duplicateWarning?.data.name || ''}
+        onClose={() => setDuplicateWarning(null)}
+        onCriarMesmoAssim={() => {
+          if (duplicateWarning) performSaveFicha(duplicateWarning.data);
+        }}
+        onUsarExistente={() => {
+          if (duplicateWarning) handleOpenEdit(duplicateWarning.existing);
+          setDuplicateWarning(null);
         }}
       />
 
