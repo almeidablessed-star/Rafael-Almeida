@@ -146,12 +146,15 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
 
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
+    if (!file) return;
+    try {
       const photo = await compressImageFile(file);
       setProfileData(prev => ({
         ...prev,
         photo,
       }));
+    } catch (err: any) {
+      alert(err?.message || 'Nao foi possivel usar esta imagem.');
     }
   };
 

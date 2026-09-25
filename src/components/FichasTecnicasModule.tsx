@@ -1162,7 +1162,12 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                           accept="image/*"
                           onChange={async (e) => {
                             const file = e.target.files?.[0];
-                            if (file) setImageUrl(await compressImageFile(file));
+                            if (!file) return;
+                            try {
+                              setImageUrl(await compressImageFile(file));
+                            } catch (err: any) {
+                              alert(err?.message || 'Nao foi possivel usar esta imagem.');
+                            }
                           }}
                           className="hidden"
                         />

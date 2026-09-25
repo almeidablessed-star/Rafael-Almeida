@@ -1,11 +1,20 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Transaction } from '../types';
 import { X, Download, Upload, Trash2, Database, ShieldCheck } from 'lucide-react';
 
 interface BackupModalProps {
   isOpen: boolean;
-  transactions: Transaction[];
+  /**
+   * Busca os lancamentos COM as fotos, so na hora de exportar.
+   *
+   * Antes o modal exportava a lista que ja estava em memoria, mas ela nao
+   * carrega mais `cliente_foto_url` nem `imagem_inspiracao`
+   * (ver `COLUNAS_SEM_FOTO`). Exportar direto dela geraria
+   * um arquivo sem fotos — e como a restauracao apaga tudo e regrava a partir
+   * do arquivo, restaurar esse backup apagaria as fotos de forma irreversivel.
+   */
+  onExportTransactions: () => Promise<Transaction[]>;
   onClose: () => void;
   // Assincronos desde que as transacoes passaram a viver no Supabase: o aviso
   // de sucesso precisa esperar a gravacao, nao adiantar-se a ela.
@@ -15,17 +24,31 @@ interface BackupModalProps {
 
 export const BackupModal: React.FC<BackupModalProps> = ({
   isOpen,
-  transactions,
+  onExportTransactions,
   onClose,
   onRestoreTransactions,
   onClearAll,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   if (!isOpen) return null;
 
-  const exportJsonBackup = () => {
-    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(transactions, null, 2));
+  const exportJsonBackup = async () => {
+    setIsExporting(true);
+    let paraExportar: Transaction[];
+    try {
+      paraExportar = await onExportTransactions();
+    } catch (err: any) {
+      // Melhor nao gerar arquivo nenhum do que gerar um backup incompleto: a
+      // restauracao regrava a partir dele e o que faltar sera perdido.
+      alert(`Erro ao preparar o backup: ${err?.message || err}\n\nNenhum arquivo foi gerado.`);
+      return;
+    } finally {
+      setIsExporting(false);
+    }
+
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(paraExportar, null, 2));
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute('href', dataStr);
     downloadAnchor.setAttribute('download', `carulaconfeitaria_backup_${Date.now()}.json`);
@@ -106,16 +129,21 @@ export const BackupModal: React.FC<BackupModalProps> = ({
           {/* Download Backup */}
           <button
             onClick={exportJsonBackup}
-            className="w-full p-3.5 bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 rounded-lg flex items-center justify-between text-left transition-all active:scale-98"
+            disabled={isExporting}
+            className="w-full p-3.5 bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 rounded-lg flex items-center justify-between text-left transition-all active:scale-98 disabled:opacity-60 disabled:cursor-wait"
           >
             <div className="flex items-center gap-3">
               <Download className="w-5 h-5 text-pink-500" />
               <div>
                 <span className="block font-bold text-xs text-neutral-800">
-                  Fazer Cópia de Segurança (Download Backup)
+                  {isExporting
+                    ? 'Preparando cópia de segurança...'
+                    : 'Fazer Cópia de Segurança (Download Backup)'}
                 </span>
                 <span className="text-[11px] text-neutral-500">
-                  Salva um arquivo .json com todos os seus lançamentos
+                  {isExporting
+                    ? 'Buscando as fotos dos pedidos — pode levar alguns segundos'
+                    : 'Salva um arquivo .json com todos os seus lançamentos'}
                 </span>
               </div>
             </div>

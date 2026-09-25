@@ -74,6 +74,7 @@ function AppContent() {
     deleteTransacao,
     substituirTudo,
     limparTudo,
+    fetchTransacoesComFotos,
   } = useTransacoes();
   const [activeTab, setActiveTab] = useState<TabType>(() => {
     const saved = localStorage.getItem('carula_activeTab') as TabType | null;
@@ -619,7 +620,7 @@ function AppContent() {
       {/* Backup and Data Management Modal */}
       <BackupModal
         isOpen={isBackupModalOpen}
-        transactions={transactions}
+        onExportTransactions={fetchTransacoesComFotos}
         onClose={() => setIsBackupModalOpen(false)}
         onRestoreTransactions={handleRestoreTransactions}
         onClearAll={handleClearAll}

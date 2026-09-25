@@ -131,7 +131,34 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
   const [copied, setCopied] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [inspirationImage, setInspirationImage] = useState<string>(transaction.inspirationImage || '');
-  const { updateTransacao } = useTransacoes();
+  const { updateTransacao, fetchTransacaoFotos } = useTransacoes();
+
+  /**
+   * Busca a foto de referencia sob demanda ao abrir o orcamento.
+   *
+   * A lista de pedidos nao traz mais `imagem_inspiracao` — ver a nota em
+   * `COLUNAS_SEM_FOTO`. Sem isto o quadro da foto abria vazio para todo pedido
+   * gravado numa sessao anterior, e a folha de orcamento saia sem a referencia
+   * que a cliente mandou.
+   */
+  useEffect(() => {
+    if (inspirationImage) return;
+    if (!('id' in transaction) || !transaction.id) return;
+
+    let cancelado = false;
+    fetchTransacaoFotos(transaction.id).then(({ inspirationImage: foto }) => {
+      // So preenche o vazio: se a confeiteira escolheu uma foto nova enquanto
+      // a busca corria, a escolha dela manda.
+      if (!cancelado && foto) setInspirationImage((prev) => prev || foto);
+    });
+
+    return () => {
+      cancelado = true;
+    };
+    // Roda uma vez por pedido aberto. `inspirationImage` fica fora das
+    // dependencias de proposito: incluir faria a busca reagir a remocao da
+    // foto e traze-la de volta do banco logo depois de apaga-la.
+  }, [transaction, fetchTransacaoFotos]);
 
   /**
    * Grava a foto de inspiracao no pedido.
@@ -158,10 +185,14 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
       return;
     }
 
-    const result = await compressImageFile(file);
-    if (result) {
-      setInspirationImage(result);
-      await persistirImagem(result);
+    try {
+      const result = await compressImageFile(file);
+      if (result) {
+        setInspirationImage(result);
+        await persistirImagem(result);
+      }
+    } catch (err: any) {
+      alert(err?.message || 'Nao foi possivel usar esta imagem.');
     }
   };
 
@@ -243,8 +274,48 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
   const { customers, fetchCustomerPhoto } = useCustomers();
   const [custPhoto, setCustPhoto] = useState<string>(transaction.customerPhotoUrl || '');
 
+  /**
+   * Trava do fallback: enquanto a busca do retrato do pedido nao termina, o
+   * efeito que procura a cliente no cadastro fica parado.
+   *
+   * Sem isto os dois correriam juntos com o retrato vazio, e a foto atual da
+   * cliente — que costuma chegar primeiro, porque `customers` ja esta em
+   * memoria — venceria a corrida contra o retrato do dia do pedido.
+   */
+  const [retratoDoPedidoChecado, setRetratoDoPedidoChecado] = useState(false);
+
+  /**
+   * Primeiro tenta o retrato gravado no proprio pedido.
+   *
+   * A lista nao traz mais `cliente_foto_url`, entao sem esta busca o efeito
+   * seguinte assumiria o comando sempre e o orcamento passaria a exibir a foto
+   * ATUAL da cliente em todo pedido antigo — perdendo o retrato do dia do
+   * pedido, que e justamente o que a nota acima explica que deve ser mostrado.
+   */
   useEffect(() => {
-    if (custPhoto || !transaction.customerName) return;
+    if (custPhoto || !('id' in transaction) || !transaction.id) {
+      // Pedido ainda nao gravado, ou retrato ja em maos: nao ha o que buscar,
+      // e o fallback pode seguir.
+      setRetratoDoPedidoChecado(true);
+      return;
+    }
+
+    let cancelado = false;
+    fetchTransacaoFotos(transaction.id).then(({ customerPhotoUrl }) => {
+      if (cancelado) return;
+      if (customerPhotoUrl) setCustPhoto((prev) => prev || customerPhotoUrl);
+      setRetratoDoPedidoChecado(true);
+    });
+
+    return () => {
+      cancelado = true;
+    };
+    // `custPhoto` fora das dependencias: a busca e uma tentativa unica por
+    // pedido aberto, nao uma reacao a cada mudanca do retrato na tela.
+  }, [transaction, fetchTransacaoFotos]);
+
+  useEffect(() => {
+    if (!retratoDoPedidoChecado || custPhoto || !transaction.customerName) return;
     const match = customers.find(
       (c) =>
         normalizeName(c.name) === normalizeName(transaction.customerName || '') &&
@@ -259,7 +330,14 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
     return () => {
       cancelado = true;
     };
-  }, [custPhoto, transaction.customerName, transaction.customerPhone, customers, fetchCustomerPhoto]);
+  }, [
+    retratoDoPedidoChecado,
+    custPhoto,
+    transaction.customerName,
+    transaction.customerPhone,
+    customers,
+    fetchCustomerPhoto,
+  ]);
 
   const handlePrint = () => {
     window.print();

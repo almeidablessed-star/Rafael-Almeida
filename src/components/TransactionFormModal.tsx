@@ -11,6 +11,7 @@ import {
   FichaTecnica,
 } from '../types';
 import { useCustomers } from '../context/CustomersContext';
+import { useTransacoes } from '../context/TransacoesContext';
 import { useCurrency } from '../context/CurrencyContext';
 import { QuotePdfModal } from './QuotePdfModal';
 import { FieldValidationError } from './FieldValidationError';
@@ -120,6 +121,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   // Clientes vem do Supabase (tabela `clientes`), a mesma fonte que a aba
   // Clientes grava via useCustomers.
   const { customers: storedCustomers, fetchCustomerPhoto } = useCustomers();
+  const { fetchTransacaoFotos } = useTransacoes();
   const { formatCurrency: formatMoney, symbol: currencySymbol } = useCurrency();
 
   const [type, setType] = useState<TransactionType>(initialType);
@@ -180,12 +182,24 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   // Sales Order State (when type === 'venda')
   const [customerName, setCustomerName] = useState<string>('');
   const [customerPhone, setCustomerPhone] = useState<string>('');
-  const [customerPhotoUrl, setCustomerPhotoUrl] = useState<string>('');
+  /**
+   * As duas fotos usam `undefined` e `''` com sentidos diferentes, e a
+   * diferenca e o que impede a foto de ser apagada sem ninguem pedir:
+   *
+   * - `undefined` = ainda nao se sabe (a lista de pedidos nao traz mais as
+   *   fotos; a busca sob demanda pode nao ter voltado). Ao salvar, o campo e
+   *   omitido do update e o banco mantem o que ja tem.
+   * - `''` = a confeiteira clicou no X para remover. Ao salvar, o campo entra
+   *   valendo NULL e a foto e apagada de verdade.
+   *
+   * Ver `fotoOuOmitida` em TransacoesContext, do outro lado dessa convencao.
+   */
+  const [customerPhotoUrl, setCustomerPhotoUrl] = useState<string | undefined>(undefined);
   const [eventDate, setEventDate] = useState<string>(() => prefilledDate || getTodayIso());
   const [deliveryTime, setDeliveryTime] = useState<string>('');
   const [deliveryAddress, setDeliveryAddress] = useState<string>('');
   const [observations, setObservations] = useState<string>('');
-  const [inspirationImage, setInspirationImage] = useState<string>('');
+  const [inspirationImage, setInspirationImage] = useState<string | undefined>(undefined);
   const [showPdfQuoteModal, setShowPdfQuoteModal] = useState<boolean>(false);
 
   // --- Busca de cliente no proprio campo de nome ---
@@ -394,7 +408,10 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       if (editingTransaction.type === 'venda') {
         setCustomerName(editingTransaction.customerName || '');
         setCustomerPhone(editingTransaction.customerPhone || '');
-        setCustomerPhotoUrl(editingTransaction.customerPhotoUrl || '');
+        // Sem `|| ''`: a lista de pedidos nao traz as fotos, e trocar o
+        // `undefined` ("nao carregada") por `''` ("removida") faria qualquer
+        // edicao de pedido apagar as duas fotos ao salvar.
+        setCustomerPhotoUrl(editingTransaction.customerPhotoUrl);
         setEventDate(editingTransaction.eventDate || getTodayIso());
         // Pedido ja lancado tem data decidida: reabrir para editar nao pode
         // deixar a data cadastrada da cliente sobrescreve-la.
@@ -402,7 +419,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
         setDeliveryTime(editingTransaction.deliveryTime || '');
         setDeliveryAddress(editingTransaction.deliveryAddress || '');
         setObservations(editingTransaction.observations || '');
-        setInspirationImage(editingTransaction.inspirationImage || '');
+        setInspirationImage(editingTransaction.inspirationImage);
         // A taxa de entrega nao tem coluna propria — vive dentro de
         // `breakdown`/`notes`. parseSaleDetail ja sabe ler dos dois lugares
         // (breakdown pra pedidos novos, regex em notes pra pedidos antigos
@@ -495,6 +512,33 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       setTotalValue('');
     }
   }, [isOpen, initialType, editingTransaction]);
+
+  /**
+   * Carrega as fotos do pedido sob demanda ao abrir uma edicao.
+   *
+   * A lista nao traz mais `cliente_foto_url` nem `imagem_inspiracao` — ver
+   * `COLUNAS_SEM_FOTO` em TransacoesContext. Sem esta busca o formulario abria
+   * sem a foto de referencia ja cadastrada, e a confeiteira via como foto
+   * perdida.
+   */
+  useEffect(() => {
+    if (!isOpen || !editingTransaction?.id) return;
+    if (editingTransaction.type !== 'venda') return;
+
+    let cancelado = false;
+    fetchTransacaoFotos(editingTransaction.id).then(({ customerPhotoUrl: retrato, inspirationImage: foto }) => {
+      if (cancelado) return;
+      // `prev ?? x` e nao `prev || x`: se a confeiteira ja clicou no X e o
+      // campo virou `''` ("removida"), a busca nao pode desfazer isso trazendo
+      // a foto de volta do banco.
+      if (retrato) setCustomerPhotoUrl((prev) => prev ?? retrato);
+      if (foto) setInspirationImage((prev) => prev ?? foto);
+    });
+
+    return () => {
+      cancelado = true;
+    };
+  }, [isOpen, editingTransaction, fetchTransacaoFotos]);
 
   // Composicao media do catalogo dela, recalculada quando as fichas mudam.
   // Substituiu percentuais fixos no codigo que somavam 100% — e portanto
@@ -863,12 +907,15 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
           description: descStr,
           customerName: customerName.trim() || undefined,
           customerPhone: customerPhone.trim() || undefined,
-          customerPhotoUrl: customerPhotoUrl || undefined,
+          // Sem `|| undefined`: `''` aqui significa "removida" e precisa chegar
+          // ao banco como NULL. Colapsar para `undefined` faria o clique no X
+          // ser silenciosamente ignorado, porque o campo seria omitido.
+          customerPhotoUrl,
           eventDate: eventDate || undefined,
           deliveryTime: deliveryTime.trim() || undefined,
           deliveryAddress: deliveryAddress.trim() || undefined,
           observations: observations.trim() || undefined,
-          inspirationImage: inspirationImage || undefined,
+          inspirationImage,
           quantity: orderItems.reduce((acc, i) => acc + i.quantity, 0),
           unitValue: grandTotalSalePrice,
           totalValue: grandTotalSalePrice,
@@ -1175,7 +1222,12 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       accept="image/*"
                       onChange={async (e) => {
                         const file = e.target.files?.[0];
-                        if (file) setInspirationImage(await compressImageFile(file));
+                        if (!file) return;
+                        try {
+                          setInspirationImage(await compressImageFile(file));
+                        } catch (err: any) {
+                          alert(err?.message || 'Nao foi possivel usar esta imagem.');
+                        }
                       }}
                       className="hidden"
                       id="inspiration-upload-input-stepped"

@@ -38,12 +38,12 @@ interface SupabaseTransacao {
   forma_pagamento: string | null;
   cliente_nome: string | null;
   cliente_telefone: string | null;
-  cliente_foto_url: string | null;
+  cliente_foto_url?: string | null;
   data_evento: string | null;
   horario_entrega: string | null;
   endereco_entrega: string | null;
   observacoes: string | null;
-  imagem_inspiracao: string | null;
+  imagem_inspiracao?: string | null;
   notas: string | null;
   fornecedor: string | null;
   periodo_mao_de_obra: string | null;
@@ -66,6 +66,52 @@ const dataOuNulo = (valor?: string) => (valor && valor.trim() ? valor : null);
 
 /** Texto vazio tambem vira NULL, para nao guardar '' e undefined como coisas diferentes. */
 const textoOuNulo = (valor?: string) => (valor && valor.trim() ? valor : null);
+
+/**
+ * Colunas de foto sao o unico lugar onde `undefined` e `''` NAO significam a
+ * mesma coisa, e a diferenca vale a foto da confeiteira:
+ *
+ * - `undefined` = a foto nao foi carregada nesta sessao (ela nao vem mais no
+ *   select de lista). A chave e OMITIDA do update, e o Postgres deixa o valor
+ *   gravado intacto.
+ * - `''` ou `null` = alguem clicou em remover na tela. A chave entra valendo
+ *   NULL, e a foto e apagada de verdade.
+ *
+ * Sem essa distincao, salvar qualquer edicao de um pedido — trocar o horario
+ * de entrega, marcar como pago — regravaria o `undefined` da foto que nunca
+ * chegou a ser carregada por cima da foto boa que continua no banco. E o
+ * mesmo defeito que o commit e69ff3e corrigiu na foto de perfil.
+ */
+const fotoOuOmitida = (coluna: string, valor?: string | null) =>
+  valor === undefined ? {} : { [coluna]: valor || null };
+
+/**
+ * Colunas lidas nas consultas de lista.
+ *
+ * `cliente_foto_url` e `imagem_inspiracao` guardam data URI em base64 e ficam
+ * de fora de proposito. Com `select('*')` toda abertura do app baixava o
+ * historico inteiro de pedidos com as fotos embutidas, e o custo crescia a
+ * cada pedido novo — era a origem do pico de egress de 744 MB num unico dia.
+ *
+ * Quem precisa da foto pede por `fetchTransacaoFotos`, mesmo padrao ja
+ * aplicado em clientes, fichas tecnicas e perfil.
+ */
+const COLUNAS_SEM_FOTO =
+  'id,tipo,descricao,data,quantidade,valor_unitario,valor_total,valor_sinal,' +
+  'status_pagamento,forma_pagamento,cliente_nome,cliente_telefone,data_evento,' +
+  'horario_entrega,endereco_entrega,observacoes,notas,fornecedor,' +
+  'periodo_mao_de_obra,categoria,breakdown,ficha_itens,insumos_consumidos,' +
+  'produto_id,created_at';
+
+/**
+ * O supabase-js deduz o tipo do retorno lendo a string do `select` como
+ * literal. Como a lista de colunas vive numa constante — para nao ser
+ * reescrita em quatro lugares e sair de sincronia — essa deducao nao acontece
+ * e o retorno chega como `GenericStringError`. A conversao explicita e so
+ * sobre isso; o formato real da linha e o que `SupabaseTransacao` descreve.
+ */
+const comoLinhas = (data: unknown) => (data || []) as unknown as SupabaseTransacao[];
+const comoLinha = (data: unknown) => data as unknown as SupabaseTransacao;
 
 const mapSupabaseToTransaction = (d: SupabaseTransacao): Transaction => {
   const fichaItems: FichaOrderItem[] = Array.isArray(d.ficha_itens) ? d.ficha_itens : [];
@@ -123,12 +169,12 @@ const mapTransactionToSupabase = (tx: Omit<Transaction, 'id' | 'createdAt'>) => 
   forma_pagamento: tx.paymentMethod || null,
   cliente_nome: textoOuNulo(tx.customerName),
   cliente_telefone: textoOuNulo(tx.customerPhone),
-  cliente_foto_url: tx.customerPhotoUrl || null,
+  ...fotoOuOmitida('cliente_foto_url', tx.customerPhotoUrl),
   data_evento: dataOuNulo(tx.eventDate),
   horario_entrega: textoOuNulo(tx.deliveryTime),
   endereco_entrega: textoOuNulo(tx.deliveryAddress),
   observacoes: textoOuNulo(tx.observations),
-  imagem_inspiracao: tx.inspirationImage || null,
+  ...fotoOuOmitida('imagem_inspiracao', tx.inspirationImage),
   notas: textoOuNulo(tx.notes),
   fornecedor: textoOuNulo(tx.supplier),
   periodo_mao_de_obra: tx.laborPeriod || null,
@@ -144,6 +190,10 @@ interface TransacoesContextType {
   isLoading: boolean;
   error: string | null;
   fetchTransacoes: () => Promise<void>;
+  fetchTransacaoFotos: (
+    id: string
+  ) => Promise<{ customerPhotoUrl: string | null; inspirationImage: string | null }>;
+  fetchTransacoesComFotos: () => Promise<Transaction[]>;
   addTransacao: (data: Omit<Transaction, 'id' | 'createdAt'>) => Promise<Transaction>;
   updateTransacao: (id: string, data: Omit<Transaction, 'id' | 'createdAt'>) => Promise<Transaction>;
   deleteTransacao: (id: string) => Promise<void>;
@@ -176,20 +226,71 @@ export const TransacoesProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
       const { data, error: fetchError } = await supabase
         .from('transacoes')
-        .select('*')
+        .select(COLUNAS_SEM_FOTO)
         .eq('usuaria_id', user.id)
         .order('data', { ascending: false })
         .order('created_at', { ascending: false });
 
       if (fetchError) throw fetchError;
 
-      setTransacoes((data || []).map(mapSupabaseToTransaction));
+      setTransacoes(comoLinhas(data).map(mapSupabaseToTransaction));
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar lançamentos');
       console.error('Error fetching transacoes:', err);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  /**
+   * Busca as duas fotos de um pedido sob demanda.
+   *
+   * Devolve `null` em cada campo que o banco nao tem, e `null` nos dois quando
+   * a consulta falha: quem chama so preenche o que veio preenchido, entao uma
+   * falha aqui deixa a tela como estava em vez de apagar o que ja aparecia.
+   */
+  const fetchTransacaoFotos = async (
+    id: string
+  ): Promise<{ customerPhotoUrl: string | null; inspirationImage: string | null }> => {
+    try {
+      const { data, error } = await supabase
+        .from('transacoes')
+        .select('cliente_foto_url,imagem_inspiracao')
+        .eq('id', parseInt(id))
+        .eq('usuaria_id', user?.id)
+        .single();
+
+      if (error) throw error;
+      return {
+        customerPhotoUrl: data?.cliente_foto_url || null,
+        inspirationImage: data?.imagem_inspiracao || null,
+      };
+    } catch (err: any) {
+      console.error('Error fetching transacao photos:', err);
+      return { customerPhotoUrl: null, inspirationImage: null };
+    }
+  };
+
+  /**
+   * Versao completa da lista, com as fotos, para o backup em arquivo.
+   *
+   * O backup e restaurado com um DELETE seguido de INSERT: se o arquivo sair
+   * sem as fotos, restaura-lo apaga todas elas de forma irreversivel. Aqui a
+   * consulta pesada e aceitavel porque acontece uma vez, quando a confeiteira
+   * pede o arquivo — nao a cada abertura do app, que era o problema.
+   */
+  const fetchTransacoesComFotos = async (): Promise<Transaction[]> => {
+    if (!user) return [];
+
+    const { data, error } = await supabase
+      .from('transacoes')
+      .select('*')
+      .eq('usuaria_id', user.id)
+      .order('data', { ascending: false })
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return (data || []).map(mapSupabaseToTransaction);
   };
 
   const addTransacao = async (txData: Omit<Transaction, 'id' | 'createdAt'>) => {
@@ -200,12 +301,15 @@ export const TransacoesProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       const { data, error: insertError } = await supabase
         .from('transacoes')
         .insert([{ usuaria_id: user.id, ...mapTransactionToSupabase(txData) }])
-        .select()
+        // Sem as colunas de foto tambem na volta: a linha acabou de ser
+        // gravada com a foto que ja esta na tela, e devolve-la so faria o
+        // mesmo base64 subir e descer na mesma operacao.
+        .select(COLUNAS_SEM_FOTO)
         .single();
 
       if (insertError) throw insertError;
 
-      const nova = mapSupabaseToTransaction(data);
+      const nova = mapSupabaseToTransaction(comoLinha(data));
       setTransacoes((prev) => [nova, ...prev]);
       return nova;
     } catch (err: any) {
@@ -224,12 +328,12 @@ export const TransacoesProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         .update(mapTransactionToSupabase(txData))
         .eq('id', parseInt(id))
         .eq('usuaria_id', user.id)
-        .select()
+        .select(COLUNAS_SEM_FOTO)
         .single();
 
       if (updateError) throw updateError;
 
-      const atualizada = mapSupabaseToTransaction(data);
+      const atualizada = mapSupabaseToTransaction(comoLinha(data));
       setTransacoes((prev) => prev.map((t) => (t.id === id ? atualizada : t)));
       return atualizada;
     } catch (err: any) {
@@ -310,6 +414,8 @@ export const TransacoesProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         isLoading,
         error,
         fetchTransacoes,
+        fetchTransacaoFotos,
+        fetchTransacoesComFotos,
         addTransacao,
         updateTransacao,
         deleteTransacao,

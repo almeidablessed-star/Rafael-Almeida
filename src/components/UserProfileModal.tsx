@@ -51,8 +51,11 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
+    if (!file) return;
+    try {
       setPhotoUrl(await compressImageFile(file));
+    } catch (err: any) {
+      alert(err?.message || 'Nao foi possivel usar esta imagem.');
     }
   };
 
