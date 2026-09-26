@@ -4,17 +4,38 @@
     {
       "name": "dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
       "port": 3000,
       "autoPort": true
     },
     {
       "name": "carula-site",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["-y", "serve", "C:\\Users\\Rafael\\Documents\\CARULA SITE\\site", "-l", "4321"],
+      "runtimeArgs": [
+        "-y",
+        "serve",
+        "C:\\Users\\Rafael\\Documents\\CARULA SITE\\site",
+        "-l",
+        "4321"
+      ],
       "port": 4321,
       "autoPort": false,
       "url": "http://localhost:4321"
+    },
+    {
+      "name": "prod-preview",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "preview",
+        "--port",
+        "4173"
+      ],
+      "port": 4173,
+      "autoPort": false
     }
   ]
 }
