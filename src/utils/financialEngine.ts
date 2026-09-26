@@ -1,7 +1,7 @@
 import { Transaction, TimePeriod, SummaryTotals, FichaTecnica, DespesaEmpresa, AdministrativeCosts } from '../types';
 import { getTodayIso, formatDateBr } from './formatters';
 import { getCurrentWeekMonday, getCurrentWeekSunday, createdAtToLocalIso } from './weeklyArchiveUtils';
-import { getJanela, janelasPorMes } from './periodoReset';
+import { getJanela, getJanelaAtual, janelasPorMes, type PeriodoReset } from './periodoReset';
 import { custoInsumosDoTamanho } from './fichaInsumos';
 
 /**
@@ -245,7 +245,7 @@ export interface WeeklySummary {
  * Returns Monday and Sunday ISO dates for a given reference Date.
  * Week starts on Monday and ends on Sunday.
  */
-export function getWeekRange(refDate: Date = new Date()): {
+export function getWeekRange(refDate: Date = new Date(), periodo: PeriodoReset = 'semanal'): {
   startIso: string;
   endIso: string;
   startDate: Date;
@@ -267,7 +267,7 @@ export function getWeekRange(refDate: Date = new Date()): {
   const refIso = `${refDate.getFullYear()}-${String(refDate.getMonth() + 1).padStart(2, '0')}-${String(
     refDate.getDate()
   ).padStart(2, '0')}`;
-  const { inicioIso: startIso, fimIso: endIso } = getJanela(refIso, 'semanal');
+  const { inicioIso: startIso, fimIso: endIso } = getJanela(refIso, periodo);
 
   const [ay, am, ad] = startIso.split('-').map(Number);
   const [by, bm, bd] = endIso.split('-').map(Number);
@@ -769,9 +769,15 @@ export function calcularTotalAReceberGeral(transactions: Transaction[]): number 
 /**
  * Calculate balances for the current week only (Monday to Sunday)
  */
-export function calculateWeeklyBalances(transactions: Transaction[], fichas: FichaTecnica[] = []): SystemBalances {
-  const startDate = getCurrentWeekMonday();
-  const endDate = getCurrentWeekSunday();
+export function calculateWeeklyBalances(
+  transactions: Transaction[],
+  fichas: FichaTecnica[] = [],
+  periodo: PeriodoReset = 'semanal'
+): SystemBalances {
+  // Default 'semanal' mantem o comportamento antigo para quem ainda nao passa
+  // o periodo. `getJanelaAtual` cobre os tres modos com a mesma aritmetica que
+  // o resto do app usa — nao ha um segundo calculo de borda aqui.
+  const { inicioIso: startDate, fimIso: endDate } = getJanelaAtual(periodo);
   // Filtra por data de LANCAMENTO (createdAt), nao pela data de entrega
   // (tx.date) escolhida no pedido — o Dashboard mostra "como estou indo essa
   // semana" em vendas fechadas, nao um calendario de entregas futuras. O
@@ -961,17 +967,18 @@ export interface MetaSemanal {
  */
 export const calcularMetaSemanal = (
   estrutura: EstruturaFinanceira | null,
-  transacoes: Transaction[]
+  transacoes: Transaction[],
+  periodo: PeriodoReset = 'semanal'
 ): MetaSemanal => {
-  // `'semanal'` fixo nesta etapa: o motor ja sabe dividir por qualquer
-  // periodo, mas o valor escolhido pela usuaria so passa a chegar aqui na
-  // etapa do schema. Ate la o divisor e exatamente o de sempre (52/12).
-  const janelas = janelasPorMes('semanal');
+  // `periodo` tem default 'semanal' para que qualquer chamador que ainda nao
+  // passe o valor mantenha exatamente o comportamento antigo — o divisor 52/12
+  // e a janela segunda-a-domingo.
+  const janelas = janelasPorMes(periodo);
 
   const faturamentoNecessarioMensal = estrutura?.valido ? estrutura.faturamentoNecessario : 0;
   const necessarioPorSemana = faturamentoNecessarioMensal / janelas;
 
-  const { startIso, endIso } = getWeekRange();
+  const { startIso, endIso } = getWeekRange(new Date(), periodo);
 
   // So venda PAGA cobre custo. Pedido pendente e promessa, nao dinheiro em
   // caixa — incluir daria a impressao de meta batida com o dinheiro ainda na
@@ -998,6 +1005,7 @@ export const calcularMetaSemanal = (
   // as duas fontes na mesma frase confundiria mais do que ajudaria.
   const maoDeObraPercent = estrutura?.valido ? estrutura.maoDeObraPercent : 0;
   const metaPessoalSemana = estrutura?.valido ? estrutura.maoDeObraAmount / janelas : 0;
+
   const jaGarantidoPessoal = faturadoNaSemana * (maoDeObraPercent / 100);
   const faltaPessoal = Math.max(0, metaPessoalSemana - jaGarantidoPessoal);
 

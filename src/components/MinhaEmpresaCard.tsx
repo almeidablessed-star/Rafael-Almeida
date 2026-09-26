@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Edit3, Save, X } from 'lucide-react';
 import { useCosts } from '../context/CostsContext';
 import { useCurrency } from '../context/CurrencyContext';
-import { DespesaEmpresa } from '../types';
+import { DespesaEmpresa, PeriodoReset } from '../types';
 import {
   calcularEstruturaFinanceira,
   calcularMetaHoras,
@@ -34,6 +34,20 @@ const secaoCard = 'bg-[#F6F2F5] rounded-2xl p-4 space-y-3';
  * so decorativo, nao representa categoria nenhuma. */
 const DESPESA_ACCENTS = ['#A85E86', '#7E4F9E', '#B08D57', '#A9D8B8', '#6E3F72'];
 
+/**
+ * Frase inteira por periodo, em vez de montar com concatenacao.
+ *
+ * Portugues tem concordancia de genero: "toda semana", "toda quinzena", mas
+ * "todo mes". Montar com `'tod' + a/o + substantivo` produz exatamente o tipo
+ * de erro que ja apareceu neste app ("Já existe um ficha técnica"). O
+ * vocabulario carrega o artigo pronto.
+ */
+const PERIODO_DESCRICAO: Record<PeriodoReset, string> = {
+  semanal: 'Toda semana — de segunda a domingo',
+  quinzenal: 'A cada quinzena — dias 1 a 15 e 16 ao fim do mês',
+  mensal: 'Todo mês — do dia 1 ao fim do mês',
+};
+
 export const MinhaEmpresaCard: React.FC = () => {
   const { administrativeCosts, salvarConfiguracaoEmpresa, salvarDespesas, error } = useCosts();
   const { formatCurrency, symbol } = useCurrency();
@@ -43,6 +57,7 @@ export const MinhaEmpresaCard: React.FC = () => {
   const [monthlyIncomeTarget, setMonthlyIncomeTarget] = useState(0);
   const [horaTrabalho, setHoraTrabalho] = useState(0);
   const [workingDaysPerWeek, setWorkingDaysPerWeek] = useState(6);
+  const [periodoReset, setPeriodoReset] = useState<PeriodoReset>('semanal');
   const [despesas, setDespesas] = useState<DespesaEmpresa[]>([]);
   const [cmvTargetPercent, setCmvTargetPercent] = useState(34);
   const [investmentTargetPercent, setInvestmentTargetPercent] = useState(5);
@@ -50,6 +65,7 @@ export const MinhaEmpresaCard: React.FC = () => {
 
   const [editandoRemuneracao, setEditandoRemuneracao] = useState(false);
   const [editandoMetas, setEditandoMetas] = useState(false);
+  const [editandoPeriodo, setEditandoPeriodo] = useState(false);
   const [salvando, setSalvando] = useState(false);
   const [erroLocal, setErroLocal] = useState('');
 
@@ -58,6 +74,7 @@ export const MinhaEmpresaCard: React.FC = () => {
     setMonthlyIncomeTarget(administrativeCosts.monthlyIncomeTarget);
     setHoraTrabalho(administrativeCosts.horaTrabalho);
     setWorkingDaysPerWeek(administrativeCosts.workingDaysPerWeek);
+    setPeriodoReset(administrativeCosts.periodoReset);
     setDespesas(administrativeCosts.despesas);
     setCmvTargetPercent(administrativeCosts.cmvTargetPercent);
     setInvestmentTargetPercent(administrativeCosts.investmentTargetPercent);
@@ -108,6 +125,24 @@ export const MinhaEmpresaCard: React.FC = () => {
     } finally {
       setSalvando(false);
     }
+  };
+
+  const salvarPeriodo = async () => {
+    setErroLocal('');
+    setSalvando(true);
+    try {
+      await salvarConfiguracaoEmpresa({ periodoReset });
+      setEditandoPeriodo(false);
+    } catch (err: any) {
+      setErroLocal(err.message || 'Erro ao salvar.');
+    } finally {
+      setSalvando(false);
+    }
+  };
+
+  const cancelarPeriodo = () => {
+    setPeriodoReset(administrativeCosts.periodoReset);
+    setEditandoPeriodo(false);
   };
 
   const cancelarMetas = () => {
@@ -209,7 +244,53 @@ export const MinhaEmpresaCard: React.FC = () => {
         )}
       </div>
 
-      {/* Secao 2 — Despesas do Negocio */}
+      {/*
+        Secao propria, e nao um campo dentro de "Sua Remuneracao", de proposito.
+        La dentro ele ficaria colado em "Dias de trabalho por semana", e as duas
+        coisas nao tem relacao nenhuma: dias por semana e rotina de trabalho e
+        alimenta a meta de HORAS, que continua sempre semanal. Lado a lado, o
+        arranjo sugeriria que escolher "quinzenal" converteria as horas junto —
+        que e exatamente a duvida que a microcopy abaixo existe para matar.
+      */}
+      <div className={secaoCard}>
+        <div className="flex items-center justify-between">
+          <h3 className={secaoTitulo} style={{ color: '#241B2B' }}>Período das Metas</h3>
+          {!editandoPeriodo && (
+            <button onClick={() => setEditandoPeriodo(true)} className="w-7 h-7 rounded-full flex items-center justify-center text-[#6E3F72] hover:bg-white transition-colors" title="Editar">
+              <Edit3 size={14} />
+            </button>
+          )}
+        </div>
+
+        {!editandoPeriodo ? (
+          <div className="bg-white rounded-xl p-3 border border-[#E6E1DB]">
+            <p className="text-[9px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>Suas metas zeram</p>
+            <p className="text-[13px] font-bold mt-1" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>
+              {PERIODO_DESCRICAO[periodoReset]}
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div>
+              <label className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>De quanto em quanto tempo suas metas recomeçam</label>
+              <CampoComAjuda microcopy="Trocar aqui reagrupa todo o seu histórico no novo período — nenhum valor de venda muda, só o recorte com que você vê. Sua meta de horas continua semanal de qualquer jeito." />
+              <select className={inputClass} value={periodoReset} onChange={(e) => setPeriodoReset(e.target.value as PeriodoReset)}>
+                <option value="semanal">Toda semana (segunda a domingo)</option>
+                <option value="quinzenal">A cada quinzena (dias 1–15 e 16 ao fim do mês)</option>
+                <option value="mensal">Todo mês (mês cheio)</option>
+              </select>
+            </div>
+            <div className="flex gap-2">
+              <button className={botaoSecundario} onClick={cancelarPeriodo} disabled={salvando}><X size={13} className="inline mr-1" />Cancelar</button>
+              <button className={botaoPrimario} style={{ background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)' }} onClick={salvarPeriodo} disabled={salvando}>
+                <Save size={13} />{salvando ? 'Salvando' : 'Salvar'}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Secao 3 — Despesas do Negocio */}
       <div className={secaoCard}>
         <div className="flex items-center justify-between">
           <h3 className={secaoTitulo} style={{ color: '#241B2B' }}>Despesas do Negócio</h3>

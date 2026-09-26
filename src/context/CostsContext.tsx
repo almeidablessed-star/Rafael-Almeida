@@ -8,7 +8,7 @@ import { somarDespesasEmpresa } from '../utils/financialEngine';
 export type CamposOnboarding = Partial<
   Pick<
     AdministrativeCosts,
-    'monthlyIncomeTarget' | 'horaTrabalho' | 'workingDaysPerWeek' | 'cmvTargetPercent' | 'investmentTargetPercent' | 'profitTargetPercent'
+    'monthlyIncomeTarget' | 'horaTrabalho' | 'workingDaysPerWeek' | 'cmvTargetPercent' | 'investmentTargetPercent' | 'profitTargetPercent' | 'periodoReset'
   >
 >;
 
@@ -46,7 +46,27 @@ const CAMPOS_ONBOARDING_LABEL: Record<keyof CamposOnboarding, string> = {
   cmvTargetPercent: 'Meta de CMV',
   investmentTargetPercent: 'Meta de investimento',
   profitTargetPercent: 'Meta de lucro',
+  // Presente so porque o Record exige a chave: `periodoReset` NUNCA e
+  // registrado no historico — ver o filtro em [[salvarConfiguracaoEmpresa]].
+  periodoReset: 'Periodo de reset',
 };
+
+/**
+ * Campos que NAO entram em `configuracao_empresa_historico`.
+ *
+ * O historico existe para responder "as metas mudaram desde que esta ficha foi
+ * salva?". `CostsContext` deriva `ultimaMudancaMetas` da linha mais recente,
+ * QUALQUER que seja o campo, e `fichaDesatualizada` usa isso para pintar o selo
+ * "Metas mudaram" em cada ficha tecnica.
+ *
+ * O periodo de reset nao pertence a essa pergunta: ele muda o recorte de
+ * exibicao, nunca o custo de uma ficha. Registra-lo faria toda troca de periodo
+ * marcar TODAS as fichas como desatualizadas — um aviso mentiroso.
+ *
+ * Isto nao e teoria: no teste da etapa anterior, inserir uma unica linha de
+ * periodo no historico marcou duas fichas com o selo na tela.
+ */
+const CAMPOS_FORA_DO_HISTORICO: ReadonlySet<keyof CamposOnboarding> = new Set(['periodoReset']);
 
 const CostsContext = createContext<CostsContextType | undefined>(undefined);
 
@@ -77,6 +97,7 @@ const CAMPOS_ONBOARDING_PARA_COLUNA: Record<keyof CamposOnboarding, string> = {
   cmvTargetPercent: 'cmv_target_percent',
   investmentTargetPercent: 'investment_target_percent',
   profitTargetPercent: 'profit_target_percent',
+  periodoReset: 'periodo_reset',
 };
 
 export const CostsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -296,6 +317,10 @@ export const CostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (valorNovo === undefined || valorNovo === valorAntigo) return;
 
       payload[CAMPOS_ONBOARDING_PARA_COLUNA[campo]] = valorNovo;
+
+      // Gravado sim, registrado no historico nao — ver [[CAMPOS_FORA_DO_HISTORICO]].
+      if (CAMPOS_FORA_DO_HISTORICO.has(campo)) return;
+
       historico.push({
         usuaria_id: user.id,
         campo: CAMPOS_ONBOARDING_LABEL[campo],
@@ -304,7 +329,11 @@ export const CostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       });
     });
 
-    if (historico.length === 0) return;
+    // `historico` vazio nao significa mais "nada mudou": pode ser uma troca so
+    // de periodo, que grava mas nao se registra. Quem decide se ha o que salvar
+    // e o payload — ele comeca com `usuaria_id` e so cresce quando algum campo
+    // realmente mudou.
+    if (Object.keys(payload).length <= 1) return;
 
     const { error: saveError } = await supabase
       .from('administrative_costs')
@@ -312,6 +341,12 @@ export const CostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (saveError) throw saveError;
 
     setAdministrativeCosts((atual) => (atual ? { ...atual, ...campos } : atual));
+
+    // Numa troca so de periodo nao ha nada a registrar, e este bloco inteiro e
+    // pulado de proposito. Sem esta guarda, o `setUltimaMudancaMetas` abaixo
+    // rodaria mesmo assim e traria o selo "Metas mudaram" de volta pela porta
+    // dos fundos — exatamente o que [[CAMPOS_FORA_DO_HISTORICO]] evita.
+    if (historico.length === 0) return;
 
     // Historico e best-effort: uma falha aqui nao pode desfazer um save que
     // ja aconteceu, so fica sem registro daquela alteracao especifica.

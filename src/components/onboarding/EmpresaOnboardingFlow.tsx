@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useCosts } from '../../context/CostsContext';
 import { useFichasTecnicas } from '../../context/FichasTecnicasContext';
 import { useCurrency } from '../../context/CurrencyContext';
-import { DespesaEmpresa } from '../../types';
+import { DespesaEmpresa, PeriodoReset } from '../../types';
 import {
   calcularEstruturaFinanceira,
   calcularMetaHoras,
@@ -25,13 +25,13 @@ import { CampoComAjuda } from './CampoComAjuda';
  * "recorta" a curva. Ver FichasTecnicasModule.tsx para a referencia exata.
  */
 
-const TOTAL_PASSOS = 8;
+const TOTAL_PASSOS = 9;
 
-const PASSO4_DESPESAS_REDESIGN_HABILITADO = true;
+const DESPESAS_REDESIGN_HABILITADO = true;
 
 /**
  * Categorias mais comuns de despesa fixa de confeitaria caseira, pra nao
- * comecar o passo 4 com a lista vazia. So entra em jogo quando a conta ainda
+ * comecar o passo 5 com a lista vazia. So entra em jogo quando a conta ainda
  * nao tem nenhuma despesa salva (`administrativeCosts.despesas` vazio) — ver
  * o efeito de carga inicial abaixo. Valores zerados, so os nomes vem prontos;
  * a pessoa edita, remove ou adiciona outras normalmente.
@@ -63,6 +63,7 @@ export const EmpresaOnboardingFlow: React.FC = () => {
   const [monthlyIncomeTarget, setMonthlyIncomeTarget] = useState(0);
   const [horaTrabalho, setHoraTrabalho] = useState(0);
   const [workingDaysPerWeek, setWorkingDaysPerWeek] = useState(6);
+  const [periodoReset, setPeriodoReset] = useState<PeriodoReset>('semanal');
   const [despesas, setDespesas] = useState<DespesaEmpresa[]>([]);
   const [cmvTargetPercent, setCmvTargetPercent] = useState(34);
   const [investmentTargetPercent, setInvestmentTargetPercent] = useState(5);
@@ -77,8 +78,9 @@ export const EmpresaOnboardingFlow: React.FC = () => {
     setMonthlyIncomeTarget(administrativeCosts.monthlyIncomeTarget);
     setHoraTrabalho(administrativeCosts.horaTrabalho);
     setWorkingDaysPerWeek(administrativeCosts.workingDaysPerWeek);
+    setPeriodoReset(administrativeCosts.periodoReset);
     setDespesas(
-      PASSO4_DESPESAS_REDESIGN_HABILITADO && administrativeCosts.despesas.length === 0
+      DESPESAS_REDESIGN_HABILITADO && administrativeCosts.despesas.length === 0
         ? DESPESAS_PADRAO
         : administrativeCosts.despesas
     );
@@ -352,11 +354,43 @@ export const EmpresaOnboardingFlow: React.FC = () => {
 
           {passo === 4 && (
             <div className="space-y-3">
+              <h2 className={labelClass} style={{ color: '#241B2B' }}>Com que frequência você quer resetar suas metas?</h2>
+              <CampoComAjuda microcopy="É de quanto em quanto tempo suas metas zeram e recomeçam. Não muda nenhum valor de venda, só o recorte com que você acompanha. Dá pra trocar depois em Minha Empresa." />
+              <select
+                className={inputClass}
+                value={periodoReset}
+                onChange={(e) => setPeriodoReset(e.target.value as PeriodoReset)}
+              >
+                <option value="semanal">Toda semana (segunda a domingo)</option>
+                <option value="quinzenal">A cada quinzena (dias 1–15 e 16 ao fim do mês)</option>
+                <option value="mensal">Todo mês (mês cheio)</option>
+              </select>
+              <div className="p-3 rounded-xl border border-[#E6E1DB] bg-white">
+                <p className="text-[10px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
+                  Sua meta de horas continua semanal
+                </p>
+                <p className="text-[13px] font-bold mt-1" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>
+                  {metaHoras.horasPorSemana.toFixed(1)}h/semana → {metaHoras.horasPorDia.toFixed(1)}h/dia
+                </p>
+              </div>
+              <div className="flex gap-2 pt-2">
+                <button className={botaoSecundario} onClick={voltar} disabled={salvando}>Voltar</button>
+                <div className="flex-1">
+                  <button className={botaoPrimario} style={{ background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)', boxShadow: '0 10px 24px rgba(58,35,80,.35)' }} onClick={() => avancar({ periodoReset })} disabled={salvando}>
+                    Avançar
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {passo === 5 && (
+            <div className="space-y-3">
               <h2 className={labelClass} style={{ color: '#241B2B' }}>Despesas mensais do negócio</h2>
               <CampoComAjuda microcopy="Aluguel, luz, internet... custos fixos, independente de quanto você vende. O que já está no custo do produto (embalagem, insumos) não entra aqui de novo." />
               <div className="space-y-2">
                 {despesas.map((d, i) => {
-                  if (!PASSO4_DESPESAS_REDESIGN_HABILITADO) {
+                  if (!DESPESAS_REDESIGN_HABILITADO) {
                     return (
                       <div key={d.id ?? `novo-${i}`} className="p-3 rounded-xl border border-[#E6E1DB] bg-white space-y-2">
                         <input
@@ -480,7 +514,7 @@ export const EmpresaOnboardingFlow: React.FC = () => {
             </div>
           )}
 
-          {passo === 5 && (
+          {passo === 6 && (
             <div className="space-y-3">
               <h2 className={labelClass} style={{ color: '#241B2B' }}>Meta de CMV (%)</h2>
               <CampoComAjuda
@@ -504,7 +538,7 @@ export const EmpresaOnboardingFlow: React.FC = () => {
             </div>
           )}
 
-          {passo === 6 && (
+          {passo === 7 && (
             <div className="space-y-3">
               <h2 className={labelClass} style={{ color: '#241B2B' }}>Meta de investimento (%)</h2>
               <CampoComAjuda
@@ -528,7 +562,7 @@ export const EmpresaOnboardingFlow: React.FC = () => {
             </div>
           )}
 
-          {passo === 7 && (
+          {passo === 8 && (
             <div className="space-y-3">
               <h2 className={labelClass} style={{ color: '#241B2B' }}>Meta de lucro (%)</h2>
               <CampoComAjuda
@@ -552,7 +586,7 @@ export const EmpresaOnboardingFlow: React.FC = () => {
             </div>
           )}
 
-          {passo === 8 && (
+          {passo === 9 && (
             <div className="space-y-3">
               <h2 className={labelClass} style={{ color: '#241B2B' }}>Resumo</h2>
               <CampoComAjuda microcopy="Quanto você precisa vender no total pra cobrir tudo — seu trabalho, os custos fixos e o lucro da empresa." />

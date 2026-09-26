@@ -8,6 +8,7 @@ import { formatCurrency, formatDateBr, getTodayIso } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
 import { useFichasTecnicas } from '../context/FichasTecnicasContext';
 import { useProdutos } from '../context/ProdutosContext';
+import { useCosts } from '../context/CostsContext';
 import { normalizeName } from '../utils/fichaMatcher';
 import { convertQuantity } from '../utils/units';
 import {
@@ -53,7 +54,9 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
 }) => {
   const { formatCurrency: formatMoney, symbol } = useCurrency();
   const { fichas } = useFichasTecnicas();
-  const balances = calculateWeeklyBalances(transactions, fichas);
+  const { administrativeCosts } = useCosts();
+  const periodoReset = administrativeCosts?.periodoReset ?? 'semanal';
+  const balances = calculateWeeklyBalances(transactions, fichas, periodoReset);
   // Compras agora referencia o catalogo Produtos (spec Modulo Produtos, secao
   // 2.2) em vez de Estoque diretamente. `estoque`/`registrarEntrada` nao sao
   // mais chamados aqui — o rastro de entrada por compra fica na propria

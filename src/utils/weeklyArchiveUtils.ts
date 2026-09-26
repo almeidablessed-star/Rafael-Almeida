@@ -1,5 +1,5 @@
 import { Transaction, WeeklySummary } from '../types';
-import { getIndiceNoMes, getJanela, getJanelaAtual } from './periodoReset';
+import { getIndiceNoMes, getJanela, getJanelaAtual, type PeriodoReset } from './periodoReset';
 
 /**
  * A aritmetica de calendario que morava aqui mudou-se para `periodoReset.ts`,
@@ -122,7 +122,7 @@ export function calculateWeeklyTotals(transactions: Transaction[]) {
  */
 
 /** Lista, sem duplicar, as semanas (segunda a domingo) que tem pelo menos 1 transacao lancada. */
-function getWeeksWithTransactions(transactions: Transaction[]): { startDate: string; endDate: string }[] {
+function getWeeksWithTransactions(transactions: Transaction[], periodo: PeriodoReset = 'semanal'): { startDate: string; endDate: string }[] {
   // Agrupa pelo INICIO da janela: duas transacoes caem na mesma linha do
   // Historico exatamente quando `getJanela` devolve o mesmo inicio para as
   // duas. Escrito assim, trocar `'semanal'` por outro periodo reagrupa o
@@ -130,25 +130,25 @@ function getWeeksWithTransactions(transactions: Transaction[]): { startDate: str
   const inicios = new Set<string>();
   transactions.forEach((tx) => {
     if (!tx.createdAt) return;
-    inicios.add(getJanela(createdAtToLocalIso(tx.createdAt), 'semanal').inicioIso);
+    inicios.add(getJanela(createdAtToLocalIso(tx.createdAt), periodo).inicioIso);
   });
   return Array.from(inicios)
     .sort()
-    .map((startDate) => ({ startDate, endDate: getJanela(startDate, 'semanal').fimIso }));
+    .map((startDate) => ({ startDate, endDate: getJanela(startDate, periodo).fimIso }));
 }
 
 /** Anos com pelo menos uma semana de transacoes lancadas, mais recente primeiro. */
-export function getHistoryYears(transactions: Transaction[]): number[] {
+export function getHistoryYears(transactions: Transaction[], periodo: PeriodoReset = 'semanal'): number[] {
   const years = new Set(
-    getWeeksWithTransactions(transactions).map((w) => Number(w.startDate.slice(0, 4)))
+    getWeeksWithTransactions(transactions, periodo).map((w) => Number(w.startDate.slice(0, 4)))
   );
   return Array.from(years).sort((a, b) => b - a);
 }
 
 /** Meses daquele ano com pelo menos uma semana de transacoes lancadas. */
-export function getHistoryMonthsByYear(transactions: Transaction[], year: number): number[] {
+export function getHistoryMonthsByYear(transactions: Transaction[], year: number, periodo: PeriodoReset = 'semanal'): number[] {
   const months = new Set(
-    getWeeksWithTransactions(transactions)
+    getWeeksWithTransactions(transactions, periodo)
       .filter((w) => Number(w.startDate.slice(0, 4)) === year)
       .map((w) => Number(w.startDate.slice(5, 7)))
   );
@@ -159,9 +159,10 @@ export function getHistoryMonthsByYear(transactions: Transaction[], year: number
 export function getWeeklySummariesByYearMonth(
   transactions: Transaction[],
   year: number,
-  month: number
+  month: number,
+  periodo: PeriodoReset = 'semanal'
 ): WeeklySummary[] {
-  const weeks = getWeeksWithTransactions(transactions).filter(
+  const weeks = getWeeksWithTransactions(transactions, periodo).filter(
     (w) => Number(w.startDate.slice(0, 4)) === year && Number(w.startDate.slice(5, 7)) === month
   );
 
@@ -173,7 +174,7 @@ export function getWeeklySummariesByYearMonth(
         id: `week-${startDate}`,
         year,
         month,
-        weekNumber: getWeekNumberInMonth(startDate),
+        weekNumber: getIndiceNoMes(startDate, periodo),
         startDate,
         endDate,
         transactionCount: weekTransactions.length,

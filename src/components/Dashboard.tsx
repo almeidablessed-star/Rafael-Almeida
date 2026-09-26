@@ -77,8 +77,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const { customers } = useCustomers();
   const { produtos, isLoading: produtosLoading } = useProdutos();
   const { isLoading: transacoesLoading } = useTransacoes();
+  const { administrativeCosts, marcarPrimeirosPassosCompletos } = useCosts();
+  // Periodo de reset escolhido pela usuaria. 'semanal' enquanto a configuracao
+  // nao carregou — mesmo default da coluna, entao a primeira renderizacao nunca
+  // mostra um numero de outro periodo por um instante.
+  const periodoReset = administrativeCosts?.periodoReset ?? 'semanal';
   const transactionsList = allTransactions.length > 0 ? allTransactions : (recentTransactions || []);
-  const balances = calculateWeeklyBalances(transactionsList, fichas);
+  const balances = calculateWeeklyBalances(transactionsList, fichas, periodoReset);
   // Excecao ao recorte semanal do restante do card: saldo pendente e dinheiro
   // real que a cliente ainda deve, nao deve sumir so porque a semana virou.
   const totalAReceberGeral = calcularTotalAReceberGeral(transactionsList);
@@ -86,7 +91,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
   // Mesma fonte que "Minha Empresa": faturamento necessario + distribuicao,
   // calculados uma unica vez pelo engine (spec Parte 5, Teste 10 — os
   // numeros aqui e na aba Minha Empresa tem que ser sempre identicos).
-  const { administrativeCosts, marcarPrimeirosPassosCompletos } = useCosts();
+  // `useCosts` subiu para o topo do componente: o periodo de reset e lido dali
+  // e ja e necessario antes daqui, em `calculateWeeklyBalances`.
   const despesasMensais = somarDespesasEmpresa(administrativeCosts?.despesas || []);
 
   // Checklist de primeiros passos (produto + ficha + pedido): so decide o que
@@ -132,7 +138,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   // mes ou o ano. Deriva da MESMA estrutura acima — nunca so das despesas —
   // pra "Precisa faturar" refletir a meta completa (despesas + recebimento
   // pessoal + CMV + investimento + lucro), nao so a fatia de custos fixos.
-  const meta = calcularMetaSemanal(estruturaFinanceira, allTransactions || []);
+  const meta = calcularMetaSemanal(estruturaFinanceira, allTransactions || [], periodoReset);
 
   // Selo de saude financeira: os precos hoje cadastrados nos produtos cobrem
   // a estrutura definida acima? Mesmo motor de calculo, agregado por conta

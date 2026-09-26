@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Transaction } from '../types';
 import { formatCurrency, formatDateBr } from '../utils/formatters';
 import { getWeeklySummariesByYearMonth, getHistoryYears, getHistoryMonthsByYear } from '../utils/weeklyArchiveUtils';
+import { useCosts } from '../context/CostsContext';
 
 interface WeeklyHistoryCardProps {
   transactions: Transaction[];
@@ -70,11 +71,16 @@ const SimpleSelect: React.FC<{ value: number; onChange: (val: number) => void; o
 };
 
 export const WeeklyHistoryCard: React.FC<WeeklyHistoryCardProps> = ({ transactions }) => {
-  const years = useMemo(() => getHistoryYears(transactions), [transactions]);
+  // O periodo escolhida pela usuaria e o que decide como as transacoes se
+  // agrupam aqui. Trocar o periodo reagrupa o historico inteiro na hora, sem
+  // migrar dado nenhum: este card sempre derivou tudo das transacoes.
+  const { administrativeCosts } = useCosts();
+  const periodoReset = administrativeCosts?.periodoReset ?? 'semanal';
+  const years = useMemo(() => getHistoryYears(transactions, periodoReset), [transactions, periodoReset]);
   const currentYear = new Date().getFullYear();
 
   const [filterYear, setFilterYear] = useState(years.length > 0 ? years[0] : currentYear);
-  const months = useMemo(() => getHistoryMonthsByYear(transactions, filterYear), [transactions, filterYear]);
+  const months = useMemo(() => getHistoryMonthsByYear(transactions, filterYear, periodoReset), [transactions, filterYear, periodoReset]);
   const [filterMonth, setFilterMonth] = useState(months.length > 0 ? months[0] : 1);
 
   // `transactions` chega assincronamente do Supabase — no primeiro render
@@ -95,7 +101,7 @@ export const WeeklyHistoryCard: React.FC<WeeklyHistoryCardProps> = ({ transactio
   }, [months, filterMonth]);
 
   const filteredSummaries = useMemo(
-    () => getWeeklySummariesByYearMonth(transactions, filterYear, filterMonth),
+    () => getWeeklySummariesByYearMonth(transactions, filterYear, filterMonth, periodoReset),
     [transactions, filterYear, filterMonth]
   );
 
@@ -150,7 +156,7 @@ export const WeeklyHistoryCard: React.FC<WeeklyHistoryCardProps> = ({ transactio
           value={filterYear}
           onChange={(newYear) => {
             setFilterYear(newYear);
-            const newMonths = getHistoryMonthsByYear(transactions, newYear);
+            const newMonths = getHistoryMonthsByYear(transactions, newYear, periodoReset);
             setFilterMonth(newMonths.length > 0 ? newMonths[0] : 1);
           }}
           options={years.map((year) => ({
