@@ -3,6 +3,7 @@ import { Transaction } from '../types';
 import { formatCurrency, formatDateBr } from '../utils/formatters';
 import { getWeeklySummariesByYearMonth, getHistoryYears, getHistoryMonthsByYear } from '../utils/weeklyArchiveUtils';
 import { useCosts } from '../context/CostsContext';
+import { rotulos } from '../utils/periodoReset';
 
 interface WeeklyHistoryCardProps {
   transactions: Transaction[];
@@ -76,6 +77,7 @@ export const WeeklyHistoryCard: React.FC<WeeklyHistoryCardProps> = ({ transactio
   // migrar dado nenhum: este card sempre derivou tudo das transacoes.
   const { administrativeCosts } = useCosts();
   const periodoReset = administrativeCosts?.periodoReset ?? 'semanal';
+  const vocab = rotulos(periodoReset);
   const years = useMemo(() => getHistoryYears(transactions, periodoReset), [transactions, periodoReset]);
   const currentYear = new Date().getFullYear();
 
@@ -100,10 +102,37 @@ export const WeeklyHistoryCard: React.FC<WeeklyHistoryCardProps> = ({ transactio
     }
   }, [months, filterMonth]);
 
+  /**
+   * No modo MENSAL o seletor de mes vira ruido: cada mes tem exatamente uma
+   * janela, entao escolher "Setembro" daria uma lista de um item so. Nesse
+   * modo o seletor some e a lista passa a ser a dos MESES do ano escolhido —
+   * que e a granularidade que a pessoa realmente quer comparar ali.
+   *
+   * Nos outros dois periodos nada muda: ano -> mes -> janelas do mes.
+   */
+  const modoMensal = periodoReset === 'mensal';
+
   const filteredSummaries = useMemo(
-    () => getWeeklySummariesByYearMonth(transactions, filterYear, filterMonth, periodoReset),
-    [transactions, filterYear, filterMonth]
+    () =>
+      modoMensal
+        ? months.flatMap((m) => getWeeklySummariesByYearMonth(transactions, filterYear, m, periodoReset))
+        : getWeeklySummariesByYearMonth(transactions, filterYear, filterMonth, periodoReset),
+    [transactions, filterYear, filterMonth, periodoReset, modoMensal, months]
   );
+
+  /**
+   * Rotulo de cada linha do Historico.
+   *
+   * Quinzena usa a forma ordinal ("1ª Quinzena"), que e como se fala; semana
+   * segue cardinal ("Semana 3"), que e como ja estava e como a confeiteira leu
+   * o historico inteiro ate hoje. No mensal o proprio nome do mes e o rotulo —
+   * repetir "Mês 1: 01/09 - 30/09" nao acrescenta nada.
+   */
+  const rotuloJanela = (summary: { weekNumber: number; month: number }) => {
+    if (periodoReset === 'mensal') return monthNames[summary.month - 1];
+    if (periodoReset === 'quinzenal') return `${summary.weekNumber}ª Quinzena`;
+    return `Semana ${summary.weekNumber}`;
+  };
 
   const hasData = filteredSummaries.length > 0;
 
@@ -140,7 +169,7 @@ export const WeeklyHistoryCard: React.FC<WeeklyHistoryCardProps> = ({ transactio
             margin: 0,
           }}
         >
-          Visualize o desempenho de semanas anteriores
+          Visualize o desempenho {vocab.anteriores}
         </p>
       </div>
 
@@ -165,15 +194,18 @@ export const WeeklyHistoryCard: React.FC<WeeklyHistoryCardProps> = ({ transactio
           }))}
         />
 
-        <SimpleSelect
-          value={filterMonth}
-          onChange={setFilterMonth}
-          options={months.map((month) => ({
-            value: month,
-            label: `Mês: ${monthNames[month - 1]}`,
-          }))}
-          disabled={months.length === 0}
-        />
+        {/* Escondido no modo mensal: la a lista ja e a dos meses do ano. */}
+        {!modoMensal && (
+          <SimpleSelect
+            value={filterMonth}
+            onChange={setFilterMonth}
+            options={months.map((month) => ({
+              value: month,
+              label: `Mês: ${monthNames[month - 1]}`,
+            }))}
+            disabled={months.length === 0}
+          />
+        )}
       </div>
 
       {/* Lista de semanas */}
@@ -214,7 +246,7 @@ export const WeeklyHistoryCard: React.FC<WeeklyHistoryCardProps> = ({ transactio
                   marginBottom: '6px',
                 }}
               >
-                Semana {summary.weekNumber}: {formatDateBr(summary.startDate)} - {formatDateBr(summary.endDate)}
+                {rotuloJanela(summary)}: {formatDateBr(summary.startDate)} - {formatDateBr(summary.endDate)}
               </div>
 
               {/* Valores */}

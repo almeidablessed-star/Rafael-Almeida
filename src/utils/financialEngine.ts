@@ -1,7 +1,7 @@
 import { Transaction, TimePeriod, SummaryTotals, FichaTecnica, DespesaEmpresa, AdministrativeCosts } from '../types';
 import { getTodayIso, formatDateBr } from './formatters';
 import { getCurrentWeekMonday, getCurrentWeekSunday, createdAtToLocalIso } from './weeklyArchiveUtils';
-import { getJanela, getJanelaAtual, janelasPorMes, type PeriodoReset } from './periodoReset';
+import { getJanela, getJanelaAtual, janelasPorMes, rotulos, type PeriodoReset } from './periodoReset';
 import { custoInsumosDoTamanho } from './fichaInsumos';
 
 /**
@@ -274,7 +274,7 @@ export function getWeekRange(refDate: Date = new Date(), periodo: PeriodoReset =
   const monday = new Date(ay, am - 1, ad);
   const sunday = new Date(by, bm - 1, bd);
 
-  const formattedRange = `Semana de ${formatDateBr(startIso).slice(0, 5)} a ${formatDateBr(endIso).slice(0, 5)}`;
+  const formattedRange = `${rotulos(periodo).prefixoIntervalo} ${formatDateBr(startIso).slice(0, 5)} a ${formatDateBr(endIso).slice(0, 5)}`;
 
   return {
     startIso,

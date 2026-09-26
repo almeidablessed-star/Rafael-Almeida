@@ -8,9 +8,9 @@
  * chances de discordarem — e elas discordavam mesmo, em fusos positivos (ver
  * a nota em `getJanela`).
  *
- * Nesta etapa o app inteiro ainda passa `'semanal'` fixo: o objetivo e trocar
- * o motor por baixo SEM mudar nenhum numero. Os ramos `quinzenal` e `mensal`
- * ja existem aqui, mas ninguem os chama ainda.
+ * Alem da aritmetica, este modulo e dono do VOCABULARIO de cada periodo (ver
+ * `rotulos`): as telas nunca montam "essa " + substantivo, porque portugues
+ * tem concordancia e o resultado sairia errado no modo mensal.
  *
  * ── REGRA INEGOCIAVEL ──────────────────────────────────────────────────────
  * Toda data e construida com `new Date(ano, mes - 1, dia)` (horario LOCAL) e
@@ -158,6 +158,75 @@ export function janelasPorMes(periodo: PeriodoReset): number {
       return 1;
   }
 }
+
+/**
+ * Vocabulario de cada periodo, em FRASES INTEIRAS.
+ *
+ * O motivo de nao montar por concatenacao (`'essa ' + substantivo`) e
+ * concordancia de genero: "essa semana" e "essa quinzena", mas "ESSE mes".
+ * Montar com pedacos produz exatamente o tipo de erro que ja apareceu neste
+ * app — "Já existe um ficha técnica" — que soa como texto de robo justamente
+ * no momento em que a confeiteira precisa confiar no numero ao lado.
+ *
+ * Cada campo carrega o artigo e a preposicao prontos. Quem exibe so escolhe a
+ * chave; nunca remonta a frase.
+ */
+export interface RotulosPeriodo {
+  /** "semana" / "quinzena" / "mes" — para quando so o substantivo serve. */
+  substantivo: string;
+  /** Titulo do card de meta no Inicio. */
+  tituloMeta: string;
+  /** "por semana" / "por quinzena" / "por mes". */
+  porPeriodo: string;
+  /** "essa semana" / "essa quinzena" / "esse mes" — note o artigo mudando. */
+  nessePeriodo: string;
+  /** "da semana" / "da quinzena" / "do mes" — a preposicao tambem muda. */
+  daPeriodo: string;
+  /** "de semanas anteriores" / "de quinzenas anteriores" / "de meses anteriores". */
+  anteriores: string;
+  /** Explicacao do reset, no rodape dos numeros do Inicio. */
+  explicacaoReset: string;
+  /** Prefixo do intervalo em `getWeekRange().formattedRange`. */
+  prefixoIntervalo: string;
+}
+
+export const rotulos = (periodo: PeriodoReset): RotulosPeriodo => {
+  switch (periodo) {
+    case 'semanal':
+      return {
+        substantivo: 'semana',
+        tituloMeta: 'Meta da Semana',
+        porPeriodo: 'por semana',
+        nessePeriodo: 'essa semana',
+        daPeriodo: 'da semana',
+        anteriores: 'de semanas anteriores',
+        explicacaoReset: 'Números da semana atual (seg–dom) · reinicia toda segunda',
+        prefixoIntervalo: 'Semana de',
+      };
+    case 'quinzenal':
+      return {
+        substantivo: 'quinzena',
+        tituloMeta: 'Meta da Quinzena',
+        porPeriodo: 'por quinzena',
+        nessePeriodo: 'essa quinzena',
+        daPeriodo: 'da quinzena',
+        anteriores: 'de quinzenas anteriores',
+        explicacaoReset: 'Números da quinzena atual (dias 1–15 e 16 ao fim do mês) · reinicia dia 1 e dia 16',
+        prefixoIntervalo: 'Quinzena de',
+      };
+    case 'mensal':
+      return {
+        substantivo: 'mês',
+        tituloMeta: 'Meta do Mês',
+        porPeriodo: 'por mês',
+        nessePeriodo: 'esse mês',
+        daPeriodo: 'do mês',
+        anteriores: 'de meses anteriores',
+        explicacaoReset: 'Números do mês atual · reinicia todo dia 1',
+        prefixoIntervalo: 'Mês de',
+      };
+  }
+};
 
 /**
  * Indice da janela dentro do mes. Usado so como rotulo no Historico.

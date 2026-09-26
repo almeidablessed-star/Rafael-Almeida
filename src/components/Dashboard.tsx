@@ -3,6 +3,7 @@ import { Transaction, SummaryTotals, TransactionType, TimePeriod } from '../type
 import { formatCurrency, formatDateBr } from '../utils/formatters';
 import { calculateWeeklyBalances, calcularTotalAReceberGeral, calcularMetaSemanal, calcularEstruturaFinanceira, somarDespesasEmpresa, avaliarSaudeFinanceiraProdutos } from '../utils/financialEngine';
 import { useCosts } from '../context/CostsContext';
+import { rotulos } from '../utils/periodoReset';
 import { ResumoDistribuicaoCard } from './ResumoDistribuicaoCard';
 import { ANIMATION_DURATIONS, ANIMATION_EASING } from '../lib/animation-tokens';
 import { useCurrency } from '../context/CurrencyContext';
@@ -82,6 +83,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
   // nao carregou — mesmo default da coluna, entao a primeira renderizacao nunca
   // mostra um numero de outro periodo por um instante.
   const periodoReset = administrativeCosts?.periodoReset ?? 'semanal';
+  // Frases prontas do periodo escolhido. Nunca concatenar aqui — ver `rotulos`.
+  const vocab = rotulos(periodoReset);
   const transactionsList = allTransactions.length > 0 ? allTransactions : (recentTransactions || []);
   const balances = calculateWeeklyBalances(transactionsList, fichas, periodoReset);
   // Excecao ao recorte semanal do restante do card: saldo pendente e dinheiro
@@ -317,7 +320,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               segunda-feira parecia um bug pra quem abria o app sem saber que
               os totais (exceto "A receber") reiniciam a cada semana. */}
           <p className="text-[10px] mt-2.5 text-center" style={{ color: 'rgba(255,255,255,0.55)', fontFamily: "'Manrope', sans-serif", lineHeight: 1.4 }}>
-            Números da semana atual (seg–dom) · reinicia toda segunda · "A receber" mostra tudo pendente, de qualquer época
+            {vocab.explicacaoReset} · "A receber" mostra tudo pendente, de qualquer época
           </p>
 
           {/* Spacer - maintains layout spacing */}
@@ -551,7 +554,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <div className="space-y-3 w-full mt-6">
           <div>
             <h3 className="font-serif-display text-[23px]" style={{ color: '#241B2B' }}>
-              Meta da Semana
+              {vocab.tituloMeta}
             </h3>
             <p className="text-[11px]" style={{ color: '#7A6E80', marginTop: '2px' }}>
               Quanto precisa entrar pra cobrir tudo — negócio e você
@@ -570,7 +573,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <p className="text-[11px] mt-1" style={{ color: '#9A8FA0' }}>
                 Recebimento desejado, despesas e metas de CMV/investimento/lucro
                 em Minha Empresa. Sem isso não dá para saber quanto você precisa
-                vender por semana. Toque para preencher.
+                vender {vocab.porPeriodo}. Toque para preencher.
               </p>
             </button>
           ) : (
@@ -584,7 +587,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     {formatMoney(meta.necessarioPorSemana)}
                   </p>
                   <p className="text-[10px]" style={{ color: '#9A8FA0' }}>
-                    por semana · {formatMoney(meta.faturamentoNecessarioMensal)}/mês pra bater sua meta completa
+                    {vocab.porPeriodo} · {formatMoney(meta.faturamentoNecessarioMensal)}/mês pra bater sua meta completa
                   </p>
                 </div>
                 <div className="text-right">
@@ -610,8 +613,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
               <p className="text-[11px] mt-2" style={{ color: meta.metaAtingida ? '#4CAF7D' : '#7A6E80', fontWeight: meta.metaAtingida ? 700 : 400 }}>
                 {meta.metaAtingida
-                  ? '✓ Meta completa da semana batida! O que entrar além disso é resultado extra.'
-                  : `Faltam ${formatMoney(meta.faltaFaturar)} para cobrir tudo essa semana.`}
+                  ? `✓ Meta completa ${vocab.daPeriodo} batida! O que entrar além disso é resultado extra.`
+                  : `Faltam ${formatMoney(meta.faltaFaturar)} para cobrir tudo ${vocab.nessePeriodo}.`}
               </p>
 
               {/* Camada motivacional: a fatia dentro da meta acima que e "sua"
@@ -623,8 +626,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   💜 Sua fatia pessoal
                 </p>
                 <p className="text-[11px] mt-1" style={{ color: '#7A6E80', lineHeight: 1.4 }}>
-                  Disso, <strong style={{ color: '#241B2B' }}>{formatMoney(meta.metaPessoalSemana)}</strong> por
-                  semana é seu — o que você decidiu receber pelo seu trabalho.
+                  Disso, <strong style={{ color: '#241B2B' }}>{formatMoney(meta.metaPessoalSemana)}</strong>{' '}
+                  {vocab.porPeriodo} é seu — o que você decidiu receber pelo seu trabalho.
                   Até agora já garantiu <strong style={{ color: '#241B2B' }}>{formatMoney(meta.jaGarantidoPessoal)}</strong>.
                 </p>
 
@@ -641,8 +644,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
                 <p className="text-[10.5px] mt-1.5" style={{ color: meta.metaPessoalAtingida ? '#4CAF7D' : '#9A8FA0', fontWeight: meta.metaPessoalAtingida ? 700 : 400 }}>
                   {meta.metaPessoalAtingida
-                    ? '✓ Sua meta pessoal da semana já foi garantida!'
-                    : `Faltam ${formatMoney(meta.faltaPessoal)} para bater sua meta pessoal essa semana.`}
+                    ? `✓ Sua meta pessoal ${vocab.daPeriodo} já foi garantida!`
+                    : `Faltam ${formatMoney(meta.faltaPessoal)} para bater sua meta pessoal ${vocab.nessePeriodo}.`}
                 </p>
               </div>
             </div>
