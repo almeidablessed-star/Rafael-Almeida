@@ -597,10 +597,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   */}
                   <p className="text-[24px] leading-tight" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
                     {formatMoney(meta.necessarioPorSemana)}
-                    {/* 600, nao 700: a unidade acompanha o numero grande (800) sem
-                        competir com ele. A Manrope carrega 400/500/600/700/800 —
-                        600 e peso real, nao negrito sintetizado pelo navegador. */}
-                    <span className="text-[11px] ml-1.5" style={{ color: '#9A8FA0', fontWeight: 600 }}>
+                    {/* 500: a unidade acompanha o numero grande (800) sem competir
+                        com ele. A Manrope carrega 400/500/600/700/800 — 500 e peso
+                        real, nao negrito sintetizado pelo navegador (que borraria
+                        um texto de 11px). */}
+                    <span className="text-[11px] ml-1.5" style={{ color: '#9A8FA0', fontWeight: 500 }}>
                       {vocab.porPeriodo}
                     </span>
                   </p>
