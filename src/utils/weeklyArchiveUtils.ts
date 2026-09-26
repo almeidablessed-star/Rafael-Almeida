@@ -1,85 +1,55 @@
 import { Transaction, WeeklySummary } from '../types';
+import { getIndiceNoMes, getJanela, getJanelaAtual } from './periodoReset';
 
 /**
- * Data de hoje em ISO LOCAL (`YYYY-MM-DD`), sem passar por `toISOString()`
- * (que converte pra UTC e pode cair no dia errado — ver nota em `getWeekMonday`).
+ * A aritmetica de calendario que morava aqui mudou-se para `periodoReset.ts`,
+ * que a generaliza para semanal / quinzenal / mensal. As funcoes abaixo
+ * permanecem como a fachada SEMANAL dessa aritmetica: mesma assinatura, mesmo
+ * resultado, so que agora delegando em vez de reimplementar.
+ *
+ * Elas continuam existindo porque sao chamadas em varios pontos e porque
+ * "semana" ainda e o unico periodo que o app expoe. Quando o periodo passar a
+ * ser configuravel, os chamadores migram para `getJanela(data, periodo)` e
+ * estas fachadas saem de cena.
+ *
+ * Toda a nota historica sobre fuso — por que nada aqui pode passar por
+ * `.toISOString()` — vive agora no cabecalho de `periodoReset.ts`.
  */
-const hojeLocalIso = (): string => {
-  const hoje = new Date();
-  return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
-};
 
 /**
  * Get the Monday of the current week.
- *
- * Delega para `getWeekMonday`, que ja resolve pela data LOCAL (sem o
- * `.toISOString()` que causava o mesmo deslocamento de fuso corrigido ali).
- * A versao anterior desta funcao repetia o bug: construia a segunda-feira
- * mantendo a HORA atual (nao zerada) e so depois convertia com
- * `.toISOString()` — pra fusos atras de UTC (ex: EUA, UTC-4/-5), isso
- * empurrava a data um dia pra frente sempre que a hora local caia entre
- * ~20h e meia-noite, excluindo lancamentos legitimos de hoje da janela da
- * semana.
  */
 export function getCurrentWeekMonday(): string {
-  return getWeekMonday(hojeLocalIso());
+  return getJanelaAtual('semanal').inicioIso;
 }
 
 /**
- * Get the Sunday of the current week. Mesmo motivo de `getCurrentWeekMonday`.
+ * Get the Sunday of the current week.
  */
 export function getCurrentWeekSunday(): string {
-  return getWeekSunday(hojeLocalIso());
+  return getJanelaAtual('semanal').fimIso;
 }
 
 /**
  * Get the Monday of a specific date's week.
- *
- * Constroi a data com `new Date(ano, mes, dia)` (horario LOCAL), nao
- * `new Date(dateStr + 'T00:00:00Z')` (UTC) — a versao antiga fazia isso, e
- * `getDay()`/`getDate()` interpretam esse instante UTC no fuso local. Para
- * qualquer usuaria num fuso atras de UTC (ex: EUA, UTC-4/-5, como a
- * confeitaria de teste em Massachusetts), meia-noite UTC cai na noite do dia
- * ANTERIOR no relogio local, jogando a semana inteira um dia pra tras.
  */
 export function getWeekMonday(dateStr: string): string {
-  const [year, month, day] = dateStr.split('-').map(Number);
-  const date = new Date(year, month - 1, day);
-  const dayOfWeek = date.getDay();
-  const diff = date.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
-  date.setDate(diff);
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  return getJanela(dateStr, 'semanal').inicioIso;
 }
 
 /**
  * Get the Sunday of a specific date's week
  */
 export function getWeekSunday(dateStr: string): string {
-  const [year, month, day] = getWeekMonday(dateStr).split('-').map(Number);
-  const sunday = new Date(year, month - 1, day + 6);
-  return `${sunday.getFullYear()}-${String(sunday.getMonth() + 1).padStart(2, '0')}-${String(sunday.getDate()).padStart(2, '0')}`;
+  return getJanela(dateStr, 'semanal').fimIso;
 }
 
 /**
- * Get week number in month (1-5)
+ * Get week number in month (1-5, ocasionalmente 6 — ver a nota em
+ * `getIndiceNoMes`, que preserva essa contagem).
  */
 export function getWeekNumberInMonth(dateStr: string): number {
-  const monday = getWeekMonday(dateStr);
-  const [year, month] = monday.split('-').map(Number);
-
-  const firstDayOfMonth = `${year}-${String(month).padStart(2, '0')}-01`;
-  const firstMonday = getWeekMonday(firstDayOfMonth);
-
-  // UTC so de proposito aqui: as duas datas ja sao YYYY-MM-DD (sem hora), e
-  // so precisamos da diferenca em dias entre elas — construir em UTC evita
-  // qualquer risco de DST deslocar a contagem de semanas em 1h perto da
-  // troca de horario de verao.
-  const toUtcMs = (iso: string) => {
-    const [y, m, d] = iso.split('-').map(Number);
-    return Date.UTC(y, m - 1, d);
-  };
-
-  return Math.round((toUtcMs(monday) - toUtcMs(firstMonday)) / (7 * 24 * 60 * 60 * 1000)) + 1;
+  return getIndiceNoMes(dateStr, 'semanal');
 }
 
 /**
@@ -153,14 +123,18 @@ export function calculateWeeklyTotals(transactions: Transaction[]) {
 
 /** Lista, sem duplicar, as semanas (segunda a domingo) que tem pelo menos 1 transacao lancada. */
 function getWeeksWithTransactions(transactions: Transaction[]): { startDate: string; endDate: string }[] {
-  const mondays = new Set<string>();
+  // Agrupa pelo INICIO da janela: duas transacoes caem na mesma linha do
+  // Historico exatamente quando `getJanela` devolve o mesmo inicio para as
+  // duas. Escrito assim, trocar `'semanal'` por outro periodo reagrupa o
+  // historico inteiro sem mais nenhuma mudanca aqui.
+  const inicios = new Set<string>();
   transactions.forEach((tx) => {
     if (!tx.createdAt) return;
-    mondays.add(getWeekMonday(createdAtToLocalIso(tx.createdAt)));
+    inicios.add(getJanela(createdAtToLocalIso(tx.createdAt), 'semanal').inicioIso);
   });
-  return Array.from(mondays)
+  return Array.from(inicios)
     .sort()
-    .map((startDate) => ({ startDate, endDate: getWeekSunday(startDate) }));
+    .map((startDate) => ({ startDate, endDate: getJanela(startDate, 'semanal').fimIso }));
 }
 
 /** Anos com pelo menos uma semana de transacoes lancadas, mais recente primeiro. */

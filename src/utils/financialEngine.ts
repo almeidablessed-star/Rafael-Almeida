@@ -1,6 +1,7 @@
 import { Transaction, TimePeriod, SummaryTotals, FichaTecnica, DespesaEmpresa, AdministrativeCosts } from '../types';
 import { getTodayIso, formatDateBr } from './formatters';
 import { getCurrentWeekMonday, getCurrentWeekSunday, createdAtToLocalIso } from './weeklyArchiveUtils';
+import { getJanela, janelasPorMes } from './periodoReset';
 import { custoInsumosDoTamanho } from './fichaInsumos';
 
 /**
@@ -251,20 +252,27 @@ export function getWeekRange(refDate: Date = new Date()): {
   endDate: Date;
   formattedRange: string;
 } {
-  const d = new Date(refDate);
-  d.setHours(0, 0, 0, 0);
+  // Segunda e domingo vem de `periodoReset`, a fonte unica de aritmetica de
+  // janela. Antes esta funcao tinha a SEGUNDA implementacao do calculo, e
+  // fechava com `.toISOString()` sobre um Date de meia-noite local: em fusos
+  // POSITIVOS (UTC+1 em diante) meia-noite local ja e o dia anterior em UTC, e
+  // a janela inteira andava um dia pra tras. Como `calculateWeeklyBalances` ja
+  // usava a versao local correta, os dois cards do Inicio discordariam em um
+  // dia para uma usuaria na Europa ou na Asia.
+  //
+  // Em UTC-3 (Brasil) e UTC-4/-5 (a confeitaria de teste) o resultado e
+  // identico ao de antes — meia-noite local ainda cai no mesmo dia em UTC —
+  // entao esta troca nao muda nenhum numero hoje; ela so remove um bug que
+  // estava esperando a primeira usuaria do outro lado do meridiano.
+  const refIso = `${refDate.getFullYear()}-${String(refDate.getMonth() + 1).padStart(2, '0')}-${String(
+    refDate.getDate()
+  ).padStart(2, '0')}`;
+  const { inicioIso: startIso, fimIso: endIso } = getJanela(refIso, 'semanal');
 
-  const day = d.getDay(); // 0 = Sunday, 1 = Monday... 6 = Saturday
-  const isoDay = day === 0 ? 7 : day; // Convert Sunday to 7
-
-  const monday = new Date(d);
-  monday.setDate(d.getDate() - (isoDay - 1));
-
-  const sunday = new Date(d);
-  sunday.setDate(d.getDate() + (7 - isoDay));
-
-  const startIso = monday.toISOString().split('T')[0];
-  const endIso = sunday.toISOString().split('T')[0];
+  const [ay, am, ad] = startIso.split('-').map(Number);
+  const [by, bm, bd] = endIso.split('-').map(Number);
+  const monday = new Date(ay, am - 1, ad);
+  const sunday = new Date(by, bm - 1, bd);
 
   const formattedRange = `Semana de ${formatDateBr(startIso).slice(0, 5)} a ${formatDateBr(endIso).slice(0, 5)}`;
 
@@ -897,6 +905,23 @@ export function calculateWeeklyBalances(transactions: Transaction[], fichas: Fic
  * mensal de R$ 2.000, dividir por 4 daria uma meta de R$ 500 e um rombo de
  * cerca de R$ 350 por mes, justamente no numero que existe para evitar rombo.
  */
+/**
+ * Semanas por mes, usado SO pela meta de HORAS (`calcularMetaHoras`).
+ *
+ * A meta financeira nao usa mais esta constante: ela passou a pedir o divisor
+ * a `janelasPorMes(periodo)`, porque e ela que vai acompanhar o periodo de
+ * reset escolhido pela usuaria.
+ *
+ * A meta de horas fica deliberadamente semanal, e por isso guarda a constante
+ * aqui: ela e ancorada em `workingDaysPerWeek` — "dias por SEMANA", um campo
+ * separado que a usuaria configurou. Converter as horas para "por quinzena" e
+ * depois dividir por "dias por semana" misturaria unidades e produziria um
+ * `horasPorDia` errado. Rotina de trabalho e periodo de analise financeira sao
+ * conceitos diferentes.
+ *
+ * Efeito colateral bom da separacao: os dois calculos deixam de compartilhar o
+ * mesmo simbolo, entao mexer num nao arrasta o outro por acidente.
+ */
 const SEMANAS_POR_MES = 52 / 12; // ≈ 4,3333
 
 export interface MetaSemanal {
@@ -938,8 +963,13 @@ export const calcularMetaSemanal = (
   estrutura: EstruturaFinanceira | null,
   transacoes: Transaction[]
 ): MetaSemanal => {
+  // `'semanal'` fixo nesta etapa: o motor ja sabe dividir por qualquer
+  // periodo, mas o valor escolhido pela usuaria so passa a chegar aqui na
+  // etapa do schema. Ate la o divisor e exatamente o de sempre (52/12).
+  const janelas = janelasPorMes('semanal');
+
   const faturamentoNecessarioMensal = estrutura?.valido ? estrutura.faturamentoNecessario : 0;
-  const necessarioPorSemana = faturamentoNecessarioMensal / SEMANAS_POR_MES;
+  const necessarioPorSemana = faturamentoNecessarioMensal / janelas;
 
   const { startIso, endIso } = getWeekRange();
 
@@ -967,7 +997,7 @@ export const calcularMetaSemanal = (
   // breakdown de cada venda individual e ja desconta saques avulsos; misturar
   // as duas fontes na mesma frase confundiria mais do que ajudaria.
   const maoDeObraPercent = estrutura?.valido ? estrutura.maoDeObraPercent : 0;
-  const metaPessoalSemana = estrutura?.valido ? estrutura.maoDeObraAmount / SEMANAS_POR_MES : 0;
+  const metaPessoalSemana = estrutura?.valido ? estrutura.maoDeObraAmount / janelas : 0;
   const jaGarantidoPessoal = faturadoNaSemana * (maoDeObraPercent / 100);
   const faltaPessoal = Math.max(0, metaPessoalSemana - jaGarantidoPessoal);
 
