@@ -1,3 +1,11 @@
+/**
+ * O tipo canonico vive em `utils/periodoReset.ts`, junto da aritmetica que o
+ * usa — reexportado aqui so para quem ja importa de `types`. Definir uma
+ * segunda copia abriria a porta para as duas listas de periodos divergirem.
+ */
+export type { PeriodoReset } from './utils/periodoReset';
+import type { PeriodoReset } from './utils/periodoReset';
+
 export interface AdministrativeCosts {
   id?: string;
 
@@ -35,6 +43,21 @@ export interface AdministrativeCosts {
 
   /** Dias de trabalho por semana informados pela usuaria. So alimenta a meta de horas exibida como referencia — nunca uma obrigacao de carga horaria. */
   workingDaysPerWeek: number;
+
+  /**
+   * De quanto em quanto tempo as metas financeiras zeram e recomecam.
+   *
+   * Vale para a meta de faturamento e para o recorte do Historico. NAO vale
+   * para a meta de HORAS, que continua sempre semanal por ser ancorada em
+   * `workingDaysPerWeek` — rotina de trabalho e periodo de analise financeira
+   * sao conceitos diferentes.
+   *
+   * Trocar o periodo reagrupa o historico inteiro retroativamente: o card
+   * Historico deriva tudo das transacoes a cada render, entao o periodo e uma
+   * lente, nao um estado congelado por janela. Nenhum valor de venda muda, so
+   * o recorte.
+   */
+  periodoReset: PeriodoReset;
 
   /** Meta MAXIMA de CMV/reposicao sobre o preco do produto. Default 34, editavel por conta — nunca fixo para todo mundo. */
   cmvTargetPercent: number;

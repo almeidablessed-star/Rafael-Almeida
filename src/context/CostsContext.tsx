@@ -101,6 +101,11 @@ export const CostsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     total: somarCustosMensaisLegado(data || {}),
     monthlyIncomeTarget: data?.monthly_income_target || 0,
     workingDaysPerWeek: data?.working_days_per_week || 6,
+    // `|| 'semanal'` cobre os dois casos em que a coluna nao responde: conta
+    // antiga gravada antes da migration, e o intervalo entre este codigo subir
+    // e a migration rodar. Como `fetchCosts` usa `select('*')`, uma coluna
+    // ainda inexistente simplesmente vem `undefined` — nao quebra a consulta.
+    periodoReset: data?.periodo_reset || 'semanal',
     cmvTargetPercent: data?.cmv_target_percent ?? 34,
     investmentTargetPercent: data?.investment_target_percent ?? 5,
     profitTargetPercent: data?.profit_target_percent ?? 13,
