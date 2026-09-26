@@ -11,6 +11,7 @@ import { useProdutos } from '../context/ProdutosContext';
 import { useCosts } from '../context/CostsContext';
 import { normalizeName } from '../utils/fichaMatcher';
 import { convertQuantity } from '../utils/units';
+import { CustomSelect } from './CustomSelect';
 import {
   Wallet,
   ShoppingBag,
@@ -427,18 +428,21 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
                 min="0"
                 style={{ flex: 1, padding: '11px 13px', background: '#FAF7FA', border: '1px solid rgba(36,27,43,.08)', borderRadius: '14px', fontSize: '11px', color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}
               />
-              <select
+              <CustomSelect
                 value={itemUnit}
-                onChange={(e) => setItemUnit(e.target.value as any)}
-                style={{ padding: '11px 13px', background: '#FAF7FA', border: '1px solid rgba(36,27,43,.08)', borderRadius: '14px', fontSize: '11px', color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}
-              >
-                <option value="un">Unidade</option>
-                <option value="kg">kg</option>
-                <option value="g">g</option>
-                <option value="L">L</option>
-                <option value="ml">ml</option>
-                <option value="pacote">Pacote</option>
-              </select>
+                onChange={(v) => setItemUnit(v as any)}
+                compacto
+                ariaLabel="Unidade do item comprado"
+                style={{ width: '120px', flexShrink: 0 }}
+                options={[
+                  { value: 'un', label: 'Unidade' },
+                  { value: 'kg', label: 'kg' },
+                  { value: 'g', label: 'g' },
+                  { value: 'L', label: 'L' },
+                  { value: 'ml', label: 'ml' },
+                  { value: 'pacote', label: 'Pacote' },
+                ]}
+              />
             </div>
           </div>
 

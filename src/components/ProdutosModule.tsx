@@ -11,6 +11,7 @@ import { DuplicateNameWarningModal } from './DuplicateNameWarningModal';
 import { useDelayedDelete } from '../hooks/useDelayedDelete';
 import { FieldValidationError } from './FieldValidationError';
 import { normalizeName } from '../utils/fichaMatcher';
+import { CustomSelect } from './CustomSelect';
 import {
   Package,
   Plus,
@@ -497,12 +498,14 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                         }}
                         className="flex-1 px-3 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
                       />
-                      <select
-                        value={unidadeEmbalagem} onChange={(e) => setUnidadeEmbalagem(e.target.value as any)}
-                        className="px-3 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
-                      >
-                        {UNIDADES.map((u) => <option key={u} value={u}>{u}</option>)}
-                      </select>
+                      <CustomSelect
+                        value={unidadeEmbalagem}
+                        onChange={(v) => setUnidadeEmbalagem(v as any)}
+                        compacto
+                        ariaLabel="Unidade de embalagem"
+                        style={{ width: '108px', flexShrink: 0 }}
+                        options={UNIDADES.map((u) => ({ value: u, label: u }))}
+                      />
                     </div>
                     {invalidFieldId === 'produto-quantidade-embalagem' && <FieldValidationError />}
                   </div>
@@ -557,12 +560,14 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                             type="text" inputMode="decimal" placeholder="100" value={nivelMinimo} onChange={(e) => setNivelMinimo(e.target.value)}
                             className="flex-1 px-3 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
                           />
-                          <select
-                            value={nivelMinimoUnidade} onChange={(e) => setNivelMinimoUnidade(e.target.value as any)}
-                            className="px-3 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
-                          >
-                            {UNIDADES.map((u) => <option key={u} value={u}>{u}</option>)}
-                          </select>
+                          <CustomSelect
+                            value={nivelMinimoUnidade}
+                            onChange={(v) => setNivelMinimoUnidade(v as any)}
+                            compacto
+                            ariaLabel="Unidade do nível mínimo"
+                            style={{ width: '108px', flexShrink: 0 }}
+                            options={UNIDADES.map((u) => ({ value: u, label: u }))}
+                          />
                         </div>
                       </div>
                     </>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { User, Store, DollarSign, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { CarulaLogo } from '../components/CarulaLogo';
+import { CustomSelect } from '../components/CustomSelect';
 
 export const SetupProfilePage: React.FC = () => {
   const { setupProfile, user } = useAuth();
@@ -107,19 +108,22 @@ export const SetupProfilePage: React.FC = () => {
               />
             </div>
 
-            <div className="relative">
-              <DollarSign className="absolute left-4 top-3.5 w-5 h-5" style={{ color: '#9A8FA0' }} />
-              <select
-                value={moeda}
-                onChange={(e) => setMoeda(e.target.value as 'BRL' | 'USD')}
-                className="w-full pl-12 pr-4 py-3 bg-white border border-[#E6E1DB] rounded-xl text-base font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] cursor-pointer"
-                disabled={isLoading}
-              >
-                <option value="BRL">Real Brasileiro (R$)</option>
-                <option value="USD">Dólar Americano ($)</option>
-                <option value="EUR">Euro (€)</option>
-              </select>
-            </div>
+            {/* O icone de cifrao que ficava sobreposto a esquerda saiu junto com
+                o `<select>`: o CustomSelect controla o proprio padding interno,
+                e nao ha onde encaixar um overlay absoluto sem desalinhar o
+                texto. Nao se perde informacao — cada opcao ja mostra o simbolo
+                da moeda (R$ / $ / €), que era o que o icone sinalizava. */}
+            <CustomSelect
+              value={moeda}
+              onChange={(v) => setMoeda(v as 'BRL' | 'USD')}
+              disabled={isLoading}
+              ariaLabel="Moeda de exibição"
+              options={[
+                { value: 'BRL', label: 'Real Brasileiro (R$)' },
+                { value: 'USD', label: 'Dólar Americano ($)' },
+                { value: 'EUR', label: 'Euro (€)' },
+              ]}
+            />
 
             {error && (
               <div className="p-3 rounded-xl bg-[#FDF4F5] border border-[rgba(196,98,111,.35)]">

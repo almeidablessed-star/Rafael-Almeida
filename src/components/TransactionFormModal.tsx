@@ -24,6 +24,7 @@ import { getTodayIso, getTransactionTypeDetails } from '../utils/formatters';
 import { buildFichaItems, normalizeName } from '../utils/fichaMatcher';
 import { capitalizeFirstLetter } from '../utils/textCase';
 import { calculateProportionalBreakdown, derivarProporcoes, parseSaleDetail } from '../utils/financialEngine';
+import { CustomSelect } from './CustomSelect';
 import {
   X,
   Plus,
@@ -1304,24 +1305,32 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                             ⚠️ Nenhum produto cadastrado ainda. Cadastre produtos na aba <strong>Fichas Técnicas</strong>.
                           </div>
                         ) : (
-                          <select
-                            id={`pedido-produto-${item.id}`}
-                            required
+                          /*
+                            O `required` nativo saiu junto com o `<select>`, e
+                            isso NAO abre buraco: `handleSubmit` ja barra item
+                            sem produto por conta propria (ver a checagem de
+                            `!item.productName`, com o alerta "Escolha o produto
+                            de cada item"), justamente porque a validacao nativa
+                            nao cobria o caso do primeiro bolo aparecer
+                            pre-selecionado sem ninguem ter escolhido.
+
+                            O `<optgroup>` de "✨ Outro" tambem saiu: ele
+                            agrupava um unico item, e o proprio rotulo ja carrega
+                            o ✨ que o separava visualmente.
+                          */
+                          <CustomSelect
                             value={item.productName}
-                            onChange={(e) => {
-                              handleUpdateItemProduct(item.id, e.target.value);
+                            placeholder="Selecione o produto…"
+                            ariaLabel="Produto do item do pedido"
+                            onChange={(v) => {
+                              handleUpdateItemProduct(item.id, v);
                               if (invalidFieldId === `pedido-produto-${item.id}`) setInvalidFieldId(null);
                             }}
-                            style={{ border: '1px solid rgba(58,35,80,0.14)', borderRadius: '10px', padding: '12px', fontSize: '15px', background: '#FAF7FA' }}
-                          >
-                            <option value="">Selecione o produto…</option>
-                            {cakeNamesList.map((name) => (
-                              <option key={name} value={name}>{name}</option>
-                            ))}
-                            <optgroup label="✨ Outro">
-                              <option value="Outro / Personalizado">✨ Outro / Personalizado</option>
-                            </optgroup>
-                          </select>
+                            options={[
+                              ...cakeNamesList.map((name) => ({ value: name, label: name })),
+                              { value: 'Outro / Personalizado', label: '✨ Outro / Personalizado' },
+                            ]}
+                          />
                         )}
                         {invalidFieldId === `pedido-produto-${item.id}` && <FieldValidationError />}
                       </div>

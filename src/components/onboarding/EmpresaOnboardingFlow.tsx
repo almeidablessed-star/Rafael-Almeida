@@ -9,6 +9,7 @@ import {
   somarDespesasEmpresa,
 } from '../../utils/financialEngine';
 import { CampoComAjuda } from './CampoComAjuda';
+import { CustomSelect } from '../CustomSelect';
 
 /**
  * Onboarding financeiro obrigatorio (spec "Minha Empresa", Parte 3), com o
@@ -324,15 +325,12 @@ export const EmpresaOnboardingFlow: React.FC = () => {
           {passo === 3 && (
             <div className="space-y-3">
               <h2 className={labelClass} style={{ color: '#241B2B' }}>Quantos dias por semana você quer trabalhar?</h2>
-              <select
-                className={inputClass}
-                value={workingDaysPerWeek}
-                onChange={(e) => setWorkingDaysPerWeek(Number(e.target.value))}
-              >
-                {[1, 2, 3, 4, 5, 6, 7].map((n) => (
-                  <option key={n} value={n}>{n}</option>
-                ))}
-              </select>
+              <CustomSelect
+                value={String(workingDaysPerWeek)}
+                onChange={(v) => setWorkingDaysPerWeek(Number(v))}
+                ariaLabel="Dias de trabalho por semana"
+                options={[1, 2, 3, 4, 5, 6, 7].map((n) => ({ value: String(n), label: String(n) }))}
+              />
               <div className="p-3 rounded-xl border border-[#E6E1DB] bg-white">
                 <p className="text-[10px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
                   Meta de referência — não é uma obrigação
@@ -356,15 +354,16 @@ export const EmpresaOnboardingFlow: React.FC = () => {
             <div className="space-y-3">
               <h2 className={labelClass} style={{ color: '#241B2B' }}>Com que frequência você quer resetar suas metas?</h2>
               <CampoComAjuda microcopy="É de quanto em quanto tempo suas metas zeram e recomeçam. Não muda nenhum valor de venda, só o recorte com que você acompanha. Dá pra trocar depois em Minha Empresa." />
-              <select
-                className={inputClass}
+              <CustomSelect
                 value={periodoReset}
-                onChange={(e) => setPeriodoReset(e.target.value as PeriodoReset)}
-              >
-                <option value="semanal">Toda semana (segunda a domingo)</option>
-                <option value="quinzenal">A cada quinzena (dias 1–15 e 16 ao fim do mês)</option>
-                <option value="mensal">Todo mês (mês cheio)</option>
-              </select>
+                onChange={(v) => setPeriodoReset(v as PeriodoReset)}
+                ariaLabel="Período de reset das metas"
+                options={[
+                  { value: 'semanal', label: 'Toda semana (segunda a domingo)' },
+                  { value: 'quinzenal', label: 'A cada quinzena (dias 1–15 e 16 ao fim do mês)' },
+                  { value: 'mensal', label: 'Todo mês (mês cheio)' },
+                ]}
+              />
               <div className="p-3 rounded-xl border border-[#E6E1DB] bg-white">
                 <p className="text-[10px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
                   Sua meta de horas continua semanal

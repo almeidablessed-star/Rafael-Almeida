@@ -4,6 +4,7 @@ import { formatCurrency, formatDateBr } from '../utils/formatters';
 import { getWeeklySummariesByYearMonth, getHistoryYears, getHistoryMonthsByYear } from '../utils/weeklyArchiveUtils';
 import { useCosts } from '../context/CostsContext';
 import { rotulos } from '../utils/periodoReset';
+import { CustomSelect } from './CustomSelect';
 
 interface WeeklyHistoryCardProps {
   transactions: Transaction[];
@@ -13,63 +14,6 @@ const monthNames = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
 ];
-
-const SimpleSelect: React.FC<{ value: number; onChange: (val: number) => void; options: { label: string; value: number }[]; disabled?: boolean }> = ({ value, onChange, options, disabled: disabledProp }) => {
-  const disabled = disabledProp || options.length === 0;
-  const label = options.find(o => o.value === value)?.label || 'Selecionar';
-
-  if (options.length === 0) {
-    return (
-      <div
-        style={{
-          flex: 1,
-          padding: '10px 12px',
-          borderRadius: '14px',
-          background: '#FAF7FA',
-          fontFamily: "'Manrope', sans-serif",
-          fontSize: '11px',
-          fontWeight: 600,
-          color: '#A096A6',
-          opacity: 0.5,
-        }}
-      >
-        {label}
-      </div>
-    );
-  }
-
-  return (
-    <select
-      value={value}
-      onChange={(e) => onChange(parseInt(e.target.value))}
-      disabled={disabled}
-      style={{
-        flex: 1,
-        padding: '10px 12px',
-        borderRadius: '14px',
-        background: '#FAF7FA',
-        border: 'none',
-        fontFamily: "'Manrope', sans-serif",
-        fontSize: '11px',
-        fontWeight: 600,
-        color: '#241B2B',
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        opacity: disabled ? 0.5 : 1,
-        appearance: 'none',
-        backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3e%3cpath fill='%23241B2B' d='M2 4l4 4 4-4'/%3e%3c/svg%3e")`,
-        backgroundRepeat: 'no-repeat',
-        backgroundPosition: 'right 8px center',
-        paddingRight: '24px',
-      }}
-    >
-      {options.map((opt) => (
-        <option key={opt.value} value={opt.value}>
-          {opt.label}
-        </option>
-      ))}
-    </select>
-  );
-};
 
 export const WeeklyHistoryCard: React.FC<WeeklyHistoryCardProps> = ({ transactions }) => {
   // O periodo escolhida pela usuaria e o que decide como as transacoes se
@@ -181,29 +125,33 @@ export const WeeklyHistoryCard: React.FC<WeeklyHistoryCardProps> = ({ transactio
           marginBottom: '12px',
         }}
       >
-        <SimpleSelect
-          value={filterYear}
-          onChange={(newYear) => {
+        <CustomSelect
+          value={String(filterYear)}
+          onChange={(v) => {
+            const newYear = Number(v);
             setFilterYear(newYear);
             const newMonths = getHistoryMonthsByYear(transactions, newYear, periodoReset);
             setFilterMonth(newMonths.length > 0 ? newMonths[0] : 1);
           }}
-          options={years.map((year) => ({
-            value: year,
-            label: `Ano: ${year}`,
-          }))}
+          compacto
+          disabled={years.length === 0}
+          placeholder="Ano"
+          ariaLabel="Ano do histórico"
+          style={{ flex: 1 }}
+          options={years.map((year) => ({ value: String(year), label: `Ano: ${year}` }))}
         />
 
         {/* Escondido no modo mensal: la a lista ja e a dos meses do ano. */}
         {!modoMensal && (
-          <SimpleSelect
-            value={filterMonth}
-            onChange={setFilterMonth}
-            options={months.map((month) => ({
-              value: month,
-              label: `Mês: ${monthNames[month - 1]}`,
-            }))}
+          <CustomSelect
+            value={String(filterMonth)}
+            onChange={(v) => setFilterMonth(Number(v))}
+            compacto
             disabled={months.length === 0}
+            placeholder="Mês"
+            ariaLabel="Mês do histórico"
+            style={{ flex: 1 }}
+            options={months.map((month) => ({ value: String(month), label: `Mês: ${monthNames[month - 1]}` }))}
           />
         )}
       </div>
