@@ -16,6 +16,7 @@ import { DuplicateNameWarningModal } from './DuplicateNameWarningModal';
 import { useDelayedDelete } from '../hooks/useDelayedDelete';
 import { CampoComAjuda } from './onboarding/CampoComAjuda';
 import { FieldValidationError } from './FieldValidationError';
+import { CustomSelect } from './CustomSelect';
 import {
   BookOpen,
   Plus,
@@ -1085,18 +1086,18 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Categoria *</label>
-                    <select
+                    <CustomSelect
                       value={category}
-                      onChange={(e) => setCategory(e.target.value as any)}
-                      className="border rounded-[10px] px-3 py-3 text-[15px] font-bold"
-                      style={{ borderColor: 'rgba(58,35,80,0.14)', background: '#FAF7FA' }}
-                    >
-                      <option value="bolos">🎂 Bolos & Massas</option>
-                      <option value="doces">🧁 Doces & Sobremesas</option>
-                      <option value="salgados">🥟 Salgados & Lanches</option>
-                      <option value="saudaveis">🥗 Saudáveis & Fit</option>
-                      <option value="kids">🧸 Kids Friendly</option>
-                    </select>
+                      onChange={(v) => setCategory(v as any)}
+                      options={[
+                        { value: 'bolos', label: '🎂 Bolos & Massas' },
+                        { value: 'doces', label: '🧁 Doces & Sobremesas' },
+                        { value: 'salgados', label: '🥟 Salgados & Lanches' },
+                        { value: 'saudaveis', label: '🥗 Saudáveis & Fit' },
+                        { value: 'kids', label: '🧸 Kids Friendly' },
+                      ]}
+                      ariaLabel="Categoria da ficha técnica"
+                    />
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Rendimento *</label>
@@ -1115,17 +1116,19 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         className="flex-1 min-w-0 border rounded-[10px] px-3 py-3 text-[15px]"
                         style={{ borderColor: 'rgba(58,35,80,0.14)', background: '#FAF7FA' }}
                       />
-                      <select
-                        value={selectedYieldUnit}
-                        onChange={(e) => handleApplyYieldUnit(e.target.value)}
-                        className="flex-1 min-w-0 border rounded-[10px] px-3 py-3 text-[15px] font-bold cursor-pointer"
-                        style={{ borderColor: 'rgba(58,35,80,0.14)', background: '#FAF7FA' }}
-                      >
-                        <option value="fatias">🍰 Fatias</option>
-                        <option value="gramas">⚖️ Gramas (g)</option>
-                        <option value="unidades">📦 Unidades</option>
-                        <option value="ml">🥛 ML</option>
-                      </select>
+                      <div className="flex-1 min-w-0">
+                        <CustomSelect
+                          value={selectedYieldUnit}
+                          onChange={handleApplyYieldUnit}
+                          ariaLabel="Unidade de rendimento"
+                          options={[
+                            { value: 'fatias', label: '🍰 Fatias' },
+                            { value: 'gramas', label: '⚖️ Gramas (g)' },
+                            { value: 'unidades', label: '📦 Unidades' },
+                            { value: 'ml', label: '🥛 ML' },
+                          ]}
+                        />
+                      </div>
                     </div>
                     {invalidFieldId === 'ficha-rendimento' && <FieldValidationError />}
                   </div>
@@ -1306,22 +1309,21 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                             {(() => {
                               const produtoVinculado = ing.produtoId ? produtos.find((p) => p.id === ing.produtoId) : undefined;
                               return (
-                                <select
+                                <CustomSelect
                                   value={ing.unit}
-                                  onChange={(e) => handleUpdateInsumoTamanho(tamanho.id, ing.id, 'unit', e.target.value)}
-                                  className="w-full px-1 py-1 bg-white border border-[#E6E1DB] rounded-lg text-[10px] font-bold"
-                                  style={{ fontFamily: "'Manrope', sans-serif" }}
-                                >
-                                  {UNIDADES_INSUMO.map((u) => (
-                                    <option
-                                      key={u}
-                                      value={u}
-                                      disabled={!!produtoVinculado && !areUnitsCompatible(produtoVinculado.unidadeEmbalagem, u)}
-                                    >
-                                      {u}
-                                    </option>
-                                  ))}
-                                </select>
+                                  onChange={(v) => handleUpdateInsumoTamanho(tamanho.id, ing.id, 'unit', v)}
+                                  compacto
+                                  ariaLabel="Unidade do insumo"
+                                  // `disabled` por opcao preserva a regra que ja
+                                  // existia: unidade incompativel com a embalagem
+                                  // do produto vinculado continua visivel, porem
+                                  // inescolhivel — some-la esconderia o porque.
+                                  options={UNIDADES_INSUMO.map((u) => ({
+                                    value: u,
+                                    label: u,
+                                    disabled: !!produtoVinculado && !areUnitsCompatible(produtoVinculado.unidadeEmbalagem, u),
+                                  }))}
+                                />
                               );
                             })()}
                           </div>
@@ -1396,18 +1398,14 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                                   onChange={(e) => setNovoProdutoQtdEmbalagem(e.target.value)}
                                   className="flex-1 px-2.5 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs"
                                 />
-                                <select
+                                <CustomSelect
                                   value={novoProdutoUnidade}
-                                  onChange={(e) => setNovoProdutoUnidade(e.target.value as any)}
-                                  className="px-2 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold"
-                                >
-                                  <option value="g">g</option>
-                                  <option value="kg">kg</option>
-                                  <option value="ml">ml</option>
-                                  <option value="L">L</option>
-                                  <option value="un">un</option>
-                                  <option value="pacote">pacote</option>
-                                </select>
+                                  onChange={(v) => setNovoProdutoUnidade(v as any)}
+                                  compacto
+                                  ariaLabel="Unidade do produto novo"
+                                  style={{ width: '104px', flexShrink: 0 }}
+                                  options={['g', 'kg', 'ml', 'L', 'un', 'pacote'].map((u) => ({ value: u, label: u }))}
+                                />
                               </div>
                               <div className="flex items-center justify-between">
                                 <label className="text-[10px]" style={{ color: '#7A6E80' }}>Controlar estoque deste produto?</label>

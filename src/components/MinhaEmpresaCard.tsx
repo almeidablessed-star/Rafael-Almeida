@@ -10,6 +10,7 @@ import {
 } from '../utils/financialEngine';
 import { CampoComAjuda } from './onboarding/CampoComAjuda';
 import { ResumoDistribuicaoCard } from './ResumoDistribuicaoCard';
+import { CustomSelect } from './CustomSelect';
 
 /**
  * Painel "Minha Empresa" — substitui o antigo AdminCostsCard (que so lia as 7
@@ -230,9 +231,13 @@ export const MinhaEmpresaCard: React.FC = () => {
             </div>
             <div>
               <label className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>Dias de trabalho por semana</label>
-              <select className={inputClass} value={workingDaysPerWeek} onChange={(e) => setWorkingDaysPerWeek(Number(e.target.value))}>
-                {[1, 2, 3, 4, 5, 6, 7].map((n) => <option key={n} value={n}>{n}</option>)}
-              </select>
+              <CustomSelect
+                value={String(workingDaysPerWeek)}
+                onChange={(v) => setWorkingDaysPerWeek(Number(v))}
+                options={[1, 2, 3, 4, 5, 6, 7].map((n) => ({ value: String(n), label: String(n) }))}
+                ariaLabel="Dias de trabalho por semana"
+                style={{ marginTop: '4px' }}
+              />
             </div>
             <div className="flex gap-2">
               <button className={botaoSecundario} onClick={cancelarRemuneracao} disabled={salvando}><X size={13} className="inline mr-1" />Cancelar</button>
@@ -274,11 +279,17 @@ export const MinhaEmpresaCard: React.FC = () => {
             <div>
               <label className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>De quanto em quanto tempo suas metas recomeçam</label>
               <CampoComAjuda microcopy="Trocar aqui reagrupa todo o seu histórico no novo período — nenhum valor de venda muda, só o recorte com que você vê. Sua meta de horas continua semanal de qualquer jeito." />
-              <select className={inputClass} value={periodoReset} onChange={(e) => setPeriodoReset(e.target.value as PeriodoReset)}>
-                <option value="semanal">Toda semana (segunda a domingo)</option>
-                <option value="quinzenal">A cada quinzena (dias 1–15 e 16 ao fim do mês)</option>
-                <option value="mensal">Todo mês (mês cheio)</option>
-              </select>
+              <CustomSelect
+                value={periodoReset}
+                onChange={(v) => setPeriodoReset(v as PeriodoReset)}
+                options={[
+                  { value: 'semanal', label: 'Toda semana (segunda a domingo)' },
+                  { value: 'quinzenal', label: 'A cada quinzena (dias 1–15 e 16 ao fim do mês)' },
+                  { value: 'mensal', label: 'Todo mês (mês cheio)' },
+                ]}
+                ariaLabel="Período de reset das metas"
+                style={{ marginTop: '4px' }}
+              />
             </div>
             <div className="flex gap-2">
               <button className={botaoSecundario} onClick={cancelarPeriodo} disabled={salvando}><X size={13} className="inline mr-1" />Cancelar</button>
