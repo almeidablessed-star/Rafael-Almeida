@@ -583,12 +583,37 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   <p className="text-[9px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
                     Precisa faturar
                   </p>
+                  {/*
+                    A unidade fica COLADA ao numero principal, na mesma linha, e
+                    o total do mes desce para uma linha propria.
+
+                    Antes as duas informacoes dividiam a mesma linha, separadas
+                    so por um ponto ("por semana · $7.916,67/mês pra bater..."),
+                    e "por semana" encostava no valor MENSAL — dava pra ler como
+                    se o periodo se referisse ao numero errado. Sao duas grandezas
+                    diferentes: uma e a meta da janela, a outra e o total do mes.
+                    Cada uma com sua linha, e a unidade grudada em quem ela
+                    qualifica.
+                  */}
                   <p className="text-[24px] leading-tight" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
                     {formatMoney(meta.necessarioPorSemana)}
+                    <span className="text-[11px] ml-1.5" style={{ color: '#9A8FA0', fontWeight: 700 }}>
+                      {vocab.porPeriodo}
+                    </span>
                   </p>
-                  <p className="text-[10px]" style={{ color: '#9A8FA0' }}>
-                    {vocab.porPeriodo} · {formatMoney(meta.faturamentoNecessarioMensal)}/mês pra bater sua meta completa
-                  </p>
+                  {/*
+                    No modo MENSAL esta linha some: ali a meta da janela E a meta
+                    do mes, entao ela repetiria o mesmo numero logo abaixo dele
+                    ("$7.916,67 por mês" / "$7.916,67/mês pra bater..."). Repetir
+                    sem acrescentar nada faz a pessoa reler procurando a diferenca
+                    que nao existe. Nos outros dois periodos a linha continua
+                    valendo: ali os numeros sao mesmo diferentes.
+                  */}
+                  {periodoReset !== 'mensal' && (
+                    <p className="text-[10px] mt-0.5" style={{ color: '#9A8FA0' }}>
+                      {formatMoney(meta.faturamentoNecessarioMensal)}/mês pra bater sua meta completa
+                    </p>
+                  )}
                 </div>
                 <div className="text-right">
                   <p className="text-[9px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
