@@ -63,7 +63,7 @@ const TOUR_PRIMEIROS_PASSOS_HABILITADO = true;
 function AppContent() {
   const { isResetPasswordRequired, isOtpVerificationRequired, user, userProfile, logout } = useAuth();
   const { formatCurrency } = useCurrency();
-  const { fichas } = useFichasTecnicas();
+  const { fichas, isLoading: fichasCarregando } = useFichasTecnicas();
   const { administrativeCosts, marcarTourVisto } = useCosts();
   const { consumirParaPedido, devolverPedido } = useProdutos();
   const {
@@ -248,10 +248,37 @@ function AppContent() {
 
   // Handlers
   const handleOpenAddModal = (type: TransactionType = 'venda') => {
-    // Para vendas, garantir que fichas foram carregadas antes de abrir o modal
-    if (type === 'venda' && fichas.length === 0) {
-      alert('⏳ As fichas técnicas ainda estão carregando. Tente novamente em alguns segundos.');
-      return;
+    /*
+      Um pedido precisa de pelo menos uma ficha tecnica: e dela que saem o preco
+      e o custo de cada item.
+
+      Antes, os dois motivos possiveis para `fichas` estar vazio caiam no MESMO
+      aviso, que dizia "ainda estao carregando". Para quem nunca cadastrou ficha
+      nenhuma — conta nova, justamente quem mais precisa de orientacao — isso
+      era simplesmente falso: nada estava carregando, e esperar "alguns
+      segundos" nunca ia resolver. A pessoa tentava de novo, via a mesma frase,
+      e nao tinha como descobrir o que fazer.
+
+      Agora os dois estados sao separados, e cada um diz a verdade.
+    */
+    if (type === 'venda') {
+      // Carregando DE VERDADE: unico caso em que pedir para esperar e honesto.
+      if (fichasCarregando) {
+        alert('⏳ As fichas técnicas ainda estão carregando. Tente novamente em alguns segundos.');
+        return;
+      }
+
+      // Carregou e nao ha nenhuma: nao e demora, e ausencia — e tem solucao.
+      if (fichas.length === 0) {
+        const criarAgora = window.confirm(
+          'Você ainda não tem nenhuma Ficha Técnica cadastrada.\n\n' +
+            'A ficha é a receita do seu produto: é dela que saem o preço e o custo ' +
+            'de cada pedido. Cadastre pelo menos uma para poder lançar um pedido.\n\n' +
+            'Quer criar a sua primeira agora?'
+        );
+        if (criarAgora) setActiveTab('fichas');
+        return;
+      }
     }
 
     setFormInitialType(type);
