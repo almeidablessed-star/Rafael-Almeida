@@ -40,6 +40,12 @@ continuam no código, mas são **inalcançáveis pela navegação real do app**
 hoje — é código morto. A tela de Compras que a usuária realmente usa é o
 `BalancesAndExpensesModule.tsx` descrito acima.
 
+> **Atualização (2026-09-27):** este parágrafo descreve o estado de então. O
+> `RestockModule.tsx` e a rota `activeTab === 'reposicao'` **não existem
+> mais** — ver "Limpeza do código morto" no fim deste documento. O resto da
+> análise continua válido: a tela de Compras real sempre foi o
+> `BalancesAndExpensesModule.tsx`.
+
 ## O que precisa decidir antes de corrigir
 
 - Se um redesign futuro for feito, ele deveria seguir o mesmo padrão visual
@@ -47,10 +53,10 @@ hoje — é código morto. A tela de Compras que a usuária realmente usa é o
   borda `#E6E1DB`), aplicado em cima da estrutura de campos que já existe
   (mesmo espírito do redesign de "Novo Registro": não mexer em lógica, só
   visual).
-- Vale também decidir, numa limpeza separada, se `RestockModule.tsx` e a
+- ~~Vale também decidir, numa limpeza separada, se `RestockModule.tsx` e a
   rota `activeTab === 'reposicao'` em `App.tsx` devem ser removidos de vez
   (código morto, sem navegação que os alcance) — fora do escopo deste
-  registro, só deixando anotado.
+  registro, só deixando anotado.~~ **Resolvido em 2026-09-27**, ver abaixo.
 
 ## Achado adicional (2026-09-17): símbolo de moeda hardcoded
 
@@ -96,3 +102,29 @@ persistida no banco, não só otimista no cliente).
 
 Nada de lógica de submit/validação, cálculo de saldo ou vínculo com Produtos
 foi alterado — só o visual e os dois bugs de token/moeda.
+
+## Limpeza do código morto (2026-09-27)
+
+O item que ficou anotado acima — remover ou não o `RestockModule.tsx` e a rota
+`activeTab === 'reposicao'` — foi **resolvido pela remoção**, no commit
+`ff11be1`, junto das duas telas mortas irmãs (`SalesModule`, aba `'vendas'`, e
+`HistoryModule`, aba `'historico'`). As três estavam na mesma situação: sem
+botão no rodapé, sem nenhum `setActiveTab` apontando para elas, alcançáveis
+apenas por uma chave `carula_activeTab` sobrando de quando os botões existiam.
+
+Por isso a remoção veio acompanhada de uma migração de `localStorage` em
+`App.tsx`: sem ela, quem tivesse uma dessas abas salva como última aberta
+cairia numa tela em branco. `'reposicao'` passou a levar para **Produtos**,
+que é onde Compras vive hoje como filtro interno — exatamente a conclusão que
+este documento já tinha registrado.
+
+Um cuidado que vale deixar anotado para quem mexer nisso no futuro:
+`'reposicao'` é **também** um `TransactionType` válido e muito usado
+(`BalancesAndExpensesModule`, `TransactionFormModal`, `financialEngine`,
+`formatters`). Só o sentido de "aba" foi removido; o sentido de "categoria de
+lançamento" continua vivo e é o que sustenta a tela de Compras real.
+
+Consequência para este documento: o comentário desatualizado em
+`TransactionFormModal.tsx` citado em "Causa da confusão original" agora aponta
+para um arquivo que não existe mais. Corrigi-lo ficou fora do escopo da
+limpeza e segue pendente.
