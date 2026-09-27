@@ -36,10 +36,7 @@ import { Dashboard } from './components/Dashboard';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { VerifyOtpPage } from './pages/VerifyOtpPage';
 import { OrdersModule } from './components/OrdersModule';
-import { SalesModule } from './components/SalesModule';
-import { RestockModule } from './components/RestockModule';
 import { CostsModule } from './components/CostsModule';
-import { HistoryModule } from './components/HistoryModule';
 import { ProdutosModule } from './components/ProdutosModule';
 import { FichasTecnicasModule } from './components/FichasTecnicasModule';
 import { CustomersModule } from './components/CustomersModule';
@@ -96,6 +93,30 @@ function AppContent() {
     // resumo de faturamento, e quem o consultava procura hoje o card "Meta da
     // Semana" e "Saldos & Divisao" do Dashboard.
     if (saved === 'semana') {
+      localStorage.setItem('carula_activeTab', 'dashboard');
+      return 'dashboard';
+    }
+    // Mesmo caso de `semana`, para as tres telas irmas removidas na mesma
+    // limpeza: `vendas` (SalesModule), `reposicao` (RestockModule) e
+    // `historico` (HistoryModule). Nenhuma tinha botao no rodape, e a unica
+    // forma de chegar nelas era justamente esta chave — por isso a migracao
+    // nao e opcional.
+    //
+    // Cada uma vai para onde o assunto dela mora hoje:
+    // - `vendas` era a lista de vendas   -> Pedidos, que cumpre esse papel;
+    // - `reposicao` era a lista de compras de insumo -> Produtos, onde Compras
+    //   virou um filtro interno;
+    // - `historico` era a lista de todos os lancamentos -> Inicio, porque nao
+    //   existe mais uma tela unica equivalente e o Dashboard e o ponto neutro.
+    if (saved === 'vendas') {
+      localStorage.setItem('carula_activeTab', 'pedidos');
+      return 'pedidos';
+    }
+    if (saved === 'reposicao') {
+      localStorage.setItem('carula_activeTab', 'produtos');
+      return 'produtos';
+    }
+    if (saved === 'historico') {
       localStorage.setItem('carula_activeTab', 'dashboard');
       return 'dashboard';
     }
@@ -559,41 +580,12 @@ function AppContent() {
           <CustomersModule />
         )}
 
-        {activeTab === 'vendas' && (
-          <SalesModule
-            transactions={filteredTransactions}
-            onOpenAddModal={() => handleOpenAddModal('venda')}
-            onEditTransaction={handleOpenEditModal}
-            onDeleteTransaction={handleRequestDelete}
-            onTogglePaymentStatus={handleTogglePaymentStatus}
-          />
-        )}
-
-        {activeTab === 'reposicao' && (
-          <RestockModule
-            transactions={filteredTransactions}
-            onOpenAddModal={() => handleOpenAddModal('reposicao')}
-            onEditTransaction={handleOpenEditModal}
-            onDeleteTransaction={handleRequestDelete}
-          />
-        )}
-
         {activeTab === 'custos' && (
           <CostsModule
             transactions={filteredTransactions}
             onOpenAddModal={(type) => handleOpenAddModal(type || 'custo')}
             onEditTransaction={handleOpenEditModal}
             onDeleteTransaction={handleRequestDelete}
-          />
-        )}
-
-        {activeTab === 'historico' && (
-          <HistoryModule
-            transactions={filteredTransactions}
-            onOpenAddModal={() => handleOpenAddModal('venda')}
-            onEditTransaction={handleOpenEditModal}
-            onDeleteTransaction={handleRequestDelete}
-            onTogglePaymentStatus={handleTogglePaymentStatus}
           />
         )}
 

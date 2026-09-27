@@ -1,4 +1,4 @@
-import { PaymentMethod, TransactionType, LaborPeriod, CostCategory } from '../types';
+import { TransactionType, LaborPeriod, CostCategory } from '../types';
 
 const LOCALE_POR_MOEDA: Record<'BRL' | 'USD' | 'EUR', string> = {
   BRL: 'pt-BR',
@@ -72,18 +72,6 @@ export const formatDateShort = (dateStr: string): string => {
   const date = new Date(dateStr + 'T00:00:00');
   if (isNaN(date.getTime())) return dateStr;
   return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' }).format(date);
-};
-
-export const getPaymentMethodLabel = (method?: PaymentMethod): string => {
-  switch (method) {
-    case 'pix': return 'Pix ⚡';
-    case 'dinheiro': return 'Dinheiro 💵';
-    case 'cartao_credito': return 'Cartão Crédito 💳';
-    case 'cartao_debito': return 'Cartão Débito 💳';
-    case 'transferencia': return 'Transferência 🏦';
-    case 'outro': return 'Outro 📝';
-    default: return 'Não especificado';
-  }
 };
 
 export const getLaborPeriodLabel = (period?: LaborPeriod): string => {
