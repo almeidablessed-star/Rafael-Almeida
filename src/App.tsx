@@ -40,7 +40,6 @@ import { SalesModule } from './components/SalesModule';
 import { RestockModule } from './components/RestockModule';
 import { CostsModule } from './components/CostsModule';
 import { HistoryModule } from './components/HistoryModule';
-import { WeeklyClosingModule } from './components/WeeklyClosingModule';
 import { ProdutosModule } from './components/ProdutosModule';
 import { FichasTecnicasModule } from './components/FichasTecnicasModule';
 import { CustomersModule } from './components/CustomersModule';
@@ -85,6 +84,20 @@ function AppContent() {
     if (saved === 'saldos' || saved === 'compras' || saved === 'estoque') {
       localStorage.setItem('carula_activeTab', 'produtos');
       return 'produtos';
+    }
+    // `semana` era a aba "Fechamento da Semana" (WeeklyClosingModule), removida
+    // como codigo morto. Ela ja nao tinha botao no rodape havia tempo, mas quem
+    // a deixou salva como ultima aberta continuava caindo nela ao abrir o app —
+    // era a UNICA forma de alcanca-la. Sem esta linha, essas contas abririam
+    // numa tela em branco depois da remocao, exatamente o defeito que a
+    // migracao acima foi escrita para evitar.
+    //
+    // Vai para o Inicio, e nao para Produtos: o fechamento semanal era um
+    // resumo de faturamento, e quem o consultava procura hoje o card "Meta da
+    // Semana" e "Saldos & Divisao" do Dashboard.
+    if (saved === 'semana') {
+      localStorage.setItem('carula_activeTab', 'dashboard');
+      return 'dashboard';
     }
     return saved || 'dashboard';
   });
@@ -485,16 +498,6 @@ function AppContent() {
           <OrdersModule
             transactions={transacoesVisiveis}
             onOpenAddModal={(type) => handleOpenAddModal(type || 'venda')}
-            onEditTransaction={handleOpenEditModal}
-            onDeleteTransaction={handleRequestDelete}
-            onTogglePaymentStatus={handleTogglePaymentStatus}
-          />
-        )}
-
-        {activeTab === 'semana' && (
-          <WeeklyClosingModule
-            transactions={transacoesVisiveis}
-            onOpenAddModal={() => handleOpenAddModal('venda')}
             onEditTransaction={handleOpenEditModal}
             onDeleteTransaction={handleRequestDelete}
             onTogglePaymentStatus={handleTogglePaymentStatus}

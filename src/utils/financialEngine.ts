@@ -210,36 +210,6 @@ export interface WeeklySaleDetail {
   caixaConfeitaria: number;
 }
 
-export interface WeeklySummary {
-  startIso: string;
-  endIso: string;
-  formattedRange: string;
-  isCurrentWeek: boolean;
-
-  // Pagamento da Semana (pessoal)
-  pagamentoPessoalTotal: number;
-  maoDeObraTotal: number;
-  adicionaisTotal: number;
-  deliveryTotal: number;
-
-  // Caixa da Confeitaria (restante)
-  caixaConfeitariaTotal: number;
-  reposicaoTotal: number;
-  custosEInvestimentoTotal: number;
-
-  // Faturamento Total da Semana
-  faturamentoTotalPago: number;
-
-  // Pedidos e Pendentes
-  pendingTotalValue: number;
-  pendingCount: number;
-  paidCount: number;
-
-  // Listas detalhadas
-  paidSalesDetails: WeeklySaleDetail[];
-  pendingSalesDetails: WeeklySaleDetail[];
-  allSalesDetails: WeeklySaleDetail[];
-}
 
 /**
  * Returns Monday and Sunday ISO dates for a given reference Date.
@@ -422,87 +392,6 @@ export function parseSaleDetail(sale: Transaction): WeeklySaleDetail {
   };
 }
 
-/**
- * Calculates weekly closing totals for transactions within the specified date range.
- */
-export function calculateWeeklyClosing(
-  transactions: Transaction[],
-  refDate: Date = new Date()
-): WeeklySummary {
-  const { startIso, endIso, formattedRange } = getWeekRange(refDate);
-
-  const currentWeekRange = getWeekRange(new Date());
-  const isCurrentWeek = startIso === currentWeekRange.startIso;
-
-  const weeklySales = transactions.filter(
-    (tx) => tx.type === 'venda' && tx.date >= startIso && tx.date <= endIso
-  );
-
-  let pagamentoPessoalTotal = 0;
-  let maoDeObraTotal = 0;
-  let adicionaisTotal = 0;
-  let deliveryTotal = 0;
-
-  let caixaConfeitariaTotal = 0;
-  let reposicaoTotal = 0;
-  let custosEInvestimentoTotal = 0;
-
-  let faturamentoTotalPago = 0;
-
-  let pendingTotalValue = 0;
-  let pendingCount = 0;
-  let paidCount = 0;
-
-  const paidSalesDetails: WeeklySaleDetail[] = [];
-  const pendingSalesDetails: WeeklySaleDetail[] = [];
-  const allSalesDetails: WeeklySaleDetail[] = [];
-
-  for (const sale of weeklySales) {
-    const detail = parseSaleDetail(sale);
-    allSalesDetails.push(detail);
-
-    if (detail.isPaid) {
-      paidCount += 1;
-      paidSalesDetails.push(detail);
-
-      maoDeObraTotal += detail.maoDeObra;
-      adicionaisTotal += detail.adicionais;
-      deliveryTotal += detail.delivery;
-      pagamentoPessoalTotal += detail.pagamentoPessoal;
-
-      reposicaoTotal += detail.reposicao;
-      custosEInvestimentoTotal += detail.custosEInvestimento;
-      caixaConfeitariaTotal += detail.caixaConfeitaria;
-
-      faturamentoTotalPago += detail.totalValue;
-    } else {
-      pendingCount += 1;
-      pendingSalesDetails.push(detail);
-      pendingTotalValue += detail.totalValue;
-    }
-  }
-
-  return {
-    startIso,
-    endIso,
-    formattedRange,
-    isCurrentWeek,
-    pagamentoPessoalTotal,
-    maoDeObraTotal,
-    adicionaisTotal,
-    deliveryTotal,
-    caixaConfeitariaTotal,
-    reposicaoTotal,
-    custosEInvestimentoTotal,
-    faturamentoTotalPago,
-    pendingTotalValue,
-    pendingCount,
-    paidCount,
-    paidSalesDetails,
-    pendingSalesDetails,
-    allSalesDetails,
-  };
-}
 
 // ============================================================================
 // Resumo por periodo arbitrario (ex-storage.ts)
