@@ -1072,11 +1072,29 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
               confeiteira para um caminho pior do que o da aba propria.
 
               Só o SELETOR saiu. Os ramos `reposicao`, `custo` e `maodeobra`
-              deste formulario continuam vivos e sao usados: a aba Compras abre
-              este mesmo modal com `initialType='reposicao'` e a de Custos com
-              'custo'/'maodeobra', e editar um lancamento antigo de qualquer
-              tipo cai aqui pelo `editingTransaction`. O tipo agora vem sempre
-              de quem abriu o modal, que e o unico que sabe o contexto. */}
+              deste formulario continuam vivos, mas cada um por uma porta
+              diferente — e essa distincao ja causou confusao antes, entao vale
+              ser exato:
+
+              - `custo` / `maodeobra`: a aba Empresa (CostsModule) abre este
+                modal com `initialType` de um dos dois.
+              - `venda`: Pedidos, Inicio e o calendario.
+              - `reposicao`: NAO ha quem abra este modal com esse
+                `initialType`. Quem LANCA uma compra usa o formulario proprio
+                do BalancesAndExpensesModule, embutido na aba Compras dentro
+                de Produtos — que nunca passa por aqui. O ramo continua
+                alcancavel apenas por EDICAO: o botao de editar da lista de
+                compras cai neste modal pelo `editingTransaction`.
+
+              (Este comentario ja afirmou que "a aba Compras abre este mesmo
+              modal com initialType='reposicao'". Era falso, e a suposicao de
+              que as duas telas compartilhavam o formulario custou uma
+              investigacao — ver docs/pendencia-redesign-compras.md. Quem
+              abria o modal assim era o RestockModule, uma tela morta ha
+              tempos, removida em ff11be1.)
+
+              O tipo agora vem sempre de quem abriu o modal, que e o unico que
+              sabe o contexto. */}
 
           {/* ================================================== */}
           {/* SALES ORDER FORM, 3 PASSOS — ver "Pedido - Novo.dc.html" */}
