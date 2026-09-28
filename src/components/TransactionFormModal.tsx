@@ -1073,8 +1073,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
 
               Só o SELETOR saiu. Os ramos `reposicao`, `custo` e `maodeobra`
               deste formulario continuam vivos, mas cada um por uma porta
-              diferente — e essa distincao ja causou confusao antes, entao vale
-              ser exato:
+              diferente:
 
               - `custo` / `maodeobra`: a aba Empresa (CostsModule) abre este
                 modal com `initialType` de um dos dois.
@@ -1085,13 +1084,6 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                 de Produtos — que nunca passa por aqui. O ramo continua
                 alcancavel apenas por EDICAO: o botao de editar da lista de
                 compras cai neste modal pelo `editingTransaction`.
-
-              (Este comentario ja afirmou que "a aba Compras abre este mesmo
-              modal com initialType='reposicao'". Era falso, e a suposicao de
-              que as duas telas compartilhavam o formulario custou uma
-              investigacao — ver docs/pendencia-redesign-compras.md. Quem
-              abria o modal assim era o RestockModule, uma tela morta ha
-              tempos, removida em ff11be1.)
 
               O tipo agora vem sempre de quem abriu o modal, que e o unico que
               sabe o contexto. */}
