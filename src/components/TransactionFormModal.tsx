@@ -421,6 +421,18 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
         setDeliveryAddress(editingTransaction.deliveryAddress || '');
         setObservations(editingTransaction.observations || '');
         setInspirationImage(editingTransaction.inspirationImage);
+        // O sinal so era preenchido no bloco dos OUTROS tipos de lancamento,
+        // logo abaixo — no de venda ele tinha sido esquecido. O campo abria
+        // vazio, e vazio significa "pago por inteiro" na hora de salvar: uma
+        // edicao inocente (corrigir um endereco) apagava do banco o valor que
+        // a cliente ainda devia, e o pedido passava a valer como quitado.
+        //
+        // Sem o `|| totalValue` que o outro bloco usa: aqui vazio e um estado
+        // legitimo (pedido pago de uma vez so nao tem sinal), e preencher com
+        // o total faria o caminho inverso — inventar um sinal onde nao havia.
+        setSignalValue(
+          editingTransaction.signalValue != null ? String(editingTransaction.signalValue) : ''
+        );
         // A taxa de entrega nao tem coluna propria — vive dentro de
         // `breakdown`/`notes`. parseSaleDetail ja sabe ler dos dois lugares
         // (breakdown pra pedidos novos, regex em notes pra pedidos antigos
@@ -820,6 +832,24 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       return;
     }
     setInvalidFieldId(null);
+
+    // Rede de seguranca para o mesmo estrago descrito la em cima: o campo do
+    // sinal ficar vazio num pedido que TINHA sinal significa apagar do banco o
+    // que a cliente ainda deve, sem aviso nenhum. O preenchimento acima ja
+    // resolve o caso comum; isto cobre quem apagou o campo sem querer, e
+    // qualquer outro caminho que leve ao mesmo lugar.
+    //
+    // A frase diz o valor pela moeda escolhida (`formatMoney`), nunca um
+    // simbolo fixo. Cancelar sai antes de `setIsSaving`, entao nada e gravado.
+    const sinalGravado = editingTransaction?.signalValue;
+    if (type === 'venda' && sinalGravado != null && !signalValue.trim()) {
+      const continuar = window.confirm(
+        `Este pedido tinha um sinal de ${formatMoney(Number(sinalGravado))} e o campo está vazio. ` +
+          'Salvar assim marca o pedido como pago por inteiro e apaga o valor que a cliente ainda deve.\n\n' +
+          'Quer continuar?'
+      );
+      if (!continuar) return;
+    }
 
     setIsSaving(true);
 
