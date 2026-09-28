@@ -156,36 +156,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const profit = Math.max(0, totalIn - totalOut);
   const marginPercent = totalIn > 0 ? Math.round((profit / totalIn) * 100) : 0;
 
-  // Calcular porcentuais por categoria — antes tentava acessar fields que nao existem
-  // Agora calcula a partir dos valores reais do objeto CategoryBalance
-  //
-  // Limitado a [0, 100]: currentBalance nunca excede accumulatedInflow (gasto
-  // nao e negativo), entao o teto e so protecao defensiva — o piso de 0 e o
-  // que importa. Quando uma compra da semana supera o quanto foi ganho em
-  // vendas (ex: repor estoque em lote numa semana de venda fraca),
-  // currentBalance fica negativo e dividir por um accumulatedInflow pequeno
-  // gerava percentuais absurdos tipo -4900%. O valor em dinheiro (negativo)
-  // continua visivel abaixo do gauge — so o anel/numero fica sempre coerente.
-  const clampPercent = (value: number) => Math.max(0, Math.min(100, value));
-  const reposicaoPercent = balances.reposicao.accumulatedInflow > 0
-    ? clampPercent(Math.round((balances.reposicao.currentBalance / balances.reposicao.accumulatedInflow) * 100))
-    : 0;
-  const laborPercent = balances.maodeobra.accumulatedInflow > 0
-    ? clampPercent(Math.round((balances.maodeobra.currentBalance / balances.maodeobra.accumulatedInflow) * 100))
-    : 0;
-  const costsPercent = balances.custoEInvestimento.accumulatedInflow > 0
-    ? clampPercent(Math.round((balances.custoEInvestimento.currentBalance / balances.custoEInvestimento.accumulatedInflow) * 100))
-    : 0;
-
-  // Sem NENHUMA entrada no periodo, a divisao acima nao existe e o gauge caia
-  // em 0% — exatamente o mesmo numero que significa "ja gastei tudo". Sao
-  // estados opostos e ninguem tinha como distingui-los olhando. Aqui so se
-  // decide o ROTULO: "—" em vez de "0%". O anel ja fica vazio sozinho, e o
-  // valor em dinheiro embaixo continua o mesmo. Nenhuma conta muda.
-  const semEntradaReposicao = balances.reposicao.accumulatedInflow <= 0;
-  const semEntradaMaodeobra = balances.maodeobra.accumulatedInflow <= 0;
-  const semEntradaCustos = balances.custoEInvestimento.accumulatedInflow <= 0;
-  const nadaEntrouNoPeriodo = semEntradaReposicao && semEntradaMaodeobra && semEntradaCustos;
+  // As porcentagens sairam. Cada circulo comparava um cofrinho com ele mesmo,
+  // entao a regua mudava de card para card: 50% em Reposicao e 50% em Mao de
+  // obra eram quantias completamente diferentes, mostradas em tres aneis
+  // identicos lado a lado. E "0%" queria dizer duas coisas opostas — "gastei
+  // tudo" e "nao entrou nada". Sem uma boa resposta para "100% de que?", o que
+  // sobra e o que a confeiteira realmente pergunta: quanto ainda posso gastar.
+  const nadaEntrouNoPeriodo =
+    balances.reposicao.accumulatedInflow <= 0 &&
+    balances.maodeobra.accumulatedInflow <= 0 &&
+    balances.custoEInvestimento.accumulatedInflow <= 0;
 
   // Saldo negativo (gastou mais do que as vendas do periodo reservaram) ja
   // aparecia com o numero certo, mas na mesma cor de tudo — nada avisava que
@@ -206,6 +186,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const despesasShare = somaPercentMeta > 0 ? despesasPercentMeta / somaPercentMeta : 0.5;
   const investimentoShare = somaPercentMeta > 0 ? investimentoPercentMeta / somaPercentMeta : 0.5;
   const saldoCustoEInvestimento = balances.custoEInvestimento.currentBalance || 0;
+
+  // Os tres cartoes sao identicos em estrutura; so mudam nome, saldo e quanto
+  // entrou. Descrever uma vez evita tres blocos quase iguais se desencontrarem
+  // na proxima edicao, que foi o que aconteceu com os aneis.
+  const cartoesDeSaldo = [
+    { nome: 'REPOSIÇÃO', saldo: balances.reposicao },
+    { nome: 'MÃO DE OBRA', saldo: balances.maodeobra },
+    { nome: 'DESPESAS + INVESTIMENTO', saldo: balances.custoEInvestimento },
+  ];
 
   return (
     <div className="space-y-0 pb-8 animate-fadeIn">
@@ -463,128 +452,57 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 com o outro nao diz nada. Usa o CampoComAjuda, o padrao de ajuda
                 ja usado em Minha Empresa, Fichas e onboarding. */}
             <CampoComAjuda
-              microcopy={`Entradas das vendas pagas − o que você já gastou ${vocab.nessePeriodo}.`}
+              microcopy={`O que já chegou das vendas − o que você já gastou ${vocab.nessePeriodo}.`}
               exemploDinamico={
-                'Cada círculo é um cofrinho. Quando um pedido é pago, o app separa o ' +
-                'valor dele em partes: o ingrediente, o seu trabalho, e as contas e o ' +
-                'investimento da empresa. A porcentagem mostra quanto ainda sobra ' +
-                'naquele cofrinho — 100% é cheio, 0% é vazio. Cada cofrinho tem um ' +
-                'tamanho diferente, então não dá para comparar a porcentagem de um com ' +
-                'a do outro. O lucro também sai de cada venda, mas não aparece aqui.'
+                'Aqui só conta o dinheiro que já chegou. Cada cartão é um cofrinho: ' +
+                'quando um pagamento entra, o app separa ele em partes — o ingrediente, ' +
+                'o seu trabalho, e as contas e o investimento da empresa. Pedido ainda ' +
+                'pendente não entra; pedido pago só em parte entra na proporção do que ' +
+                'foi recebido. O valor grande é o que sobra para gastar naquela parte.'
               }
             />
           </div>
 
-          {/* 3 Circular Gauges */}
+          {/* Tres cartoes em DINHEIRO. Antes eram aneis com porcentagem; ver o
+              comentario em `nadaEntrouNoPeriodo` para o motivo de terem saido.
+              O saldo fica em destaque e, embaixo, quanto entrou naquela parte —
+              e o "de quanto" que a porcentagem tentava dizer, agora numa
+              grandeza que se compara entre cartoes: dinheiro. */}
           <div className="flex gap-3 w-full">
-            {/* Reposição */}
-            <div
-              className="flex-1 bg-white rounded-[22px] p-4 text-center transition-all duration-300 cursor-pointer"
-              style={{ boxShadow: '0 8px 20px rgba(58,35,80,0.08)' }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.boxShadow = '0 16px 32px rgba(58,35,80,0.16)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 8px 20px rgba(58,35,80,0.08)';
-              }}>
-              <div className="relative w-14 h-14 mx-auto">
-                <svg width="56" height="56" viewBox="0 0 56 56" style={{ transform: 'rotate(-90deg)' }}>
-                  <circle cx="28" cy="28" r="23" fill="none" stroke="#F0E9EE" strokeWidth="6" />
-                  <circle
-                    cx="28" cy="28" r="23" fill="none" stroke="#C4626F" strokeWidth="6"
-                    strokeDasharray={`${145 * (reposicaoPercent / 100)} ${145}`}
-                    strokeLinecap="round"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center text-[11px] font-black" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
-                  {semEntradaReposicao ? '—' : `${Math.round(reposicaoPercent)}%`}
+            {cartoesDeSaldo.map(({ nome, saldo }) => (
+              <div
+                key={nome}
+                className="flex-1 bg-white rounded-[22px] p-4 text-center transition-all duration-300"
+                style={{ boxShadow: '0 8px 20px rgba(58,35,80,0.08)' }}
+              >
+                <div className="text-[9px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800, minHeight: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {nome}
+                </div>
+                <div className="text-[19px] mt-1" style={{ color: corDoSaldo(saldo.isNegative), fontFamily: "'Manrope', sans-serif", fontWeight: 800, letterSpacing: '-0.02em' }}>
+                  {formatMoney(saldo.currentBalance || 0)}
+                </div>
+                <div className="text-[9.5px] mt-1" style={{ color: '#9A8FA0', fontFamily: "'Manrope', sans-serif" }}>
+                  de {formatMoney(saldo.accumulatedInflow || 0)} que entraram
                 </div>
               </div>
-              <div className="text-[9px] uppercase tracking-[0.05em] mt-2" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', minHeight: '24px' }}>
-                REPOSIÇÃO
-              </div>
-              <div className="text-[15px] mt-2" style={{ color: corDoSaldo(balances.reposicao.isNegative), fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>{formatMoney(balances.reposicao.currentBalance || 0)}</div>
-            </div>
-
-            {/* Mão de Obra */}
-            <div
-              className="flex-1 bg-white rounded-[22px] p-4 text-center transition-all duration-300 cursor-pointer"
-              style={{ boxShadow: '0 8px 20px rgba(58,35,80,0.08)' }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.boxShadow = '0 16px 32px rgba(58,35,80,0.16)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 8px 20px rgba(58,35,80,0.08)';
-              }}>
-              <div className="relative w-14 h-14 mx-auto">
-                <svg width="56" height="56" viewBox="0 0 56 56" style={{ transform: 'rotate(-90deg)' }}>
-                  <circle cx="28" cy="28" r="23" fill="none" stroke="#F0E9EE" strokeWidth="6" />
-                  <circle
-                    cx="28" cy="28" r="23" fill="none" stroke="#7E4F9E" strokeWidth="6"
-                    strokeDasharray={`${145 * (laborPercent / 100)} ${145}`}
-                    strokeLinecap="round"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center text-[11px] font-black" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
-                  {semEntradaMaodeobra ? '—' : `${Math.round(laborPercent)}%`}
-                </div>
-              </div>
-              <div className="text-[9px] uppercase tracking-[0.05em] mt-2" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', minHeight: '24px' }}>
-                MÃO DE OBRA
-              </div>
-              <div className="text-[15px] mt-2" style={{ color: corDoSaldo(balances.maodeobra.isNegative), fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>{formatMoney(balances.maodeobra.currentBalance || 0)}</div>
-            </div>
-
-            {/* Custo + Investimento */}
-            <div
-              className="flex-1 bg-white rounded-[22px] p-4 text-center transition-all duration-300 cursor-pointer"
-              style={{ boxShadow: '0 8px 20px rgba(58,35,80,0.08)' }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.boxShadow = '0 16px 32px rgba(58,35,80,0.16)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 8px 20px rgba(58,35,80,0.08)';
-              }}>
-              <div className="relative w-14 h-14 mx-auto">
-                <svg width="56" height="56" viewBox="0 0 56 56" style={{ transform: 'rotate(-90deg)' }}>
-                  <circle cx="28" cy="28" r="23" fill="none" stroke="#F0E9EE" strokeWidth="6" />
-                  <circle
-                    cx="28" cy="28" r="23" fill="none" stroke="#B08D57" strokeWidth="6"
-                    strokeDasharray={`${145 * (costsPercent / 100)} ${145}`}
-                    strokeLinecap="round"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center text-[11px] font-black" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
-                  {semEntradaCustos ? '—' : `${Math.round(costsPercent)}%`}
-                </div>
-              </div>
-              <div className="text-[9px] uppercase tracking-[0.05em] mt-2" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', minHeight: '24px' }}>
-                CUSTO+INV
-              </div>
-              <div className="text-[15px] mt-2" style={{ color: corDoSaldo(balances.custoEInvestimento.isNegative), fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>{formatMoney(balances.custoEInvestimento.currentBalance || 0)}</div>
-            </div>
+            ))}
           </div>
 
-          {/* Acompanha o "—" dos tres circulos: diz em palavras que nao houve
-              venda, em vez de deixar tres zeros parecendo "gastou tudo". So
-              quando os TRES estao sem entrada — se um cofrinho recebeu algo, a
-              frase seria falsa. */}
+          {/* Tres zeros sozinhos parecem "gastou tudo". Esta frase diz em
+              palavras que o motivo e outro: nao chegou dinheiro. So quando os
+              TRES estao sem entrada — com um cofrinho cheio ela seria falsa. */}
           {nadaEntrouNoPeriodo && (
             <p className="text-[10px]" style={{ color: '#9A8FA0' }}>
-              Nenhuma venda paga {vocab.nessePeriodo} ainda — por isso não há nada separado aqui.
+              Nenhum pagamento recebido {vocab.nessePeriodo} ainda.
             </p>
           )}
 
-          {/* Divisao real do saldo combinado, na mesma proporcao das metas
-              configuradas em Minha Empresa — nao mais um /2 fixo. */}
+          {/* Divide o cartao "Despesas + Investimento", que e uma pilha so, na
+              mesma proporcao das metas configuradas em Minha Empresa. Em
+              dinheiro, e nao em porcentagem: a porcentagem aqui repetia a meta
+              (que ja vive em Minha Empresa) em vez de dizer quanto ha. */}
           <p className="text-[10px]" style={{ color: '#9A8FA0' }}>
-            {Math.round(despesasShare * 100)}% Despesas ({formatMoney(saldoCustoEInvestimento * despesasShare)}) / {Math.round(investimentoShare * 100)}% Investimento ({formatMoney(saldoCustoEInvestimento * investimentoShare)})
+            Despesas {formatMoney(saldoCustoEInvestimento * despesasShare)} · Investimento {formatMoney(saldoCustoEInvestimento * investimentoShare)}
           </p>
         </div>
 

@@ -641,10 +641,28 @@ export function calculateWeeklyBalances(
         // existia aqui reescrevia o lucro de pedidos ja fechados sempre que um
         // insumo mudava de preco — uma venda de marco virava outra em agosto.
         const detail = parseSaleDetail(tx);
-        reposicaoInflow += detail.reposicao || 0;
-        maodeobraInflow += (detail.maoDeObra || 0) + (detail.adicionais || 0) + (detail.delivery || 0);
-        custoInflow += detail.custos || 0;
-        investimentoInflow += detail.investimento || 0;
+
+        // SO O DINHEIRO QUE JA CHEGOU entra nos cofrinhos.
+        //
+        // Antes, a composicao inteira era somada assim que o pedido era
+        // registrado, mesmo quando so o sinal havia sido recebido. Num pedido
+        // de $100 com sinal de $40, os cofrinhos guardavam os $100 enquanto o
+        // caixa tinha $40 — e a confeiteira comprava insumo com dinheiro que
+        // ainda nao existia. O proprio app ja sabia da diferenca: registrava
+        // $60 em "a receber" na linha acima e, na Meta, "Ja entrou" sempre
+        // contou so o sinal. O card e que discordava dos dois.
+        //
+        // O fator e um so, aplicado a TODAS as partes: pendente nem chega
+        // aqui (fica fora do if), sinal de $40 em $100 entra a 0,4, pago por
+        // completo entra a 1. Entrega e adicionais viajam dentro de mao de
+        // obra e recebem o mesmo fator — nenhum pedaco escapa, senao a soma
+        // dos cofrinhos deixaria de fechar com o caixa recebido.
+        const fatorRecebido = val > 0 ? Math.min(1, paidAmount / val) : 0;
+        reposicaoInflow += (detail.reposicao || 0) * fatorRecebido;
+        maodeobraInflow +=
+          ((detail.maoDeObra || 0) + (detail.adicionais || 0) + (detail.delivery || 0)) * fatorRecebido;
+        custoInflow += (detail.custos || 0) * fatorRecebido;
+        investimentoInflow += (detail.investimento || 0) * fatorRecebido;
       } else {
         // Pendentes completamente a receber
         totalAReceber += val;
