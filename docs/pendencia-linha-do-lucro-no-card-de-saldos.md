@@ -76,3 +76,30 @@ cheio.
 ## Situação
 
 Aguardando decisão. Nada implementado.
+
+## RESOLVIDO (2026-09-27)
+
+A pergunta em aberto acima — como entram os pedidos pagos só com sinal — foi
+respondida por uma decisão maior: **o card inteiro passou a contar só o
+dinheiro recebido**, na proporção do que entrou de cada pedido (ver
+`docs/nota-cofrinhos-so-dinheiro-recebido.md`). Com isso o lucro deixou de ser
+ambíguo, porque passou a existir uma base única para tudo no card.
+
+A linha é o que sobra depois das quatro partes já exibidas, sobre essa mesma
+base: dinheiro recebido no período, menos Reposição, Mão de obra, Despesas e
+Investimento — todos já proporcionais ao recebido. Por isso **fecha**: os três
+cartões mais o lucro somam exatamente o dinheiro que entrou.
+
+Não usa o `lucroLiquido` que já existia: aquele soma outra janela (o seletor de
+período do topo da tela) e ainda desconta as despesas lançadas, então
+apareceria contradizendo os cartões ao lado.
+
+Não virou um quarto cartão, pelo motivo já registrado acima: nenhum lançamento
+sai do lucro, então ele nunca teria saldo consumido.
+
+**Lucro negativo** (os pedidos saíram por menos do que custaram) troca a
+palavra e a cor: vira "Prejuízo", em `#C4626F`, com a frase "os pedidos saíram
+por menos do que custaram" — dizer "fica guardado" seria falso, já que não há
+nada guardado. A linha some quando não houve pagamento nenhum no período: um
+"Lucro: $0,00" não informaria nada, e a frase de estado vazio logo acima já
+explica o motivo.

@@ -196,6 +196,23 @@ export const Dashboard: React.FC<DashboardProps> = ({
     { nome: 'DESPESAS + INVESTIMENTO', saldo: balances.custoEInvestimento },
   ];
 
+  // O lucro e a quinta parte de cada venda, e era a unica que o card nunca
+  // mostrava — quem somasse os tres cartoes nao chegava no dinheiro recebido e
+  // nao tinha como saber por que. Nao ganha cartao proprio porque nenhum
+  // lancamento sai do lucro: um cofrinho dele ficaria sempre cheio.
+  //
+  // E o que sobra depois das quatro partes ja exibidas, sobre a MESMA base:
+  // dinheiro recebido no periodo. Por isso fecha — cartoes + lucro = caixa.
+  // Nao usa o `lucroLiquido` que ja existe no app: aquele soma outra janela (o
+  // seletor do topo da tela) e ainda desconta as despesas lancadas, entao
+  // apareceria aqui contradizendo os cartoes ao lado.
+  const lucroRecebidoNoPeriodo =
+    (balances.totalPaidSales || 0) -
+    (balances.reposicao.accumulatedInflow || 0) -
+    (balances.maodeobra.accumulatedInflow || 0) -
+    (balances.custoEInvestimento.accumulatedInflow || 0);
+  const lucroNegativo = lucroRecebidoNoPeriodo < 0;
+
   return (
     <div className="space-y-0 pb-8 animate-fadeIn">
 
@@ -504,6 +521,29 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <p className="text-[10px]" style={{ color: '#9A8FA0' }}>
             Despesas {formatMoney(saldoCustoEInvestimento * despesasShare)} · Investimento {formatMoney(saldoCustoEInvestimento * investimentoShare)}
           </p>
+
+          {/* A quinta parte da venda. Some quando nao houve pagamento nenhum:
+              "Lucro: $0,00" numa semana sem venda nao informa nada, e a frase
+              de cima ja explicou o vazio.
+
+              No negativo a palavra muda junto com a cor: "fica guardado" seria
+              falso — nao ha nada guardado, os pedidos sairam por menos do que
+              custaram, e chamar isso de lucro seria mentir na cor certa. */}
+          {!nadaEntrouNoPeriodo && (
+            <p className="text-[10px]" style={{ color: lucroNegativo ? '#C4626F' : '#9A8FA0' }}>
+              {lucroNegativo ? (
+                <>
+                  Prejuízo {vocab.daPeriodo}: {formatMoney(lucroRecebidoNoPeriodo)} — os pedidos
+                  saíram por menos do que custaram.
+                </>
+              ) : (
+                <>
+                  Lucro {vocab.daPeriodo}: {formatMoney(lucroRecebidoNoPeriodo)} — fica guardado,
+                  nenhum gasto sai daqui.
+                </>
+              )}
+            </p>
+          )}
         </div>
 
         {/* 3b. META SEMANAL COMPLETA (despesas + recebimento pessoal + CMV +
