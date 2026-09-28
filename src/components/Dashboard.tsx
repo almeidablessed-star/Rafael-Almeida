@@ -13,6 +13,7 @@ import { useProdutos } from '../context/ProdutosContext';
 import { useTransacoes } from '../context/TransacoesContext';
 import { OrdersCalendar } from './OrdersCalendar';
 import { PrimeirosPassosChecklist } from './onboarding/PrimeirosPassosChecklist';
+import { CampoComAjuda } from './onboarding/CampoComAjuda';
 import { AvatarProfile } from './AvatarProfile';
 import {
   Wallet,
@@ -175,6 +176,23 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const costsPercent = balances.custoEInvestimento.accumulatedInflow > 0
     ? clampPercent(Math.round((balances.custoEInvestimento.currentBalance / balances.custoEInvestimento.accumulatedInflow) * 100))
     : 0;
+
+  // Sem NENHUMA entrada no periodo, a divisao acima nao existe e o gauge caia
+  // em 0% — exatamente o mesmo numero que significa "ja gastei tudo". Sao
+  // estados opostos e ninguem tinha como distingui-los olhando. Aqui so se
+  // decide o ROTULO: "—" em vez de "0%". O anel ja fica vazio sozinho, e o
+  // valor em dinheiro embaixo continua o mesmo. Nenhuma conta muda.
+  const semEntradaReposicao = balances.reposicao.accumulatedInflow <= 0;
+  const semEntradaMaodeobra = balances.maodeobra.accumulatedInflow <= 0;
+  const semEntradaCustos = balances.custoEInvestimento.accumulatedInflow <= 0;
+  const nadaEntrouNoPeriodo = semEntradaReposicao && semEntradaMaodeobra && semEntradaCustos;
+
+  // Saldo negativo (gastou mais do que as vendas do periodo reservaram) ja
+  // aparecia com o numero certo, mas na mesma cor de tudo — nada avisava que
+  // passou do limite. `isNegative` vem pronto do calculo dos saldos e ate
+  // entao ninguem lia; aqui ele so escolhe a cor. #C4626F e o vermelho que o
+  // app ja usa (inclusive neste arquivo, nomeado `vermelho`).
+  const corDoSaldo = (negativo: boolean) => (negativo ? '#C4626F' : '#241B2B');
 
   // Como o saldo de "Custo+Inv" acima soma Despesas e Investimento numa
   // pilha so, a legenda abaixo do gauge precisa dividi-lo de volta em dois —
@@ -438,9 +456,23 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <h3 className="font-serif-display text-[23px]" style={{ color: '#241B2B' }}>
               Saldos &amp; Divisão dos Pedidos
             </h3>
-            <p className="text-[11px]" style={{ color: '#7A6E80', marginTop: '2px' }}>
-              Entradas das vendas pagas − Compras registradas
-            </p>
+            {/* A frase de cima trocou "Compras registradas" por "o que voce ja
+                gastou": retirada de mao de obra nao e compra, e o card desconta
+                ela tambem. O "?" abre a explicacao do que a porcentagem mede —
+                sobretudo que cada circulo tem regua propria, entao comparar um
+                com o outro nao diz nada. Usa o CampoComAjuda, o padrao de ajuda
+                ja usado em Minha Empresa, Fichas e onboarding. */}
+            <CampoComAjuda
+              microcopy={`Entradas das vendas pagas − o que você já gastou ${vocab.nessePeriodo}.`}
+              exemploDinamico={
+                'Cada círculo é um cofrinho. Quando um pedido é pago, o app separa o ' +
+                'valor dele em partes: o ingrediente, o seu trabalho, e as contas e o ' +
+                'investimento da empresa. A porcentagem mostra quanto ainda sobra ' +
+                'naquele cofrinho — 100% é cheio, 0% é vazio. Cada cofrinho tem um ' +
+                'tamanho diferente, então não dá para comparar a porcentagem de um com ' +
+                'a do outro. O lucro também sai de cada venda, mas não aparece aqui.'
+              }
+            />
           </div>
 
           {/* 3 Circular Gauges */}
@@ -467,13 +499,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   />
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center text-[11px] font-black" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
-                  {Math.round(reposicaoPercent)}%
+                  {semEntradaReposicao ? '—' : `${Math.round(reposicaoPercent)}%`}
                 </div>
               </div>
               <div className="text-[9px] uppercase tracking-[0.05em] mt-2" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', minHeight: '24px' }}>
                 REPOSIÇÃO
               </div>
-              <div className="text-[15px] mt-2" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>{formatMoney(balances.reposicao.currentBalance || 0)}</div>
+              <div className="text-[15px] mt-2" style={{ color: corDoSaldo(balances.reposicao.isNegative), fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>{formatMoney(balances.reposicao.currentBalance || 0)}</div>
             </div>
 
             {/* Mão de Obra */}
@@ -498,13 +530,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   />
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center text-[11px] font-black" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
-                  {Math.round(laborPercent)}%
+                  {semEntradaMaodeobra ? '—' : `${Math.round(laborPercent)}%`}
                 </div>
               </div>
               <div className="text-[9px] uppercase tracking-[0.05em] mt-2" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', minHeight: '24px' }}>
                 MÃO DE OBRA
               </div>
-              <div className="text-[15px] mt-2" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>{formatMoney(balances.maodeobra.currentBalance || 0)}</div>
+              <div className="text-[15px] mt-2" style={{ color: corDoSaldo(balances.maodeobra.isNegative), fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>{formatMoney(balances.maodeobra.currentBalance || 0)}</div>
             </div>
 
             {/* Custo + Investimento */}
@@ -529,15 +561,25 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   />
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center text-[11px] font-black" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
-                  {Math.round(costsPercent)}%
+                  {semEntradaCustos ? '—' : `${Math.round(costsPercent)}%`}
                 </div>
               </div>
               <div className="text-[9px] uppercase tracking-[0.05em] mt-2" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', minHeight: '24px' }}>
                 CUSTO+INV
               </div>
-              <div className="text-[15px] mt-2" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>{formatMoney(balances.custoEInvestimento.currentBalance || 0)}</div>
+              <div className="text-[15px] mt-2" style={{ color: corDoSaldo(balances.custoEInvestimento.isNegative), fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>{formatMoney(balances.custoEInvestimento.currentBalance || 0)}</div>
             </div>
           </div>
+
+          {/* Acompanha o "—" dos tres circulos: diz em palavras que nao houve
+              venda, em vez de deixar tres zeros parecendo "gastou tudo". So
+              quando os TRES estao sem entrada — se um cofrinho recebeu algo, a
+              frase seria falsa. */}
+          {nadaEntrouNoPeriodo && (
+            <p className="text-[10px]" style={{ color: '#9A8FA0' }}>
+              Nenhuma venda paga {vocab.nessePeriodo} ainda — por isso não há nada separado aqui.
+            </p>
+          )}
 
           {/* Divisao real do saldo combinado, na mesma proporcao das metas
               configuradas em Minha Empresa — nao mais um /2 fixo. */}
