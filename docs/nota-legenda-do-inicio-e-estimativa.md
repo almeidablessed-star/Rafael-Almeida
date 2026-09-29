@@ -1,7 +1,12 @@
-# Nota: a legenda do Início mostra estimativa, não o valor real
+# RESOLVIDO (2026-09-28): a legenda do Início mostrava estimativa
 
-> 2026-09-28. Próximo passo já identificado, **não implementado** e ainda não
-> aprovado. Nota curta de propósito.
+> **Resolvido no commit `144fe94`.** A legenda passou a mostrar os valores
+> reais de despesas e investimento, iguais aos da aba Compras. Medido na tela:
+> onde ela dizia "Investimento $8,68" (33% da pilha), passou a dizer "$6,00",
+> idêntico ao cartão de Compras — e agora Despesas + Investimento fecham exato
+> com o valor do cartão acima.
+>
+> O texto abaixo descreve o problema como ele era, e fica como registro.
 
 No card "Saldos & Divisão dos Pedidos" do Início, a linha de baixo diz algo como
 "Despesas $14,15 · Investimento $7,00". Esses dois números **não são os saldos
@@ -34,3 +39,9 @@ Se a legenda passar a mostrar os dois valores reais, talvez o card combinado
 "Despesas + Investimento" do Início deixe de fazer sentido como pilha única —
 poderia virar dois cartões, como ficou em Compras. Vale decidir as duas coisas
 na mesma conversa.
+
+## Sobre a pergunta que ficou aberta
+
+A nota terminava perguntando se o cartão combinado "Despesas + Investimento" do
+Início deveria virar dois cartões, como ficou em Compras. **Isso continua em
+aberto** — a legenda foi corrigida, mas o cartão segue sendo uma pilha só.
