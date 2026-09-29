@@ -168,18 +168,23 @@ export const Dashboard: React.FC<DashboardProps> = ({
     balances.maodeobra.accumulatedInflow <= 0 &&
     balances.custoEInvestimento.accumulatedInflow <= 0;
 
-  // Como o saldo de "Custo+Inv" acima soma Despesas e Investimento numa
-  // pilha so, a legenda abaixo do gauge precisa dividi-lo de volta em dois —
-  // usava um /2 fixo (sempre 50/50), ignorando que a proporcao real entre as
-  // duas metas (custosPercent vs investmentTargetPercent, de Minha Empresa)
-  // quase nunca e igual. Cai em 50/50 so quando a estrutura ainda nao esta
-  // configurada (onboarding incompleto) — mesmo fallback que o resto do card.
-  const despesasPercentMeta = estruturaFinanceira?.valido ? estruturaFinanceira.custosPercent : 0;
-  const investimentoPercentMeta = estruturaFinanceira?.valido ? estruturaFinanceira.investmentTargetPercent : 0;
-  const somaPercentMeta = despesasPercentMeta + investimentoPercentMeta;
-  const despesasShare = somaPercentMeta > 0 ? despesasPercentMeta / somaPercentMeta : 0.5;
-  const investimentoShare = somaPercentMeta > 0 ? investimentoPercentMeta / somaPercentMeta : 0.5;
+  // O cartao "Despesas + Investimento" soma os dois numa pilha so, e a legenda
+  // abaixo dele desfaz a soma. Ate aqui ela repartia pela proporcao das METAS
+  // configuradas em Minha Empresa — uma ESTIMATIVA apresentada com cara de
+  // fato: gastar tudo de investimento e nada de despesas nao mexia num
+  // milimetro dos dois numeros.
+  //
+  // Agora sao os valores REAIS, os mesmos que a aba Compras ja mostra no
+  // cartao de Investimento — as duas telas passam a dizer a mesma coisa sobre
+  // o mesmo dinheiro.
+  //
+  // Despesas sai por subtracao, e isso e exato, nao aproximacao: a pilha e
+  // (entrou custo + entrou investimento) − (gastou custo + gastou
+  // investimento), entao tirar a parte de investimento devolve exatamente a de
+  // custo. Sem divisao, nao ha centavo perdido no arredondamento.
   const saldoCustoEInvestimento = balances.custoEInvestimento.currentBalance || 0;
+  const saldoInvestimento = balances.investimento.currentBalance || 0;
+  const saldoDespesas = saldoCustoEInvestimento - saldoInvestimento;
 
   // Os tres cartoes sao identicos em estrutura; so mudam nome, saldo e quanto
   // entrou. Descrever uma vez evita tres blocos quase iguais se desencontrarem
@@ -500,12 +505,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </p>
           )}
 
-          {/* Divide o cartao "Despesas + Investimento", que e uma pilha so, na
-              mesma proporcao das metas configuradas em Minha Empresa. Em
-              dinheiro, e nao em porcentagem: a porcentagem aqui repetia a meta
-              (que ja vive em Minha Empresa) em vez de dizer quanto ha. */}
+          {/* Desfaz a pilha "Despesas + Investimento" nos valores REAIS de cada
+              um — o mesmo numero que a aba Compras mostra no cartao de
+              Investimento. Mesmo formato de la, para as duas telas se lerem
+              igual. */}
           <p className="text-[10px]" style={{ color: '#9A8FA0' }}>
-            Despesas {formatMoney(saldoCustoEInvestimento * despesasShare)} · Investimento {formatMoney(saldoCustoEInvestimento * investimentoShare)}
+            Despesas {formatMoney(saldoDespesas)} · Investimento {formatMoney(saldoInvestimento)}
           </p>
 
           {/* A quinta parte da venda. Some quando nao houve pagamento nenhum:
