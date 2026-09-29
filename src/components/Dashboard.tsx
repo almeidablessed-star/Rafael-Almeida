@@ -14,6 +14,7 @@ import { useTransacoes } from '../context/TransacoesContext';
 import { OrdersCalendar } from './OrdersCalendar';
 import { PrimeirosPassosChecklist } from './onboarding/PrimeirosPassosChecklist';
 import { CampoComAjuda } from './onboarding/CampoComAjuda';
+import { CardDeSaldo } from './CardDeSaldo';
 import { AvatarProfile } from './AvatarProfile';
 import {
   Wallet,
@@ -166,13 +167,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
     balances.reposicao.accumulatedInflow <= 0 &&
     balances.maodeobra.accumulatedInflow <= 0 &&
     balances.custoEInvestimento.accumulatedInflow <= 0;
-
-  // Saldo negativo (gastou mais do que as vendas do periodo reservaram) ja
-  // aparecia com o numero certo, mas na mesma cor de tudo — nada avisava que
-  // passou do limite. `isNegative` vem pronto do calculo dos saldos e ate
-  // entao ninguem lia; aqui ele so escolhe a cor. #C4626F e o vermelho que o
-  // app ja usa (inclusive neste arquivo, nomeado `vermelho`).
-  const corDoSaldo = (negativo: boolean) => (negativo ? '#C4626F' : '#241B2B');
 
   // Como o saldo de "Custo+Inv" acima soma Despesas e Investimento numa
   // pilha so, a legenda abaixo do gauge precisa dividi-lo de volta em dois —
@@ -487,21 +481,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
               grandeza que se compara entre cartoes: dinheiro. */}
           <div className="flex gap-3 w-full">
             {cartoesDeSaldo.map(({ nome, saldo }) => (
-              <div
+              <CardDeSaldo
                 key={nome}
-                className="flex-1 bg-white rounded-[22px] p-4 text-center transition-all duration-300"
-                style={{ boxShadow: '0 8px 20px rgba(58,35,80,0.08)' }}
-              >
-                <div className="text-[9px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800, minHeight: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {nome}
-                </div>
-                <div className="text-[19px] mt-1" style={{ color: corDoSaldo(saldo.isNegative), fontFamily: "'Manrope', sans-serif", fontWeight: 800, letterSpacing: '-0.02em' }}>
-                  {formatMoney(saldo.currentBalance || 0)}
-                </div>
-                <div className="text-[9.5px] mt-1" style={{ color: '#9A8FA0', fontFamily: "'Manrope', sans-serif" }}>
-                  de {formatMoney(saldo.accumulatedInflow || 0)} que entraram
-                </div>
-              </div>
+                nome={nome}
+                saldo={saldo.currentBalance || 0}
+                entrou={saldo.accumulatedInflow || 0}
+                negativo={saldo.isNegative}
+              />
             ))}
           </div>
 

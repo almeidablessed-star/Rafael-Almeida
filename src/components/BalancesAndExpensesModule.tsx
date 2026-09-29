@@ -10,6 +10,8 @@ import { useFichasTecnicas } from '../context/FichasTecnicasContext';
 import { useProdutos } from '../context/ProdutosContext';
 import { useCosts } from '../context/CostsContext';
 import { normalizeName } from '../utils/fichaMatcher';
+import { CardDeSaldo } from './CardDeSaldo';
+import { rotulos } from '../utils/periodoReset';
 import { convertQuantity } from '../utils/units';
 import { CustomSelect } from './CustomSelect';
 import {
@@ -58,6 +60,20 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
   const { administrativeCosts } = useCosts();
   const periodoReset = administrativeCosts?.periodoReset ?? 'semanal';
   const balances = calculateWeeklyBalances(transactions, fichas, periodoReset);
+  // Frases prontas do periodo escolhido, mesma fonte do Inicio. Nunca
+  // concatenar aqui — portugues tem concordancia ("essa semana", mas "esse mes").
+  const vocab = rotulos(periodoReset);
+  // Soma dos DOIS cartoes abaixo, e nao dos tres cofrinhos como antes.
+  //
+  // Nesta tela so se gasta de Reposicao e de Investimento — a categoria do
+  // formulario tem exatamente essas duas opcoes. Entao "disponivel" aqui quer
+  // dizer "o que da pra gastar nesta tela", e o numero grande passa a ser a
+  // soma do que esta logo abaixo dele, conferivel a olho.
+  //
+  // O que saiu da conta: mao de obra (gasta pela aba Empresa) e a parte de
+  // despesas fixas. Esse dinheiro continua existindo, so nao e gasto por aqui.
+  const saldoTotalDisponivel =
+    (balances.reposicao.currentBalance || 0) + (balances.investimento.currentBalance || 0);
   // Compras agora referencia o catalogo Produtos (spec Modulo Produtos, secao
   // 2.2) em vez de Estoque diretamente. `estoque`/`registrarEntrada` nao sao
   // mais chamados aqui — o rastro de entrada por compra fica na propria
@@ -236,11 +252,11 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
 
   const conteudo = (
     <>
-      {/* TOTAL BALANCE CARD - SALDO TOTAL DISPONÍVEL */}
+      {/* SALDO TOTAL + OS DOIS COFRINHOS QUE ESTA TELA GASTA */}
       <div
-        className="rounded-[22px] p-6 text-white mx-5"
+        className="rounded-[22px] p-5 text-white mx-5"
         style={{
-          background: 'linear-gradient(155deg, var(--color-brand-900) 0%, var(--color-brand-700) 60%, var(--color-brand-500) 100%)',
+          background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
           position: 'relative',
           zIndex: 50,
         }}
@@ -249,31 +265,38 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
           Saldo Total Disponível
         </span>
         <span style={{ fontSize: '31px', fontWeight: 800, color: '#FFFFFF', letterSpacing: '-0.03em', lineHeight: 1, display: 'block', marginTop: '8px', fontFamily: "'Manrope', sans-serif" }}>
-          {formatMoney(balances.reposicao.currentBalance + balances.maodeobra.currentBalance + balances.custoEInvestimento.currentBalance)}
+          {formatMoney(saldoTotalDisponivel)}
         </span>
+        <span style={{ fontSize: '10px', color: 'rgba(247, 220, 225, 0.75)', display: 'block', marginTop: '6px', fontFamily: "'Manrope', sans-serif" }}>
+          O que já chegou das vendas − o que você já gastou {vocab.nessePeriodo}.
+        </span>
+      </div>
 
-        {/* Progress bar with category divisions */}
-        <div style={{ display: 'flex', height: '10px', borderRadius: '999px', overflow: 'hidden', background: 'rgba(255, 255, 255, 0.18)', marginTop: '12px', marginBottom: '12px' }}>
-          <div style={{ width: '45.6%', background: '#F5B9C6' }} />
-          <div style={{ width: '31.6%', background: '#D6B8E0' }} />
-          <div style={{ width: '22.8%', background: '#A9D8B8' }} />
-        </div>
+      {/* Os dois cofrinhos que ESTA tela desconta: escolher "Reposição" ou
+          "Investimento" no formulario abaixo tira daqui. Mao de obra tambem e
+          um cofrinho, mas quem gasta dela e a aba Empresa — por isso ela nao
+          ganha cartao aqui, so entra no total acima.
 
-        {/* Legend */}
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', fontSize: '9.5px', fontWeight: 700, color: 'rgba(247, 220, 225, 0.85)', fontFamily: "'Manrope', sans-serif" }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-            <span style={{ width: '8px', height: '8px', borderRadius: '3px', background: '#F5B9C6' }} />
-            Reposição
-          </span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-            <span style={{ width: '8px', height: '8px', borderRadius: '3px', background: '#D6B8E0' }} />
-            Mão de Obra
-          </span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-            <span style={{ width: '8px', height: '8px', borderRadius: '3px', background: '#A9D8B8' }} />
-            Custo + Invest.
-          </span>
-        </div>
+          Mesmo componente dos cartoes do Inicio (CardDeSaldo) de proposito:
+          sao os mesmos cofrinhos, e duas copias do estilo iam divergir na
+          primeira edicao de qualquer uma das duas telas.
+
+          Saiu daqui a barrinha de proporcoes 45,6% / 31,6% / 22,8%: os tres
+          numeros eram fixos no codigo, sem nenhuma relacao com o dinheiro da
+          conta — desenho com cara de dado. */}
+      <div className="flex gap-3 mx-5" style={{ marginTop: '14px' }}>
+        <CardDeSaldo
+          nome="REPOSIÇÃO"
+          saldo={balances.reposicao.currentBalance || 0}
+          entrou={balances.reposicao.accumulatedInflow || 0}
+          negativo={balances.reposicao.isNegative}
+        />
+        <CardDeSaldo
+          nome="INVESTIMENTO"
+          saldo={balances.investimento.currentBalance || 0}
+          entrou={balances.investimento.accumulatedInflow || 0}
+          negativo={balances.investimento.isNegative}
+        />
       </div>
 
       {/* REGISTRATION FORM FOR REAL PURCHASES / EXPENSES */}
