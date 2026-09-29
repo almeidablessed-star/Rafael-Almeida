@@ -1410,7 +1410,13 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                                   placeholder="Preço pago"
                                   value={novoProdutoPreco}
                                   onChange={(e) => setNovoProdutoPreco(e.target.value)}
-                                  className="flex-1 px-2.5 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs"
+                                  /* `min-w-0`: sem isso um item flex nao encolhe
+                                     abaixo do proprio conteudo (min-width: auto e
+                                     o padrao), e com o seletor de unidade ao lado
+                                     em largura fixa a linha estourava — no
+                                     celular os campos saiam do card e a lista de
+                                     unidades abria por cima do fundo da tela. */
+                                  className="flex-1 min-w-0 px-2.5 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs"
                                 />
                                 <input
                                   type="text"
@@ -1418,7 +1424,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                                   placeholder="Qtd. embalagem"
                                   value={novoProdutoQtdEmbalagem}
                                   onChange={(e) => setNovoProdutoQtdEmbalagem(e.target.value)}
-                                  className="flex-1 px-2.5 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs"
+                                  className="flex-1 min-w-0 px-2.5 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs"
                                 />
                                 <CustomSelect
                                   value={novoProdutoUnidade}
