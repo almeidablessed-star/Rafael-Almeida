@@ -196,6 +196,18 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
   const [quantidadeAtual, setQuantidadeAtual] = useState('');
   const [nivelMinimo, setNivelMinimo] = useState('');
   const [nivelMinimoUnidade, setNivelMinimoUnidade] = useState<Produto['unidadeEmbalagem']>('g');
+  /**
+   * A pessoa ja mexeu no alerta neste formulario? Enquanto nao mexeu, digitar
+   * a quantidade da embalagem re-sugere 20% dela. Depois de mexer, a sugestao
+   * nunca mais toca no campo — inclusive se ela zerar de proposito.
+   *
+   * O alerta nasce em 0, e 0 e ambiguo: pode ser "nunca configurei" ou "nao
+   * quero alerta". Por isso a sugestao aparece no CAMPO, visivel e editavel
+   * antes de salvar, em vez de ser decidida na hora de gravar — assim o valor
+   * salvo e sempre a escolha dela, e nao existe regra de sobrescrita para dar
+   * errado depois.
+   */
+  const [alertaTocado, setAlertaTocado] = useState(false);
 
   /** Produto duplicado achado ao salvar (criar ou renomear) — guarda os dados
    * prontos pra salvar, pra "Criar mesmo assim" nao precisar remontar tudo. */
@@ -212,6 +224,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
       setQuantidadeAtual('');
       setNivelMinimo('');
       setNivelMinimoUnidade('g');
+      setAlertaTocado(false);
       setEditingId(null);
     }
   }, [isAdding]);
@@ -232,6 +245,9 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
     setQuantidadeAtual(p.quantidadeAtual != null ? String(Math.round(p.quantidadeAtual * 100) / 100).replace('.', ',') : '');
     setNivelMinimo(p.nivelMinimo != null ? String(p.nivelMinimo) : '');
     setNivelMinimoUnidade(p.nivelMinimoUnidade || 'g');
+    // Editando um produto que ja existe: o alerta dele e uma escolha feita, e
+    // a sugestao nao pode reescrever nada — nem se ela mudar a embalagem aqui.
+    setAlertaTocado(true);
     setEditingId(p.id);
     setIsAdding(true);
     setInvalidFieldId(null);
@@ -496,12 +512,35 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                         onChange={(e) => {
                           setQuantidadeEmbalagem(e.target.value);
                           if (invalidFieldId === 'produto-quantidade-embalagem') setInvalidFieldId(null);
+                          // Sugere 20% da embalagem como alerta, na MESMA
+                          // unidade dela — o campo de alerta tem unidade
+                          // propria, e sugerir num sistema e gravar noutro ja
+                          // deu problema neste app. 20% porque o vermelho do
+                          // anel dispara em 1,25x o alerta: 20% acende com um
+                          // quarto do pacote ainda na prateleira, cedo o
+                          // bastante para recomprar sem faltar.
+                          if (!alertaTocado) {
+                            const qtd = parseFloat(e.target.value.replace(',', '.'));
+                            setNivelMinimoUnidade(unidadeEmbalagem);
+                            setNivelMinimo(
+                              Number.isFinite(qtd) && qtd > 0
+                                ? String(Math.round(qtd * 0.2 * 100) / 100).replace('.', ',')
+                                : ''
+                            );
+                          }
                         }}
                         className="flex-1 px-3 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
                       />
                       <CustomSelect
                         value={unidadeEmbalagem}
-                        onChange={(v) => setUnidadeEmbalagem(v as any)}
+                        onChange={(v) => {
+                          setUnidadeEmbalagem(v as any);
+                          // A unidade do alerta tem que acompanhar enquanto ele
+                          // for sugestao: trocar a embalagem para kg e deixar o
+                          // alerta em g transformaria "0,2" em 0,2 g — mil vezes
+                          // menor do que o pretendido, e silenciosamente.
+                          if (!alertaTocado) setNivelMinimoUnidade(v as any);
+                        }}
                         compacto
                         ariaLabel="Unidade de embalagem"
                         style={{ width: '108px', flexShrink: 0 }}
@@ -573,12 +612,12 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                         <label className="block text-xs font-bold text-neutral-900 mb-1.5">Alerta mínimo</label>
                         <div className="flex gap-2">
                           <input
-                            type="text" inputMode="decimal" placeholder="100" value={nivelMinimo} onChange={(e) => setNivelMinimo(e.target.value)}
+                            type="text" inputMode="decimal" placeholder="100" value={nivelMinimo} onChange={(e) => { setNivelMinimo(e.target.value); setAlertaTocado(true); }}
                             className="flex-1 px-3 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
                           />
                           <CustomSelect
                             value={nivelMinimoUnidade}
-                            onChange={(v) => setNivelMinimoUnidade(v as any)}
+                            onChange={(v) => { setNivelMinimoUnidade(v as any); setAlertaTocado(true); }}
                             compacto
                             ariaLabel="Unidade do nível mínimo"
                             style={{ width: '108px', flexShrink: 0 }}

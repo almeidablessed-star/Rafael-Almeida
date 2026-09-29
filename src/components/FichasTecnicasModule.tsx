@@ -594,6 +594,11 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   const [novoProdutoUnidade, setNovoProdutoUnidade] = useState<Produto['unidadeEmbalagem']>('g');
   const [novoProdutoControlaEstoque, setNovoProdutoControlaEstoque] = useState(true);
   const [novoProdutoQtdAtual, setNovoProdutoQtdAtual] = useState('');
+  const [novoProdutoNivelMinimo, setNovoProdutoNivelMinimo] = useState('');
+  /** Ver a mesma ideia em ProdutosModule: enquanto a pessoa nao mexe no alerta,
+   * digitar a quantidade da embalagem re-sugere 20% dela. Depois de mexer, a
+   * sugestao nunca mais toca no campo — inclusive se ela zerar de proposito. */
+  const [novoProdutoAlertaTocado, setNovoProdutoAlertaTocado] = useState(false);
   const [salvandoNovoProduto, setSalvandoNovoProduto] = useState(false);
 
   const handleAbrirCriarProduto = (tamanhoId: string, insumoId: string, nomeSugerido: string) => {
@@ -605,6 +610,8 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     setNovoProdutoUnidade('g');
     setNovoProdutoControlaEstoque(true);
     setNovoProdutoQtdAtual('');
+    setNovoProdutoNivelMinimo('');
+    setNovoProdutoAlertaTocado(false);
   };
 
   const handleSalvarNovoProdutoInline = async () => {
@@ -640,7 +647,9 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         controlaEstoque: novoProdutoControlaEstoque,
         quantidadeAtual: novoProdutoControlaEstoque ? qtdAtualNum : null,
         quantidadeReferencia: null,
-        nivelMinimo: novoProdutoControlaEstoque ? 0 : null,
+        nivelMinimo: novoProdutoControlaEstoque
+          ? parseFloat(novoProdutoNivelMinimo.replace(',', '.')) || 0
+          : null,
         nivelMinimoUnidade: novoProdutoControlaEstoque ? novoProdutoUnidade : null,
       });
 
@@ -1423,7 +1432,21 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                                   inputMode="decimal"
                                   placeholder="Qtd. embalagem"
                                   value={novoProdutoQtdEmbalagem}
-                                  onChange={(e) => setNovoProdutoQtdEmbalagem(e.target.value)}
+                                  onChange={(e) => {
+                                    setNovoProdutoQtdEmbalagem(e.target.value);
+                                    // 20% da embalagem como alerta sugerido, na
+                                    // unidade dela. 20% porque o vermelho do anel
+                                    // dispara em 1,25x o alerta: acende com um
+                                    // quarto do pacote ainda na prateleira.
+                                    if (!novoProdutoAlertaTocado) {
+                                      const qtd = parseFloat(e.target.value.replace(',', '.'));
+                                      setNovoProdutoNivelMinimo(
+                                        Number.isFinite(qtd) && qtd > 0
+                                          ? String(Math.round(qtd * 0.2 * 100) / 100).replace('.', ',')
+                                          : ''
+                                      );
+                                    }
+                                  }}
                                   className="flex-1 min-w-0 px-2.5 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs"
                                 />
                                 <CustomSelect
@@ -1465,6 +1488,27 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                                       'Pode deixar vazio se não quiser controlar.'
                                     }
                                   />
+                                  {/* Este campo nao existia aqui: o alerta era
+                                      gravado em 0 sem a pessoa ver. Agora vem
+                                      sugerido em 20% da embalagem, na unidade
+                                      dela, visivel e editavel antes de salvar —
+                                      o valor gravado e sempre a escolha dela. */}
+                                  <div className="mt-2">
+                                    <label className="text-[10px] block mb-1" style={{ color: '#7A6E80' }}>
+                                      Avisar quando restar menos de ({novoProdutoUnidade})
+                                    </label>
+                                    <input
+                                      type="text"
+                                      inputMode="decimal"
+                                      placeholder="0"
+                                      value={novoProdutoNivelMinimo}
+                                      onChange={(e) => {
+                                        setNovoProdutoNivelMinimo(e.target.value);
+                                        setNovoProdutoAlertaTocado(true);
+                                      }}
+                                      className="w-full px-2.5 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs"
+                                    />
+                                  </div>
                                 </div>
                               )}
                               <div className="flex justify-end gap-2 pt-1">
