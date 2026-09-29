@@ -252,24 +252,32 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
 
   const conteudo = (
     <>
-      {/* SALDO TOTAL + OS DOIS COFRINHOS QUE ESTA TELA GASTA */}
-      <div
-        className="rounded-[22px] p-5 text-white mx-5"
-        style={{
-          background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
-          position: 'relative',
-          zIndex: 50,
-        }}
-      >
-        <span style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '0.14em', color: 'rgba(247, 220, 225, 0.8)', textTransform: 'uppercase', display: 'block', fontFamily: "'Manrope', sans-serif" }}>
-          Saldo Total Disponível
-        </span>
-        <span style={{ fontSize: '31px', fontWeight: 800, color: '#FFFFFF', letterSpacing: '-0.03em', lineHeight: 1, display: 'block', marginTop: '8px', fontFamily: "'Manrope', sans-serif" }}>
+      {/* Total em LINHA, e nao num terceiro cartao: ele nao e um cofrinho, e a
+          soma dos dois que vem logo abaixo. Em formato de cartao, lado a lado
+          com os outros, pareceria um terceiro cofrinho — e a pessoa somaria
+          tres numeros onde so existem dois.
+
+          O roxo antigo saiu: aqui ele destoava dos cartoes claros e puxava a
+          atencao para o total em vez de para os saldos que se gasta. */}
+      <div className="mx-5" style={{ fontFamily: "'Manrope', sans-serif" }}>
+        <div className="text-[9px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontWeight: 800 }}>
+          Total disponível
+        </div>
+        <div
+          className="text-[24px]"
+          style={{
+            color: saldoTotalDisponivel < 0 ? '#C4626F' : '#241B2B',
+            fontWeight: 800,
+            letterSpacing: '-0.02em',
+            lineHeight: 1.1,
+            marginTop: '2px',
+          }}
+        >
           {formatMoney(saldoTotalDisponivel)}
-        </span>
-        <span style={{ fontSize: '10px', color: 'rgba(247, 220, 225, 0.75)', display: 'block', marginTop: '6px', fontFamily: "'Manrope', sans-serif" }}>
+        </div>
+        <div className="text-[10px]" style={{ color: '#9A8FA0', marginTop: '3px' }}>
           O que já chegou das vendas − o que você já gastou {vocab.nessePeriodo}.
-        </span>
+        </div>
       </div>
 
       {/* Os dois cofrinhos que ESTA tela desconta: escolher "Reposição" ou
@@ -284,7 +292,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
           Saiu daqui a barrinha de proporcoes 45,6% / 31,6% / 22,8%: os tres
           numeros eram fixos no codigo, sem nenhuma relacao com o dinheiro da
           conta — desenho com cara de dado. */}
-      <div className="flex gap-3 mx-5" style={{ marginTop: '14px' }}>
+      <div className="flex gap-3 mx-5" style={{ marginTop: '10px' }}>
         <CardDeSaldo
           nome="REPOSIÇÃO"
           saldo={balances.reposicao.currentBalance || 0}
