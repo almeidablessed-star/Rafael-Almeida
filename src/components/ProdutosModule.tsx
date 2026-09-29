@@ -12,6 +12,7 @@ import { useDelayedDelete } from '../hooks/useDelayedDelete';
 import { FieldValidationError } from './FieldValidationError';
 import { normalizeName } from '../utils/fichaMatcher';
 import { CustomSelect } from './CustomSelect';
+import { CampoComAjuda } from './onboarding/CampoComAjuda';
 import {
   Package,
   Plus,
@@ -546,11 +547,26 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
 
                   {controlaEstoque && (
                     <>
+                      {/* Mesmo rotulo que a Ficha usa para este campo. Ali,
+                          "Quantidade atual em estoque" ficava ao lado do
+                          quanto a receita usa e ja custou um insumo cadastrado
+                          com estoque zero. Aqui o vizinho e outro — o tamanho
+                          da embalagem — mas continuam sendo dois "quantidade"
+                          na mesma tela, e nao ha motivo para as duas telas
+                          chamarem a mesma coisa por nomes diferentes. */}
                       <div>
-                        <label className="block text-xs font-bold text-neutral-900 mb-1.5">Quantidade atual em estoque</label>
+                        <label className="block text-xs font-bold text-neutral-900 mb-1.5">Quanto você já tem guardado</label>
                         <input
                           type="text" inputMode="decimal" placeholder="0" value={quantidadeAtual} onChange={(e) => setQuantidadeAtual(e.target.value)}
                           className="w-full px-3 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
+                        />
+                        <CampoComAjuda
+                          microcopy="Seu estoque de hoje — não o tamanho da embalagem que você compra."
+                          exemploDinamico={
+                            'É quanto você já tem em casa hoje. O campo acima é o tamanho do pacote ' +
+                            'que você costuma comprar (ex.: 1000 g), usado para calcular o custo. ' +
+                            'Pode deixar em zero se ainda não comprou.'
+                          }
                         />
                       </div>
                       <div>
