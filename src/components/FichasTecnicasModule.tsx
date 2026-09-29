@@ -609,6 +609,22 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 
   const handleSalvarNovoProdutoInline = async () => {
     if (!criandoProdutoInsumo || !novoProdutoNome.trim()) return;
+
+    // Pega a confusao no momento em que ela acontece. Com o controle de
+    // estoque LIGADO e o campo vazio, o produto nasce com zero e ja aparece
+    // como CRITICO no Estoque — foi assim que um insumo real acabou zerado,
+    // porque a quantidade tinha sido digitada no campo de cima ("quanto a
+    // receita usa"). Nao bloqueia: zero e uma resposta legitima para quem
+    // ainda nao comprou o item.
+    if (novoProdutoControlaEstoque && !novoProdutoQtdAtual.trim()) {
+      const seguir = window.confirm(
+        'Você não informou quanto já tem guardado deste item, então ele vai entrar com estoque zero.\n\n' +
+          'Esse campo é o seu estoque de hoje — não o quanto a receita usa, que é o de cima.\n\n' +
+          'Quer salvar assim mesmo?'
+      );
+      if (!seguir) return;
+    }
+
     setSalvandoNovoProduto(true);
     try {
       const precoNum = parseFloat(novoProdutoPreco.replace(',', '.')) || 0;
@@ -1298,7 +1314,13 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                           <div className="col-span-4">
                             <input
                               type="number"
-                              placeholder="Qtd"
+                              /* "Qtd" sozinho nao dizia de que: a poucos
+                                 centimetros dali fica "quanto voce ja tem
+                                 guardado", no cadastro de produto novo, e os
+                                 dois pediam "quantidade". Ja houve um insumo
+                                 cadastrado com estoque zero por causa disso. */
+                              placeholder="Quanto a receita usa"
+                              title="Quanto a receita usa deste ingrediente por vez"
                               value={ing.quantity || ''}
                               onChange={(e) => handleUpdateInsumoTamanho(tamanho.id, ing.id, 'quantity', e.target.value)}
                               className="w-full px-1.5 py-1 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold text-center"
@@ -1418,14 +1440,26 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                                 </button>
                               </div>
                               {novoProdutoControlaEstoque && (
-                                <input
-                                  type="text"
-                                  inputMode="decimal"
-                                  placeholder="Quantidade atual em estoque"
-                                  value={novoProdutoQtdAtual}
-                                  onChange={(e) => setNovoProdutoQtdAtual(e.target.value)}
-                                  className="w-full px-2.5 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs"
-                                />
+                                <div>
+                                  <input
+                                    type="text"
+                                    inputMode="decimal"
+                                    placeholder="Quanto você já tem guardado"
+                                    value={novoProdutoQtdAtual}
+                                    onChange={(e) => setNovoProdutoQtdAtual(e.target.value)}
+                                    className="w-full px-2.5 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs"
+                                  />
+                                  {/* O "?" explica a diferenca para o campo de
+                                      cima, que e o outro "quanto". Mesmo
+                                      padrao de ajuda ja usado no app. */}
+                                  <CampoComAjuda
+                                    microcopy="Seu estoque de hoje — não o quanto a receita usa."
+                                    exemploDinamico={
+                                      'É quanto você já tem em casa hoje, não quanto a receita usa. ' +
+                                      'Pode deixar vazio se não quiser controlar.'
+                                    }
+                                  />
+                                </div>
                               )}
                               <div className="flex justify-end gap-2 pt-1">
                                 <button
