@@ -145,6 +145,34 @@ export const ProdutosProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     );
   };
 
+  /**
+   * Saldo dos produtos LIDO DO BANCO na hora, sem passar pelo estado.
+   *
+   * Existe por causa de um defeito concreto: ao editar um pedido, o app devolve
+   * ao estoque o que a versao anterior consumiu e em seguida consome pela versao
+   * nova. A estrategia esta certa, mas as duas funcoes liam o saldo do array
+   * `produtos` do componente — um retrato tirado antes da devolucao. A
+   * devolucao gravava o saldo certo no banco e o consumo logo depois calculava
+   * em cima do valor velho preso na memoria, sobrescrevendo-a.
+   *
+   * Media assim, com um item de 100 g e estoque de 1000 g: lancar o pedido
+   * levava a 900 (certo), mas reabrir e salvar sem mexer em nada levava a 800,
+   * e mudar para 3 unidades levava a 500 em vez de 700. Cada edicao comia mais
+   * um pedido inteiro de insumo, em silencio.
+   *
+   * O estado continua sendo a fonte da TELA; para escrever saldo, a fonte e o
+   * banco.
+   */
+  const buscarProdutosFrescos = async (): Promise<Produto[]> => {
+    if (!user) return [];
+    const { data, error: errBusca } = await supabase
+      .from('produtos')
+      .select('*')
+      .eq('usuaria_id', user.id);
+    if (errBusca) throw errBusca;
+    return (data || []).map(mapSupabaseToProduto);
+  };
+
   const fetchProdutos = async () => {
     if (!user) return;
     try {
@@ -271,7 +299,9 @@ export const ProdutosProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   ): Promise<ResultadoBaixa> => {
     if (!user) throw new Error('User not authenticated');
 
-    const produtosComoStockItems: StockItem[] = produtos.map((p) => ({
+    // Saldo do banco, nao do estado: ver `buscarProdutosFrescos`.
+    const produtosAtuais = await buscarProdutosFrescos();
+    const produtosComoStockItems: StockItem[] = produtosAtuais.map((p) => ({
       id: String(p.id),
       name: p.nome,
       quantity: p.quantidadeAtual || 0,
@@ -374,23 +404,54 @@ export const ProdutosProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const devolverPedido = async (transacaoId: string) => {
     if (!user) throw new Error('User not authenticated');
 
+    // Consumos E devolucoes, porque o que interessa e o SALDO LIQUIDO que este
+    // pedido ainda tem preso no estoque.
+    //
+    // Buscar so os consumos devolvia tudo de novo a cada edicao: nada marca um
+    // consumo como ja devolvido, entao a segunda edicao encontrava o consumo
+    // original mais o da primeira edicao e devolvia os dois. Medido com um item
+    // de 100 g: o estoque subia para 1100 antes do novo consumo e o pedido
+    // terminava com 800 no lugar de 700 — sobrando insumo que nunca existiu.
     const { data: movs, error: errBusca } = await supabase
       .from('estoque_movimentos')
       .select('*')
       .eq('usuaria_id', user.id)
       .eq('transacao_id', transacaoId)
-      .eq('tipo', 'consumo');
+      .in('tipo', ['consumo', 'devolucao']);
     if (errBusca) throw errBusca;
     if (!movs || movs.length === 0) return;
 
+    // Consumo soma, devolucao subtrai. Sobra o que falta devolver.
+    const pendentePorChave = new Map<string, { mov: any; quantidade: number }>();
     for (const m of movs) {
+      const chave = m.produto_id ? `p${m.produto_id}` : `e${m.estoque_id}:${m.item_nome}`;
+      const sinal = m.tipo === 'consumo' ? 1 : -1;
+      const anterior = pendentePorChave.get(chave);
+      pendentePorChave.set(chave, {
+        mov: anterior?.mov || m,
+        quantidade: (anterior?.quantidade || 0) + sinal * Number(m.quantidade),
+      });
+    }
+
+    const aDevolver = [...pendentePorChave.values()]
+      .filter((x) => x.quantidade > 0)
+      .map((x) => ({ ...x.mov, quantidade: x.quantidade }));
+    if (aDevolver.length === 0) return;
+
+    // Saldo do banco, nao do estado: ver `buscarProdutosFrescos`. Aqui importa
+    // tambem entre uma volta e outra do laco — dois movimentos do mesmo produto
+    // liam o mesmo saldo antigo e a segunda devolucao apagava a primeira.
+    const saldos = new Map((await buscarProdutosFrescos()).map((p) => [p.id, p.quantidadeAtual || 0]));
+
+    for (const m of aDevolver) {
       if (m.produto_id) {
-        const atual = produtos.find((p) => p.id === m.produto_id);
-        if (!atual) continue; // produto apagado do catalogo: nao ha onde devolver
+        if (!saldos.has(m.produto_id)) continue; // produto apagado do catalogo: nao ha onde devolver
+        const novoSaldo = (saldos.get(m.produto_id) || 0) + Number(m.quantidade);
+        saldos.set(m.produto_id, novoSaldo);
 
         await supabase
           .from('produtos')
-          .update({ quantidade_atual: (atual.quantidadeAtual || 0) + Number(m.quantidade) })
+          .update({ quantidade_atual: novoSaldo })
           .eq('id', m.produto_id)
           .eq('usuaria_id', user.id);
 
