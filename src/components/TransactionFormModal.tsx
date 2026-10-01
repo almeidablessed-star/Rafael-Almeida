@@ -996,31 +996,24 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       }
 
       // Build Order Notes for automatic calculation parsing
-      let notesStr = `Breakdown: Reposição ${formatMoney(
-        totalItemsReposicao
-      )}, Mão de Obra ${formatMoney(totalItemsMaodeobra)}, Custos ${formatMoney(
-        totalItemsCusto
-      )}, Investimento ${formatMoney(totalItemsInvestimento)}.`;
-
-      if (hasDelivery && deliveryFee > 0) {
-        notesStr += ` Taxa de Entrega: ${formatMoney(deliveryFee)}.`;
-      }
-
-      if (validAddons.length > 0) {
-        const details = validAddons
-          .map(
-            (a) =>
-              `${a.description.trim() || 'Adicional'}: ${formatMoney(
-                parseFloat(a.value.replace(',', '.')) || 0
-              )}`
-          )
-          .join(', ');
-        notesStr += ` Adicionais: ${details}.`;
-      }
-
-      if (notes.trim()) {
-        notesStr += ` Obs: ${notes.trim()}`;
-      }
+      // As anotacoes guardam SO o que a pessoa escreveu.
+      //
+      // Antes, o app montava aqui um texto proprio ("Breakdown: Reposicao
+      // $0,00... Taxa de Entrega: $25,00. Adicionais: Vela: $20,00. Obs: ...")
+      // e gravava tudo junto neste campo. Ao reabrir a edicao, esse texto
+      // inteiro voltava para a caixa de observacoes e era embrulhado dentro de
+      // si mesmo no proximo salvamento: "Breakdown:" aparecia duas vezes depois
+      // da primeira edicao, tres depois da segunda, e o texto so crescia.
+      //
+      // Ele existia como fonte de dado, para reconstruir a taxa de entrega e a
+      // composicao de pedidos sem `breakdown` gravado. Hoje isso tudo vive
+      // estruturado no proprio `breakdown` — composicao, itens, adicionais e
+      // entrega — entao o texto nao tem mais funcao.
+      //
+      // `parseSaleDetail` continua lendo este campo por regex, mas SO quando
+      // nao ha `breakdown`: pedidos muito antigos, cujas anotacoes nao sao
+      // reescritas (a edicao deles fica bloqueada). Eles seguem funcionando.
+      const notesStr = notes.trim();
 
       // Trigger celebration confetti on new Sale!
       if (!editingTransaction) {
