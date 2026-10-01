@@ -316,17 +316,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user) throw new Error('No user found');
 
     try {
+      // `upsert` com `ignoreDuplicates`, e nao `insert`: criar o perfil precisa
+      // ser idempotente. Com o insert, uma segunda chamada para a mesma conta
+      // — duplo clique no botao, aba duplicada, retry depois de uma falha de
+      // rede — violava a chave primaria e o erro do Postgres subia cru ate a
+      // tela, como se o cadastro tivesse falhado.
+      //
+      // `ignoreDuplicates: true` vira `ON CONFLICT DO NOTHING`: a linha que ja
+      // existe fica intacta. E de proposito que nao seja `DO UPDATE` — este
+      // payload tem so os tres campos da tela de setup mais o `created_at`, e
+      // reescrever a linha existente com ele apagaria a data de criacao
+      // original. Quando nao ha conflito (o caso normal, cadastro novo) o
+      // comando e um INSERT igual ao de antes.
       const { error } = await supabase
         .from('usuarias')
-        .insert([
-          {
-            id: user.id,
-            nome,
-            nome_confeitaria,
-            moeda,
-            created_at: new Date().toISOString(),
-          },
-        ]);
+        .upsert(
+          [
+            {
+              id: user.id,
+              nome,
+              nome_confeitaria,
+              moeda,
+              created_at: new Date().toISOString(),
+            },
+          ],
+          { onConflict: 'id', ignoreDuplicates: true }
+        );
 
       if (error) throw error;
 
