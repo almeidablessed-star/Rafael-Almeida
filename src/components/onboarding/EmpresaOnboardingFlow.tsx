@@ -8,6 +8,7 @@ import {
   calcularMetaHoras,
   somarDespesasEmpresa,
 } from '../../utils/financialEngine';
+import { formatNumeroParaEdicao, parseNumeroDigitado } from '../../utils/formatters';
 import { CampoComAjuda } from './CampoComAjuda';
 import { CustomSelect } from '../CustomSelect';
 
@@ -53,6 +54,57 @@ const botaoPrimario =
 const botaoSecundario =
   'px-4 py-3 rounded-xl bg-white border border-[#E6E1DB] text-sm font-bold text-neutral-700 hover:bg-neutral-50 transition-all active:scale-95 disabled:opacity-50';
 
+/**
+ * Campo de valor que aceita o numero escrito do jeito brasileiro.
+ *
+ * Existe porque `type="number"` descartava o que a pessoa digitava: ao digitar
+ * "3.000" o browser julga o valor invalido e devolve string vazia, entao o
+ * `Number(e.target.value)` do codigo anterior gravava 0 — tres mil virava
+ * zero, sem nenhum aviso na tela. Aqui o campo e `type="text"` com
+ * `inputMode="decimal"` (teclado numerico no celular, mas sem a validacao do
+ * browser) e quem interpreta a string e `parseNumeroDigitado`.
+ *
+ * O texto digitado fica em estado proprio, nao derivado do numero, para que
+ * formas intermediarias de digitacao sobrevivam: "3." e "3.000," passam a ser
+ * estados validos enquanto a pessoa ainda escreve, em vez de serem reescritos
+ * no meio da palavra. O numero segue sendo a fonte de verdade de quem salva.
+ */
+const CampoNumerico: React.FC<{
+  value: number;
+  onChange: (valor: number) => void;
+  className?: string;
+  placeholder?: string;
+  style?: React.CSSProperties;
+  ariaLabel?: string;
+}> = ({ value, onChange, className, placeholder, style, ariaLabel }) => {
+  const [texto, setTexto] = useState(() => formatNumeroParaEdicao(value));
+
+  // Ressincroniza so quando o numero muda POR FORA (carga inicial do banco,
+  // reset de passo). A guarda evita o caso em que isto reescreveria o texto
+  // que esta sendo digitado: se o texto atual ja le como o valor recebido,
+  // nao ha nada a corrigir.
+  useEffect(() => {
+    if (parseNumeroDigitado(texto) !== value) setTexto(formatNumeroParaEdicao(value));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
+
+  return (
+    <input
+      type="text"
+      inputMode="decimal"
+      value={texto}
+      placeholder={placeholder}
+      className={className}
+      style={style}
+      aria-label={ariaLabel}
+      onChange={(e) => {
+        setTexto(e.target.value);
+        onChange(parseNumeroDigitado(e.target.value));
+      }}
+    />
+  );
+};
+
 export const EmpresaOnboardingFlow: React.FC = () => {
   const { administrativeCosts, salvarPassoOnboarding, salvarDespesas, concluirOnboarding } = useCosts();
   const { fichas } = useFichasTecnicas();
@@ -72,6 +124,10 @@ export const EmpresaOnboardingFlow: React.FC = () => {
 
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState('');
+  // Aviso do passo 9 quando a remuneracao ficou em zero. So aparece depois de
+  // uma tentativa de concluir: avisar antes seria repreender quem ainda nem
+  // chegou no fim do fluxo.
+  const [avisoRemuneracao, setAvisoRemuneracao] = useState(false);
 
   useEffect(() => {
     if (!administrativeCosts || carregouInicial) return;
@@ -130,7 +186,22 @@ export const EmpresaOnboardingFlow: React.FC = () => {
     }
   };
 
+  const PASSO_REMUNERACAO = 1;
+
+  /**
+   * Unico campo que o fluxo exige de verdade. Os demais (CMV, investimento,
+   * lucro, despesas) tem default valido e podem ficar como estao — ja a
+   * remuneracao em zero faria o faturamento necessario nascer zerado, e a
+   * conta comecaria com todas as metas em branco sem a pessoa perceber.
+   */
+  const remuneracaoPreenchida = monthlyIncomeTarget > 0;
+
   const confirmarConclusao = async () => {
+    if (!remuneracaoPreenchida) {
+      setAvisoRemuneracao(true);
+      return;
+    }
+    setAvisoRemuneracao(false);
     setErro('');
     setSalvando(true);
     try {
@@ -282,11 +353,11 @@ export const EmpresaOnboardingFlow: React.FC = () => {
                   >
                     {symbol}
                   </span>
-                  <input
-                    type="number"
-                    value={monthlyIncomeTarget || ''}
-                    onChange={(e) => setMonthlyIncomeTarget(Number(e.target.value))}
+                  <CampoNumerico
+                    value={monthlyIncomeTarget}
+                    onChange={setMonthlyIncomeTarget}
                     placeholder="0"
+                    ariaLabel="Quanto você quer receber por mês"
                     className="flex-1 min-w-0 focus:outline-none"
                     style={{ padding: '10px 12px', border: 'none', background: 'transparent', fontSize: '14px', color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}
                   />
@@ -304,12 +375,12 @@ export const EmpresaOnboardingFlow: React.FC = () => {
             <div className="space-y-3">
               <h2 className={labelClass} style={{ color: '#241B2B' }}>Quanto vale sua hora de trabalho?</h2>
               <CampoComAjuda microcopy="Multiplicado pelas horas de cada receita, vira a mão de obra daquele produto — automaticamente, sem você fazer a conta." />
-              <input
-                type="number"
+              <CampoNumerico
                 className={inputClass}
-                value={horaTrabalho || ''}
-                onChange={(e) => setHoraTrabalho(Number(e.target.value))}
+                value={horaTrabalho}
+                onChange={setHoraTrabalho}
                 placeholder="0"
+                ariaLabel="Quanto vale sua hora de trabalho"
               />
               <div className="flex gap-2 pt-2">
                 <button className={botaoSecundario} onClick={voltar} disabled={salvando}>Voltar</button>
@@ -400,18 +471,18 @@ export const EmpresaOnboardingFlow: React.FC = () => {
                           className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
                         />
                         <div className="flex gap-2 items-center">
-                          <input
-                            type="number"
+                          <CampoNumerico
                             placeholder="Valor"
-                            value={d.valor || ''}
-                            onChange={(e) => atualizarDespesa(i, 'valor', Number(e.target.value))}
+                            ariaLabel="Valor da despesa"
+                            value={d.valor}
+                            onChange={(valor) => atualizarDespesa(i, 'valor', valor)}
                             className="flex-1 px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
                           />
-                          <input
-                            type="number"
+                          <CampoNumerico
                             placeholder="% negócio"
+                            ariaLabel="Percentual do negócio"
                             value={d.percentualRateio}
-                            onChange={(e) => atualizarDespesa(i, 'percentualRateio', Number(e.target.value))}
+                            onChange={(valor) => atualizarDespesa(i, 'percentualRateio', valor)}
                             className="w-24 px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
                           />
                           <button
@@ -456,11 +527,11 @@ export const EmpresaOnboardingFlow: React.FC = () => {
                           <label className="text-[9px] font-bold block mb-1" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
                             Valor ({symbol})
                           </label>
-                          <input
-                            type="number"
+                          <CampoNumerico
                             placeholder="0"
-                            value={d.valor || ''}
-                            onChange={(e) => atualizarDespesa(i, 'valor', Number(e.target.value))}
+                            ariaLabel="Valor da despesa"
+                            value={d.valor}
+                            onChange={(valor) => atualizarDespesa(i, 'valor', valor)}
                             className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
                           />
                         </div>
@@ -468,11 +539,11 @@ export const EmpresaOnboardingFlow: React.FC = () => {
                           <label className="text-[9px] font-bold block mb-1" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
                             % do negócio
                           </label>
-                          <input
-                            type="number"
+                          <CampoNumerico
                             placeholder="100"
-                            value={d.percentualRateio || ''}
-                            onChange={(e) => atualizarDespesa(i, 'percentualRateio', Number(e.target.value))}
+                            ariaLabel="Percentual do negócio"
+                            value={d.percentualRateio}
+                            onChange={(valor) => atualizarDespesa(i, 'percentualRateio', valor)}
                             className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
                           />
                         </div>
@@ -520,11 +591,11 @@ export const EmpresaOnboardingFlow: React.FC = () => {
                 microcopy="Quanto do preço do bolo vai embora só com ingredientes e embalagem. Quanto menor, mais sobra pra você."
                 exemploDinamico={exemploCmv}
               />
-              <input
-                type="number"
+              <CampoNumerico
                 className={inputClass}
                 value={cmvTargetPercent}
-                onChange={(e) => setCmvTargetPercent(Number(e.target.value))}
+                onChange={setCmvTargetPercent}
+                ariaLabel="Meta de CMV em porcentagem"
               />
               <div className="flex gap-2 pt-2">
                 <button className={botaoSecundario} onClick={voltar} disabled={salvando}>Voltar</button>
@@ -544,11 +615,11 @@ export const EmpresaOnboardingFlow: React.FC = () => {
                 microcopy="Uma reserva pra comprar equipamento, fazer curso, crescer o negócio — sem tirar do seu bolso."
                 exemploDinamico={exemploInvestimento}
               />
-              <input
-                type="number"
+              <CampoNumerico
                 className={inputClass}
                 value={investmentTargetPercent}
-                onChange={(e) => setInvestmentTargetPercent(Number(e.target.value))}
+                onChange={setInvestmentTargetPercent}
+                ariaLabel="Meta de investimento em porcentagem"
               />
               <div className="flex gap-2 pt-2">
                 <button className={botaoSecundario} onClick={voltar} disabled={salvando}>Voltar</button>
@@ -568,11 +639,11 @@ export const EmpresaOnboardingFlow: React.FC = () => {
                 microcopy="O que sobra pra empresa, além do que você já recebe pelo seu trabalho."
                 exemploDinamico={exemploLucro}
               />
-              <input
-                type="number"
+              <CampoNumerico
                 className={inputClass}
                 value={profitTargetPercent}
-                onChange={(e) => setProfitTargetPercent(Number(e.target.value))}
+                onChange={setProfitTargetPercent}
+                ariaLabel="Meta de lucro em porcentagem"
               />
               <div className="flex gap-2 pt-2">
                 <button className={botaoSecundario} onClick={voltar} disabled={salvando}>Voltar</button>
@@ -622,6 +693,25 @@ export const EmpresaOnboardingFlow: React.FC = () => {
                       Hoje seus produtos custam em média {formatCurrency(precoMedioAtual)}. A comparação detalhada com o preço sugerido por produto chega quando as fichas técnicas forem religadas a este mesmo motor de cálculo.
                     </p>
                   )}
+                </div>
+              )}
+
+              {avisoRemuneracao && (
+                <div className="p-3.5 rounded-xl" style={{ background: '#FDF4F5', border: '1px solid #F0D9DD' }} role="alert">
+                  <p className="text-[12.5px] leading-relaxed m-0 font-bold" style={{ color: '#C4626F', fontFamily: "'Manrope', sans-serif" }}>
+                    Falta dizer quanto você quer receber por mês.
+                  </p>
+                  <p className="text-[12px] leading-relaxed mt-1 mb-2.5" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
+                    É desse valor que sai o cálculo de todas as suas metas. Sem ele, elas nascem zeradas.
+                  </p>
+                  <button
+                    className="px-4 py-2.5 rounded-xl text-white text-[12px] font-bold active:scale-95 transition-all"
+                    style={{ background: '#C4626F' }}
+                    onClick={() => { setAvisoRemuneracao(false); irParaPasso(PASSO_REMUNERACAO); }}
+                    disabled={salvando}
+                  >
+                    Preencher agora
+                  </button>
                 </div>
               )}
 

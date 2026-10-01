@@ -42,6 +42,60 @@ export const parseCurrencyInput = (input: string): number => {
   return isNaN(num) ? 0 : num;
 };
 
+/**
+ * Le um numero do jeito que uma pessoa no Brasil digita num campo de valor.
+ *
+ * O campo usa `type="text"` e nao `type="number"`: com `type="number"` o
+ * browser considera "3.000" invalido e devolve string vazia em
+ * `e.target.value`, entao `Number(e.target.value)` virava 0 sem nenhum aviso —
+ * a pessoa digitava tres mil e o app salvava zero.
+ *
+ * A virgula e SEMPRE decimal, como manda a convencao pt-BR: "3000,50" sao tres
+ * mil e cinquenta centavos. O ponto e ambiguo — pode ser milhar pt-BR
+ * ("3.000" = tres mil) ou decimal en-US ("3.5" = tres e meio) — e a regra de
+ * desempate e o tamanho do grupo: um unico ponto seguido de exatamente 3
+ * digitos e milhar; qualquer outro tamanho e decimal. Mais de um ponto sao
+ * todos milhar ("3.000.000").
+ *
+ * Quando os dois separadores aparecem, o ultimo manda: "3.000,50" -> 3000.5.
+ * Entrada vazia ou sem nenhum digito devolve 0.
+ */
+export const parseNumeroDigitado = (input: string): number => {
+  const limpo = String(input ?? '').replace(/[^\d.,-]/g, '');
+  const negativo = limpo.startsWith('-');
+  const corpo = limpo.replace(/-/g, '');
+  if (!/\d/.test(corpo)) return 0;
+
+  const ultimaVirgula = corpo.lastIndexOf(',');
+  const ultimoPonto = corpo.lastIndexOf('.');
+
+  let posDecimal = -1;
+  if (ultimaVirgula > ultimoPonto) {
+    posDecimal = ultimaVirgula;
+  } else if (ultimoPonto > ultimaVirgula) {
+    const digitosDepois = corpo.length - ultimoPonto - 1;
+    const temOutroPonto = corpo.indexOf('.') !== ultimoPonto;
+    posDecimal = temOutroPonto || digitosDepois === 3 ? -1 : ultimoPonto;
+  }
+
+  const parteInteira = (posDecimal >= 0 ? corpo.slice(0, posDecimal) : corpo).replace(/[.,]/g, '');
+  const parteDecimal = posDecimal >= 0 ? corpo.slice(posDecimal + 1).replace(/[.,]/g, '') : '';
+
+  const n = parseFloat(`${parteInteira || '0'}.${parteDecimal || '0'}`);
+  if (!Number.isFinite(n)) return 0;
+  return negativo ? -n : n;
+};
+
+/**
+ * Inverso de `parseNumeroDigitado`, para preencher o campo com um valor que
+ * veio do banco: virgula decimal e NENHUM separador de milhar, para que o
+ * texto exibido seja exatamente o que o parser le de volta sem ambiguidade.
+ */
+export const formatNumeroParaEdicao = (value: number): string => {
+  if (!Number.isFinite(value) || value === 0) return '';
+  return String(value).replace('.', ',');
+};
+
 export const getTodayIso = (): string => {
   const now = new Date();
   const year = now.getFullYear();
