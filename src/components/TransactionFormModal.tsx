@@ -454,9 +454,34 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
         // CAMINHO NOVO: a lista gravada no `breakdown`, com um item por linha e
         // o valor de cada um. Tudo abaixo disto e o caminho antigo, que
         // adivinhava pelo texto da descricao e so sabia remontar UM item.
-        const itensGravados = (editingTransaction.breakdown as any)?.itens;
-        if (Array.isArray(itensGravados) && itensGravados.length > 0) {
+        const breakdownGravado = editingTransaction.breakdown as any;
+        const itensGravados = breakdownGravado?.itens;
+        const adicionaisGravados = breakdownGravado?.adicionaisDetalhados;
+        // Pedido salvo entre a correcao dos itens e a dos adicionais: tem a
+        // lista de itens, mas os adicionais so existem como total. Se esse
+        // total for zero nao ha nada a restaurar e o pedido abre normal; se
+        // houver adicional, cai na mesma regra dos pedidos antigos — bloquear,
+        // nunca adivinhar pelo texto.
+        const adicionaisIrrecuperaveis =
+          !Array.isArray(adicionaisGravados) && (Number(breakdownGravado?.adicionais) || 0) > 0;
+
+        if (Array.isArray(itensGravados) && itensGravados.length > 0 && !adicionaisIrrecuperaveis) {
           setPedidoSemItensDetalhados(false);
+          if (Array.isArray(adicionaisGravados) && adicionaisGravados.length > 0) {
+            setHasAddons(true);
+            setAddons(
+              adicionaisGravados.map((a: any, i: number) => ({
+                id: String(i + 1),
+                description: a.nome || '',
+                value: String(a.valor ?? 0),
+                hasCost: !!a.temCusto,
+                costValue: a.temCusto ? String(a.custo ?? 0) : '',
+              }))
+            );
+          } else {
+            setHasAddons(false);
+            setAddons([{ id: '1', description: '', value: '', hasCost: false, costValue: '' }]);
+          }
           setOrderItems(
             itensGravados.map((it: any, i: number) => {
               // Ficha apagada depois do pedido vira item personalizado, com o
@@ -1079,6 +1104,22 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                   personalizado: item.productName === 'Outro / Personalizado',
                 };
               }),
+            // Os adicionais, um por linha, pelo mesmo motivo dos itens: ate
+            // aqui eles so existiam dentro do texto das anotacoes ("Adicionais:
+            // Vela: $20,00"), e a edicao nao sabia remonta-los — sumiam ao
+            // salvar, levando o valor deles embora do total. O campo
+            // `adicionais` logo acima continua sendo so o TOTAL, que e o que
+            // `parseSaleDetail` le; esta lista e informacao nova ao lado dele.
+            //
+            // Guardado como lista, e nao relido do texto, tambem porque o texto
+            // e ambiguo: um adicional chamado "Topo, com flores" quebra
+            // qualquer separacao por virgula.
+            adicionaisDetalhados: validAddons.map((a) => ({
+              nome: a.description.trim() || 'Adicional',
+              valor: parseFloat(a.value.replace(',', '.')) || 0,
+              temCusto: !!a.hasCost,
+              custo: a.hasCost ? parseFloat((a.costValue || '0').replace(',', '.')) || 0 : 0,
+            })),
           },
           fichaItems: buildFichaItems(
             orderItems.map(item => ({
