@@ -367,6 +367,11 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   }, [showCustomerList]);
 
   const [orderItems, setOrderItems] = useState<OrderItemState[]>([criarItemVazio('1')]);
+  /** Pedido antigo, gravado antes da lista de itens existir no breakdown. Abre
+   * com os itens em branco e bloqueia o salvamento ate a pessoa remonta-los. */
+  const [pedidoSemItensDetalhados, setPedidoSemItensDetalhados] = useState(false);
+  /** Total que estava gravado no pedido sendo editado, para a trava do centavo. */
+  const [totalGravadoDoPedido, setTotalGravadoDoPedido] = useState<number | null>(null);
 
   // Delivery State
   const [hasDelivery, setHasDelivery] = useState<boolean>(false);
@@ -446,6 +451,50 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
           setHasDelivery(false);
           setDeliveryFeeInput('');
         }
+        // CAMINHO NOVO: a lista gravada no `breakdown`, com um item por linha e
+        // o valor de cada um. Tudo abaixo disto e o caminho antigo, que
+        // adivinhava pelo texto da descricao e so sabia remontar UM item.
+        const itensGravados = (editingTransaction.breakdown as any)?.itens;
+        if (Array.isArray(itensGravados) && itensGravados.length > 0) {
+          setPedidoSemItensDetalhados(false);
+          setOrderItems(
+            itensGravados.map((it: any, i: number) => {
+              // Ficha apagada depois do pedido vira item personalizado, com o
+              // nome e o valor que ficaram gravados: o item continua na tela e
+              // o total do pedido nao muda. Antes ele simplesmente sumia.
+              const ficha = it.personalizado
+                ? undefined
+                : fichas.find((f) => String(f.id) === String(it.fichaId));
+              if (!ficha) {
+                return {
+                  id: String(i + 1),
+                  productName: 'Outro / Personalizado',
+                  selectedTamanhoId: '',
+                  quantity: Number(it.quantidade) || 1,
+                  customDescription: it.nome || 'Item',
+                  customUnitValue: String(it.valorUnitario ?? 0),
+                };
+              }
+              return {
+                id: String(i + 1),
+                productName: ficha.name,
+                selectedTamanhoId: it.tamanhoId || ficha.tamanhos?.[0]?.id || '',
+                quantity: Number(it.quantidade) || 1,
+              };
+            })
+          );
+          setTotalGravadoDoPedido(Number(editingTransaction.totalValue) || 0);
+          return;
+        }
+
+        // Pedido gravado antes desta lista existir. Nao adivinhamos pelo texto:
+        // era justamente a adivinhacao que apagava itens e mudava o total ao
+        // salvar. O formulario abre com os itens em branco e o salvamento fica
+        // bloqueado ate a pessoa remontar o pedido — melhor pedir para refazer
+        // do que gravar um valor errado em silencio.
+        setPedidoSemItensDetalhados(true);
+        setTotalGravadoDoPedido(Number(editingTransaction.totalValue) || 0);
+
         // Look up if existing description matches a ficha name
         const matchedFicha = fichas.find((ficha) =>
           (editingTransaction.description || '').toLowerCase().includes(ficha.name.toLowerCase())
@@ -513,6 +562,8 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
 
       // Default sales items
       setOrderItems([criarItemVazio('1')]);
+      setPedidoSemItensDetalhados(false);
+      setTotalGravadoDoPedido(null);
       setHasDelivery(false);
       setDeliveryFeeInput('');
       setHasAddons(false);
@@ -833,6 +884,34 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
     }
     setInvalidFieldId(null);
 
+    // Pedido antigo, sem a lista de itens gravada. Deixar salvar aqui gravaria
+    // o pedido com o que estiver na tela — provavelmente um item so — e mudaria
+    // o valor em silencio, que e exatamente o defeito que esta correcao fecha.
+    if (type === 'venda' && editingTransaction && pedidoSemItensDetalhados) {
+      alert(
+        'Este pedido foi criado antes de o app guardar a lista de itens, então não dá para reabrir os itens com segurança.\n\n' +
+          'Refaça os itens antes de salvar, ou cancele e lance o pedido de novo. Nada foi salvo.'
+      );
+      setPedidoFormStep(2);
+      return;
+    }
+
+    // Trava do centavo: o pedido remontado tem que valer o mesmo que o gravado.
+    // Se divergir, alguma coisa se perdeu entre abrir e salvar — e gravar assim
+    // trocaria o valor do pedido sem ninguem pedir. Melhor nao salvar nada.
+    if (type === 'venda' && editingTransaction && totalGravadoDoPedido != null) {
+      const remontado = Math.round(grandTotalSalePrice * 100) / 100;
+      const gravado = Math.round(totalGravadoDoPedido * 100) / 100;
+      if (Math.abs(remontado - gravado) >= 0.005) {
+        alert(
+          `O total deste pedido era ${formatMoney(gravado)} e ficou ${formatMoney(remontado)} ao reabrir. ` +
+            'Isso não deveria acontecer — nada foi salvo. Confira os itens antes de continuar.'
+        );
+        setPedidoFormStep(2);
+        return;
+      }
+    }
+
     // Rede de seguranca para o mesmo estrago descrito la em cima: o campo do
     // sinal ficar vazio num pedido que TINHA sinal significa apagar do banco o
     // que a cliente ainda deve, sem aviso nenhum. O preenchimento acima ja
@@ -968,6 +1047,38 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
             investimento: totalItemsInvestimento,
             delivery: hasDelivery ? deliveryFee : 0,
             adicionais: totalAddonsValue,
+            // A lista do pedido, item por item, COM O VALOR DE CADA UM.
+            //
+            // Nada disto existia gravado: `ficha_itens` guarda ficha, nome,
+            // quantidade e tamanho — sem valor, sem o item "Outro /
+            // Personalizado" (que e descartado la) e somando numa linha so dois
+            // itens da mesma ficha. Por isso a edicao remontava o pedido
+            // adivinhando pelo texto da descricao e errava: tres itens de
+            // fichas diferentes viravam um, e um pedido de $250,00 virava
+            // $205,00 ao ser salvo sem nenhuma alteracao.
+            //
+            // Fica aqui, e nao em `ficha_itens`, de proposito: aquele campo
+            // alimenta a baixa de estoque e mexer no formato dele arriscaria o
+            // estoque sem necessidade. A coluna `breakdown` e livre e aceita
+            // campos novos sem mudanca de banco.
+            itens: orderItems
+              .filter((item) => item.productName)
+              .map((item) => {
+                const bd = getItemBreakdown(item);
+                const ficha =
+                  item.productName === 'Outro / Personalizado'
+                    ? undefined
+                    : fichas.find((f) => normalizeName(f.name) === normalizeName(item.productName));
+                return {
+                  fichaId: ficha?.id,
+                  nome: bd.name,
+                  tamanhoId: item.selectedTamanhoId || null,
+                  quantidade: item.quantity,
+                  valorUnitario: bd.unitVenda,
+                  valorTotal: bd.totalVenda,
+                  personalizado: item.productName === 'Outro / Personalizado',
+                };
+              }),
           },
           fichaItems: buildFichaItems(
             orderItems.map(item => ({
