@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Produto, Transaction } from '../types';
 import { useProdutos } from '../context/ProdutosContext';
-import { formatQuantity } from '../utils/formatters';
+import { formatQuantity, parseNumeroDigitado } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
 import { capitalizeFirstLetter } from '../utils/textCase';
 import { StockMovementsHistory } from './StockMovementsHistory';
@@ -270,10 +270,10 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
     if (!nome.trim()) return;
     setFormError('');
 
-    const precoNum = parseFloat(precoPago.replace(',', '.')) || 0;
-    const qtdEmbalagemNum = parseFloat(quantidadeEmbalagem.replace(',', '.')) || 1;
-    const qtdAtualNum = parseFloat(quantidadeAtual.replace(',', '.')) || 0;
-    const nivelMinNum = parseFloat(nivelMinimo.replace(',', '.')) || 0;
+    const precoNum = parseNumeroDigitado(precoPago) || 0;
+    const qtdEmbalagemNum = parseNumeroDigitado(quantidadeEmbalagem) || 1;
+    const qtdAtualNum = parseNumeroDigitado(quantidadeAtual) || 0;
+    const nivelMinNum = parseNumeroDigitado(nivelMinimo) || 0;
 
     const data: Omit<Produto, 'id'> = {
       nome: nome.trim(),
@@ -520,7 +520,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                           // quarto do pacote ainda na prateleira, cedo o
                           // bastante para recomprar sem faltar.
                           if (!alertaTocado) {
-                            const qtd = parseFloat(e.target.value.replace(',', '.'));
+                            const qtd = parseNumeroDigitado(e.target.value);
                             setNivelMinimoUnidade(unidadeEmbalagem);
                             setNivelMinimo(
                               Number.isFinite(qtd) && qtd > 0
@@ -557,8 +557,8 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                     <input
                       type="text" disabled
                       value={`${custoPorUnidade({
-                        precoPago: parseFloat(precoPago.replace(',', '.')) || 0,
-                        quantidadeEmbalagem: parseFloat(quantidadeEmbalagem.replace(',', '.')) || 1,
+                        precoPago: parseNumeroDigitado(precoPago) || 0,
+                        quantidadeEmbalagem: parseNumeroDigitado(quantidadeEmbalagem) || 1,
                       }).toFixed(4)}/${unidadeEmbalagem}`}
                       className="w-full px-3 py-2.5 bg-neutral-100 border border-[#E6E1DB] rounded-xl text-xs font-normal text-neutral-400 focus:outline-none transition-all cursor-not-allowed"
                     />

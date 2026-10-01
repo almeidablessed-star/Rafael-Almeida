@@ -4,7 +4,7 @@ import { calculateWeeklyBalances } from '../utils/financialEngine';
 import { WeeklyHistoryCard } from './WeeklyHistoryCard';
 import { FieldValidationError } from './FieldValidationError';
 import { StockItemAutocomplete } from './StockItemAutocomplete';
-import { formatCurrency, formatDateBr, getTodayIso } from '../utils/formatters';
+import { formatCurrency, formatDateBr, getTodayIso, parseNumeroDigitado } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
 import { useFichasTecnicas } from '../context/FichasTecnicasContext';
 import { useProdutos } from '../context/ProdutosContext';
@@ -134,13 +134,13 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
     }
     setInvalidFieldId(null);
 
-    const valNum = parseFloat(amount.replace(',', '.'));
+    const valNum = parseNumeroDigitado(amount);
     if (!description.trim() || isNaN(valNum) || valNum <= 0) {
       return;
     }
 
     // Validate stock item fields: if quantity is filled, description is used as item name
-    const itemQtyNum = itemQuantity ? parseFloat(itemQuantity.replace(',', '.')) : 0;
+    const itemQtyNum = itemQuantity ? parseNumeroDigitado(itemQuantity) : 0;
     const hasItemQty = itemQtyNum > 0;
 
     if (hasItemQty && itemQtyNum <= 0) {
@@ -451,12 +451,11 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
             </label>
             <div style={{ display: 'flex', gap: '8px' }}>
               <input
-                type="number"
+                type="text"
+                inputMode="decimal"
                 value={itemQuantity}
                 onChange={(e) => setItemQuantity(e.target.value)}
                 placeholder="Quantidade"
-                step="0.01"
-                min="0"
                 style={{ flex: 1, padding: '11px 13px', background: '#FAF7FA', border: '1px solid rgba(36,27,43,.08)', borderRadius: '14px', fontSize: '11px', color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}
               />
               <CustomSelect

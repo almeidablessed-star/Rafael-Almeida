@@ -35,13 +35,6 @@ export const formatQuantity = (value: number): string => {
   });
 };
 
-export const parseCurrencyInput = (input: string): number => {
-  // Removes $, spaces, commas, replaces comma with dot
-  const clean = input.replace(/[^\d,.-]/g, '').replace(/,/g, '.');
-  const num = parseFloat(clean);
-  return isNaN(num) ? 0 : num;
-};
-
 /**
  * Le um numero do jeito que uma pessoa no Brasil digita num campo de valor.
  *

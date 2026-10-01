@@ -9,6 +9,7 @@ import {
   somarDespesasEmpresa,
 } from '../utils/financialEngine';
 import { CampoComAjuda } from './onboarding/CampoComAjuda';
+import { CampoNumerico } from './CampoNumerico';
 import { ResumoDistribuicaoCard } from './ResumoDistribuicaoCard';
 import { CustomSelect } from './CustomSelect';
 
@@ -222,12 +223,12 @@ export const MinhaEmpresaCard: React.FC = () => {
             <div>
               <label className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>Quanto você quer receber por mês</label>
               <CampoComAjuda microcopy="É quanto você quer receber pelo seu trabalho — nunca o lucro da empresa. São coisas diferentes." />
-              <input type="number" className={inputClass} value={monthlyIncomeTarget || ''} onChange={(e) => setMonthlyIncomeTarget(Number(e.target.value))} />
+              <CampoNumerico className={inputClass} value={monthlyIncomeTarget} onChange={setMonthlyIncomeTarget} ariaLabel="Quanto você quer receber por mês" />
             </div>
             <div>
               <label className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>Valor da sua hora</label>
               <CampoComAjuda microcopy="Multiplicado pelas horas de cada receita, vira a mão de obra daquele produto." />
-              <input type="number" className={inputClass} value={horaTrabalho || ''} onChange={(e) => setHoraTrabalho(Number(e.target.value))} />
+              <CampoNumerico className={inputClass} value={horaTrabalho} onChange={setHoraTrabalho} ariaLabel="Valor da sua hora" />
             </div>
             <div>
               <label className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>Dias de trabalho por semana</label>
@@ -327,13 +328,13 @@ export const MinhaEmpresaCard: React.FC = () => {
                 <div className="flex gap-2 items-end">
                   <div className="flex-1">
                     <label className="text-xs font-semibold block mb-1" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>Valor ({symbol})</label>
-                    <input type="number" placeholder="0" value={d.valor || ''} onChange={(e) => atualizarDespesa(i, 'valor', Number(e.target.value))}
+                    <CampoNumerico placeholder="0" ariaLabel="Valor da despesa" value={d.valor} onChange={(valor) => atualizarDespesa(i, 'valor', valor)}
                       style={{ fontFamily: "'Manrope', sans-serif", fontSize: '16px', fontWeight: 600, padding: '11px 13px', borderRadius: '10px', border: '1px solid rgba(58,35,80,0.14)', background: '#FAF7FA', fontVariantNumeric: 'tabular-nums' }}
                       className="w-full focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe" />
                   </div>
                   <div className="w-24">
                     <label className="text-xs font-semibold block mb-1" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>% do negócio</label>
-                    <input type="number" placeholder="100" value={d.percentualRateio || ''} onChange={(e) => atualizarDespesa(i, 'percentualRateio', Number(e.target.value))}
+                    <CampoNumerico placeholder="100" ariaLabel="Percentual do negócio" value={d.percentualRateio} onChange={(valor) => atualizarDespesa(i, 'percentualRateio', valor)}
                       style={{ fontFamily: "'Manrope', sans-serif", fontSize: '16px', fontWeight: 600, padding: '11px 13px', borderRadius: '10px', border: '1px solid rgba(58,35,80,0.14)', background: '#FAF7FA', fontVariantNumeric: 'tabular-nums' }}
                       className="w-full focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe" />
                   </div>
@@ -400,17 +401,17 @@ export const MinhaEmpresaCard: React.FC = () => {
             <div>
               <label className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>Meta de CMV (%)</label>
               <CampoComAjuda microcopy="Quanto do preço do bolo vai embora só com ingredientes e embalagem. Quanto menor, mais sobra pra você." exemploDinamico={exemploCmv} />
-              <input type="number" className={inputClass} value={cmvTargetPercent} onChange={(e) => setCmvTargetPercent(Number(e.target.value))} />
+              <CampoNumerico className={inputClass} value={cmvTargetPercent} onChange={setCmvTargetPercent} ariaLabel="Meta de CMV em porcentagem" />
             </div>
             <div>
               <label className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>Meta de investimento (%)</label>
               <CampoComAjuda microcopy="Uma reserva pra comprar equipamento, fazer curso, crescer o negócio — sem tirar do seu bolso." exemploDinamico={exemploInvestimento} />
-              <input type="number" className={inputClass} value={investmentTargetPercent} onChange={(e) => setInvestmentTargetPercent(Number(e.target.value))} />
+              <CampoNumerico className={inputClass} value={investmentTargetPercent} onChange={setInvestmentTargetPercent} ariaLabel="Meta de investimento em porcentagem" />
             </div>
             <div>
               <label className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>Meta de lucro (%)</label>
               <CampoComAjuda microcopy="O que sobra pra empresa, além do que você já recebe pelo seu trabalho." exemploDinamico={exemploLucro} />
-              <input type="number" className={inputClass} value={profitTargetPercent} onChange={(e) => setProfitTargetPercent(Number(e.target.value))} />
+              <CampoNumerico className={inputClass} value={profitTargetPercent} onChange={setProfitTargetPercent} ariaLabel="Meta de lucro em porcentagem" />
             </div>
             <div className="flex gap-2">
               <button className={botaoSecundario} onClick={cancelarMetas} disabled={salvando}><X size={13} className="inline mr-1" />Cancelar</button>

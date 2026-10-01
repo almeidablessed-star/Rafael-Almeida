@@ -20,7 +20,7 @@ import {
   LABOR_PRESETS,
   COST_PRESETS,
 } from '../data/presetData';
-import { getTodayIso, getTransactionTypeDetails } from '../utils/formatters';
+import { getTodayIso, getTransactionTypeDetails, parseNumeroDigitado } from '../utils/formatters';
 import { buildFichaItems, normalizeName } from '../utils/fichaMatcher';
 import { capitalizeFirstLetter } from '../utils/textCase';
 import { calculateProportionalBreakdown, derivarProporcoes, parseSaleDetail } from '../utils/financialEngine';
@@ -649,7 +649,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   // --- Order Items Logic ---
   const getItemBreakdown = (item: OrderItemState) => {
     if (item.productName === 'Outro / Personalizado') {
-      const customVenda = parseFloat(item.customUnitValue?.replace(',', '.') || '0') || 0;
+      const customVenda = parseNumeroDigitado(item.customUnitValue?.replace(',', '.') || '0') || 0;
       // Item avulso nao tem ficha; estimamos pela media real do catalogo dela.
       const prop = calculateProportionalBreakdown(customVenda, undefined, proporcoesDoCatalogo);
       return {
@@ -735,14 +735,14 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   const totalItemsInvestimento = itemsBreakdownList.reduce((sum, b) => sum + b.totalInvestimento, 0);
 
   // Delivery Calculations
-  const deliveryFee = hasDelivery ? parseFloat(deliveryFeeInput.replace(',', '.')) || 0 : 0;
+  const deliveryFee = hasDelivery ? parseNumeroDigitado(deliveryFeeInput) || 0 : 0;
 
   // Addons Calculations
   const validAddons = hasAddons
-    ? addons.filter((a) => (parseFloat(a.value.replace(',', '.')) || 0) > 0 || a.description.trim() !== '')
+    ? addons.filter((a) => (parseNumeroDigitado(a.value) || 0) > 0 || a.description.trim() !== '')
     : [];
   const totalAddonsValue = hasAddons
-    ? addons.reduce((sum, a) => sum + (parseFloat(a.value.replace(',', '.')) || 0), 0)
+    ? addons.reduce((sum, a) => sum + (parseNumeroDigitado(a.value) || 0), 0)
     : 0;
 
   const grandTotalSalePrice = totalItemsVenda + deliveryFee + totalAddonsValue;
@@ -830,7 +830,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   const handleQuantityChange = (newQty: number) => {
     const validQty = Math.max(1, newQty);
     setQuantity(validQty);
-    const unitValNum = parseFloat(unitValue.replace(',', '.')) || 0;
+    const unitValNum = parseNumeroDigitado(unitValue) || 0;
     if (unitValNum > 0) {
       setTotalValue((validQty * unitValNum).toFixed(2).replace('.', ','));
     }
@@ -838,7 +838,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
 
   const handleUnitValueChange = (valStr: string) => {
     setUnitValue(valStr);
-    const unitValNum = parseFloat(valStr.replace(',', '.')) || 0;
+    const unitValNum = parseNumeroDigitado(valStr) || 0;
     if (unitValNum >= 0 && quantity > 0) {
       setTotalValue((quantity * unitValNum).toFixed(2).replace('.', ','));
     }
@@ -846,7 +846,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
 
   const handleTotalValueChange = (valStr: string) => {
     setTotalValue(valStr);
-    const totalValNum = parseFloat(valStr.replace(',', '.')) || 0;
+    const totalValNum = parseNumeroDigitado(valStr) || 0;
     if (totalValNum > 0 && quantity > 0) {
       setUnitValue((totalValNum / quantity).toFixed(2).replace('.', ','));
     }
@@ -1109,9 +1109,9 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
             // qualquer separacao por virgula.
             adicionaisDetalhados: validAddons.map((a) => ({
               nome: a.description.trim() || 'Adicional',
-              valor: parseFloat(a.value.replace(',', '.')) || 0,
+              valor: parseNumeroDigitado(a.value) || 0,
               temCusto: !!a.hasCost,
-              custo: a.hasCost ? parseFloat((a.costValue || '0').replace(',', '.')) || 0 : 0,
+              custo: a.hasCost ? parseNumeroDigitado((a.costValue || '0')) || 0 : 0,
             })),
           },
           fichaItems: buildFichaItems(
@@ -1137,9 +1137,9 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       return;
     }
 
-    const parsedUnit = parseFloat(unitValue.replace(',', '.')) || 0;
+    const parsedUnit = parseNumeroDigitado(unitValue) || 0;
     const parsedTotal =
-      parseFloat(totalValue.replace(',', '.')) || quantity * parsedUnit;
+      parseNumeroDigitado(totalValue) || quantity * parsedUnit;
 
     if (parsedTotal <= 0) {
       alert('Por favor, digite um valor válido maior que zero.');
@@ -1147,7 +1147,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
     }
 
     const parsedSignalValue = type === 'venda' && signalValue
-      ? parseFloat(signalValue.replace(',', '.'))
+      ? parseNumeroDigitado(signalValue)
       : undefined;
 
     onSave(
@@ -1730,9 +1730,8 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                             <div>
                               <label style={{ fontSize: '10px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '3px' }}>Valor ({currencySymbol})</label>
                               <input
-                                type="number"
-                                min="0"
-                                step="0.5"
+                                type="text"
+                                inputMode="decimal"
                                 value={addon.value}
                                 onChange={(e) => handleUpdateAddon(addon.id, 'value', e.target.value)}
                                 placeholder="0.00"
@@ -1857,8 +1856,8 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                           if (val === '') {
                             setSignalValue(val);
                           } else if (totalValue) {
-                            const numVal = parseFloat(val.replace(',', '.'));
-                            const totalNum = parseFloat(totalValue.replace(',', '.')) || 0;
+                            const numVal = parseNumeroDigitado(val);
+                            const totalNum = parseNumeroDigitado(totalValue) || 0;
                             if (numVal <= totalNum) setSignalValue(val);
                           } else {
                             setSignalValue(val);

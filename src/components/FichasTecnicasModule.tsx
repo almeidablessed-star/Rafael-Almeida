@@ -1,6 +1,6 @@
 ﻿import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { FichaTecnica, IngredientUsage, Transaction, TamanhoOpcao, StockItem, Produto } from '../types';
-import { formatCurrency } from '../utils/formatters';
+import { formatCurrency, parseNumeroDigitado } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
 import { useFichasTecnicas } from '../context/FichasTecnicasContext';
 import { useProdutos } from '../context/ProdutosContext';
@@ -324,12 +324,15 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   const avisosDePreco = useMemo(() => {
     const comparaveis = tamanhos
       .map((t) => {
-        const medida = parseFloat((t.descricao || '').replace(',', '.').match(/\d+(?:[.,]\d+)?/)?.[0] || '');
-        const preco = parseFloat((t.preco || '').replace(',', '.'));
+        const medida = parseNumeroDigitado((t.descricao || '').match(/\d+(?:[.,]\d+)?/)?.[0] || '');
+        const preco = parseNumeroDigitado(t.preco || '');
         return { descricao: t.descricao, medida, preco };
       })
-      // Preco 0/vazio significa "ainda nao preencheu", nao "de graca".
-      .filter((t) => Number.isFinite(t.medida) && Number.isFinite(t.preco) && t.preco > 0);
+      // Preco 0/vazio significa "ainda nao preencheu", nao "de graca". A
+      // medida entra na mesma regra: parseNumeroDigitado devolve 0 — e nao
+      // NaN — quando a descricao nao tem numero nenhum, entao e o "> 0" que
+      // tira esses tamanhos da comparacao, no lugar do Number.isFinite antigo.
+      .filter((t) => t.medida > 0 && t.preco > 0);
 
     const avisos: string[] = [];
     for (const maior of comparaveis) {
@@ -343,7 +346,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   }, [tamanhos]);
 
   const totalReposicao = ingredients.reduce((sum, ing) => sum + (ing.totalCost || 0), 0);
-  const repoNum = parseFloat(reposicaoCost.replace(',', '.')) || 0;
+  const repoNum = parseNumeroDigitado(reposicaoCost) || 0;
 
   /**
    * Mão de obra de um tamanho: horas x tarifa.
@@ -352,10 +355,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
    * mantem valida uma ficha cadastrada antes destes campos existirem.
    */
   const calcularMaoDeObra = (t: { horasTrabalho: string; valorHora: string; maoDeObraCost: string }) => {
-    const horas = parseFloat((t.horasTrabalho || '').replace(',', '.')) || 0;
-    const tarifa = parseFloat((t.valorHora || '').replace(',', '.')) || 0;
+    const horas = parseNumeroDigitado((t.horasTrabalho || '')) || 0;
+    const tarifa = parseNumeroDigitado((t.valorHora || '')) || 0;
     const calculada = horas * tarifa;
-    return calculada > 0 ? calculada : parseFloat((t.maoDeObraCost || '').replace(',', '.')) || 0;
+    return calculada > 0 ? calculada : parseNumeroDigitado((t.maoDeObraCost || '')) || 0;
   };
 
   /**
@@ -371,19 +374,19 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
    * para nao zerar uma ficha antiga so por abrir e salvar de novo.
    */
   const calcularCustoAdmAutomatico = (t: { preco: string; custoCost: string }) => {
-    const preco = parseFloat((t.preco || '').replace(',', '.')) || 0;
+    const preco = parseNumeroDigitado((t.preco || '')) || 0;
     if (estruturaFinanceira?.valido && preco > 0) {
       return preco * (estruturaFinanceira.custosPercent / 100);
     }
-    return parseFloat((t.custoCost || '').replace(',', '.')) || 0;
+    return parseNumeroDigitado((t.custoCost || '')) || 0;
   };
 
   const calcularInvestimentoAutomatico = (t: { preco: string; investimentoCost: string }) => {
-    const preco = parseFloat((t.preco || '').replace(',', '.')) || 0;
+    const preco = parseNumeroDigitado((t.preco || '')) || 0;
     if (estruturaFinanceira?.valido && administrativeCosts && preco > 0) {
       return preco * (administrativeCosts.investmentTargetPercent / 100);
     }
-    return parseFloat((t.investimentoCost || '').replace(',', '.')) || 0;
+    return parseNumeroDigitado((t.investimentoCost || '')) || 0;
   };
 
   const handleOpenAdd = () => {
@@ -520,8 +523,8 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     }
 
     if (field === 'quantity' || field === 'unitCost') {
-      const q = field === 'quantity' ? parseFloat(val) || 0 : ing.quantity;
-      const c = field === 'unitCost' ? parseFloat(val) || 0 : ing.unitCost;
+      const q = field === 'quantity' ? parseNumeroDigitado(val) || 0 : ing.quantity;
+      const c = field === 'unitCost' ? parseNumeroDigitado(val) || 0 : ing.unitCost;
       updated.totalCost = q * c;
     }
     return updated;
@@ -634,9 +637,9 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 
     setSalvandoNovoProduto(true);
     try {
-      const precoNum = parseFloat(novoProdutoPreco.replace(',', '.')) || 0;
-      const qtdEmbNum = parseFloat(novoProdutoQtdEmbalagem.replace(',', '.')) || 1;
-      const qtdAtualNum = parseFloat(novoProdutoQtdAtual.replace(',', '.')) || 0;
+      const precoNum = parseNumeroDigitado(novoProdutoPreco) || 0;
+      const qtdEmbNum = parseNumeroDigitado(novoProdutoQtdEmbalagem) || 1;
+      const qtdAtualNum = parseNumeroDigitado(novoProdutoQtdAtual) || 0;
 
       const produto = await addProduto({
         nome: novoProdutoNome.trim(),
@@ -648,7 +651,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         quantidadeAtual: novoProdutoControlaEstoque ? qtdAtualNum : null,
         quantidadeReferencia: null,
         nivelMinimo: novoProdutoControlaEstoque
-          ? parseFloat(novoProdutoNivelMinimo.replace(',', '.')) || 0
+          ? parseNumeroDigitado(novoProdutoNivelMinimo) || 0
           : null,
         nivelMinimoUnidade: novoProdutoControlaEstoque ? novoProdutoUnidade : null,
       });
@@ -782,14 +785,14 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 
     // Converter tamanhos do formulário para TamanhoOpcao
     const tamanhosData: TamanhoOpcao[] = tamanhos.map((t) => {
-      const horas = parseFloat(t.horasTrabalho) || 0;
-      const tarifa = parseFloat(t.valorHora) || 0;
+      const horas = parseNumeroDigitado(t.horasTrabalho) || 0;
+      const tarifa = parseNumeroDigitado(t.valorHora) || 0;
       const maoDeObraCalculada = horas * tarifa;
 
       return {
         id: t.id,
         descricao: t.descricao,
-        preco: parseFloat(t.preco) || 0,
+        preco: parseNumeroDigitado(t.preco) || 0,
         horasTrabalho: horas > 0 ? horas : undefined,
         valorHora: tarifa > 0 ? tarifa : undefined,
         // Insumos deste tamanho, sem as linhas em branco que ficaram por engano.
@@ -799,7 +802,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         // ficha antiga e salvar zeraria a mao de obra dela sem aviso.
         maoDeObraCost: maoDeObraCalculada > 0
           ? maoDeObraCalculada
-          : parseFloat(t.maoDeObraCost) || 0,
+          : parseNumeroDigitado(t.maoDeObraCost) || 0,
         custoCost: calcularCustoAdmAutomatico(t),
         investimentoCost: calcularInvestimentoAutomatico(t),
       };
@@ -815,10 +818,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
       // e a de cada tamanho; esta so atende quem ainda le o campo antigo (a
       // folha de orcamento) e serve de rede para fichas sem lista por tamanho.
       ingredients: tamanhosData[0]?.ingredients || [],
-      reposicaoCost: parseFloat(reposicaoCost) || 0,
-      maoDeObraCost: parseFloat(maoDeObraCost) || 0,
-      custoCost: parseFloat(custoCost) || 0,
-      investimentoCost: parseFloat(investimentoCost) || 0,
+      reposicaoCost: parseNumeroDigitado(reposicaoCost) || 0,
+      maoDeObraCost: parseNumeroDigitado(maoDeObraCost) || 0,
+      custoCost: parseNumeroDigitado(custoCost) || 0,
+      investimentoCost: parseNumeroDigitado(investimentoCost) || 0,
     };
 
     // Mesmo nome (ignorando maiuscula/minuscula, acento e pontuacao — ver
@@ -1322,7 +1325,8 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                           </div>
                           <div className="col-span-4">
                             <input
-                              type="number"
+                              type="text"
+                              inputMode="decimal"
                               /* "Qtd" sozinho nao dizia de que: a poucos
                                  centimetros dali fica "quanto voce ja tem
                                  guardado", no cadastro de produto novo, e os
@@ -1439,7 +1443,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                                     // dispara em 1,25x o alerta: acende com um
                                     // quarto do pacote ainda na prateleira.
                                     if (!novoProdutoAlertaTocado) {
-                                      const qtd = parseFloat(e.target.value.replace(',', '.'));
+                                      const qtd = parseNumeroDigitado(e.target.value);
                                       setNovoProdutoNivelMinimo(
                                         Number.isFinite(qtd) && qtd > 0
                                           ? String(Math.round(qtd * 0.2 * 100) / 100).replace('.', ',')
@@ -1620,12 +1624,12 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   const cus = calcularCustoAdmAutomatico(tamanho);
                   const inv = calcularInvestimentoAutomatico(tamanho);
                   const custoTotal = insumos + mdo + cus + inv;
-                  const preco = parseFloat((tamanho.preco || '').replace(',', '.')) || 0;
+                  const preco = parseNumeroDigitado((tamanho.preco || '')) || 0;
                   const margem = preco - custoTotal;
                   const margemPct = preco > 0 ? (margem / preco) * 100 : 0;
                   const noPrejuizo = preco > 0 && margem < 0;
-                  const horasNum = parseFloat((tamanho.horasTrabalho || '').replace(',', '.')) || 0;
-                  const tarifaNum = parseFloat((tamanho.valorHora || '').replace(',', '.')) || 0;
+                  const horasNum = parseNumeroDigitado((tamanho.horasTrabalho || '')) || 0;
+                  const tarifaNum = parseNumeroDigitado((tamanho.valorHora || '')) || 0;
                   const precoCalculado =
                     administrativeCosts && estruturaFinanceira?.valido && insumos > 0
                       ? calcularPrecoSugeridoProduto(insumos, horasNum, tarifaNum, administrativeCosts.cmvTargetPercent, estruturaFinanceira)

@@ -8,7 +8,7 @@ import {
   calcularMetaHoras,
   somarDespesasEmpresa,
 } from '../../utils/financialEngine';
-import { formatNumeroParaEdicao, parseNumeroDigitado } from '../../utils/formatters';
+import { CampoNumerico } from '../CampoNumerico';
 import { CampoComAjuda } from './CampoComAjuda';
 import { CustomSelect } from '../CustomSelect';
 
@@ -53,57 +53,6 @@ const botaoPrimario =
   'w-full py-3.5 rounded-2xl text-white text-sm font-bold active:scale-98 transition-all flex items-center justify-center gap-2 hover:brightness-110 disabled:opacity-50';
 const botaoSecundario =
   'px-4 py-3 rounded-xl bg-white border border-[#E6E1DB] text-sm font-bold text-neutral-700 hover:bg-neutral-50 transition-all active:scale-95 disabled:opacity-50';
-
-/**
- * Campo de valor que aceita o numero escrito do jeito brasileiro.
- *
- * Existe porque `type="number"` descartava o que a pessoa digitava: ao digitar
- * "3.000" o browser julga o valor invalido e devolve string vazia, entao o
- * `Number(e.target.value)` do codigo anterior gravava 0 — tres mil virava
- * zero, sem nenhum aviso na tela. Aqui o campo e `type="text"` com
- * `inputMode="decimal"` (teclado numerico no celular, mas sem a validacao do
- * browser) e quem interpreta a string e `parseNumeroDigitado`.
- *
- * O texto digitado fica em estado proprio, nao derivado do numero, para que
- * formas intermediarias de digitacao sobrevivam: "3." e "3.000," passam a ser
- * estados validos enquanto a pessoa ainda escreve, em vez de serem reescritos
- * no meio da palavra. O numero segue sendo a fonte de verdade de quem salva.
- */
-const CampoNumerico: React.FC<{
-  value: number;
-  onChange: (valor: number) => void;
-  className?: string;
-  placeholder?: string;
-  style?: React.CSSProperties;
-  ariaLabel?: string;
-}> = ({ value, onChange, className, placeholder, style, ariaLabel }) => {
-  const [texto, setTexto] = useState(() => formatNumeroParaEdicao(value));
-
-  // Ressincroniza so quando o numero muda POR FORA (carga inicial do banco,
-  // reset de passo). A guarda evita o caso em que isto reescreveria o texto
-  // que esta sendo digitado: se o texto atual ja le como o valor recebido,
-  // nao ha nada a corrigir.
-  useEffect(() => {
-    if (parseNumeroDigitado(texto) !== value) setTexto(formatNumeroParaEdicao(value));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value]);
-
-  return (
-    <input
-      type="text"
-      inputMode="decimal"
-      value={texto}
-      placeholder={placeholder}
-      className={className}
-      style={style}
-      aria-label={ariaLabel}
-      onChange={(e) => {
-        setTexto(e.target.value);
-        onChange(parseNumeroDigitado(e.target.value));
-      }}
-    />
-  );
-};
 
 export const EmpresaOnboardingFlow: React.FC = () => {
   const { administrativeCosts, salvarPassoOnboarding, salvarDespesas, concluirOnboarding } = useCosts();
