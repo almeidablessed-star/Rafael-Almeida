@@ -54,6 +54,26 @@ const botaoPrimario =
 const botaoSecundario =
   'px-4 py-3 rounded-xl bg-white border border-[#E6E1DB] text-sm font-bold text-neutral-700 hover:bg-neutral-50 transition-all active:scale-95 disabled:opacity-50';
 
+/**
+ * Nota que explica de onde vem o numero sugerido do passo, logo abaixo do
+ * microcopy. Fica SEMPRE visivel, e nao atras do "?" do CampoComAjuda, porque
+ * responde a duvida que faz a pessoa parar no passo ("esse numero esta certo?",
+ * "esse lucro nao e baixo demais?") — escondida atras de um clique, ela so
+ * seria lida por quem ja desconfiou. O "?" continua com o exemplo numerico da
+ * conta, que e outra coisa.
+ *
+ * Usa os mesmos tokens do painel de ajuda do CampoComAjuda (fundo #F6F2F5,
+ * borda #E6E1DB), para nao introduzir estilo novo.
+ */
+const NotaSobreOPadrao: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <p
+    className="p-2.5 rounded-xl border border-[#E6E1DB] bg-[#F6F2F5] text-[11px] leading-relaxed m-0"
+    style={{ color: '5A4E46', fontFamily: "'Manrope', sans-serif" }}
+  >
+    {children}
+  </p>
+);
+
 export const EmpresaOnboardingFlow: React.FC = () => {
   const { administrativeCosts, salvarPassoOnboarding, salvarDespesas, concluirOnboarding } = useCosts();
   const { fichas } = useFichasTecnicas();
@@ -540,6 +560,9 @@ export const EmpresaOnboardingFlow: React.FC = () => {
                 microcopy="Quanto do preço do bolo vai embora só com ingredientes e embalagem. Quanto menor, mais sobra pra você."
                 exemploDinamico={exemploCmv}
               />
+              <NotaSobreOPadrao>
+                34% é uma referência comum para confeitaria e doceria — a maioria fica entre 25% e 40% do preço de venda. Pode ajustar para a realidade do seu negócio.
+              </NotaSobreOPadrao>
               <CampoNumerico
                 className={inputClass}
                 value={cmvTargetPercent}
@@ -564,6 +587,9 @@ export const EmpresaOnboardingFlow: React.FC = () => {
                 microcopy="Uma reserva pra comprar equipamento, fazer curso, crescer o negócio — sem tirar do seu bolso."
                 exemploDinamico={exemploInvestimento}
               />
+              <NotaSobreOPadrao>
+                5% é uma reserva para reinvestir no negócio — equipamento, melhorias, capital de giro. Não é um padrão fixo do setor, é um ponto de partida: ajuste como fizer sentido pra você.
+              </NotaSobreOPadrao>
               <CampoNumerico
                 className={inputClass}
                 value={investmentTargetPercent}
@@ -588,6 +614,9 @@ export const EmpresaOnboardingFlow: React.FC = () => {
                 microcopy="O que sobra pra empresa, além do que você já recebe pelo seu trabalho."
                 exemploDinamico={exemploLucro}
               />
+              <NotaSobreOPadrao>
+                Pode parecer baixo perto das margens de 30% a 50% que você vê por aí — mas aquelas normalmente misturam o lucro com o seu próprio trabalho. Aqui no Carula a mão de obra já é paga à parte, como se fosse o seu salário. Este número é só o que sobra pra empresa depois disso. Ajuste como quiser.
+              </NotaSobreOPadrao>
               <CampoNumerico
                 className={inputClass}
                 value={profitTargetPercent}
