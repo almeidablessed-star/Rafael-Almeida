@@ -1047,7 +1047,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
           quantity: orderItems.reduce((acc, i) => acc + i.quantity, 0),
           unitValue: grandTotalSalePrice,
           totalValue: grandTotalSalePrice,
-          signalValue: signalValue ? Number(signalValue.replace(',', '.')) : undefined,
+          signalValue: signalValue ? parseNumeroDigitado(signalValue) : undefined,
           date: eventDate || getTodayIso(),
           paymentMethod,
           paymentStatus,
