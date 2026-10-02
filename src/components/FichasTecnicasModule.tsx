@@ -36,6 +36,7 @@ import {
   ChevronDown,
   ChevronUp,
   AlertTriangle,
+  Star,
 } from 'lucide-react';
 
 /**
@@ -1662,56 +1663,136 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                           </p>
                         )}
 
-                        <div className="rounded-lg px-3 py-2.5 text-xs space-y-1" style={{ background: '#FAF7FA', border: '1px solid #F3E9F3' }}>
-                          <div className="flex justify-between" style={{ color: '#7A6E80' }}>
-                            <span>Insumos</span><span>{formatMoney(insumos)}</span>
-                          </div>
-                          <div className="flex justify-between" style={{ color: '#7A6E80' }}>
-                            <span>Mão de obra</span><span>{formatMoney(mdo)}</span>
-                          </div>
-                          <div className="flex justify-between" style={{ color: '#7A6E80' }}>
-                            <span>Despesas fixas</span><span>{formatMoney(cus)}</span>
-                          </div>
-                          <div className="flex justify-between" style={{ color: '#7A6E80' }}>
-                            <span>Investimento</span><span>{formatMoney(inv)}</span>
-                          </div>
-                          <div className="flex justify-between font-bold pt-1" style={{ borderTop: '1px solid #EDE6EF', color: '#3A2350' }}>
-                            <span>Custo total</span><span>{formatMoney(custoTotal)}</span>
-                          </div>
-                          <div className="flex justify-between font-bold" style={{ color: noPrejuizo ? '#C4626F' : '#4CAF7D' }}>
-                            <span>{noPrejuizo ? '⚠️ Prejuízo' : 'Lucro neste preço'}</span>
-                            <span>{formatMoney(margem)}{preco > 0 && ` (${margemPct.toFixed(0)}%)`}</span>
-                          </div>
-                          {noPrejuizo && (
-                            <p style={{ color: '#C4626F', lineHeight: 1.4 }}>Este tamanho custa mais do que você cobra por ele.</p>
-                          )}
-                          {precoCalculado && (
-                            <div className="pt-1" style={{ borderTop: '1px solid #EDE6EF' }}>
-                              <div className="flex justify-between" style={{ color: '#7A6E80' }}>
-                                <span>Preço atual</span><span>{preco > 0 ? formatMoney(preco) : '—'}</span>
+                        {/* CUSTOS — as quatro partes, com a nomenclatura
+                            fechada do app: "Despesas", e nao "Despesas
+                            fixas", porque e o mesmo conceito que Minha
+                            Empresa e o Pedido ja chamam assim. */}
+                        <div className="flex flex-col gap-2">
+                          <span
+                            className="text-[10px] font-bold uppercase"
+                            style={{ color: '#9A8FA0', letterSpacing: '0.1em', fontFamily: "'Manrope', sans-serif" }}
+                          >
+                            Custos
+                          </span>
+
+                          <div className="flex flex-col gap-1.5 text-[13px]" style={{ fontFamily: "'Manrope', sans-serif" }}>
+                            {([
+                              ['Insumos', insumos],
+                              ['Mão de obra', mdo],
+                              ['Despesas', cus],
+                              ['Investimento', inv],
+                            ] as const).map(([rotulo, valor]) => (
+                              <div key={rotulo} className="flex justify-between items-baseline" style={{ color: '#7A6E80' }}>
+                                <span>{rotulo}</span>
+                                <span style={{ fontVariantNumeric: 'tabular-nums' }}>{formatMoney(valor)}</span>
                               </div>
-                              <div className="flex justify-between font-bold" style={{ color: '#3A2350' }}>
-                                <span>Preço sugerido</span><span>{formatMoney(precoCalculado.precoSugerido)}</span>
-                              </div>
-                              {preco > 0 && (
-                                abaixoDaMeta ? (
-                                  <div style={{ marginTop: '4px' }}>
-                                    <span
-                                      className="inline-flex items-center rounded-full bg-red-100 text-red-700 font-bold"
-                                      style={{ fontSize: '11px', padding: '4px 10px', lineHeight: 1.4 }}
-                                    >
-                                      Abaixo do preço sugerido em {formatMoney(precoCalculado.precoSugerido - preco)}
-                                    </span>
-                                  </div>
-                                ) : (
-                                  <p style={{ color: '#4CAF7D', lineHeight: 1.4, marginTop: '2px' }}>
-                                    ✓ Esse preço já cobre a meta sugerida
-                                  </p>
-                                )
-                              )}
-                            </div>
-                          )}
+                            ))}
+                          </div>
+
+                          <div
+                            className="flex justify-between items-baseline pt-2.5 text-[15px] font-bold"
+                            style={{ borderTop: '1px solid #EDE6EF', color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}
+                          >
+                            <span>Custo total</span>
+                            <span style={{ fontVariantNumeric: 'tabular-nums' }}>{formatMoney(custoTotal)}</span>
+                          </div>
                         </div>
+
+                        {/* O lucro ganha card proprio: e a resposta da tela,
+                            nao mais uma linha perdida no meio da lista. */}
+                        <div
+                          className="rounded-xl flex justify-between items-center gap-3"
+                          style={{
+                            padding: '12px 14px',
+                            background: noPrejuizo ? '#FDF4F5' : '#EAF6EF',
+                            border: noPrejuizo ? '1px solid #F0D9DD' : '1px solid #CFE8DA',
+                            fontFamily: "'Manrope', sans-serif",
+                          }}
+                        >
+                          <span className="text-[13px] font-bold" style={{ color: noPrejuizo ? '#C4626F' : '#2F7D57' }}>
+                            {noPrejuizo ? 'Prejuízo neste preço' : 'Lucro neste preço'}
+                          </span>
+                          <span
+                            className="text-[15px] font-bold"
+                            style={{ color: noPrejuizo ? '#C4626F' : '#2F7D57', fontVariantNumeric: 'tabular-nums' }}
+                          >
+                            {formatMoney(margem)}{preco > 0 && ` (${margemPct.toFixed(0)}%)`}
+                          </span>
+                        </div>
+
+                        {noPrejuizo && (
+                          <p className="text-[11px] leading-relaxed" style={{ color: '#C4626F', fontFamily: "'Manrope', sans-serif" }}>
+                            Este tamanho custa mais do que você cobra por ele.
+                          </p>
+                        )}
+
+                        {precoCalculado && (
+                          <div
+                            className="rounded-xl flex flex-col gap-2.5"
+                            style={{ padding: '14px', background: '#FAF7FA', border: '1px solid #F3E9F3', fontFamily: "'Manrope', sans-serif" }}
+                          >
+                            <div className="flex justify-between items-baseline text-[12px]" style={{ color: '#7A6E80' }}>
+                              <span>Preço atual</span>
+                              <span style={{ fontVariantNumeric: 'tabular-nums' }}>{preco > 0 ? formatMoney(preco) : '—'}</span>
+                            </div>
+
+                            <div className="flex justify-between items-center gap-3">
+                              <span className="text-[13px] font-bold" style={{ color: '#241B2B' }}>Preço sugerido</span>
+
+                              {/* O numero que esta tela existe para entregar.
+                                  O halo usa `carGlow`, o pulso que ja mora no
+                                  index.css — quem pulsa e o brilho ATRAS, nao
+                                  a pilula: assim o numero nunca treme nem muda
+                                  de tamanho enquanto a pessoa le. */}
+                              <span className="relative inline-flex flex-shrink-0">
+                                <span
+                                  aria-hidden="true"
+                                  className="absolute rounded-full"
+                                  style={{
+                                    inset: '-3px',
+                                    background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)',
+                                    filter: 'blur(7px)',
+                                    opacity: 0.45,
+                                    animation: 'carGlow 2.8s ease-in-out infinite',
+                                  }}
+                                />
+                                <span
+                                  className="relative inline-flex items-center gap-1.5 rounded-full text-white font-bold"
+                                  style={{
+                                    padding: '8px 15px',
+                                    fontSize: '15px',
+                                    background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)',
+                                    boxShadow: '0 8px 18px rgba(58,35,80,.32)',
+                                    fontVariantNumeric: 'tabular-nums',
+                                  }}
+                                >
+                                  <Star className="w-3.5 h-3.5 shrink-0" fill="#F5B9C6" strokeWidth={0} />
+                                  {formatMoney(precoCalculado.precoSugerido)}
+                                </span>
+                              </span>
+                            </div>
+
+                            {preco > 0 && (
+                              abaixoDaMeta ? (
+                                <span
+                                  className="inline-flex items-center gap-1.5 rounded-full font-bold self-start"
+                                  style={{ fontSize: '11px', padding: '5px 11px', background: '#FDF4F5', color: '#C4626F', border: '1px solid #F0D9DD' }}
+                                >
+                                  <AlertTriangle className="w-3 h-3 shrink-0" />
+                                  Abaixo da meta em {formatMoney(precoCalculado.precoSugerido - preco)}
+                                </span>
+                              ) : (
+                                <span
+                                  className="inline-flex items-center gap-1.5 rounded-full font-bold self-start"
+                                  style={{ fontSize: '11px', padding: '5px 11px', background: '#EAF6EF', color: '#2F7D57', border: '1px solid #CFE8DA' }}
+                                >
+                                  <Check className="w-3 h-3 shrink-0" strokeWidth={3} />
+                                  Esse preço já cobre a meta sugerida
+                                </span>
+                              )
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
