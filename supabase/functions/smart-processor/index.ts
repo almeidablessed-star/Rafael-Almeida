@@ -47,22 +47,53 @@ function isPermanentEmailError(error: any): boolean {
   return status >= 400 && status < 500 && status !== 429;
 }
 
+// Eventos que TIRAM o acesso. Todos sao tratados igual: marcam a conta como
+// inativa. A diferenca entre reembolso, chargeback e cancelamento importa para
+// a Hotmart (dinheiro), nao para nos (acesso) — e o rastro cru de qual foi fica
+// em `assinatura_eventos` de qualquer forma.
+//
+// PURCHASE_DELAYED (atraso) NAO entra: atraso nao e perda de acesso, e cortar
+// quem so esqueceu de pagar seria pior que esperar o cancelamento vir depois.
+const REVOKING_EVENTS = [
+  'PURCHASE_CANCELED',
+  'PURCHASE_REFUNDED',
+  'PURCHASE_CHARGEBACK',
+  'PURCHASE_PROTEST',
+  'PURCHASE_EXPIRED',
+  'SUBSCRIPTION_CANCELLATION',
+];
+
 interface NormalizedPayload {
   email?: string;
   name?: string;
   status?: string;
   event?: string;
+  eventId?: string;
+  affiliateCode?: string;
+  transacao?: string;
+  subscriberCode?: string;
 }
 
-// Accepts the Hotmart 2.x envelope (everything nested under `data`) and the
-// flat { email, name, status } shape used by our manual curl tests.
+// Tres formatos convivem aqui: o envelope de COMPRA da Hotmart (tudo sob
+// `data.buyer` / `data.purchase`), o de ASSINATURA (`data.subscriber`, que o
+// cancelamento usa e que NAO traz afiliado nenhum — ver
+// docs/pendencia-acesso-status-default-inativo.md), e a forma chata
+// { email, name, status } dos testes manuais por curl.
 function normalizePayload(body: any): NormalizedPayload {
   if (body?.data) {
+    const d = body.data;
     return {
-      email: body.data.buyer?.email,
-      name: body.data.buyer?.name,
-      status: body.data.purchase?.status,
+      email: d.buyer?.email || d.subscriber?.email || d.subscription?.user?.email,
+      name: d.buyer?.name || d.subscriber?.name,
+      status: d.purchase?.status,
       event: body.event,
+      eventId: body.id,
+      // Array: uma venda pode ter mais de um afiliado. O primeiro e quem
+      // promoveu; os demais, quando existem, sao divisao de comissao, que e
+      // assunto da Hotmart e nao nosso.
+      affiliateCode: d.affiliates?.[0]?.affiliate_code,
+      transacao: d.purchase?.transaction,
+      subscriberCode: d.subscriber?.code || d.subscription?.subscriber_code,
     };
   }
 
@@ -71,7 +102,110 @@ function normalizePayload(body: any): NormalizedPayload {
     name: body?.name,
     status: body?.status,
     event: body?.event,
+    eventId: body?.id,
+    affiliateCode: body?.affiliate_code,
+    subscriberCode: body?.subscriber_code,
   };
+}
+
+/**
+ * Acha o id da conta a partir do que o evento trouxe.
+ *
+ * Prefere o `subscriber_code` da Hotmart ao e-mail: o codigo e estavel, o
+ * e-mail a pessoa troca. Como `usuarias` nao guarda o codigo, a ligacao vem do
+ * proprio rastro — um evento anterior da mesma assinatura que ja tenha sido
+ * casado com uma conta.
+ */
+async function acharUsuariaId(subscriberCode?: string, email?: string): Promise<string | null> {
+  if (subscriberCode) {
+    const { data } = await supabase
+      .from('assinatura_eventos')
+      .select('usuaria_id')
+      .eq('hotmart_subscriber_code', subscriberCode)
+      .not('usuaria_id', 'is', null)
+      .limit(1);
+    if (data?.[0]?.usuaria_id) return data[0].usuaria_id;
+  }
+
+  if (!email) return null;
+
+  // Nao ha getUserByEmail no admin do supabase-js, e `usuarias` nao guarda
+  // e-mail. Paginar o auth e aceitavel nesta escala; se a base crescer, o certo
+  // e indexar o e-mail numa coluna propria em vez de varrer paginas.
+  const alvo = email.trim().toLowerCase();
+  for (let pagina = 1; pagina <= 20; pagina++) {
+    const { data, error } = await supabase.auth.admin.listUsers({ page: pagina, perPage: 200 });
+    if (error || !data?.users?.length) return null;
+    const achou = data.users.find((u: any) => (u.email || '').toLowerCase() === alvo);
+    if (achou) return achou.id;
+    if (data.users.length < 200) return null;
+  }
+  return null;
+}
+
+/** Codigo do afiliado -> parceiro cadastrado. Afiliado desconhecido vira null. */
+async function acharParceiroId(affiliateCode?: string): Promise<number | null> {
+  if (!affiliateCode) return null;
+  const { data } = await supabase
+    .from('parceiros')
+    .select('id')
+    .eq('affiliate_code', affiliateCode)
+    .limit(1);
+  return data?.[0]?.id ?? null;
+}
+
+/**
+ * Concede acesso e grava a atribuicao do parceiro.
+ *
+ * `parceiro_id` so e escrito quando ainda esta NULL — o `.is(null)` no filtro
+ * garante isso no proprio banco, sem leitura antes da escrita: a comissao e da
+ * Hotmart, aqui e so atribuicao, e a primeira venda e que vale.
+ *
+ * ATENCAO: a linha de `usuarias` so nasce quando a compradora entra e preenche
+ * o perfil. Numa compra de conta nova este UPDATE acerta ZERO linhas, e e por
+ * isso que a atribuicao tambem fica gravada em `assinatura_eventos` — e de la
+ * que a etapa seguinte precisa resgatar o vinculo ao criar o perfil.
+ */
+async function aplicarConcessao(usuariaId: string, parceiroId: number | null) {
+  const agora = new Date().toISOString();
+
+  const { data: ativadas } = await supabase
+    .from('usuarias')
+    .update({ acesso_status: 'ativo', acesso_atualizado_em: agora })
+    .eq('id', usuariaId)
+    .select('id');
+
+  if (!ativadas?.length) {
+    console.log(`Sem perfil ainda para ${usuariaId} - vinculo fica no rastro de eventos`);
+    return;
+  }
+
+  if (parceiroId) {
+    await supabase
+      .from('usuarias')
+      .update({ parceiro_id: parceiroId })
+      .eq('id', usuariaId)
+      .is('parceiro_id', null);
+  }
+}
+
+/**
+ * Grava o evento cru. Chamado SO depois do efeito ter acontecido: e a presenca
+ * da linha que marca "ja processei isto", e gravar antes faria um reenvio
+ * depois de uma falha ser descartado sem nunca ter surtido efeito.
+ */
+async function registrarEvento(p: NormalizedPayload, body: any, usuariaId: string | null, parceiroId: number | null) {
+  const { error } = await supabase.from('assinatura_eventos').insert({
+    hotmart_event_id: p.eventId ?? null,
+    evento: p.event ?? 'DESCONHECIDO',
+    email: p.email ?? null,
+    usuaria_id: usuariaId,
+    parceiro_id: parceiroId,
+    hotmart_transacao: p.transacao ?? null,
+    hotmart_subscriber_code: p.subscriberCode ?? null,
+    payload: body,
+  });
+  if (error) console.error('Falha ao registrar evento (efeito ja aplicado):', error.message);
 }
 
 Deno.serve(async (req) => {
@@ -91,11 +225,54 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { email, name, status, event } = normalizePayload(body);
+    const p = normalizePayload(body);
+    const { email, name, status, event } = p;
 
-    // Acknowledge events we deliberately do not act on, so Hotmart does not retry.
+    // A Hotmart reenvia o mesmo evento ate receber 200. Como cada reenvio traz
+    // o mesmo `id`, a linha ja gravada e a prova de que este evento ja surtiu
+    // efeito — e so entao ele pode ser descartado.
+    if (p.eventId) {
+      const { data: jaVisto } = await supabase
+        .from('assinatura_eventos')
+        .select('id')
+        .eq('hotmart_event_id', p.eventId)
+        .limit(1);
+      if (jaVisto?.length) {
+        console.log(`Evento ${p.eventId} ja processado`);
+        return json({ message: 'Event already processed', eventId: p.eventId }, 200);
+      }
+    }
+
+    // Perda de acesso. So grava o status; nada no app olha para ele ainda —
+    // o bloqueio e a etapa seguinte, de proposito.
+    if (event && REVOKING_EVENTS.includes(event)) {
+      const usuariaId = await acharUsuariaId(p.subscriberCode, email);
+
+      if (usuariaId) {
+        const { error } = await supabase
+          .from('usuarias')
+          .update({ acesso_status: 'inativo', acesso_atualizado_em: new Date().toISOString() })
+          .eq('id', usuariaId);
+        if (error) {
+          console.error('Falha ao revogar acesso:', error);
+          return json({ error: 'Failed to revoke access' }, 500);
+        }
+      } else {
+        // Conta ainda nao existe (comprou e nunca entrou) ou e-mail nao bateu.
+        // Nao e erro: o evento fica registrado e a atribuicao pode ser refeita
+        // a partir do rastro quando a conta aparecer.
+        console.log(`Revogacao sem conta correspondente: ${email ?? p.subscriberCode}`);
+      }
+
+      await registrarEvento(p, body, usuariaId, null);
+      return json({ message: 'Access revoked', event, matched: Boolean(usuariaId) }, 200);
+    }
+
+    // Eventos que nao concedem nem revogam (boleto impresso, atraso, troca de
+    // plano). Ficam registrados e param de ser reenviados.
     if (event && !GRANTING_EVENTS.includes(event)) {
       console.log(`Ignoring event ${event}`);
+      await registrarEvento(p, body, null, null);
       return json({ message: 'Event ignored', event }, 200);
     }
 
@@ -118,6 +295,12 @@ Deno.serve(async (req) => {
 
     if (createError) {
       if (createError.message?.includes('already exists')) {
+        // Recompra ou renovacao de quem ja tem conta: nao ha usuario a criar,
+        // mas o acesso volta e a atribuicao de parceiro ainda precisa valer.
+        const existenteId = await acharUsuariaId(p.subscriberCode, email);
+        const parceiroId = await acharParceiroId(p.affiliateCode);
+        if (existenteId) await aplicarConcessao(existenteId, parceiroId);
+        await registrarEvento(p, body, existenteId, parceiroId);
         return json({ message: 'User already exists', email }, 200);
       }
       console.error('Error creating user:', createError);
@@ -218,11 +401,16 @@ Deno.serve(async (req) => {
       return json({ error: 'Failed to send email' }, 500);
     }
 
+    const parceiroId = await acharParceiroId(p.affiliateCode);
+    await aplicarConcessao(userId, parceiroId);
+    await registrarEvento(p, body, userId, parceiroId);
+
     return json(
       {
         message: 'User created successfully',
         email,
         userId,
+        parceiroId,
         emailSent: true,
       },
       201
