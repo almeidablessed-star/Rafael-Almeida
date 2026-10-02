@@ -424,7 +424,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                   <div
                     className="flex flex-row items-center justify-between w-full shrink-0 gap-3 border-t border-dashed border-[rgba(36,27,43,0.14)] pt-[11px] sm:border-t-0 sm:pt-0"
                   >
-                    <div className="text-right">
+                    <div className="text-left">
                       <span className="font-black text-[var(--color-ink)]" style={{ fontSize: '17px', fontWeight: 800, color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>
                         {formatMoney(tx.totalValue)}
                       </span>
