@@ -368,7 +368,6 @@ export interface FichaTecnica {
   yieldInfo?: string; // Rendimento da receita (ex: "10 fatias")
   tamanhos: TamanhoOpcao[]; // Lista de tamanhos com preços
   ingredients: IngredientUsage[];
-  reposicaoCost: number;
   maoDeObraCost: number;
   custoCost: number;
   investimentoCost: number;

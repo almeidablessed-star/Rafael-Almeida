@@ -277,7 +277,6 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   // vazia: antes vinha com "Farinha de Trigo 200 g" de uma ficha de exemplo,
   // que entrava em toda ficha nova sem ninguem ter pedido.
   const [ingredients, setIngredients] = useState<IngredientUsage[]>([]);
-  const [reposicaoCost, setReposicaoCost] = useState('0');
   // Custos globais - mantidos como defaults, não editáveis via UI
   const maoDeObraCost = '0';
   const custoCost = '0';
@@ -347,7 +346,6 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   }, [tamanhos]);
 
   const totalReposicao = ingredients.reduce((sum, ing) => sum + (ing.totalCost || 0), 0);
-  const repoNum = parseNumeroDigitado(reposicaoCost) || 0;
 
   /**
    * Mão de obra de um tamanho: horas x tarifa.
@@ -396,7 +394,6 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     setImageUrl('');
     setYieldInfo('1');
     setIngredients([]);
-    setReposicaoCost('0');
     // UM tamanho, e nao tres. Cada confeiteira tem uma realidade: umas vendem
     // um tamanho so, outras varios. Abrir com tres campos vazios alongava o
     // formulario a toa e sugeria que era preciso preencher os tres. Quem
@@ -416,7 +413,6 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     setImageUrl(ficha.imageUrl || '');
     setYieldInfo(ficha.yieldInfo || getYieldInfoCompat(ficha));
     setIngredients(ficha.ingredients || []);
-    setReposicaoCost((ficha.reposicaoCost || 0).toString());
 
     // Carregar tamanhos da ficha, convertendo para string
     if (ficha.tamanhos && ficha.tamanhos.length > 0) {
@@ -819,7 +815,6 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
       // e a de cada tamanho; esta so atende quem ainda le o campo antigo (a
       // folha de orcamento) e serve de rede para fichas sem lista por tamanho.
       ingredients: tamanhosData[0]?.ingredients || [],
-      reposicaoCost: parseNumeroDigitado(reposicaoCost) || 0,
       maoDeObraCost: parseNumeroDigitado(maoDeObraCost) || 0,
       custoCost: parseNumeroDigitado(custoCost) || 0,
       investimentoCost: parseNumeroDigitado(investimentoCost) || 0,
@@ -874,7 +869,6 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         imageUrl: fichaToDup.imageUrl,
         tamanhos: fichaToDup.tamanhos,
         ingredients: (fichaToDup.ingredients || []).map((ing, idx) => ({ ...ing, id: `${Date.now()}_${idx}` })),
-        reposicaoCost: fichaToDup.reposicaoCost,
         maoDeObraCost: fichaToDup.maoDeObraCost,
         custoCost: fichaToDup.custoCost,
         investimentoCost: fichaToDup.investimentoCost,
@@ -1620,7 +1614,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                 )}
                 {tamanhos.map((tamanho) => {
                   const insumos =
-                    tamanho.ingredients.reduce((s, i) => s + (Number(i.totalCost) || 0), 0) + repoNum;
+                    tamanho.ingredients.reduce((s, i) => s + (Number(i.totalCost) || 0), 0);
                   const mdo = calcularMaoDeObra(tamanho);
                   const cus = calcularCustoAdmAutomatico(tamanho);
                   const inv = calcularInvestimentoAutomatico(tamanho);

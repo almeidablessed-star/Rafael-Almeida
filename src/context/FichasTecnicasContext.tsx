@@ -92,7 +92,6 @@ const mapSupabaseToFicha = (data: SupabaseFichaTecnica): FichaTecnica => {
     yieldInfo: data.rendimento || undefined,
     tamanhos: tamanhos,
     ingredients: data.insumos || [],
-    reposicaoCost: data.reposicao,
     maoDeObraCost: data.mao_de_obra,
     custoCost: data.custo,
     investimentoCost: data.investimento,
@@ -128,7 +127,9 @@ const mapFichaToSupabase = (ficha: Omit<FichaTecnica, 'id' | 'createdAt'>) => ({
     investimentoCost: t.investimentoCost ?? 0,
   })),
   insumos: ficha.ingredients || [],
-  reposicao: ficha.reposicaoCost,
+  // A coluna continua existindo no banco (pode ser NOT NULL), mas o app nao a
+  // le mais: grava 0 e pronto. Ver o commit que removeu `reposicaoCost`.
+  reposicao: 0,
   mao_de_obra: ficha.maoDeObraCost,
   custo: ficha.custoCost,
   investimento: ficha.investimentoCost,
@@ -272,7 +273,7 @@ export const FichasTecnicasProvider: React.FC<{ children: React.ReactNode }> = (
             insumos: ficha.ingredients,
             mao_de_obra: ficha.maoDeObraCost,
             custo: ficha.custoCost,
-            reposicao: ficha.reposicaoCost,
+            reposicao: 0,
             investimento: ficha.investimentoCost,
           },
         ])

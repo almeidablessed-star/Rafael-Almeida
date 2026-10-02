@@ -69,31 +69,35 @@ export const fichaDesatualizada = (
   ficha.updatedAt != null && ultimaMudancaMetas != null && ficha.updatedAt < ultimaMudancaMetas;
 
 export const derivarProporcoes = (fichas: FichaTecnica[]): ProporcoesMedias | null => {
-  const amostras: { rep: number; mdo: number; cus: number; inv: number }[] = [];
+  const amostras: { mdo: number; cus: number; inv: number }[] = [];
 
   (fichas || []).forEach((ficha) => {
     (ficha.tamanhos || []).forEach((t) => {
       const venda = Number(t.preco) || 0;
       if (venda <= 0) return;
 
-      // Reposicao so existe no nivel da ficha; os demais aceitam valor
-      // especifico do tamanho, com o da ficha como padrao.
-      const rep = Number(ficha.reposicaoCost) || 0;
+      // Os valores aceitam ajuste por tamanho, com o da ficha como padrao.
       const mdo = Number(t.maoDeObraCost ?? ficha.maoDeObraCost) || 0;
       const cus = Number(t.custoCost ?? ficha.custoCost) || 0;
       const inv = Number(t.investimentoCost ?? ficha.investimentoCost) || 0;
 
-      amostras.push({ rep: rep / venda, mdo: mdo / venda, cus: cus / venda, inv: inv / venda });
+      amostras.push({ mdo: mdo / venda, cus: cus / venda, inv: inv / venda });
     });
   });
 
   if (amostras.length === 0) return null;
 
-  const media = (campo: 'rep' | 'mdo' | 'cus' | 'inv') =>
+  const media = (campo: 'mdo' | 'cus' | 'inv') =>
     amostras.reduce((soma, a) => soma + a[campo], 0) / amostras.length;
 
   return {
-    reposicao: media('rep'),
+    // Zero, e nao uma media: a reposicao media vinha do campo
+    // `ficha.reposicaoCost`, que nenhuma tela preenchia ha muito tempo — logo
+    // ela ja era 0 em todas as contas antes desta limpeza. Deixar o 0 explicito
+    // nao muda nenhum numero; so para de fingir que havia uma media aqui.
+    // Consequencia pre-existente, NAO corrigida nesta mudanca: um item
+    // "Outro / Personalizado" no Pedido nunca separa nada para Reposicao.
+    reposicao: 0,
     maoDeObra: media('mdo'),
     custos: media('cus'),
     investimento: media('inv'),
@@ -1188,7 +1192,7 @@ export const avaliarSaudeFinanceiraProdutos = (
       const preco = Number(tamanho.preco) || 0;
       if (preco <= 0) return;
 
-      const cmv = custoInsumosDoTamanho(ficha, tamanho.id) + (Number(ficha.reposicaoCost) || 0);
+      const cmv = custoInsumosDoTamanho(ficha, tamanho.id);
       if (cmv <= 0) return;
 
       totalAvaliados += 1;
