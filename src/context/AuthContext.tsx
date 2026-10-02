@@ -345,6 +345,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) throw error;
 
+      // Resgata o parceiro que indicou a compra.
+      //
+      // O webhook da Hotmart chega ANTES desta linha existir: numa compra de
+      // conta nova ele so cria o usuario no auth, e a linha de `usuarias` so
+      // nasce aqui, quando a pessoa preenche o perfil. Ate entao o vinculo com
+      // o parceiro fica guardado em `assinatura_eventos.parceiro_id`, e este e
+      // o primeiro momento em que ha para onde copia-lo.
+      //
+      // A leitura nao pode acontecer aqui no navegador: `assinatura_eventos`
+      // tem RLS sem policy nenhuma, de proposito — o rastro guarda o payload
+      // inteiro da Hotmart e nao deve ser legivel pelo app. Quem resolve e a
+      // funcao `vincular_parceiro_da_compra`, SECURITY DEFINER, que casa pelo
+      // e-mail da propria sessao e so escreve quando `parceiro_id` ainda e NULL.
+      //
+      // Falha aqui NAO derruba o cadastro: sem o vinculo a pessoa usa o app
+      // igual, e so o painel do parceiro fica sem contar essa venda — motivo
+      // ruim para impedir alguem de entrar no proprio app.
+      const { error: vinculoError } = await supabase.rpc('vincular_parceiro_da_compra');
+      if (vinculoError) {
+        console.error('Falha ao vincular parceiro da compra:', vinculoError.message);
+      }
+
       const newProfile: UserProfile = {
         id: user.id,
         nome,
