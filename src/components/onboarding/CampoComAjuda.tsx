@@ -15,14 +15,21 @@ export const CampoComAjuda: React.FC<{
    * antigo — texto solto com o "?" flutuando, usado em todo o resto do app
    * (onboarding incluso) para nao alterar nada fora do escopo pedido. */
   variant?: 'inline' | 'card';
-}> = ({ microcopy, exemploDinamico, variant = 'inline' }) => {
+  /** O que o leitor de tela anuncia ao focar o botao "?". O padrao e generico
+   * de proposito: o painel que abre nem sempre e um exemplo numerico — em
+   * varios usos (estoque de hoje, cofrinhos do Inicio) e so uma explicacao, e
+   * o rotulo antigo, fixo em "Ver exemplo com os numeros da sua conta",
+   * prometia a quem nao enxerga a tela um numero que nunca vinha. Passe o
+   * texto especifico so onde o painel mostra mesmo valores da conta. */
+  ariaLabelAjuda?: string;
+}> = ({ microcopy, exemploDinamico, variant = 'inline', ariaLabelAjuda = 'Ver explicação' }) => {
   const [aberto, setAberto] = useState(false);
 
   const botaoAjuda = (
     <button
       type="button"
       onClick={() => setAberto((v) => !v)}
-      aria-label="Ver exemplo com os números da sua conta"
+      aria-label={ariaLabelAjuda}
       className="flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold text-white transition-transform active:scale-90"
       style={{ background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)' }}
     >
@@ -37,7 +44,7 @@ export const CampoComAjuda: React.FC<{
           <button
             type="button"
             onClick={() => setAberto((v) => !v)}
-            aria-label="Ver exemplo com os números da sua conta"
+            aria-label={ariaLabelAjuda}
             className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white transition-transform active:scale-90"
             style={{ background: '#3A2350' }}
           >

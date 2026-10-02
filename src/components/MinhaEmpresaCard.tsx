@@ -356,6 +356,7 @@ export const MinhaEmpresaCard: React.FC = () => {
                   variant="card"
                   microcopy="Se essa despesa também é usada na sua vida pessoal, informe aqui só a parte que é do negócio. Deixe 100 se ela é toda da confeitaria."
                   exemploDinamico={exemploRateio}
+                  ariaLabelAjuda="Ver exemplo com os números da sua conta"
                 />
               </div>
             </div>
@@ -400,17 +401,17 @@ export const MinhaEmpresaCard: React.FC = () => {
           <div className="space-y-3">
             <div>
               <label className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>Meta de CMV (%)</label>
-              <CampoComAjuda microcopy="Quanto do preço do bolo vai embora só com ingredientes e embalagem. Quanto menor, mais sobra pra você." exemploDinamico={exemploCmv} />
+              <CampoComAjuda microcopy="Quanto do preço do bolo vai embora só com ingredientes e embalagem. Quanto menor, mais sobra pra você." exemploDinamico={exemploCmv} ariaLabelAjuda="Ver exemplo com os números da sua conta" />
               <CampoNumerico className={inputClass} value={cmvTargetPercent} onChange={setCmvTargetPercent} ariaLabel="Meta de CMV em porcentagem" />
             </div>
             <div>
               <label className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>Meta de investimento (%)</label>
-              <CampoComAjuda microcopy="Uma reserva pra comprar equipamento, fazer curso, crescer o negócio — sem tirar do seu bolso." exemploDinamico={exemploInvestimento} />
+              <CampoComAjuda microcopy="Uma reserva pra comprar equipamento, fazer curso, crescer o negócio — sem tirar do seu bolso." exemploDinamico={exemploInvestimento} ariaLabelAjuda="Ver exemplo com os números da sua conta" />
               <CampoNumerico className={inputClass} value={investmentTargetPercent} onChange={setInvestmentTargetPercent} ariaLabel="Meta de investimento em porcentagem" />
             </div>
             <div>
               <label className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>Meta de lucro (%)</label>
-              <CampoComAjuda microcopy="O que sobra pra empresa, além do que você já recebe pelo seu trabalho." exemploDinamico={exemploLucro} />
+              <CampoComAjuda microcopy="O que sobra pra empresa, além do que você já recebe pelo seu trabalho." exemploDinamico={exemploLucro} ariaLabelAjuda="Ver exemplo com os números da sua conta" />
               <CampoNumerico className={inputClass} value={profitTargetPercent} onChange={setProfitTargetPercent} ariaLabel="Meta de lucro em porcentagem" />
             </div>
             <div className="flex gap-2">

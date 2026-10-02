@@ -527,6 +527,7 @@ export const EmpresaOnboardingFlow: React.FC = () => {
                       <CampoComAjuda
                         microcopy="Se essa despesa também é usada na sua vida pessoal, informe aqui só a parte que é do negócio. Deixe 100 se ela é toda da confeitaria."
                         exemploDinamico={exemploRateio}
+                        ariaLabelAjuda="Ver exemplo com os números da sua conta"
                       />
                     </div>
                   );
@@ -559,6 +560,7 @@ export const EmpresaOnboardingFlow: React.FC = () => {
               <CampoComAjuda
                 microcopy="Quanto do preço do bolo vai embora só com ingredientes e embalagem. Quanto menor, mais sobra pra você."
                 exemploDinamico={exemploCmv}
+                ariaLabelAjuda="Ver exemplo com os números da sua conta"
               />
               <NotaSobreOPadrao>
                 34% é uma referência comum para confeitaria e doceria — a maioria fica entre 25% e 40% do preço de venda. Pode ajustar para a realidade do seu negócio.
@@ -586,6 +588,7 @@ export const EmpresaOnboardingFlow: React.FC = () => {
               <CampoComAjuda
                 microcopy="Uma reserva pra comprar equipamento, fazer curso, crescer o negócio — sem tirar do seu bolso."
                 exemploDinamico={exemploInvestimento}
+                ariaLabelAjuda="Ver exemplo com os números da sua conta"
               />
               <NotaSobreOPadrao>
                 5% é uma reserva para reinvestir no negócio — equipamento, melhorias, capital de giro. Não é um padrão fixo do setor, é um ponto de partida: ajuste como fizer sentido pra você.
@@ -613,6 +616,7 @@ export const EmpresaOnboardingFlow: React.FC = () => {
               <CampoComAjuda
                 microcopy="O que sobra pra empresa, além do que você já recebe pelo seu trabalho."
                 exemploDinamico={exemploLucro}
+                ariaLabelAjuda="Ver exemplo com os números da sua conta"
               />
               <NotaSobreOPadrao>
                 Pode parecer baixo perto das margens de 30% a 50% que você vê por aí — mas aquelas normalmente misturam o lucro com o seu próprio trabalho. Aqui no Carula a mão de obra já é paga à parte, como se fosse o seu salário. Este número é só o que sobra pra empresa depois disso. Ajuste como quiser.

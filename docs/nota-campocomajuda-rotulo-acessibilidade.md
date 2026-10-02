@@ -24,3 +24,17 @@ Início.
 **A correção provável** é aceitar um rótulo opcional por prop, mantendo o texto
 de hoje como padrão para não alterar nada nas telas que já usam o componente.
 Algo como `ariaLabelAjuda?: string`, usado só onde o painel não for um exemplo.
+
+## Corrigido em 2026-10-02
+
+O componente passou a aceitar `ariaLabelAjuda?: string`, usado nas duas
+variantes. O padrão ficou **genérico** — "Ver explicação" — e não o texto
+antigo: a maioria dos usos é mesmo explicação sem número, então o padrão certo
+é o que vale para eles, e o texto específico passou a ser a exceção declarada.
+"Ver exemplo com os números da sua conta" é passado só onde o painel mostra
+valores reais da conta: o rateio de despesa e as três metas (CMV, investimento,
+lucro), em Minha Empresa e no onboarding.
+
+Conferido no app pelo atributo renderizado: Início (cofrinhos) e Produtos
+(estoque de hoje) anunciam "Ver explicação"; Minha Empresa anuncia o texto
+específico nos quatro botões. Nada mudou visualmente.
