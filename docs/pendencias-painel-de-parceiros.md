@@ -6,7 +6,7 @@
 ## Já aplicado em produção
 
 **Script B — trava de privilégios em `usuarias`** (2026-10-07, SQL Editor;
-cópia em `supabase/migrations/20261007_1_usuarias_trava_privilegios_colunas.sql`).
+cópia em `supabase/migrations/20261007120000_usuarias_trava_privilegios_colunas.sql`).
 `authenticated` passou a ter INSERT só em `id, nome, nome_confeitaria, moeda,
 created_at` e UPDATE só em `nome, nome_confeitaria, moeda, foto_url, telefone,
 endereco, instagram`. `anon` ficou sem escrita nenhuma e o DELETE foi revogado
@@ -15,7 +15,7 @@ coluna. É esta trava que impede alguém de se reativar sozinho mexendo em
 `acesso_status` pelo console — sem ela a RLS do Script A seria decorativa.
 
 **Script A — a RLS passa a exigir assinatura ativa** (2026-10-07, depois do B;
-cópia em `supabase/migrations/20261007_2_rls_exige_acesso_ativo.sql`). Criou a
+cópia em `supabase/migrations/20261007120100_rls_exige_acesso_ativo.sql`). Criou a
 função `tem_acesso_ativo()` e deixou **uma única política** em cada uma das dez
 tabelas: `administrative_costs`, `clientes`, `fichas_tecnicas`, `transacoes`,
 `produtos`, `estoque_movimentos`, `despesas_empresa`,
@@ -39,10 +39,17 @@ o B foi aplicado, Script C completo para o estado de hoje.
 
 ## Obrigatórias antes do lançamento
 
-**O botão "Sair" da tela de pausa não faz nada.** Observado pelo Rafael em
-produção, com uma conta inativa: clicar não desloga e não acontece nada. É a
-**única** saída de quem está pausado, então hoje essa pessoa fica presa na tela.
-Ainda não investigado. **Prioridade alta.**
+**O botão "Sair" da tela de pausa não fazia nada — CORRIGIDO** em 2026-10-07,
+aguardando teste do Rafael em produção. A causa: a página destruturava
+`signOut` de `useAuth()`, mas o contexto expõe a função como `logout`; o campo
+vinha `undefined` e o botão nunca teve handler.
+
+**Por que o typecheck não pegou — e isso vale para o projeto inteiro:**
+`@types/react` **não está instalado**. Sem ele, `useContext` e o resto da API do
+React são `any` para o compilador, e destruturar um campo inexistente de um
+hook passa batido. Ou seja, "14 erros, nenhum novo" **não** prova que um nome de
+campo existe. Instalar `@types/react` e `@types/react-dom` faria essa classe de
+erro voltar a ser detectável — vale avaliar como tarefa própria.
 
 **Ativação de conta nova pela compra.** O webhook tenta gravar
 `acesso_status = 'ativo'` quando a compra é aprovada, mas nesse momento a linha
@@ -85,8 +92,9 @@ entender o motivo, porque a tela de pausa ainda não apareceu. Vale avaliar
 revalidar o status quando a aba volta a receber foco. Baixa prioridade:
 cancelamento com o app aberto é raro e um F5 resolve.
 
-**Fundo bege da tela de pausa.** `AssinaturaInativaPage` usa `#EDE7DC`; trocar
-por uma cor da identidade do app. Baixa prioridade.
+**Fundo bege da tela de pausa — RESOLVIDO** em 2026-10-07: o `#EDE7DC` do
+onboarding deu lugar ao `#F6F2F5`, o mesmo fundo das demais telas, e o circulo
+do icone passou a usar o gradiente roxo da identidade.
 
 **Apagar as tabelas antigas `pedidos` e `saldos_semanais`.** Nenhuma linha de
 `src/` as acessa. `pedidos` tem 11 linhas e `saldos_semanais` está vazia. Entraram

@@ -3,7 +3,7 @@
 Cópia de segurança dos desfazeres da Etapa 4, guardada aqui para não depender de
 achar a conversa onde foram escritos. **Nada aqui precisa ser rodado** — os
 Scripts A e B já estão aplicados e verificados em produção desde 2026-10-07 (ver
-`supabase/migrations/20261007_1_*` e `20261007_2_*`). Isto é o botão de pânico.
+`supabase/migrations/20261007120000_*` e `20261007120100_*`). Isto é o botão de pânico.
 
 A rede de segurança é o SQL Editor do Supabase: ele roda como service-role e
 ignora a RLS, então funciona mesmo que o app inteiro esteja trancado.
