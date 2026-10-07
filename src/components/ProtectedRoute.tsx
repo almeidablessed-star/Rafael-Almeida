@@ -4,6 +4,7 @@ import { LoginPage } from '../pages/LoginPage';
 import { SignupPage } from '../pages/SignupPage';
 import { SetupProfilePage } from '../pages/SetupProfilePage';
 import { VerifyOtpStandalonePage } from '../pages/VerifyOtpStandalonePage';
+import { AssinaturaInativaPage } from '../pages/AssinaturaInativaPage';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -39,6 +40,19 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   // If user needs to reset password or verify OTP, show AppContent which will handle those flows
   if (isResetPasswordRequired || isOtpVerificationRequired) {
     return <>{children}</>;
+  }
+
+  // Acesso pausado. Vem ANTES dos portoes de setup e de onboarding: com a RLS
+  // da Etapa 4 ligada, uma conta inativa le `administrative_costs` vazio, o app
+  // conclui que ela nunca fez o onboarding financeiro e a prende num fluxo de 9
+  // passos que tambem nao grava. Esta tela precisa aparecer antes disso.
+  //
+  // A comparacao e com 'inativo', e NAO "diferente de ativo", de proposito: se o
+  // campo vier ausente — perfil carregado por um caminho antigo, coluna que
+  // ainda nao existe no ambiente — o app segue funcionando como hoje. O erro
+  // caro aqui e barrar quem esta em dia, nao deixar passar quem cancelou.
+  if (userProfile?.acesso_status === 'inativo') {
+    return <AssinaturaInativaPage />;
   }
 
   if (isSetupRequired || !userProfile) {
