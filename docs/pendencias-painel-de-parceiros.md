@@ -39,8 +39,10 @@ o B foi aplicado, Script C completo para o estado de hoje.
 
 ## Obrigatórias antes do lançamento
 
-**O botão "Sair" da tela de pausa não fazia nada — CORRIGIDO** em 2026-10-07,
-aguardando teste do Rafael em produção. A causa: a página destruturava
+**O botão "Sair" da tela de pausa não fazia nada — RESOLVIDO** em 2026-10-07 e
+testado pelo Rafael em produção, em janela anônima com uma conta inativa: a tela
+de pausa apareceu, o Sair levou ao login e a reativação devolveu o app ao
+normal. A causa: a página destruturava
 `signOut` de `useAuth()`, mas o contexto expõe a função como `logout`; o campo
 vinha `undefined` e o botão nunca teve handler.
 
@@ -92,7 +94,8 @@ entender o motivo, porque a tela de pausa ainda não apareceu. Vale avaliar
 revalidar o status quando a aba volta a receber foco. Baixa prioridade:
 cancelamento com o app aberto é raro e um F5 resolve.
 
-**Fundo bege da tela de pausa — RESOLVIDO** em 2026-10-07: o `#EDE7DC` do
+**Fundo bege da tela de pausa — RESOLVIDO** em 2026-10-07 e conferido na tela
+pelo Rafael: o `#EDE7DC` do
 onboarding deu lugar ao `#F6F2F5`, o mesmo fundo das demais telas, e o circulo
 do icone passou a usar o gradiente roxo da identidade.
 
