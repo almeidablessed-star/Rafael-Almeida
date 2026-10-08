@@ -79,3 +79,32 @@ Atenção ao reverter: a versão antiga **cai no remetente de teste do resend.de
 quando `RESEND_FROM` não existe, e aquele endereço só entrega ao dono da conta
 Resend. Reverter devolve o comportamento de "a compradora não recebe nada, e
 nada no log diz isso" — por isso reverta só se o problema for pior que esse.
+
+## Etapa 2 — falha de e-mail e reenvio (publicado em 2026-10-08)
+
+Mudou o `smart-processor` (classificação do erro do Resend em três classes e
+registro de `EMAIL_FALHOU`) e entrou a função nova `resend-otp`, com o botão
+"Não recebi o código" nas duas telas de verificação. O `swift-responder` **não**
+foi tocado nesta etapa.
+
+Versão anterior do `smart-processor`: commit `5e37be9`.
+
+```bash
+git checkout 5e37be9 -- supabase/functions/smart-processor/index.ts
+npx supabase functions deploy smart-processor --project-ref inqyobsjuztztvafpzxn --no-verify-jwt
+git checkout HEAD -- supabase/functions/smart-processor/index.ts
+npx supabase functions delete resend-otp --project-ref inqyobsjuztztvafpzxn
+git revert --no-edit 04923f3 ee540a5 dd3b481 2889892 0a1d30c
+git push origin chore/carula-site-preview
+git push origin HEAD:production
+git push origin HEAD:master
+```
+
+Apagar a `resend-otp` é opcional: sem o botão no app ninguém a chama, e deixá-la
+publicada não abre nada — ela responde sempre a mesma mensagem genérica. Só
+apague se quiser a superfície menor.
+
+Atenção ao reverter o `smart-processor`: a versão `5e37be9` volta à regra antiga
+de "qualquer 4xx é definitivo", que **apaga a conta de quem pagou** e responde
+200 para a Hotmart não reenviar. Uma configuração quebrada volta a derrubar
+todas as compradoras em silêncio. Reverta só se o problema for pior que esse.
