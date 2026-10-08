@@ -73,7 +73,16 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   // campo vier ausente — perfil carregado por um caminho antigo, coluna que
   // ainda nao existe no ambiente — o app segue funcionando como hoje. O erro
   // caro aqui e barrar quem esta em dia, nao deixar passar quem cancelou.
-  if (userProfile?.acesso_status === 'inativo') {
+  // Mesma regra do banco, em `tem_acesso_ativo()`: pausado quando o status e
+  // 'inativo' OU quando o prazo ja venceu. Sem o segundo teste, quem cancelou
+  // veria o app funcionando enquanto o banco recusava gravar tudo.
+  //
+  // `acesso_ate` nulo NUNCA tranca ninguem — e o caso da esmagadora maioria das
+  // contas, e um engano aqui prenderia quem esta em dia do lado de fora.
+  const prazoVencido = Boolean(
+    userProfile?.acesso_ate && new Date(userProfile.acesso_ate).getTime() <= Date.now()
+  );
+  if (userProfile?.acesso_status === 'inativo' || prazoVencido) {
     return <AssinaturaInativaPage />;
   }
 

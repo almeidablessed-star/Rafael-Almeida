@@ -17,6 +17,8 @@ export interface UserProfile {
   /** Quem manda neste campo e o webhook da Hotmart. Opcional de proposito: se
    *  vier ausente, o app trata como acesso normal — ver ProtectedRoute. */
   acesso_status?: 'ativo' | 'inativo';
+  /** Ate quando o acesso vale. NULL = sem prazo, o caso normal. */
+  acesso_ate?: string | null;
 }
 
 interface AuthContextType {
@@ -192,7 +194,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { data, error } = await supabase
         .from('usuarias')
-        .select('id,nome,nome_confeitaria,moeda,telefone,endereco,instagram,created_at,acesso_status')
+        .select('id,nome,nome_confeitaria,moeda,telefone,endereco,instagram,created_at,acesso_status,acesso_ate')
         .eq('id', userId)
         .single();
 
@@ -232,7 +234,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { data, error } = await supabase
         .from('usuarias')
-        .select('id,nome,nome_confeitaria,moeda,telefone,endereco,instagram,foto_url,created_at,acesso_status')
+        .select('id,nome,nome_confeitaria,moeda,telefone,endereco,instagram,foto_url,created_at,acesso_status,acesso_ate')
         .eq('id', user.id)
         .single();
 
