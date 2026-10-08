@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { Lock, AlertCircle, CheckCircle } from 'lucide-react';
 
 export const VerifyOtpPage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, beginAuthTransition, endAuthTransition } = useAuth();
   const [otp, setOtp] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -18,7 +18,7 @@ export const VerifyOtpPage: React.FC = () => {
       return;
     }
 
-    if (!user) {
+    if (!user?.email) {
       setError('Usuária(o) não encontrada(o)');
       return;
     }
@@ -27,39 +27,48 @@ export const VerifyOtpPage: React.FC = () => {
     setError(null);
 
     try {
-      // Query OTP code from database
-      const { data: otpRecord, error: queryError } = await supabase
-        .from('otp_codes')
-        .select('*')
-        .eq('code', otp)
-        .eq('user_id', user.id)
-        .eq('used', false)
-        .gt('expires_at', new Date().toISOString())
-        .single();
+      // Mesma rota da VerifyOtpStandalonePage: quem confere o codigo e a Edge
+      // Function, com service-role.
+      //
+      // Antes esta tela consultava `otp_codes` direto do navegador e marcava
+      // `used` ela mesma — e era so por causa disso que a tabela precisava de
+      // politicas abertas para visitante. Com o codigo guardado em texto, isso
+      // deixava qualquer um ler os codigos de todas as compradoras. Nenhuma tela
+      // do app toca mais nessa tabela.
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/swift-responder`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: user.email, code: otp }),
+        }
+      );
 
-      if (queryError || !otpRecord) {
-        setError('Código inválido ou expirado');
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Código inválido ou expirado');
         return;
       }
 
-      // Mark OTP as used
-      const { error: updateError } = await supabase
-        .from('otp_codes')
-        .update({ used: true })
-        .eq('id', otpRecord.id);
-
-      if (updateError) {
-        setError('Erro ao validar código');
-        return;
+      // A sessao chega aqui, mas a pessoa ainda precisa definir a senha: segura
+      // o ouvinte de auth ate o redirecionamento, senao as telas de pos-login
+      // assumem e desmontam esta pagina no meio da confirmacao.
+      if (data.accessToken) {
+        beginAuthTransition();
+        await supabase.auth.setSession({
+          access_token: data.accessToken,
+          refresh_token: data.refreshToken || '',
+        });
       }
 
       setSuccess(true);
 
-      // Redirect to password reset page after 1.5 seconds
       setTimeout(() => {
         window.location.href = '/?type=recovery';
       }, 1500);
     } catch (err: any) {
+      endAuthTransition();
       setError(err.message || 'Erro ao verificar código');
     } finally {
       setIsLoading(false);
