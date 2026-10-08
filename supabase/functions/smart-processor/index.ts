@@ -61,14 +61,75 @@ function readHottok(req: Request): string {
 const GRANTING_EVENTS = ['PURCHASE_APPROVED', 'PURCHASE_COMPLETE'];
 const GRANTING_STATUSES = ['APPROVED', 'COMPLETE', 'COMPLETED'];
 
-// A 4xx from Resend means the request itself was rejected - an invalid or
-// disallowed recipient, a sender the account may not use. Sending it again
-// replays the same rejection, so it must not be retried. 429 is the exception:
-// rate limiting clears on its own.
-function isPermanentEmailError(error: any): boolean {
-  const status = error?.statusCode;
-  if (typeof status !== 'number') return false;
-  return status >= 400 && status < 500 && status !== 429;
+/**
+ * Em que classe cai uma recusa do Resend.
+ *
+ * A diferenca decide duas coisas de peso: se a conta da compradora sobrevive e
+ * se a Hotmart vai reenviar o evento.
+ *
+ *   'nosso'       — o problema e de configuracao nossa: chave invalida ou
+ *                   revogada, dominio nao verificado, remetente recusado,
+ *                   limite da nossa conta. NAO e culpa do pedido, e um reenvio
+ *                   depois do conserto funciona.
+ *   'destinatario'— o endereco e que nao serve: invalido, rejeitado,
+ *                   suprimido. Reenviar replica a mesma recusa para sempre.
+ *   'transitorio' — rede, 5xx do provedor, 429. Passa sozinho.
+ *
+ * Por que nao basta "4xx = definitivo", como era antes: uma chave revogada ou
+ * um dominio nao verificado tambem respondem 4xx. Com a regra antiga, uma
+ * configuracao quebrada faria TODAS as compradoras virarem "200, nao reenvie" —
+ * o pior resultado possivel, porque cada venda perdida fica invisivel e
+ * irrecuperavel. Erro nosso precisa parar a fila ate ser consertado.
+ */
+function classificarErroDeEmail(error: any): 'nosso' | 'destinatario' | 'transitorio' {
+  const status = typeof error?.statusCode === 'number' ? error.statusCode : 0;
+  const texto = `${error?.name ?? ''} ${error?.message ?? ''}`.toLowerCase();
+
+  if (status === 429 || status >= 500 || status === 0) return 'transitorio';
+
+  const pistasNossas = [
+    'api key', 'api_key', 'unauthorized', 'forbidden', 'restricted',
+    'domain', 'not verified', 'verify a domain', 'from address', 'sender',
+    'quota', 'limit',
+  ];
+  if (status === 401 || status === 403 || pistasNossas.some((p) => texto.includes(p))) {
+    return 'nosso';
+  }
+
+  // Sobrou 4xx que fala do destinatario: endereco invalido, caixa inexistente,
+  // endereco na lista de supressao.
+  return 'destinatario';
+}
+
+/**
+ * Deixa registrado que o e-mail nao saiu.
+ *
+ * Guarda so motivo, codigo HTTP e provedor — nunca o corpo da mensagem nem o
+ * codigo de acesso. E o unico rastro consultavel de uma compra que foi paga e
+ * nao virou acesso; sem ele, o caso so existiria no log da funcao, que ninguem
+ * olha por conta propria.
+ */
+async function registrarFalhaDeEmail(
+  p: NormalizedPayload,
+  classe: string,
+  error: any,
+  usuariaId: string | null
+) {
+  const { error: erroAoGravar } = await supabase.from('assinatura_eventos').insert({
+    hotmart_event_id: p.eventId ? `${p.eventId}:email-falhou` : null,
+    evento: 'EMAIL_FALHOU',
+    email: p.email ?? null,
+    usuaria_id: usuariaId,
+    hotmart_transacao: p.transacao ?? null,
+    hotmart_subscriber_code: p.subscriberCode ?? null,
+    payload: {
+      classe,
+      codigo_http: error?.statusCode ?? null,
+      motivo: typeof error?.message === 'string' ? error.message.slice(0, 300) : null,
+      provedor: 'resend',
+    },
+  });
+  if (erroAoGravar) console.error('Falha ao registrar EMAIL_FALHOU:', erroAoGravar.message);
 }
 
 // Eventos que TIRAM o acesso. Todos sao tratados igual: marcam a conta como
@@ -438,25 +499,32 @@ Deno.serve(async (req) => {
     });
 
     if (emailResult.error) {
-      console.error('Error sending email:', emailResult.error);
-      await rollback('Email delivery failed');
+      const classe = classificarErroDeEmail(emailResult.error);
+      console.error(`Falha de e-mail (${classe}) - status ${emailResult.error?.statusCode}`);
 
-      if (isPermanentEmailError(emailResult.error)) {
-        // Acknowledged so Hotmart stops retrying, but nobody got access. This
-        // line is the only trace a paying buyer was dropped - watch for it.
-        console.error(
-          `PERMANENT email failure for ${email} - purchase processed, no access granted`
-        );
-        return json(
-          {
-            message: 'Email permanently rejected, not retrying',
-            email,
-            reason: emailResult.error?.message,
-          },
-          200
-        );
+      if (classe === 'destinatario') {
+        // O endereco e que nao serve. Reenviar repete a mesma recusa para
+        // sempre, entao 200 para a Hotmart parar — mas A CONTA FICA. Antes
+        // disto o rollback apagava quem tinha pagado, e a venda sumia sem
+        // deixar nada para tras. Com a conta viva, o reenvio de codigo resolve
+        // sem precisar recriar nada.
+        await registrarFalhaDeEmail(p, classe, emailResult.error, userId);
+        const parceiroIdFalha = await acharParceiroId(p.affiliateCode);
+        await aplicarConcessao(userId, parceiroIdFalha);
+        await registrarEvento(p, body, userId, parceiroIdFalha);
+        return json({ message: 'Email rejected by recipient, account kept' }, 200);
       }
 
+      // Classes 'nosso' e 'transitorio': um reenvio tem chance de dar certo
+      // depois do conserto, entao 500 e a Hotmart repete. O rollback evita
+      // deixar para tras uma conta sem codigo, que faria o reenvio esbarrar em
+      // "ja existe".
+      //
+      // E de proposito que erro NOSSO nao vire 200: com a regra antiga, uma
+      // chave revogada ou um dominio nao verificado faria a Hotmart desistir de
+      // TODAS as compradoras de uma vez, cada perda invisivel.
+      await registrarFalhaDeEmail(p, classe, emailResult.error, null);
+      await rollback(`Email delivery failed (${classe})`);
       return json({ error: 'Failed to send email' }, 500);
     }
 
