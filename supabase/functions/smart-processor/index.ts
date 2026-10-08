@@ -141,21 +141,83 @@ async function registrarFalhaDeEmail(
   if (erroAoGravar) console.error('Falha ao registrar EMAIL_FALHOU:', erroAoGravar.message);
 }
 
-// Eventos que TIRAM o acesso. Todos sao tratados igual: marcam a conta como
-// inativa. A diferenca entre reembolso, chargeback e cancelamento importa para
-// a Hotmart (dinheiro), nao para nos (acesso) — e o rastro cru de qual foi fica
-// em `assinatura_eventos` de qualquer forma.
-//
-// PURCHASE_DELAYED (atraso) NAO entra: atraso nao e perda de acesso, e cortar
-// quem so esqueceu de pagar seria pior que esperar o cancelamento vir depois.
-const REVOKING_EVENTS = [
-  'PURCHASE_CANCELED',
-  'PURCHASE_REFUNDED',
-  'PURCHASE_CHARGEBACK',
-  'PURCHASE_PROTEST',
-  'PURCHASE_EXPIRED',
-  'SUBSCRIPTION_CANCELLATION',
-];
+/**
+ * Eventos que revogam na HORA. O dinheiro voltou, o acesso vai junto.
+ *
+ * `SUBSCRIPTION_CANCELLATION` NAO esta aqui: quem cancela mantem o acesso ate o
+ * fim do periodo ja pago, e tem tratamento proprio mais abaixo.
+ *
+ * `PURCHASE_EXPIRED` tambem saiu, e esse foi o motivo de existir a trava: boleto
+ * e Pix que vencem sem pagamento geram "expirada" e "cancelada" com o mesmo
+ * e-mail de uma assinante ATIVA. Revogar por e-mail cortaria o acesso de quem
+ * esta em dia so porque gerou uma segunda via e nao pagou.
+ */
+const REVOGA_NA_HORA = ['PURCHASE_REFUNDED', 'PURCHASE_CHARGEBACK', 'PURCHASE_PROTEST'];
+
+/**
+ * Eventos que so revogam se forem da MESMA compra que deu o acesso.
+ *
+ * `PURCHASE_CANCELED` cabe tanto a "assinante cancelou a cobranca de verdade"
+ * quanto a "tentativa de pagamento que nunca foi paga". A transacao e o que
+ * separa os dois casos.
+ */
+const REVOGA_COM_TRAVA = ['PURCHASE_CANCELED'];
+
+// Nunca revogam e caem no ramo generico de evento ignorado mais abaixo, que os
+// registra e responde 200: PURCHASE_EXPIRED, PURCHASE_DELAYED,
+// PURCHASE_BILLET_PRINTED e SWITCH_PLAN.
+
+/**
+ * Quando o cancelamento nao traz data utilizavel.
+ *
+ * Nem revogar na hora (tiraria o acesso de quem pagou pelo mes inteiro) nem
+ * deixar para sempre (seria acesso vitalicio de graca). 32 dias cobre o maior
+ * ciclo mensal com folga, e o evento de revisao abaixo existe para o caso nao
+ * passar despercebido.
+ */
+const DIAS_DE_SEGURANCA = 32;
+
+/**
+ * Le `date_next_charge` da Hotmart, que vem em milissegundos desde 1970 (UTC).
+ *
+ * Devolve null quando o valor falta, nao e numero ou ja passou — os tres casos
+ * em que a data nao serve para decidir nada. Como e um instante absoluto em
+ * UTC, nao ha fuso a interpretar: `new Date(ms)` ja e o momento certo, e o
+ * `toISOString()` grava em UTC, que e o que a coluna timestamptz espera.
+ */
+function lerDataDeCorte(valor: unknown): string | null {
+  const ms = typeof valor === 'number' ? valor : Number(valor);
+  if (!Number.isFinite(ms) || ms <= 0) return null;
+  const data = new Date(ms);
+  if (Number.isNaN(data.getTime())) return null;
+  if (data.getTime() <= Date.now()) return null;
+  return data.toISOString();
+}
+
+/**
+ * A transacao deste evento e a mesma que concedeu o acesso que vale hoje?
+ *
+ * Numa assinatura cada cobranca tem transacao propria, e a renovacao chega como
+ * compra aprovada — entao "a que concedeu" e sempre a concessao mais recente
+ * registrada para aquela conta.
+ *
+ * Sem transacao no evento ou sem concessao registrada, devolve false: nao da
+ * para afirmar que e a mesma compra, e na duvida nao se corta acesso de ninguem.
+ */
+async function eADaCompraQueDeuAcesso(usuariaId: string, transacao?: string): Promise<boolean> {
+  if (!transacao) return false;
+
+  const { data } = await supabase
+    .from('assinatura_eventos')
+    .select('hotmart_transacao')
+    .eq('usuaria_id', usuariaId)
+    .in('evento', ['PURCHASE_APPROVED', 'PURCHASE_COMPLETE'])
+    .not('hotmart_transacao', 'is', null)
+    .order('recebido_em', { ascending: false })
+    .limit(1);
+
+  return data?.[0]?.hotmart_transacao === transacao;
+}
 
 interface NormalizedPayload {
   email?: string;
@@ -279,6 +341,7 @@ async function garantirLinhaDeUsuaria(
         moeda: 'BRL',
         acesso_status: 'ativo',
         acesso_atualizado_em: new Date().toISOString(),
+        acesso_ate: null,
         parceiro_id: parceiroId,
         created_at: new Date().toISOString(),
       },
@@ -305,7 +368,9 @@ async function aplicarConcessao(usuariaId: string, parceiroId: number | null) {
 
   const { data: ativadas } = await supabase
     .from('usuarias')
-    .update({ acesso_status: 'ativo', acesso_atualizado_em: agora })
+    // `acesso_ate: null` junto: quem cancelou e voltou a assinar nao pode ser
+    // cortada pela data do cancelamento antigo.
+    .update({ acesso_status: 'ativo', acesso_atualizado_em: agora, acesso_ate: null })
     .eq('id', usuariaId)
     .select('id');
 
@@ -321,6 +386,36 @@ async function aplicarConcessao(usuariaId: string, parceiroId: number | null) {
       .eq('id', usuariaId)
       .is('parceiro_id', null);
   }
+}
+
+/**
+ * Registra algo que PRECISA de olho humano depois.
+ *
+ * Separado do rastro normal de propósito: sao os casos em que o automatico fez
+ * a escolha conservadora e pode ter errado — cancelamento sem data utilizavel,
+ * revogacao recusada pela trava. Sem isto, a escolha conservadora viraria
+ * silencio, que e o pior desfecho: ninguem descobre que o acesso deixou de ser
+ * cortado.
+ *
+ * Consulta: evento LIKE para os tipos de revisao em assinatura_eventos.
+ */
+async function registrarRevisao(
+  p: NormalizedPayload,
+  body: any,
+  usuariaId: string | null,
+  tipo: string,
+  detalhes: Record<string, unknown>
+) {
+  const { error } = await supabase.from('assinatura_eventos').insert({
+    hotmart_event_id: p.eventId ? `${p.eventId}:${tipo.toLowerCase()}` : null,
+    evento: tipo,
+    email: p.email ?? null,
+    usuaria_id: usuariaId,
+    hotmart_transacao: p.transacao ?? null,
+    hotmart_subscriber_code: p.subscriberCode ?? null,
+    payload: { ...detalhes, evento_original: p.event ?? null },
+  });
+  if (error) console.error(`Falha ao registrar ${tipo}:`, error.message);
 }
 
 /**
@@ -402,29 +497,84 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Perda de acesso. So grava o status; nada no app olha para ele ainda —
-    // o bloqueio e a etapa seguinte, de proposito.
-    if (event && REVOKING_EVENTS.includes(event)) {
+    // Cancelamento de assinatura: o acesso vale ate o fim do periodo ja pago.
+    if (event === 'SUBSCRIPTION_CANCELLATION') {
       const usuariaId = await acharUsuariaId(p.subscriberCode, email);
+      const dataDeCorte = lerDataDeCorte(body?.data?.date_next_charge);
 
-      if (usuariaId) {
-        const { error } = await supabase
-          .from('usuarias')
-          .update({ acesso_status: 'inativo', acesso_atualizado_em: new Date().toISOString() })
-          .eq('id', usuariaId);
-        if (error) {
-          console.error('Falha ao revogar acesso:', error);
-          return json({ error: 'Failed to revoke access' }, 500);
-        }
-      } else {
-        // Conta ainda nao existe (comprou e nunca entrou) ou e-mail nao bateu.
-        // Nao e erro: o evento fica registrado e a atribuicao pode ser refeita
-        // a partir do rastro quando a conta aparecer.
-        console.log(`Revogacao sem conta correspondente: ${email ?? p.subscriberCode}`);
+      if (!usuariaId) {
+        console.log('Cancelamento sem conta correspondente');
+        await registrarEvento(p, body, null, null);
+        return json({ message: 'Cancellation recorded, no account', matched: false }, 200);
+      }
+
+      // Sem data utilizavel: nem cortar agora (tiraria o acesso de quem pagou)
+      // nem deixar para sempre (seria acesso de graca). A data de seguranca
+      // resolve, e o evento de revisao garante que o caso nao passe batido.
+      const corte =
+        dataDeCorte ??
+        new Date(Date.now() + DIAS_DE_SEGURANCA * 24 * 60 * 60 * 1000).toISOString();
+
+      const { error } = await supabase
+        .from('usuarias')
+        .update({ acesso_ate: corte, acesso_atualizado_em: new Date().toISOString() })
+        .eq('id', usuariaId);
+
+      if (error) {
+        console.error('Falha ao gravar acesso_ate:', error.message);
+        return json({ error: 'Failed to schedule revocation' }, 500);
+      }
+
+      if (!dataDeCorte) {
+        await registrarRevisao(p, body, usuariaId, 'CANCELAMENTO_SEM_DATA', {
+          motivo: 'date_next_charge ausente, invalido ou no passado',
+          data_de_seguranca: corte,
+          dias_de_seguranca: DIAS_DE_SEGURANCA,
+        });
       }
 
       await registrarEvento(p, body, usuariaId, null);
-      return json({ message: 'Access revoked', event, matched: Boolean(usuariaId) }, 200);
+      return json({ message: 'Access scheduled to end', ate: corte }, 200);
+    }
+
+    // Revogacao imediata, com ou sem trava conforme o evento.
+    if (event && (REVOGA_NA_HORA.includes(event) || REVOGA_COM_TRAVA.includes(event))) {
+      const usuariaId = await acharUsuariaId(p.subscriberCode, email);
+
+      if (!usuariaId) {
+        console.log('Revogacao sem conta correspondente');
+        await registrarEvento(p, body, null, null);
+        return json({ message: 'Access revoked', event, matched: false }, 200);
+      }
+
+      if (REVOGA_COM_TRAVA.includes(event)) {
+        const mesmaCompra = await eADaCompraQueDeuAcesso(usuariaId, p.transacao);
+        if (!mesmaCompra) {
+          // Recusa registrada, nunca silenciosa: se a trava estiver errando, e
+          // aqui que isso aparece, em vez de virar "o acesso nao foi cortado e
+          // ninguem sabe por que".
+          await registrarRevisao(p, body, usuariaId, 'REVOGACAO_RECUSADA', {
+            motivo: 'transacao do evento nao e a que concedeu o acesso atual',
+            evento: event,
+            transacao_do_evento: p.transacao ?? null,
+          });
+          await registrarEvento(p, body, usuariaId, null);
+          return json({ message: 'Revocation skipped, different purchase', event }, 200);
+        }
+      }
+
+      const { error } = await supabase
+        .from('usuarias')
+        .update({ acesso_status: 'inativo', acesso_atualizado_em: new Date().toISOString() })
+        .eq('id', usuariaId);
+
+      if (error) {
+        console.error('Falha ao revogar acesso:', error.message);
+        return json({ error: 'Failed to revoke access' }, 500);
+      }
+
+      await registrarEvento(p, body, usuariaId, null);
+      return json({ message: 'Access revoked', event, matched: true }, 200);
     }
 
     // Eventos que nao concedem nem revogam (boleto impresso, atraso, troca de
