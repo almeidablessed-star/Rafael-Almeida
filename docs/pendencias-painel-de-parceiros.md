@@ -86,9 +86,29 @@ sandbox, que so entrega ao dono da conta Resend. Uma compradora de verdade nunca
 recebe o codigo de acesso. Verificar o dominio `carulaconfeitaria.com.br` no
 Resend e apontar o `RESEND_FROM` para ele. **Obrigatorio antes do lancamento.**
 
-**`otp_codes` com políticas abertas.** Ficou fora do escopo da Etapa 4 e segue
-pendente. É a tabela dos códigos de acesso por e-mail; políticas permissivas
-demais ali são problema de segurança real. **Bloqueador antes do lançamento.**
+**`otp_codes` — bloqueio imediato aplicado pelo Rafael** (2026-10-08): as cinco
+políticas foram removidas e `anon` e `authenticated` perderam os privilégios na
+tabela. Só o service-role a toca. Isso **quebra a `VerifyOtpPage` antiga de
+propósito**, até a versão reescrita subir. O motivo era grave: o código ficava em
+texto puro e legível por qualquer visitante, e a política de INSERT só conferia
+`user_id`, sem olhar o e-mail — qualquer pessoa logada podia forjar uma linha com
+o e-mail de outra e obter sessão da vítima, porque a função gerava o link pelo
+e-mail da requisição.
+
+**Reenvio de código não existe.** Nenhuma tela permite pedir um código novo; o
+único caminho é um novo evento de compra no webhook. Quem perder ou deixar o
+código expirar fica sem primeiro acesso. **Obrigatório antes do lançamento**, e
+com limite próprio de pedidos por e-mail, senão o reenvio vira um jeito de
+inundar a caixa de alguém.
+
+**CORS `*` no `swift-responder`.** Qualquer origem pode chamar o verificador.
+Mantido nesta etapa porque restringir pode quebrar o PWA instalado, que nem
+sempre manda a origem esperada. Avaliar uma lista de origens permitidas depois
+de confirmar o comportamento do PWA.
+
+**`DROP COLUMN code` pendente.** A coluna em texto puro continua na tabela, agora
+sem NOT NULL e sem ninguém escrevendo nela. Só remover **depois** de as duas
+funções novas estarem no ar e nenhum código em trânsito depender dela.
 
 ## Sem pressa
 
