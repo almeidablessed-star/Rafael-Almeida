@@ -18,6 +18,30 @@ function json(body: unknown, status: number) {
   });
 }
 
+/**
+ * HMAC-SHA256 do codigo com o segredo OTP_PEPPER, em hexadecimal.
+ *
+ * E o MESMO calculo do swift-responder: se um dos dois mudar, nenhum codigo
+ * mais confere. Hash simples nao serviria — seis digitos sao mil milhoes de
+ * possibilidades de menos, e uma tabela vazada cairia por forca bruta na hora.
+ */
+async function hashDoCodigo(codigo: string): Promise<string> {
+  const pepper = Deno.env.get('OTP_PEPPER');
+  if (!pepper) throw new Error('OTP_PEPPER nao configurado');
+
+  const chave = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(pepper),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const assinatura = await crypto.subtle.sign('HMAC', chave, new TextEncoder().encode(codigo));
+  return Array.from(new Uint8Array(assinatura))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
 function generateOtp(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
@@ -327,14 +351,21 @@ Deno.serve(async (req) => {
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes
 
     // Store OTP in database
+    // Guarda o HASH, nunca o codigo. O codigo em texto vai so no e-mail, e some
+    // daqui em diante — enquanto ele ficava na tabela, qualquer um que lesse a
+    // tabela entrava na conta de qualquer compradora.
+    //
+    // O e-mail entra normalizado porque o verificador procura com `eq` sobre o
+    // valor normalizado; gravar com outra caixa faria o codigo nunca ser achado.
     const { error: otpError } = await supabase
       .from('otp_codes')
       .insert({
-        email,
-        code: otp,
+        email: email.trim().toLowerCase(),
+        code_hash: await hashDoCodigo(otp),
         user_id: userId,
         expires_at: expiresAt,
         used: false,
+        tentativas: 0,
       });
 
     if (otpError) {

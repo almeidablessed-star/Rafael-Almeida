@@ -1,0 +1,28 @@
+# Configuracao do CLI do Supabase.
+#
+# Existe por um motivo so, e importante: as duas Edge Functions deste projeto
+# estao publicadas com `verify_jwt = false`, e isso hoje depende de alguem
+# lembrar de passar `--no-verify-jwt` em cada deploy. O padrao do CLI e `true`.
+# Um deploy sem a flag passaria a exigir JWT e quebraria as duas na hora:
+#
+#   - `smart-processor` e chamada pela Hotmart, que manda o segredo no cabecalho
+#     `X-HOTMART-HOTTOK` e nao tem como mandar um JWT do Supabase. Com
+#     verificacao ligada, toda notificacao de compra seria recusada — e o
+#     sintoma apareceria como "a compradora nao recebeu o codigo".
+#   - `swift-responder` e chamada por quem ainda NAO tem sessao: e justamente
+#     ela que cria a sessao. Exigir JWT ali e uma contradicao.
+#
+# Em ambas, quem faz as vezes da autenticacao e a propria funcao: o hottok numa,
+# o codigo de uso unico na outra.
+#
+# Conferido antes de criar este arquivo: sao as unicas duas funcoes publicadas
+# no projeto, as duas com `verify_jwt = false`. Este arquivo descreve o que ja
+# esta no ar; nao muda o comportamento de nada.
+
+project_id = "inqyobsjuztztvafpzxn"
+
+[functions.smart-processor]
+verify_jwt = false
+
+[functions.swift-responder]
+verify_jwt = false
