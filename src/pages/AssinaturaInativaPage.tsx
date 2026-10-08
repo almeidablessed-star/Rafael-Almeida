@@ -1,16 +1,8 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
+import { HOTMART_URL } from '../config/hotmart';
 import { supabase } from '../lib/supabase';
 
-/**
- * Para onde mandar quem quer voltar a assinar.
- *
- * TODO: preencher com a URL da oferta na Hotmart. Enquanto estiver vazia o
- * botao de renovar simplesmente nao aparece — um botao que leva a lugar nenhum
- * e pior que nenhum botao, porque a pessoa clica, nada acontece e ela conclui
- * que o app esta quebrado em vez de entender que precisa renovar.
- */
-const HOTMART_URL = '';
 
 /**
  * Tela unica de quem esta com o acesso pausado.

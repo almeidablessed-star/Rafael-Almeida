@@ -28,6 +28,13 @@ precisar recriar a tela.
 
 ## 2. Padrão da coluna
 
+> **O arquivo de migração está no repositório desde o commit `027ab2e`, mas
+> isso NÃO significa que ele já foi aplicado.** Ele é rodado à mão pelo Rafael
+> no SQL Editor, logo depois de o app ir ao ar — nesta ordem, porque a compra
+> simulada seguinte é o que prova que o webhook manda `acesso_status`
+> explicitamente. Enquanto não for rodado, o default no banco continua
+> `ativo`.
+
 Arquivo `supabase/migrations/20261009120000_acesso_status_default_inativo.sql`.
 
 ```sql
