@@ -117,6 +117,19 @@ e precisa de um reenvio. Classe `nosso` ou `transitorio` quer dizer que a conta
 foi desfeita e a Hotmart vai reenviar sozinha — o que precisa de conserto ali é
 a configuração.
 
+**Bounce assíncrono não gera `EMAIL_FALHOU` — o buraco maior desta consulta.**
+O `EMAIL_FALHOU` só nasce quando o Resend **recusa na hora**, na própria chamada
+de envio. O caso mais comum na vida real é outro: o Resend **aceita** o e-mail,
+responde 200, e só depois a caixa de destino devolve — endereço digitado errado,
+conta inexistente, caixa cheia. Isso é um *bounce assíncrono*, e chega apenas
+pelo webhook do Resend, no evento `email.bounced`
+([documentação](https://resend.com/docs/webhooks/emails/bounced)). Como esse
+webhook não é tratado, **essas falhas hoje não aparecem em lugar nenhum**: a
+compradora pagou, a conta existe, o código nunca chegou, e a consulta acima
+continua vazia. Tratar o webhook e registrar `EMAIL_FALHOU` com classe
+`destinatario_assincrono` é **obrigatório antes do lançamento**, junto com o
+aviso ativo — os dois resolvem o mesmo problema por caminhos diferentes.
+
 **Reenvio pode ser usado contra a pessoa (aceito por ora).** Quem souber o
 e-mail de alguém pode apertar "Não recebi o código" e, com isso, **invalidar o
 código pendente dessa pessoa** e **gastar o teto diário dela** (5 por dia), que é
