@@ -95,11 +95,41 @@ texto puro e legível por qualquer visitante, e a política de INSERT só confer
 o e-mail de outra e obter sessão da vítima, porque a função gerava o link pelo
 e-mail da requisição.
 
-**Reenvio de código não existe.** Nenhuma tela permite pedir um código novo; o
-único caminho é um novo evento de compra no webhook. Quem perder ou deixar o
-código expirar fica sem primeiro acesso. **Obrigatório antes do lançamento**, e
-com limite próprio de pedidos por e-mail, senão o reenvio vira um jeito de
-inundar a caixa de alguém.
+**Aviso ativo quando o e-mail falha.** O webhook passou a registrar
+`EMAIL_FALHOU` em `assinatura_eventos` quando o Resend recusa, mas **ninguém é
+avisado**: o registro só aparece para quem for olhar. Uma compra paga que não
+virou acesso pode ficar dias sem ninguém notar. **Obrigatório antes do
+lançamento.** Até lá, rodar esta consulta uma vez por semana:
+
+```sql
+SELECT recebido_em, email, usuaria_id,
+       payload->>'classe'      AS classe,
+       payload->>'codigo_http' AS codigo_http,
+       payload->>'motivo'      AS motivo
+  FROM public.assinatura_eventos
+ WHERE evento = 'EMAIL_FALHOU'
+   AND recebido_em > now() - interval '7 days'
+ ORDER BY recebido_em DESC;
+```
+
+Classe `destinatario` quer dizer conta criada e e-mail recusado: a pessoa existe
+e precisa de um reenvio. Classe `nosso` ou `transitorio` quer dizer que a conta
+foi desfeita e a Hotmart vai reenviar sozinha — o que precisa de conserto ali é
+a configuração.
+
+**Reenvio pode ser usado contra a pessoa (aceito por ora).** Quem souber o
+e-mail de alguém pode apertar "Não recebi o código" e, com isso, **invalidar o
+código pendente dessa pessoa** e **gastar o teto diário dela** (5 por dia), que é
+justamente o que impede o abuso de virar enxurrada de e-mail. O resultado é
+incômodo — a dona da conta pede outro e recebe —, nunca acesso indevido: o
+código vai sempre para o endereço cadastrado. Decidido conviver com isso por
+ora; a saída seria exigir uma prova humana no botão.
+
+**Reenvio de código — IMPLEMENTADO**, aguardando publicação e teste: função
+`resend-otp` e botão "Não recebi o código" nas duas telas de verificação.
+Intervalo mínimo de 60 s, teto de 5 por dia por conta, código novo invalida os
+anteriores, e resposta sempre idêntica — inclusive com o limite estourado,
+porque dizer "espere um pouco" confirmaria que a conta existe.
 
 **CORS `*` no `swift-responder`.** Qualquer origem pode chamar o verificador.
 Mantido nesta etapa porque restringir pode quebrar o PWA instalado, que nem
