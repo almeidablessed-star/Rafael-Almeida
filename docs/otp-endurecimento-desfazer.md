@@ -108,3 +108,45 @@ Atenção ao reverter o `smart-processor`: a versão `5e37be9` volta à regra an
 de "qualquer 4xx é definitivo", que **apaga a conta de quem pagou** e responde
 200 para a Hotmart não reenviar. Uma configuração quebrada volta a derrubar
 todas as compradoras em silêncio. Reverta só se o problema for pior que esse.
+
+## Correção do primeiro acesso (commitado em 2026-10-08, ainda não publicado)
+
+Dois commits, publicados nesta ordem: **primeiro o app** (`a9261c0`), **depois o
+webhook** (`841c960`). A ordem importa — o app novo funciona com o webhook
+antigo (conta sem linha e sem marcador: cai no ramo de perfil, como antes), mas
+o webhook novo com o app antigo criaria linhas com `nome_confeitaria` vazio que
+o app antigo trataria como perfil completo, mandando a pessoa direto ao
+onboarding com o nome da confeitaria em branco.
+
+O que mudou:
+
+- `ProtectedRoute` renderiza a `ResetPasswordPage` ele mesmo, acima do
+  `FinancialOnboardingGate`, e a decisão saiu do `AppContent`.
+- A tela de senha também aparece por `user_metadata.senha_temporaria`, não só
+  por `?type=recovery`.
+- O teste de perfil virou "incompleto" (`!nome_confeitaria`), não "ausente".
+- `setupProfile` faz UPDATE e, se nenhuma linha for atingida, INSERT.
+- O webhook cria a linha de `usuarias` na compra e marca
+  `senha_temporaria = true` no usuário.
+
+### Desfazer
+
+```bash
+git checkout b6bd3ab -- supabase/functions/smart-processor/index.ts
+npx supabase functions deploy smart-processor --project-ref inqyobsjuztztvafpzxn --no-verify-jwt
+git checkout HEAD -- supabase/functions/smart-processor/index.ts
+git revert --no-edit 841c960 a9261c0
+git push origin chore/carula-site-preview
+git push origin HEAD:production
+git push origin HEAD:master
+```
+
+Reverter traz de volta o primeiro acesso quebrado: quem comprar cai no
+onboarding e a RLS recusa gravar. As linhas de `usuarias` já criadas pelo
+webhook novo **podem ficar** — são válidas; o app revertido só vai considerá-las
+perfil completo mesmo com `nome_confeitaria` vazio. Se isso incomodar, a saída é
+preencher o campo pela tela de perfil, não apagar a linha.
+
+Contas que já tiverem `senha_temporaria = true` e não tiverem definido senha
+ficam sem a tela de senha depois do revert — o caminho para elas passa a ser o
+reenvio de código.
