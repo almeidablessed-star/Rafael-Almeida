@@ -27,3 +27,12 @@ COMMENT ON COLUMN public.otp_codes.tentativas IS 'Erros de digitacao neste codig
 -- de fora as linhas com NULL, que sao tao validas quanto para quem le com
 -- `.eq('used', false)`.
 UPDATE public.otp_codes SET used = true WHERE used IS NOT TRUE;
+
+-- Apaga o codigo em texto das linhas antigas, ja invalidadas acima.
+--
+-- Rodado pelo Rafael junto do resto do passo 0, e registrado aqui para o
+-- repositorio refletir o banco. Invalidar nao basta: enquanto o texto continua
+-- gravado, ele segue sendo um segredo guardado a toa — e esses codigos
+-- especificos ja estiveram expostos enquanto as politicas da tabela eram
+-- abertas. A coluna em si so sai numa migration posterior.
+UPDATE public.otp_codes SET code = NULL;
