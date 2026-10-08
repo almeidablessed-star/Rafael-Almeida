@@ -258,6 +258,16 @@ Deno.serve(async (req) => {
     return json({ error: 'Server misconfigured' }, 500);
   }
 
+  // Mesmo motivo, para o segredo do hash: sem ele, `hashDoCodigo` so estouraria
+  // la na frente, DEPOIS de a conta ja estar criada — e o catch de erro faria o
+  // rollback apagar a conta de uma compradora que pagou. Conferir aqui recusa o
+  // evento antes de tocar em qualquer coisa, e o 500 faz a Hotmart reenviar
+  // assim que o segredo existir.
+  if (!Deno.env.get('OTP_PEPPER')) {
+    console.error('OTP_PEPPER nao configurado - nenhum codigo pode ser gerado');
+    return json({ error: 'Server misconfigured' }, 500);
+  }
+
   if (readHottok(req) !== secret) {
     return json({ error: 'Unauthorized' }, 401);
   }
