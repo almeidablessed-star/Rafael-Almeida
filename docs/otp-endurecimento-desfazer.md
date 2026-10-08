@@ -57,3 +57,25 @@ ler os códigos de todas as compradoras e forjar sessão de outra pessoa. Se, ao
 reverter, a `VerifyOtpPage` antiga voltar, ela **não vai funcionar** — ela lia a
 tabela pelo navegador. Nesse cenário o caminho de primeiro acesso é a
 `VerifyOtpStandalonePage`, que já passava pela função.
+
+## Remetente configurável (publicado em 2026-10-08)
+
+O `smart-processor` passou a exigir `RESEND_FROM` e `OTP_PEPPER` no início do
+pedido, e monta o remetente como `Carula Confeitaria <endereço do secret>`. A
+versão anterior é o commit `d821bcf`. Só o `smart-processor` mudou — o
+`swift-responder` não precisa voltar.
+
+```bash
+git checkout d821bcf -- supabase/functions/smart-processor/index.ts
+npx supabase functions deploy smart-processor --project-ref inqyobsjuztztvafpzxn --no-verify-jwt
+git checkout HEAD -- supabase/functions/smart-processor/index.ts
+git revert --no-edit bc4e95a 37ff718
+git push origin chore/carula-site-preview
+git push origin HEAD:production
+git push origin HEAD:master
+```
+
+Atenção ao reverter: a versão antiga **cai no remetente de teste do resend.dev**
+quando `RESEND_FROM` não existe, e aquele endereço só entrega ao dono da conta
+Resend. Reverter devolve o comportamento de "a compradora não recebe nada, e
+nada no log diz isso" — por isso reverta só se o problema for pior que esse.
