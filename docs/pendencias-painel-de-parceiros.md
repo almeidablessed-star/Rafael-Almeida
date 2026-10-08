@@ -81,6 +81,11 @@ assinatura" **não é renderizado** — de propósito: um botão que não leva a
 nenhum é pior que nenhum botão. Mas isso significa que hoje quem está pausado não
 tem caminho de volta. Preencher antes de haver assinante de verdade.
 
+**Resend ainda envia pelo remetente de teste.** O remetente e `resend.dev`, de
+sandbox, que so entrega ao dono da conta Resend. Uma compradora de verdade nunca
+recebe o codigo de acesso. Verificar o dominio `carulaconfeitaria.com.br` no
+Resend e apontar o `RESEND_FROM` para ele. **Obrigatorio antes do lancamento.**
+
 **`otp_codes` com políticas abertas.** Ficou fora do escopo da Etapa 4 e segue
 pendente. É a tabela dos códigos de acesso por e-mail; políticas permissivas
 demais ali são problema de segurança real. **Bloqueador antes do lançamento.**
