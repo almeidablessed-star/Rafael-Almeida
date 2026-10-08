@@ -4,6 +4,7 @@ import { LoginPage } from '../pages/LoginPage';
 import { SignupPage } from '../pages/SignupPage';
 import { SetupProfilePage } from '../pages/SetupProfilePage';
 import { VerifyOtpStandalonePage } from '../pages/VerifyOtpStandalonePage';
+import { ResetPasswordPage } from '../pages/ResetPasswordPage';
 import { AssinaturaInativaPage } from '../pages/AssinaturaInativaPage';
 
 interface ProtectedRouteProps {
@@ -37,9 +38,32 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
-  // If user needs to reset password or verify OTP, show AppContent which will handle those flows
-  if (isResetPasswordRequired || isOtpVerificationRequired) {
+  // A verificacao de codigo continua indo pelos children: ela e tratada dentro
+  // do AppContent e nao disputa com o portao de onboarding, porque so acontece
+  // em conta que ja passou por aqui antes.
+  if (isOtpVerificationRequired) {
     return <>{children}</>;
+  }
+
+  // DEFINIR SENHA — e esta a correcao central.
+  //
+  // Antes, este ramo devolvia os children, e a ResetPasswordPage morava dentro
+  // do AppContent. So que os children comecam pelo FinancialOnboardingGate: ele
+  // montava primeiro, via o onboarding incompleto e mostrava o passo 1 de 9. O
+  // AppContent nunca era alcancado, entao a tela de senha nunca aparecia — e,
+  // junto com ela, o ramo do perfil logo abaixo era pulado tambem. Quem comprava
+  // caia direto num onboarding que a RLS recusava gravar.
+  //
+  // Renderizando a pagina AQUI, ela fica acima do portao de onboarding.
+  //
+  // E a marca nao pode ser so a URL: `?type=recovery` se perde ao recarregar ou
+  // ao apertar voltar, e a conta ficava presa para sempre com a senha aleatoria
+  // que ninguem conhece. O marcador `senha_temporaria` vive no usuario do Auth e
+  // sobrevive aos dois. Ele e editavel pela propria pessoa, o que aqui nao e
+  // problema: ele decide se uma tela aparece, nunca da acesso a nada.
+  const senhaTemporaria = user.user_metadata?.senha_temporaria === true;
+  if (isResetPasswordRequired || senhaTemporaria) {
+    return <ResetPasswordPage />;
   }
 
   // Acesso pausado. Vem ANTES dos portoes de setup e de onboarding: com a RLS
@@ -55,7 +79,11 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     return <AssinaturaInativaPage />;
   }
 
-  if (isSetupRequired || !userProfile) {
+  // Perfil INCOMPLETO, e nao so perfil ausente. Com o webhook criando a linha na
+  // compra, existir linha deixou de significar perfil preenchido: ela nasce so
+  // com o nome do comprador, e `nome_confeitaria` e a moeda ficam para esta
+  // tela. Sem o segundo teste, quem comprasse pularia o cadastro.
+  if (isSetupRequired || !userProfile || !userProfile.nome_confeitaria) {
     return <SetupProfilePage />;
   }
 

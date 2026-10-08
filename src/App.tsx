@@ -33,7 +33,6 @@ import { Header } from './components/Header';
 import { BottomNav } from './components/BottomNav';
 import { PeriodSelector } from './components/PeriodSelector';
 import { Dashboard } from './components/Dashboard';
-import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { VerifyOtpPage } from './pages/VerifyOtpPage';
 import { OrdersModule } from './components/OrdersModule';
 import { CostsModule } from './components/CostsModule';
@@ -498,9 +497,9 @@ function AppContent() {
     return <VerifyOtpPage />;
   }
 
-  if (isResetPasswordRequired) {
-    return <ResetPasswordPage />;
-  }
+  // A tela de senha saiu daqui: quem decide e o ProtectedRoute, ACIMA do
+  // FinancialOnboardingGate. Aqui dentro ela ficava atras do portao de
+  // onboarding e nunca chegava a aparecer no primeiro acesso.
 
   return (
       <div className="min-h-screen text-[var(--color-ink)] flex flex-col font-sans" style={{ overflow: 'hidden' }}>

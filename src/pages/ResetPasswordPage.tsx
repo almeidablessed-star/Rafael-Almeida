@@ -43,8 +43,13 @@ export const ResetPasswordPage: React.FC = () => {
       // logout and redirect below.
       beginAuthTransition();
 
+      // `senha_temporaria: false` junto com a senha, na MESMA chamada: e esse
+      // marcador que faz o ProtectedRoute mostrar esta tela. Apagar depois, numa
+      // segunda chamada, deixaria uma janela em que a senha ja mudou mas a
+      // pessoa continua presa aqui se a segunda falhar.
       const { error: updateError } = await supabase.auth.updateUser({
         password: password,
+        data: { senha_temporaria: false },
       });
 
       if (updateError) {

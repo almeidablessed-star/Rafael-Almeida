@@ -319,34 +319,52 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user) throw new Error('No user found');
 
     try {
-      // `upsert` com `ignoreDuplicates`, e nao `insert`: criar o perfil precisa
-      // ser idempotente. Com o insert, uma segunda chamada para a mesma conta
-      // — duplo clique no botao, aba duplicada, retry depois de uma falha de
-      // rede — violava a chave primaria e o erro do Postgres subia cru ate a
-      // tela, como se o cadastro tivesse falhado.
+      // UPDATE primeiro, INSERT so se nao houver linha.
       //
-      // `ignoreDuplicates: true` vira `ON CONFLICT DO NOTHING`: a linha que ja
-      // existe fica intacta. E de proposito que nao seja `DO UPDATE` — este
-      // payload tem so os tres campos da tela de setup mais o `created_at`, e
-      // reescrever a linha existente com ele apagaria a data de criacao
-      // original. Quando nao ha conflito (o caso normal, cadastro novo) o
-      // comando e um INSERT igual ao de antes.
-      const { error } = await supabase
+      // Antes era um `upsert ... ignoreDuplicates`, que vira
+      // `INSERT ... ON CONFLICT DO NOTHING`. Isso bastava quando a linha de
+      // `usuarias` nascia aqui. Agora o webhook a cria na compra, com o nome do
+      // comprador e `nome_confeitaria` vazio — e o DO NOTHING nao gravaria nada:
+      // a tela salvaria "com sucesso", `nome_confeitaria` continuaria vazio, e o
+      // ProtectedRoute mandaria a pessoa de volta para ca, em volta e volta.
+      //
+      // O `.select('id')` no UPDATE e o que diz quantas linhas foram atingidas:
+      // sem ele nao da para saber se e preciso inserir.
+      const { data: atualizadas, error: updateError } = await supabase
         .from('usuarias')
-        .upsert(
-          [
-            {
-              id: user.id,
-              nome,
-              nome_confeitaria,
-              moeda,
-              created_at: new Date().toISOString(),
-            },
-          ],
-          { onConflict: 'id', ignoreDuplicates: true }
-        );
+        .update({ nome, nome_confeitaria, moeda })
+        .eq('id', user.id)
+        .select('id');
 
-      if (error) throw error;
+      if (updateError) throw updateError;
+
+      if (!atualizadas || atualizadas.length === 0) {
+        // Sem linha ainda: cadastro direto, sem compra. As colunas aqui sao
+        // exatamente as que o Script B liberou para INSERT.
+        const { error: insertError } = await supabase.from('usuarias').insert([
+          {
+            id: user.id,
+            nome,
+            nome_confeitaria,
+            moeda,
+            created_at: new Date().toISOString(),
+          },
+        ]);
+
+        // Corrida com outra aba ou com o webhook: se a linha apareceu entre o
+        // UPDATE e o INSERT, a chave primaria reclama. Nao e falha — o dado ja
+        // esta la — entao so o UPDATE acima precisa valer, e ele roda de novo.
+        if (insertError && !insertError.message?.includes('duplicate key')) {
+          throw insertError;
+        }
+        if (insertError) {
+          const { error: erroSegundaTentativa } = await supabase
+            .from('usuarias')
+            .update({ nome, nome_confeitaria, moeda })
+            .eq('id', user.id);
+          if (erroSegundaTentativa) throw erroSegundaTentativa;
+        }
+      }
 
       // Resgata o parceiro que indicou a compra.
       //
