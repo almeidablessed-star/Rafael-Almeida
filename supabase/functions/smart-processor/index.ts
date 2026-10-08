@@ -64,41 +64,50 @@ const GRANTING_STATUSES = ['APPROVED', 'COMPLETE', 'COMPLETED'];
 /**
  * Em que classe cai uma recusa do Resend.
  *
- * A diferenca decide duas coisas de peso: se a conta da compradora sobrevive e
- * se a Hotmart vai reenviar o evento.
+ * A decisao vale muito: ela define se a conta da compradora sobrevive e se a
+ * Hotmart vai reenviar o evento.
  *
- *   'nosso'       — o problema e de configuracao nossa: chave invalida ou
- *                   revogada, dominio nao verificado, remetente recusado,
- *                   limite da nossa conta. NAO e culpa do pedido, e um reenvio
- *                   depois do conserto funciona.
- *   'destinatario'— o endereco e que nao serve: invalido, rejeitado,
- *                   suprimido. Reenviar replica a mesma recusa para sempre.
- *   'transitorio' — rede, 5xx do provedor, 429. Passa sozinho.
+ *   'nosso'        — configuracao nossa: chave invalida, suspensa ou sem
+ *                    permissao, dominio nao verificado, remetente recusado,
+ *                    payload malformado. Um reenvio depois do conserto funciona.
+ *   'destinatario' — o endereco de destino e que nao serve. Reenviar replica a
+ *                    mesma recusa para sempre.
+ *   'transitorio'  — rede, 5xx do provedor, limite de taxa. Passa sozinho.
  *
- * Por que nao basta "4xx = definitivo", como era antes: uma chave revogada ou
- * um dominio nao verificado tambem respondem 4xx. Com a regra antiga, uma
- * configuracao quebrada faria TODAS as compradoras virarem "200, nao reenvie" —
- * o pior resultado possivel, porque cada venda perdida fica invisivel e
- * irrecuperavel. Erro nosso precisa parar a fila ate ser consertado.
+ * Classifica por STATUS e pelo campo `name` do erro, nao por pedaco de texto:
+ * a redacao da mensagem muda sem aviso e levaria a classificacao junto.
+ * Referencia: https://resend.com/docs/api-reference/errors
+ *
+ * REGRA DE SEGURANCA: o que nao for reconhecido com certeza cai em 'nosso'.
+ * Errar para 'nosso' custa um reenvio da Hotmart; errar para 'destinatario'
+ * custa uma venda paga que nunca vira acesso e ninguem percebe. Por isso so
+ * vira 'destinatario' o caso que a documentacao aponta como problema do
+ * endereco de destino.
  */
 function classificarErroDeEmail(error: any): 'nosso' | 'destinatario' | 'transitorio' {
   const status = typeof error?.statusCode === 'number' ? error.statusCode : 0;
-  const texto = `${error?.name ?? ''} ${error?.message ?? ''}`.toLowerCase();
+  const name = typeof error?.name === 'string' ? error.name : '';
 
-  if (status === 429 || status >= 500 || status === 0) return 'transitorio';
+  // Sem status nenhum: a chamada nem chegou ao Resend (rede, DNS, timeout).
+  if (status === 0) return 'transitorio';
 
-  const pistasNossas = [
-    'api key', 'api_key', 'unauthorized', 'forbidden', 'restricted',
-    'domain', 'not verified', 'verify a domain', 'from address', 'sender',
-    'quota', 'limit',
-  ];
-  if (status === 401 || status === 403 || pistasNossas.some((p) => texto.includes(p))) {
-    return 'nosso';
-  }
+  // 429 e 5xx passam sozinhos. Cotas diaria e mensal entram aqui de proposito:
+  // sao um teto que vira a virada do dia ou do mes, nao defeito de configuracao.
+  if (status === 429 || status >= 500) return 'transitorio';
 
-  // Sobrou 4xx que fala do destinatario: endereco invalido, caixa inexistente,
-  // endereco na lista de supressao.
-  return 'destinatario';
+  // O UNICO caso de destinatario que a documentacao define: o Resend recusa na
+  // hora enderecos de dominios que nao servem para e-mail (example.com,
+  // test.com) com 422. Ver
+  // https://resend.com/docs/knowledge-base/what-email-addresses-to-use-for-testing
+  //
+  // Os demais 422 da lista de erros — missing_required_field,
+  // missing_required_parameter, invalid_attachment, invalid_parameter — sao
+  // payload nosso malformado, e por isso NAO caem aqui.
+  if (status === 422 && name === 'validation_error') return 'destinatario';
+
+  // Todo o resto e nosso: 401 e 403 de chave e dominio, 400 de payload, 404,
+  // 405, 409, e qualquer `name` novo que a Resend passe a devolver.
+  return 'nosso';
 }
 
 /**
