@@ -141,12 +141,28 @@ git push origin HEAD:production
 git push origin HEAD:master
 ```
 
-Reverter traz de volta o primeiro acesso quebrado: quem comprar cai no
-onboarding e a RLS recusa gravar. As linhas de `usuarias` já criadas pelo
-webhook novo **podem ficar** — são válidas; o app revertido só vai considerá-las
-perfil completo mesmo com `nome_confeitaria` vazio. Se isso incomodar, a saída é
-preencher o campo pela tela de perfil, não apagar a linha.
+Os dois commits foram publicados em momentos diferentes — o app primeiro, o
+webhook depois —, então **se só o app estiver no ar**, o desfazer é apenas
+`git revert --no-edit a9261c0`, sem tocar na Edge Function. O bloco acima vale
+para o estado atual, com os dois publicados.
 
-Contas que já tiverem `senha_temporaria = true` e não tiverem definido senha
-ficam sem a tela de senha depois do revert — o caminho para elas passa a ser o
-reenvio de código.
+Reverter traz de volta o primeiro acesso quebrado: quem comprar cai no
+onboarding e a RLS recusa gravar.
+
+### O que acontece com as contas já criadas pelo webhook novo
+
+**A linha em `usuarias` criada na compra é inofensiva.** Ela é uma linha válida,
+com `acesso_status = 'ativo'` e o nome do comprador; nada no app revertido se
+incomoda com a existência dela. A única diferença é que o app antigo testa
+"perfil ausente" e não "perfil incompleto", então vai tratá-la como cadastro
+pronto mesmo com `nome_confeitaria` vazio — a pessoa entra com o nome da
+confeitaria em branco no orçamento. A saída é preencher pela tela de perfil,
+**nunca apagar a linha**: apagá-la tira o acesso de quem pagou.
+
+**O marcador `senha_temporaria` fica como está, verdadeiro, até a senha ser
+definida.** Ele vive no usuário do Auth e nada o limpa sozinho. Depois do
+revert, o app volta a decidir a tela de senha só por `?type=recovery`, então o
+marcador deixa de ter efeito e quem ainda não definiu senha fica sem essa tela —
+o caminho para essas contas passa a ser o reenvio de código, que cria uma sessão
+nova pelo link mágico. O marcador não dá acesso a nada por si só; ele apenas
+deixa de ser lido.
