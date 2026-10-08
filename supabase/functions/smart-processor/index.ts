@@ -243,6 +243,21 @@ Deno.serve(async (req) => {
     return json({ error: 'Server misconfigured' }, 500);
   }
 
+  // Remetente conferido AQUI, antes de criar qualquer coisa.
+  //
+  // Nao ha mais queda silenciosa para o remetente de teste: ele so entregava ao
+  // dono da conta Resend, entao uma compradora de verdade nunca receberia o
+  // codigo — e o sintoma aparecia como "comprei e nao recebi nada", sem rastro
+  // de erro em lugar nenhum. Falhar alto e melhor que entregar no vazio.
+  //
+  // 500, e nao 200: a Hotmart reenvia o evento. Secret faltando e configuracao,
+  // nao defeito do pedido; quando ele for definido, o reenvio entra sozinho e a
+  // compradora recebe o acesso sem ninguem precisar reprocessar a mao.
+  if (!Deno.env.get('RESEND_FROM')) {
+    console.error('RESEND_FROM nao configurado - nenhum e-mail sera enviado');
+    return json({ error: 'Server misconfigured' }, 500);
+  }
+
   if (readHottok(req) !== secret) {
     return json({ error: 'Unauthorized' }, 401);
   }
@@ -377,7 +392,10 @@ Deno.serve(async (req) => {
     // Send email with OTP
     const appUrl = Deno.env.get('APP_URL') || 'https://rafael-almeida-nine.vercel.app';
     const emailResult = await resend.emails.send({
-      from: Deno.env.get('RESEND_FROM') || 'Carula Confeitaria <noreply@resend.dev>',
+      // O secret guarda so o endereco; o nome de exibicao vive no codigo, para
+      // trocar de dominio nao exigir lembrar do formato com os sinais de menor
+      // e maior — que, de quebra, o terminal do Windows engoliria ao gravar.
+      from: `Carula Confeitaria <${Deno.env.get('RESEND_FROM')}>`,
       to: email,
       subject: 'Seu Código de Acesso - Carula Confeitaria',
       html: `
