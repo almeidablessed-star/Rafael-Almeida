@@ -106,6 +106,17 @@ Mantido nesta etapa porque restringir pode quebrar o PWA instalado, que nem
 sempre manda a origem esperada. Avaliar uma lista de origens permitidas depois
 de confirmar o comportamento do PWA.
 
+**Remetente do Resend fixo no codigo.** Alem de trocar o sandbox pelo dominio
+`carulaconfeitaria.com.br` depois de verifica-lo, o remetente deve virar
+configuravel por secret (`RESEND_FROM`, que ja e lido com um valor padrao no
+codigo) — assim trocar de dominio nao exige republicar funcao.
+
+**Excluir `supabase/functions` do `tsconfig`.** O typecheck foi de 14 para 21
+erros quando a segunda funcao entrou no repositorio: sao todos `Cannot find name
+Deno` e `Cannot find module https://esm.sh/...`. E codigo Deno sendo conferido
+por um `tsconfig` de navegador; o ruido mascara erro de verdade. Excluir a pasta
+devolve o sinal.
+
 **`DROP COLUMN code` pendente.** A coluna em texto puro continua na tabela, agora
 sem NOT NULL e sem ninguém escrevendo nela. Só remover **depois** de as duas
 funções novas estarem no ar e nenhum código em trânsito depender dela.
