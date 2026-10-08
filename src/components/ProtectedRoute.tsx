@@ -1,7 +1,6 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { LoginPage } from '../pages/LoginPage';
-import { SignupPage } from '../pages/SignupPage';
 import { SetupProfilePage } from '../pages/SetupProfilePage';
 import { VerifyOtpStandalonePage } from '../pages/VerifyOtpStandalonePage';
 import { ResetPasswordPage } from '../pages/ResetPasswordPage';
@@ -13,7 +12,10 @@ interface ProtectedRouteProps {
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { user, userProfile, isLoading, isSetupRequired, isResetPasswordRequired, isOtpVerificationRequired, isValidatingProfile } = useAuth();
-  const [authMode, setAuthMode] = React.useState<'login' | 'signup' | 'verify-otp'>('login');
+  // Sem 'signup': o cadastro aberto saiu do app. Quem entra, entra porque
+  // comprou, e a conta nasce pela notificacao da Hotmart. A SignupPage continua
+  // no repositorio, sem rota, para dar meia-volta facil se a decisao mudar.
+  const [authMode, setAuthMode] = React.useState<'login' | 'verify-otp'>('login');
 
   if (isLoading || isValidatingProfile) {
     return (
@@ -31,11 +33,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
       return <VerifyOtpStandalonePage onBackClick={() => setAuthMode('login')} />;
     }
 
-    return authMode === 'login' ? (
-      <LoginPage onSignupClick={() => setAuthMode('signup')} onVerifyOtpClick={() => setAuthMode('verify-otp')} />
-    ) : (
-      <SignupPage onLoginClick={() => setAuthMode('login')} />
-    );
+    return <LoginPage onVerifyOtpClick={() => setAuthMode('verify-otp')} />;
   }
 
   // A verificacao de codigo continua indo pelos children: ela e tratada dentro

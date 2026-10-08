@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { Mail, Lock, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { CarulaLogo } from '../components/CarulaLogo';
+import { HOTMART_URL } from '../config/hotmart';
 
 interface LoginPageProps {
-  onSignupClick: () => void;
-  onVerifyOtpClick?: () => void;
+  onVerifyOtpClick: () => void;
 }
 
-export const LoginPage: React.FC<LoginPageProps> = ({ onSignupClick, onVerifyOtpClick }) => {
+export const LoginPage: React.FC<LoginPageProps> = ({ onVerifyOtpClick }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -87,29 +87,39 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSignupClick, onVerifyOtp
         </form>
 
         <div className="mt-8 pt-8 border-t border-gray-200 space-y-3">
+          {/* "Criar conta" saiu daqui.
+              O app passou a ser vendido por assinatura: quem entra, entra
+              porque comprou, e a conta nasce pela notificacao da Hotmart. Um
+              botao de cadastro aberto deixava qualquer pessoa criar conta e —
+              enquanto o padrao da coluna era 'ativo' — ganhar acesso sem pagar.
+              A SignupPage continua no repositorio, sem rota, para dar meia-volta
+              facil se a decisao mudar. */}
           <div>
             <p className="text-center text-gray-600 mb-4">
-              Não tem conta?
+              Já comprou?
             </p>
             <button
-              onClick={onSignupClick}
+              onClick={onVerifyOtpClick}
               className="w-full py-3 rounded-xl font-semibold border-2 border-[#6E3F72] text-[#6E3F72] hover:bg-[#6E3F72] hover:text-white transition-all"
             >
-              Criar Conta
+              Verificar Código
             </button>
           </div>
 
-          {onVerifyOtpClick && (
+          {/* So aparece quando houver link de verdade — ver src/config/hotmart.ts. */}
+          {HOTMART_URL && (
             <div>
               <p className="text-center text-gray-600 mb-4 text-sm">
-                Já recebeu um código?
+                Ainda não tem acesso?
               </p>
-              <button
-                onClick={onVerifyOtpClick}
-                className="w-full py-3 rounded-xl font-semibold bg-gray-100 text-[#6E3F72] hover:bg-gray-200 transition-all text-sm"
+              <a
+                href={HOTMART_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-3 rounded-xl font-semibold bg-gray-100 text-[#6E3F72] hover:bg-gray-200 transition-all text-sm flex items-center justify-center"
               >
-                Verificar Código
-              </button>
+                Quero comprar
+              </a>
             </div>
           )}
         </div>
