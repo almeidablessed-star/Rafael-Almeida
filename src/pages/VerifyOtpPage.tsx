@@ -10,6 +10,31 @@ export const VerifyOtpPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
+
+  // Reenvio. A funcao responde sempre a mesma coisa — e-mail existindo ou nao,
+  // limite estourado ou nao — entao a tela nao tem como dizer mais do que
+  // "pedimos um novo". Confirmar o envio aqui entregaria quem e cliente.
+  const [reenviando, setReenviando] = useState(false);
+  const [avisoReenvio, setAvisoReenvio] = useState<string | null>(null);
+
+  const naoRecebi = async () => {
+    if (!user?.email) return;
+    setReenviando(true);
+    setAvisoReenvio(null);
+    try {
+      await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/resend-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: user?.email }),
+      });
+    } catch {
+      // Silencio de proposito: mesmo uma falha de rede nao deve virar sinal.
+    } finally {
+      setAvisoReenvio('Se houver uma conta com esse e-mail, enviamos um novo código. Use sempre o mais recente.');
+      setReenviando(false);
+    }
+  };
+
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -250,6 +275,32 @@ export const VerifyOtpPage: React.FC = () => {
             {isLoading ? 'Verificando...' : 'Verificar Código'}
           </button>
         </form>
+
+        {/* Reenvio. Fica fora do <form> para nao disparar o submit. */}
+        <div style={{ marginTop: '14px', textAlign: 'center' }}>
+          <button
+            type="button"
+            onClick={naoRecebi}
+            disabled={reenviando}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#6E3F72',
+              fontSize: '13px',
+              fontWeight: 700,
+              cursor: reenviando ? 'default' : 'pointer',
+              opacity: reenviando ? 0.6 : 1,
+              textDecoration: 'underline',
+            }}
+          >
+            {reenviando ? 'Enviando...' : 'Não recebi o código'}
+          </button>
+          {avisoReenvio && (
+            <p style={{ marginTop: '8px', fontSize: '12px', color: '#7A6E80', lineHeight: 1.5 }}>
+              {avisoReenvio}
+            </p>
+          )}
+        </div>
 
         {/* Info */}
         <p style={{
