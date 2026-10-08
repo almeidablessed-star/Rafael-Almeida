@@ -249,6 +249,46 @@ async function acharParceiroId(affiliateCode?: string): Promise<number | null> {
 }
 
 /**
+ * Cria a linha de `usuarias` na COMPRA, se ela ainda nao existir.
+ *
+ * Antes, a linha so nascia quando a compradora preenchia o perfil. Isso deixava
+ * um intervalo em que a conta existia no Auth mas nao em `usuarias` — e, com a
+ * RLS da Etapa 4, nesse intervalo ela nao conseguia gravar nada: o onboarding
+ * financeiro recusava com "new row violates row-level security policy". Criando
+ * aqui, a conta ja nasce podendo usar o app.
+ *
+ * `ignoreDuplicates`, ou seja `ON CONFLICT DO NOTHING`, e NAO `DO UPDATE`: um
+ * reenvio do mesmo evento, ou uma recompra de quem ja e cliente, nao pode
+ * sobrescrever nome, nome da confeitaria nem moeda que a pessoa ja escolheu.
+ *
+ * `nome_confeitaria` e `moeda` ficam em branco de proposito: sao o que a tela de
+ * perfil pede, e e por `nome_confeitaria` vazio que o app sabe que o cadastro
+ * ainda falta.
+ */
+async function garantirLinhaDeUsuaria(
+  userId: string,
+  nome: string | undefined,
+  parceiroId: number | null
+) {
+  const { error } = await supabase.from('usuarias').upsert(
+    [
+      {
+        id: userId,
+        nome: (nome || '').trim() || 'Confeiteira',
+        nome_confeitaria: '',
+        moeda: 'BRL',
+        acesso_status: 'ativo',
+        acesso_atualizado_em: new Date().toISOString(),
+        parceiro_id: parceiroId,
+        created_at: new Date().toISOString(),
+      },
+    ],
+    { onConflict: 'id', ignoreDuplicates: true }
+  );
+
+  if (error) console.error('Falha ao criar a linha de usuarias:', error.message);
+}
+/**
  * Concede acesso e grava a atribuicao do parceiro.
  *
  * `parceiro_id` so e escrito quando ainda esta NULL — o `.is(null)` no filtro
@@ -406,10 +446,15 @@ Deno.serve(async (req) => {
 
     // Create user with temporary password
     const tempPassword = generateRandomPassword();
+    // `senha_temporaria` marca que a senha acima e aleatoria e ninguem a conhece.
+    // E por ela que o app mostra a tela de definir senha, mesmo depois de
+    // recarregar a pagina ou de apertar voltar — o antigo gatilho por URL se
+    // perdia nos dois casos e deixava a conta presa sem caminho de volta.
     const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
       email,
       password: tempPassword,
       email_confirm: false,
+      user_metadata: { senha_temporaria: true },
     });
 
     if (createError) {
@@ -418,7 +463,10 @@ Deno.serve(async (req) => {
         // mas o acesso volta e a atribuicao de parceiro ainda precisa valer.
         const existenteId = await acharUsuariaId(p.subscriberCode, email);
         const parceiroId = await acharParceiroId(p.affiliateCode);
-        if (existenteId) await aplicarConcessao(existenteId, parceiroId);
+        if (existenteId) {
+          await garantirLinhaDeUsuaria(existenteId, name, parceiroId);
+          await aplicarConcessao(existenteId, parceiroId);
+        }
         await registrarEvento(p, body, existenteId, parceiroId);
         return json({ message: 'User already exists', email }, 200);
       }
@@ -519,6 +567,7 @@ Deno.serve(async (req) => {
         // sem precisar recriar nada.
         await registrarFalhaDeEmail(p, classe, emailResult.error, userId);
         const parceiroIdFalha = await acharParceiroId(p.affiliateCode);
+        await garantirLinhaDeUsuaria(userId, name, parceiroIdFalha);
         await aplicarConcessao(userId, parceiroIdFalha);
         await registrarEvento(p, body, userId, parceiroIdFalha);
         return json({ message: 'Email rejected by recipient, account kept' }, 200);
@@ -538,6 +587,7 @@ Deno.serve(async (req) => {
     }
 
     const parceiroId = await acharParceiroId(p.affiliateCode);
+    await garantirLinhaDeUsuaria(userId, name, parceiroId);
     await aplicarConcessao(userId, parceiroId);
     await registrarEvento(p, body, userId, parceiroId);
 
