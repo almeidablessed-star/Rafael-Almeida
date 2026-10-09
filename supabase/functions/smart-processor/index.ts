@@ -358,10 +358,12 @@ async function garantirLinhaDeUsuaria(
  * garante isso no proprio banco, sem leitura antes da escrita: a comissao e da
  * Hotmart, aqui e so atribuicao, e a primeira venda e que vale.
  *
- * ATENCAO: a linha de `usuarias` so nasce quando a compradora entra e preenche
- * o perfil. Numa compra de conta nova este UPDATE acerta ZERO linhas, e e por
- * isso que a atribuicao tambem fica gravada em `assinatura_eventos` — e de la
- * que a etapa seguinte precisa resgatar o vinculo ao criar o perfil.
+ * Hoje `garantirLinhaDeUsuaria` roda ANTES desta funcao em todos os caminhos de
+ * concessao, entao a linha ja existe e este UPDATE acerta uma linha. O ramo do
+ * "sem perfil ainda" abaixo sobrou como rede: se algum dia a ordem mudar, ele
+ * evita que a concessao passe por aplicada sem ter acertado nada — e a
+ * atribuicao de parceiro continua gravada em `assinatura_eventos` de qualquer
+ * forma, que e de onde o vinculo pode ser resgatado.
  */
 async function aplicarConcessao(usuariaId: string, parceiroId: number | null) {
   const agora = new Date().toISOString();
@@ -635,18 +637,30 @@ Deno.serve(async (req) => {
     });
 
     if (createError) {
-      if (createError.message?.includes('already exists')) {
-        // Recompra ou renovacao de quem ja tem conta: nao ha usuario a criar,
-        // mas o acesso volta e a atribuicao de parceiro ainda precisa valer.
-        const existenteId = await acharUsuariaId(p.subscriberCode, email);
+      // NAO decidir pelo texto do erro.
+      //
+      // Antes, "ja existe" era reconhecido por `message.includes('already
+      // exists')`. O Auth recusa e-mail repetido com outra frase, e o efeito era
+      // o pior possivel: TODA renovacao mensal — que chega como compra aprovada
+      // de um usuario que ja existe — caia no 500 abaixo, a Hotmart reenviava
+      // sem parar e a assinante em dia ficava sem acesso.
+      //
+      // A prova de que a conta existe e ENCONTRA-LA. Se ela existe, isto e
+      // recompra ou renovacao: nao ha usuario a criar, mas o acesso volta e a
+      // atribuicao de parceiro ainda precisa valer.
+      const existenteId = await acharUsuariaId(p.subscriberCode, email);
+      if (existenteId) {
         const parceiroId = await acharParceiroId(p.affiliateCode);
-        if (existenteId) {
-          await garantirLinhaDeUsuaria(existenteId, name, parceiroId);
-          await aplicarConcessao(existenteId, parceiroId);
-        }
+        await garantirLinhaDeUsuaria(existenteId, name, parceiroId);
+        await aplicarConcessao(existenteId, parceiroId);
         await registrarEvento(p, body, existenteId, parceiroId);
         return json({ message: 'User already exists', email }, 200);
       }
+
+      // Conta nao encontrada: 500, e nao 200. Antes este caso respondia 200 sem
+      // conceder nada, e uma compra paga virava silencio — a Hotmart parava de
+      // reenviar e ninguem ficava sabendo. Com 500 ela reenvia, e o erro real
+      // fica no log da funcao.
       console.error('Error creating user:', createError);
       return json({ error: 'Failed to create user' }, 500);
     }
