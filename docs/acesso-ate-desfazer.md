@@ -1,13 +1,31 @@
 # Acesso com prazo (`acesso_ate`) — desfazer e regra de leitura
 
 Commits: `3687465` (migração), `03f1e4e` (webhook), `3278cda` (app),
-`f514b96` (webhook: cancelamento nunca amplia prazo).
+`f514b96` (webhook: cancelamento nunca amplia prazo), `d8ef546` (webhook:
+renovação deixa de cair em 500).
 Ordem usada: rodar a migração → publicar o webhook → publicar o app → **só
 então** marcar os eventos na Hotmart.
 
-Estado em 09/10/2026: migração rodada, webhook publicado (versão 23,
-`verify_jwt = false`, POST sem hottok responde 401) e app publicado.
+Estado em 09/10/2026: migração rodada, app publicado em `ce4f0ad` e webhook
+publicado na **versão 24** (`verify_jwt = false`, POST sem hottok responde 401),
+que corresponde a `d8ef546` — ou seja, **o webhook está um commit à frente do
+app publicado**, de propósito: `d8ef546` só mexe na função.
 Na Hotmart **nada foi mexido**: segue só "Compra aprovada" marcada.
+
+## A renovação mensal (o defeito de `d8ef546`)
+
+Até a versão 23 o webhook reconhecia "este usuário já existe" pelo **texto** do
+erro do `createUser` (`includes('already exists')`). O Auth recusa e-mail
+repetido com outra frase, então **toda renovação mensal** — que chega como
+compra aprovada de um usuário que já existe — respondia 500. A Hotmart
+reenviaria sem parar e a assinante em dia ficaria sem acesso. Provado em teste
+ao vivo: o evento `zz-prazo-5` devolveu `{"error":"Failed to create user"}`.
+
+A versão 24 decide pela **existência da conta**: em qualquer erro do
+`createUser`, procura a conta; se existe, segue o ramo de renovação (zera
+`acesso_ate`, reaplica `ativo`, grava o evento, responde 200). Conta **não**
+encontrada passa a responder 500 em vez de 200 — antes esse caso gravava o
+evento e respondia 200 sem conceder nada, e uma compra paga virava silêncio.
 
 ## A regra de acesso vigente, para qualquer leitura futura
 
@@ -98,7 +116,7 @@ git checkout HEAD -- supabase/functions/smart-processor/index.ts
 ```
 
 ```bash
-git revert --no-edit f514b96 3278cda 03f1e4e
+git revert --no-edit d8ef546 f514b96 3278cda 03f1e4e
 ```
 
 ```bash
@@ -107,7 +125,23 @@ git push origin chore/carula-site-preview && git push origin HEAD:production && 
 
 Atenção: a versão anterior do webhook (`e22d449`) **revoga na hora por e-mail,
 sem trava**. Reverter devolve o risco de uma assinante em dia perder o acesso
-por causa de um boleto que ela gerou e não pagou.
+por causa de um boleto que ela gerou e não pagou — e devolve também o defeito da
+renovação acima, que derruba **toda** cobrança mensal em 500.
+
+Desfazer SÓ a correção da renovação (volta à versão 23, **com o defeito** —
+útil apenas para reproduzi-lo):
+
+```bash
+git checkout ce4f0ad -- supabase/functions/smart-processor/index.ts
+```
+
+```bash
+npx supabase functions deploy smart-processor --project-ref inqyobsjuztztvafpzxn
+```
+
+```bash
+git checkout HEAD -- supabase/functions/smart-processor/index.ts
+```
 
 **Hotmart** — nada a desfazer: a configuração não foi tocada nesta mudança.
 Quando os eventos novos forem marcados, tire um print antes, para a volta não
