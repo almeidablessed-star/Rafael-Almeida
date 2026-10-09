@@ -1,8 +1,13 @@
 # Acesso com prazo (`acesso_ate`) — desfazer e regra de leitura
 
-Commits: `3687465` (migração), `03f1e4e` (webhook), `3278cda` (app).
-Ordem: rodar a migração → publicar o webhook → publicar o app → **só então**
-marcar os eventos na Hotmart.
+Commits: `3687465` (migração), `03f1e4e` (webhook), `3278cda` (app),
+`f514b96` (webhook: cancelamento nunca amplia prazo).
+Ordem usada: rodar a migração → publicar o webhook → publicar o app → **só
+então** marcar os eventos na Hotmart.
+
+Estado em 09/10/2026: migração rodada, webhook publicado (versão 23,
+`verify_jwt = false`, POST sem hottok responde 401) e app publicado.
+Na Hotmart **nada foi mexido**: segue só "Compra aprovada" marcada.
 
 ## A regra de acesso vigente, para qualquer leitura futura
 
@@ -19,6 +24,41 @@ painel do parceiro, que vai contar assinantes ativos. Contar só por
 ficaria maior que a realidade, e a comissão seria discutida em cima dele. A
 função `public.tem_acesso_ativo()` já aplica essa regra; prefira reutilizá-la a
 repetir a condição.
+
+## Quem pode escrever em `acesso_ate` (consulta de conferência)
+
+A consulta genérica de `column_privileges` não serve para esta pergunta: ela
+devolve `acesso_ate` com `SELECT` e `REFERENCES`, que são normais e esperados, e
+isso dá a impressão falsa de que o navegador alcança a coluna. O que importa é
+só `INSERT` e `UPDATE`:
+
+```sql
+SELECT grantee, privilege_type
+  FROM information_schema.column_privileges
+ WHERE table_schema = 'public'
+   AND table_name = 'usuarias'
+   AND column_name = 'acesso_ate'
+   AND grantee IN ('anon', 'authenticated')
+   AND privilege_type IN ('INSERT', 'UPDATE');
+```
+
+**Resultado esperado: nenhuma linha.** Qualquer linha aqui significa que o
+navegador pode mexer no próprio prazo, e a trava de acesso deixa de valer.
+
+## Como o prazo se comporta
+
+- Cancelamento de assinatura grava `acesso_ate = date_next_charge`.
+- Sem data utilizável (ausente, não numérica ou no passado): grava a data de
+  segurança de 32 dias e registra `CANCELAMENTO_SEM_DATA` em
+  `assinatura_eventos`.
+- **Um cancelamento nunca amplia um prazo existente.** Se a conta já tem
+  `acesso_ate`, vale o **mais cedo**; o prazo descartado fica registrado como
+  `PRAZO_IGNORADO`. Nesse caso `CANCELAMENTO_SEM_DATA` não é gravado, porque a
+  data de segurança não foi aplicada.
+- Só uma compra aprovada devolve prazo, zerando a coluna (`acesso_ate = null`).
+- Reembolso, chargeback e protesto revogam na hora. `PURCHASE_CANCELED` só
+  revoga se a transação for a mesma que concedeu o acesso atual; recusa pela
+  trava fica como `REVOGACAO_RECUSADA`.
 
 ## Desfazer
 
@@ -43,23 +83,32 @@ voltam a ter `acesso_status = 'ativo'` e nada mais limitando. É o lado seguro,
 mas significa que um cancelamento recente deixa de ser respeitado até alguém
 revogar à mão.
 
-**Funções e app:**
+**Funções e app** (um bloco por vez no cmd):
 
 ```bash
 git checkout e22d449 -- supabase/functions/smart-processor/index.ts
-npx supabase functions deploy smart-processor --project-ref inqyobsjuztztvafpzxn --no-verify-jwt
-git checkout HEAD -- supabase/functions/smart-processor/index.ts
-git revert --no-edit 3278cda 03f1e4e
-git push origin chore/carula-site-preview
-git push origin HEAD:production
-git push origin HEAD:master
 ```
 
-Atenção: a versão anterior do webhook **revoga na hora por e-mail, sem trava**.
-Reverter devolve o risco de uma assinante em dia perder o acesso por causa de um
-boleto que ela gerou e não pagou.
+```bash
+npx supabase functions deploy smart-processor --project-ref inqyobsjuztztvafpzxn
+```
 
-**Hotmart** — voltar ao estado de hoje: em Ferramentas → Webhook (API e
-notificações) → "Carula Confeitaria Acesso" → Editar, deixar **apenas "Compra
-aprovada"** marcada e salvar. Tire um print antes de mexer, para a volta não
+```bash
+git checkout HEAD -- supabase/functions/smart-processor/index.ts
+```
+
+```bash
+git revert --no-edit f514b96 3278cda 03f1e4e
+```
+
+```bash
+git push origin chore/carula-site-preview && git push origin HEAD:production && git push origin HEAD:master
+```
+
+Atenção: a versão anterior do webhook (`e22d449`) **revoga na hora por e-mail,
+sem trava**. Reverter devolve o risco de uma assinante em dia perder o acesso
+por causa de um boleto que ela gerou e não pagou.
+
+**Hotmart** — nada a desfazer: a configuração não foi tocada nesta mudança.
+Quando os eventos novos forem marcados, tire um print antes, para a volta não
 depender de memória.
