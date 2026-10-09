@@ -511,9 +511,25 @@ Deno.serve(async (req) => {
       // Sem data utilizavel: nem cortar agora (tiraria o acesso de quem pagou)
       // nem deixar para sempre (seria acesso de graca). A data de seguranca
       // resolve, e o evento de revisao garante que o caso nao passe batido.
-      const corte =
+      const candidato =
         dataDeCorte ??
         new Date(Date.now() + DIAS_DE_SEGURANCA * 24 * 60 * 60 * 1000).toISOString();
+
+      // Um cancelamento NUNCA pode AMPLIAR um prazo que ja existe. Se a conta ja
+      // tem `acesso_ate`, vale sempre o MAIS CEDO: um segundo cancelamento (ou
+      // um reenvio com data nova, ou a data de seguranca de 32 dias caindo sobre
+      // um prazo de poucos dias) nao pode esticar acesso de quem ja esta com
+      // prazo marcado. So uma compra aprovada devolve prazo, zerando a coluna.
+      const { data: perfil } = await supabase
+        .from('usuarias')
+        .select('acesso_ate')
+        .eq('id', usuariaId)
+        .limit(1);
+
+      const prazoAtual: string | null = perfil?.[0]?.acesso_ate ?? null;
+      const msAtual = prazoAtual ? new Date(prazoAtual).getTime() : NaN;
+      const manterOAtual = Number.isFinite(msAtual) && msAtual <= new Date(candidato).getTime();
+      const corte = manterOAtual ? (prazoAtual as string) : candidato;
 
       const { error } = await supabase
         .from('usuarias')
@@ -525,7 +541,18 @@ Deno.serve(async (req) => {
         return json({ error: 'Failed to schedule revocation' }, 500);
       }
 
-      if (!dataDeCorte) {
+      if (manterOAtual) {
+        await registrarRevisao(p, body, usuariaId, 'PRAZO_IGNORADO', {
+          motivo: 'a conta ja tinha um prazo mais cedo; o novo prazo foi descartado',
+          prazo_mantido: prazoAtual,
+          prazo_descartado: candidato,
+          tinha_data_no_evento: Boolean(dataDeCorte),
+        });
+      }
+
+      // So vale registrar a falta de data quando a data de seguranca foi mesmo
+      // aplicada: se o prazo antigo prevaleceu, nao ha nada de novo a revisar.
+      if (!dataDeCorte && !manterOAtual) {
         await registrarRevisao(p, body, usuariaId, 'CANCELAMENTO_SEM_DATA', {
           motivo: 'date_next_charge ausente, invalido ou no passado',
           data_de_seguranca: corte,
