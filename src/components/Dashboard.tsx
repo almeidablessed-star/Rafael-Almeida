@@ -236,7 +236,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           marginTop: 'calc(0px - env(safe-area-inset-top, 0px))',
           paddingLeft: 'calc(0.5 * var(--app-bleed) - 50% + 18px)',
           paddingRight: 'calc(0.5 * var(--app-bleed) - 50% + 18px)',
-          borderRadius: '32px 0px 32px 32px',
+          borderRadius: '0px 0px 32px 32px',
           zIndex: 1,
         }}
       >
