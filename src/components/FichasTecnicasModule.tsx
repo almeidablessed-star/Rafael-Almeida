@@ -979,7 +979,9 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
             paddingLeft: 'calc(20px + max(0px, env(safe-area-inset-left)))',
             paddingRight: 'calc(20px + max(0px, env(safe-area-inset-right)))',
             zIndex: 50,
-            boxShadow: 'inset 0 -8px 16px rgba(58,35,80,.06), inset 0 8px 16px rgba(58,35,80,.06)',
+            // Sem sombra interna: ela escurecia as bordas de cima e de baixo da
+            // folha com um tom roxo e era isso que aparecia como variacao de cor no
+            // fim da tela. Nenhuma outra aba tem isto; o Inicio nao tem.
           }}
         >
 
