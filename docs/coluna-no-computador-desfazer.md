@@ -32,3 +32,23 @@ com o selo "Pago" por cima do valor na aba Pedidos e o menu de baixo esticado
 de ponta a ponta — era assim antes.
 
 Nada de banco, função ou Hotmart está envolvido aqui: o desfazer é só o app.
+
+## Espaço no fim das telas (`3629e9a`) — desfazer separado
+
+Publicado em 09/10/2026, junto com o app. Mudou **uma linha** em
+`src/index.css`: a classe `bottom-nav-safe` passou de 5rem (80px) fixos para
+`calc(82px + max(1rem, env(safe-area-inset-bottom)))`, porque o menu de baixo
+mede 70px mais a área segura do aparelho — faltavam 6px.
+
+É independente dos dois commits acima; para tirar só ele:
+
+```bash
+git revert --no-edit 3629e9a
+```
+
+```bash
+git push origin chore/carula-site-preview && git push origin HEAD:production && git push origin HEAD:master
+```
+
+Voltando atrás, um cartão que termine colado no fim do conteúdo volta a ficar
+com 6px escondidos atrás do menu. Nada mais muda.
