@@ -261,19 +261,6 @@ a:hover {
    Nada de `backdrop-filter` nem de opacidade menor que 1: os dois atrapalham a
    leitura da cor pelo Safari.
 
-   ALTURA FIXA de 8px, nao a altura da area segura. No atalho da tela inicial a
-   area segura tem uns 47px, e uma tira dessa altura cobriria o topo do
-   cabecalho com uma rampa HORIZONTAL — que so bate com o cabecalho na linha de
-   cima — e apareceria como uma faixa de outro tom. O atalho ja esta certo e
-   nao pode mudar. 8px passam do minimo que o Safari precisa (cerca de 6px) e
-   somem dentro do cabecalho.
-
-   `z-index: 40` fica ACIMA do cabecalho da pagina (que usa 1) e ABAIXO de tudo
-   que cobre a tela inteira: modais (50 e 99999), login e perfil (1000/1001),
-   menu de baixo (9999) e o balao do tour (10000). Assim a tira nunca aparece
-   por cima de um aviso ou do topo de um modal; quando um deles esta aberto,
-   quem o Safari le e o proprio modal, que e o certo.
-
    So ate 639px: no computador a coluna tem fundo de areia em volta e uma tira
    roxa atravessada no topo ficaria sem sentido. */
 @media (max-width: 639px) {
@@ -283,10 +270,10 @@ a:hover {
     top: 0;
     left: 0;
     right: 0;
-    height: 8px;
+    height: max(8px, env(safe-area-inset-top, 0px));
     background-color: #462958;
     background-image: linear-gradient(90deg, #3A2350, #523060);
     pointer-events: none;
-    z-index: 40;
+    z-index: 2000;
   }
 }
