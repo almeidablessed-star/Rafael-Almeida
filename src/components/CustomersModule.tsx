@@ -528,7 +528,7 @@ export const CustomersModule: React.FC = () => {
 
   if (isLoadingCustomers) {
     return (
-      <div className="flex items-center justify-center h-screen" style={{ background: '#FAF7FA' }}>
+      <div className="flex items-center justify-center h-screen" style={{ background: '#F6F2F5' }}>
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 rounded-full border-4 border-gray-200 border-t-[#6E3F72] animate-spin" />
           <p className="text-gray-600">Carregando clientes...</p>
@@ -933,7 +933,7 @@ export const CustomersModule: React.FC = () => {
         style={{
           paddingLeft: '18px',
           paddingRight: '18px',
-          background: '#FAF7FA',
+          background: '#F6F2F5',
         }}
       >
         {filteredCustomers.length === 0 ? (
