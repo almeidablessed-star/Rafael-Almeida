@@ -1,12 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { User, Store, DollarSign, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabase';
 import { CarulaLogo } from '../components/CarulaLogo';
 import { CustomSelect } from '../components/CustomSelect';
 
 export const SetupProfilePage: React.FC = () => {
-  const { setupProfile, user } = useAuth();
+  const { setupProfile, user, logout } = useAuth();
 
+
+  // Mesmo botao e mesmo caminho de saida da tela de pausa: `logout` do
+  // contexto, com queda para encerrar a sessao local se ele falhar.
+  const sair = async () => {
+    try {
+      await logout();
+    } catch (err) {
+      console.error('Falha ao sair:', err);
+      await supabase.auth.signOut({ scope: 'local' }).catch(() => {});
+      window.location.reload();
+    }
+  };
   const [nome, setNome] = useState('');
   // Ja preenchido com o que foi digitado na tela de cadastro, que viaja no
   // metadata do auth. Continua editavel: quem chegou aqui por outro caminho
@@ -147,6 +160,15 @@ export const SetupProfilePage: React.FC = () => {
           <p className="text-center text-[11px] mt-5" style={{ color: '#9A8FA0', fontFamily: "'Manrope', sans-serif" }}>
             Você pode alterar essas informações no seu perfil depois
           </p>
+
+        <button
+          type="button"
+          onClick={sair}
+          className="w-full py-3 rounded-2xl text-sm font-bold transition-colors"
+          style={{ border: '1px solid rgba(58,35,80,0.16)', color: '#3A2350', background: '#FFFFFF' }}
+        >
+          Sair
+        </button>
         </div>
       </div>
     </div>

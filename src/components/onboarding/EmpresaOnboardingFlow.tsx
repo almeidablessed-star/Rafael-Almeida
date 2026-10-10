@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { supabase } from '../../lib/supabase';
 import { useCosts } from '../../context/CostsContext';
 import { useFichasTecnicas } from '../../context/FichasTecnicasContext';
 import { useCurrency } from '../../context/CurrencyContext';
@@ -76,6 +78,7 @@ const NotaSobreOPadrao: React.FC<{ children: React.ReactNode }> = ({ children })
 
 export const EmpresaOnboardingFlow: React.FC = () => {
   const { administrativeCosts, salvarPassoOnboarding, salvarDespesas, concluirOnboarding } = useCosts();
+  const { logout } = useAuth();
   const { fichas } = useFichasTecnicas();
   const { formatCurrency, symbol } = useCurrency();
 
@@ -116,6 +119,18 @@ export const EmpresaOnboardingFlow: React.FC = () => {
     setCarregouInicial(true);
   }, [administrativeCosts, carregouInicial]);
 
+
+  // Mesmo botao e mesmo caminho de saida da tela de pausa: `logout` do
+  // contexto, com queda para encerrar a sessao local se ele falhar.
+  const sair = async () => {
+    try {
+      await logout();
+    } catch (err) {
+      console.error('Falha ao sair:', err);
+      await supabase.auth.signOut({ scope: 'local' }).catch(() => {});
+      window.location.reload();
+    }
+  };
   if (!carregouInicial) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#EDE7DC]">
@@ -728,6 +743,15 @@ export const EmpresaOnboardingFlow: React.FC = () => {
             </p>
           </div>
         )}
+
+        <button
+          type="button"
+          onClick={sair}
+          className="w-full py-3 rounded-2xl text-sm font-bold transition-colors"
+          style={{ border: '1px solid rgba(58,35,80,0.16)', color: '#3A2350', background: '#FFFFFF' }}
+        >
+          Sair
+        </button>
         </div>
       </div>
     </div>

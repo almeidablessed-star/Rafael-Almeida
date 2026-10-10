@@ -5,6 +5,18 @@ import { Lock, CheckCircle, AlertCircle } from 'lucide-react';
 
 export const ResetPasswordPage: React.FC = () => {
   const { logout, beginAuthTransition, endAuthTransition } = useAuth();
+
+  // Mesmo botao e mesmo caminho de saida da tela de pausa: `logout` do
+  // contexto, com queda para encerrar a sessao local se ele falhar.
+  const sair = async () => {
+    try {
+      await logout();
+    } catch (err) {
+      console.error('Falha ao sair:', err);
+      await supabase.auth.signOut({ scope: 'local' }).catch(() => {});
+      window.location.reload();
+    }
+  };
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -286,6 +298,15 @@ export const ResetPasswordPage: React.FC = () => {
         }}>
           A senha deve ter no mínimo 6 caracteres
         </p>
+
+        <button
+          type="button"
+          onClick={sair}
+          className="w-full py-3 rounded-2xl text-sm font-bold transition-colors"
+          style={{ border: '1px solid rgba(58,35,80,0.16)', color: '#3A2350', background: '#FFFFFF' }}
+        >
+          Sair
+        </button>
       </div>
     </div>
   );
