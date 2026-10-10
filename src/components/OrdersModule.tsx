@@ -76,9 +76,14 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
     <div className="space-y-4 animate-fadeIn pb-8">
       {/* Header Card — Flutuante com cabeçalho roxo */}
       <div
-        className="overflow-hidden shadow-card"
+        className="overflow-hidden"
         style={{
-          boxShadow: '0 30px 70px rgba(58,35,80,.26)',
+          // Sem sombra aqui: este envolucro e a pagina inteira, nao um cartao. A
+          // sombra roxa (0 30px 70px) caia logo abaixo da borda de baixo dele e,
+          // no iPhone — onde 100vh e maior que a area visivel — essa borda fica
+          // ACIMA do menu, entao a sombra aparecia como uma faixa roxa/rosa no
+          // fim da tela. O Inicio nao tem envolucro nem sombra, e por isso o fim
+          // dele e so o fundo da pagina. Aqui passa a ser igual.
           display: 'flex',
           flexDirection: 'column',
           minHeight: '100vh',
