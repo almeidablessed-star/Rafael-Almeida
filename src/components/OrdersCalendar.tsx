@@ -76,7 +76,11 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
   const monthSales = transactions.filter((tx) => {
     if (tx.type !== 'venda') return false;
     if (!tx.date) return false;
-    const dateStr = typeof tx.date === 'string' ? tx.date : (tx.date instanceof Date ? tx.date.toISOString().split('T')[0] : String(tx.date));
+    // `date` e string no tipo, mas a conversao defensiva fica: ela ja existia
+    // e protege contra um valor fora do formato vindo do banco. O `unknown`
+    // existe so para o compilador aceitar as duas verificacoes.
+    const dateBruta: unknown = tx.date;
+    const dateStr = typeof dateBruta === 'string' ? dateBruta : (dateBruta instanceof Date ? dateBruta.toISOString().split('T')[0] : String(dateBruta));
     const [y, m] = dateStr.split('-').map(Number);
     return y === year && m === month + 1;
   });
@@ -84,7 +88,11 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
   // Group sales by date string 'YYYY-MM-DD'
   const salesByDate: Record<string, Transaction[]> = {};
   monthSales.forEach((tx) => {
-    const dateStr = typeof tx.date === 'string' ? tx.date : (tx.date instanceof Date ? tx.date.toISOString().split('T')[0] : String(tx.date));
+    // `date` e string no tipo, mas a conversao defensiva fica: ela ja existia
+    // e protege contra um valor fora do formato vindo do banco. O `unknown`
+    // existe so para o compilador aceitar as duas verificacoes.
+    const dateBruta: unknown = tx.date;
+    const dateStr = typeof dateBruta === 'string' ? dateBruta : (dateBruta instanceof Date ? dateBruta.toISOString().split('T')[0] : String(dateBruta));
     if (!salesByDate[dateStr]) {
       salesByDate[dateStr] = [];
     }

@@ -180,6 +180,25 @@ export interface FichaOrderItem {
  * Uma venda e um fato historico. O que ela custou no dia em que aconteceu nao
  * muda porque a farinha subiu depois. Gravar aqui encerra as tres divergencias.
  */
+/** Um item do pedido, como foi gravado em `breakdown.itens`. */
+export interface SaleBreakdownItem {
+  fichaId?: string;
+  nome: string;
+  tamanhoId: string | null;
+  quantidade: number;
+  valorUnitario: number;
+  valorTotal: number;
+  personalizado: boolean;
+}
+
+/** Um adicional do pedido, como foi gravado em `breakdown.adicionaisDetalhados`. */
+export interface SaleBreakdownAdicional {
+  nome: string;
+  valor: number;
+  temCusto: boolean;
+  custo: number;
+}
+
 export interface SaleBreakdown {
   reposicao: number;
   maoDeObra: number;
@@ -187,6 +206,15 @@ export interface SaleBreakdown {
   investimento: number;
   delivery: number;
   adicionais: number;
+  /**
+   * A lista de itens do pedido, um por linha. Gravada aqui, e nao em
+   * `ficha_itens`, porque aquele campo alimenta a baixa de estoque e mudar o
+   * formato dele arriscaria o estoque. Opcional: pedidos gravados antes desta
+   * mudanca nao tem a lista, e a edicao cai no caminho antigo.
+   */
+  itens?: SaleBreakdownItem[];
+  /** Os adicionais, um por linha. `adicionais` acima continua sendo so o total. */
+  adicionaisDetalhados?: SaleBreakdownAdicional[];
 }
 
 export interface Transaction {

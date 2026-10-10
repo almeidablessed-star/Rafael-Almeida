@@ -1146,9 +1146,11 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       return;
     }
 
-    const parsedSignalValue = type === 'venda' && signalValue
-      ? parseNumeroDigitado(signalValue)
-      : undefined;
+    // Daqui para baixo o tipo NUNCA e 'venda': o ramo da venda termina com
+    // `onSave` e `return` la em cima. O sinal so existe em venda, e e gravado
+    // dentro daquele ramo — aqui ele e sempre indefinido. Antes a linha
+    // comparava com 'venda', uma condicao que nunca podia ser verdadeira.
+    const parsedSignalValue = undefined;
 
     onSave(
       {
