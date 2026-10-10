@@ -96,21 +96,32 @@
   100% { transform: translateX(220%); }
 }
 
-/* `html` e quem pinta a area de overscroll/rubber-band (tem prioridade sobre
-   o background do `body` para o "canvas" da pagina) — por isso precisa da
-   MESMA cor de fundo usada atras dos cards no resto do app (--color-surface),
-   nao um tom escuro do header. Antes era #462958 (roxo escuro, pra combinar
-   com o header no PWA instalado via tint de status bar do Safari), mas isso
-   aparecia como um flash rosa/roxo ao rolar alem do topo/fim em toda tela
-   comum — a maioria das telas nao e o header, e sim o fundo claro atras dos
-   cards. */
-html {
+/* O roxo do topo voltou, mas CURTO.
+ *
+ * `html` e quem pinta o "canvas" da pagina, inclusive a faixa de seguranca do
+ * topo no iPhone e a area de overscroll. Antes o roxo era o fundo INTEIRO, e
+ * por isso aparecia tambem embaixo, ao puxar a tela alem do fim. Agora a base
+ * e o cinza-claro de sempre e o roxo e so uma faixa no topo, sem repeticao:
+ * cobre a area segura do aparelho mais uma folga, e acaba ali.
+ *
+ * #462958 e a cor MEDIDA no meio da borda de cima do cabecalho (a borda e uma
+ * rampa de #3A2350 na esquerda a #523060 na direita). E o valor que faz a
+ * emenda nao aparecer. Nao usar #3A2350: e a ponta mais escura da rampa e
+ * aparece como uma faixa chapada e escura.
+ *
+ * Vale para `html` E para `body` porque o Safari escolhe entre os dois.
+ */
+html,
+body {
   background-color: #F6F2F5;
+  background-image: linear-gradient(#462958, #462958);
+  background-repeat: no-repeat;
+  background-position: top center;
+  background-size: 100% calc(env(safe-area-inset-top, 0px) + 150px);
 }
 
 body {
   margin: 0;
-  background: #F6F2F5;
   font-family: 'Plus Jakarta Sans', 'Manrope', sans-serif;
   font-variant-numeric: lining-nums tabular-nums;
   color: var(--car-text-900);
