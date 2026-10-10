@@ -730,7 +730,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
   }
 
   return (
-    <div className="pb-12 animate-fadeIn" style={{ background: '#FAF7FA' }}>
+    <div className="pb-12 animate-fadeIn" style={{ background: '#F6F2F5' }}>
       {/* Header Card — Flutuante com cabeçalho roxo */}
       <div
         className="overflow-hidden shadow-card"
@@ -785,7 +785,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
         <div
           style={{
             marginTop: '-70px',
-            background: '#FAF7FA',
+            background: '#F6F2F5',
             borderRadius: '28px 28px 0 0',
             position: 'relative',
             paddingTop: '20px',
