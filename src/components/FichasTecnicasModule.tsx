@@ -913,9 +913,11 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     <div className="space-y-0 pb-12 animate-fadeIn" style={{ background: '#F6F2F5', minHeight: '100vh' }}>
       {/* Header - Roxo Gradiente */}
       <div
-        className="overflow-hidden shadow-card"
+        className="overflow-hidden"
         style={{
-          boxShadow: '0 30px 70px rgba(58,35,80,.26)',
+          // Sem sombra: este envolucro e a pagina inteira, nao um cartao — a sombra
+          // roxa caia abaixo da borda de baixo dele e aparecia como faixa no fim da
+          // tela no iPhone. Mesma correcao da aba Pedidos.
           background: '#F6F2F5',
           minHeight: '100vh',
           display: 'flex',

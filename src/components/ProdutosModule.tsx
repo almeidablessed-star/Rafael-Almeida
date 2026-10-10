@@ -348,9 +348,11 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
   return (
     <div className="pb-12 animate-fadeIn" style={{ background: '#FAF7FA' }}>
       <div
-        className="overflow-hidden shadow-card"
+        className="overflow-hidden"
         style={{
-          boxShadow: '0 30px 70px rgba(58,35,80,.26)',
+          // Sem sombra: este envolucro e a pagina inteira, nao um cartao — a sombra
+          // roxa caia abaixo da borda de baixo dele e aparecia como faixa no fim da
+          // tela no iPhone. Mesma correcao da aba Pedidos.
           fontFamily: "'Manrope', sans-serif",
           // Sangra para cima cobrindo a safe area, mesmo padrao do header do
           // Dashboard — ver comentario em OrdersModule.tsx.

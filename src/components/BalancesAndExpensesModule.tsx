@@ -733,9 +733,11 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
     <div className="pb-12 animate-fadeIn" style={{ background: '#FAF7FA' }}>
       {/* Header Card — Flutuante com cabeçalho roxo */}
       <div
-        className="overflow-hidden shadow-card"
+        className="overflow-hidden"
         style={{
-          boxShadow: '0 30px 70px rgba(58,35,80,.26)',
+          // Sem sombra: este envolucro e a pagina inteira, nao um cartao — a sombra
+          // roxa caia abaixo da borda de baixo dele e aparecia como faixa no fim da
+          // tela no iPhone. Mesma correcao da aba Pedidos.
         }}
       >
         {/* Header with Title only */}

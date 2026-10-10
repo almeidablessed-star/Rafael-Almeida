@@ -75,9 +75,11 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
           cabecalho de 40/120px de padding, titulo de 31px e cantos
           arredondados no card abaixo. */}
       <div
-        className="overflow-hidden shadow-card"
+        className="overflow-hidden"
         style={{
-          boxShadow: '0 30px 70px rgba(58,35,80,.26)',
+          // Sem sombra: este envolucro e a pagina inteira, nao um cartao — a sombra
+          // roxa caia abaixo da borda de baixo dele e aparecia como faixa no fim da
+          // tela no iPhone. Mesma correcao da aba Pedidos.
           // Sangra para cima cobrindo a safe area, mesmo padrao do header do
           // Dashboard — ver comentario em OrdersModule.tsx.
           marginTop: 'calc(0px - env(safe-area-inset-top, 0px))',
