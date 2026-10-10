@@ -1,5 +1,25 @@
 # Coluna no computador — desfazer
 
+## Tira fixa no topo (`119ea85` + `91e5fed`) — desfazer separado
+
+Publicado em 10/10/2026, só o app. Acrescenta em `src/index.css`, **só até
+639px**, um `body::before` fixo de 8px colado no topo, com `background-color`
+sólido `#462958` e a rampa da borda de cima do cabeçalho por cima, para o
+Safari do iOS pintar a faixa de segurança do topo (ele ignora `theme-color` e
+não lê `background-image`). `z-index: 40`: acima do cabeçalho, abaixo de
+modais, menu e tour. Nenhum componente foi tocado.
+
+```bash
+git revert --no-edit 91e5fed 119ea85
+```
+
+```bash
+git push origin chore/carula-site-preview && git push origin HEAD:production && git push origin HEAD:master
+```
+
+Voltando atrás, a faixa do topo volta a ficar clara no Safari do iPhone. Para
+só ajustar o tamanho, mude os 8px em vez de reverter.
+
 ## Faixa roxa no topo da página (`03c0c86`) — desfazer separado
 
 Publicado em 09/10/2026, só o app. Mudou **uma regra** em `src/index.css`: o
