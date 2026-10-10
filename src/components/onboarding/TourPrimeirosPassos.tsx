@@ -125,7 +125,7 @@ export const TourPrimeirosPassos: React.FC<TourPrimeirosPassosProps> = ({ onNavi
             left: balaoLeft,
             bottom: 110,
             width: larguraBalao,
-            maxWidth: `calc(100vw - ${margem * 2}px)`,
+            maxWidth: `calc(var(--app-bleed) - ${margem * 2}px)`,
             background: '#FFFFFF',
             borderRadius: 18,
             padding: '16px 18px',

@@ -116,8 +116,8 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
           display: 'flex',
           flexDirection: 'column',
           gap: '10px',
-          marginLeft: 'calc(-50vw + 50%)',
-          marginRight: 'calc(-50vw + 50%)',
+          marginLeft: 'calc(-0.5 * var(--app-bleed) + 50%)',
+          marginRight: 'calc(-0.5 * var(--app-bleed) + 50%)',
           paddingLeft: 'calc(20px + max(0px, env(safe-area-inset-left)))',
           paddingRight: 'calc(20px + max(0px, env(safe-area-inset-right)))',
           // Sem isso, todo texto aqui dentro que nao define fontFamily no

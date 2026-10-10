@@ -279,7 +279,7 @@ export const EmpresaOnboardingFlow: React.FC = () => {
       {/* Conteudo full-bleed — mesma tecnica de FichasTecnicasModule.tsx:
           marginTop negativo maior que qualquer radius envolvido, radius so
           nos cantos superiores, escapando o max-width do pai via margin
-          left/right calc(-50vw + 50%) e devolvendo o respiro com padding. */}
+          left/right calc(-0.5 * var(--app-bleed) + 50%) e devolvendo o respiro com padding. */}
       <div
         className="flex flex-col gap-4"
         style={{
@@ -288,8 +288,8 @@ export const EmpresaOnboardingFlow: React.FC = () => {
           borderRadius: '28px 28px 0 0',
           position: 'relative',
           padding: '20px',
-          marginLeft: 'calc(-50vw + 50%)',
-          marginRight: 'calc(-50vw + 50%)',
+          marginLeft: 'calc(-0.5 * var(--app-bleed) + 50%)',
+          marginRight: 'calc(-0.5 * var(--app-bleed) + 50%)',
           paddingLeft: 'calc(20px + max(0px, env(safe-area-inset-left)))',
           paddingRight: 'calc(20px + max(0px, env(safe-area-inset-right)))',
         }}

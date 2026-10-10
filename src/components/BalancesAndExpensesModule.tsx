@@ -789,8 +789,8 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
             borderRadius: '28px 28px 0 0',
             position: 'relative',
             paddingTop: '20px',
-            marginLeft: 'calc(-50vw + 50%)',
-            marginRight: 'calc(-50vw + 50%)',
+            marginLeft: 'calc(-0.5 * var(--app-bleed) + 50%)',
+            marginRight: 'calc(-0.5 * var(--app-bleed) + 50%)',
             paddingLeft: 'max(0px, env(safe-area-inset-left))',
             paddingRight: 'max(0px, env(safe-area-inset-right))',
           }}

@@ -228,14 +228,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
           // margem sobe, entao nada abaixo do card se move.
           paddingTop: 'calc(8px + env(safe-area-inset-top, 0px))',
           boxShadow: '0 30px 70px rgba(58,35,80,0.26)',
-          marginLeft: 'calc(-50vw + 50%)',
-          marginRight: 'calc(-50vw + 50%)',
+          marginLeft: 'calc(-0.5 * var(--app-bleed) + 50%)',
+          marginRight: 'calc(-0.5 * var(--app-bleed) + 50%)',
           // Subtracao, nao multiplicacao: calc(-1 * env(...)) e rejeitado por
           // versoes do WebKit, o que descarta a declaracao inteira e faz o card
           // parar de sangrar para cima.
           marginTop: 'calc(0px - env(safe-area-inset-top, 0px))',
-          paddingLeft: 'calc(50vw - 50% + 18px)',
-          paddingRight: 'calc(50vw - 50% + 18px)',
+          paddingLeft: 'calc(0.5 * var(--app-bleed) - 50% + 18px)',
+          paddingRight: 'calc(0.5 * var(--app-bleed) - 50% + 18px)',
           borderRadius: '32px 0px 32px 32px',
           zIndex: 1,
         }}
@@ -373,11 +373,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
           position: 'relative',
           zIndex: 50,
           marginTop: '-44px',
-          marginLeft: 'calc(-50vw + 50%)',
-          marginRight: 'calc(-50vw + 50%)',
+          marginLeft: 'calc(-0.5 * var(--app-bleed) + 50%)',
+          marginRight: 'calc(-0.5 * var(--app-bleed) + 50%)',
           paddingTop: '32px',
-          paddingLeft: 'calc(50vw - 50% + 18px)',
-          paddingRight: 'calc(50vw - 50% + 18px)',
+          paddingLeft: 'calc(0.5 * var(--app-bleed) - 50% + 18px)',
+          paddingRight: 'calc(0.5 * var(--app-bleed) - 50% + 18px)',
           borderRadius: '28px 28px 0 0',
         }}
       >

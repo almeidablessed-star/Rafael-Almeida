@@ -391,7 +391,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
           className="flex flex-col gap-4"
           style={{
             marginTop: '-56px', background: '#FAF7FA', borderRadius: '28px 28px 0 0', position: 'relative', padding: '20px',
-            marginLeft: 'calc(-50vw + 50%)', marginRight: 'calc(-50vw + 50%)',
+            marginLeft: 'calc(-0.5 * var(--app-bleed) + 50%)', marginRight: 'calc(-0.5 * var(--app-bleed) + 50%)',
             paddingLeft: 'calc(20px + max(0px, env(safe-area-inset-left)))', paddingRight: 'calc(20px + max(0px, env(safe-area-inset-right)))',
           }}
         >

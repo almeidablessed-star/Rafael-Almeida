@@ -189,9 +189,21 @@ a:hover {
 
 :root {
   --app-col: 480px;
+
+  /* Largura que os blocos "de ponta a ponta" usam para escapar do respiro
+     lateral (o truque `margin-inline: calc(-0.5 * X + 50%)`, usado no Inicio,
+     Pedidos, Fichas, Produtos, Clientes, Minha Empresa e no onboarding).
+     No celular e a janela inteira, exatamente o que `50vw` fazia antes; no
+     computador passa a ser a COLUNA — senao o bloco escapa ate a borda da
+     janela e a parte de fora e cortada pelo recorte da coluna. */
+  --app-bleed: 100vw;
 }
 
 @media (min-width: 640px) {
+  :root {
+    --app-bleed: var(--app-col);
+  }
+
   /* `html` tambem, porque e ele que pinta a area de overscroll. */
   html,
   body {
