@@ -968,7 +968,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         <div className="flex flex-col gap-4"
           style={{
             marginTop: '-70px',
-            background: '#F6F2F5',
+            background: '#FFFFFF',
             borderRadius: '28px 28px 0 0',
             position: 'relative',
             padding: '20px',

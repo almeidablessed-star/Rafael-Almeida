@@ -346,7 +346,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
   }).length;
 
   return (
-    <div className="pb-12 animate-fadeIn" style={{ background: '#F6F2F5' }}>
+    <div className="pb-12 animate-fadeIn" style={{ background: '#FAF7FA' }}>
       <div
         className="overflow-hidden shadow-card"
         style={{
@@ -390,7 +390,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
         <div
           className="flex flex-col gap-4"
           style={{
-            marginTop: '-56px', background: '#F6F2F5', borderRadius: '28px 28px 0 0', position: 'relative', padding: '20px',
+            marginTop: '-56px', background: '#FAF7FA', borderRadius: '28px 28px 0 0', position: 'relative', padding: '20px',
             marginLeft: 'calc(-0.5 * var(--app-bleed) + 50%)', marginRight: 'calc(-0.5 * var(--app-bleed) + 50%)',
             paddingLeft: 'calc(20px + max(0px, env(safe-area-inset-left)))', paddingRight: 'calc(20px + max(0px, env(safe-area-inset-right)))',
           }}
