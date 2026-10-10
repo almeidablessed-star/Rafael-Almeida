@@ -15,7 +15,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   // Sem 'signup': o cadastro aberto saiu do app. Quem entra, entra porque
   // comprou, e a conta nasce pela notificacao da Hotmart. A SignupPage continua
   // no repositorio, sem rota, para dar meia-volta facil se a decisao mudar.
-  const [authMode, setAuthMode] = React.useState<'login' | 'verify-otp'>('login');
+  const [authMode, setAuthMode] = React.useState<'login' | 'verify-otp' | 'esqueci-senha'>('login');
 
   if (isLoading || isValidatingProfile) {
     return (
@@ -29,11 +29,21 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   }
 
   if (!user) {
-    if (authMode === 'verify-otp') {
-      return <VerifyOtpStandalonePage onBackClick={() => setAuthMode('login')} />;
+    if (authMode === 'verify-otp' || authMode === 'esqueci-senha') {
+      return (
+        <VerifyOtpStandalonePage
+          onBackClick={() => setAuthMode('login')}
+          modo={authMode === 'esqueci-senha' ? 'esqueci-senha' : 'primeiro-acesso'}
+        />
+      );
     }
 
-    return <LoginPage onVerifyOtpClick={() => setAuthMode('verify-otp')} />;
+    return (
+      <LoginPage
+        onVerifyOtpClick={() => setAuthMode('verify-otp')}
+        onForgotPasswordClick={() => setAuthMode('esqueci-senha')}
+      />
+    );
   }
 
   // A verificacao de codigo continua indo pelos children: ela e tratada dentro
@@ -60,7 +70,12 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   // sobrevive aos dois. Ele e editavel pela propria pessoa, o que aqui nao e
   // problema: ele decide se uma tela aparece, nunca da acesso a nada.
   const senhaTemporaria = user.user_metadata?.senha_temporaria === true;
-  if (isResetPasswordRequired || senhaTemporaria) {
+  // Mesma ideia do marcador acima, para quem ESQUECEU a senha: ligado quando a
+  // pessoa acerta o codigo vindo de "Esqueci minha senha" e desligado ao gravar
+  // a senha nova. Sem ele, recarregar ou voltar jogaria a pessoa para dentro do
+  // app, logada e com a senha antiga ainda valendo.
+  const redefinirSenha = user.user_metadata?.redefinir_senha === true;
+  if (isResetPasswordRequired || senhaTemporaria || redefinirSenha) {
     return <ResetPasswordPage />;
   }
 

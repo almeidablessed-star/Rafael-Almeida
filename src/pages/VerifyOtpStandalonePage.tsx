@@ -4,10 +4,12 @@ import { useAuth } from '../context/AuthContext';
 import { Lock, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
 
 interface VerifyOtpStandalonePageProps {
+  /** De onde a pessoa veio. So muda os textos e o marcador que fica ligado. */
+  modo?: 'primeiro-acesso' | 'esqueci-senha';
   onBackClick?: () => void;
 }
 
-export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = ({ onBackClick }) => {
+export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = ({ onBackClick, modo = 'primeiro-acesso' }) => {
   const { beginAuthTransition, endAuthTransition } = useAuth();
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
@@ -76,6 +78,13 @@ export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = (
           access_token: data.accessToken,
           refresh_token: data.refreshToken || '',
         });
+      }
+
+      // Quem veio por "Esqueci minha senha" ja tem senha, entao nao tem o
+      // marcador de senha temporaria para segurar a tela. Este fica no lugar
+      // dele e sobrevive a recarregar e ao voltar.
+      if (modo === 'esqueci-senha') {
+        await supabase.auth.updateUser({ data: { redefinir_senha: true } });
       }
 
       setSuccess(true);
@@ -194,13 +203,15 @@ export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = (
             color: '#241B2B',
             marginBottom: '8px',
           }}>
-            Verifique Seu Email
+            {modo === 'esqueci-senha' ? 'Trocar a Senha' : 'Verifique Seu Email'}
           </h1>
           <p style={{
             color: '#666',
             fontSize: '14px',
           }}>
-            Digite seu e-mail e o código de 6 dígitos que enviamos
+            {modo === 'esqueci-senha'
+              ? 'Digite seu e-mail para receber um código e definir uma senha nova'
+              : 'Digite seu e-mail e o código de 6 dígitos que enviamos'}
           </p>
         </div>
 

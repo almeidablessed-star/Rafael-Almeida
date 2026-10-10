@@ -61,7 +61,9 @@ export const ResetPasswordPage: React.FC = () => {
       // pessoa continua presa aqui se a segunda falhar.
       const { error: updateError } = await supabase.auth.updateUser({
         password: password,
-        data: { senha_temporaria: false },
+        // Os DOIS marcadores saem juntos: quem chegou aqui definiu a senha, nao
+        // importa por qual porta entrou. Desligar so um deixaria a tela presa.
+        data: { senha_temporaria: false, redefinir_senha: false },
       });
 
       if (updateError) {

@@ -5,10 +5,12 @@ import { CarulaLogo } from '../components/CarulaLogo';
 import { HOTMART_URL } from '../config/hotmart';
 
 interface LoginPageProps {
+  /** Mesma tela de codigo do "Ja comprou?", so que anunciada como troca de senha. */
+  onForgotPasswordClick: () => void;
   onVerifyOtpClick: () => void;
 }
 
-export const LoginPage: React.FC<LoginPageProps> = ({ onVerifyOtpClick }) => {
+export const LoginPage: React.FC<LoginPageProps> = ({ onVerifyOtpClick, onForgotPasswordClick }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -103,6 +105,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onVerifyOtpClick }) => {
               className="w-full py-3 rounded-xl font-semibold border-2 border-[#6E3F72] text-[#6E3F72] hover:bg-[#6E3F72] hover:text-white transition-all"
             >
               Verificar Código
+            </button>
+          </div>
+
+          {/* Esqueceu a senha: mesma porta do codigo por e-mail, com outro nome.
+              Quem acerta o codigo cai na tela de definir senha, agora tambem
+              para quem ja tinha uma. */}
+          <div>
+            <button
+              type="button"
+              onClick={onForgotPasswordClick}
+              className="w-full text-center text-sm text-[#6E3F72] underline"
+            >
+              Esqueci minha senha
             </button>
           </div>
 
