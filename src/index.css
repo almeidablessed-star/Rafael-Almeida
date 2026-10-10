@@ -242,38 +242,3 @@ a:hover {
     transform: translateX(-50%);
   }
 }
-
-/* ================================================================
-   TIRA DA FAIXA DE SEGURANCA DO TOPO (so no celular)
-   ================================================================
-
-   No Safari do iOS 26 o `theme-color` e ignorado e a cor da faixa do topo (a
-   do relogio e da bateria) vem do `background-color` de `body`/`html` ou de um
-   elemento FIXO e fino colado no topo — `background-image` nao conta. Por isso
-   a faixa roxa de `background-image` da regra acima nao pintou nada: ela
-   continua ali, so para o fundo da pagina.
-
-   Esta tira resolve de outro jeito: um pseudo-elemento fixo no topo, com
-   `background-color` solido (o que o Safari consegue ler) e, por cima, a rampa
-   real da borda de cima do cabecalho, para que ela seja indistinguivel do
-   cabecalho que fica logo abaixo.
-
-   Nada de `backdrop-filter` nem de opacidade menor que 1: os dois atrapalham a
-   leitura da cor pelo Safari.
-
-   So ate 639px: no computador a coluna tem fundo de areia em volta e uma tira
-   roxa atravessada no topo ficaria sem sentido. */
-@media (max-width: 639px) {
-  body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: max(8px, env(safe-area-inset-top, 0px));
-    background-color: #462958;
-    background-image: linear-gradient(90deg, #3A2350, #523060);
-    pointer-events: none;
-    z-index: 2000;
-  }
-}
