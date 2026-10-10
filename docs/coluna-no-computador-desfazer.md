@@ -1,5 +1,25 @@
 # Coluna no computador — desfazer
 
+## Faixa roxa no topo da página (`03c0c86`) — desfazer separado
+
+Publicado em 09/10/2026, só o app. Mudou **uma regra** em `src/index.css`: o
+fundo de `html` e `body` passa a ter o cinza-claro de sempre como base e uma
+faixa roxa (`#462958`) só no topo, sem repetição, com altura igual à área
+segura do aparelho mais 150px. Serve para a faixa de segurança do topo do
+iPhone não ficar branca no Safari, sem o roxo voltar a aparecer embaixo.
+Nenhum componente foi tocado.
+
+```bash
+git revert --no-edit 03c0c86
+```
+
+```bash
+git push origin chore/carula-site-preview && git push origin HEAD:production && git push origin HEAD:master
+```
+
+Voltando atrás, a faixa do topo fica branca de novo no Safari do iPhone.
+Para só ajustar o tamanho da faixa, mude os 150px na regra em vez de reverter.
+
 > **09/10/2026 — os dois ajustes de aparência abaixo foram DESFEITOS a pedido
 > do usuário** ("desfaz tudo"). Revertidos e publicados nos commits `0b1d509`
 > (desfaz `e673737`, a cor de fundo das abas) e `8320ec7` (desfaz `3629e9a`, o
