@@ -1,5 +1,19 @@
 # Coluna no computador — desfazer
 
+> **09/10/2026 — os dois ajustes de aparência abaixo foram DESFEITOS a pedido
+> do usuário** ("desfaz tudo"). Revertidos e publicados nos commits `0b1d509`
+> (desfaz `e673737`, a cor de fundo das abas) e `8320ec7` (desfaz `3629e9a`, o
+> espaço no fim das telas). Motivo: depois desses dois commits o app perdeu
+> partes do **topo** das telas no celular; o pedido original era só de ajuste
+> na parte de **baixo**, ao rolar.
+>
+> O layout de computador (`a821a6e` e `0e8a670`) **continua no ar** — não foi
+> revertido. Depois dos reverts, `src/` ficou idêntico a `0e8a670` (conferido:
+> `git diff 0e8a670 HEAD -- src` vazio).
+>
+> As seções sobre esses dois commits ficam abaixo como registro do que eles
+> faziam; para refazê-los um dia, é só reverter os reverts.
+
 Commits: `a821a6e` (coluna centralizada a partir de 640px) e `0e8a670` (os
 blocos de ponta a ponta param de vazar da coluna).
 
