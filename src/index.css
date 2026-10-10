@@ -161,8 +161,14 @@ a:hover {
   padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
 
+/* Espaco no fim do conteudo para o menu de baixo, que e fixo e fica POR CIMA.
+   O menu tem 70px de altura propria e reserva por baixo a area segura do
+   aparelho (no minimo 1rem) — a conta aqui e a mesma, mais 12px de respiro.
+   Antes eram 5rem (80px) fixos, 6px a MENOS que a altura real do menu num
+   navegador sem area segura: um elemento que terminasse colado no fim do
+   conteudo ficava com esses 6px escondidos atras do menu. */
 .bottom-nav-safe {
-  padding-bottom: max(5rem, calc(5rem + env(safe-area-inset-bottom)));
+  padding-bottom: calc(82px + max(1rem, env(safe-area-inset-bottom)));
 }
 
 /* PDF rendering styles - force RGB colors to avoid oklab parsing issues in html2canvas */
