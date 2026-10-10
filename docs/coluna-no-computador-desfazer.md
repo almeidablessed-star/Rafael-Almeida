@@ -1,5 +1,16 @@
 # Coluna no computador — desfazer
 
+> **10/10/2026 — os três ajustes do TOPO foram DESFEITOS a pedido do usuário.**
+> Revertidos e publicados em `b3978ac` (desfaz `91e5fed`), `8b2c4e3` (desfaz
+> `119ea85`) e `2f3446b` (desfaz `03c0c86`). Motivo: a tira roxa apareceu como
+> uma ponta roxa dentro da área do app, numa cor que não combina, e o usuário
+> não tinha pedido nada no topo.
+>
+> O layout de computador (`a821a6e` e `0e8a670`) **continua no ar**. Depois dos
+> reverts, `src/` ficou idêntico a `0e8a670` (conferido: `git diff 0e8a670 HEAD
+> -- src` vazio). As seções abaixo ficam como registro do que esses commits
+> faziam.
+
 ## Tira fixa no topo (`119ea85` + `91e5fed`) — desfazer separado
 
 Publicado em 10/10/2026, só o app. Acrescenta em `src/index.css`, **só até
