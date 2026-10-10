@@ -538,7 +538,7 @@ export const CustomersModule: React.FC = () => {
   }
 
   return (
-    <div className="space-y-4 animate-fadeIn pb-12" style={{ background: '#FAF7FA' }}>
+    <div className="space-y-4 animate-fadeIn pb-12" style={{ background: '#F6F2F5' }}>
       {/* Error Alert */}
       {(customersError || formError) && (
         <div className="mx-4 mt-4 p-3 rounded-lg bg-red-50 border border-red-200">
@@ -553,7 +553,7 @@ export const CustomersModule: React.FC = () => {
           // Sem sombra: este envolucro e a pagina inteira, nao um cartao — a sombra
           // roxa caia abaixo da borda de baixo dele e aparecia como faixa no fim da
           // tela no iPhone. Mesma correcao da aba Pedidos.
-          background: '#FAF7FA',
+          background: '#F6F2F5',
           display: 'flex',
           flexDirection: 'column',
           marginBottom: '-100px',
@@ -590,7 +590,7 @@ export const CustomersModule: React.FC = () => {
         <div className="flex flex-col gap-3"
           style={{
             marginTop: '-70px',
-            background: '#FAF7FA',
+            background: '#F6F2F5',
             borderRadius: '28px 28px 0 0',
             position: 'relative',
             paddingTop: '16px',
