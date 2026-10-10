@@ -52,3 +52,21 @@ git push origin chore/carula-site-preview && git push origin HEAD:production && 
 
 Voltando atrás, um cartão que termine colado no fim do conteúdo volta a ficar
 com 6px escondidos atrás do menu. Nada mais muda.
+
+## Cor de fundo das abas (`e673737`) — desfazer separado
+
+Publicado em 09/10/2026, só o app. Trocou **a cor do fundo** em cinco pontos
+(Fichas, Produtos, Clientes e Compras), de `#FFFFFF`/`#FAF7FA` para `#F6F2F5`,
+que é a cor que o Início já usava. Nenhuma classe de tamanho, posição ou
+espaçamento foi tocada.
+
+```bash
+git revert --no-edit e673737
+```
+
+```bash
+git push origin chore/carula-site-preview && git push origin HEAD:production && git push origin HEAD:master
+```
+
+Voltando atrás, reaparecem as faixas de cor diferente no fim dessas telas —
+62px em Fichas, 26px em Produtos e 14px em Clientes.
