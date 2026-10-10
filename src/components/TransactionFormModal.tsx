@@ -2457,7 +2457,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
 
       {/* Success Toast */}
       {showSuccessToast && (
-        <div className="fixed bottom-4 left-4 right-4 sm:bottom-8 sm:right-8 sm:left-auto bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg animate-slideUp flex items-center gap-2 max-w-sm">
+        <div className="fixed bottom-4 left-4 right-4 sm:bottom-8 sm:right-8 sm:left-auto app-col-fixed bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg animate-slideUp flex items-center gap-2 max-w-sm">
           <Check className="w-5 h-5" />
           <span className="font-bold">{editingTransaction ? 'Alterações salvas!' : 'Pedido gravado com sucesso!'}</span>
         </div>

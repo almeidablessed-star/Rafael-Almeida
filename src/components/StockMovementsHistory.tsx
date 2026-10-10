@@ -110,7 +110,7 @@ const FullHistoryModal: React.FC<{ movimentos: MovimentoEstoque[]; onClose: () =
   onClose,
 }) => {
   return createPortal(
-    <div className="fixed inset-0 z-[99999] bg-white flex flex-col">
+    <div className="fixed inset-0 z-[99999] bg-white flex flex-col app-col-fixed">
       <div className="flex-shrink-0 flex items-center justify-between gap-3 px-4 py-3 bg-gradient-to-r from-[#3A2350] to-[#5A3F7F]">
         <div className="flex items-center gap-2 min-w-0">
           <History size={18} className="text-white flex-shrink-0" />

@@ -172,3 +172,50 @@ a:hover {
   background-color: rgb(255, 255, 255) !important;
   border-color: rgb(200, 200, 200) !important;
 }
+
+/* ================================================================
+   COLUNA NO COMPUTADOR (a partir de 640px)
+   ================================================================
+
+   O app foi desenhado para celular. Em telas largas as linhas de numero
+   esticam junto com a janela e os valores acabam se encontrando. Em vez de
+   redesenhar cada tela, a janela larga passa a mostrar o app como uma COLUNA
+   centralizada com largura de celular grande — as mesmas medidas que ja
+   funcionam no telefone — e o resto da tela vira fundo.
+
+   Abaixo de 640px NADA aqui vale: o celular continua exatamente como estava.
+   640px e o mesmo ponto do `sm:` do Tailwind que varios modais ja usam, entao
+   nao cria um segundo limite para ninguem decorar. */
+
+:root {
+  --app-col: 480px;
+}
+
+@media (min-width: 640px) {
+  /* `html` tambem, porque e ele que pinta a area de overscroll. */
+  html,
+  body {
+    background: var(--car-sand-100);
+  }
+
+  /* Tudo que o app desenha vive dentro de #root: a coluna aqui pega de uma vez
+     o app logado, o login, a verificacao de codigo, a senha, o perfil, o
+     onboarding e a tela de pausa. */
+  #root {
+    max-width: var(--app-col);
+    margin-inline: auto;
+    min-height: 100vh;
+    background: var(--color-surface);
+    box-shadow: 0 0 0 1px rgba(58, 35, 80, 0.06), 0 18px 48px rgba(58, 35, 80, 0.1);
+  }
+
+  /* `position: fixed` se mede pela JANELA, nao pelo #root — sem isto o menu de
+     baixo e o historico de estoque atravessariam a tela inteira. Como a coluna
+     e centralizada, centralizar na janela cai exatamente sobre ela. */
+  .app-col-fixed {
+    left: 50% !important;
+    right: auto !important;
+    width: min(var(--app-col), 100vw);
+    transform: translateX(-50%);
+  }
+}

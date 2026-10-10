@@ -394,7 +394,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
 
                 {/* Content */}
                 <div
-                  className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-[9px]"
+                  className="flex flex-col items-start justify-between gap-[9px]"
                   style={{ padding: '16px 18px 16px 22px' }}
                 >
 
@@ -422,7 +422,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                   </div>
 
                   <div
-                    className="flex flex-row items-center justify-between w-full shrink-0 gap-3 border-t border-dashed border-[rgba(36,27,43,0.14)] pt-[11px] sm:border-t-0 sm:pt-0"
+                    className="flex flex-row items-center justify-between w-full shrink-0 gap-3 border-t border-dashed border-[rgba(36,27,43,0.14)] pt-[11px]"
                   >
                     <div className="text-left">
                       <span className="font-black text-[var(--color-ink)]" style={{ fontSize: '17px', fontWeight: 800, color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>
