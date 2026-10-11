@@ -421,7 +421,42 @@ async function registrarRevisao(
 }
 
 /**
- * Grava o evento cru. Chamado SO depois do efeito ter acontecido: e a presenca
+ * Resumo do evento, com LISTA CURTA de campos.
+ *
+ * Antes o corpo inteiro da Hotmart ia para `payload`, e junto vinham CPF,
+ * endereco e telefone da compradora — dados que o webhook nunca le e que o app
+ * nunca consulta. Guardar o que nao se usa so aumenta o estrago de um vazamento.
+ *
+ * Lista de PERMITIDOS, e nao de proibidos: o campo novo que a Hotmart inventar
+ * amanha fica de fora sozinho, sem ninguem precisar lembrar de bloquea-lo.
+ *
+ * `campos_recebidos` guarda so os NOMES dos campos que chegaram (nunca os
+ * valores). E o que permite notar que a Hotmart passou a mandar algo novo, ou
+ * que um campo esperado sumiu, sem guardar conteudo nenhum.
+ */
+function resumirPayload(p: NormalizedPayload, body: any) {
+  const d = body?.data;
+  const nomes = (o: any) => (o && typeof o === 'object' && !Array.isArray(o) ? Object.keys(o) : []);
+
+  return {
+    event: p.event ?? null,
+    id: p.eventId ?? null,
+    status: p.status ?? null,
+    transaction: p.transacao ?? null,
+    subscriber_code: p.subscriberCode ?? null,
+    affiliate_code: p.affiliateCode ?? null,
+    date_next_charge: d?.date_next_charge ?? null,
+    buyer_email: p.email ?? null,
+    buyer_name: p.name ?? null,
+    campos_recebidos: {
+      raiz: nomes(body),
+      data: nomes(d),
+    },
+  };
+}
+
+/**
+ * Grava o evento. Chamado SO depois do efeito ter acontecido: e a presenca
  * da linha que marca "ja processei isto", e gravar antes faria um reenvio
  * depois de uma falha ser descartado sem nunca ter surtido efeito.
  */
@@ -434,7 +469,7 @@ async function registrarEvento(p: NormalizedPayload, body: any, usuariaId: strin
     parceiro_id: parceiroId,
     hotmart_transacao: p.transacao ?? null,
     hotmart_subscriber_code: p.subscriberCode ?? null,
-    payload: body,
+    payload: resumirPayload(p, body),
   });
   if (error) console.error('Falha ao registrar evento (efeito ja aplicado):', error.message);
 }
