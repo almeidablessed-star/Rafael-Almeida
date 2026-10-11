@@ -8,6 +8,104 @@ const supabase = createClient(
 
 const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
 
+
+/**
+ * Mesma classificacao do smart-processor, copiada de proposito: as funcoes sao
+ * arquivos independentes no runtime do Supabase e nao compartilham modulo — o
+ * mesmo motivo pelo qual `hashDoCodigo` tambem vive duplicada. Se uma mudar, a
+ * outra precisa mudar junto.
+ */
+function classificarErroDeEmail(error: any): 'nosso' | 'destinatario' | 'transitorio' {
+  const status = typeof error?.statusCode === 'number' ? error.statusCode : 0;
+  const name = typeof error?.name === 'string' ? error.name : '';
+  if (status === 0) return 'transitorio';
+  if (status === 429 || status >= 500) return 'transitorio';
+  if (status === 422 && name === 'validation_error') return 'destinatario';
+  return 'nosso';
+}
+
+/**
+ * Avisa o DONO do app que um e-mail nao saiu.
+ *
+ * A compradora nem esta logada quando isso acontece, entao aviso dentro do app
+ * nao serve: quem precisa agir e quem cuida do negocio.
+ *
+ * So nas classes 'nosso' e 'destinatario'. A 'transitorio' fica de fora de
+ * proposito: rede e limite de taxa passam sozinhos, e avisar neles so ensinaria
+ * a ignorar o aviso.
+ *
+ * ISOLADO em try/catch que engole tudo: este aviso nao pode estourar erro nem
+ * mudar a resposta dada a Hotmart. Uma venda nao pode falhar porque o aviso
+ * falhou.
+ *
+ * ATENCAO: o aviso sai pelo MESMO provedor que acabou de recusar o envio. Se a
+ * causa for nossa (chave revogada, dominio fora do ar), o aviso falha junto e
+ * em silencio — por isso a linha EMAIL_FALHOU em `assinatura_eventos` continua
+ * sendo o registro que sobrevive, e nao este e-mail.
+ *
+ * Nunca leva o codigo de acesso, nome, CPF nem endereco.
+ */
+async function avisarFalhaDeEmail(
+  origem: string,
+  classe: string,
+  error: any,
+  destinoQueFalhou: string | null,
+  referencia: string | null
+) {
+  try {
+    if (classe !== 'nosso' && classe !== 'destinatario') return;
+
+    const alerta = Deno.env.get('ALERTA_EMAIL');
+    const remetente = Deno.env.get('RESEND_FROM');
+    if (!alerta || !remetente) return;
+
+    const motivo = typeof error?.message === 'string' ? error.message.slice(0, 300) : 'sem mensagem';
+    const linhas = [
+      `Origem: ${origem}`,
+      `Classe: ${classe}`,
+      `Codigo HTTP: ${error?.statusCode ?? 'sem codigo'}`,
+      `Motivo: ${motivo}`,
+      `E-mail que falhou: ${destinoQueFalhou ?? 'desconhecido'}`,
+      `Referencia: ${referencia ?? 'sem referencia'}`,
+    ];
+
+    await resend.emails.send({
+      from: `Carula Confeitaria <${remetente}>`,
+      to: alerta,
+      subject: `[Carula] E-mail nao entregue (${classe})`,
+      text: linhas.join('\n'),
+    });
+  } catch (err) {
+    console.error('Falha ao enviar o aviso de e-mail nao entregue');
+  }
+}
+
+/**
+ * O reenvio tambem deixa rastro agora.
+ *
+ * Antes a recusa do Resend virava so `console.error`, que ninguem le por conta
+ * propria: o reenvio falhava de forma invisivel. Agora grava a mesma linha
+ * EMAIL_FALHOU do webhook e avisa pelo mesmo caminho.
+ */
+async function registrarFalhaDeReenvio(email: string, usuariaId: string, classe: string, error: any) {
+  const { error: erroAoGravar } = await supabase.from('assinatura_eventos').insert({
+    hotmart_event_id: null,
+    evento: 'EMAIL_FALHOU',
+    email,
+    usuaria_id: usuariaId,
+    payload: {
+      classe,
+      codigo_http: error?.statusCode ?? null,
+      motivo: typeof error?.message === 'string' ? error.message.slice(0, 300) : null,
+      provedor: 'resend',
+      origem: 'reenvio de codigo (resend-otp)',
+    },
+  });
+  if (erroAoGravar) console.error('Falha ao registrar EMAIL_FALHOU do reenvio:', erroAoGravar.message);
+
+  await avisarFalhaDeEmail('reenvio de codigo (resend-otp)', classe, error, email, usuariaId);
+}
+
 // `*` pelo mesmo motivo do swift-responder: restringir origem pode quebrar o
 // PWA instalado. Registrado como pendencia em docs/.
 const corsHeaders = {
@@ -178,10 +276,20 @@ Deno.serve(async (req) => {
         subject: 'Seu novo código de acesso - Carula Confeitaria',
         html: corpoDoEmail(codigo, appUrl),
       })
-      .then((r: any) => {
-        if (r?.error) console.error('Reenvio recusado pelo Resend - status', r.error?.statusCode);
+      .then(async (r: any) => {
+        if (r?.error) {
+          const classe = classificarErroDeEmail(r.error);
+          console.error('Reenvio recusado pelo Resend - status', r.error?.statusCode);
+          await registrarFalhaDeReenvio(usuaria.email, usuaria.id, classe, r.error);
+        }
       })
-      .catch((e: any) => console.error('Reenvio falhou:', e?.message));
+      .catch(async (e: any) => {
+        // Sem resposta do provedor: rede, DNS ou tempo esgotado. Cai em
+        // 'transitorio' pela mesma regra do webhook, entao fica registrado mas
+        // nao gera aviso.
+        console.error('Reenvio falhou:', e?.message);
+        await registrarFalhaDeReenvio(usuaria.email, usuaria.id, classificarErroDeEmail(e), e);
+      });
 
     // @ts-ignore EdgeRuntime existe no runtime do Supabase, nao nos tipos.
     if (typeof EdgeRuntime !== 'undefined') EdgeRuntime.waitUntil(envio);

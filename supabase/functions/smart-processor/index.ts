@@ -110,6 +110,63 @@ function classificarErroDeEmail(error: any): 'nosso' | 'destinatario' | 'transit
   return 'nosso';
 }
 
+
+/**
+ * Avisa o DONO do app que um e-mail nao saiu.
+ *
+ * A compradora nem esta logada quando isso acontece, entao aviso dentro do app
+ * nao serve: quem precisa agir e quem cuida do negocio.
+ *
+ * So nas classes 'nosso' e 'destinatario'. A 'transitorio' fica de fora de
+ * proposito: rede e limite de taxa passam sozinhos, e avisar neles so ensinaria
+ * a ignorar o aviso.
+ *
+ * ISOLADO em try/catch que engole tudo: este aviso nao pode estourar erro nem
+ * mudar a resposta dada a Hotmart. Uma venda nao pode falhar porque o aviso
+ * falhou.
+ *
+ * ATENCAO: o aviso sai pelo MESMO provedor que acabou de recusar o envio. Se a
+ * causa for nossa (chave revogada, dominio fora do ar), o aviso falha junto e
+ * em silencio — por isso a linha EMAIL_FALHOU em `assinatura_eventos` continua
+ * sendo o registro que sobrevive, e nao este e-mail.
+ *
+ * Nunca leva o codigo de acesso, nome, CPF nem endereco.
+ */
+async function avisarFalhaDeEmail(
+  origem: string,
+  classe: string,
+  error: any,
+  destinoQueFalhou: string | null,
+  referencia: string | null
+) {
+  try {
+    if (classe !== 'nosso' && classe !== 'destinatario') return;
+
+    const alerta = Deno.env.get('ALERTA_EMAIL');
+    const remetente = Deno.env.get('RESEND_FROM');
+    if (!alerta || !remetente) return;
+
+    const motivo = typeof error?.message === 'string' ? error.message.slice(0, 300) : 'sem mensagem';
+    const linhas = [
+      `Origem: ${origem}`,
+      `Classe: ${classe}`,
+      `Codigo HTTP: ${error?.statusCode ?? 'sem codigo'}`,
+      `Motivo: ${motivo}`,
+      `E-mail que falhou: ${destinoQueFalhou ?? 'desconhecido'}`,
+      `Referencia: ${referencia ?? 'sem referencia'}`,
+    ];
+
+    await resend.emails.send({
+      from: `Carula Confeitaria <${remetente}>`,
+      to: alerta,
+      subject: `[Carula] E-mail nao entregue (${classe})`,
+      text: linhas.join('\n'),
+    });
+  } catch (err) {
+    console.error('Falha ao enviar o aviso de e-mail nao entregue');
+  }
+}
+
 /**
  * Deixa registrado que o e-mail nao saiu.
  *
@@ -139,6 +196,14 @@ async function registrarFalhaDeEmail(
     },
   });
   if (erroAoGravar) console.error('Falha ao registrar EMAIL_FALHOU:', erroAoGravar.message);
+
+  await avisarFalhaDeEmail(
+    'webhook da compra (smart-processor)',
+    classe,
+    error,
+    p.email ?? null,
+    p.transacao ?? p.subscriberCode ?? null
+  );
 }
 
 /**
