@@ -5,7 +5,7 @@ import { Lock, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
 
 interface VerifyOtpStandalonePageProps {
   /** De onde a pessoa veio. So muda os textos e o marcador que fica ligado. */
-  modo?: 'primeiro-acesso' | 'esqueci-senha';
+  modo?: 'primeiro-acesso' | 'esqueci-senha' | 'parceiro';
   onBackClick?: () => void;
 }
 
@@ -83,6 +83,8 @@ export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = (
       // Quem veio por "Esqueci minha senha" ja tem senha, entao nao tem o
       // marcador de senha temporaria para segurar a tela. Este fica no lugar
       // dele e sobrevive a recarregar e ao voltar.
+      // Parceiro nao define senha: ele so precisa da sessao para o painel ler
+      // os proprios numeros. Por isso nenhum marcador e ligado aqui.
       if (modo === 'esqueci-senha') {
         await supabase.auth.updateUser({ data: { redefinir_senha: true } });
       }
@@ -91,7 +93,7 @@ export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = (
 
       // Redirect to password reset page after 1.5 seconds
       setTimeout(() => {
-        window.location.href = '/?type=recovery';
+        window.location.href = modo === 'parceiro' ? '/parceiro' : '/?type=recovery';
       }, 1500);
     } catch (err: any) {
       endAuthTransition();
@@ -203,7 +205,11 @@ export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = (
             color: '#241B2B',
             marginBottom: '8px',
           }}>
-            {modo === 'esqueci-senha' ? 'Trocar a Senha' : 'Verifique Seu Email'}
+            {modo === 'esqueci-senha'
+              ? 'Trocar a Senha'
+              : modo === 'parceiro'
+                ? 'Área do Parceiro'
+                : 'Verifique Seu Email'}
           </h1>
           <p style={{
             color: '#666',
@@ -211,7 +217,9 @@ export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = (
           }}>
             {modo === 'esqueci-senha'
               ? 'Digite seu e-mail para receber um código e definir uma senha nova'
-              : 'Digite seu e-mail e o código de 6 dígitos que enviamos'}
+              : modo === 'parceiro'
+                ? 'Digite seu e-mail de parceiro para receber um código de entrada'
+                : 'Digite seu e-mail e o código de 6 dígitos que enviamos'}
           </p>
         </div>
 

@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { PainelParceiroPage } from './pages/PainelParceiroPage';
 import { Header } from './components/Header';
 import { BottomNav } from './components/BottomNav';
 import { PeriodSelector } from './components/PeriodSelector';
@@ -715,6 +716,18 @@ function AppContent() {
 }
 
 export default function App() {
+  // Rota do parceiro, decidida pelo endereco. O app nao usa roteador: uma
+  // comparacao aqui custa menos que trazer uma biblioteca inteira para UMA
+  // tela. Fica FORA do ProtectedRoute de proposito — parceiro nao tem linha em
+  // `usuarias` e cairia no portao de perfil e no de onboarding.
+  if (typeof window !== 'undefined' && window.location.pathname.startsWith('/parceiro')) {
+    return (
+      <AuthProvider>
+        <PainelParceiroPage />
+      </AuthProvider>
+    );
+  }
+
   return (
     <AuthProvider>
       <ProtectedRoute>
