@@ -443,21 +443,26 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
             <button
               onClick={onLogout}
               style={{
-                background: 'none',
+                // Mesmo botao da tela de perfil: forma padrao do app (padding
+                // 12, raio 12, Manrope 14/700) com o vermelho de acao
+                // destrutiva.
+                minWidth: '140px',
+                padding: '12px 32px',
+                borderRadius: '12px',
+                background: '#C4626F',
+                color: '#FFFFFF',
                 border: 'none',
-                padding: '6px 12px',
                 fontFamily: "'Manrope', sans-serif",
-                fontSize: '12px',
-                fontWeight: 600,
-                color: '#C4626F',
+                fontSize: '14px',
+                fontWeight: 700,
                 cursor: 'pointer',
-                transition: 'color 0.2s ease',
+                transition: 'background 0.2s ease',
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.color = '#E07080';
+                (e.currentTarget as HTMLButtonElement).style.background = '#E07080';
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.color = '#C4626F';
+                (e.currentTarget as HTMLButtonElement).style.background = '#C4626F';
               }}
               title="Sair da conta"
             >

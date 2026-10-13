@@ -818,35 +818,6 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
           </div>
         )}
 
-        {/* Logout Button - Discrete */}
-        {onLogout && (
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px', paddingTop: onIniciarTour ? '0' : '8px', borderTop: onIniciarTour ? 'none' : '1px solid #F0E8F2' }}>
-            <button
-              onClick={onLogout}
-              style={{
-                background: 'none',
-                border: 'none',
-                padding: '6px 12px',
-                fontFamily: "'Manrope', sans-serif",
-                fontSize: '12px',
-                fontWeight: 600,
-                color: '#C4626F',
-                cursor: 'pointer',
-                transition: 'color 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.color = '#E07080';
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.color = '#C4626F';
-              }}
-              title="Sair da conta"
-            >
-              Sair
-            </button>
-          </div>
-        )}
-
         {/* Buttons */}
         <div style={{ display: 'flex', gap: '12px' }}>
           <button
@@ -899,6 +870,41 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
             {isSaving ? 'Salvando...' : 'Salvar Perfil'}
           </button>
         </div>
+
+        {/* Logout Button - Discrete. Depois de Cancelar/Salvar de proposito:
+            sair e a acao secundaria da tela, nao disputa com o salvar. */}
+        {onLogout && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '16px', paddingTop: onIniciarTour ? '0' : '8px', borderTop: onIniciarTour ? 'none' : '1px solid #F0E8F2' }}>
+            <button
+              onClick={onLogout}
+              style={{
+                // Mesma forma dos botoes "Cancelar"/"Salvar Perfil" logo acima
+                // (padding 12, raio 12, Manrope 14/700); muda so a cor, que e o
+                // vermelho ja usado no app para acao destrutiva.
+                minWidth: '140px',
+                padding: '12px 32px',
+                borderRadius: '12px',
+                background: '#C4626F',
+                color: '#FFFFFF',
+                border: 'none',
+                fontFamily: "'Manrope', sans-serif",
+                fontSize: '14px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'background 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.background = '#E07080';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.background = '#C4626F';
+              }}
+              title="Sair da conta"
+            >
+              Sair
+            </button>
+          </div>
+        )}
       </div>
     </>
   );
