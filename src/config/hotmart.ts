@@ -12,4 +12,4 @@
  * assinatura pausada e a de login — e um valor repetido viraria um lugar
  * atualizado e outro esquecido.
  */
-export const HOTMART_URL = '';
+export const HOTMART_URL = 'https://pay.hotmart.com/I107952126V';
