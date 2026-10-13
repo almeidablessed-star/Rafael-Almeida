@@ -16,6 +16,7 @@ import { PrimeirosPassosChecklist } from './onboarding/PrimeirosPassosChecklist'
 import { CampoComAjuda } from './onboarding/CampoComAjuda';
 import { CardDeSaldo } from './CardDeSaldo';
 import { AvatarProfile } from './AvatarProfile';
+
 import {
   Wallet,
   ShoppingBag,
@@ -39,6 +40,30 @@ import {
 } from 'lucide-react';
 
 const CHECKLIST_PRIMEIROS_PASSOS_HABILITADO = true;
+
+// Rotulo dos botoes do cabecalho da aba Inicio, que antes eram so icones. Usa
+// o mesmo tratamento dos rotulos que ja existem neste cabecalho (caixa alta
+// miuda em rosa claro, tipo "TOTAL EM VENDAS"). O corpo de 7px mantem cada
+// rotulo dentro da largura do seu proprio botao, para o grupo de icones nao
+// crescer e encostar no letreiro "Carula", que flutua centralizado por cima.
+const rotuloBotaoCabecalho: React.CSSProperties = {
+  fontFamily: "'Manrope', sans-serif",
+  fontSize: '7px',
+  fontWeight: 800,
+  textTransform: 'uppercase',
+  letterSpacing: '0.04em',
+  color: 'rgba(247,220,225,0.8)',
+  lineHeight: 1,
+  whiteSpace: 'nowrap',
+};
+
+// Mesma coisa, um ponto menor, para os tres botoes de acao da direita: eles
+// encolheram de 32 para 28px e o rotulo acompanha, para seguir cabendo dentro
+// da largura do proprio botao (e o espacamento entre os tres continuar igual).
+const rotuloBotaoAcao: React.CSSProperties = {
+  ...rotuloBotaoCabecalho,
+  fontSize: '6px',
+};
 
 interface DashboardProps {
   summary: SummaryTotals;
@@ -244,15 +269,19 @@ export const Dashboard: React.FC<DashboardProps> = ({
         {/* Content */}
         <div className="relative z-10 space-y-4">
           {/* Header: Logo, Title, Icons */}
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex items-start justify-between gap-2">
             {/* Avatar Profile - Circular */}
-            <AvatarProfile onClick={onOpenProfileModal} />
+            <div className="flex flex-col items-center gap-1">
+              <AvatarProfile onClick={onOpenProfileModal} />
+              <span style={rotuloBotaoCabecalho}>Perfil</span>
+            </div>
 
             {/* Action Icons - 32x32px each */}
-            <div className="flex-shrink-0 flex items-center gap-2">
+            <div className="flex-shrink-0 flex items-start gap-1">
+              <div className="flex flex-col items-center gap-1">
               <button
                 onClick={onOpenPwaModal}
-                className="w-8 h-8 rounded-[11px] text-white flex items-center justify-center"
+                className="w-7 h-7 rounded-[10px] text-white flex items-center justify-center"
                 style={{
                   background: 'rgba(255,255,255,.16)',
                   cursor: 'pointer',
@@ -266,11 +295,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 }}
                 title="Versão Mobile"
               >
-                <Smartphone className="w-4 h-4" />
+                <Smartphone className="w-3.5 h-3.5" />
               </button>
+              <span style={rotuloBotaoAcao}>Mobile</span>
+              </div>
+              <div className="flex flex-col items-center gap-1">
               <button
                 onClick={onOpenBackupModal}
-                className="w-8 h-8 rounded-[11px] text-white flex items-center justify-center"
+                className="w-7 h-7 rounded-[10px] text-white flex items-center justify-center"
                 style={{
                   background: 'rgba(255,255,255,.16)',
                   cursor: 'pointer',
@@ -284,11 +316,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 }}
                 title="Baixar Dados"
               >
-                <Download className="w-4 h-4" />
+                <Download className="w-3.5 h-3.5" />
               </button>
+              <span style={rotuloBotaoAcao}>Dados</span>
+              </div>
+              <div className="flex flex-col items-center gap-1">
               <button
                 onClick={onOpenGlossaryModal}
-                className="w-8 h-8 rounded-[11px] text-white flex items-center justify-center"
+                className="w-7 h-7 rounded-[10px] text-white flex items-center justify-center"
                 style={{
                   background: 'rgba(255,255,255,.16)',
                   cursor: 'pointer',
@@ -302,8 +337,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 }}
                 title="Glossário"
               >
-                <HelpCircle className="w-4 h-4" />
+                <HelpCircle className="w-3.5 h-3.5" />
               </button>
+              <span style={rotuloBotaoAcao}>Ajuda</span>
+              </div>
             </div>
           </div>
 
