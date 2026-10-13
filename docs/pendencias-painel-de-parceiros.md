@@ -81,10 +81,21 @@ assinatura" **não é renderizado** — de propósito: um botão que não leva a
 nenhum é pior que nenhum botão. Mas isso significa que hoje quem está pausado não
 tem caminho de volta. Preencher antes de haver assinante de verdade.
 
-**Resend ainda envia pelo remetente de teste.** O remetente e `resend.dev`, de
-sandbox, que so entrega ao dono da conta Resend. Uma compradora de verdade nunca
-recebe o codigo de acesso. Verificar o dominio `carulaconfeitaria.com.br` no
-Resend e apontar o `RESEND_FROM` para ele. **Obrigatorio antes do lancamento.**
+**Remetente do Resend — RESOLVIDO** (segredo gravado em 2026-10-08; conferido
+em 2026-10-13). O texto antigo dizia que o remetente era o sandbox `resend.dev`,
+que so entrega ao dono da conta — nao e mais verdade.
+
+- `RESEND_FROM` = `acesso@carulaconfeitaria.com.br`. Conferido por
+  `npx supabase secrets list`, que devolve o SHA-256 de cada segredo: o digest
+  do `RESEND_FROM` bate com o desse endereco, e NAO bate com
+  `onboarding@resend.dev`. (O esquema do hash foi confirmado antes pelo
+  `ALERTA_EMAIL`, cujo digest bate com o e-mail de alerta conhecido.)
+- DNS publicado e resolvendo: DKIM em `resend._domainkey.carulaconfeitaria.com.br`,
+  SPF e MX em `send.carulaconfeitaria.com.br` (CNAME para `send.forge.rmta.net`,
+  infraestrutura do Resend).
+- Dominio `carulaconfeitaria.com.br` marcado **Verified** no painel do Resend —
+  confirmado pelo Rafael em 2026-10-13. Esta parte so se ve no painel: do lado
+  do codigo e do DNS nao da para provar que o Resend concluiu a verificacao.
 
 **`otp_codes` — bloqueio imediato aplicado pelo Rafael** (2026-10-08): as cinco
 políticas foram removidas e `anon` e `authenticated` perderam os privilégios na
