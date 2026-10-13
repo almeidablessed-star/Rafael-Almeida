@@ -842,7 +842,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
               }}
               title="Sair da conta"
             >
-              Log Out
+              Sair
             </button>
           </div>
         )}

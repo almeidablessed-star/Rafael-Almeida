@@ -586,6 +586,7 @@ function AppContent() {
             onOpenAddModal={(type) => handleOpenAddModal(type || 'custo')}
             onEditTransaction={handleOpenEditModal}
             onDeleteTransaction={handleRequestDelete}
+            onLogout={handleLogout}
           />
         )}
 

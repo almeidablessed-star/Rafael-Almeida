@@ -10,6 +10,9 @@ interface CostsModuleProps {
   onOpenAddModal: (type?: any) => void;
   onEditTransaction: (tx: Transaction) => void;
   onDeleteTransaction: (tx: Transaction) => void;
+  // Mesmo `handleLogout` do App.tsx que ja serve o modal de perfil: aqui ele
+  // existe so para que sair da conta nao dependa de voltar a aba Inicio.
+  onLogout?: () => void;
 }
 
 export const CostsModule: React.FC<CostsModuleProps> = ({
@@ -17,6 +20,7 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
   onOpenAddModal,
   onEditTransaction,
   onDeleteTransaction,
+  onLogout,
 }) => {
   const { formatCurrency: formatMoney } = useCurrency();
   const [activeTab, setActiveTab] = useState<'todos' | 'custos' | 'investimentos' | 'maodeobra'>('todos');
@@ -430,6 +434,37 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
             ))
           )}
         </div>
+
+        {/* Sair da conta — mesmo visual do link dentro do modal de perfil.
+            Fica aqui porque a barra inferior alcanca esta aba de qualquer
+            tela, entao sair deixa de exigir uma volta ate a aba Inicio. */}
+        {onLogout && (
+          <div style={{ textAlign: 'center', paddingTop: '8px' }}>
+            <button
+              onClick={onLogout}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: '6px 12px',
+                fontFamily: "'Manrope', sans-serif",
+                fontSize: '12px',
+                fontWeight: 600,
+                color: '#C4626F',
+                cursor: 'pointer',
+                transition: 'color 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.color = '#E07080';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.color = '#C4626F';
+              }}
+              title="Sair da conta"
+            >
+              Sair da conta
+            </button>
+          </div>
+        )}
 
         </div>
       </div>
