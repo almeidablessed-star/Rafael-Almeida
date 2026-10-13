@@ -1,19 +1,30 @@
-# Pendência — virar o default de `acesso_status` para `'inativo'` antes do lançamento
+# RESOLVIDO: virar o default de `acesso_status` para `'inativo'`
 
 > Registrado em 2026-10-02, logo depois de rodar a migration do schema de
-> assinatura (Etapa 2 do plano Hotmart). **Não fazer agora**, por decisão
-> explícita do Rafael.
+> assinatura (Etapa 2 do plano Hotmart), com a decisão explícita do Rafael de
+> não fazer naquele momento.
+>
+> **Aplicado no banco de produção — confirmado pelo Rafael em 2026-10-13.** A
+> coluna `usuarias.acesso_status` já tem `DEFAULT 'inativo'`. O texto do
+> comando aprovado está versionado em
+> `supabase/migrations/20261009120000_acesso_status_default_inativo.sql`,
+> junto com o comando de desfazer. **Não há mais nada a fazer aqui** — o
+> restante deste documento fica como registro do porquê.
+>
+> Cuidado ao reler a seção final, "Etapas do plano Hotmart ainda em aberto":
+> ela envelheceu. A Etapa 4 (RLS) tem migration aplicada, a Etapa 5 (tela de
+> assinatura pausada) está no roteamento e a Etapa 6 (painel do parceiro)
+> está em produção.
 
 ## O comando
 
-Quando o app começar a vender de verdade — ou seja, quando houver a primeira
-assinatura paga por alguém de fora —, rodar no SQL Editor do Supabase:
+Rodado no SQL Editor do Supabase:
 
 ```sql
 ALTER TABLE public.usuarias ALTER COLUMN acesso_status SET DEFAULT 'inativo';
 ```
 
-## Por que não agora
+## Por que não foi feito na época
 
 A migration criou `usuarias.acesso_status` com `DEFAULT 'ativo'` **de
 propósito**: isso faz o backfill das contas que já existiam entrarem como
@@ -22,7 +33,7 @@ coluna nasceu. Enquanto o único usuário é o próprio Rafael, com contas de
 teste, o default aberto é o que mantém o trabalho fluindo — trocar agora só
 criaria atrito para criar conta de teste.
 
-## Por que fazer antes do lançamento
+## Por que precisava ser feito antes do lançamento
 
 O default vale também para contas **futuras**. Enquanto ele for `'ativo'`,
 qualquer linha nova em `usuarias` nasce com acesso liberado, inclusive uma
@@ -34,7 +45,7 @@ furo no fluxo de cadastro falha para o lado seguro (pessoa sem acesso, que
 reclama e é destravada na hora) em vez de falhar para o lado caro (acesso
 grátis e silencioso).
 
-## Ordem em relação às outras etapas
+## Ordem em relação às outras etapas (checklist cumprido antes de rodar)
 
 Isto só faz sentido **depois** que o webhook souber conceder acesso
 explicitamente (Etapa 3 do plano) — caso contrário as contas novas nasceriam

@@ -41,17 +41,41 @@ Enquanto as Etapas 2 e 3 não chegarem, rode o teste com pedidos **sem
 adicionais e com um item só**, senão o resultado mistura defeitos já conhecidos
 com regressões novas.
 
-## Um caso que ainda NÃO foi testado
+## O caso dos produtos diferentes — TESTADO em 2026-10-13
 
-**Itens de produtos diferentes.** Todos os testes até aqui usaram várias
-unidades do *mesmo* produto, porque a conta de teste só tinha uma ficha. Nesse
-caso os três itens viram uma linha com quantidade 3 e o valor por acaso
-sobrevive.
+Este era o caso que faltava: até então todos os testes usavam várias unidades
+do *mesmo* produto, porque a conta só tinha uma ficha.
 
-Com produtos **diferentes** a expectativa é que o segundo e o terceiro item
-sejam trocados pelo primeiro e o total mude — mas isso é dedução, não medição.
-A Etapa 2 precisa começar por criar duas fichas de preços distintos e medir esse
-caso antes de qualquer correção.
+Montado na conta real, com dados de teste criados e apagados no mesmo dia: um
+produto de estoque (5.000 g), uma ficha nova ligada a ele (100 g por unidade,
+R$ 50,00) e um pedido de **R$ 1.073,00** com **duas fichas diferentes**
+(1× R$ 883,00 + 2× R$ 50,00), um item **"Outro / Personalizado"** (R$ 45,00),
+**entrega** (R$ 25,00) e **adicional** (R$ 20,00).
+
+Resultado de salvar sem mexer em nada, **duas vezes seguidas**:
+
+| | antes | depois da 1ª | depois da 2ª |
+|---|---|---|---|
+| Total | R$ 1.073,00 | R$ 1.073,00 | R$ 1.073,00 |
+| Itens em `breakdown.itens` | 3 | 3 | 3 |
+| `breakdown` + `ficha_itens` | — | byte a byte idênticos | idênticos |
+| `notas` | `null` | `null` | `null` |
+| Estoque do insumo | 4.800 g | 4.800 g | 4.800 g |
+
+A expectativa antiga registrada aqui — "o segundo e o terceiro item são
+trocados pelo primeiro e o total muda" — **não se confirma mais**: as Etapas 2
+e 3 corrigiram isso antes deste teste.
+
+## Estoque na edição — TESTADO em 2026-10-13
+
+A edição **não calcula delta**: devolve tudo o que a versão antiga consumiu e
+consome de novo pela composição nova (App.tsx). Medido em
+`estoque_movimentos`: cada salvamento grava um par `devolucao: 200` +
+`consumo: 200`, e o saldo fica em 4.800 g. Apagar o pedido devolveu os 200 g e
+o saldo voltou a 5.000 g, exatamente o valor inicial.
+
+O ledger cresce a cada edição — é o projeto do reequilíbrio, não um defeito —,
+mas as linhas de um produto já apagado continuam na tabela.
 
 ## Cuidado ao limpar depois do teste
 

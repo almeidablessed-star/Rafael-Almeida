@@ -1,7 +1,9 @@
 -- O acesso passa a ser negado por padrao.
 --
--- NAO RODAR ainda: este arquivo e o texto aprovado, para o Rafael rodar no SQL
--- Editor no passo combinado. Ate la o default segue 'ativo'.
+-- JA APLICADO no banco de producao (confirmado pelo Rafael em 2026-10-13): a
+-- coluna `usuarias.acesso_status` ja tem DEFAULT 'inativo'. Nao ha nada
+-- pendente aqui — o texto abaixo fica como registro do porque da mudanca e
+-- como desfaze-la.
 --
 -- Por que: enquanto o default for 'ativo', qualquer linha nova em `usuarias`
 -- que omita a coluna nasce com acesso liberado. Com o app sendo vendido por

@@ -1,7 +1,46 @@
-# Pendência: editar um pedido pode mudar o total sem avisar
+# RESOLVIDO: editar um pedido pode mudar o total sem avisar
 
-> Registrado em 2026-09-28. Trilha **pausada por decisão do Rafael** — a
-> Etapa 1 foi entregue, as Etapas 2 e 3 ficam para quando ele retomar.
+> Registrado em 2026-09-28, com a trilha pausada por decisão do Rafael depois
+> da Etapa 1.
+>
+> **Resolvido — verificado ao vivo em 2026-10-13.** As Etapas 2 e 3 foram
+> entregues logo depois deste texto e o documento ficou para trás: `a037776`
+> (30/09, itens), `414fa32` (01/10, adicionais) e `cd5df00` (anotações). Todos
+> em produção.
+>
+> O caminho escolhido foi o **Caminho B** recomendado abaixo: itens e
+> adicionais passaram a ser gravados estruturados em `breakdown.itens` e
+> `breakdown.adicionaisDetalhados`, e a edição lê de lá. `ficha_itens` não foi
+> tocado.
+>
+> **Teste feito em 2026-10-13** (roteiro em
+> `docs/teste-aceitacao-edicao-de-pedido.md`), com pedido de R$ 1.073,00 —
+> duas fichas diferentes, um item "Outro / Personalizado", entrega e adicional:
+> salvar sem mexer em nada **duas vezes seguidas** deixou o total, a linha crua
+> do banco (`breakdown` + `ficha_itens`) e o estoque **idênticos**. As
+> anotações continuaram `null` nas duas vezes — o texto "Breakdown:" não volta
+> mais ao campo.
+>
+> **Três ressalvas que continuam valendo:**
+>
+> 1. **Pedidos criados antes de 30/09 não têm `breakdown.itens`** e, por isso,
+>    **não podem ser editados**: o app bloqueia o salvamento com um aviso
+>    pedindo para refazer os itens (TransactionFormModal.tsx, "Pedido antigo,
+>    sem a lista de itens gravada"). É proposital — melhor bloquear que gravar
+>    valor errado —, mas é um beco sem saída para esses pedidos: a única saída
+>    é apagar e lançar de novo.
+> 2. **Os valores dos itens de ficha são recalculados pelo preço ATUAL da
+>    ficha** ao reabrir, não pelo `valorUnitario` congelado (só item
+>    personalizado e ficha apagada usam o valor gravado). Quem segura o
+>    estrago é a "trava do centavo", que recusa salvar se o total remontado
+>    divergir do gravado. Resultado prático: se a ficha mudou de preço, aquele
+>    pedido fica travado para edição. O histórico não é reescrito, mas também
+>    não é restaurado.
+> 3. O ledger `estoque_movimentos` **cresce a cada edição** (devolução +
+>    consumo), o que é o projeto do reequilíbrio e mantém o saldo correto —
+>    mas as linhas de um produto apagado permanecem na tabela.
+>
+> O texto abaixo fica como registro do problema original.
 
 ## O problema
 
