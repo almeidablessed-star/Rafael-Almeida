@@ -24,7 +24,19 @@ interface Numeros {
  * a conta existe mas nao e parceira ja e informacao a mais.
  */
 export const PainelParceiroPage: React.FC = () => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, logout } = useAuth();
+  // Mesmo botao e mesmo caminho de saida das outras telas: `logout` do
+  // contexto, com queda para encerrar a sessao local se ele falhar.
+  const sair = async () => {
+    try {
+      await logout();
+    } catch (err) {
+      console.error('Falha ao sair:', err);
+      await supabase.auth.signOut({ scope: 'local' }).catch(() => {});
+      window.location.reload();
+    }
+  };
+
   const [numeros, setNumeros] = useState<Numeros | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [negado, setNegado] = useState(false);
@@ -160,6 +172,15 @@ export const PainelParceiroPage: React.FC = () => {
           "Ativas" conta quem está com a assinatura em dia. A comissão é paga
           pela Hotmart — confira os valores por lá.
         </p>
+
+        <button
+          type="button"
+          onClick={sair}
+          className="w-full py-3 rounded-2xl text-sm font-bold transition-colors"
+          style={{ border: '1px solid rgba(58,35,80,0.16)', color: '#3A2350', background: '#FFFFFF' }}
+        >
+          Sair
+        </button>
       </div>
     </div>
   );
