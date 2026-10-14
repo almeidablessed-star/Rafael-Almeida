@@ -29,3 +29,8 @@ verify_jwt = false
 
 [functions.resend-otp]
 verify_jwt = false
+
+# Quem chama e o Resend, que nao manda JWT do Supabase. O papel da
+# autenticacao aqui e a assinatura Svix conferida dentro da funcao.
+[functions.resend-webhook]
+verify_jwt = false
