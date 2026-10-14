@@ -201,10 +201,38 @@ Intervalo mínimo de 60 s, teto de 5 por dia por conta, código novo invalida os
 anteriores, e resposta sempre idêntica — inclusive com o limite estourado,
 porque dizer "espere um pouco" confirmaria que a conta existe.
 
-**CORS `*` no `swift-responder`.** Qualquer origem pode chamar o verificador.
-Mantido nesta etapa porque restringir pode quebrar o PWA instalado, que nem
-sempre manda a origem esperada. Avaliar uma lista de origens permitidas depois
-de confirmar o comportamento do PWA.
+**CORS `*` no `swift-responder` — RESOLVIDO em 2026-10-13** (commit `54239e4`,
+funcao ja implantada). O `*` virou uma lista de origens:
+
+- `APP_URL` (lida do ambiente), `https://rafael-almeida-nine.vercel.app`,
+  `https://carulaconfeitaria.com.br` (com e sem `www`),
+  `http://localhost:3000` e `http://localhost:5173`.
+- Origem **na lista** -> ecoada, o navegador libera a leitura.
+- Origem **ausente ou `null`** -> responde `*`, de proposito. E o caso do PWA
+  instalado, que em alguns aparelhos nao manda origem — e e justamente o
+  publico do app. Era este o risco que adiou a correcao.
+- Origem **fora da lista** -> nenhum cabecalho de CORS. A funcao responde
+  igual (nao e 403: CORS nao e autorizacao); o navegador e que recusa
+  entregar a resposta a pagina que chamou.
+- `Vary: Origin` em todas as respostas, para cache nenhum servir a resposta de
+  uma origem para outra.
+
+Nada do que de fato protege este endpoint foi tocado: resposta unica para todo
+erro, piso de tempo, teto de tentativas, hash em tempo constante e identidade
+vinda do `user_id` da linha. Vale lembrar o que a lista NAO faz: CORS nao
+impede ninguem de chamar o endpoint (curl, script e servidor passam longe). O
+ganho real e contra phishing — uma pagina que convenca a pessoa a digitar o
+codigo nao consegue mais LER os tokens de sessao da resposta.
+
+**Verificado em 2026-10-13, em duas camadas:**
+
+1. Sondagens contra a funcao publicada: origem permitida e ecoada; `evil.com`
+   nao recebe cabecalho nenhum; `Origin: null` e origem ausente recebem `*`.
+   No POST real, corpo e status sao identicos nos dois casos — a funcao nao
+   virou um novo oraculo, so deixou de autorizar a leitura.
+2. Teste no aparelho, feito pelo Rafael: **login por codigo funcionou pelo app
+   instalado na tela inicial (PWA, Safari) e tambem pelo Safari normal**. Era
+   a hipotese que faltava derrubar, e ela caiu.
 
 **Remetente do Resend fixo no codigo.** Alem de trocar o sandbox pelo dominio
 `carulaconfeitaria.com.br` depois de verifica-lo, o remetente deve virar
