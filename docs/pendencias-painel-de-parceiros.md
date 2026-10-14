@@ -128,18 +128,64 @@ e precisa de um reenvio. Classe `nosso` ou `transitorio` quer dizer que a conta
 foi desfeita e a Hotmart vai reenviar sozinha — o que precisa de conserto ali é
 a configuração.
 
-**Bounce assíncrono não gera `EMAIL_FALHOU` — o buraco maior desta consulta.**
-O `EMAIL_FALHOU` só nasce quando o Resend **recusa na hora**, na própria chamada
-de envio. O caso mais comum na vida real é outro: o Resend **aceita** o e-mail,
-responde 200, e só depois a caixa de destino devolve — endereço digitado errado,
-conta inexistente, caixa cheia. Isso é um *bounce assíncrono*, e chega apenas
-pelo webhook do Resend, no evento `email.bounced`
-([documentação](https://resend.com/docs/webhooks/emails/bounced)). Como esse
-webhook não é tratado, **essas falhas hoje não aparecem em lugar nenhum**: a
-compradora pagou, a conta existe, o código nunca chegou, e a consulta acima
-continua vazia. Tratar o webhook e registrar `EMAIL_FALHOU` com classe
-`destinatario_assincrono` é **obrigatório antes do lançamento**, junto com o
-aviso ativo — os dois resolvem o mesmo problema por caminhos diferentes.
+**Bounce assíncrono — RESOLVIDO em 2026-10-13.** O problema era real: o
+`EMAIL_FALHOU` só nascia quando o Resend **recusava na hora**, na própria
+chamada de envio. O caso mais comum na vida real é outro — o Resend aceita,
+responde 200, e só depois a caixa de destino devolve (endereço digitado
+errado, conta inexistente, caixa cheia). Esse *bounce assíncrono* chega apenas
+pelo webhook, no evento `email.bounced`
+([documentação](https://resend.com/docs/webhooks/emails/bounced)), e como
+ninguém o tratava a compradora pagava, a conta existia, o código nunca chegava
+e a consulta acima continuava vazia.
+
+O que foi feito:
+
+- **Função nova `resend-webhook`** (commit `1f68bc5`), separada das outras três
+  porque é a única que recebe DO Resend, com outro contrato de segurança.
+  Publicada com `verify_jwt = false`; quem autentica é a assinatura Svix
+  (HMAC-SHA256 sobre `<svix-id>.<svix-timestamp>.<corpo cru>`, janela de 5
+  minutos contra repetição, comparação em tempo constante).
+  URL: `https://inqyobsjuztztvafpzxn.supabase.co/functions/v1/resend-webhook`.
+- **Segredo `RESEND_WEBHOOK_SECRET` configurado** nos secrets do projeto. Sem
+  ele a função recusa tudo com 500 — e 500, não 200, de propósito: o Resend
+  reenvia o que falha, então os eventos represados entram sozinhos quando a
+  configuração aparece.
+- **Webhook cadastrado no painel do Resend**, assinando `email.bounced` e
+  `email.complained`. `email.delivered` e `email.sent` ficaram de fora: gerariam
+  volume sem decisão associada.
+- Grava a MESMA linha `EMAIL_FALHOU` em `assinatura_eventos`, com
+  `classe: destinatario_assincrono` e `provedor: resend` — então a consulta de
+  monitoramento acima passou a enxergar os dois caminhos sem mudar nada.
+
+**Teste de ponta a ponta em 2026-10-13**, com o simulador oficial do Resend
+(`bounced@resend.dev`, que devolve SMTP 550 5.1.1 — bounce real, não dado
+fictício):
+
+- Envio aceito, id `01a13828-0aec-72a3-b8cb-c40e0f4c05c6`.
+- Linha **37** gravada em `assinatura_eventos`, conferida pelo Rafael:
+  `evento = EMAIL_FALHOU`, `classe = destinatario_assincrono`,
+  `provedor = resend`, `email_id` e `hotmart_event_id` corretos.
+- Aviso por e-mail chegou na caixa do `ALERTA_EMAIL`, com o assunto e o
+  conteúdo esperados.
+
+A linha 37 fica no banco de propósito: é um bounce real do simulador oficial.
+
+**Duas ressalvas, ainda em aberto:**
+
+1. **Só o hard bounce foi validado.** Os nomes exatos dos campos do payload
+   para os outros casos — soft bounce (caixa cheia, indisponibilidade
+   temporária) e `email.complained` — **não foram testados com evento real**.
+   A função lê `data.bounce.message/type/subType` com alternativas; se os nomes
+   diferirem nesses casos, a linha é gravada do mesmo jeito, mas com
+   `motivo: "sem mensagem"`. O mecanismo funciona; o detalhe do motivo é que
+   fica por confirmar.
+2. **A trava de duplicidade é por consulta, não por restrição do banco.** A
+   chave `resend:<email_id>:<tipo>` é consultada antes de gravar, espelhando o
+   que o `smart-processor` já faz com `hotmart_event_id`. Dois reenvios
+   simultâneos do mesmo evento ainda poderiam passar pelos dois lados da
+   janela e gerar linha e alerta repetidos. Risco teórico, registrado e **não
+   resolvido** — a solução sólida é um índice único em `hotmart_event_id`, que
+   protegeria também o caminho da Hotmart, hoje igualmente exposto.
 
 **Reenvio pode ser usado contra a pessoa (aceito por ora).** Quem souber o
 e-mail de alguém pode apertar "Não recebi o código" e, com isso, **invalidar o
