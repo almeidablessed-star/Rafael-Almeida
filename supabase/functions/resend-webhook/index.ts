@@ -207,9 +207,15 @@ Deno.serve(async (req) => {
   // colidir com um id da Hotmart, e com o tipo no fim porque um mesmo envio
   // pode legitimamente gerar `bounced` e depois `complained`.
   //
-  // Vale a mesma ressalva do caminho da Hotmart: a trava e por consulta antes
-  // de gravar, nao por restricao do banco. Dois reenvios simultaneos ainda
-  // poderiam passar pelos dois lados da janela.
+  // Esta consulta e a PRIMEIRA camada, nao a unica: a coluna tem indice unico
+  // (`assinatura_eventos_hotmart_event_id_key`), entao dois reenvios
+  // simultaneos que passem pelos dois lados desta janela ainda assim nao
+  // viram duas linhas — o banco recusa a segunda, e o 500 daqui faz o Resend
+  // reenviar ate a consulta acima resolver em 200.
+  //
+  // O comentario anterior dizia que a trava era "so por consulta, nao por
+  // restricao do banco". Era engano: foi concluido de nao haver migration no
+  // repositorio, sem nunca consultar `pg_indexes`. Conferido em 14/10.
   const chave = emailId ? `resend:${emailId}:${tipo}` : null;
   if (chave) {
     const { data: jaVisto } = await supabase

@@ -199,15 +199,38 @@ conferir é o `motivo` da linha: a função lê `data.bounce.message`, com queda
 para `data.reason` e para `"sem mensagem"` — o registro nasce de qualquer
 jeito, é o detalhe do motivo que fica por confirmar.
 
-**Uma ressalva, ainda em aberto:**
+**A trava de duplicidade NUNCA esteve aberta — correção de 2026-10-14.** Esta
+seção registrava, desde 13/10, que a proteção contra duplicidade era "só uma
+consulta antes do insert, sem restrição do banco", e listava o índice único
+como pendência. **Estava errado.** A coluna `hotmart_event_id` já tinha um
+índice único o tempo todo, chamado `assinatura_eventos_hotmart_event_id_key`.
 
-1. **A trava de duplicidade é por consulta, não por restrição do banco.** A
-   chave `resend:<email_id>:<tipo>` é consultada antes de gravar, espelhando o
-   que o `smart-processor` já faz com `hotmart_event_id`. Dois reenvios
-   simultâneos do mesmo evento ainda poderiam passar pelos dois lados da
-   janela e gerar linha e alerta repetidos. Risco teórico, registrado e **não
-   resolvido** — a solução sólida é um índice único em `hotmart_event_id`, que
-   protegeria também o caminho da Hotmart, hoje igualmente exposto.
+Como o erro aconteceu, para não se repetir: a conclusão foi tirada de **não
+achar migration no repositório**, sem nunca consultar `pg_indexes`. Neste
+projeto a ausência de migration não prova ausência de estrutura — várias
+coisas foram criadas direto no Supabase e não têm arquivo versionado (a
+coluna `rendimento` de `fichas_tecnicas` é outro caso conhecido, e a própria
+tabela `assinatura_eventos` não tem `CREATE TABLE` em `supabase/migrations/`).
+**Afirmação sobre o banco se confere no banco.**
+
+O sufixo `_key` é a pista que faltou: é o nome que o Postgres dá sozinho ao
+índice que nasce de uma restrição `UNIQUE` na tabela — ou seja, a coluna foi
+declarada única na criação da tabela, não por um `CREATE INDEX` avulso.
+
+O que de fato aconteceu em 14/10: um segundo índice, redundante
+(`assinatura_eventos_hotmart_event_id_unico`), chegou a ser criado antes de a
+duplicidade ser percebida, e foi removido em seguida. A migration que o criava
+saiu do repositório — manter um arquivo que recria um índice desnecessário só
+prepararia a próxima confusão. Nada de errado ficou no banco: dois índices
+únicos iguais protegem o mesmo que um, só custam escrita à toa.
+
+**Segue valendo**, agora com o motivo certo: as funções consultam antes de
+gravar (primeira camada, que responde 200 sem ruído no caso comum) e o banco
+recusa a segunda linha se duas execuções simultâneas passarem pela janela
+(segunda camada, que já existia). O que o `smart-processor` ainda faz e vale
+anotar: em `registrarFalhaDeEmail` o aviso por e-mail é enviado mesmo quando o
+insert é recusado, então um reenvio naquele ponto exato pode gerar **alerta
+repetido** — linha repetida, não.
 
 **Reenvio pode ser usado contra a pessoa (aceito por ora).** Quem souber o
 e-mail de alguém pode apertar "Não recebi o código" e, com isso, **invalidar o
