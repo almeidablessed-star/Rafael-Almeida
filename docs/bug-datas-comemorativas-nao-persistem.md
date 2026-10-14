@@ -1,8 +1,37 @@
-# Bug pendente: "Datas comemorativas" no cadastro de cliente nunca salva nem carrega
+# RESOLVIDO: "Datas comemorativas" no cadastro de cliente nunca salva nem carrega
 
 > Encontrado em 2026-09-10, durante o preview do novo layout de "Cliente -
 > Cadastro" (mesmo formato de registro usado para o CORS em
 > docs/investigacao-cors-transacoes-movimentos.md).
+>
+> **Resolvido em 2026-09-12, no commit `9a12462`** ("fix(clientes): persiste
+> additionalEvents"), com a coluna criada pela migration
+> `supabase/migrations/20260913_clientes_additional_events.sql`. Está em
+> produção. O documento ficou para trás e só foi fechado em 2026-10-13.
+>
+> **Verificado ao vivo em 2026-10-13**, ida e volta completa: cliente de teste
+> com uma data extra ("aniversário de casamento", 04/07/2026) gravou
+> `additionalEvents` na linha do banco; depois de recarregar a página inteira,
+> o formulário de edição reabriu **com a data preenchida**, e o cartão "Todas
+> as Datas Comemorativas" passou de 14 (só feriados) para 16. A cliente de
+> teste foi apagada em seguida e a conta voltou ao estado anterior.
+>
+> **Diferença em relação ao que este texto propunha:** a coluna não se chama
+> `eventos_adicionais`. Ficou `"additionalEvents" jsonb NOT NULL DEFAULT '[]'`,
+> em camelCase com aspas, para casar com `eventDate` e `recurringEventTitle`
+> que já existiam — assim o mapeamento no código não precisa traduzir nomes.
+>
+> **A decisão 2 abaixo foi tomada no sentido de incluir:** a lista "Todas as
+> Datas Comemorativas" monta os eventos em três blocos — data principal,
+> `additionalEvents` um a um, e os feriados de `UNIVERSAL_HOLIDAYS`
+> (CustomersModule.tsx, por volta da linha 485). Os dois conceitos aparecem
+> juntos na lista, mas continuam separados na origem.
+>
+> **A decisão 3 continua valendo como aviso:** datas que alguém tenha tentado
+> salvar antes de 2026-09-12 nunca chegaram ao banco e **não são
+> recuperáveis** — precisam ser recadastradas. Não é tarefa de código.
+>
+> O texto abaixo fica como registro do problema original.
 
 ## Sintoma
 
