@@ -3,6 +3,56 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { Lock, CheckCircle, AlertCircle } from 'lucide-react';
 
+/**
+ * Uma — e so uma — retentativa na troca de senha, quando o fetch nao recebeu
+ * resposta nenhuma.
+ *
+ * Por que aqui e nao no wrapper de `lib/supabase.ts`: aquele retry cobre so
+ * GET, de proposito. Repetir uma ESCRITA tem risco de duplicar o efeito se a
+ * falha acontecer depois de o servidor processar e so a resposta se perder —
+ * e lancar o mesmo pedido duas vezes e justamente o estrago que a regra evita.
+ *
+ * Trocar senha nao tem esse risco: definir a mesma senha duas vezes da no
+ * mesmo que definir uma vez. A operacao e idempotente, entao ela — e so ela —
+ * pode sair da regra geral. NAO generalizar isto para outras escritas.
+ *
+ * O caso que motivou: uma conexao ociosa por alguns minutos e derrubada entre
+ * o navegador e o Supabase, e a primeira chamada depois disso falha sem
+ * `Response` — "Load failed" no Safari, "Failed to fetch" no Chrome. A mesma
+ * chamada funciona na tentativa seguinte, com conexao nova. Ver
+ * docs/pendencia-load-failed-ao-trocar-senha.md e
+ * docs/investigacao-cors-transacoes-movimentos.md.
+ *
+ * So repete falha de REDE. Senha fraca, sessao expirada, 422 — qualquer erro
+ * que o servidor respondeu — passa direto, sem segunda tentativa: repetir nao
+ * mudaria a resposta e so faria a pessoa esperar mais.
+ */
+const RETRY_TROCA_SENHA_MS = 400;
+
+/** A falha de rede chega de duas formas conforme a versao do supabase-js:
+ *  lancada como `TypeError`, ou devolvida como erro com `status` 0 /
+ *  `AuthRetryableFetchError`. As duas contam como "nao houve resposta". */
+const semRespostaDoServidor = (erro: any): boolean => {
+  if (erro instanceof TypeError) return true;
+  if (!erro) return false;
+  return erro.name === 'AuthRetryableFetchError' || erro.status === 0;
+};
+
+async function trocarSenhaComUmaRetentativa(
+  atributos: Parameters<typeof supabase.auth.updateUser>[0]
+) {
+  try {
+    const resultado = await supabase.auth.updateUser(atributos);
+    if (!semRespostaDoServidor(resultado.error)) return resultado;
+  } catch (err) {
+    if (!semRespostaDoServidor(err)) throw err;
+  }
+
+  await new Promise((resolve) => setTimeout(resolve, RETRY_TROCA_SENHA_MS));
+  // 2a e ULTIMA tentativa. Se falhar de novo, o erro sobe como sempre subiu.
+  return supabase.auth.updateUser(atributos);
+}
+
 export const ResetPasswordPage: React.FC = () => {
   const { logout, beginAuthTransition, endAuthTransition } = useAuth();
 
@@ -59,7 +109,7 @@ export const ResetPasswordPage: React.FC = () => {
       // marcador que faz o ProtectedRoute mostrar esta tela. Apagar depois, numa
       // segunda chamada, deixaria uma janela em que a senha ja mudou mas a
       // pessoa continua presa aqui se a segunda falhar.
-      const { error: updateError } = await supabase.auth.updateUser({
+      const { error: updateError } = await trocarSenhaComUmaRetentativa({
         password: password,
         // Os DOIS marcadores saem juntos: quem chegou aqui definiu a senha, nao
         // importa por qual porta entrou. Desligar so um deixaria a tela presa.
