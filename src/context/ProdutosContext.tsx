@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from './AuthContext';
 import { Produto, FichaTecnica, StockItem } from '../types';
 import { planejarBaixa, ResultadoBaixa } from '../utils/stockConsumption';
+import { normalizeName } from '../utils/fichaMatcher';
 
 /**
  * Fonte unica do catalogo de Produtos, compartilhada por todas as telas.
@@ -61,13 +62,20 @@ interface ProdutosContextType {
     transacaoId: string
   ) => Promise<ResultadoBaixa>;
   /**
-   * `fichasQueNaoVoltam`: ids de ficha cujo consumo deve FICAR baixado.
+   * `fichasQueNaoVoltam`: NOMES de ficha cujo consumo deve FICAR baixado.
    *
    * Serve a um caso so, o da edicao: quando a ficha de um item foi apagada do
    * catalogo, a edicao devolve o consumo dela e nao tem como reconsumir —
    * o insumo voltaria ao estoque e nunca mais sairia, com o bolo ainda a
    * produzir. Nesses itens a devolucao e PULADA. Vazio (o padrao) devolve
    * tudo, que e o certo no cancelamento e na exclusao.
+   *
+   * NOME, e nao id, por um motivo medido em producao: `estoque_movimentos.
+   * ficha_id` e chave estrangeira com ON DELETE SET NULL, entao apagar a
+   * ficha ZERA o vinculo nos movimentos ja gravados — justamente no caso que
+   * esta funcao precisa reconhecer. Conferido no banco: movimento de ficha
+   * viva tinha `ficha_id` preenchido; o da ficha apagada depois estava nulo.
+   * O nome sobrevive porque fica escrito na `descricao` do proprio movimento.
    */
   devolverPedido: (transacaoId: string, fichasQueNaoVoltam?: string[]) => Promise<void>;
 }
@@ -434,15 +442,33 @@ export const ProdutosProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     // o consumo nem a devolucao deles entram. Devolver o que nao sera
     // reconsumido era o que inflava o estoque na edicao.
     //
-    // `ficha_id` e numero no banco e texto no app: compara como texto.
-    // Movimento sem `ficha_id` (consumo antigo, de antes desta ligacao) nao
-    // tem como ser atribuido e segue o caminho normal.
+    // A identificacao e pelo NOME escrito na descricao do movimento
+    // ("Consumo: Bolo Teste (Pedido #138)"), nao por `ficha_id` — ver a nota
+    // na assinatura: a chave estrangeira e zerada quando a ficha e apagada.
+    //
+    // Movimento que atende MAIS DE UMA ficha ("Consumo: Bolo A + Bolo B") so
+    // e pulado se TODAS tiverem sido apagadas. Com uma viva e outra apagada,
+    // ele volta normalmente: pular o movimento inteiro faria a parte da ficha
+    // viva ser consumida de novo sem ter sido devolvida, e o saldo cairia mais
+    // a cada edicao — erro pior do que o que estamos evitando.
+    const nomesQueNaoVoltam = fichasQueNaoVoltam.map(normalizeName).filter(Boolean);
+
+    const fichasDaDescricao = (descricao: string | null): string[] => {
+      const achado = /^[^:]+:\s*(.*?)\s*\(Pedido #/.exec(descricao || '');
+      if (!achado) return [];
+      return achado[1].split(' + ').map((n) => n.trim()).filter(Boolean);
+    };
+
     const movimentosConsiderados =
-      fichasQueNaoVoltam.length === 0
+      nomesQueNaoVoltam.length === 0
         ? movs
-        : movs.filter(
-            (m: any) => m.ficha_id == null || !fichasQueNaoVoltam.includes(String(m.ficha_id))
-          );
+        : movs.filter((m: any) => {
+            const nomes = fichasDaDescricao(m.descricao);
+            // Sem nome reconhecivel na descricao nao da para atribuir: segue o
+            // caminho normal, como sempre foi.
+            if (nomes.length === 0) return true;
+            return !nomes.every((n) => nomesQueNaoVoltam.includes(normalizeName(n)));
+          });
     if (movimentosConsiderados.length === 0) return;
 
     // Consumo soma, devolucao subtrai. Sobra o que falta devolver.

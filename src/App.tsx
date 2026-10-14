@@ -403,9 +403,14 @@ function AppContent() {
             (item) => !fichas.some((f) => f.id === item.fichaId)
           );
 
+          // Vai o NOME, nao o id: apagar a ficha zera `ficha_id` nos
+          // movimentos ja gravados (ON DELETE SET NULL), e o nome sobrevive
+          // na descricao deles. Medido em producao — ver a nota em
+          // [[devolverPedido]]. Item antigo sem `fichaName` nao tem como ser
+          // reconhecido e segue o caminho de sempre.
           await devolverPedido(
             editingId,
-            fichasApagadas.map((item) => item.fichaId)
+            fichasApagadas.map((item) => item.fichaName || '').filter(Boolean)
           );
           const itens = resolverItensDoPedido(updated.fichaItems);
           if (itens.length > 0) {
