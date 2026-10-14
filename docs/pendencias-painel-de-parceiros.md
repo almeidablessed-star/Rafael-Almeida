@@ -1,6 +1,6 @@
 # Pendências abertas do painel de parceiros
 
-> Atualizado em 2026-10-07, depois de a Etapa 4 ir para produção. Lista viva:
+> Atualizado em 2026-10-14, com a validação do `email.complained`. Lista viva:
 > risque o item quando ele for resolvido.
 
 ## Já aplicado em produção
@@ -170,16 +170,38 @@ fictício):
 
 A linha 37 fica no banco de propósito: é um bounce real do simulador oficial.
 
-**Duas ressalvas, ainda em aberto:**
+**Complained validado em 2026-10-14**, pelo mesmo caminho e com o simulador
+oficial (`complained@resend.dev`, que marca o envio como spam — reclamação
+real, não dado fictício):
 
-1. **Só o hard bounce foi validado.** Os nomes exatos dos campos do payload
-   para os outros casos — soft bounce (caixa cheia, indisponibilidade
-   temporária) e `email.complained` — **não foram testados com evento real**.
-   A função lê `data.bounce.message/type/subType` com alternativas; se os nomes
-   diferirem nesses casos, a linha é gravada do mesmo jeito, mas com
-   `motivo: "sem mensagem"`. O mecanismo funciona; o detalhe do motivo é que
-   fica por confirmar.
-2. **A trava de duplicidade é por consulta, não por restrição do banco.** A
+- Envio aceito, id `01a13c16-90eb-7204-90af-cf80112842c8`. A consulta do
+  próprio e-mail na API do Resend devolveu `last_event: "complained"`.
+- Linha **38** gravada em `assinatura_eventos`, conferida pelo Rafael:
+  `evento = EMAIL_FALHOU`, `classe = destinatario_assincrono`,
+  **`tipo_do_evento = email.complained`** — o campo que separa a reclamação do
+  bounce — e `bounce_tipo` / `bounce_subtipo` **nulos**, como esperado (só o
+  bounce preenche esses dois).
+- Aviso por e-mail chegou na caixa do `ALERTA_EMAIL`, com o conteúdo esperado.
+
+Como a linha 37, a 38 fica no banco de propósito: é uma reclamação real do
+simulador oficial.
+
+**O soft bounce não tem como ser testado — limite conhecido, não pendência.**
+O Resend oferece quatro endereços de teste, e nenhum simula soft bounce
+([documentação](https://resend.com/docs/dashboard/emails/send-test-emails)):
+`delivered@resend.dev` (entrega), `bounced@resend.dev` (rejeição com SMTP
+550 5.1.1 — **hard** bounce), `complained@resend.dev` (marcado como spam) e
+`suppressed@resend.dev` (endereço já suprimido por ter bouncado antes). Os
+dois eventos que a função escuta estão validados com evento real; o caso de
+caixa cheia ou indisponibilidade temporária só poderá ser observado se um
+soft bounce de verdade aparecer em produção. Se isso acontecer, o que vale
+conferir é o `motivo` da linha: a função lê `data.bounce.message`, com queda
+para `data.reason` e para `"sem mensagem"` — o registro nasce de qualquer
+jeito, é o detalhe do motivo que fica por confirmar.
+
+**Uma ressalva, ainda em aberto:**
+
+1. **A trava de duplicidade é por consulta, não por restrição do banco.** A
    chave `resend:<email_id>:<tipo>` é consultada antes de gravar, espelhando o
    que o `smart-processor` já faz com `hotmart_event_id`. Dois reenvios
    simultâneos do mesmo evento ainda poderiam passar pelos dois lados da
