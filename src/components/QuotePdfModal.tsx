@@ -10,6 +10,7 @@ import { useTransacoes } from '../context/TransacoesContext';
 import { useCustomers } from '../context/CustomersContext';
 import { compressImageFile } from '../utils/imageCompression';
 import { normalizeName } from '../utils/fichaMatcher';
+import { formatRendimentoParaExibir } from '../utils/rendimento';
 import {
   Printer,
   X,
@@ -1272,7 +1273,7 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
                           <div className="flex items-center gap-2 shrink-0">
                             {ficha && (
                               <span className="text-[10px] font-bold bg-[#F5B9C6] text-[#3A2350] px-2 py-0.5 rounded-full border border-[#E8A0B0]/60" style={{ fontFamily: "'Manrope', sans-serif" }}>
-                                Rendimento: {ficha.yieldInfo}
+                                Rendimento: {formatRendimentoParaExibir(ficha)}
                               </span>
                             )}
                             {isOpen ? (

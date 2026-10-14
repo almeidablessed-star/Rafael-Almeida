@@ -17,6 +17,7 @@ import { useDelayedDelete } from '../hooks/useDelayedDelete';
 import { CampoComAjuda } from './onboarding/CampoComAjuda';
 import { FieldValidationError } from './FieldValidationError';
 import { CustomSelect } from './CustomSelect';
+import { getRendimentoSugerido } from '../utils/rendimento';
 import {
   BookOpen,
   Plus,
@@ -53,9 +54,9 @@ const getPrincipalTamanho = (ficha: FichaTecnica) => {
   return ficha.tamanhos?.[0] || { id: 't1', descricao: '1', preco: 0 };
 };
 
-const getYieldInfoCompat = (ficha: FichaTecnica) => {
-  return getPrincipalTamanho(ficha).descricao || '1';
-};
+// Mesma funcao de sempre, agora com uma unica fonte em `utils/rendimento`, de
+// onde a folha da cozinha tambem le — ate aqui cada lado tinha a sua regra.
+const getYieldInfoCompat = (ficha: FichaTecnica) => getRendimentoSugerido(ficha);
 
 const getSugestaoVendaCompat = (ficha: FichaTecnica) => {
   return getPrincipalTamanho(ficha).preco || 0;
@@ -411,7 +412,15 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     setName(ficha.name);
     setCategory(ficha.category);
     setImageUrl(ficha.imageUrl || '');
-    setYieldInfo(ficha.yieldInfo || getYieldInfoCompat(ficha));
+    // Ficha antiga, sem rendimento gravado, abre o campo VAZIO.
+    //
+    // Antes caia em `getYieldInfoCompat` — a descricao do primeiro tamanho — e
+    // o campo abria com "20 cm" ja preenchido. Quem editasse a ficha por outro
+    // motivo e salvasse gravava esse diametro na coluna `rendimento`, sem
+    // nenhum aviso e sem jeito de distinguir depois do que foi digitado de
+    // proposito. A sugestao de tela nao pode ser o que vai para o banco: o
+    // rendimento so e gravado quando alguem o digita.
+    setYieldInfo(ficha.yieldInfo || '');
     setIngredients(ficha.ingredients || []);
 
     // Carregar tamanhos da ficha, convertendo para string
