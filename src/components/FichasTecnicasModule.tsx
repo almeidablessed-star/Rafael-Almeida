@@ -17,7 +17,12 @@ import { useDelayedDelete } from '../hooks/useDelayedDelete';
 import { CampoComAjuda } from './onboarding/CampoComAjuda';
 import { FieldValidationError } from './FieldValidationError';
 import { CustomSelect } from './CustomSelect';
-import { getRendimentoSugerido } from '../utils/rendimento';
+import {
+  RENDIMENTO_UNIDADES,
+  comporRendimentoParaGravar,
+  deduzirUnidadeDoRendimento,
+  getRendimentoSugerido,
+} from '../utils/rendimento';
 import {
   BookOpen,
   Plus,
@@ -256,13 +261,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 
   const handleApplyYieldUnit = (unitKey: string) => {
     setSelectedYieldUnit(unitKey);
-    const unitLabels: Record<string, string> = {
-      fatias: 'fatias',
-      gramas: 'g',
-      unidades: 'unidades',
-      ml: 'ml',
-    };
-    const label = unitLabels[unitKey] || unitKey;
+    const label = RENDIMENTO_UNIDADES[unitKey] || unitKey;
     if (!yieldInfo || yieldInfo.trim() === '') {
       setYieldInfo(`10 ${label}`);
       return;
@@ -394,6 +393,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     setCategory(selectedCategory);
     setImageUrl('');
     setYieldInfo('1');
+    // Volta ao padrao: o seletor nao era reiniciado, entao a unidade escolhida
+    // numa ficha continuava valendo na proxima aberta na mesma sessao — e
+    // agora que a unidade entra no texto gravado, isso viraria dado errado.
+    setSelectedYieldUnit('fatias');
     setIngredients([]);
     // UM tamanho, e nao tres. Cada confeiteira tem uma realidade: umas vendem
     // um tamanho so, outras varios. Abrir com tres campos vazios alongava o
@@ -421,6 +424,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     // proposito. A sugestao de tela nao pode ser o que vai para o banco: o
     // rendimento so e gravado quando alguem o digita.
     setYieldInfo(ficha.yieldInfo || '');
+    // O seletor abre na unidade que o proprio texto gravado declara ("500 g"
+    // abre em Gramas). Sem isto ele abriria em Fatias — ou na unidade que
+    // sobrou da ficha anterior — e salvar converteria gramas em fatias.
+    setSelectedYieldUnit(deduzirUnidadeDoRendimento(ficha.yieldInfo));
     setIngredients(ficha.ingredients || []);
 
     // Carregar tamanhos da ficha, convertendo para string
@@ -818,7 +825,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
       name: name.trim(),
       category,
       imageUrl: imageUrl.trim() || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&auto=format&fit=crop&q=80',
-      yieldInfo: yieldInfo.trim() || undefined,
+      // Numero digitado + unidade do seletor, sempre — nao so quando alguem
+      // abre o seletor e clica. A unidade nao tem coluna propria, entao ou ela
+      // entra aqui no texto ou se perde. Ver [[comporRendimentoParaGravar]].
+      yieldInfo: comporRendimentoParaGravar(yieldInfo, selectedYieldUnit) || undefined,
       tamanhos: tamanhosData,
       // A lista da FICHA vira um espelho do primeiro tamanho. A lista que vale
       // e a de cada tamanho; esta so atende quem ainda le o campo antigo (a
