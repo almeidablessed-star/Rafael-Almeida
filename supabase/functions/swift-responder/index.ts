@@ -5,23 +5,82 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 );
 
-// `*` de proposito NESTA etapa: restringir a origem pode quebrar o PWA
-// instalado, que nem sempre envia a origem esperada. Registrado como pendencia
-// em docs/pendencias-painel-de-parceiros.md.
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-};
+/**
+ * CORS por lista de origens, no lugar do `*` que havia aqui antes.
+ *
+ * O que isto protege, e o que NAO protege: CORS nao e controle de acesso.
+ * Ele diz ao NAVEGADOR se o JavaScript de uma pagina pode LER a resposta.
+ * Nao impede ninguem de chamar o endpoint — curl, script e servidor passam
+ * longe disto. Quem defende de verdade este endpoint e o que ja estava aqui:
+ * resposta unica para todo erro, piso de tempo, teto de tentativas, hash
+ * comparado em tempo constante e identidade vinda do `user_id` da linha.
+ *
+ * O ganho real da lista e contra phishing: uma pagina que convenca a pessoa a
+ * digitar o codigo nao consegue mais LER os tokens de sessao da resposta.
+ *
+ * `APP_URL` entra primeiro porque e a origem de producao de verdade; o resto
+ * da lista e o que ja aparece no codigo (o dominio padrao da Vercel), o
+ * dominio proprio e as duas portas de desenvolvimento.
+ */
+const ORIGENS_PERMITIDAS = [
+  Deno.env.get('APP_URL'),
+  'https://rafael-almeida-nine.vercel.app',
+  'https://carulaconfeitaria.com.br',
+  'https://www.carulaconfeitaria.com.br',
+  'http://localhost:3000',
+  'http://localhost:5173',
+]
+  .filter((o): o is string => !!o)
+  .map((o) => o.replace(/\/+$/, ''));
+
+/**
+ * Monta os cabecalhos de CORS para ESTA requisicao.
+ *
+ * Tres casos:
+ *
+ * 1. Origem na lista -> ecoa a origem. O navegador libera a leitura.
+ * 2. Origem AUSENTE ou literalmente `null` -> responde `*`. E o caso do PWA
+ *    instalado, que em algumas combinacoes de aparelho e navegador manda
+ *    `Origin: null` ou nao manda nada — e esse e justamente o publico que o
+ *    app quer atender. Bloquear aqui derrubaria o login de quem instalou o
+ *    app na tela inicial.
+ * 3. Origem presente e FORA da lista -> nenhum cabecalho de CORS. A funcao
+ *    responde igual (nao e 403: CORS nao e autorizacao, e recusar aqui so
+ *    mudaria o sintoma), mas o navegador recusa entregar a resposta para a
+ *    pagina que chamou.
+ *
+ * `Vary: Origin` sempre, senao um cache intermediario pode servir a resposta
+ * de uma origem para outra.
+ */
+function corsPara(req: Request): Record<string, string> {
+  const base = {
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    Vary: 'Origin',
+  };
+
+  const origem = req.headers.get('origin');
+
+  if (!origem || origem === 'null') {
+    return { ...base, 'Access-Control-Allow-Origin': '*' };
+  }
+
+  const normalizada = origem.replace(/\/+$/, '');
+  if (ORIGENS_PERMITIDAS.includes(normalizada)) {
+    return { ...base, 'Access-Control-Allow-Origin': origem };
+  }
+
+  return base;
+}
 
 /** Erros nunca dizem QUAL parte falhou. Ver `responderGenerico`. */
 const MENSAGEM_GENERICA = 'Código inválido ou expirado';
 const MAX_TENTATIVAS = 5;
 
-function json(body: unknown, status: number) {
+function json(body: unknown, status: number, cors: Record<string, string>) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    headers: { ...cors, 'Content-Type': 'application/json' },
   });
 }
 
@@ -35,13 +94,13 @@ function json(body: unknown, status: number) {
  * sem ele, "e-mail nao existe" responderia na hora e "codigo errado" so depois
  * da consulta, e a diferenca entregaria a informacao de novo.
  */
-async function responderGenerico(inicio: number) {
+async function responderGenerico(inicio: number, cors: Record<string, string>) {
   const PISO_MS = 350;
   const decorrido = Date.now() - inicio;
   if (decorrido < PISO_MS) {
     await new Promise((r) => setTimeout(r, PISO_MS - decorrido));
   }
-  return json({ error: MENSAGEM_GENERICA }, 400);
+  return json({ error: MENSAGEM_GENERICA }, 400, cors);
 }
 
 /** HMAC-SHA256 do codigo com o segredo do ambiente, em hexadecimal. */
@@ -81,13 +140,14 @@ function igualEmTempoConstante(a: string, b: string): boolean {
 
 Deno.serve(async (req) => {
   const inicio = Date.now();
+  const cors = corsPara(req);
 
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return new Response('ok', { headers: cors });
   }
 
   if (req.method !== 'POST') {
-    return json({ error: 'Method not allowed' }, 405);
+    return json({ error: 'Method not allowed' }, 405, cors);
   }
 
   try {
@@ -100,7 +160,7 @@ Deno.serve(async (req) => {
     const email = emailBruto.trim().toLowerCase();
 
     if (!email || !code || code.length !== 6) {
-      return await responderGenerico(inicio);
+      return await responderGenerico(inicio, cors);
     }
 
     // `used IS NOT TRUE` e nao `used = false`: a coluna e NULLABLE, e uma linha
@@ -120,11 +180,11 @@ Deno.serve(async (req) => {
 
     if (queryError) {
       console.error('Erro ao consultar otp_codes');
-      return json({ error: 'Erro interno' }, 500);
+      return json({ error: 'Erro interno' }, 500, cors);
     }
 
     if (!candidatas || candidatas.length === 0) {
-      return await responderGenerico(inicio);
+      return await responderGenerico(inicio, cors);
     }
 
     const hashRecebido = await hashDoCodigo(code);
@@ -152,7 +212,7 @@ Deno.serve(async (req) => {
           )
           .eq('id', linha.id);
       }
-      return await responderGenerico(inicio);
+      return await responderGenerico(inicio, cors);
     }
 
     const { error: updateError } = await supabase
@@ -162,7 +222,7 @@ Deno.serve(async (req) => {
 
     if (updateError) {
       console.error('Erro ao marcar codigo como usado');
-      return json({ error: 'Erro interno' }, 500);
+      return json({ error: 'Erro interno' }, 500, cors);
     }
 
     // A IDENTIDADE VEM DO `user_id` DA LINHA, consultado no Auth — nunca do
@@ -180,7 +240,7 @@ Deno.serve(async (req) => {
 
     if (donoError || !dono?.user?.email) {
       console.error('Nao foi possivel resolver o dono do codigo');
-      return json({ error: 'Erro interno' }, 500);
+      return json({ error: 'Erro interno' }, 500, cors);
     }
 
     const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
@@ -191,7 +251,7 @@ Deno.serve(async (req) => {
 
     if (linkError || !linkData?.properties?.hashed_token) {
       console.error('Erro ao gerar o link de sessao');
-      return json({ error: 'Erro interno' }, 500);
+      return json({ error: 'Erro interno' }, 500, cors);
     }
 
     const { data: sessionData, error: verifyError } = await supabase.auth.verifyOtp({
@@ -201,7 +261,7 @@ Deno.serve(async (req) => {
 
     if (verifyError || !sessionData?.session?.access_token) {
       console.error('Erro ao criar a sessao');
-      return json({ error: 'Erro interno' }, 500);
+      return json({ error: 'Erro interno' }, 500, cors);
     }
 
     // Sem console.log das respostas de generateLink/verifyOtp: elas carregam o
@@ -212,10 +272,11 @@ Deno.serve(async (req) => {
         accessToken: sessionData.session.access_token,
         refreshToken: sessionData.session.refresh_token,
       },
-      200
+      200,
+      cors
     );
   } catch (error: any) {
     console.error('Erro inesperado no verificador de codigo');
-    return json({ error: 'Erro interno' }, 500);
+    return json({ error: 'Erro interno' }, 500, cors);
   }
 });
