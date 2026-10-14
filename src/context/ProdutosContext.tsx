@@ -60,7 +60,16 @@ interface ProdutosContextType {
     items: { ficha: FichaTecnica; quantity: number; tamanhoId?: string }[],
     transacaoId: string
   ) => Promise<ResultadoBaixa>;
-  devolverPedido: (transacaoId: string) => Promise<void>;
+  /**
+   * `fichasQueNaoVoltam`: ids de ficha cujo consumo deve FICAR baixado.
+   *
+   * Serve a um caso so, o da edicao: quando a ficha de um item foi apagada do
+   * catalogo, a edicao devolve o consumo dela e nao tem como reconsumir —
+   * o insumo voltaria ao estoque e nunca mais sairia, com o bolo ainda a
+   * produzir. Nesses itens a devolucao e PULADA. Vazio (o padrao) devolve
+   * tudo, que e o certo no cancelamento e na exclusao.
+   */
+  devolverPedido: (transacaoId: string, fichasQueNaoVoltam?: string[]) => Promise<void>;
 }
 
 const ProdutosContext = createContext<ProdutosContextType | undefined>(undefined);
@@ -401,7 +410,7 @@ export const ProdutosProvider: React.FC<{ children: React.ReactNode }> = ({ chil
    * devolucao no historico, para a tela continuar mostrando o par
    * consumo/devolucao corretamente.
    */
-  const devolverPedido = async (transacaoId: string) => {
+  const devolverPedido = async (transacaoId: string, fichasQueNaoVoltam: string[] = []) => {
     if (!user) throw new Error('User not authenticated');
 
     // Consumos E devolucoes, porque o que interessa e o SALDO LIQUIDO que este
@@ -421,9 +430,24 @@ export const ProdutosProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (errBusca) throw errBusca;
     if (!movs || movs.length === 0) return;
 
+    // Itens cuja ficha sumiu do catalogo ficam de fora da conta inteira — nem
+    // o consumo nem a devolucao deles entram. Devolver o que nao sera
+    // reconsumido era o que inflava o estoque na edicao.
+    //
+    // `ficha_id` e numero no banco e texto no app: compara como texto.
+    // Movimento sem `ficha_id` (consumo antigo, de antes desta ligacao) nao
+    // tem como ser atribuido e segue o caminho normal.
+    const movimentosConsiderados =
+      fichasQueNaoVoltam.length === 0
+        ? movs
+        : movs.filter(
+            (m: any) => m.ficha_id == null || !fichasQueNaoVoltam.includes(String(m.ficha_id))
+          );
+    if (movimentosConsiderados.length === 0) return;
+
     // Consumo soma, devolucao subtrai. Sobra o que falta devolver.
     const pendentePorChave = new Map<string, { mov: any; quantidade: number }>();
-    for (const m of movs) {
+    for (const m of movimentosConsiderados) {
       const chave = m.produto_id ? `p${m.produto_id}` : `e${m.estoque_id}:${m.item_nome}`;
       const sinal = m.tipo === 'consumo' ? 1 : -1;
       const anterior = pendentePorChave.get(chave);
@@ -443,30 +467,78 @@ export const ProdutosProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     // liam o mesmo saldo antigo e a segunda devolucao apagava a primeira.
     const saldos = new Map((await buscarProdutosFrescos()).map((p) => [p.id, p.quantidadeAtual || 0]));
 
+    // ORDEM DAS DUAS ESCRITAS, e por que o movimento vem primeiro.
+    //
+    // Nenhuma das duas era conferida antes: o resultado era descartado, e com
+    // ele o erro. Reproduzido em laboratorio com o codigo real: o UPDATE do
+    // saldo falhando deixava a linha "devolucao" gravada assim mesmo — o
+    // historico dizia que os 300 g voltaram e o saldo seguia em 700. Pior, a
+    // conta do pendente e `consumo - devolucao`: com a devolucao mentirosa
+    // gravada, o pendente zera e NENHUMA tentativa seguinte conserta. O
+    // insumo fica baixado para sempre.
+    //
+    // Gravar o movimento primeiro NAO resolve isso sozinho — invertida e sem
+    // conferencia, a falha no saldo produz exatamente aquele estado. O que
+    // fecha o caso e a dupla: movimento primeiro E desfazer o movimento se o
+    // saldo nao for gravado. Assim o pior caso volta a ser "nada aconteceu",
+    // com o pendente intacto e a proxima tentativa funcionando.
+    //
+    // Mesmo padrao do `consumirParaPedido` logo acima: confere cada escrita,
+    // desfaz o que ja aplicou e DEIXA O ERRO SUBIR — quem chama (App.tsx, no
+    // cancelamento e na edicao) ja mostra o aviso e, na exclusao, segura o
+    // pedido para o estorno poder ser refeito.
     for (const m of aDevolver) {
       if (m.produto_id) {
         if (!saldos.has(m.produto_id)) continue; // produto apagado do catalogo: nao ha onde devolver
         const novoSaldo = (saldos.get(m.produto_id) || 0) + Number(m.quantidade);
-        saldos.set(m.produto_id, novoSaldo);
 
-        await supabase
+        const { data: movGravado, error: errMov } = await supabase
+          .from('estoque_movimentos')
+          .insert({
+            usuaria_id: user.id,
+            produto_id: m.produto_id,
+            item_nome: m.item_nome,
+            tipo: 'devolucao',
+            quantidade: m.quantidade,
+            unidade: m.unidade,
+            transacao_id: transacaoId,
+            descricao: `Devolução: ${m.item_nome} (Pedido #${numeroCurto(transacaoId)} cancelado)`,
+          })
+          .select('id')
+          .single();
+        if (errMov) throw errMov;
+
+        // `.select('id')` nao e enfeite: sem ele, um UPDATE que nao encontra a
+        // linha (id ou usuaria_id que nao casam) volta como SUCESSO com zero
+        // linhas alteradas, e conferir so o erro nao pegaria.
+        const { data: atualizados, error: errSaldo } = await supabase
           .from('produtos')
           .update({ quantidade_atual: novoSaldo })
           .eq('id', m.produto_id)
-          .eq('usuaria_id', user.id);
+          .eq('usuaria_id', user.id)
+          .select('id');
 
-        await supabase.from('estoque_movimentos').insert({
-          usuaria_id: user.id,
-          produto_id: m.produto_id,
-          item_nome: m.item_nome,
-          tipo: 'devolucao',
-          quantidade: m.quantidade,
-          unidade: m.unidade,
-          transacao_id: transacaoId,
-          descricao: `Devolução: ${m.item_nome} (Pedido #${numeroCurto(transacaoId)} cancelado)`,
-        });
+        if (errSaldo || !atualizados || atualizados.length === 0) {
+          // Desfaz o movimento recem-gravado: deixa-lo seria gravar a mentira.
+          const { error: errDesfazer } = await supabase
+            .from('estoque_movimentos')
+            .delete()
+            .eq('id', movGravado.id);
+          if (errDesfazer) {
+            // Nao da para esconder: a linha ficou dizendo que voltou. Fica o
+            // rastro para quem for conferir o estoque depois.
+            console.error(
+              `[PRODUTOS] Devolucao de "${m.item_nome}" gravou o movimento ${movGravado.id} mas nao atualizou o saldo, e o movimento nao pode ser desfeito. O saldo deste produto esta menor do que deveria.`,
+              errDesfazer
+            );
+          }
+          throw errSaldo || new Error(`O saldo de "${m.item_nome}" não pôde ser atualizado.`);
+        }
+
+        saldos.set(m.produto_id, novoSaldo);
       } else if (m.estoque_id) {
-        await supabase.from('estoque_movimentos').insert({
+        // Ramo legado: so historico, nao ha saldo para atualizar.
+        const { error: errMovLegado } = await supabase.from('estoque_movimentos').insert({
           usuaria_id: user.id,
           item_nome: m.item_nome,
           tipo: 'devolucao',
@@ -475,6 +547,7 @@ export const ProdutosProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           transacao_id: transacaoId,
           descricao: `Devolução: ${m.item_nome} (Pedido #${numeroCurto(transacaoId)} cancelado)`,
         });
+        if (errMovLegado) throw errMovLegado;
       }
     }
 

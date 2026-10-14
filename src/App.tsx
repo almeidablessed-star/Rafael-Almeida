@@ -386,17 +386,43 @@ function AppContent() {
         return;
       }
 
-      // Vendas reequilibram o estoque na edicao: devolve tudo o que a versao
-      // antiga consumiu e consome de novo pela composicao nova. Nao calculamos
+      // Vendas reequilibram o estoque na edicao: devolve o que a versao antiga
+      // consumiu — menos o que nao tem como ser reconsumido, ver abaixo — e
+      // consome de novo pela composicao nova. Nao calculamos
       // delta de proposito — delta so funciona quando muda apenas a quantidade,
       // e quebra quando a confeiteira troca o produto ou mistura itens.
       if (updated.type === 'venda') {
         try {
-          await devolverPedido(editingId);
+          // Fichas que o pedido usava e que sumiram do catalogo desde entao.
+          //
+          // Elas nao serao reconsumidas (nao ha mais receita), entao devolver
+          // o consumo delas colocaria o insumo de volta no estoque com o bolo
+          // ainda a produzir — estoque inflado, sem ninguem notar. Ficam
+          // baixadas, e a pessoa e avisada logo abaixo.
+          const fichasApagadas = (existing.fichaItems || []).filter(
+            (item) => !fichas.some((f) => f.id === item.fichaId)
+          );
+
+          await devolverPedido(
+            editingId,
+            fichasApagadas.map((item) => item.fichaId)
+          );
           const itens = resolverItensDoPedido(updated.fichaItems);
           if (itens.length > 0) {
             const resultado = await consumirParaPedido(itens, editingId);
             avisarProblemasDeBaixa(resultado.problemas);
+          }
+
+          if (fichasApagadas.length > 0) {
+            alert(
+              `⚠️ O pedido foi salvo, mas estes itens não mexem mais no estoque:\n\n` +
+                fichasApagadas
+                  .map((item) => `• ${item.fichaName || 'Item'} — a ficha técnica foi apagada`)
+                  .join('\n') +
+                `\n\nO que eles já tinham baixado continua baixado, porque o pedido ` +
+                `segue de pé. Para o estoque voltar a acompanhar este item, ` +
+                `cadastre a ficha de novo e refaça o pedido.`
+            );
           }
         } catch (err: any) {
           alert(

@@ -105,12 +105,23 @@ export const buildFichaItems = (
 
   orderItems.forEach((item) => {
     // "Outro / Personalizado" nao tem nome de catalogo; usa o texto livre.
-    const lookupName =
-      item.productName === 'Outro / Personalizado'
-        ? item.customDescription || ''
-        : item.productName;
+    const personalizado = item.productName === 'Outro / Personalizado';
+    const lookupName = personalizado ? item.customDescription || '' : item.productName;
 
-    const ficha = findFichaForProduct(lookupName, fichas);
+    // Texto livre so casa EXATO.
+    //
+    // O degrau tolerante ("um contem o outro") existe para o nome que veio do
+    // proprio catalogo, onde uma ficha renomeada ainda deve ser reconhecida.
+    // Aplicado a texto digitado a mao ele vincula o pedido a ficha ERRADA
+    // quando um nome contem o outro — "Bolo de Cenoura" casando com "Bolo de
+    // Cenoura Especial" —, e a partir dai o pedido passa a consumir os
+    // insumos de outra receita, com numero plausivel e nenhum aviso.
+    //
+    // O caminho mais comum do item personalizado e nao ter ficha nenhuma, e
+    // esse continua igual: sem ficha, nao movimenta estoque.
+    const ficha = personalizado
+      ? fichas.find((f) => normalizeName(f.name) === normalizeName(lookupName))
+      : findFichaForProduct(lookupName, fichas);
     if (!ficha) return;
 
     const quantity = Number(item.quantity) || 0;
