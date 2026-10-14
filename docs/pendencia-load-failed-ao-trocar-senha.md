@@ -1,8 +1,39 @@
-# Pendência: "Load failed" ao definir a senha nova (conexão ociosa, escrita sem retry)
+# RESOLVIDO: "Load failed" ao definir a senha nova (conexão ociosa, escrita sem retry)
 
 > Observado em 2026-10-13, no iPhone, pelo app instalado na tela inicial
 > (Safari/PWA), durante o teste da restrição de CORS do `swift-responder`.
-> **Não urgente** — registrado para não se perder. Nada foi corrigido.
+>
+> **Corrigido no mesmo dia, commit `92439f3`**, publicado em `production` e
+> `master`. A chamada de troca de senha passou a ter **uma** retentativa, no
+> próprio ponto de chamada (`ResetPasswordPage.tsx`), sem afrouxar o retry
+> compartilhado de `lib/supabase.ts`, que continua cobrindo só GET.
+>
+> Repete **só** falha de rede, nas duas formas que o `supabase-js` usa
+> conforme a versão: `TypeError` lançado, ou erro devolvido com `status: 0` /
+> `AuthRetryableFetchError`. Erro respondido pelo servidor (senha fraca,
+> sessão expirada, 422) passa direto, sem segunda tentativa.
+>
+> **Teste do Rafael, 2026-10-13:** entrou com o código, **esperou 5 minutos
+> parado na tela da senha nova** — justamente o intervalo ocioso que é o
+> gatilho descrito abaixo — e depois salvou a senha. **Salvou normalmente, sem
+> erro nenhum**, e entrou no app em seguida.
+>
+> **O que esse teste NÃO prova — e vale dizer com clareza:** não dá para
+> afirmar se a conexão chegou a cair dessa vez e a retentativa cobriu em
+> silêncio, ou se simplesmente não caiu. Do lado de fora os dois cenários são
+> idênticos: a senha salva e pronto. Confirmar qual deles aconteceu exigiria
+> instrumentar a tela para registrar a retentativa, o que não vale o custo.
+>
+> **E isso não muda a conclusão prática:** com o retry em produção, o
+> resultado para a usuária é sempre "a senha salva", com ou sem queda de
+> conexão no meio. Era esse o objetivo.
+>
+> Fica também, de propósito, sem veredito definitivo a **causa raiz** do
+> episódio original: o encaixe com o padrão da conexão ociosa é forte, mas a
+> prova decisiva (falhar, repetir na hora e funcionar) nunca foi registrada.
+> Se o sintoma voltar em outro caminho de escrita, começar por aqui.
+>
+> O texto abaixo fica como registro do problema original.
 
 ## O sintoma
 
