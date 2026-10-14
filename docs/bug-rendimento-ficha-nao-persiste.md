@@ -1,9 +1,46 @@
-# Bug pendente: "Rendimento" da Ficha Técnica nunca é salvo
+# RESOLVIDO: "Rendimento" da Ficha Técnica nunca é salvo
 
 > Encontrado em 2026-09-10, durante o teste ao vivo do novo formulário em 3
 > passos de "Ficha Técnica - Opções" (mesmo formato de registro usado para o
 > CORS em docs/investigacao-cors-transacoes-movimentos.md e para as datas
 > comemorativas em docs/bug-datas-comemorativas-nao-persistem.md).
+>
+> **Resolvido no mesmo dia, no commit `f57a2e6`** ("fix(fichas): persiste o
+> campo Rendimento da ficha tecnica") — este documento e a correção entraram
+> JUNTOS nesse commit, e por isso o título continuou dizendo "pendente" por um
+> mês. Está em produção. Fechado de verdade em 2026-10-13.
+>
+> A correção é exatamente a do item 1 abaixo: `yieldInfo` entrou no objeto
+> salvo (`FichasTecnicasModule.tsx`, ~linha 812) e a leitura virou
+> `ficha.yieldInfo || getYieldInfoCompat(ficha)` (~linha 414), mantendo o
+> fallback para fichas antigas. O mapeamento `rendimento` ↔ `yieldInfo` vive
+> em `FichasTecnicasContext.tsx` (~92 e ~110).
+>
+> **Item 2 respondido:** a coluna `rendimento` existe em `fichas_tecnicas`.
+> Atenção: ela **não tem migration no repositório** — foi criada direto no
+> Supabase. Diferente de `additionalEvents`, que ganhou arquivo versionado.
+>
+> **Verificado ao vivo em 2026-10-13**, com o cenário exato deste documento —
+> ficha de teste com rendimento "10 Fatias" e tamanho "20 cm", valores
+> propositalmente diferentes:
+>
+> - Linha crua ao salvar: `rendimento: "10"`, `tamanhos[0].descricao: "20 cm"`
+>   — campos separados, cada um com o seu valor.
+> - Depois de recarregar a página inteira, a edição reabriu com **Rendimento =
+>   10** e "20 cm" no bloco de Tamanhos. O sintoma (o campo mostrar a descrição
+>   do tamanho) não se reproduz.
+> - Ficha de teste apagada em seguida; a conta voltou ao estado anterior.
+>
+> **Ressalva: a unidade não vai junto no valor gravado.** O que foi para o
+> banco é `"10"`, não `"10 Fatias"`. Na tela isso não se perde — o seletor de
+> unidade reabre certo —, mas quem lê `yieldInfo` cru recebe só o número. Ver
+> `docs/nota-rendimento-sem-unidade-no-pdf.md`.
+>
+> **Item 3 continua valendo:** fichas salvas antes de 2026-09-10 nunca
+> gravaram o rendimento e seguem mostrando o fallback (descrição do tamanho)
+> até alguém editar e resalvar.
+>
+> O texto abaixo fica como registro do problema original.
 
 ## Sintoma
 
