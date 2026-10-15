@@ -20,7 +20,6 @@ import {
   Instagram,
   Calendar,
   Sparkles,
-  Heart,
   Copy,
   Check,
   User,
@@ -730,6 +729,26 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
     .map((l) => l.trim())
     .filter(Boolean);
 
+  /**
+   * Os itens da folha do cliente, cada um com o seu preco.
+   *
+   * A fonte boa e `breakdown.itens`, a lista estruturada que o pedido grava
+   * com nome, quantidade e valor de cada linha. Ela e que permite mostrar o
+   * preco ao lado do item — antes so o total do pedido aparecia, la embaixo.
+   *
+   * Pedidos gravados antes dessa lista existir (anteriores a 30/09) caem no
+   * texto da descricao, como sempre foi, e saem SEM preco por item: inventar
+   * um rateio do total seria mostrar a cliente um numero que ninguem cobrou.
+   */
+  const itensDaFolha: { nome: string; quantidade: number; valorTotal: number | null }[] =
+    transaction.breakdown?.itens?.length
+      ? transaction.breakdown.itens.map((i) => ({
+          nome: i.nome,
+          quantidade: Number(i.quantidade) || 1,
+          valorTotal: Number(i.valorTotal) || 0,
+        }))
+      : itemLines.map((line) => ({ nome: line, quantidade: 1, valorTotal: null }));
+
   // Filter out delivery and fee items for the Kitchen Production sheet
   const recipeItems = itemLines.filter((line) => {
     const lower = line.toLowerCase();
@@ -885,13 +904,13 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
                       {/* Sem fallback de nome: perfil incompleto sai em branco.
                           Um orcamento com o nome de outra confeitaria e pior
                           do que um orcamento sem nome. */}
+                      {/* So o nome que a confeiteira cadastrou. Saiu daqui a
+                          linha fixa "Confeitaria Artesanal & Bolos de Festa"
+                          com o coracao: era texto do app, igual para todas, no
+                          documento que cada uma manda para a propria cliente. */}
                       <h2 className="font-bold text-lg sm:text-xl tracking-tight leading-tight text-[var(--color-pastry-chocolate)]">
                         {sellerName}
                       </h2>
-                      <p className="text-[11px] text-[var(--color-pastry-chocolate)]/80 font-bold flex items-center gap-1">
-                        <Heart className="w-3 h-3 fill-[#E8A0B0] text-[var(--color-pastry-light-pink)] shrink-0" />
-                        <span>Confeitaria Artesanal & Bolos de Festa</span>
-                      </p>
                     </div>
                   </div>
 
@@ -974,12 +993,19 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
                 </div>
 
                 <div className="space-y-1">
-                  {itemLines.map((line, idx) => (
-                    <div key={`item-${idx}-${line}`} className="flex items-center gap-2 text-xs font-bold text-[var(--color-pastry-chocolate)] bg-[var(--color-pastry-cream)]/60 p-2 rounded-xl border border-[var(--color-text-muted)]">
+                  {itensDaFolha.map((item, idx) => (
+                    <div key={`item-${idx}-${item.nome}`} className="flex items-center gap-2 text-xs font-bold text-[var(--color-pastry-chocolate)] bg-[var(--color-pastry-cream)]/60 p-2 rounded-xl border border-[var(--color-text-muted)]">
                       <span className="bg-[var(--color-pastry-chocolate)] text-[var(--color-pastry-pink)] text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center shrink-0">
                         {idx + 1}
                       </span>
-                      <span className="leading-tight">{line}</span>
+                      <span className="leading-tight">
+                        {item.quantidade > 1 && `${item.quantidade}× `}{item.nome}
+                      </span>
+                      {item.valorTotal !== null && (
+                        <span className="ml-auto shrink-0 tabular-nums">
+                          {formatCurrency(item.valorTotal)}
+                        </span>
+                      )}
                     </div>
                   ))}
                 </div>
