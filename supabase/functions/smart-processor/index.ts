@@ -58,6 +58,17 @@ function readHottok(req: Request): string {
 
 // Only these grant access. Refunds, chargebacks and cancellations are
 // acknowledged with 200 so Hotmart stops retrying, but create no user.
+/**
+ * Validade do codigo de acesso. Era 10 minutos: quem pagava e so abria o
+ * e-mail depois do almoco encontrava codigo vencido no primeiro contato com o
+ * produto, logo apos pagar. 30 minutos cobre esse intervalo sem alongar a
+ * janela em que um codigo vazado ainda serve.
+ *
+ * O MESMO numero vive em resend-otp (VALIDADE_MS) e precisa mudar junto: um
+ * codigo reenviado com validade diferente do original confunde a tela.
+ */
+const VALIDADE_MS = 30 * 60 * 1000;
+
 const GRANTING_EVENTS = ['PURCHASE_APPROVED', 'PURCHASE_COMPLETE'];
 const GRANTING_STATUSES = ['APPROVED', 'COMPLETE', 'COMPLETED'];
 
@@ -782,7 +793,7 @@ Deno.serve(async (req) => {
 
     // Generate OTP
     const otp = generateOtp();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes
+    const expiresAt = new Date(Date.now() + VALIDADE_MS).toISOString();
 
     // Store OTP in database
     // Guarda o HASH, nunca o codigo. O codigo em texto vai so no e-mail, e some
@@ -830,7 +841,7 @@ Deno.serve(async (req) => {
             <div style="background: #f5f5f5; padding: 30px; border-radius: 12px; text-align: center; margin: 30px 0;">
               <p style="color: #999; font-size: 12px; margin: 0 0 10px 0;">SEU CÓDIGO DE ACESSO</p>
               <p style="color: #6E3F72; font-size: 48px; font-weight: bold; margin: 0; letter-spacing: 8px;">${otp}</p>
-              <p style="color: #999; font-size: 12px; margin: 10px 0 0 0;">Este código expira em 10 minutos</p>
+              <p style="color: #999; font-size: 12px; margin: 10px 0 0 0;">Este código expira em 30 minutos</p>
             </div>
             <ol style="color: #666; line-height: 1.8; margin: 30px 0;">
               <li>Acesse <strong>${appUrl}</strong></li>

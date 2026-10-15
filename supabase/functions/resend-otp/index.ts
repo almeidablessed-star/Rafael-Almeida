@@ -128,7 +128,7 @@ const RESPOSTA_UNICA = {
 
 const INTERVALO_MINIMO_MS = 60 * 1000;
 const TETO_DIARIO = 5;
-const VALIDADE_MS = 10 * 60 * 1000;
+const VALIDADE_MS = 30 * 60 * 1000;
 
 function json(body: unknown, status: number) {
   return new Response(JSON.stringify(body), {
@@ -185,7 +185,7 @@ function corpoDoEmail(codigo: string, appUrl: string): string {
         <div style="background: #f5f5f5; padding: 30px; border-radius: 12px; text-align: center; margin: 30px 0;">
           <p style="color: #999; font-size: 12px; margin: 0 0 10px 0;">CÓDIGO DE ACESSO</p>
           <p style="color: #6E3F72; font-size: 48px; font-weight: bold; margin: 0; letter-spacing: 8px;">${codigo}</p>
-          <p style="color: #999; font-size: 12px; margin: 10px 0 0 0;">Este código expira em 10 minutos</p>
+          <p style="color: #999; font-size: 12px; margin: 10px 0 0 0;">Este código expira em 30 minutos</p>
         </div>
         <p style="color: #666; line-height: 1.6;">
           <strong>Use sempre o código mais recente.</strong> Se você pediu mais de um,
