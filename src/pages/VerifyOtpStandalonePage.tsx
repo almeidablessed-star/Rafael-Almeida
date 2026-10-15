@@ -378,7 +378,7 @@ export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = (
           textAlign: 'center',
           marginTop: '20px',
         }}>
-          O código expira em 10 minutos
+          O código expira em 30 minutos
         </p>
       </div>
     </div>
