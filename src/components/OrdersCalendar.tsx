@@ -258,12 +258,14 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
         </div>
       </div>
 
-      {/* Filters */}
+      {/* LEGENDA, nao filtro: explica o codigo de cores do calendario acima.
+          "Hoje" trazia um `cursor-pointer` sobrando — a mao do mouse prometia
+          um clique que nunca existiu, e por isso os tres foram reportados como
+          "filtros que nao funcionam". Os dias do calendario e que sao
+          clicaveis. Se um dia virarem filtro de verdade, o cursor volta junto
+          com o `onClick`, nao antes. */}
       <div className="pt-4 border-t flex items-center justify-center gap-6 text-xs uppercase tracking-widest">
-        <div
-          className="flex items-center gap-2 cursor-pointer opacity-60"
-          style={{ opacity: 1 }}
-        >
+        <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded" style={{ background: 'var(--color-surface)', border: '1.5px solid var(--color-brand-700)' }} />
           <span style={{ color: 'var(--color-ink-soft)', fontSize: '10px', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>Hoje</span>
         </div>
