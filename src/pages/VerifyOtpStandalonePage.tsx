@@ -24,6 +24,21 @@ export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = (
   const [reenviando, setReenviando] = useState(false);
   const [avisoReenvio, setAvisoReenvio] = useState<string | null>(null);
 
+  /**
+   * Duas etapas, SO no "esqueci minha senha".
+   *
+   * Quem cai aqui por esse caminho nao tem codigo nenhum — e a tela pedia
+   * e-mail e codigo de uma vez, com um unico botao "Verificar Codigo". O unico
+   * jeito de receber um codigo era clicar em "Nao recebi o codigo", um link
+   * cujo nome pressupoe um envio que nunca houve. Quem lesse aquilo com o
+   * campo em branco entendia que nao era para ele, e ficava parado.
+   *
+   * Primeiro acesso e area do parceiro continuam em UMA etapa: ali a pessoa
+   * chega com o codigo ja no e-mail, e separar so adicionaria um clique.
+   */
+  const duasEtapas = modo === 'esqueci-senha';
+  const [etapa, setEtapa] = useState<'email' | 'codigo'>(duasEtapas ? 'email' : 'codigo');
+
   const naoRecebi = async () => {
     if (!email) return;
     setReenviando(true);
@@ -40,6 +55,21 @@ export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = (
       setAvisoReenvio('Se houver uma conta com esse e-mail, enviamos um novo código. Use sempre o mais recente.');
       setReenviando(false);
     }
+  };
+
+  /**
+   * Etapa 1: pede o codigo e AVANCA SEMPRE, inclusive se o e-mail nao existir.
+   *
+   * A funcao `resend-otp` responde a mesma coisa em todos os casos, de
+   * proposito, para nao revelar quem e cliente. Se a tela parasse aqui quando o
+   * e-mail nao existe, ela entregaria exatamente o que a funcao esconde.
+   */
+  const enviarCodigo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+    setError(null);
+    await naoRecebi();
+    setEtapa('codigo');
   };
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
@@ -216,7 +246,9 @@ export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = (
             fontSize: '14px',
           }}>
             {modo === 'esqueci-senha'
-              ? 'Digite seu e-mail para receber um código e definir uma senha nova'
+              ? (etapa === 'email'
+                  ? 'Digite seu e-mail para receber um código de 6 dígitos'
+                  : 'Digite o código que enviamos. Em seguida você define a senha nova.')
               : modo === 'parceiro'
                 ? 'Digite seu e-mail de parceiro para receber um código de entrada'
                 : 'Digite seu e-mail e o código de 6 dígitos que enviamos'}
@@ -253,9 +285,47 @@ export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = (
         )}
 
         {/* Form */}
-        <form onSubmit={handleVerifyOtp} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <form
+          onSubmit={duasEtapas && etapa === 'email' ? enviarCodigo : handleVerifyOtp}
+          style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+        >
+          {/* Na etapa do codigo, o e-mail ja escolhido vira texto — continua a
+              vista (e o que o codigo foi enviado) sem convidar a reeditar. */}
+          {duasEtapas && etapa === 'codigo' && (
+            <div style={{
+              background: '#F6F2F5',
+              border: '1px solid #E6E1DB',
+              borderRadius: '12px',
+              padding: '10px 14px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '10px',
+            }}>
+              <span style={{ fontSize: '13px', color: '#241B2B', wordBreak: 'break-all' }}>
+                {email}
+              </span>
+              <button
+                type="button"
+                onClick={() => { setEtapa('email'); setOtp(''); setAvisoReenvio(null); setError(null); }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#6E3F72',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                  flexShrink: 0,
+                }}
+              >
+                trocar
+              </button>
+            </div>
+          )}
+
           {/* Email Input */}
-          <div>
+          <div style={{ display: duasEtapas && etapa === 'codigo' ? 'none' : 'block' }}>
             <label style={{
               display: 'block',
               fontSize: '13px',
@@ -286,7 +356,7 @@ export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = (
           </div>
 
           {/* OTP Input */}
-          <div>
+          <div style={{ display: duasEtapas && etapa === 'email' ? 'none' : 'block' }}>
             <label style={{
               display: 'block',
               fontSize: '13px',
@@ -324,29 +394,46 @@ export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = (
           </div>
 
           {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={isLoading || !email || otp.length !== 6}
-            style={{
-              background: 'linear-gradient(140deg, #6E3F72, #A85E86)',
-              color: 'white',
-              border: 'none',
-              padding: '12px 16px',
-              borderRadius: '12px',
-              fontSize: '14px',
-              fontWeight: '600',
-              cursor: (isLoading || !email || otp.length !== 6) ? 'not-allowed' : 'pointer',
-              transition: 'opacity 0.2s',
-              opacity: (isLoading || !email || otp.length !== 6) ? 0.7 : 1,
-              marginTop: '8px',
-            }}
-          >
-            {isLoading ? 'Verificando...' : 'Verificar Código'}
-          </button>
+          {(() => {
+            const enviando = duasEtapas && etapa === 'email';
+            const bloqueado = enviando
+              ? (reenviando || !email)
+              : (isLoading || !email || otp.length !== 6);
+            return (
+              <button
+                type="submit"
+                disabled={bloqueado}
+                style={{
+                  background: 'linear-gradient(140deg, #6E3F72, #A85E86)',
+                  color: 'white',
+                  border: 'none',
+                  padding: '12px 16px',
+                  borderRadius: '12px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: bloqueado ? 'not-allowed' : 'pointer',
+                  transition: 'opacity 0.2s',
+                  opacity: bloqueado ? 0.7 : 1,
+                  marginTop: '8px',
+                }}
+              >
+                {enviando
+                  ? (reenviando ? 'Enviando...' : 'Enviar código')
+                  : (isLoading ? 'Verificando...' : 'Verificar Código')}
+              </button>
+            );
+          })()}
         </form>
 
-        {/* Reenvio. Fica fora do <form> para nao disparar o submit. */}
-        <div style={{ marginTop: '14px', textAlign: 'center' }}>
+        {/* Reenvio. Fica fora do <form> para nao disparar o submit.
+            Na etapa do e-mail some: ali o envio JA e o botao principal, e
+            oferecer "nao recebi" antes do primeiro envio era a confusao que
+            esta separacao veio desfazer. */}
+        <div style={{
+          marginTop: '14px',
+          textAlign: 'center',
+          display: duasEtapas && etapa === 'email' ? 'none' : 'block',
+        }}>
           <button
             type="button"
             onClick={naoRecebi}
