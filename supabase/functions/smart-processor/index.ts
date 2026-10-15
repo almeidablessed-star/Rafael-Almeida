@@ -218,7 +218,11 @@ async function registrarFalhaDeEmail(
 }
 
 /**
- * Eventos que revogam na HORA. O dinheiro voltou, o acesso vai junto.
+ * Dinheiro de volta: o acesso cai — QUANDO a compra devolvida e a que sustenta
+ * o acesso de hoje. Desde 15/10/2026 esta lista passa pela MESMA trava de
+ * transacao da lista de baixo; o que muda entre as duas e so o texto da linha
+ * de revisao, porque aqui o caso tem dinheiro envolvido. Ver o bloco da
+ * revogacao, mais abaixo, para o cenario que motivou a mudanca.
  *
  * `SUBSCRIPTION_CANCELLATION` NAO esta aqui: quem cancela mantem o acesso ate o
  * fim do periodo ja pago, e tem tratamento proprio mais abaixo.
@@ -677,7 +681,25 @@ Deno.serve(async (req) => {
       return json({ message: 'Access scheduled to end', ate: corte }, 200);
     }
 
-    // Revogacao imediata, com ou sem trava conforme o evento.
+    // Revogacao imediata. A trava da transacao vale para TODOS os eventos que
+    // cortam acesso, inclusive reembolso, chargeback e protesto.
+    //
+    // Antes ela valia so para `PURCHASE_CANCELED`, e a assimetria cortava quem
+    // estava pagando. O caso concreto: a compradora pede reembolso em janeiro
+    // (acesso cai, correto), volta a comprar em abril (acesso restaurado), e em
+    // maio chega o chargeback da compra de JANEIRO — disputa de cartao leva de
+    // 30 a 90 dias. A conta era achada pelo e-mail, nao pela compra, e o acesso
+    // que ela acabou de pagar caia junto. Ela abria o app na tela de assinatura
+    // pausada, ninguem era avisado, e so uma compra nova reativaria — mas ela
+    // ja tinha comprado.
+    //
+    // Agora: so corta quando a transacao devolvida e a MESMA que sustenta o
+    // acesso de hoje. Qualquer outra vira linha de revisao e espera olho
+    // humano. O custo dessa escolha esta anotado na propria linha de revisao:
+    // evento sem transacao no payload tambem nao corta, entao um reembolso
+    // legitimo pode deixar acesso de pe ate alguem olhar a fila. Para dinheiro,
+    // errar para o lado de nao cortar quem pagou e a escolha consciente —
+    // desde que nao seja em silencio, e por isso a linha de revisao.
     if (event && (REVOGA_NA_HORA.includes(event) || REVOGA_COM_TRAVA.includes(event))) {
       const usuariaId = await acharUsuariaId(p.subscriberCode, email);
 
@@ -687,16 +709,24 @@ Deno.serve(async (req) => {
         return json({ message: 'Access revoked', event, matched: false }, 200);
       }
 
-      if (REVOGA_COM_TRAVA.includes(event)) {
+      {
         const mesmaCompra = await eADaCompraQueDeuAcesso(usuariaId, p.transacao);
         if (!mesmaCompra) {
           // Recusa registrada, nunca silenciosa: se a trava estiver errando, e
           // aqui que isso aparece, em vez de virar "o acesso nao foi cortado e
           // ninguem sabe por que".
+          //
+          // Mesmo `evento` das outras recusas de proposito: a consulta de
+          // monitoramento que ja existe continua pegando as duas sem mudar. O
+          // `motivo` e que separa o caso rotineiro (boleto vencido) do caso de
+          // dinheiro, que e o que precisa de olho.
           await registrarRevisao(p, body, usuariaId, 'REVOGACAO_RECUSADA', {
-            motivo: 'transacao do evento nao e a que concedeu o acesso atual',
+            motivo: REVOGA_NA_HORA.includes(event)
+              ? 'DINHEIRO DEVOLVIDO de uma compra que nao e a que sustenta o acesso atual — acesso MANTIDO, decidir a mao'
+              : 'transacao do evento nao e a que concedeu o acesso atual',
             evento: event,
             transacao_do_evento: p.transacao ?? null,
+            sem_transacao_no_evento: !p.transacao,
           });
           await registrarEvento(p, body, usuariaId, null);
           return json({ message: 'Revocation skipped, different purchase', event }, 200);
