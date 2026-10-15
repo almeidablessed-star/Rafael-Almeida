@@ -41,6 +41,19 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
   const [detailsDayStr, setDetailsDayStr] = useState<string | null>(null);
   const [confirmEmptyDayStr, setConfirmEmptyDayStr] = useState<string | null>(null);
 
+  /**
+   * Filtro da legenda. `null` = sem filtro, que e o estado normal.
+   *
+   * Um de cada vez: clicar num item liga aquele e desliga qualquer outro,
+   * clicar no mesmo desliga. Os dias que nao combinam NAO somem da grade —
+   * ficam apagados no lugar. Tira-los faria os dias seguintes andarem de
+   * coluna e o dia 15 cair numa quarta que nao e a dele.
+   */
+  type FiltroAgenda = 'hoje' | 'com-pedido' | 'livre';
+  const [filtro, setFiltro] = useState<FiltroAgenda | null>(null);
+  const alternarFiltro = (qual: FiltroAgenda) =>
+    setFiltro((atual) => (atual === qual ? null : qual));
+
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth(); // 0-indexed
 
@@ -56,14 +69,18 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
   const startingDayOfWeek = firstDayOfMonth.getDay(); // 0 = Sunday
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
+  // Trocar de mes limpa o filtro: "Hoje" noutro mes apagaria a grade inteira,
+  // e um mes todo cinza parece tela quebrada, nao filtro ligado.
   const handlePrevMonth = () => {
     setCurrentDate(new Date(year, month - 1, 1));
     setSelectedDateStr(null);
+    setFiltro(null);
   };
 
   const handleNextMonth = () => {
     setCurrentDate(new Date(year, month + 1, 1));
     setSelectedDateStr(null);
+    setFiltro(null);
   };
 
   const handleToday = () => {
@@ -219,6 +236,20 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
               textColor = '#6E3F72';
             }
 
+            // Fora do filtro: a celula fica apagada no lugar, com a mesma cor
+            // das celulas vazias do inicio do mes, e para de responder ao
+            // clique — um dia que nao esta a vista nao deve abrir detalhes.
+            const combinaComFiltro =
+              !filtro ||
+              (filtro === 'hoje' ? isToday : filtro === 'com-pedido' ? hasOrders : !hasOrders);
+
+            if (!combinaComFiltro) {
+              bgColor = 'transparent';
+              textColor = '#D3C9D6';
+              boxShadowStyle = 'none';
+              fontWeightStyle = 800;
+            }
+
             const handleDayClick = () => {
               if (hasOrders) {
                 // Abrir modal de detalhes
@@ -232,19 +263,21 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
             return (
               <button
                 key={dayStr}
-                onClick={handleDayClick}
-                className="aspect-square rounded-[13px] flex items-center justify-center cursor-pointer"
+                onClick={combinaComFiltro ? handleDayClick : undefined}
+                disabled={!combinaComFiltro}
+                className="aspect-square rounded-[13px] flex items-center justify-center"
                 style={{
                   background: bgColor,
                   color: textColor,
-                  border: isToday ? '1.5px solid #6E3F72' : 'none',
+                  border: isToday && combinaComFiltro ? '1.5px solid #6E3F72' : 'none',
                   fontSize: '12px',
                   fontWeight: fontWeightStyle,
                   boxShadow: boxShadowStyle,
                   transition: 'all 0.2s ease',
+                  cursor: combinaComFiltro ? 'pointer' : 'default',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  if (combinaComFiltro) e.currentTarget.style.transform = 'translateY(-2px)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'translateY(0)';
@@ -258,27 +291,37 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
         </div>
       </div>
 
-      {/* LEGENDA, nao filtro: explica o codigo de cores do calendario acima.
-          "Hoje" trazia um `cursor-pointer` sobrando — a mao do mouse prometia
-          um clique que nunca existiu, e por isso os tres foram reportados como
-          "filtros que nao funcionam". Os dias do calendario e que sao
-          clicaveis. Se um dia virarem filtro de verdade, o cursor volta junto
-          com o `onClick`, nao antes. */}
+      {/* LEGENDA que tambem FILTRA. Clicar num item deixa so os dias daquele
+          tipo a vista; clicar de novo mostra todos. Um de cada vez.
+          Quando ha filtro ligado, os outros dois desbotam — e o unico sinal
+          de estado, sem cor nova: a cor ativa e a do proprio quadradinho. */}
       <div className="pt-4 border-t flex items-center justify-center gap-6 text-xs uppercase tracking-widest">
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded" style={{ background: 'var(--color-surface)', border: '1.5px solid var(--color-brand-700)' }} />
-          <span style={{ color: 'var(--color-ink-soft)', fontSize: '10px', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>Hoje</span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded" style={{ background: 'linear-gradient(150deg, #8F5A9C, #C4626F)' }} />
-          <span style={{ color: 'var(--color-ink-soft)', fontSize: '10px', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>Com Pedido</span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded" style={{ background: '#B4E7B4' }} />
-          <span style={{ color: 'var(--color-ink-soft)', fontSize: '10px', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>Livre</span>
-        </div>
+        {([
+          { id: 'hoje', rotulo: 'Hoje', amostra: { background: 'var(--color-surface)', border: '1.5px solid var(--color-brand-700)' } },
+          { id: 'com-pedido', rotulo: 'Com Pedido', amostra: { background: 'linear-gradient(150deg, #8F5A9C, #C4626F)' } },
+          { id: 'livre', rotulo: 'Livre', amostra: { background: '#B4E7B4' } },
+        ] as const).map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => alternarFiltro(item.id)}
+            aria-pressed={filtro === item.id}
+            title={filtro === item.id ? 'Mostrar todos os dias' : `Ver só os dias: ${item.rotulo}`}
+            className="flex items-center gap-2 cursor-pointer"
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: 0,
+              opacity: !filtro || filtro === item.id ? 1 : 0.4,
+              transition: 'opacity 0.2s ease',
+            }}
+          >
+            <div className="w-3 h-3 rounded" style={item.amostra} />
+            <span style={{ color: 'var(--color-ink-soft)', fontSize: '10px', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
+              {item.rotulo}
+            </span>
+          </button>
+        ))}
       </div>
 
       {/* Datas Comemorativas do mes exibido — mesmo card, secao a mais.
