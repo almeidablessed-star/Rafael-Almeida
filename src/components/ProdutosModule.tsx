@@ -22,7 +22,7 @@ import {
   Edit3,
   Trash2,
   Check,
-  Sparkles,
+  X,
 } from 'lucide-react';
 
 /**
@@ -457,23 +457,42 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
           {isAdding && aba !== 'compras' && createPortal(
             <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-neutral-900/80 backdrop-blur-xs p-0 sm:p-4" role="dialog" aria-modal="true">
             <div className="w-full h-full sm:h-auto sm:max-w-[430px] sm:max-h-[90vh] bg-[#F6F2F5] sm:rounded-[24px] overflow-hidden flex flex-col" style={{ boxShadow: '0 30px 70px rgba(58,35,80,0.26)' }}>
-              <div style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)' }} className="px-4 sm:px-5 py-3 sm:py-4 flex items-center justify-between flex-shrink-0">
-                <h3 className="font-brand font-black text-sm sm:text-base text-white flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-[#F5B9C6]" />
-                  {editingId ? 'Editar Produto' : 'Novo Produto'}
-                </h3>
-                <button type="button" onClick={() => setIsAdding(false)} className="text-xs text-white/70 hover:text-white font-bold px-2 py-1 transition-colors">
-                  Cancelar
+              {/* Cabecalho nas medidas do topo da propria aba Produtos (titulo
+                  29px + descricao); o safe-area tira o X de baixo do relogio
+                  no iPhone. */}
+              <div
+                style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)', paddingTop: 'calc(24px + env(safe-area-inset-top, 0px))', paddingBottom: '28px' }}
+                className="px-5 flex items-start justify-between gap-3 flex-shrink-0"
+              >
+                <div className="flex flex-col gap-2 min-w-0">
+                  <span className="text-[10px] font-bold tracking-[0.16em] uppercase text-white/65">Produtos</span>
+                  <h3 className="text-white leading-tight" style={{ fontFamily: "'Instrument Serif', serif", fontSize: '29px', lineHeight: '1.1' }}>
+                    {editingId ? 'Editar Produto' : 'Novo Produto'}
+                  </h3>
+                  <span className="text-[11px] leading-relaxed" style={{ color: 'rgba(247,220,225,.8)' }}>
+                    {editingId
+                      ? 'Ajuste preço, embalagem e estoque deste item.'
+                      : 'Cadastre um ingrediente, embalagem ou item de decoração.'}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsAdding(false)}
+                  className="w-8 h-8 rounded-[10px] bg-white/15 hover:bg-white/25 flex items-center justify-center text-white transition-colors flex-shrink-0"
+                  aria-label="Fechar"
+                >
+                  <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <form ref={produtoFormRef} onSubmit={handleSave} noValidate className="flex-1 overflow-y-auto bg-[#F6F2F5] p-4 sm:p-5 pb-0 sm:pb-0 space-y-4">
+              <form ref={produtoFormRef} onSubmit={handleSave} noValidate className="flex-1 min-h-0 flex flex-col bg-[#F6F2F5]">
+              <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
                 {formError && (
                   <div className="p-2.5 rounded-xl bg-[#FDF4F5] border border-[rgba(196,98,111,.35)] text-[12px] text-[#C4626F]" style={{ fontFamily: "'Manrope', sans-serif" }}>
                     {formError}
                   </div>
                 )}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white p-4 rounded-xl border border-[#E6E1DB] shadow-card">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-white p-4 rounded-2xl border border-[#E6E1DB] shadow-card">
                   <div className="sm:col-span-2">
                     <label className="block text-xs font-bold text-neutral-900 mb-1.5">Nome do Produto *</label>
                     <input
@@ -483,7 +502,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                         setNome(capitalizeFirstLetter(e.target.value));
                         if (invalidFieldId === 'produto-nome') setInvalidFieldId(null);
                       }}
-                      className="w-full px-3 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
+                      className="w-full px-3 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-sm font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
                     />
                     {invalidFieldId === 'produto-nome' && <FieldValidationError />}
                   </div>
@@ -493,7 +512,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                     <input
                       type="text" list="categorias-sugeridas" placeholder="Massa, Recheio, Cobertura..." value={categoria}
                       onChange={(e) => setCategoria(e.target.value)}
-                      className="w-full px-3 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
+                      className="w-full px-3 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-sm font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
                     />
                     <datalist id="categorias-sugeridas">
                       {CATEGORIAS_SUGERIDAS.map((c) => <option key={c} value={c} />)}
@@ -509,7 +528,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                         setPrecoPago(e.target.value);
                         if (invalidFieldId === 'produto-preco') setInvalidFieldId(null);
                       }}
-                      className="w-full px-3 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
+                      className="w-full px-3 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-sm font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
                     />
                     {invalidFieldId === 'produto-preco' && <FieldValidationError />}
                   </div>
@@ -540,7 +559,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                             );
                           }
                         }}
-                        className="flex-1 min-w-0 px-3 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
+                        className="flex-1 min-w-0 px-3 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-sm font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
                       />
                       <CustomSelect
                         value={unidadeEmbalagem}
@@ -552,7 +571,6 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                           // menor do que o pretendido, e silenciosamente.
                           if (!alertaTocado) setNivelMinimoUnidade(v as any);
                         }}
-                        compacto
                         ariaLabel="Unidade de embalagem"
                         style={{ width: '108px', flexShrink: 0 }}
                         options={UNIDADES.map((u) => ({ value: u, label: u }))}
@@ -608,7 +626,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                         <label className="block text-xs font-bold text-neutral-900 mb-1.5">Quanto você já tem guardado</label>
                         <input
                           type="text" inputMode="decimal" placeholder="0" value={quantidadeAtual} onChange={(e) => setQuantidadeAtual(e.target.value)}
-                          className="w-full px-3 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
+                          className="w-full px-3 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-sm font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
                         />
                         <CampoComAjuda
                           microcopy="Seu estoque de hoje — não o tamanho da embalagem que você compra."
@@ -624,12 +642,11 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                         <div className="flex gap-2">
                           <input
                             type="text" inputMode="decimal" placeholder="100" value={nivelMinimo} onChange={(e) => { setNivelMinimo(e.target.value); setAlertaTocado(true); }}
-                            className="flex-1 min-w-0 px-3 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
+                            className="flex-1 min-w-0 px-3 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-sm font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
                           />
                           <CustomSelect
                             value={nivelMinimoUnidade}
                             onChange={(v) => { setNivelMinimoUnidade(v as any); setAlertaTocado(true); }}
-                            compacto
                             ariaLabel="Unidade do nível mínimo"
                             style={{ width: '108px', flexShrink: 0 }}
                             options={UNIDADES.map((u) => ({ value: u, label: u }))}
@@ -640,14 +657,30 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                   )}
                 </div>
 
-                {/* Rodape grudado no fim da area que rola: Salvar sempre a vista */}
-                <div className="sticky bottom-0 -mx-4 sm:-mx-5 px-4 sm:px-5 py-3 bg-[#F6F2F5] flex items-center justify-end gap-2" style={{ borderTop: '1px solid rgba(58,35,80,0.08)' }}>
-                  <button type="button" onClick={() => setIsAdding(false)} className="px-4 py-2 rounded-xl bg-white border border-[#E6E1DB] text-neutral-700 font-bold text-xs hover:bg-neutral-50 shadow-card active:scale-95 transition-all duration-normal">
+              </div>
+
+                {/* Rodape fixo no fim da tela, igual ao de Clientes */}
+                <div
+                  className="flex-shrink-0 bg-white flex gap-2.5 px-4 pt-4"
+                  style={{ paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))', borderTop: '1px solid rgba(58,35,80,0.08)', boxShadow: '0 -8px 24px rgba(58,35,80,0.07)' }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setIsAdding(false)}
+                    className="px-[18px] py-3.5 rounded-[11px] text-sm font-semibold transition-colors"
+                    style={{ border: '1px solid rgba(58,35,80,0.16)', color: '#3A2350' }}
+                  >
                     Cancelar
                   </button>
-                  <button type="submit" className="px-5 py-2 rounded-xl bg-[#6E3F72] hover:bg-[#5A3560] text-white font-brand font-bold text-xs shadow-card flex items-center gap-1 active:scale-95 transition-all duration-normal">
+                  <button
+                    type="submit"
+                    className="flex-1 flex items-center justify-center gap-1.5 py-3.5 rounded-[11px] text-white text-sm font-semibold transition-colors active:scale-95"
+                    style={{ background: '#3A2350', boxShadow: '0 10px 20px rgba(58,35,80,.3)' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = '#6E3F72'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = '#3A2350'; }}
+                  >
                     <Check className="w-4 h-4 stroke-[2.5]" />
-                    Salvar
+                    Salvar produto
                   </button>
                 </div>
               </form>
