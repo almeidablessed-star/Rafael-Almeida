@@ -31,6 +31,7 @@ export const formatRendimentoParaExibir = (ficha: FichaTecnica): string =>
 export const RENDIMENTO_UNIDADES: Record<string, string> = {
   fatias: 'fatias',
   gramas: 'g',
+  quilos: 'kg',
   unidades: 'unidades',
   ml: 'ml',
 };
@@ -66,6 +67,7 @@ export const deduzirUnidadeDoRendimento = (texto?: string): string => {
   if (/fatias?/.test(t)) return 'fatias';
   if (/unidades?|\bun\b/.test(t)) return 'unidades';
   if (/\bml\b/.test(t)) return 'ml';
+  if (/\bkg\b|quilos?/.test(t)) return 'quilos';
   if (/gramas?|\bg\b/.test(t)) return 'gramas';
   return 'fatias';
 };

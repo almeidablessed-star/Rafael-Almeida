@@ -1172,7 +1172,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Rendimento *</label>
-                    <CampoComAjuda microcopy="Quantas porções esse tamanho rende — em fatias, gramas, unidades ou ml, o que fizer mais sentido pro seu produto. É só uma referência pra você e pra cliente; não entra na conta do custo." />
+                    <CampoComAjuda microcopy="Quantas porções esse tamanho rende — em fatias, gramas, quilos, unidades ou ml, o que fizer mais sentido pro seu produto. É só uma referência pra você e pra cliente; não entra na conta do custo." />
                     <div className="flex gap-2">
                       <input
                         id="ficha-rendimento"
@@ -1195,6 +1195,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                           options={[
                             { value: 'fatias', label: '🍰 Fatias' },
                             { value: 'gramas', label: '⚖️ Gramas (g)' },
+                            { value: 'quilos', label: '⚖️ Quilos (kg)' },
                             { value: 'unidades', label: '📦 Unidades' },
                             { value: 'ml', label: '🥛 ML' },
                           ]}
