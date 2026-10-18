@@ -42,14 +42,10 @@ export const LABOR_PRESETS: BakeryPreset[] = [
 ];
 
 export const COST_PRESETS: BakeryPreset[] = [
-  { id: 'c1', name: 'Gás', type: 'custo', categoryTag: 'fixo' },
-  { id: 'c2', name: 'Energia Elétrica', type: 'custo', categoryTag: 'fixo' },
-  { id: 'c3', name: 'Água', type: 'custo', categoryTag: 'fixo' },
-  { id: 'c4', name: 'Internet', type: 'custo', categoryTag: 'fixo' },
-  { id: 'c5', name: 'Aluguel', type: 'custo', categoryTag: 'fixo' },
   { id: 'c6', name: 'Taxas de Pagamento', type: 'custo', categoryTag: 'variavel' },
   { id: 'c7', name: 'Divulgação e Anúncios', type: 'custo', categoryTag: 'variavel' },
   { id: 'c8', name: 'Combustível / Transporte', type: 'custo', categoryTag: 'variavel' },
+  { id: 'c9', name: 'Alimentação', type: 'custo', categoryTag: 'variavel' },
   { id: 'inv1', name: 'Formas e Utensílios', type: 'investimento', categoryTag: 'investimento' },
   { id: 'inv2', name: 'Equipamento', type: 'investimento', categoryTag: 'investimento' },
 ];
