@@ -73,6 +73,18 @@ const getTamanhoSelecionado = (ficha: FichaTecnica, selectedTamanhoId?: string) 
   return ficha.tamanhos.find(t => t.id === selectedTamanhoId) || getPrincipalTamanho(ficha);
 };
 
+/**
+ * Horas gravadas (decimais) -> os dois campos da tela: 1,5 vira "1" h e "30" min.
+ * Ficha antiga sem horas abre com os dois VAZIOS, como antes.
+ */
+const separarHorasEMinutos = (horas?: number) => {
+  if (horas == null) return { horasTrabalho: '', minutosTrabalho: '' };
+  let h = Math.floor(horas);
+  let m = Math.round((horas - h) * 60);
+  if (m === 60) { h += 1; m = 0; }
+  return { horasTrabalho: String(h), minutosTrabalho: m > 0 ? String(m) : '' };
+};
+
 const getMaoDeObraParaTamanho = (tamanho: TamanhoOpcao, fichaGlobal: number) => {
   return tamanho.maoDeObraCost !== undefined ? tamanho.maoDeObraCost : fichaGlobal;
 };
@@ -289,6 +301,9 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     descricao: string;
     preco: string;
     horasTrabalho: string;
+    // Minutos alem das horas cheias. Na tela sao dois campos; no banco segue
+    // um numero so de horas (1 h 30 min = 1,5), sem mudar o formato gravado.
+    minutosTrabalho: string;
     valorHora: string;
     ingredients: IngredientUsage[];
     maoDeObraCost: string;
@@ -298,9 +313,9 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     // Tamanhos em branco. Antes nasciam com preco 55/75/90 e custos 20/5/5 —
     // numeros de uma ficha de exemplo de outra fase. Quem nao reparasse
     // cadastrava um bolo com o preco de um bolo que nunca existiu.
-    { id: 'ts-1', descricao: '1', preco: '', horasTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '', custoCost: '', investimentoCost: '' },
-    { id: 'ts-2', descricao: '2', preco: '', horasTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '', custoCost: '', investimentoCost: '' },
-    { id: 'ts-3', descricao: '3', preco: '', horasTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '', custoCost: '', investimentoCost: '' },
+    { id: 'ts-1', descricao: '1', preco: '', horasTrabalho: '', minutosTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '', custoCost: '', investimentoCost: '' },
+    { id: 'ts-2', descricao: '2', preco: '', horasTrabalho: '', minutosTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '', custoCost: '', investimentoCost: '' },
+    { id: 'ts-3', descricao: '3', preco: '', horasTrabalho: '', minutosTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '', custoCost: '', investimentoCost: '' },
   ]);
 
   // Fichas são agora gerenciadas pelo hook useFichasTecnicas (salva no Supabase)
@@ -348,14 +363,18 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 
   const totalReposicao = ingredients.reduce((sum, ing) => sum + (ing.totalCost || 0), 0);
 
+  /** Horas + minutos do tamanho, em horas decimais (1 h 30 min = 1,5). */
+  const horasTotais = (t: { horasTrabalho: string; minutosTrabalho: string }) =>
+    (parseNumeroDigitado(t.horasTrabalho || '') || 0) + (parseNumeroDigitado(t.minutosTrabalho || '') || 0) / 60;
+
   /**
    * Mão de obra de um tamanho: horas x tarifa.
    *
    * Sem horas ou sem tarifa, devolve o valor que ja estava gravado — e o que
    * mantem valida uma ficha cadastrada antes destes campos existirem.
    */
-  const calcularMaoDeObra = (t: { horasTrabalho: string; valorHora: string; maoDeObraCost: string }) => {
-    const horas = parseNumeroDigitado((t.horasTrabalho || '')) || 0;
+  const calcularMaoDeObra = (t: { horasTrabalho: string; minutosTrabalho: string; valorHora: string; maoDeObraCost: string }) => {
+    const horas = horasTotais(t);
     const tarifa = parseNumeroDigitado((t.valorHora || '')) || 0;
     const calculada = horas * tarifa;
     return calculada > 0 ? calculada : parseNumeroDigitado((t.maoDeObraCost || '')) || 0;
@@ -404,7 +423,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     // formulario a toa e sugeria que era preciso preencher os tres. Quem
     // precisa de mais usa o "+ Adicionar", um de cada vez.
     setTamanhos([
-      { id: 'ts-1', descricao: '1', preco: '', horasTrabalho: '', valorHora: tarifaSugerida, ingredients: [], maoDeObraCost: '', custoCost: '', investimentoCost: '' },
+      { id: 'ts-1', descricao: '1', preco: '', horasTrabalho: '', minutosTrabalho: '', valorHora: tarifaSugerida, ingredients: [], maoDeObraCost: '', custoCost: '', investimentoCost: '' },
     ]);
     setEditingId(null);
     setInvalidFieldId(null);
@@ -441,7 +460,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
           // Ficha antiga nao tem horas nem tarifa: os campos abrem VAZIOS e o
           // `maoDeObraCost` gravado e preservado como esta. Preencher com zero
           // faria a conta zerar a mao de obra que ela ja tinha definido.
-          horasTrabalho: t.horasTrabalho != null ? String(t.horasTrabalho) : '',
+          ...separarHorasEMinutos(t.horasTrabalho),
           valorHora: t.valorHora != null ? String(t.valorHora) : '',
           // Ficha antiga so tem a lista da ficha: cada tamanho abre com uma
           // COPIA dela, pronta para ser ajustada. Sem isso a confeiteira
@@ -458,9 +477,9 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     } else {
       // Se não há tamanhos, usar padrão
       setTamanhos([
-        { id: 'ts-1', descricao: '1', preco: '0', horasTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '0', custoCost: '0', investimentoCost: '0' },
-        { id: 'ts-2', descricao: '2', preco: '0', horasTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '0', custoCost: '0', investimentoCost: '0' },
-        { id: 'ts-3', descricao: '3', preco: '0', horasTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '0', custoCost: '0', investimentoCost: '0' },
+        { id: 'ts-1', descricao: '1', preco: '0', horasTrabalho: '', minutosTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '0', custoCost: '0', investimentoCost: '0' },
+        { id: 'ts-2', descricao: '2', preco: '0', horasTrabalho: '', minutosTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '0', custoCost: '0', investimentoCost: '0' },
+        { id: 'ts-3', descricao: '3', preco: '0', horasTrabalho: '', minutosTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '0', custoCost: '0', investimentoCost: '0' },
       ]);
     }
 
@@ -770,6 +789,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
           // Repete a tarifa do tamanho anterior: quem cadastra varios tamanhos do
           // mesmo bolo costuma cobrar a mesma hora, e so as horas mudam.
           horasTrabalho: '',
+          minutosTrabalho: '',
           valorHora: anterior?.valorHora || tarifaSugerida,
           // Nasce com os MESMOS insumos do tamanho anterior (so a quantidade
           // muda entre tamanhos do mesmo bolo). Nascer vazio e o que fazia a
@@ -799,7 +819,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 
     // Converter tamanhos do formulário para TamanhoOpcao
     const tamanhosData: TamanhoOpcao[] = tamanhos.map((t) => {
-      const horas = parseNumeroDigitado(t.horasTrabalho) || 0;
+      const horas = horasTotais(t);
       const tarifa = parseNumeroDigitado(t.valorHora) || 0;
       const maoDeObraCalculada = horas * tarifa;
 
@@ -1586,7 +1606,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                       </div>
                     </div>
 
-                    <div className="bg-white rounded-2xl p-4 grid grid-cols-2 gap-3" style={{ boxShadow: '0 8px 20px rgba(58,35,80,.09)' }}>
+                    <div className="bg-white rounded-2xl p-4 grid grid-cols-3 gap-3" style={{ boxShadow: '0 8px 20px rgba(58,35,80,.09)' }}>
                       <div className="flex flex-col gap-1.5">
                         <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Horas</label>
                         <input
@@ -1595,7 +1615,19 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                           placeholder="0"
                           value={tamanho.horasTrabalho}
                           onChange={(e) => handleUpdateTamanho(tamanho.id, 'horasTrabalho', e.target.value)}
-                          className="border rounded-[10px] px-2.5 py-2.5 text-sm font-bold text-right"
+                          className="min-w-0 border rounded-[10px] px-2.5 py-2.5 text-sm font-bold text-right"
+                          style={{ borderColor: 'rgba(58,35,80,0.14)', background: '#FAF7FA' }}
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Minutos</label>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          placeholder="0"
+                          value={tamanho.minutosTrabalho}
+                          onChange={(e) => handleUpdateTamanho(tamanho.id, 'minutosTrabalho', e.target.value)}
+                          className="min-w-0 border rounded-[10px] px-2.5 py-2.5 text-sm font-bold text-right"
                           style={{ borderColor: 'rgba(58,35,80,0.14)', background: '#FAF7FA' }}
                         />
                       </div>
@@ -1607,11 +1639,11 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                           placeholder="0"
                           value={tamanho.valorHora}
                           onChange={(e) => handleUpdateTamanho(tamanho.id, 'valorHora', e.target.value)}
-                          className="border rounded-[10px] px-2.5 py-2.5 text-sm font-bold text-right"
+                          className="min-w-0 border rounded-[10px] px-2.5 py-2.5 text-sm font-bold text-right"
                           style={{ borderColor: 'rgba(58,35,80,0.14)', background: '#FAF7FA' }}
                         />
                       </div>
-                      <div className="col-span-2 flex items-center justify-between rounded-[10px] px-3 py-2.5" style={{ background: '#F3E9F3' }}>
+                      <div className="col-span-3 flex items-center justify-between rounded-[10px] px-3 py-2.5" style={{ background: '#F3E9F3' }}>
                         <span className="text-xs font-semibold" style={{ color: '#6E3F72' }}>Mão de obra</span>
                         <span className="text-sm font-bold" style={{ color: '#3A2350' }}>{formatMoney(calcularMaoDeObra(tamanho))}</span>
                       </div>
@@ -1651,7 +1683,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   const margem = preco - custoTotal;
                   const margemPct = preco > 0 ? (margem / preco) * 100 : 0;
                   const noPrejuizo = preco > 0 && margem < 0;
-                  const horasNum = parseNumeroDigitado((tamanho.horasTrabalho || '')) || 0;
+                  const horasNum = horasTotais(tamanho);
                   const tarifaNum = parseNumeroDigitado((tamanho.valorHora || '')) || 0;
                   const precoCalculado =
                     administrativeCosts && estruturaFinanceira?.valido && insumos > 0
