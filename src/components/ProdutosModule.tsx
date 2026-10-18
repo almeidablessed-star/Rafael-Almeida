@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Produto, Transaction } from '../types';
 import { useProdutos } from '../context/ProdutosContext';
 import { formatQuantity, parseNumeroDigitado } from '../utils/formatters';
@@ -450,10 +451,13 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
             </div>
           )}
 
-          {/* Form */}
-          {isAdding && aba !== 'compras' && (
-            <div className="bg-[#F6F2F5] rounded-xl overflow-hidden shadow-highlight border border-[#E6E1DB] animate-slideUp">
-              <div style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)' }} className="px-4 sm:px-5 py-3 sm:py-4 flex items-center justify-between">
+          {/* Form em tela cheia, no mesmo padrao do cadastro de Clientes. Antes
+              abria no topo da lista: quem clicava no lapis de um produto la
+              embaixo nao via nada acontecer, porque o form surgia fora da tela. */}
+          {isAdding && aba !== 'compras' && createPortal(
+            <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-neutral-900/80 backdrop-blur-xs p-0 sm:p-4" role="dialog" aria-modal="true">
+            <div className="w-full h-full sm:h-auto sm:max-w-[430px] sm:max-h-[90vh] bg-[#F6F2F5] sm:rounded-[24px] overflow-hidden flex flex-col" style={{ boxShadow: '0 30px 70px rgba(58,35,80,0.26)' }}>
+              <div style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)' }} className="px-4 sm:px-5 py-3 sm:py-4 flex items-center justify-between flex-shrink-0">
                 <h3 className="font-brand font-black text-sm sm:text-base text-white flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-[#F5B9C6]" />
                   {editingId ? 'Editar Produto' : 'Novo Produto'}
@@ -463,7 +467,12 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                 </button>
               </div>
 
-              <form ref={produtoFormRef} onSubmit={handleSave} noValidate className="bg-[#F6F2F5] p-4 sm:p-5 space-y-4">
+              <form ref={produtoFormRef} onSubmit={handleSave} noValidate className="flex-1 overflow-y-auto bg-[#F6F2F5] p-4 sm:p-5 pb-0 sm:pb-0 space-y-4">
+                {formError && (
+                  <div className="p-2.5 rounded-xl bg-[#FDF4F5] border border-[rgba(196,98,111,.35)] text-[12px] text-[#C4626F]" style={{ fontFamily: "'Manrope', sans-serif" }}>
+                    {formError}
+                  </div>
+                )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white p-4 rounded-xl border border-[#E6E1DB] shadow-card">
                   <div className="sm:col-span-2">
                     <label className="block text-xs font-bold text-neutral-900 mb-1.5">Nome do Produto *</label>
@@ -531,7 +540,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                             );
                           }
                         }}
-                        className="flex-1 px-3 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
+                        className="flex-1 min-w-0 px-3 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
                       />
                       <CustomSelect
                         value={unidadeEmbalagem}
@@ -615,7 +624,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                         <div className="flex gap-2">
                           <input
                             type="text" inputMode="decimal" placeholder="100" value={nivelMinimo} onChange={(e) => { setNivelMinimo(e.target.value); setAlertaTocado(true); }}
-                            className="flex-1 px-3 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
+                            className="flex-1 min-w-0 px-3 py-2.5 bg-white border border-[#E6E1DB] rounded-xl text-xs font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
                           />
                           <CustomSelect
                             value={nivelMinimoUnidade}
@@ -631,7 +640,8 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                   )}
                 </div>
 
-                <div className="flex items-center justify-end gap-2 pt-2">
+                {/* Rodape grudado no fim da area que rola: Salvar sempre a vista */}
+                <div className="sticky bottom-0 -mx-4 sm:-mx-5 px-4 sm:px-5 py-3 bg-[#F6F2F5] flex items-center justify-end gap-2" style={{ borderTop: '1px solid rgba(58,35,80,0.08)' }}>
                   <button type="button" onClick={() => setIsAdding(false)} className="px-4 py-2 rounded-xl bg-white border border-[#E6E1DB] text-neutral-700 font-bold text-xs hover:bg-neutral-50 shadow-card active:scale-95 transition-all duration-normal">
                     Cancelar
                   </button>
@@ -642,6 +652,24 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                 </div>
               </form>
             </div>
+
+            {/* Fica dentro do portal: fora dele, o z-50 do aviso caia atras
+                do form em tela cheia (z-[99999]) e a usuaria nao via nada. */}
+            <DuplicateNameWarningModal
+              isOpen={!!duplicateWarning}
+              itemType="produto"
+              nome={duplicateWarning?.data.nome || ''}
+              onClose={() => setDuplicateWarning(null)}
+              onCriarMesmoAssim={() => {
+                if (duplicateWarning) performSave(duplicateWarning.data);
+              }}
+              onUsarExistente={() => {
+                if (duplicateWarning) handleOpenEdit(duplicateWarning.existing);
+                setDuplicateWarning(null);
+              }}
+            />
+            </div>,
+            document.body
           )}
 
           {/* Aba Compras: reaproveita a tela inteira de Compras (mesma que
@@ -898,20 +926,6 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
             requestDeleteProduto(deletingProduto);
             setDeletingProduto(null);
           }
-        }}
-      />
-
-      <DuplicateNameWarningModal
-        isOpen={!!duplicateWarning}
-        itemType="produto"
-        nome={duplicateWarning?.data.nome || ''}
-        onClose={() => setDuplicateWarning(null)}
-        onCriarMesmoAssim={() => {
-          if (duplicateWarning) performSave(duplicateWarning.data);
-        }}
-        onUsarExistente={() => {
-          if (duplicateWarning) handleOpenEdit(duplicateWarning.existing);
-          setDuplicateWarning(null);
         }}
       />
 
