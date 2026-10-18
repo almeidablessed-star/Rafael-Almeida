@@ -1,4 +1,5 @@
 ﻿import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { FichaTecnica, IngredientUsage, Transaction, TamanhoOpcao, StockItem, Produto } from '../types';
 import { formatCurrency, parseNumeroDigitado } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
@@ -1052,15 +1053,19 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
           desmontar) para a validacao nativa "required" do Passo 1 continuar
           funcionando mesmo se a usuaria for direto pro Passo 3 e clicar
           Salvar. */}
-      {isCreating && (
+      {/* Form em tela cheia, no mesmo padrao de Clientes e Produtos. Antes
+          era um card na pagina com o corpo limitado a 65vh, e rolava "por
+          dentro" enquanto a pagina tambem rolava. */}
+      {isCreating && createPortal(
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-neutral-900/80 backdrop-blur-xs p-0 sm:p-4" role="dialog" aria-modal="true">
         <div
-          className="rounded-[24px] overflow-hidden flex flex-col animate-slideUp"
+          className="w-full h-full sm:h-auto sm:max-w-[430px] sm:max-h-[90vh] sm:rounded-[24px] overflow-hidden flex flex-col"
           style={{ background: '#FFFFFF', boxShadow: '0 30px 70px rgba(58,35,80,0.26)' }}
         >
           {/* Cabecalho gradiente com navegacao de passos */}
           <div
-            style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 55%, #A85E86 100%)' }}
-            className="px-5 pt-[18px] pb-4 flex flex-col gap-3.5 flex-shrink-0"
+            style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 55%, #A85E86 100%)', paddingTop: 'calc(18px + env(safe-area-inset-top, 0px))' }}
+            className="px-5 pb-4 flex flex-col gap-3.5 flex-shrink-0"
           >
             <div className="flex items-center justify-between">
               <span className="font-serif-display text-white" style={{ fontSize: '23px' }}>
@@ -1105,7 +1110,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
           </div>
 
           {/* Corpo com rolagem */}
-          <div className="flex-1 overflow-y-auto p-[18px]" style={{ background: '#F6F2F5', maxHeight: '65vh' }}>
+          <div className="flex-1 min-h-0 overflow-y-auto p-[18px]" style={{ background: '#F6F2F5' }}>
             <form id="form-ficha-stepped" ref={stepFormRef} onSubmit={handleSaveFicha} noValidate>
 
               {/* PASSO 1 — IDENTIFICAÇÃO */}
@@ -1843,8 +1848,8 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 
           {/* Rodape fixo */}
           <div
-            className="flex-shrink-0 bg-white flex gap-2.5 items-center justify-between p-4"
-            style={{ borderTop: '1px solid rgba(58,35,80,0.08)' }}
+            className="flex-shrink-0 bg-white flex gap-2.5 items-center justify-between px-4 pt-4"
+            style={{ paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))', borderTop: '1px solid rgba(58,35,80,0.08)' }}
           >
             <button
               type="button"
@@ -1907,54 +1912,73 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
             )}
           </div>
         </div>
-      )}
 
-      {/* Confirmacao ao tentar avancar do Passo 2 (Insumos) com algum tamanho
-          zerado: nao bloqueia (pode ser proposital, ex: item so de
-          referencia de preco), so garante que a decisao foi consciente —
-          sem isso a ficha calcula CMV como zero em silencio. */}
-      {confirmandoAvancarSemInsumos && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/60 backdrop-blur-xs p-4 animate-fadeIn" role="dialog" aria-modal="true">
-          <div className="w-full max-w-sm bg-white rounded-xl shadow-highlight overflow-hidden animate-scaleUp">
-            <div className="p-5 text-center">
-              <div
-                className="w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-3"
-                style={{ background: '#FFF6E8', color: '#B27A16' }}
-              >
-                <AlertTriangle className="w-6 h-6" />
-              </div>
-
-              <h3 className="font-brand font-bold text-base text-neutral-900 mb-1">
-                Continuar sem insumos?
-              </h3>
-
-              <p className="text-xs text-neutral-600 mb-4">
-                Essa ficha não vai calcular custo real (CMV). Pode ser proposital (ex: item só de referência de preço) — se não for, volte e adicione os insumos.
-              </p>
-
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setConfirmandoAvancarSemInsumos(false)}
-                  className="py-2.5 px-4 bg-white border border-[#E6E1DB] text-neutral-700 font-bold text-xs rounded-xl hover:bg-neutral-50 shadow-card transition-all active:scale-95"
+        {/* Os dois avisos que o form dispara ficam dentro do portal: fora
+            dele, o z-50 deles caia atras do form em tela cheia (z-[99999]). */}
+        {/* Confirmacao ao tentar avancar do Passo 2 (Insumos) com algum tamanho
+            zerado: nao bloqueia (pode ser proposital, ex: item so de
+            referencia de preco), so garante que a decisao foi consciente —
+            sem isso a ficha calcula CMV como zero em silencio. */}
+        {confirmandoAvancarSemInsumos && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/60 backdrop-blur-xs p-4 animate-fadeIn" role="dialog" aria-modal="true">
+            <div className="w-full max-w-sm bg-white rounded-xl shadow-highlight overflow-hidden animate-scaleUp">
+              <div className="p-5 text-center">
+                <div
+                  className="w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-3"
+                  style={{ background: '#FFF6E8', color: '#B27A16' }}
                 >
-                  Voltar e adicionar
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setConfirmandoAvancarSemInsumos(false);
-                    setFormStep(3);
-                  }}
-                  className="py-2.5 px-4 text-white font-bold text-xs rounded-xl shadow-sm transition-all active:scale-95"
-                  style={{ background: '#3A2350' }}
-                >
-                  Continuar assim
-                </button>
+                  <AlertTriangle className="w-6 h-6" />
+                </div>
+
+                <h3 className="font-brand font-bold text-base text-neutral-900 mb-1">
+                  Continuar sem insumos?
+                </h3>
+
+                <p className="text-xs text-neutral-600 mb-4">
+                  Essa ficha não vai calcular custo real (CMV). Pode ser proposital (ex: item só de referência de preço) — se não for, volte e adicione os insumos.
+                </p>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setConfirmandoAvancarSemInsumos(false)}
+                    className="py-2.5 px-4 bg-white border border-[#E6E1DB] text-neutral-700 font-bold text-xs rounded-xl hover:bg-neutral-50 shadow-card transition-all active:scale-95"
+                  >
+                    Voltar e adicionar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setConfirmandoAvancarSemInsumos(false);
+                      setFormStep(3);
+                    }}
+                    className="py-2.5 px-4 text-white font-bold text-xs rounded-xl shadow-sm transition-all active:scale-95"
+                    style={{ background: '#3A2350' }}
+                  >
+                    Continuar assim
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
+
+        <DuplicateNameWarningModal
+          isOpen={!!duplicateWarning}
+          itemType="ficha"
+          nome={duplicateWarning?.data.name || ''}
+          onClose={() => setDuplicateWarning(null)}
+          onCriarMesmoAssim={() => {
+            if (duplicateWarning) performSaveFicha(duplicateWarning.data);
+          }}
+          onUsarExistente={() => {
+            if (duplicateWarning) handleOpenEdit(duplicateWarning.existing);
+            setDuplicateWarning(null);
+          }}
+        />
+
+        </div>,
+        document.body
       )}
 
       {/* FICHAS CARDS LIST - SEGUINDO FIELMENTE O DESIGN DE REFERÊNCIA */}
@@ -2449,20 +2473,6 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
             handleConfirmDelete(deletingFicha.id);
             setDeletingFicha(null);
           }
-        }}
-      />
-
-      <DuplicateNameWarningModal
-        isOpen={!!duplicateWarning}
-        itemType="ficha"
-        nome={duplicateWarning?.data.name || ''}
-        onClose={() => setDuplicateWarning(null)}
-        onCriarMesmoAssim={() => {
-          if (duplicateWarning) performSaveFicha(duplicateWarning.data);
-        }}
-        onUsarExistente={() => {
-          if (duplicateWarning) handleOpenEdit(duplicateWarning.existing);
-          setDuplicateWarning(null);
         }}
       />
 
