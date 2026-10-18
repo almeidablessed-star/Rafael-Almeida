@@ -2067,11 +2067,11 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         ) : (
           filteredFichas.map((ficha) => {
             // Converter descrição de tamanho quando exibir
-            const getTamanhoDisplay = (tamanho: any, index: number) => {
-              return tamanho.descricao.includes('cm') || tamanho.descricao.includes('fatias')
-                ? String(index + 1)
-                : tamanho.descricao;
-            };
+            // O botao mostra o nome que a confeiteira deu ao tamanho ("20 cm",
+            // "1kg", "3 andares"). Antes, nomes com "cm" ou "fatias" viravam o
+            // numero da posicao, e ela via "1" no lugar do "20 cm" que digitou.
+            const getTamanhoDisplay = (tamanho: any, index: number) =>
+              (tamanho.descricao || '').trim() || String(index + 1);
 
             const ingList = ficha.ingredients || [];
             const isExpanded = expandedFichaId === ficha.id;
