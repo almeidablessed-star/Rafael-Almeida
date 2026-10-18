@@ -1171,40 +1171,6 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Rendimento *</label>
-                    <CampoComAjuda microcopy="Quantas porções esse tamanho rende — em fatias, gramas, quilos, unidades ou ml, o que fizer mais sentido pro seu produto. É só uma referência pra você e pra cliente; não entra na conta do custo." />
-                    <div className="flex gap-2">
-                      <input
-                        id="ficha-rendimento"
-                        type="text"
-                        required
-                        placeholder="Ex: 10 ou 500"
-                        value={yieldInfo}
-                        onChange={(e) => {
-                          setYieldInfo(e.target.value);
-                          if (invalidFieldId === 'ficha-rendimento') setInvalidFieldId(null);
-                        }}
-                        className="flex-1 min-w-0 border rounded-[10px] px-3 py-3 text-[15px]"
-                        style={{ borderColor: 'rgba(58,35,80,0.14)', background: '#FAF7FA' }}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <CustomSelect
-                          value={selectedYieldUnit}
-                          onChange={handleApplyYieldUnit}
-                          ariaLabel="Unidade de rendimento"
-                          options={[
-                            { value: 'fatias', label: '🍰 Fatias' },
-                            { value: 'gramas', label: '⚖️ Gramas (g)' },
-                            { value: 'quilos', label: '⚖️ Quilos (kg)' },
-                            { value: 'unidades', label: '📦 Unidades' },
-                            { value: 'ml', label: '🥛 ML' },
-                          ]}
-                        />
-                      </div>
-                    </div>
-                    {invalidFieldId === 'ficha-rendimento' && <FieldValidationError />}
-                  </div>
-                  <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Foto</label>
                     {imageUrl ? (
                       <div className="flex items-center gap-3">
@@ -1651,6 +1617,44 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                     </div>
                   </div>
                 ))}
+
+                {/* Rendimento: veio do Passo 1 para ficar junto de horas e mao
+                    de obra. E um campo da FICHA (nao de cada tamanho), entao
+                    aparece uma vez so, depois do ultimo tamanho. */}
+                <div className="bg-white rounded-2xl p-4 flex flex-col gap-1.5" style={{ boxShadow: '0 8px 20px rgba(58,35,80,.09)' }}>
+                  <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Rendimento *</label>
+                  <CampoComAjuda microcopy="Quantas porções esse tamanho rende — em fatias, gramas, quilos, unidades ou ml, o que fizer mais sentido pro seu produto. É só uma referência pra você e pra cliente; não entra na conta do custo." />
+                  <div className="flex gap-2">
+                    <input
+                      id="ficha-rendimento"
+                      type="text"
+                      required
+                      placeholder="Ex: 10 ou 500"
+                      value={yieldInfo}
+                      onChange={(e) => {
+                        setYieldInfo(e.target.value);
+                        if (invalidFieldId === 'ficha-rendimento') setInvalidFieldId(null);
+                      }}
+                      className="flex-1 min-w-0 border rounded-[10px] px-3 py-3 text-[15px]"
+                      style={{ borderColor: 'rgba(58,35,80,0.14)', background: '#FAF7FA' }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <CustomSelect
+                        value={selectedYieldUnit}
+                        onChange={handleApplyYieldUnit}
+                        ariaLabel="Unidade de rendimento"
+                        options={[
+                          { value: 'fatias', label: '🍰 Fatias' },
+                          { value: 'gramas', label: '⚖️ Gramas (g)' },
+                          { value: 'quilos', label: '⚖️ Quilos (kg)' },
+                          { value: 'unidades', label: '📦 Unidades' },
+                          { value: 'ml', label: '🥛 ML' },
+                        ]}
+                      />
+                    </div>
+                  </div>
+                  {invalidFieldId === 'ficha-rendimento' && <FieldValidationError />}
+                </div>
               </div>
 
               {/* PASSO 3 — PREÇO (um bloco por tamanho, mesma quebra ja
