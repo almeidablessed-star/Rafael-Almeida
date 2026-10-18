@@ -1351,10 +1351,10 @@ export const CustomersModule: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => handleSendReminder(c, ev.title, ev.date, ev.customTemplate)}
-                              className="px-2.5 py-1.5 rounded-xl bg-[var(--color-neutral-charcoal)] text-white hover:bg-black font-extrabold text-[10px] flex items-center gap-1 shrink-0 active:scale-95 transition-transform cursor-pointer"
+                              className="px-2.5 py-1.5 rounded-xl bg-[#3A2350] text-white hover:bg-[#241B2B] font-extrabold text-[10px] flex items-center gap-1 shrink-0 active:scale-95 transition-transform cursor-pointer"
                               title="Mandar mensagem no WhatsApp sem ano"
                             >
-                              <MessageCircle className="w-3.5 h-3.5 text-[var(--color-accent-gold)]" />
+                              <MessageCircle className="w-3.5 h-3.5 text-[#F5B9C6]" />
                               <span>Avisar</span>
                             </button>
                           </div>
