@@ -44,6 +44,7 @@ import {
   ChevronUp,
   AlertTriangle,
   Star,
+  Scale,
 } from 'lucide-react';
 
 /**
@@ -2338,11 +2339,11 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   </div>
                 </div>
 
-                {/* INSUMOS EXPANDÍVEL */}
+                {/* INSUMOS EXPANDÍVEL + rendimento ao lado */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px' }}>
                 <button
                   onClick={() => setExpandedFichaId(isExpanded ? null : ficha.id)}
                   style={{
-                    alignSelf: 'flex-start',
                     background: '#F6F2F5',
                     border: 'none',
                     fontSize: '10.5px',
@@ -2368,6 +2369,30 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
                   Ver {ingList.length} Insumos
                 </button>
+
+                {/* So exibe o rendimento que a confeiteira gravou na ficha (no
+                    Passo 2 do form). Ficha sem rendimento nao mostra nada: o
+                    fallback de `formatRendimentoParaExibir` usaria o nome do
+                    tamanho ("1kg") e pareceria que o bolo "rende 1kg". */}
+                {ficha.yieldInfo?.trim() && (
+                  <span
+                    style={{
+                      background: '#F6F2F5',
+                      fontSize: '10.5px',
+                      fontWeight: 700,
+                      color: '#3A2350',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '7px 13px',
+                      borderRadius: '999px',
+                    }}
+                  >
+                    <Scale className="w-3 h-3" />
+                    Rende {ficha.yieldInfo.trim()}
+                  </span>
+                )}
+                </div>
 
                 {/* INSUMOS EXPANDIDOS */}
                 {isExpanded && (
