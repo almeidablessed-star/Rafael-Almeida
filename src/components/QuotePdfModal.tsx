@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { toPng } from 'html-to-image';
 import jsPDF from 'jspdf';
@@ -123,6 +123,14 @@ const getFontEmbedCssCached = (): Promise<string> => {
   return cachedFontEmbedCss;
 };
 
+/**
+ * Largura em que a folha e diagramada no PDF (a largura que ela tem no
+ * computador). Em tela mais estreita, a pre-visualizacao mostra a folha nessa
+ * largura, reduzida — uma miniatura do PDF, e nao uma versao empilhada que o
+ * PDF nunca teria.
+ */
+const LARGURA_FOLHA = 656;
+
 interface QuotePdfModalProps {
   transaction: Omit<Transaction, 'id' | 'createdAt'> | Transaction;
   onClose: () => void;
@@ -136,6 +144,34 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
   const [copied, setCopied] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [inspirationImage, setInspirationImage] = useState<string>(transaction.inspirationImage || '');
+
+  // Miniatura da folha no celular: a folha e montada com LARGURA_FOLHA e
+  // reduzida para caber, entao a tela mostra exatamente o que sai no PDF. Na
+  // captura, `handleDownloadPdf` alarga o documento para 668px; a area
+  // disponivel passa de LARGURA_FOLHA e a reducao some sozinha.
+  const miniaturaRef = useRef<HTMLDivElement>(null);
+  const folhaRef = useRef<HTMLDivElement>(null);
+  const [miniatura, setMiniatura] = useState<{ escala: number; altura: number } | null>(null);
+  useLayoutEffect(() => {
+    const area = miniaturaRef.current;
+    const folha = folhaRef.current;
+    if (!area || !folha) return;
+    const medir = () => {
+      const disponivel = area.clientWidth;
+      if (disponivel >= LARGURA_FOLHA) {
+        setMiniatura(null);
+        return;
+      }
+      const escala = disponivel / LARGURA_FOLHA;
+      // offsetHeight ignora o transform: e a altura real da folha montada.
+      setMiniatura({ escala, altura: folha.offsetHeight * escala });
+    };
+    medir();
+    const observador = new ResizeObserver(medir);
+    observador.observe(area);
+    observador.observe(folha);
+    return () => observador.disconnect();
+  }, []);
   const { updateTransacao, fetchTransacaoFotos } = useTransacoes();
 
   /**
@@ -941,6 +977,39 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
           id="quote-pdf-document"
           className="@container p-1 sm:p-1.5 flex-1 min-h-0 overflow-y-auto space-y-1 sm:space-y-2 bg-[#F6F2F5] text-[#241B2B] print:p-1 print:bg-white print:overflow-visible print:flex-none"
         >
+          {/* Barra so da miniatura (celular): os botoes de foto da folha ficam
+              minusculos reduzidos, entao aparecem aqui em tamanho normal. E
+              no-print, e some na captura (a miniatura e desligada nela). */}
+          {miniatura && (
+            <div className="no-print flex items-center justify-between gap-2" style={{ padding: '6px 4px 4px', fontFamily: "'Manrope', sans-serif" }}>
+              <span style={{ fontSize: '11px', fontWeight: 700, color: '#7A6E80' }}>Prévia do PDF</span>
+              <div className="flex items-center gap-1.5">
+                <label className="px-3 py-1.5 rounded-xl bg-[#F5B9C6] text-[#3A2350] font-bold text-[11px] flex items-center gap-1 cursor-pointer shadow-sm">
+                  <Camera className="w-3.5 h-3.5" />
+                  <span>{inspirationImage ? 'Alterar foto' : 'Adicionar foto'}</span>
+                  <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                </label>
+                {inspirationImage && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveImage}
+                    className="px-2.5 py-1.5 rounded-xl bg-red-100 text-red-700 font-bold text-[11px] flex items-center gap-1 cursor-pointer"
+                    title="Remover Foto de Referência"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 text-red-600" />
+                    <span>Remover</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
+          <div ref={miniaturaRef} style={miniatura ? { height: `${miniatura.altura}px`, overflow: 'hidden' } : undefined}>
+          <div
+            ref={folhaRef}
+            className={miniatura ? '@container [&_.no-print]:hidden' : '@container'}
+            style={miniatura ? { width: `${LARGURA_FOLHA}px`, transform: `scale(${miniatura.escala})`, transformOrigin: 'top left' } : undefined}
+          >
           {activeTab === 'cliente' ? (
             /* ======================================================== */
             /* TAB 1: FOLHA DO CLIENTE (GROOVY COMPACT 1-PAGE LAYOUT)   */
@@ -1385,6 +1454,8 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
               </section>
             </div>
           )}
+          </div>
+          </div>
         </div>
       </div>
     </div>
