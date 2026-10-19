@@ -1181,67 +1181,108 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
             /* ======================================================== */
             /* TAB 2: FICHA TÉCNICA DE PRODUÇÃO - COZINHA (RECIPES ONLY) */
             /* ======================================================== */
-            <div className="space-y-3.5">
-              {/* Internal Banner Header */}
-              <div className="bg-gradient-to-r from-[#3A2350] to-[#A85E86] rounded-lg p-4 text-white shadow-sm border border-white/20 print-avoid-break">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <ChefHat className="w-6 h-6 text-[#A9D8B8]" />
-                    <div>
-                      <h2 className="font-bold text-lg text-white" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                        FICHA TÉCNICA DE PRODUÇÃO - COZINHA
-                      </h2>
-                      <p className="text-[11px] text-white/70 font-medium" style={{ fontFamily: "'Manrope', sans-serif" }}>
-                        Somente Insumos e Ingredientes da Receita
-                      </p>
+            <div className="flex flex-col gap-3 p-2 @min-[600px]:p-4" style={{ background: '#F6F2F5', fontFamily: "'Manrope', sans-serif", color: '#241B2B' }}>
+              {/* Mesmo visual da Folha do Cliente (design "Pedido Carula
+                  Cake"), com o conteudo da producao: sem precos, com a foto
+                  para a decoracao e os insumos de cada item. */}
+
+              {/* Cabecalho em forma de ticket */}
+              <header
+                className="relative flex flex-wrap items-center justify-between gap-x-4 gap-y-2 print-avoid-break"
+                style={{ minHeight: '72px', padding: '12px 18px 12px 28px', borderRadius: '20px', background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)', boxShadow: '0 14px 30px rgba(58,35,80,.3)' }}
+              >
+                <span aria-hidden="true" className="absolute top-1/2 -translate-y-1/2 rounded-full" style={{ left: '-11px', width: '22px', height: '22px', background: '#F6F2F5' }} />
+                <span aria-hidden="true" className="absolute top-1/2 -translate-y-1/2 rounded-full" style={{ right: '-11px', width: '22px', height: '22px', background: '#F6F2F5' }} />
+                <div className="flex flex-col gap-0.5 min-w-0" style={{ borderLeft: '2px dashed rgba(245,185,198,.5)', paddingLeft: '14px' }}>
+                  <span style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '.24em', color: 'rgba(247,220,225,.8)' }}>PRODUÇÃO{sellerName ? ` · ${sellerName.toUpperCase()}` : ''}</span>
+                  <span style={{ fontFamily: "'Instrument Serif', serif", fontSize: '32px', lineHeight: 1, color: '#FFFFFF' }}>Ficha da Cozinha</span>
+                </div>
+                <span className="flex items-center gap-1.5" style={{ background: 'rgba(255,255,255,.14)', color: '#FFFFFF', fontSize: '11px', fontWeight: 700, padding: '7px 11px', borderRadius: '11px' }}>
+                  <ChefHat className="w-3 h-3 shrink-0" style={{ color: '#F5B9C6' }} strokeWidth={2.2} />
+                  Uso interno
+                </span>
+              </header>
+
+              {/* Com foto: cliente/entrega e observacoes a esquerda, foto a
+                  direita. Mesma regra de colunas da Folha do Cliente. */}
+              <div className={inspirationImage ? 'grid grid-cols-1 @min-[600px]:grid-cols-2 gap-3' : 'flex flex-col gap-3'}>
+                <div className="flex flex-col gap-3 min-w-0">
+                  {/* Cliente */}
+                  <section className="print-avoid-break" style={{ background: '#FFFFFF', borderRadius: '22px', boxShadow: '0 8px 20px rgba(58,35,80,.09)', padding: '14px 18px' }}>
+                    <div className="flex items-center gap-[7px]" style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '.12em', color: '#6E3F72' }}>
+                      <User className="w-[13px] h-[13px]" strokeWidth={2.2} />
+                      CLIENTE
                     </div>
-                  </div>
-                  <span className="bg-[#A9D8B8] text-[#3A2350] font-bold text-xs px-2.5 py-1 rounded-full uppercase" style={{ fontFamily: "'Manrope', sans-serif" }}>
-                    Uso Interno
-                  </span>
-                </div>
-              </div>
+                    <div className="flex items-center gap-3 mt-2.5">
+                      <div className="w-11 h-11 rounded-full overflow-hidden shrink-0 flex items-center justify-center rounded-photo-container" style={{ background: '#F3E9F3', fontFamily: "'Instrument Serif', serif", fontSize: '20px', color: '#6E3F72' }}>
+                        {custPhoto ? (
+                          <img src={custPhoto} alt={transaction.customerName || 'Cliente'} className="w-full h-full object-cover" />
+                        ) : (
+                          iniciaisDaCliente
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-[3px] min-w-0">
+                        <span className="truncate" style={{ fontFamily: "'Instrument Serif', serif", fontSize: '22px', lineHeight: 1.1 }}>
+                          {transaction.customerName || 'Cliente'}
+                        </span>
+                        {transaction.customerPhone && (
+                          <span className="flex items-center gap-[5px]" style={{ fontSize: '11px', fontWeight: 600, color: '#7A6E80' }}>
+                            <Phone className="w-[11px] h-[11px] shrink-0" style={{ color: '#C4626F' }} strokeWidth={2.2} />
+                            {transaction.customerPhone}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </section>
 
-              {/* Quick Summary Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 print-avoid-break">
-                <div className="bg-white p-3 rounded-[16px] border border-[#E6E1DB] shadow-sm">
-                  <span className="text-[9px] font-black uppercase tracking-wider text-[#241B2B] block" style={{ fontFamily: "'Manrope', sans-serif" }}>Cliente</span>
-                  <p className="font-bold text-xs text-[#241B2B]">{transaction.customerName || 'Cliente'}</p>
-                  <p className="text-[10px] text-[#7A6E80]">{transaction.customerPhone}</p>
+                  {/* Entrega */}
+                  <section className="print-avoid-break" style={{ background: '#FFFFFF', border: '1px solid rgba(36,27,43,.07)', borderRadius: '22px', boxShadow: '0 8px 20px rgba(58,35,80,.09)', padding: '14px 16px' }}>
+                    <span style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '.12em', color: '#6E3F72' }}>PRONTO PARA ENTREGA</span>
+                    <div className="grid grid-cols-2 gap-2 mt-[9px]">
+                      {[
+                        { rotulo: 'DATA', valor: transaction.eventDate ? formatDateBr(transaction.eventDate) : formatDateBr(transaction.date) },
+                        { rotulo: 'HORÁRIO', valor: transaction.deliveryTime || 'A definir' },
+                      ].map((c) => (
+                        <div key={c.rotulo} className="flex flex-col gap-px min-w-0" style={{ background: '#F6F2F5', borderRadius: '14px', padding: '8px 12px' }}>
+                          <span style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '.1em', color: '#7A6E80' }}>{c.rotulo}</span>
+                          <span className="truncate" style={{ fontSize: '17px', fontWeight: 800, letterSpacing: '-.02em' }}>{c.valor}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-1.5 mt-2" style={{ fontSize: '11px', fontWeight: 600, color: '#5B4A6B' }}>
+                      <MapPin className="w-3 h-3 shrink-0" style={{ color: '#6E3F72' }} strokeWidth={2.2} />
+                      {transaction.deliveryAddress || 'Retirada na confeitaria'}
+                    </div>
+                  </section>
+
+                  {/* Observacoes: na cozinha elas importam tanto quanto a
+                      receita, entao ganham card proprio */}
+                  <section className="flex-1 flex items-start gap-2 print-avoid-break" style={{ background: '#FBF6EC', color: '#5B4A2E', borderRadius: '22px', padding: '14px 16px', fontSize: '12px', fontWeight: 600, lineHeight: 1.5 }}>
+                    <Pencil className="w-3.5 h-3.5 shrink-0 mt-0.5" strokeWidth={2.2} />
+                    <span>
+                      <b style={{ fontWeight: 800, display: 'block', fontSize: '9px', letterSpacing: '.12em', marginBottom: '3px' }}>OBSERVAÇÕES DA CLIENTE</b>
+                      {transaction.observations ? `"${transaction.observations}"` : 'Nenhuma observação especial.'}
+                    </span>
+                  </section>
                 </div>
 
-                <div className="bg-white p-3 rounded-[16px] border border-[#E6E1DB] shadow-sm">
-                  <span className="text-[9px] font-black uppercase tracking-wider text-[#241B2B] block" style={{ fontFamily: "'Manrope', sans-serif" }}>Horário de Entrega</span>
-                  <p className="font-bold text-xs text-[#241B2B] flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-[#241B2B]" />
-                    {transaction.deliveryTime || 'Horário a definir'} ({transaction.eventDate ? formatDateBr(transaction.eventDate) : formatDateBr(transaction.date)})
-                  </p>
-                  <p className="text-[10px] text-[#7A6E80] truncate">{transaction.deliveryAddress || 'Retirada'}</p>
-                </div>
-
-                <div className="bg-white p-3 rounded-[16px] border border-[#E6E1DB] shadow-sm">
-                  <span className="text-[9px] font-black uppercase tracking-wider text-[#241B2B] block" style={{ fontFamily: "'Manrope', sans-serif" }}>Observações do Cliente</span>
-                  <p className="font-semibold text-xs text-[#241B2B] italic">{transaction.observations || 'Nenhuma observação especial'}</p>
-                </div>
-              </div>
-
-              {/* Inspiration Image for Decorators - WITH UPLOAD/CHANGE/REMOVE IN KITCHEN TAB */}
-              {inspirationImage ? (
-                <div className="bg-white p-3 rounded-[16px] border-2 border-[#F5B9C6] space-y-2 print-avoid-break shadow-sm">
-                  <div className="flex items-center justify-between gap-2">
-                    <h4 className="text-[9px] font-black uppercase tracking-wider text-[#241B2B] flex items-center gap-1" style={{ fontFamily: "'Manrope', sans-serif" }}>
-                      <Camera className="w-3 h-3 text-[#241B2B]" /> Foto de Referência para Decoração na Cozinha
-                    </h4>
-                    <div className="flex items-center gap-1.5 no-print">
-                      <label className="px-2.5 py-1 rounded-xl bg-[#F5B9C6] hover:bg-[#E8A0B0] text-[#3A2350] font-bold text-[10px] flex items-center gap-1 cursor-pointer transition-colors shadow-sm" style={{ fontFamily: "'Manrope', sans-serif" }}>
+                {/* Foto para a decoracao: mesma montagem da Folha do Cliente */}
+                {inspirationImage ? (
+                  <div className="flex flex-col gap-2 min-w-0">
+                    <section
+                      className="relative overflow-hidden rounded-photo-container aspect-[3/4] w-[70%] mx-auto @min-[600px]:aspect-auto @min-[600px]:w-full @min-[600px]:flex-1"
+                      style={{ minHeight: '200px', borderRadius: '26px', border: '3px solid #FFFFFF', boxShadow: '0 0 0 1.5px #F5B9C6, 0 14px 30px rgba(58,35,80,.16)' }}
+                    >
+                      <img src={inspirationImage} alt="Foto de referência para a decoração" className="absolute inset-0 w-full h-full object-cover" />
+                      <span className="absolute" style={{ top: '12px', left: '12px', background: 'rgba(255,255,255,.92)', color: '#3A2350', fontSize: '9px', fontWeight: 800, letterSpacing: '.12em', padding: '6px 11px', borderRadius: '999px', boxShadow: '0 4px 10px rgba(58,35,80,.12)' }}>
+                        REFERÊNCIA DA DECORAÇÃO
+                      </span>
+                    </section>
+                    <div className="flex items-center justify-center gap-1.5 no-print">
+                      <label className="px-2.5 py-1 rounded-xl bg-[#F5B9C6] hover:bg-[#E8A0B0] text-[#3A2350] font-bold text-[10px] flex items-center gap-1 cursor-pointer transition-colors shadow-sm">
                         <Camera className="w-3 h-3 text-[#3A2350]" />
                         <span>Alterar Foto</span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageUpload}
-                          className="hidden"
-                        />
+                        <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                       </label>
                       <button
                         type="button"
@@ -1254,115 +1295,85 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
                       </button>
                     </div>
                   </div>
-
-                  <div className="w-full rounded-xl overflow-hidden border border-[var(--color-pastry-light-pink)]/50 bg-[var(--color-pastry-cream)]/30 flex items-center justify-center p-1 print:overflow-visible inspiration-image-container">
-                    <img
-                      src={inspirationImage}
-                      alt="Foto de Referência para Cozinha"
-                      className="w-full h-auto max-h-[150px] sm:max-h-none object-contain rounded-lg inspiration-image"
-                    />
+                ) : (
+                  <div className="no-print" style={{ background: '#FFFFFF', borderRadius: '22px', border: '2px dashed #F5B9C6' }}>
+                    <label className="flex flex-col items-center justify-center py-5 px-4 cursor-pointer text-center gap-1.5">
+                      <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: '#FCEFF2', color: '#6E3F72' }}>
+                        <Upload className="w-4 h-4" />
+                      </div>
+                      <span className="font-bold text-xs" style={{ color: '#3A2350' }}>+ Adicionar Foto de Referência para Cozinha</span>
+                      <span className="text-[10px] max-w-sm" style={{ color: '#7A6E80' }}>
+                        Clique aqui para enviar a foto do modelo/bolo para a equipe de produção e decoração.
+                      </span>
+                      <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                    </label>
                   </div>
-                </div>
-              ) : (
-                <div className="bg-white p-3.5 rounded-[16px] border-2 border-dashed border-[#F5B9C6] shadow-sm no-print hover:bg-[#F5B9C6]/10 transition-colors">
-                  <label className="flex flex-col items-center justify-center py-3 cursor-pointer text-center space-y-1.5">
-                    <div className="w-9 h-9 rounded-full bg-[#F5B9C6]/60 text-[#3A2350] flex items-center justify-center shadow-sm">
-                      <Upload className="w-4 h-4" />
-                    </div>
-                    <span className="font-bold text-xs text-[#241B2B]" style={{ fontFamily: "'Manrope', sans-serif" }}>
-                      + Adicionar Foto de Referência para Cozinha
-                    </span>
-                    <span className="text-[10px] text-[#7A6E80] max-w-sm">
-                      Clique aqui para enviar a foto do modelo/bolo para a equipe de produção e decoração.
-                    </span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                    />
-                  </label>
-                </div>
-              )}
+                )}
+              </div>
 
-              {/* Breakdown of Recipe Items with Clickable Expandable Accordion */}
-              <div className="space-y-3 print-avoid-break">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-bold text-xs text-[#241B2B] uppercase tracking-wider flex items-center gap-1.5" style={{ fontFamily: "'Manrope', sans-serif" }}>
-                    <Layers className="w-4 h-4 text-[#241B2B]" />
-                    Insumos da Produção ({recipeItems.length} {recipeItems.length === 1 ? 'item de receita' : 'itens de receita'})
-                  </h4>
-                  <span className="text-[10px] text-[#7A6E80] font-bold">
-                    Clique no item para abrir/fechar ingredientes
+              {/* Insumos de cada item, com a largura toda (a lista pode ser
+                  longa). Cada item abre/fecha na tela; no PDF sai como estiver. */}
+              <section className="flex flex-col gap-2.5" style={{ background: '#FFFFFF', border: '1px solid rgba(36,27,43,.07)', borderRadius: '22px', boxShadow: '0 8px 20px rgba(58,35,80,.09)', padding: '14px 16px' }}>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="flex items-center gap-[7px]" style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '.12em', color: '#6E3F72' }}>
+                    <Layers className="w-[13px] h-[13px]" strokeWidth={2.2} />
+                    INSUMOS DA PRODUÇÃO
+                  </span>
+                  <span className="whitespace-nowrap" style={{ background: '#F3E9F3', color: '#3A2350', fontSize: '9px', fontWeight: 800, padding: '5px 10px', borderRadius: '999px' }}>
+                    {recipeItems.length} {recipeItems.length === 1 ? 'item de receita' : 'itens de receita'}
                   </span>
                 </div>
+                <span className="no-print" style={{ fontSize: '10px', fontWeight: 600, color: '#7A6E80' }}>
+                  Toque no item para abrir ou fechar os ingredientes.
+                </span>
 
                 {recipeItems.length === 0 ? (
-                  <div className="bg-white p-4 rounded-[16px] border border-[#E6E1DB] text-center text-xs text-[#7A6E80] font-medium shadow-sm">
-                    Nenhum item de receita cadastrado nesta ordem.
+                  <div className="text-center" style={{ background: '#F6F2F5', borderRadius: '14px', padding: '14px', fontSize: '12px', fontWeight: 600, color: '#7A6E80' }}>
+                    Nenhum item de receita cadastrado neste pedido.
                   </div>
                 ) : (
                   recipeItems.map((itemStr, idx) => {
                     const ficha = getRecipeDetailsForItem(itemStr);
-                    const isOpen = expandedItems[idx] !== false; // Open by default
+                    const isOpen = expandedItems[idx] !== false; // aberto por padrao
 
                     return (
-                      <div
-                        key={`recipe-${idx}-${itemStr}`}
-                        className="bg-white rounded-[16px] border-2 border-[#E6E1DB] shadow-sm overflow-hidden transition-all"
-                      >
-                        {/* CLICKABLE ITEM HEADER */}
+                      <div key={`recipe-${idx}-${itemStr}`} className="print-avoid-break" style={{ border: '1px solid #EDE6EF', borderRadius: '16px', overflow: 'hidden' }}>
                         <button
                           type="button"
                           onClick={() => toggleAccordion(idx)}
-                          className="w-full p-3 bg-[#F6F2F5] hover:bg-[#E8D5E8] flex items-center justify-between text-left border-b border-[#E6E1DB] transition-colors cursor-pointer"
+                          className="w-full flex items-center gap-2.5 text-left cursor-pointer"
+                          style={{ padding: '8px 10px', background: '#FFFFFF' }}
                         >
-                          <span className="font-bold text-xs text-[#241B2B] flex items-center gap-2" style={{ fontFamily: "'Manrope', sans-serif" }}>
-                            <span className="w-5 h-5 rounded-full bg-[#3A2350] text-[#F5B9C6] text-[10px] font-bold flex items-center justify-center shrink-0">
-                              {idx + 1}
-                            </span>
-                            <span>{itemStr}</span>
-                          </span>
-
-                          <div className="flex items-center gap-2 shrink-0">
-                            {ficha && (
-                              <span className="text-[10px] font-bold bg-[#F5B9C6] text-[#3A2350] px-2 py-0.5 rounded-full border border-[#E8A0B0]/60" style={{ fontFamily: "'Manrope', sans-serif" }}>
-                                Rendimento: {formatRendimentoParaExibir(ficha)}
-                              </span>
-                            )}
-                            {isOpen ? (
-                              <ChevronUp className="w-4 h-4 text-[#7A6E80]" />
-                            ) : (
-                              <ChevronDown className="w-4 h-4 text-[#7A6E80]" />
-                            )}
+                          <div className="w-[30px] h-[30px] shrink-0 flex items-center justify-center" style={{ borderRadius: '10px', background: '#3A2350' }}>
+                            <Cake className="w-[15px] h-[15px]" style={{ color: '#F5B9C6' }} strokeWidth={2} />
                           </div>
+                          <span className="flex-1 min-w-0 leading-tight" style={{ fontSize: '13px', fontWeight: 700 }}>{itemStr}</span>
+                          {ficha && (
+                            <span className="shrink-0 whitespace-nowrap" style={{ background: '#FCEFF2', color: '#3A2350', fontSize: '10px', fontWeight: 800, padding: '4px 10px', borderRadius: '999px' }}>
+                              Rende {formatRendimentoParaExibir(ficha)}
+                            </span>
+                          )}
+                          <span className="no-print shrink-0" style={{ color: '#7A6E80' }}>
+                            {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                          </span>
                         </button>
 
-                        {/* EXPANDABLE INGREDIENTS BODY */}
                         {isOpen && (
-                          <div className="p-3.5 space-y-2 bg-white animate-fadeIn">
+                          <div style={{ padding: '4px 10px 10px', background: '#FFFFFF' }}>
                             {ficha && ficha.ingredients.length > 0 ? (
-                              <div className="space-y-1.5">
-                                <span className="text-[9px] font-black uppercase tracking-wider text-[#7A6E80] block" style={{ fontFamily: "'Manrope', sans-serif" }}>
-                                  Insumos e Quantidades (Ex: 300g Farinha, 300g Açúcar):
-                                </span>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 text-xs">
-                                  {ficha.ingredients.map((ing) => (
-                                    <div
-                                      key={ing.id}
-                                      className="bg-[#F6F2F5] p-2 rounded-xl border border-[#E6E1DB] flex items-center justify-between"
-                                    >
-                                      <span className="font-bold text-[#241B2B]">🥣 {ing.name}</span>
-                                      <strong className="font-bold text-[#3A2350] bg-[#A9D8B8] px-2 py-0.5 rounded-lg text-[11px]">
-                                        {ing.quantity} {ing.unit}
-                                      </strong>
-                                    </div>
-                                  ))}
-                                </div>
+                              <div className="grid grid-cols-1 @min-[600px]:grid-cols-2 gap-1.5">
+                                {ficha.ingredients.map((ing) => (
+                                  <div key={ing.id} className="flex items-center justify-between gap-2" style={{ background: '#F6F2F5', borderRadius: '12px', padding: '7px 10px' }}>
+                                    <span className="min-w-0 truncate" style={{ fontSize: '12px', fontWeight: 700 }}>{ing.name}</span>
+                                    <span className="shrink-0 tabular-nums" style={{ background: '#E7F2EA', color: '#3A2350', fontSize: '11px', fontWeight: 800, padding: '3px 8px', borderRadius: '8px' }}>
+                                      {ing.quantity} {ing.unit}
+                                    </span>
+                                  </div>
+                                ))}
                               </div>
                             ) : (
-                              <p className="text-[11px] text-[#7A6E80] font-medium italic p-2 bg-[#F6F2F5] rounded-xl border border-[#E6E1DB]">
-                                bolo/doce artesanal. Monte os insumos base da receita padrão para {itemStr}.
+                              <p style={{ background: '#F6F2F5', borderRadius: '12px', padding: '9px 12px', fontSize: '11px', fontWeight: 600, fontStyle: 'italic', color: '#7A6E80' }}>
+                                Sem ficha técnica cadastrada para "{itemStr}". Monte os insumos da receita padrão.
                               </p>
                             )}
                           </div>
@@ -1371,7 +1382,7 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
                     );
                   })
                 )}
-              </div>
+              </section>
             </div>
           )}
         </div>
