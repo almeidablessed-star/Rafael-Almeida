@@ -740,7 +740,7 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
    * texto da descricao, como sempre foi, e saem SEM preco por item: inventar
    * um rateio do total seria mostrar a cliente um numero que ninguem cobrou.
    */
-  const itensDaFolha: { nome: string; quantidade: number; valorTotal: number | null }[] =
+  const itensDaFolha: { nome: string; quantidade: number; valorTotal: number | null; adicional?: boolean }[] =
     transaction.breakdown?.itens?.length
       ? transaction.breakdown.itens.map((i) => ({
           nome: i.nome,
@@ -748,6 +748,27 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
           valorTotal: Number(i.valorTotal) || 0,
         }))
       : itemLines.map((line) => ({ nome: line, quantidade: 1, valorTotal: null }));
+
+  // Os adicionais (flores, topo, vela...) entram na lista, um por linha. Antes
+  // so os produtos apareciam: o total ja somava o adicional e a cliente via
+  // $260 com um bolo de $240 e nenhuma explicacao para os outros $20. So no
+  // caminho estruturado — no antigo, o texto da descricao ja traz o adicional.
+  // Pedido que gravou so o TOTAL dos adicionais (sem a lista) sai numa linha.
+  if (transaction.breakdown?.itens?.length) {
+    const detalhados = transaction.breakdown.adicionaisDetalhados || [];
+    if (detalhados.length > 0) {
+      detalhados.forEach((a) => {
+        itensDaFolha.push({ nome: a.nome || 'Adicional', quantidade: 1, valorTotal: Number(a.valor) || 0, adicional: true });
+      });
+    } else if ((Number(transaction.breakdown.adicionais) || 0) > 0) {
+      itensDaFolha.push({ nome: 'Adicionais', quantidade: 1, valorTotal: Number(transaction.breakdown.adicionais) });
+    }
+    // A taxa de entrega tambem soma no total; sem esta linha a conta nao fechava.
+    const taxaEntrega = Number(transaction.breakdown.delivery) || 0;
+    if (taxaEntrega > 0) {
+      itensDaFolha.push({ nome: 'Taxa de entrega', quantidade: 1, valorTotal: taxaEntrega });
+    }
+  }
 
   // Filter out delivery and fee items for the Kitchen Production sheet
   const recipeItems = itemLines.filter((line) => {
@@ -995,10 +1016,8 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
                 <div className="space-y-1">
                   {itensDaFolha.map((item, idx) => (
                     <div key={`item-${idx}-${item.nome}`} className="flex items-center gap-2 text-xs font-bold text-[var(--color-pastry-chocolate)] bg-[var(--color-pastry-cream)]/60 p-2 rounded-xl border border-[var(--color-text-muted)]">
-                      <span className="bg-[var(--color-pastry-chocolate)] text-[var(--color-pastry-pink)] text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center shrink-0">
-                        {idx + 1}
-                      </span>
                       <span className="leading-tight">
+                        {item.adicional && <span className="font-semibold opacity-70">Adicional · </span>}
                         {item.quantidade > 1 && `${item.quantidade}× `}{item.nome}
                       </span>
                       {item.valorTotal !== null && (
