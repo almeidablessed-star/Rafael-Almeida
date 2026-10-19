@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Carula Cake · Globo Groovy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Kaushan+Script&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/groove.css">
+<style>
+
+.hero { position: relative; isolation: isolate; overflow: hidden; min-height: 100svh; background: var(--choc); color: var(--creme);
+  padding: 104px max(16px, env(safe-area-inset-right)) 80px max(16px, env(safe-area-inset-left)); display: grid; align-content: center; }
+.bg-check { position: absolute; left: 0; top: -10%; width: 100%; height: 120%; opacity: .09; z-index: -1; }
+.hero-wave { position: absolute; left: 0; right: 0; bottom: -1px; z-index: 9; }
+.hero-grid { display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; width: 100%; max-width: 1320px; margin: 0 auto; }
+.hero-copy { position: relative; z-index: 6; display: grid; justify-items: center; text-align: center; gap: 12px; }
+.hero .eyebrow { color: var(--rosa); }
+.title { font-size: clamp(3.9rem, 20vw, 10rem); --d: .014em; }
+.hero .script { font-size: clamp(1.7rem, 7vw, 2.8rem); rotate: -3deg; margin-top: .3rem; text-wrap: balance; }
+.hero .eyebrow { text-wrap: balance; }
+.ctas { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: .6rem; }
+.hero .btn { border-color: var(--creme); box-shadow: 4px 5px 0 var(--coral), 0 18px 30px -10px rgba(0, 0, 0, .5); }
+.hero .btn-main { background: var(--coral); }
+.hero .btn-alt { background: var(--creme); }
+
+.orbit { position: relative; width: min(124vw, 900px); aspect-ratio: 1.42; margin-top: -2%; }
+.orbit canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; }
+.orbiter { position: absolute; left: 0; top: 0; width: 23%; margin-left: -11.5%; margin-top: -19%; pointer-events: none; }
+.orbiter img { width: 100%; filter: drop-shadow(3px 4px 0 var(--coral)) drop-shadow(0 16px 18px rgba(0, 0, 0, .45)); }
+.spark { position: absolute; width: 24px; aspect-ratio: 1; fill: var(--rosa); z-index: 1; animation: tw 3.2s ease-in-out infinite; }
+@keyframes tw { 0%, 100% { transform: scale(.4) rotate(0); opacity: .6; } 50% { transform: scale(1) rotate(90deg); opacity: 1; } }
+
+@media (min-width: 900px) {
+  .hero-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); align-items: center; gap: 2vw; }
+  .hero .eyebrow { max-width: none; }
+  .hero-copy { justify-items: start; text-align: left; }
+  .ctas { justify-content: flex-start; }
+  .title { font-size: clamp(5rem, 9.4vw, 10rem); }
+  .orbit { width: min(54vw, 120svh); }
+}
+
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="sparkle" viewBox="0 0 24 24"><path d="M12 0c1.05 8.2 3.8 10.95 12 12-8.2 1.05-10.95 3.8-12 12-1.05-8.2-3.8-10.95-12-12C8.2 10.95 10.95 8.2 12 0Z"/></symbol>
+  <symbol id="arrow" viewBox="0 0 256 256"><path fill="currentColor" d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z"/></symbol>
+</svg>
+<header class="topbar">
+  <a class="brand" href="#capa" aria-label="Carula Cake, voltar ao início"><img src="img/logo-carula.webp" alt="Carula Cake Confeitaria" width="900" height="524"></a>
+  <button class="burger" aria-label="Abrir menu" aria-expanded="false" aria-controls="menu"><span></span><span></span><span></span></button>
+</header>
+<nav class="menu" id="menu" aria-label="Menu principal">
+  <canvas id="menu-check" aria-hidden="true"></canvas>
+  <div class="menu-inner">
+    <ol>
+      <li><a href="#capa">Início</a></li>
+      <li><a href="#sobre">Sobre</a></li>
+      <li><a href="#cardapio">Cardápio</a></li>
+      <li><a href="#galeria">Galeria</a></li>
+      <li><a href="#instagram">Instagram</a></li>
+      <li><a href="#contato">Contato</a></li>
+    </ol>
+    <div class="menu-foot">
+      <a class="chip" href="tel:+17814206892">(781) 420-6892</a>
+      <a class="chip" href="https://www.instagram.com/carula.cake/" target="_blank" rel="noopener">@carula.cake</a>
+      <span class="chip">North Shore, MA</span>
+    </div>
+  </div>
+</nav>
+<main>
+  <section class="hero" id="capa">
+    <canvas class="bg-check" id="bg-check" data-speed=".12" aria-hidden="true"></canvas>
+    <svg class="spark" style="left:8%;top:22%" aria-hidden="true"><use href="#sparkle"/></svg>
+    <svg class="spark" style="right:9%;top:16%;width:16px;animation-delay:-1.1s" aria-hidden="true"><use href="#sparkle"/></svg>
+    <svg class="spark" style="left:44%;top:48%;width:14px;fill:#8E5CF0;animation-delay:-2s" aria-hidden="true"><use href="#sparkle"/></svg>
+    <div class="hero-grid">
+      <div class="hero-copy" data-speed=".25">
+        <p class="eyebrow" data-pop>Confeitaria artesanal<br>North Shore, MA · desde 2024</p>
+        <h1 class="groovy title" aria-label="Carula Cake"><span class="w" data-split>Carula</span><span class="w" data-split>Cake</span></h1>
+        <p class="script" data-pop>onde há um bolo, há uma história</p>
+        <div class="ctas" data-pop>
+        <a class="btn btn-main magnetic" href="#cardapio"><span>Ver cardápio</span></a>
+        <a class="btn btn-alt magnetic" href="#contato"><span>Encomendar</span><svg aria-hidden="true"><use href="#arrow"/></svg></a>
+        </div>
+      </div>
+      <div class="orbit" id="orbit" data-speed="-.06" data-depth=".6">
+        <canvas id="globe" aria-label="Globo xadrez girando com bolos em órbita" role="img"></canvas>
+        <div class="orbiter"><img src="img/bolo-oceano-sticker.webp" alt="" width="595" height="640"></div>
+        <div class="orbiter"><img src="img/bolo-vintage-sticker.webp" alt="" width="583" height="640"></div>
+        <div class="orbiter"><img src="img/bolo-pistache-sticker.webp" alt="" width="640" height="509"></div>
+        <div class="orbiter"><img src="img/bolo-dri-sticker.webp" alt="" width="476" height="640"></div>
+        <div class="orbiter"><img src="img/bolo-lambeth-sticker.webp" alt="" width="634" height="640"></div>
+      </div>
+    </div>
+    <svg class="wave-divider hero-wave" viewBox="0 0 1440 120" preserveAspectRatio="none" aria-hidden="true"><path class="fill" fill="#F8F1E4"/><path class="line"/></svg>
+  </section>
+</main>
+<div class="tapes" aria-hidden="true">
+  <div class="marquee tape-a" data-rate="55"><div class="track"><b>Franciele</b><svg aria-hidden="true"><use href="#sparkle"/></svg><b>Fernanda</b><svg aria-hidden="true"><use href="#sparkle"/></svg><b>Kaenny</b><svg aria-hidden="true"><use href="#sparkle"/></svg><b>Matilda</b><svg aria-hidden="true"><use href="#sparkle"/></svg><b>Klicya</b><svg aria-hidden="true"><use href="#sparkle"/></svg><b>Isabel</b><svg aria-hidden="true"><use href="#sparkle"/></svg><b>Any</b><svg aria-hidden="true"><use href="#sparkle"/></svg><b>Lauren</b><svg aria-hidden="true"><use href="#sparkle"/></svg><b>Morgana</b><svg aria-hidden="true"><use href="#sparkle"/></svg><b>Amanda</b><svg aria-hidden="true"><use href="#sparkle"/></svg><b>Vanessa</b><svg aria-hidden="true"><use href="#sparkle"/></svg><b>Adriana</b><svg aria-hidden="true"><use href="#sparkle"/></svg><b>Alexia</b><svg aria-hidden="true"><use href="#sparkle"/></svg><b>Letícia</b><svg aria-hidden="true"><use href="#sparkle"/></svg><b>Karina</b><svg aria-hidden="true"><use href="#sparkle"/></svg><b>Maria</b><svg aria-hidden="true"><use href="#sparkle"/></svg></div></div>
+  <div class="marquee tape-b" data-dir="1" data-rate="38"><div class="track"><b>16 Mulheres, 16 Histórias</b><svg aria-hidden="true"><use href="#sparkle"/></svg><b>Onde há um bolo, há uma história</b><svg aria-hidden="true"><use href="#sparkle"/></svg><b>Feito à mão no North Shore</b><svg aria-hidden="true"><use href="#sparkle"/></svg><b>Desde 2024</b><svg aria-hidden="true"><use href="#sparkle"/></svg></div></div>
+</div>
+
+<section class="next" id="sobre">
+  <div class="about">
+    <div class="about-photo" data-reveal data-rot="5"><canvas id="about-check" aria-hidden="true"></canvas><p>Foto da Camila aqui</p></div>
+    <div class="about-copy" data-reveal data-rot="-2">
+      <p class="eyebrow">Prévia da próxima seção</p>
+      <h2 class="groovy"><span class="w">Sobre a</span><span class="w">Carula</span></h2>
+      <p class="script">uma homenagem à minha avó</p>
+      <p class="txt">A Carula Cake nasceu da minha paixão pela confeitaria e hoje é uma homenagem à memória da minha avó, que me ensinou desde cedo a cuidar de cada detalhe.</p>
+      <p class="txt">Sou Camila, tenho 32 anos e nasci no interior de São Paulo. Aprendi na infância a dedicar atenção e carinho a tudo o que faço, e levo isso para cada bolo e cada pedido entregue.</p>
+    </div>
+  </div>
+  <div class="soon">
+    <span id="cardapio">Cardápio · 16 Mulheres, 16 Histórias</span>
+    <span id="galeria">Galeria</span>
+    <span id="instagram">Instagram</span>
+    <span id="contato">Contato</span>
+  </div>
+</section>
+<a class="proto-tag" href="index.html">F · Globo Groovy · ver os 3</a>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="shared/groove.js"></script>
+<script>
+  Groove.checker(document.getElementById('menu-check'), { a: '#F5C6CE', b: '#F8F1E4', cell: 120, amp: 22, shade: .1, still: true });
+  Groove.checker(document.getElementById('about-check'), { a: '#D8CDEB', b: '#F8F1E4', cell: 46, amp: 10, shade: .18, speed: .5, drift: [0, 12] });
+  Groove.checker(document.getElementById('bg-check'), { a: '#F5C6CE', b: '#2B2420', cell: 90, amp: 24, k: .008, shade: 0, speed: .4, drift: [6, 10] });
+  const narrow = innerWidth < 900;
+  const geo = Groove.sphere(document.getElementById('globe'), { a: '#E8452B', b: '#F5C6CE', lat: 10, lon: 20, speed: .07, tilt: .42,
+    scale: narrow ? .43 : .36, ring: { rx: narrow ? 1.5 : 1.6, ry: .34, color: '#F8F1E4' } });
+  Groove.orbit(geo, [...document.querySelectorAll('.orbiter')], .035);
+  Groove.pop('[data-pop]', .2);
+  Groove.title(document.querySelector('.title'), .3);
+  if (!Groove.reduce) gsap.from('#orbit', { scale: .6, opacity: 0, rotation: -8, duration: 1.6, ease: 'elastic.out(1, .6)', delay: .2 });
+  Groove.common();
+</script>
+</body>
+</html>

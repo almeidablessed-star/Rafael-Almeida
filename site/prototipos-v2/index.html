@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Capas Carula Cake</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Kaushan+Script&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Página de escolha: três cartões-adesivo lado a lado, linguagem da marca */
+  --creme: #F8F1E4; --choc: #2B2420; --coral: #E8452B; --suave: #7A6A5F; --rotulo: #8C7F73;
+  --rosa: #F5C6CE; --roxo: #8E5CF0; --verde: #D6E4CC; --lavanda: #D8CDEB;
+  --display: 'Bagel Fat One', 'Arial Black', sans-serif; --script: 'Kaushan Script', cursive; --body: 'Poppins', system-ui, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--creme); color: var(--choc); font-family: var(--body);
+  padding-block: 48px 72px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header { text-align: center; max-width: 720px; margin: 0 auto 40px; }
+header img { width: min(62vw, 260px); height: auto; margin: 0 auto; display: block; filter: drop-shadow(4px 5px 0 var(--choc)); }
+h1 { font-family: var(--display); font-weight: 400; font-size: clamp(2rem, 7vw, 3.2rem); line-height: 1; margin: 22px 0 6px; text-wrap: balance; }
+header p.s { font-family: var(--script); color: var(--coral); font-size: clamp(1.3rem, 5vw, 1.7rem); margin: 0; }
+header p.t { color: var(--suave); line-height: 1.65; max-width: 52ch; margin: 14px auto 0; font-size: .96rem; }
+ul { list-style: none; padding: 0; margin: 0 auto; max-width: 1180px; display: grid; gap: 28px; }
+@media (min-width: 900px) { ul { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; } }
+li a { display: grid; grid-template-rows: auto 1fr; height: 100%; text-decoration: none; color: inherit; border: 3px solid var(--choc); border-radius: 30px;
+  overflow: hidden; background: var(--creme); box-shadow: 6px 8px 0 var(--choc), 0 30px 40px -18px rgba(43, 36, 32, .4);
+  transition: translate .45s cubic-bezier(.3, 1.6, .5, 1), rotate .45s cubic-bezier(.3, 1.6, .5, 1), box-shadow .3s; }
+li a:hover { translate: -3px -6px; rotate: -1.2deg; box-shadow: 9px 13px 0 var(--choc), 0 40px 50px -18px rgba(43, 36, 32, .45); }
+li a:focus-visible { outline: 3px solid var(--roxo); outline-offset: 5px; }
+.shot { aspect-ratio: 4 / 5; overflow: hidden; border-bottom: 3px solid var(--choc); }
+.shot img { width: 100%; height: auto; display: block; transition: translate 1.2s cubic-bezier(.2, .8, .2, 1); }
+li a:hover .shot img { translate: 0 -12%; }
+.info { padding: 20px 22px 24px; display: grid; gap: 8px; align-content: start; }
+.tag { justify-self: start; font: 600 .7rem var(--body); letter-spacing: .16em; text-transform: uppercase; border: 2.5px solid var(--choc);
+  border-radius: 999px; padding: .4rem .7rem; }
+li:nth-child(1) .tag { background: var(--rosa); }
+li:nth-child(2) .tag { background: var(--lavanda); }
+li:nth-child(3) .tag { background: var(--verde); }
+h2 { font-family: var(--display); font-weight: 400; font-size: 1.9rem; line-height: 1; margin: 4px 0 0; }
+.info p { margin: 0; color: var(--suave); line-height: 1.6; font-size: .93rem; }
+.go { margin-top: 6px; font-weight: 600; font-size: .9rem; color: var(--coral); }
+footer { text-align: center; color: var(--rotulo); font-size: .82rem; margin-top: 44px; line-height: 1.6; }
+@media (prefers-reduced-motion: reduce) { li a, .shot img { transition: none; } }
+</style>
+</head>
+<body>
+<header>
+  <img src="img/logo-carula.webp" alt="Carula Cake Confeitaria" width="900" height="524">
+  <h1>Três capas para escolher</h1>
+  <p class="s">groove anos 70, feito em 2026</p>
+  <p class="t">Mesma paleta e mesmas fontes nas três, com as fotos reais dos bolos recortadas como camadas. Abra cada uma no celular e no computador: mexa o mouse, role a página e abra o menu.</p>
+</header>
+<ul>
+  <li><a href="d-colagem-viva.html">
+    <div class="shot"><img src="previas/d-colagem-viva.webp" alt="Prévia da capa Colagem Viva no celular" width="480" height="1038"></div>
+    <div class="info"><span class="tag">Capa D</span><h2>Colagem Viva</h2>
+      <p>Papel recortado em camadas: formas que respiram, xadrez líquido com relevo dentro de uma forma orgânica e o bolo real entre as duas palavras do nome. Os adesivos dos outros bolos flutuam em profundidades diferentes e seguem o cursor.</p>
+      <span class="go">Abrir a capa D →</span></div></a></li>
+  <li><a href="e-onda-liquida.html">
+    <div class="shot"><img src="previas/e-onda-liquida.webp" alt="Prévia da capa Onda Líquida no celular" width="480" height="1038"></div>
+    <div class="info"><span class="tag">Capa E</span><h2>Onda Líquida</h2>
+      <p>As ondas da identidade viram tiras de papel empilhadas, cada uma com sombra sobre a de baixo, subindo devagar. No centro, uma janela em arco funciona como diorama: fundo, sol e bolo se movem em profundidades diferentes.</p>
+      <span class="go">Abrir a capa E →</span></div></a></li>
+  <li><a href="f-globo-groovy.html">
+    <div class="shot"><img src="previas/f-globo-groovy.webp" alt="Prévia da capa Globo Groovy no celular" width="480" height="1038"></div>
+    <div class="info"><span class="tag">Capa F</span><h2>Globo Groovy</h2>
+      <p>Fundo chocolate com xadrez escuro ondulando. Um globo xadrez em 3D gira com luz e sombra, e os bolos orbitam em volta dele, passando por trás e pela frente.</p>
+      <span class="go">Abrir a capa F →</span></div></a></li>
+</ul>
+<footer>Em cada capa, a faixa rolando e a seção “Sobre” logo abaixo mostram como a transição entre seções vai funcionar.</footer>
+</body>
+</html>
