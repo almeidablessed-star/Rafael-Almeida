@@ -1063,73 +1063,125 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
                 )}
               </header>
 
-              {/* Com foto: cliente, evento e itens a esquerda e a foto em pe a
-                  direita, na altura deles. Sem foto, uma coluna so (o convite
-                  para enviar foto e no-print, a direita ficaria vazia no PDF).
-                  As colunas seguem a largura da FOLHA (container query), nao
-                  da janela: um "sm:" responderia a janela e no celular nunca
-                  ativaria. Na tela do celular empilham; no PDF, montado com
-                  668px em handleDownloadPdf, ficam lado a lado. */}
-              {/* Na largura do PDF a folha tem altura minima de tela de celular
-                  (~1:1,85, `min-h-[1220px]` acima): aberta no celular, a pagina
-                  ocupa a tela toda em vez de so a metade de cima. Este bloco do
-                  meio estica para preencher essa altura: a foto fica mais alta e
-                  o card de itens (ou de observacoes) cresce. */}
-              <div className={inspirationImage ? 'grid grid-cols-1 @min-[600px]:grid-cols-2 @min-[600px]:flex-1 gap-3' : 'flex flex-col @min-[600px]:flex-1 gap-3'}>
-                <div className="flex flex-col gap-3 min-w-0">
-                  {/* Cliente */}
-                  <section className="print-avoid-break @min-[600px]:flex-1 flex flex-col justify-center" style={{ background: '#FFFFFF', borderRadius: '22px', boxShadow: '0 8px 20px rgba(58,35,80,.09)', padding: '24px 22px' }}>
-                    <div className="flex items-center gap-[7px]" style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '.12em', color: '#6E3F72' }}>
-                      <User className="w-[14px] h-[14px]" strokeWidth={2.2} />
-                      DADOS DA(O) CLIENTE
-                    </div>
-                    <div className="flex items-center gap-4 mt-4">
-                      {/* Foto da cliente quando existe; senao as iniciais.
-                          Mesma marcacao da logo: sem ela o retrato sai quadrado
-                          no PDF. */}
-                      <div className="w-[60px] h-[60px] rounded-full overflow-hidden shrink-0 flex items-center justify-center rounded-photo-container" style={{ background: '#F3E9F3', fontFamily: "'Instrument Serif', serif", fontSize: '26px', color: '#6E3F72' }}>
-                        {custPhoto ? (
-                          <img src={custPhoto} alt={transaction.customerName || 'Cliente'} className="w-full h-full object-cover" />
-                        ) : (
-                          iniciaisDaCliente
-                        )}
+              {/* Meio da folha em duas linhas, com as bordas alinhadas:
+                  1) cliente e evento empilhados a esquerda, terminando na mesma
+                     reta que a foto (em pe, tamanho natural) a direita;
+                  2) itens e pagamento lado a lado, com a mesma altura, crescendo
+                     para preencher a pagina em pe (`min-h-[1220px]` acima).
+                  Sem foto, cliente e evento ficam lado a lado na linha 1.
+                  As colunas seguem a largura da FOLHA (container query), nao da
+                  janela: na tela estreita empilham; no PDF e na miniatura (656
+                  a 668px) ficam lado a lado. */}
+              <div className="flex flex-col gap-3 @min-[600px]:flex-1">
+                <div className="grid grid-cols-1 @min-[600px]:grid-cols-2 gap-3">
+                  <div className={inspirationImage ? 'flex flex-col gap-3 min-w-0' : 'contents'}>
+                    {/* Cliente */}
+                    <section className="print-avoid-break @min-[600px]:flex-1 flex flex-col justify-center min-w-0" style={{ background: '#FFFFFF', borderRadius: '22px', boxShadow: '0 8px 20px rgba(58,35,80,.09)', padding: '18px 20px' }}>
+                      <div className="flex items-center gap-[7px]" style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '.12em', color: '#6E3F72' }}>
+                        <User className="w-[13px] h-[13px]" strokeWidth={2.2} />
+                        DADOS DA(O) CLIENTE
                       </div>
-                      <div className="flex flex-col gap-[3px] min-w-0">
-                        <span className="truncate" style={{ fontFamily: "'Instrument Serif', serif", fontSize: '30px', lineHeight: 1.1 }}>
-                          {transaction.customerName || 'Cliente'}
-                        </span>
-                        <span className="flex items-center gap-[6px]" style={{ fontSize: '13px', fontWeight: 600, color: '#7A6E80' }}>
-                          <Phone className="w-[13px] h-[13px] shrink-0" style={{ color: '#C4626F' }} strokeWidth={2.2} />
-                          {transaction.customerPhone || 'Não informado'}
-                        </span>
-                      </div>
-                    </div>
-                  </section>
-
-                  {/* Evento & horario de entrega */}
-                  <section className="print-avoid-break @min-[600px]:flex-1 flex flex-col justify-center" style={{ background: '#FFFFFF', border: '1px solid rgba(36,27,43,.07)', borderRadius: '22px', boxShadow: '0 8px 20px rgba(58,35,80,.09)', padding: '24px 20px' }}>
-                    <span style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '.12em', color: '#6E3F72' }}>EVENTO &amp; HORÁRIO DE ENTREGA</span>
-                    <div className="flex flex-col gap-2 mt-3.5">
-                      {[
-                        { rotulo: 'DATA', valor: transaction.eventDate ? formatDateBr(transaction.eventDate) : formatDateBr(transaction.date) },
-                        { rotulo: 'HORÁRIO', valor: transaction.deliveryTime || 'A combinar' },
-                      ].map((c) => (
-                        <div key={c.rotulo} className="flex items-center justify-between gap-3 min-w-0" style={{ background: '#F6F2F5', borderRadius: '16px', padding: '12px 16px' }}>
-                          <span style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '.1em', color: '#7A6E80' }}>{c.rotulo}</span>
-                          <span className="truncate" style={{ fontSize: '22px', fontWeight: 800, letterSpacing: '-.02em' }}>{c.valor}</span>
+                      <div className="flex items-center gap-3 mt-3">
+                        {/* Foto da cliente quando existe; senao as iniciais.
+                            Mesma marcacao da logo: sem ela o retrato sai quadrado
+                            no PDF. */}
+                        <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 flex items-center justify-center rounded-photo-container" style={{ background: '#F3E9F3', fontFamily: "'Instrument Serif', serif", fontSize: '21px', color: '#6E3F72' }}>
+                          {custPhoto ? (
+                            <img src={custPhoto} alt={transaction.customerName || 'Cliente'} className="w-full h-full object-cover" />
+                          ) : (
+                            iniciaisDaCliente
+                          )}
                         </div>
-                      ))}
-                    </div>
-                    <div className="flex items-center gap-1.5 mt-3.5" style={{ fontSize: '13px', fontWeight: 600, color: '#5B4A6B' }}>
-                      <MapPin className="w-3.5 h-3.5 shrink-0" style={{ color: '#6E3F72' }} strokeWidth={2.2} />
-                      {transaction.deliveryAddress || 'Retirada na confeitaria'}
-                    </div>
-                  </section>
+                        <div className="flex flex-col gap-[3px] min-w-0">
+                          <span className="truncate" style={{ fontFamily: "'Instrument Serif', serif", fontSize: '24px', lineHeight: 1.1 }}>
+                            {transaction.customerName || 'Cliente'}
+                          </span>
+                          <span className="flex items-center gap-[5px]" style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80' }}>
+                            <Phone className="w-3 h-3 shrink-0" style={{ color: '#C4626F' }} strokeWidth={2.2} />
+                            {transaction.customerPhone || 'Não informado'}
+                          </span>
+                        </div>
+                      </div>
+                    </section>
 
+                    {/* Evento & horario de entrega */}
+                    <section className="print-avoid-break @min-[600px]:flex-1 flex flex-col justify-center min-w-0" style={{ background: '#FFFFFF', border: '1px solid rgba(36,27,43,.07)', borderRadius: '22px', boxShadow: '0 8px 20px rgba(58,35,80,.09)', padding: '16px 18px' }}>
+                      <span style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '.12em', color: '#6E3F72' }}>EVENTO &amp; HORÁRIO DE ENTREGA</span>
+                      <div className="flex flex-col gap-1.5 mt-2.5">
+                        {[
+                          { rotulo: 'DATA', valor: transaction.eventDate ? formatDateBr(transaction.eventDate) : formatDateBr(transaction.date) },
+                          { rotulo: 'HORÁRIO', valor: transaction.deliveryTime || 'A combinar' },
+                        ].map((c) => (
+                          <div key={c.rotulo} className="flex items-center justify-between gap-3 min-w-0" style={{ background: '#F6F2F5', borderRadius: '13px', padding: '8px 14px' }}>
+                            <span style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '.1em', color: '#7A6E80' }}>{c.rotulo}</span>
+                            <span className="truncate" style={{ fontSize: '16px', fontWeight: 800, letterSpacing: '-.02em' }}>{c.valor}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex items-center gap-1.5 mt-2.5" style={{ fontSize: '12px', fontWeight: 600, color: '#5B4A6B' }}>
+                        <MapPin className="w-3 h-3 shrink-0" style={{ color: '#6E3F72' }} strokeWidth={2.2} />
+                        {transaction.deliveryAddress || 'Retirada na confeitaria'}
+                      </div>
+                    </section>
+                  </div>
+
+                  {/* Foto de referencia no tamanho natural, na largura da coluna.
+                      A coluna da esquerda estica ate a altura dela, entao os
+                      cards terminam na mesma reta. Fica fora das classes
+                      `inspiration-image*`, que forcam altura automatica na
+                      captura; `rounded-photo-container` mantem o arredondado.
+                      Os botoes ficam por cima da foto (no-print), para nao
+                      empurrarem a altura da coluna na tela. */}
+                  {inspirationImage && (
+                    <section
+                      className="relative overflow-hidden rounded-photo-container w-[70%] mx-auto @min-[600px]:w-full self-start"
+                      style={{ borderRadius: '26px', border: '3px solid #FFFFFF', boxShadow: '0 0 0 1.5px #F5B9C6, 0 14px 30px rgba(58,35,80,.16)' }}
+                    >
+                      <img src={inspirationImage} alt="Foto de referência do bolo" className="block w-full h-auto" />
+                      <span className="absolute" style={{ top: '12px', left: '12px', background: 'rgba(255,255,255,.92)', color: '#3A2350', fontSize: '9px', fontWeight: 800, letterSpacing: '.12em', padding: '6px 11px', borderRadius: '999px', boxShadow: '0 4px 10px rgba(58,35,80,.12)' }}>
+                        FOTO DE REFERÊNCIA
+                      </span>
+                      <div className="absolute left-0 right-0 bottom-2.5 flex items-center justify-center gap-1.5 no-print">
+                        <label className="px-2.5 py-1 rounded-xl bg-[#F5B9C6] hover:bg-[#E8A0B0] text-[#3A2350] font-bold text-[10px] flex items-center gap-1 cursor-pointer transition-colors shadow-sm">
+                          <Camera className="w-3 h-3 text-[#3A2350]" />
+                          <span>Alterar Foto</span>
+                          <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                        </label>
+                        <button
+                          type="button"
+                          onClick={handleRemoveImage}
+                          className="px-2 py-1 rounded-xl bg-red-100 hover:bg-red-200 text-red-700 font-bold text-[10px] flex items-center gap-1 transition-colors cursor-pointer shadow-sm"
+                          title="Remover Foto de Referência"
+                        >
+                          <Trash2 className="w-3 h-3 text-red-600" />
+                          <span>Remover</span>
+                        </button>
+                      </div>
+                    </section>
+                  )}
+                </div>
+
+                {!inspirationImage && (
+                  <div className="no-print" style={{ background: '#FFFFFF', borderRadius: '22px', border: '2px dashed #F5B9C6' }}>
+                    <label className="flex flex-col items-center justify-center py-5 px-4 cursor-pointer text-center gap-1.5">
+                      <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: '#FCEFF2', color: '#6E3F72' }}>
+                        <Upload className="w-4 h-4" />
+                      </div>
+                      <span className="font-bold text-xs" style={{ color: '#3A2350' }}>+ Adicionar Foto de Referência do Cliente</span>
+                      <span className="text-[10px] max-w-sm" style={{ color: '#7A6E80' }}>
+                        Clique aqui para enviar a foto do modelo/bolo enviada pela cliente.
+                      </span>
+                      <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                    </label>
+                  </div>
+                )}
+
+                {/* Linha 2: itens e pagamento, mesma altura */}
+                <div className="grid grid-cols-1 @min-[600px]:grid-cols-2 gap-3 @min-[600px]:flex-1">
                   {/* Itens solicitados */}
-                  <section className="flex-1 flex flex-col gap-[7px] print-avoid-break" style={{ background: '#FFFFFF', border: '1px solid rgba(36,27,43,.07)', borderRadius: '22px', boxShadow: '0 8px 20px rgba(58,35,80,.09)', padding: '14px 16px' }}>
+                  <section className="flex flex-col gap-[7px] min-w-0 print-avoid-break" style={{ background: '#FFFFFF', border: '1px solid rgba(36,27,43,.07)', borderRadius: '22px', boxShadow: '0 8px 20px rgba(58,35,80,.09)', padding: '16px 16px' }}>
                     <div className="flex items-center justify-between mb-0.5">
-                      <span style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '.12em', color: '#6E3F72' }}>ITENS SOLICITADOS</span>
+                      <span style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '.12em', color: '#6E3F72' }}>ITENS SOLICITADOS</span>
                       <span className="whitespace-nowrap" style={{ background: '#F3E9F3', color: '#3A2350', fontSize: '9px', fontWeight: 800, padding: '5px 10px', borderRadius: '999px' }}>
                         Qtd total: {transaction.quantity}
                       </span>
@@ -1166,86 +1218,39 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
                       </div>
                     )}
                   </section>
-                </div>
 
-                {/* Foto de referencia: preenche a coluna da direita na altura
-                    dos cards (object-cover, como no design). Fica fora das
-                    classes `inspiration-image*`, que forcam altura automatica
-                    na captura; `rounded-photo-container` mantem o recorte
-                    arredondado. Na tela estreita vira um retrato 3:4 centrado. */}
-                {inspirationImage ? (
-                  <div className="flex flex-col gap-2 min-w-0">
-                    <section
-                      className="relative overflow-hidden rounded-photo-container w-[70%] mx-auto @min-[600px]:w-full"
-                      style={{ borderRadius: '26px', border: '3px solid #FFFFFF', boxShadow: '0 0 0 1.5px #F5B9C6, 0 14px 30px rgba(58,35,80,.16)' }}
-                    >
-                      {/* Foto no tamanho natural dela, na largura da coluna: sem esticar
-                          nem preencher com desfoque. O espaco que sobra na folha vai
-                          para os cards da esquerda. */}
-                      <img src={inspirationImage} alt="Foto de referência do bolo" className="block w-full h-auto" />
-                      <span className="absolute" style={{ top: '12px', left: '12px', background: 'rgba(255,255,255,.92)', color: '#3A2350', fontSize: '9px', fontWeight: 800, letterSpacing: '.12em', padding: '6px 11px', borderRadius: '999px', boxShadow: '0 4px 10px rgba(58,35,80,.12)' }}>
-                        FOTO DE REFERÊNCIA
+                  {/* Pagamento em pe (versao clara do design), ao lado dos itens:
+                      forma de pagamento, valor total e, com sinal, quanto ja
+                      foi pago e quanto falta na entrega. */}
+                  <section className="flex flex-col gap-4 min-w-0 print-avoid-break" style={{ padding: '18px 20px', borderRadius: '22px', background: '#FDF6F8', border: '1px solid rgba(196,98,111,.16)', boxShadow: '0 8px 20px rgba(58,35,80,.09)' }}>
+                    <div className="flex flex-col gap-2">
+                      <span style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '.16em', color: '#6E3F72' }}>FORMA DE PAGAMENTO</span>
+                      <span className="self-start flex items-center gap-1.5" style={{ background: '#F5B9C6', color: '#3A2350', fontSize: '11px', fontWeight: 800, letterSpacing: '.08em', padding: '6px 13px', borderRadius: '999px' }}>
+                        <Zap className="w-3 h-3" strokeWidth={2.4} />
+                        {transaction.paymentMethod === 'cash' ? 'DINHEIRO / ESPÉCIE' : (transaction.paymentMethod ? transaction.paymentMethod.toUpperCase() : 'A COMBINAR')}
                       </span>
-                    </section>
-                    <div className="flex items-center justify-center gap-1.5 no-print">
-                      <label className="px-2.5 py-1 rounded-xl bg-[#F5B9C6] hover:bg-[#E8A0B0] text-[#3A2350] font-bold text-[10px] flex items-center gap-1 cursor-pointer transition-colors shadow-sm">
-                        <Camera className="w-3 h-3 text-[#3A2350]" />
-                        <span>Alterar Foto</span>
-                        <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-                      </label>
-                      <button
-                        type="button"
-                        onClick={handleRemoveImage}
-                        className="px-2 py-1 rounded-xl bg-red-100 hover:bg-red-200 text-red-700 font-bold text-[10px] flex items-center gap-1 transition-colors cursor-pointer"
-                        title="Remover Foto de Referência"
-                      >
-                        <Trash2 className="w-3 h-3 text-red-600" />
-                        <span>Remover</span>
-                      </button>
                     </div>
-                  </div>
-                ) : (
-                  <div className="no-print" style={{ background: '#FFFFFF', borderRadius: '22px', border: '2px dashed #F5B9C6' }}>
-                    <label className="flex flex-col items-center justify-center py-5 px-4 cursor-pointer text-center gap-1.5">
-                      <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: '#FCEFF2', color: '#6E3F72' }}>
-                        <Upload className="w-4 h-4" />
-                      </div>
-                      <span className="font-bold text-xs" style={{ color: '#3A2350' }}>+ Adicionar Foto de Referência do Cliente</span>
-                      <span className="text-[10px] max-w-sm" style={{ color: '#7A6E80' }}>
-                        Clique aqui para enviar a foto do modelo/bolo enviada pela cliente.
+                    <div className="flex flex-col gap-1" style={{ borderTop: '2px dashed rgba(196,98,111,.3)', paddingTop: '14px' }}>
+                      <span style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '.16em', color: '#6E3F72' }}>VALOR TOTAL DO PEDIDO</span>
+                      <span className="tabular-nums" style={{ fontSize: '36px', fontWeight: 800, letterSpacing: '-.03em', lineHeight: 1.05, color: '#3A2350' }}>
+                        {formatCurrency(transaction.totalValue)}
                       </span>
-                      <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-                    </label>
-                  </div>
-                )}
+                    </div>
+                    {transaction.signalValue ? (
+                      <div className="flex flex-col gap-1.5 mt-auto">
+                        <div className="flex items-center justify-between gap-2" style={{ background: 'rgba(169,216,184,.25)', borderRadius: '12px', padding: '8px 12px' }}>
+                          <span style={{ fontSize: '11px', fontWeight: 700, color: '#4C7358' }}>Sinal pago</span>
+                          <span className="tabular-nums" style={{ fontSize: '14px', fontWeight: 800, color: '#4C7358' }}>{formatCurrency(transaction.signalValue)}</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-2" style={{ background: '#FBECEE', borderRadius: '12px', padding: '8px 12px' }}>
+                          <span style={{ fontSize: '11px', fontWeight: 700, color: '#C4626F' }}>A pagar na entrega</span>
+                          <span className="tabular-nums" style={{ fontSize: '14px', fontWeight: 800, color: '#C4626F' }}>{formatCurrency(transaction.totalValue - transaction.signalValue)}</span>
+                        </div>
+                      </div>
+                    ) : null}
+                  </section>
+                </div>
               </div>
-
-              {/* Pagamento (versao clara do design) */}
-              <section
-                className="relative flex flex-wrap items-center justify-between gap-x-6 gap-y-3 print-avoid-break"
-                style={{ minHeight: '112px', padding: '16px 30px', borderRadius: '22px', background: '#FDF6F8', border: '1px solid rgba(196,98,111,.16)', boxShadow: '0 8px 20px rgba(58,35,80,.09)' }}
-              >
-                <span aria-hidden="true" className="absolute top-1/2 -translate-y-1/2 rounded-full" style={{ left: '-11px', width: '22px', height: '22px', background: '#F6F2F5', border: '1px solid rgba(196,98,111,.16)' }} />
-                <span aria-hidden="true" className="absolute top-1/2 -translate-y-1/2 rounded-full" style={{ right: '-11px', width: '22px', height: '22px', background: '#F6F2F5', border: '1px solid rgba(196,98,111,.16)' }} />
-                <div className="flex flex-col gap-[9px]">
-                  <span style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '.2em', color: '#6E3F72' }}>FORMA DE PAGAMENTO</span>
-                  <span className="self-start flex items-center gap-1.5" style={{ background: '#F5B9C6', color: '#3A2350', fontSize: '10px', fontWeight: 800, letterSpacing: '.08em', padding: '6px 12px', borderRadius: '999px' }}>
-                    <Zap className="w-[11px] h-[11px]" strokeWidth={2.4} />
-                    {transaction.paymentMethod === 'cash' ? 'DINHEIRO / ESPÉCIE' : (transaction.paymentMethod ? transaction.paymentMethod.toUpperCase() : 'A COMBINAR')}
-                  </span>
-                </div>
-                <div className="flex flex-col items-end gap-[3px] ml-auto" style={{ borderLeft: '2px dashed rgba(196,98,111,.3)', paddingLeft: '28px' }}>
-                  <span style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '.2em', color: '#6E3F72' }}>VALOR TOTAL DO PEDIDO</span>
-                  <span style={{ fontSize: '40px', fontWeight: 800, letterSpacing: '-.03em', lineHeight: 1.05, color: '#3A2350' }}>
-                    {formatCurrency(transaction.totalValue)}
-                  </span>
-                  {transaction.signalValue ? (
-                    <span className="text-right" style={{ fontSize: '11px', fontWeight: 600, color: '#7A6E80' }}>
-                      Sinal pago <b style={{ color: '#4C7358', fontWeight: 800 }}>{formatCurrency(transaction.signalValue)}</b> · A pagar na entrega <b style={{ color: '#C4626F', fontWeight: 800 }}>{formatCurrency(transaction.totalValue - transaction.signalValue)}</b>
-                    </span>
-                  ) : null}
-                </div>
-              </section>
 
               {/* Rodape. Nome segue o perfil (antes era fixo "Carula Cake
                   Confeitaria" para toda compradora) e some quando vazio. */}
@@ -1327,9 +1332,9 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
                         { rotulo: 'DATA', valor: transaction.eventDate ? formatDateBr(transaction.eventDate) : formatDateBr(transaction.date) },
                         { rotulo: 'HORÁRIO', valor: transaction.deliveryTime || 'A definir' },
                       ].map((c) => (
-                        <div key={c.rotulo} className="flex items-center justify-between gap-3 min-w-0" style={{ background: '#F6F2F5', borderRadius: '16px', padding: '12px 16px' }}>
+                        <div key={c.rotulo} className="flex items-center justify-between gap-3 min-w-0" style={{ background: '#F6F2F5', borderRadius: '13px', padding: '8px 14px' }}>
                           <span style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '.1em', color: '#7A6E80' }}>{c.rotulo}</span>
-                          <span className="truncate" style={{ fontSize: '22px', fontWeight: 800, letterSpacing: '-.02em' }}>{c.valor}</span>
+                          <span className="truncate" style={{ fontSize: '16px', fontWeight: 800, letterSpacing: '-.02em' }}>{c.valor}</span>
                         </div>
                       ))}
                     </div>
