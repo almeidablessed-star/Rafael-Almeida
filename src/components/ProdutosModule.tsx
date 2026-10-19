@@ -12,6 +12,7 @@ import { DuplicateNameWarningModal } from './DuplicateNameWarningModal';
 import { useDelayedDelete } from '../hooks/useDelayedDelete';
 import { FieldValidationError } from './FieldValidationError';
 import { normalizeName } from '../utils/fichaMatcher';
+import { areUnitsCompatible, convertQuantity } from '../utils/units';
 import { CustomSelect } from './CustomSelect';
 import { CampoComAjuda } from './onboarding/CampoComAjuda';
 import {
@@ -195,6 +196,11 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
   const [unidadeEmbalagem, setUnidadeEmbalagem] = useState<Produto['unidadeEmbalagem']>('g');
   const [controlaEstoque, setControlaEstoque] = useState(true);
   const [quantidadeAtual, setQuantidadeAtual] = useState('');
+  // Unidade em que a confeiteira DIGITA o estoque guardado. O banco segue
+  // gravando na unidade da embalagem (e o que alerta e baixa de estoque leem):
+  // a conversao acontece ao salvar. Sem isto, num acucar cadastrado em kg,
+  // digitar "900" pensando em gramas gravava 900 kg.
+  const [quantidadeAtualUnidade, setQuantidadeAtualUnidade] = useState<Produto['unidadeEmbalagem']>('g');
   const [nivelMinimo, setNivelMinimo] = useState('');
   const [nivelMinimoUnidade, setNivelMinimoUnidade] = useState<Produto['unidadeEmbalagem']>('g');
   /**
@@ -225,6 +231,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
       setQuantidadeAtual('');
       setNivelMinimo('');
       setNivelMinimoUnidade('g');
+      setQuantidadeAtualUnidade('g');
       setAlertaTocado(false);
       setEditingId(null);
     }
@@ -244,6 +251,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
     setUnidadeEmbalagem(p.unidadeEmbalagem);
     setControlaEstoque(p.controlaEstoque);
     setQuantidadeAtual(p.quantidadeAtual != null ? String(Math.round(p.quantidadeAtual * 100) / 100).replace('.', ',') : '');
+    setQuantidadeAtualUnidade(p.unidadeEmbalagem);
     setNivelMinimo(p.nivelMinimo != null ? String(p.nivelMinimo) : '');
     setNivelMinimoUnidade(p.nivelMinimoUnidade || 'g');
     // Editando um produto que ja existe: o alerta dele e uma escolha feita, e
@@ -273,7 +281,8 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
 
     const precoNum = parseNumeroDigitado(precoPago) || 0;
     const qtdEmbalagemNum = parseNumeroDigitado(quantidadeEmbalagem) || 1;
-    const qtdAtualNum = parseNumeroDigitado(quantidadeAtual) || 0;
+    const qtdAtualDigitada = parseNumeroDigitado(quantidadeAtual) || 0;
+    const qtdAtualNum = convertQuantity(qtdAtualDigitada, quantidadeAtualUnidade, unidadeEmbalagem) ?? qtdAtualDigitada;
     const nivelMinNum = parseNumeroDigitado(nivelMinimo) || 0;
 
     const data: Omit<Produto, 'id'> = {
@@ -565,6 +574,10 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                           // alerta em g transformaria "0,2" em 0,2 g — mil vezes
                           // menor do que o pretendido, e silenciosamente.
                           if (!alertaTocado) setNivelMinimoUnidade(v as any);
+                          // O estoque guardado so aceita unidades da mesma
+                          // familia da embalagem (g/kg, ml/L); trocou de familia,
+                          // volta para a unidade da embalagem.
+                          if (!areUnitsCompatible(quantidadeAtualUnidade, v)) setQuantidadeAtualUnidade(v as any);
                         }}
                         compacto
                         ariaLabel="Unidade de embalagem"
@@ -620,10 +633,20 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                           chamarem a mesma coisa por nomes diferentes. */}
                       <div>
                         <label className="block text-xs font-bold text-neutral-900 mb-1">Quanto você já tem guardado</label>
-                        <input
-                          type="text" inputMode="decimal" placeholder="0" value={quantidadeAtual} onChange={(e) => setQuantidadeAtual(e.target.value)}
-                          className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-xl text-sm font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
-                        />
+                        <div className="flex gap-2">
+                          <input
+                            type="text" inputMode="decimal" placeholder="0" value={quantidadeAtual} onChange={(e) => setQuantidadeAtual(e.target.value)}
+                            className="flex-1 min-w-0 px-3 py-2 bg-white border border-[#E6E1DB] rounded-xl text-sm font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
+                          />
+                          <CustomSelect
+                            value={quantidadeAtualUnidade}
+                            onChange={(v) => setQuantidadeAtualUnidade(v as any)}
+                            compacto
+                            ariaLabel="Unidade do estoque guardado"
+                            style={{ width: '108px', flexShrink: 0 }}
+                            options={UNIDADES.filter((u) => areUnitsCompatible(u, unidadeEmbalagem)).map((u) => ({ value: u, label: u }))}
+                          />
+                        </div>
                         <CampoComAjuda
                           microcopy="Seu estoque de hoje — não o tamanho da embalagem que você compra."
                           exemploDinamico={
