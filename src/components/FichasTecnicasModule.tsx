@@ -179,6 +179,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   // "Ficha Tecnica - Opcoes.dc.html". Reseta pra 1 sempre que o formulario
   // abre (handleOpenAdd/handleOpenEdit), pra nunca abrir num passo do meio.
   const [formStep, setFormStep] = useState<1 | 2 | 3>(1);
+  // Tamanho aberto nos passos 2 e 3: um de cada vez, escolhido no seletor do
+  // topo. Com ate 5 tamanhos empilhados a lista ficava longa e era facil
+  // confundir de qual tamanho era cada insumo ou preco. `null` = o primeiro.
+  const [tamanhoAtivoId, setTamanhoAtivoId] = useState<string | null>(null);
   const stepFormRef = useRef<HTMLFormElement>(null);
   /** Id do campo obrigatorio vazio, pra mostrar o card de erro custom no lugar do balao nativo do navegador. */
   const [invalidFieldId, setInvalidFieldId] = useState<string | null>(null);
@@ -433,6 +437,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     setInvalidFieldId(null);
     setIsCreating(true);
     setFormStep(1);
+    setTamanhoAtivoId(null);
   };
 
   const handleOpenEdit = async (ficha: FichaTecnica) => {
@@ -490,6 +495,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     setEditingId(ficha.id);
     setIsCreating(true);
     setFormStep(1);
+    setTamanhoAtivoId(null);
     setInvalidFieldId(null);
 
     if (!ficha.imageUrl) {
@@ -953,6 +959,75 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     : fichas;
   const filteredFichas = fichasVisiveis.filter((f) => f.category === selectedCategory);
 
+  // Tamanho aberto nos passos 2 e 3. Se o escolhido foi removido no passo 1,
+  // cai no primeiro.
+  const tamanhoAtivo = tamanhos.find((t) => t.id === tamanhoAtivoId) ?? tamanhos[0];
+
+  /**
+   * Seletor do topo dos passos 2 e 3: um botao por tamanho cadastrado no
+   * passo 1. Cada botao mostra um resumo do tamanho (insumos no passo 2,
+   * preco no passo 3) e um alerta quando falta algo, para nada ficar
+   * esquecido no tamanho que nao esta aberto.
+   */
+  const seletorDeTamanho = (passo: 2 | 3) => (
+    <div className="flex flex-col gap-2">
+      <span style={ROTULO_COMANDA}>TAMANHO</span>
+      {/* Uma linha so, com os botoes dividindo a largura por igual: cada
+          tamanho novo entra ao lado e todos encolhem para caber. Com
+          flex-wrap os 5 quebravam em duas linhas. Nome comprido corta com
+          "…". */}
+      <div
+        className="grid gap-1.5"
+        style={{ gridTemplateColumns: `repeat(${tamanhos.length}, minmax(0, 1fr))` }}
+        role="tablist"
+        aria-label="Tamanho"
+      >
+        {tamanhos.map((t, i) => {
+          const ativo = t.id === tamanhoAtivo?.id;
+          const preco = parseNumeroDigitado(t.preco || '') || 0;
+          const custoTotal = passo === 3
+            ? t.ingredients.reduce((soma, ing) => soma + (Number(ing.totalCost) || 0), 0)
+              + calcularMaoDeObra(t) + calcularCustoAdmAutomatico(t) + calcularInvestimentoAutomatico(t)
+            : 0;
+          const alerta = passo === 2
+            ? t.ingredients.length === 0
+            : preco <= 0 || preco < custoTotal;
+          const resumo = passo === 2
+            ? `${t.ingredients.length} insumo${t.ingredients.length === 1 ? '' : 's'}`
+            // Sem centavos no botao: com 5 tamanhos cada um tem ~60px no
+            // celular. O valor completo aparece no card do tamanho aberto.
+            : preco > 0 ? formatMoney(preco).replace(/[.,]\d{2}$/, '') : '—';
+          return (
+            <button
+              key={t.id}
+              type="button"
+              role="tab"
+              aria-selected={ativo}
+              onClick={() => setTamanhoAtivoId(t.id)}
+              className="relative flex flex-col items-center gap-0.5 min-w-0 cursor-pointer transition-transform hover:-translate-y-0.5"
+              style={{
+                padding: '8px 4px 9px',
+                borderRadius: '14px',
+                border: ativo ? 'none' : '1px solid rgba(110,63,114,.18)',
+                background: ativo ? '#3A2350' : '#FFFFFF',
+                boxShadow: ativo ? '0 10px 20px rgba(58,35,80,.3)' : '0 4px 12px rgba(58,35,80,.06)',
+                textAlign: 'center',
+              }}
+            >
+              <span className="max-w-full truncate" style={{ fontSize: '13px', fontWeight: 800, color: ativo ? '#FFFFFF' : '#241B2B', whiteSpace: 'nowrap' }}>
+                {t.descricao.trim() || `Tamanho ${i + 1}`}
+              </span>
+              <span className="flex items-center justify-center gap-0.5 max-w-full" style={{ fontSize: '10px', fontWeight: 700, whiteSpace: 'nowrap', color: alerta ? (ativo ? '#F5B9C6' : '#C4626F') : (ativo ? 'rgba(255,255,255,.7)' : '#7A6E80') }}>
+                {alerta && <AlertTriangle className="w-2.5 h-2.5 shrink-0" strokeWidth={2.6} />}
+                {resumo}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+
   return (
     <div className="space-y-0 pb-12 animate-fadeIn" style={{ background: '#F6F2F5', minHeight: '100vh' }}>
       {/* Header - Roxo Gradiente */}
@@ -1268,9 +1343,9 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                 </div>
               </div>
 
-              {/* PASSO 2 — INSUMOS (um bloco por tamanho, todos empilhados —
-                  nao um seletor, pra nao perder a visao simultanea que ja
-                  existe hoje) */}
+              {/* PASSO 2 — INSUMOS de um tamanho por vez, escolhido no seletor
+                  do topo (ver `tamanhoAtivoId`). Os outros continuam no
+                  estado e sao gravados igual; so nao aparecem na tela. */}
               <div data-step={2} style={{ display: formStep === 2 ? 'flex' : 'none', flexDirection: 'column', gap: '14px', fontFamily: "'Manrope', sans-serif", color: '#241B2B' }}>
                 {/* Visual do design "Ficha Tecnica · Insumos" (Claude Design):
                     cada insumo e uma comanda com numero, nome a tinta, picote,
@@ -1278,8 +1353,12 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                     design nao trazia e o app ja tinha (titulo de cada tamanho,
                     aviso de tamanho sem insumos, copiar do tamanho anterior,
                     cadastrar produto novo, rendimento) segue o mesmo estilo. */}
-                {tamanhos.map((tamanho, index) => (
+                {tamanhos.length > 1 && seletorDeTamanho(2)}
+                {tamanhos.map((tamanho, index) => tamanho.id !== tamanhoAtivo?.id ? null : (
                   <div key={tamanho.id} className="flex flex-col gap-3">
+                    {/* Com mais de um tamanho, o seletor do topo ja diz qual
+                        esta aberto e quantos insumos tem. */}
+                    {tamanhos.length === 1 && (
                     <div className="flex items-center justify-between gap-2">
                       <span className="whitespace-nowrap" style={{ background: '#3A2350', color: '#F5B9C6', fontSize: '11px', fontWeight: 800, padding: '6px 12px', borderRadius: '999px' }}>
                         Tamanho · {tamanho.descricao || '(sem nome)'}
@@ -1288,6 +1367,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         {tamanho.ingredients.length} insumo{tamanho.ingredients.length === 1 ? '' : 's'}
                       </span>
                     </div>
+                    )}
 
                     {tamanho.ingredients.length === 0 && (
                       <div className="flex items-start gap-2.5" style={{ background: '#FBF6EC', borderRadius: '18px', padding: '12px 14px', border: '1px solid #F0D2A0' }} role="status">
@@ -1769,7 +1849,9 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                     </p>
                   </div>
                 )}
+                {tamanhos.length > 1 && seletorDeTamanho(3)}
                 {tamanhos.map((tamanho) => {
+                  if (tamanho.id !== tamanhoAtivo?.id) return null;
                   const insumos =
                     tamanho.ingredients.reduce((s, i) => s + (Number(i.totalCost) || 0), 0);
                   const mdo = calcularMaoDeObra(tamanho);
@@ -1858,7 +1940,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                             border: noPrejuizo ? '1px solid rgba(196,98,111,.25)' : '1px solid rgba(76,115,88,.18)',
                           }}
                         >
-                          <div className="flex items-center gap-2.5">
+                          <div className="flex items-center gap-2.5 min-w-0">
                             <span className="flex items-center justify-center flex-shrink-0" style={{ width: '32px', height: '32px', borderRadius: '10px', background: noPrejuizo ? '#F5B9C6' : '#A9D8B8' }}>
                               {noPrejuizo
                                 ? <AlertTriangle className="w-[15px] h-[15px]" style={{ color: '#6E2231' }} strokeWidth={2.4} />
@@ -1871,7 +1953,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                               </span>
                             </div>
                           </div>
-                          <span className="tabular-nums" style={{ fontSize: '24px', fontWeight: 800, letterSpacing: '-.03em', color: noPrejuizo ? '#C4626F' : '#26402F' }}>
+                          <span className="tabular-nums whitespace-nowrap flex-shrink-0" style={{ fontSize: '22px', fontWeight: 800, letterSpacing: '-.03em', color: noPrejuizo ? '#C4626F' : '#26402F' }}>
                             {formatMoney(margem)}
                           </span>
                         </div>
