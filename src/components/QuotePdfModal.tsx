@@ -1014,7 +1014,7 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
             /* ======================================================== */
             /* TAB 1: FOLHA DO CLIENTE (GROOVY COMPACT 1-PAGE LAYOUT)   */
             /* ======================================================== */
-            <div className="flex flex-col gap-3 p-2 @min-[600px]:p-4" style={{ background: '#F6F2F5', fontFamily: "'Manrope', sans-serif", color: '#241B2B' }}>
+            <div className="flex flex-col gap-3 p-2 @min-[600px]:p-4 @min-[600px]:min-h-[1220px]" style={{ background: '#F6F2F5', fontFamily: "'Manrope', sans-serif", color: '#241B2B' }}>
               {/* Visual da "Versao final · combinada" desenhada no Claude Design
                   (artefato "Pedido Carula Cake"): cabecalho em forma de ticket,
                   cards brancos com rotulos roxos, foto em pe a direita e o
@@ -1023,8 +1023,8 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
 
               {/* Cabecalho: nome da confeitaria + contatos do perfil */}
               <header
-                className="relative flex flex-wrap items-center justify-between gap-x-4 gap-y-2 print-avoid-break"
-                style={{ minHeight: '72px', padding: '12px 18px 12px 28px', borderRadius: '20px', background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)', boxShadow: '0 14px 30px rgba(58,35,80,.3)' }}
+                className="relative flex flex-col items-start gap-2.5 print-avoid-break"
+                style={{ minHeight: '72px', padding: '14px 22px 14px 28px', borderRadius: '20px', background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)', boxShadow: '0 14px 30px rgba(58,35,80,.3)' }}
               >
                 <span aria-hidden="true" className="absolute top-1/2 -translate-y-1/2 rounded-full" style={{ left: '-11px', width: '22px', height: '22px', background: '#F6F2F5' }} />
                 <span aria-hidden="true" className="absolute top-1/2 -translate-y-1/2 rounded-full" style={{ right: '-11px', width: '22px', height: '22px', background: '#F6F2F5' }} />
@@ -1045,6 +1045,8 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
                     <span className="truncate" style={{ fontFamily: "'Instrument Serif', serif", fontSize: '32px', lineHeight: 1, color: '#FFFFFF' }}>{sellerName}</span>
                   </div>
                 </div>
+                {/* Contatos numa linha propria, embaixo do nome: lado a lado, com
+                    tres contatos o nome da confeitaria ficava espremido. */}
                 {(sellerPhone || sellerInstagram || sellerAddress) && (
                   <div className="flex flex-wrap gap-2">
                     {[
@@ -1068,7 +1070,12 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
                   da janela: um "sm:" responderia a janela e no celular nunca
                   ativaria. Na tela do celular empilham; no PDF, montado com
                   668px em handleDownloadPdf, ficam lado a lado. */}
-              <div className={inspirationImage ? 'grid grid-cols-1 @min-[600px]:grid-cols-2 gap-3' : 'flex flex-col gap-3'}>
+              {/* Na largura do PDF a folha tem altura minima de tela de celular
+                  (~1:1,85, `min-h-[1220px]` acima): aberta no celular, a pagina
+                  ocupa a tela toda em vez de so a metade de cima. Este bloco do
+                  meio estica para preencher essa altura: a foto fica mais alta e
+                  o card de itens (ou de observacoes) cresce. */}
+              <div className={inspirationImage ? 'grid grid-cols-1 @min-[600px]:grid-cols-2 @min-[600px]:flex-1 gap-3' : 'flex flex-col @min-[600px]:flex-1 gap-3'}>
                 <div className="flex flex-col gap-3 min-w-0">
                   {/* Cliente */}
                   <section className="print-avoid-break" style={{ background: '#FFFFFF', borderRadius: '22px', boxShadow: '0 8px 20px rgba(58,35,80,.09)', padding: '14px 18px' }}>
@@ -1172,7 +1179,12 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
                       className="relative overflow-hidden rounded-photo-container aspect-[3/4] w-[70%] mx-auto @min-[600px]:aspect-auto @min-[600px]:w-full @min-[600px]:flex-1"
                       style={{ minHeight: '200px', borderRadius: '26px', border: '3px solid #FFFFFF', boxShadow: '0 0 0 1.5px #F5B9C6, 0 14px 30px rgba(58,35,80,.16)' }}
                     >
-                      <img src={inspirationImage} alt="Foto de referência do bolo" className="absolute inset-0 w-full h-full object-cover" />
+                      {/* A coluna da foto e alta e estreita na folha em pe: com
+                          object-cover o bolo perdia as laterais. A foto vai
+                          INTEIRA (contain) e o resto da coluna e a mesma foto,
+                          ampliada e desfocada, por tras — sem faixa branca. */}
+                      <img src={inspirationImage} alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover" style={{ filter: 'blur(18px) saturate(1.1)', transform: 'scale(1.15)', opacity: 0.55 }} />
+                      <img src={inspirationImage} alt="Foto de referência do bolo" className="absolute inset-0 w-full h-full object-contain" />
                       <span className="absolute" style={{ top: '12px', left: '12px', background: 'rgba(255,255,255,.92)', color: '#3A2350', fontSize: '9px', fontWeight: 800, letterSpacing: '.12em', padding: '6px 11px', borderRadius: '999px', boxShadow: '0 4px 10px rgba(58,35,80,.12)' }}>
                         FOTO DE REFERÊNCIA
                       </span>
@@ -1250,7 +1262,7 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
             /* ======================================================== */
             /* TAB 2: FICHA TÉCNICA DE PRODUÇÃO - COZINHA (RECIPES ONLY) */
             /* ======================================================== */
-            <div className="flex flex-col gap-3 p-2 @min-[600px]:p-4" style={{ background: '#F6F2F5', fontFamily: "'Manrope', sans-serif", color: '#241B2B' }}>
+            <div className="flex flex-col gap-3 p-2 @min-[600px]:p-4 @min-[600px]:min-h-[1220px]" style={{ background: '#F6F2F5', fontFamily: "'Manrope', sans-serif", color: '#241B2B' }}>
               {/* Mesmo visual da Folha do Cliente (design "Pedido Carula
                   Cake"), com o conteudo da producao: sem precos, com a foto
                   para a decoracao e os insumos de cada item. */}
@@ -1274,7 +1286,12 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
 
               {/* Com foto: cliente/entrega e observacoes a esquerda, foto a
                   direita. Mesma regra de colunas da Folha do Cliente. */}
-              <div className={inspirationImage ? 'grid grid-cols-1 @min-[600px]:grid-cols-2 gap-3' : 'flex flex-col gap-3'}>
+              {/* Na largura do PDF a folha tem altura minima de tela de celular
+                  (~1:1,85, `min-h-[1220px]` acima): aberta no celular, a pagina
+                  ocupa a tela toda em vez de so a metade de cima. Este bloco do
+                  meio estica para preencher essa altura: a foto fica mais alta e
+                  o card de itens (ou de observacoes) cresce. */}
+              <div className={inspirationImage ? 'grid grid-cols-1 @min-[600px]:grid-cols-2 @min-[600px]:flex-1 gap-3' : 'flex flex-col @min-[600px]:flex-1 gap-3'}>
                 <div className="flex flex-col gap-3 min-w-0">
                   {/* Cliente */}
                   <section className="print-avoid-break" style={{ background: '#FFFFFF', borderRadius: '22px', boxShadow: '0 8px 20px rgba(58,35,80,.09)', padding: '14px 18px' }}>
@@ -1342,7 +1359,12 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
                       className="relative overflow-hidden rounded-photo-container aspect-[3/4] w-[70%] mx-auto @min-[600px]:aspect-auto @min-[600px]:w-full @min-[600px]:flex-1"
                       style={{ minHeight: '200px', borderRadius: '26px', border: '3px solid #FFFFFF', boxShadow: '0 0 0 1.5px #F5B9C6, 0 14px 30px rgba(58,35,80,.16)' }}
                     >
-                      <img src={inspirationImage} alt="Foto de referência para a decoração" className="absolute inset-0 w-full h-full object-cover" />
+                      {/* A coluna da foto e alta e estreita na folha em pe: com
+                          object-cover o bolo perdia as laterais. A foto vai
+                          INTEIRA (contain) e o resto da coluna e a mesma foto,
+                          ampliada e desfocada, por tras — sem faixa branca. */}
+                      <img src={inspirationImage} alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover" style={{ filter: 'blur(18px) saturate(1.1)', transform: 'scale(1.15)', opacity: 0.55 }} />
+                      <img src={inspirationImage} alt="Foto de referência para a decoração" className="absolute inset-0 w-full h-full object-contain" />
                       <span className="absolute" style={{ top: '12px', left: '12px', background: 'rgba(255,255,255,.92)', color: '#3A2350', fontSize: '9px', fontWeight: 800, letterSpacing: '.12em', padding: '6px 11px', borderRadius: '999px', boxShadow: '0 4px 10px rgba(58,35,80,.12)' }}>
                         REFERÊNCIA DA DECORAÇÃO
                       </span>
