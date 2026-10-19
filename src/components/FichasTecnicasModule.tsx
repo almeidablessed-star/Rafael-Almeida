@@ -424,7 +424,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     // formulario a toa e sugeria que era preciso preencher os tres. Quem
     // precisa de mais usa o "+ Adicionar", um de cada vez.
     setTamanhos([
-      { id: 'ts-1', descricao: '1', preco: '', horasTrabalho: '', minutosTrabalho: '', valorHora: tarifaSugerida, ingredients: [], maoDeObraCost: '', custoCost: '', investimentoCost: '' },
+      { id: 'ts-1', descricao: '', preco: '', horasTrabalho: '', minutosTrabalho: '', valorHora: tarifaSugerida, ingredients: [], maoDeObraCost: '', custoCost: '', investimentoCost: '' },
     ]);
     setEditingId(null);
     setInvalidFieldId(null);
@@ -785,7 +785,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         ...prev,
         {
           id: newId,
-          descricao: `${prev.length + 1}`,
+          descricao: '',
           preco: '0',
           // Repete a tarifa do tamanho anterior: quem cadastra varios tamanhos do
           // mesmo bolo costuma cobrar a mesma hora, e so as horas mudam.
@@ -1244,7 +1244,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                     <div key={tamanho.id} className="flex items-center gap-2.5">
                       <input
                         type="text"
-                        placeholder="Ex: 20 cm, 1, 2"
+                        placeholder="Ex: 20 cm, 15 fatias"
                         value={tamanho.descricao}
                         onChange={(e) => handleUpdateTamanho(tamanho.id, 'descricao', e.target.value)}
                         className="flex-1 min-w-0 border rounded-[10px] px-3 py-2.5 text-sm font-semibold"
