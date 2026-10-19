@@ -392,6 +392,12 @@ export const CustomersModule: React.FC = () => {
     message: string;
   } | null>(null);
 
+  // Janela "Configurar WhatsApp": so escolhe o app padrao. Antes o botao abria
+  // a tela de ENVIO para a primeira cliente da lista (e nada, sem clientes), e
+  // quem tocava em "Abrir" para testar mandava mensagem para uma cliente real.
+  const [waConfigAberto, setWaConfigAberto] = useState(false);
+  const [waConfigEscolha, setWaConfigEscolha] = useState<'business' | 'standard' | 'ask'>('business');
+
   const [expandedDatesCustomerId, setExpandedDatesCustomerId] = useState<string | null>(null);
 
   // Execute WhatsApp send
@@ -1453,9 +1459,8 @@ export const CustomersModule: React.FC = () => {
 
         <button
           onClick={() => {
-            if (customers.length > 0) {
-              handleSendReminder(customers[0], undefined, undefined, undefined, true);
-            }
+            setWaConfigEscolha(waPreference);
+            setWaConfigAberto(true);
           }}
           style={{
             display: 'flex',
@@ -1486,80 +1491,86 @@ export const CustomersModule: React.FC = () => {
         </div>
       </div>
 
-      {/* WHATSAPP SELECTOR & SEND MODAL */}
+      {/* Tela de envio: aparece no "Avisar" quando o modo e "Perguntar sempre".
+          Mesmo padrao visual do cadastro de Clientes; as cores sao literais
+          porque as variaveis --color-* nao existem em runtime. */}
       {waModalData && createPortal(
-        <div className="fixed inset-0 z-[99999] bg-[var(--color-ink)]/80 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl max-w-md w-full shadow-2xl border-2 border-[var(--color-accent-gold)] overflow-hidden animate-fadeIn p-5 space-y-4 my-auto">
-            <div className="flex items-center justify-between border-b border-[var(--color-neutral-hero)] pb-2">
-              <div className="flex items-center gap-2">
-                <MessageCircle className="w-5 h-5 text-[var(--color-neutral-charcoal)]" />
-                <h3 className="font-brand font-black text-base text-[var(--color-neutral-charcoal)]">
-                  Enviar Mensagem WhatsApp
-                </h3>
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-neutral-900/80 backdrop-blur-xs p-4" role="dialog" aria-modal="true">
+          <div className="w-full max-w-[400px] max-h-[90vh] bg-[#F6F2F5] rounded-[24px] overflow-hidden flex flex-col animate-fadeIn" style={{ boxShadow: '0 30px 70px rgba(58,35,80,0.26)' }}>
+            <div
+              style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 55%, #A85E86 100%)' }}
+              className="px-[18px] pt-[18px] pb-5 flex items-center justify-between gap-3 flex-shrink-0"
+            >
+              <div className="flex flex-col gap-0.5 min-w-0">
+                <span className="text-[10px] font-bold tracking-[0.16em] uppercase text-white/65">WhatsApp</span>
+                <span className="font-serif-display text-2xl leading-tight text-white">Enviar mensagem</span>
               </div>
               <button
+                type="button"
                 onClick={() => setWaModalData(null)}
-                className="p-1 rounded-xl text-[var(--color-neutral-charcoal)]/40 hover:text-[var(--color-neutral-charcoal)]"
+                className="w-8 h-8 rounded-[10px] bg-white/15 hover:bg-white/25 flex items-center justify-center text-white transition-colors flex-shrink-0"
+                aria-label="Fechar"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="space-y-2">
-              <p className="text-xs text-[var(--color-neutral-charcoal)]/80 font-medium">
-                Cliente: <strong className="text-[var(--color-neutral-charcoal)]">{waModalData.customer.name}</strong> ({waModalData.phone})
-              </p>
-              <div className="p-3 bg-[var(--color-neutral-hero)] rounded-lg border border-[var(--color-accent-gold)]/40 text-xs text-[var(--color-neutral-charcoal)] font-medium whitespace-pre-wrap leading-relaxed max-h-48 overflow-y-auto">
-                "{waModalData.message}"
+            <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
+              <div className="bg-white rounded-2xl p-4 flex flex-col gap-2.5" style={{ boxShadow: '0 8px 20px rgba(58,35,80,.09)' }}>
+                <div className="flex items-baseline justify-between gap-2">
+                  <span className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Para</span>
+                  <span className="text-sm font-bold text-right truncate" style={{ color: '#241B2B' }}>
+                    {waModalData.customer.name} <span className="font-medium" style={{ color: '#7A6E80' }}>· {waModalData.phone}</span>
+                  </span>
+                </div>
+                <div
+                  className="rounded-[14px] rounded-tl-[4px] px-3.5 py-3 text-[13px] leading-relaxed whitespace-pre-wrap max-h-48 overflow-y-auto"
+                  style={{ background: '#E7F2EA', color: '#241B2B' }}
+                >
+                  {waModalData.message}
+                </div>
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <span className="text-xs font-bold text-[var(--color-neutral-charcoal)] block">
-                Escolha o aplicativo do WhatsApp para abrir:
-              </span>
-
+              <span className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Abrir com</span>
               <button
+                type="button"
                 onClick={() => {
                   executeSendWhatsApp(waModalData.phone, waModalData.message, 'business');
                   setWaModalData(null);
                 }}
-                className="w-full py-3 px-4 rounded-lg bg-[var(--color-neutral-charcoal)] hover:bg-black text-[var(--color-accent-gold)] font-bold text-xs shadow-sm flex items-center justify-between transition-all active:scale-95"
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-[11px] text-white text-sm font-semibold transition-transform active:scale-95"
+                style={{ background: '#4C7358', boxShadow: '0 10px 20px rgba(76,115,88,.3)' }}
               >
-                <div className="flex items-center gap-2">
-                  <span className="bg-[var(--color-accent-gold)] text-[var(--color-neutral-charcoal)] p-1 rounded-lg font-black text-[10px]">
-                    BUSINESS
-                  </span>
-                  <span>Abrir no WhatsApp Business</span>
-                </div>
-                <Sparkles className="w-4 h-4 text-[var(--color-accent-gold)]" />
+                <MessageCircle className="w-4 h-4" />
+                WhatsApp Business
               </button>
-
               <button
+                type="button"
                 onClick={() => {
                   executeSendWhatsApp(waModalData.phone, waModalData.message, 'standard');
                   setWaModalData(null);
                 }}
-                className="w-full py-2.5 px-4 rounded-lg bg-[var(--color-neutral-hero)] hover:bg-[var(--color-accent-gold)]/30 text-[var(--color-neutral-charcoal)] font-bold text-xs flex items-center justify-between transition-all active:scale-95 border border-[var(--color-accent-gold)]/40"
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-[11px] bg-white text-sm font-semibold transition-transform active:scale-95"
+                style={{ border: '1px solid rgba(58,35,80,0.16)', color: '#3A2350' }}
               >
-                <span>Abrir no WhatsApp Comum / Padrão</span>
-                <MessageCircle className="w-4 h-4 text-[var(--color-neutral-charcoal)]/60" />
+                <MessageCircle className="w-4 h-4" />
+                WhatsApp comum
               </button>
-
               <button
+                type="button"
                 onClick={() => {
                   executeSendWhatsApp(waModalData.phone, waModalData.message, 'web');
                   setWaModalData(null);
                 }}
-                className="w-full py-2 px-4 rounded-lg text-[var(--color-neutral-charcoal)]/60 hover:text-[var(--color-neutral-charcoal)] font-semibold text-xs text-center"
+                className="w-full py-2 text-xs font-semibold text-center transition-colors"
+                style={{ color: '#7A6E80' }}
               >
-                Abrir pelo Navegador (wa.me)
+                Abrir pelo navegador
               </button>
             </div>
 
-            {/* Default preference setting checkbox */}
-            <div className="pt-3 border-t border-[var(--color-neutral-hero)] flex items-center justify-between">
-              <label className="flex items-center gap-2 text-[11px] text-[var(--color-neutral-charcoal)]/80 font-bold cursor-pointer select-none">
+            <div className="flex-shrink-0 bg-white px-4 py-3.5" style={{ borderTop: '1px solid rgba(58,35,80,0.08)' }}>
+              <label className="flex items-center gap-2.5 text-xs font-semibold cursor-pointer select-none" style={{ color: '#3A2350' }}>
                 <input
                   type="checkbox"
                   checked={waPreference === 'business'}
@@ -1568,10 +1579,104 @@ export const CustomersModule: React.FC = () => {
                     setWaPreference(pref);
                     localStorage.setItem('carula_wa_preference', pref);
                   }}
-                  className="rounded border-[var(--color-accent-gold)] text-[var(--color-neutral-charcoal)] focus:ring-[var(--color-neutral-charcoal)]"
+                  className="w-4 h-4"
+                  style={{ accentColor: '#6E3F72' }}
                 />
                 <span>Sempre abrir direto no WhatsApp Business</span>
               </label>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Configurar WhatsApp: escolhe o app que o "Avisar" abre. Nao envolve
+          cliente nem mensagem, entao funciona mesmo sem clientes cadastradas. */}
+      {waConfigAberto && createPortal(
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-neutral-900/80 backdrop-blur-xs p-4" role="dialog" aria-modal="true">
+          <div className="w-full max-w-[400px] max-h-[90vh] bg-[#F6F2F5] rounded-[24px] overflow-hidden flex flex-col animate-fadeIn" style={{ boxShadow: '0 30px 70px rgba(58,35,80,0.26)' }}>
+            <div
+              style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 55%, #A85E86 100%)' }}
+              className="px-[18px] pt-[18px] pb-5 flex items-start justify-between gap-3 flex-shrink-0"
+            >
+              <div className="flex flex-col gap-1 min-w-0">
+                <span className="text-[10px] font-bold tracking-[0.16em] uppercase text-white/65">WhatsApp</span>
+                <span className="font-serif-display text-2xl leading-tight text-white">Configurar WhatsApp</span>
+                <span className="text-[11px] leading-relaxed" style={{ color: 'rgba(247,220,225,.85)' }}>
+                  Qual app abrir quando você tocar em "Avisar" numa cliente?
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setWaConfigAberto(false)}
+                className="w-8 h-8 rounded-[10px] bg-white/15 hover:bg-white/25 flex items-center justify-center text-white transition-colors flex-shrink-0"
+                aria-label="Fechar"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2.5" role="radiogroup" aria-label="App do WhatsApp">
+              {([
+                { id: 'business', titulo: 'WhatsApp Business', descricao: 'Abre direto no Business.' },
+                { id: 'standard', titulo: 'WhatsApp comum', descricao: 'Abre direto no WhatsApp normal.' },
+                { id: 'ask', titulo: 'Perguntar sempre', descricao: 'A cada envio, mostra a mensagem e pergunta qual app usar.' },
+              ] as const).map((opcao) => {
+                const ativo = waConfigEscolha === opcao.id;
+                return (
+                  <button
+                    key={opcao.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={ativo}
+                    onClick={() => setWaConfigEscolha(opcao.id)}
+                    className="w-full bg-white rounded-2xl px-4 py-3.5 flex items-center gap-3 text-left transition-colors"
+                    style={{ border: `2px solid ${ativo ? '#6E3F72' : 'transparent'}`, boxShadow: '0 8px 20px rgba(58,35,80,.09)' }}
+                  >
+                    <span
+                      className="w-[18px] h-[18px] rounded-full flex items-center justify-center flex-shrink-0"
+                      style={{ border: `2px solid ${ativo ? '#6E3F72' : 'rgba(58,35,80,0.25)'}` }}
+                    >
+                      {ativo && <span className="w-2 h-2 rounded-full" style={{ background: '#6E3F72' }} />}
+                    </span>
+                    <span className="flex flex-col gap-0.5 min-w-0">
+                      <span className="text-sm font-bold" style={{ color: '#241B2B' }}>{opcao.titulo}</span>
+                      <span className="text-xs" style={{ color: '#7A6E80' }}>{opcao.descricao}</span>
+                    </span>
+                  </button>
+                );
+              })}
+              <p className="text-[11px] px-1" style={{ color: '#7A6E80' }}>
+                A escolha fica salva neste aparelho.
+              </p>
+            </div>
+
+            <div
+              className="flex-shrink-0 bg-white flex gap-2.5 p-4"
+              style={{ borderTop: '1px solid rgba(58,35,80,0.08)', boxShadow: '0 -8px 24px rgba(58,35,80,0.07)' }}
+            >
+              <button
+                type="button"
+                onClick={() => setWaConfigAberto(false)}
+                className="px-[18px] py-3.5 rounded-[11px] text-sm font-semibold transition-colors"
+                style={{ border: '1px solid rgba(58,35,80,0.16)', color: '#3A2350' }}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setWaPreference(waConfigEscolha);
+                  localStorage.setItem('carula_wa_preference', waConfigEscolha);
+                  setWaConfigAberto(false);
+                }}
+                className="flex-1 text-center py-3.5 rounded-[11px] text-white text-sm font-semibold transition-colors"
+                style={{ background: '#3A2350', boxShadow: '0 10px 20px rgba(58,35,80,.3)' }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = '#6E3F72'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = '#3A2350'; }}
+              >
+                Salvar
+              </button>
             </div>
           </div>
         </div>,
