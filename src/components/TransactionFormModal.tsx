@@ -1382,6 +1382,26 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                     />
                   </div>
 
+                  {/* Data da entrega: veio do passo de Pagamento para ficar junto
+                      do endereco e do horario. Continua obrigatoria; se faltar,
+                      salvar pula de volta para este passo (ver [data-step]). */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <label style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80' }}>Data da entrega</label>
+                    <input
+                      id="pedido-data-entrega"
+                      type="date"
+                      required
+                      value={eventDate}
+                      onChange={(e) => {
+                        setEventDate(e.target.value);
+                        setEventDateTouched(true);
+                        if (invalidFieldId === 'pedido-data-entrega') setInvalidFieldId(null);
+                      }}
+                      style={{ border: '1px solid rgba(58,35,80,0.14)', borderRadius: '10px', padding: '12px', fontSize: '15px', background: '#FAF7FA', color: '#241B2B' }}
+                    />
+                    {invalidFieldId === 'pedido-data-entrega' && <FieldValidationError />}
+                  </div>
+
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     <label style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80' }}>Horário de entrega / retirada</label>
                     <input
@@ -1811,23 +1831,6 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                         </button>
                       ))}
                     </div>
-                  </div>
-
-                  <div>
-                    <label style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '6px' }}>Data da entrega</label>
-                    <input
-                      id="pedido-data-entrega"
-                      type="date"
-                      required
-                      value={eventDate}
-                      onChange={(e) => {
-                        setEventDate(e.target.value);
-                        setEventDateTouched(true);
-                        if (invalidFieldId === 'pedido-data-entrega') setInvalidFieldId(null);
-                      }}
-                      style={{ width: '100%', border: '1px solid rgba(58,35,80,0.14)', borderRadius: '10px', padding: '12px', fontSize: '15px', background: '#FAF7FA', color: '#241B2B' }}
-                    />
-                    {invalidFieldId === 'pedido-data-entrega' && <FieldValidationError />}
                   </div>
 
                   <div>
