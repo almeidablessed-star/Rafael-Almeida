@@ -16,6 +16,7 @@ import { PrimeirosPassosChecklist } from './onboarding/PrimeirosPassosChecklist'
 import { CampoComAjuda } from './onboarding/CampoComAjuda';
 import { CardDeSaldo } from './CardDeSaldo';
 import { AvatarProfile } from './AvatarProfile';
+import { LogoCarulaApp } from './LogoCarulaApp';
 
 import {
   Wallet,
@@ -387,19 +388,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div style={{ height: '32px' }} />
         </div>
 
-        {/* "Carula Confeitaria" Title - Centered on screen, floating */}
+        {/* Logo do app ("carula" + etiqueta APP), centralizado e flutuando
+            por cima, entre o Perfil e os botoes. Substitui o letreiro
+            "Carula / CONFEITARIA" em serifada. */}
         <div
-          className="absolute left-1/2 -translate-x-1/2 text-center z-20"
+          data-logo-inicio
+          className="absolute left-1/2 -translate-x-1/2 z-20 whitespace-nowrap"
           style={{
-            top: 'calc(env(safe-area-inset-top, 0px) + 2px)',
+            top: 'calc(env(safe-area-inset-top, 0px) + 14px)',
           }}
         >
-          <div className="font-serif-display text-[38px] text-white leading-[1.2] tracking-[0.01em]">
-            Carula
-          </div>
-          <div style={{ fontSize: '8px', fontWeight: 700, letterSpacing: '0.44em', color: 'rgba(247,220,225,0.78)', marginTop: '3px', paddingLeft: '0.44em', textTransform: 'uppercase', fontFamily: "'Manrope', sans-serif" }}>
-            CONFEITARIA
-          </div>
+          <LogoCarulaApp fundo="roxo" tamanho={31} />
         </div>
       </div>
 
