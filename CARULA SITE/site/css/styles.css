@@ -1,0 +1,397 @@
+/* ==========================================================================
+   Carula Cake . styles.css
+   Foundation layer: tokens, reset, typography, layout primitives, motion base.
+   Component styles live in components.css.
+
+   SHAPE LOCK (documented rule, followed everywhere):
+     - interactive (buttons, pills, tags, inputs) . full pill, 999px
+     - cards / panels ........................... 28px
+     - photo frames ............................. organic blob radius
+     - small chips inside cards ................. 999px
+   COLOR LOCK:
+     - coral (--c-coral) is THE accent. Every CTA, every key mark, both themes.
+     - magenta/purple are ganache material only (drips, frames, tier marks).
+     - the five pastels map 1:1 onto the five flavour families. Never decorative.
+   ========================================================================== */
+
+/* ---------- 1. Fonts (self-hosted, latin subset) ------------------------- */
+
+@font-face {
+  font-family: 'Bagel Fat One';
+  src: url('../fonts/bagel-fat-one.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Kaushan Script';
+  src: url('../fonts/kaushan-script.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Outfit';
+  src: url('../fonts/outfit-var.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* ---------- 2. Design tokens -------------------------------------------- */
+
+:root {
+  /* Brand core. Sampled from the logo and paletas.txt. */
+  --c-cream: #f8f1e4;
+  --c-cream-deep: #f1e4cf;
+  --c-cream-warm: #fdf8ee;
+  --c-coral: #e8452b;
+  --c-coral-bright: #ff5c3d;
+  --c-coral-soft: #ff8a70;
+  --c-magenta: #a11d5c;
+  --c-magenta-bright: #c82472;
+  --c-purple: #5e2a6e;
+  --c-cocoa: #2b2420;
+
+  /* Flavour families. One pastel per family, from paletas.txt. */
+  --c-fam-fruta: #f5c6ce;
+  --c-fam-formiga: #f0d2b8;
+  --c-fam-classico: #f3e3b8;
+  --c-fam-sofisticado: #d8cdeb;
+  --c-fam-duo: #d6e4cc;
+
+  /* Semantic surface + text tokens. Swapped wholesale in dark mode. */
+  --bg: var(--c-cream);
+  --bg-alt: var(--c-cream-deep);
+  --bg-raised: var(--c-cream-warm);
+  --text: var(--c-cocoa);
+  --text-soft: #6b5c52;
+  --text-onDark: var(--c-cream);
+  --hairline: rgba(43, 36, 32, 0.14);
+  --frame-back: var(--c-magenta);
+  --shadow-tint: rgba(94, 42, 110, 0.18);
+
+  /* Cocoa is a brand ink, not a surface token. Used as a border against the
+     dark page it lands at 1.1:1 and vanishes, so anything sitting on or near
+     the page background strokes with --stroke instead.
+     --surface-invert is the panel that reverses against the page: dark on the
+     cream theme, cream on the dark theme.
+     --surface-feature is the fill for promoted cards; in dark it moves to the
+     brand purple because cocoa would match --bg-alt exactly. */
+  --stroke: var(--c-cocoa);
+  --surface-invert: var(--c-cocoa);
+  --on-invert: var(--c-cream);
+  --accent-on-invert: var(--c-coral-soft);
+  --surface-feature: var(--c-cocoa);
+
+  /* Shape lock */
+  --r-pill: 999px;
+  --r-card: 28px;
+  --r-chip: 999px;
+  --r-blob: 62% 38% 55% 45% / 48% 52% 48% 52%;
+
+  /* Type scale. Fluid, capped so the hero never overflows the viewport.
+     --t-display is sized so the longest hero line ("nome de mulher") stays on
+     one line inside the 7fr column. Raising it re-wraps the headline. */
+  --t-display: clamp(2.2rem, 5.3vw, 4.6rem);
+  --t-h2: clamp(2.2rem, 5.4vw, 4.2rem);
+  --t-h3: clamp(1.35rem, 2.4vw, 1.9rem);
+  --t-script: clamp(1.5rem, 3.4vw, 2.8rem);
+  --t-body: clamp(1rem, 1.05vw, 1.125rem);
+  --t-small: 0.875rem;
+
+  /* Rhythm. VISUAL_DENSITY 3, so sections breathe. */
+  --space-section: clamp(5rem, 11vw, 9.5rem);
+  --gutter: clamp(1.25rem, 4vw, 3.5rem);
+  --maxw: 1400px;
+
+  /* Motion.
+     Durations are named by job, not by number, so nothing drifts past the
+     300ms ceiling that separates "responsive" from "sluggish".
+       press  . the instant acknowledgement of a click
+       fast   . leaving a hover state (the system responding)
+       base   . entering a hover state (the user deciding)
+       enter  . elements arriving on screen
+     Exit is always quicker than enter. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  /* Reserved for the few playful chips. Overshoot kept low: 1.56 reads as a
+     toy, 1.2 reads as confidence. */
+  --ease-pop: cubic-bezier(0.34, 1.2, 0.64, 1);
+
+  --dur-press: 140ms;
+  --dur-fast: 160ms;
+  --dur-base: 220ms;
+  --dur-enter: 260ms;
+
+  /* Layer scale. Documented so nothing freelances a z-index. */
+  --z-bg: 0;
+  --z-content: 1;
+  --z-particles: 2;
+  --z-nav: 40;
+  --z-overlay: 60;
+
+  color-scheme: light;
+}
+
+/* Dark mode keeps coral at full strength and swaps cream for the brand's own
+   cocoa (#2b2420 in paletas.txt), so the identity survives the flip. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #201b18;
+    --bg-alt: #2b2420;
+    --bg-raised: #352c27;
+    --text: var(--c-cream);
+    --text-soft: #b8a596;
+    --hairline: rgba(248, 241, 228, 0.16);
+    --frame-back: var(--c-magenta-bright);
+    --shadow-tint: rgba(0, 0, 0, 0.5);
+    --c-fam-fruta: #d99aa5;
+    --c-fam-formiga: #d4ab8b;
+    --c-fam-classico: #d8c288;
+    --c-fam-sofisticado: #b3a3cc;
+    --c-fam-duo: #a9c199;
+    --stroke: #7d6a5a;
+    --surface-invert: var(--c-cream);
+    --on-invert: var(--c-cocoa);
+    --accent-on-invert: var(--c-coral);
+    --surface-feature: var(--c-purple);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg: #201b18;
+  --bg-alt: #2b2420;
+  --bg-raised: #352c27;
+  --text: var(--c-cream);
+  --text-soft: #b8a596;
+  --hairline: rgba(248, 241, 228, 0.16);
+  --frame-back: var(--c-magenta-bright);
+  --shadow-tint: rgba(0, 0, 0, 0.5);
+  --c-fam-fruta: #d99aa5;
+  --c-fam-formiga: #d4ab8b;
+  --c-fam-classico: #d8c288;
+  --c-fam-sofisticado: #b3a3cc;
+  --c-fam-duo: #a9c199;
+  --stroke: #7d6a5a;
+  --surface-invert: var(--c-cream);
+  --on-invert: var(--c-cocoa);
+  --accent-on-invert: var(--c-coral);
+  --surface-feature: var(--c-purple);
+  color-scheme: dark;
+}
+
+/* ---------- 3. Reset ----------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Outfit', ui-sans-serif, system-ui, sans-serif;
+  font-size: var(--t-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  transition: background-color 0.4s var(--ease-out), color 0.4s var(--ease-out);
+}
+
+img,
+svg,
+picture {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+ul,
+ol {
+  margin: 0;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+:focus-visible {
+  outline: 3px solid var(--c-coral);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ---------- 4. Layout primitives ---------------------------------------- */
+
+.shell {
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.section {
+  position: relative;
+  padding-block: var(--space-section);
+}
+
+.section--tight {
+  padding-block: clamp(3.5rem, 7vw, 6rem);
+}
+
+.section--alt {
+  background: var(--bg-alt);
+}
+
+/* ---------- 5. Typography ------------------------------------------------ */
+
+.display {
+  font-family: 'Bagel Fat One', 'Outfit', cursive;
+  font-weight: 400;
+  line-height: 0.92;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+
+.script {
+  font-family: 'Kaushan Script', cursive;
+  font-weight: 400;
+  /* Kaushan has deep descenders. Extra leading + reserve keeps g/y/p intact. */
+  line-height: 1.25;
+  padding-bottom: 0.14em;
+}
+
+.section__head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: clamp(2.5rem, 5vw, 4rem);
+}
+
+.section__title {
+  font-family: 'Bagel Fat One', cursive;
+  font-size: var(--t-h2);
+  line-height: 0.94;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  max-width: 18ch;
+}
+
+/* Kaushan sits BELOW the title as a subhead, never above as an eyebrow.
+   Brand-driven, and it sidesteps the templated uppercase-eyebrow rhythm. */
+.section__script {
+  font-family: 'Kaushan Script', cursive;
+  font-size: var(--t-script);
+  line-height: 1.25;
+  padding-bottom: 0.14em;
+  color: var(--c-coral);
+}
+
+.section__lede {
+  max-width: 52ch;
+  color: var(--text-soft);
+  margin-top: 0.75rem;
+}
+
+.eyebrow {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--c-magenta);
+}
+
+/* ---------- 6. Icons ----------------------------------------------------- */
+
+.icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  fill: currentColor;
+  flex: none;
+}
+
+.icon--lg {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+.u-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---------- 7. Motion base ---------------------------------------------- */
+
+/* Elements GSAP will reveal start hidden, but ONLY when JS is running and
+   motion is welcome. .js-ready is set by main.js; without it nothing hides,
+   so no-JS and reduced-motion users always see full content. */
+/* No will-change here. Promoting all 51 reveal targets to their own
+   compositor layer for the whole session costs more than it buys; main.js
+   adds the hint just before each batch animates and strips it after. */
+.js-ready [data-reveal] {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .js-ready [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,55 @@
+Escopo do projeto — App de controle de ponto
+
+Cliente: Tharmor
+
+1. Objetivo
+
+Substituir o controle manual (hoje feito no Timestation + planilhas adaptadas à mão) por um app onde cada funcionário registra o próprio ponto, e o Tharmor recebe tudo já organizado em planilha — pronto para gerar folha de horas, paychecks dos funcionários e invoices para cobrar os clientes dele.
+
+2. Como funciona hoje (contexto do Tharmor)
+Usa o Timestation para controle de ponto, mas precisa adaptar manualmente as planilhas depois.
+Cada funcionário tem um valor de hora que o Tharmor paga a ele (labor cost).
+Cada cliente do Tharmor é cobrado por um valor de hora diferente, mais alto (labor price) — a diferença entre os dois é a margem do Tharmor.
+Exemplo: João ganha $50/hora do Tharmor. Se ele trabalhar 50h na semana, o paycheck do João é $2.500.
+Só que o cliente do Tharmor paga $100/hora pelo trabalho do João. Nas mesmas 50h, o invoice cobrado do cliente é $5.000.
+O app precisa gerar as duas coisas a partir do mesmo registro de ponto: o que pagar ao funcionário e o que cobrar do cliente.
+3. Requisito importante sobre localização
+
+Sem GPS automático. O Tharmor foi claro: GPS erra às vezes, e no trabalho dele erro não pode acontecer. Em vez de captura automática, o endereço é um campo de texto livre que o próprio funcionário preenche na hora do check-in ("Hoje eu tô no endereço tal"). Isso tira a variável de erro de GPS e dá controle total pro funcionário sobre o que fica registrado.
+
+(Ajuste em relação à primeira versão do protótipo, que usava GPS — aqui trocamos por endereço digitado manualmente.)
+
+4. Papéis de usuário
+
+Funcionário
+
+Login com e-mail e senha
+Preenche o próprio ponto (ver campos abaixo)
+Não edita pontos já registrados — só o admin pode corrigir
+
+Administrador (Tharmor)
+
+Cria e gerencia os funcionários
+Vê todos os pontos de todos os funcionários
+Pode editar qualquer ponto (corrigir horário, endereço, descrição, break) — toda edição fica registrada para auditoria (quem editou, quando, o que mudou)
+Cadastra o valor de hora pago a cada funcionário (labor cost) e o valor de hora cobrado do cliente (labor price)
+Exporta planilha de horas
+Gera paycheck (o que pagar ao funcionário) e invoice (o que cobrar do cliente) por período
+5. Campos do registro de ponto
+
+Cada entrada de ponto do funcionário tem:
+
+Campo	Descrição
+Address	Endereço digitado manualmente pelo funcionário
+Time in	Horário de entrada
+Time out	Horário de saída
+Break	Tempo de intervalo (não contabilizado como hora trabalhada)
+Description	O que foi feito naquele período
+Note	Campo livre para observações adicionais
+6. Funcionalidades (lista confirmada com o Tharmor)
+Administrador cria novos funcionários.
+Administrador e funcionários se autenticam no app (login/senha).
+Funcionários batem ponto com: horário de entrada, saída, intervalo, endereço (manual), descrição e notas.
+Administrador vê e edita os pontos, com toda alteração registrada para auditoria.
+Administrador exporta os pontos em planilha.
+Administrador gera paychecks e invoices de cada funcionário, a partir de dois valores de hora cadastrados por pessoa: o que o funcionário recebe e o que o cliente do Tharmor paga.

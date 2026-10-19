@@ -1,0 +1,74 @@
+Plano, sem tocar em arquivo nenhum. Verifiquei tudo que você pediu antes de propor.
+
+## 1. O "?" e o texto de ajuda
+
+**Onde:** substitui a linha de subtítulo que já existe logo abaixo do título "Saldos & Divisão dos Pedidos" ([Dashboard.tsx:441](src/components/Dashboard.tsx:441)).
+
+**Como:** usando o `CampoComAjuda`, que já é o padrão de ajuda do app (Minha Empresa, Fichas, onboarding). Ele mostra um texto curto sempre visível e um "?" que abre o texto longo. Não crio componente novo.
+
+**Frase sempre visível** (substitui "Entradas das vendas pagas − Compras registradas"):
+
+> Entradas das vendas pagas − o que você já gastou essa semana.
+
+Muda com o período: *essa quinzena* / *esse mês*. De quebra corrige uma imprecisão da frase atual — ela diz "Compras registradas", mas retirada de mão de obra não é compra.
+
+**Texto que abre no "?":**
+
+> Cada círculo é um cofrinho. Quando um pedido é pago, o app separa o valor dele em partes: o ingrediente, o seu trabalho, e as contas e o investimento da empresa. A porcentagem mostra quanto ainda sobra naquele cofrinho — 100% é cheio, 0% é vazio. Cada cofrinho tem o tamanho dele, então não dá para comparar a porcentagem de um com a do outro. O lucro também sai de cada venda, mas não aparece aqui.
+
+**Um detalhe que preciso avisar:** o `CampoComAjuda` tem o rótulo de acessibilidade fixo em "Ver exemplo com os números da sua conta" — aqui é explicação, não exemplo com números. Mudar isso mexe num componente compartilhado com outras telas, então **não vou mexer**. Ou aceitamos o rótulo genérico, ou isso vira um item separado. Me diz qual.
+
+## 2. Quando não houve venda no período
+
+**Onde:** dentro do círculo, no lugar do "0%", e uma linha abaixo dos três.
+
+Cada círculo tem sua própria entrada, então trato um por um: se aquele cofrinho não recebeu nada no período, o círculo mostra **"—"** em vez de "0%". O anel fica vazio e o dinheiro embaixo continua $0,00.
+
+Quando **os três** estiverem sem entrada, aparece uma linha só:
+
+> Nenhuma venda paga essa semana ainda — por isso não há nada separado aqui.
+
+Também acompanha o período.
+
+## 3. O vermelho
+
+**Elemento:** o valor em dinheiro embaixo de cada círculo ([Dashboard.tsx:474](src/components/Dashboard.tsx:474), 505 e 536) — hoje sempre em `#241B2B`.
+
+**Cor:** `#C4626F`, que já é o vermelho do app (usado em 50 lugares, e no próprio Dashboard ele está literalmente nomeado como `vermelho` na linha 719).
+
+**Quando:** saldo abaixo de zero. Uso o sinalizador `isNegative` que o cálculo **já produz** e que hoje ninguém lê — não é conta nova, é só passar a usar um valor que já vem pronto.
+
+O anel continua travado em 0%, como na correção anterior. Só a cor do dinheiro muda.
+
+## 4. Período e moeda
+
+Todas as frases saem do vocabulário de período que já existe (`rotulos`), que guarda **frases inteiras** justamente porque "essa semana" e "essa quinzena" mas "**esse** mês". Nenhuma frase é montada por pedaço. Os valores continuam passando pelo `formatMoney` da moeda escolhida — não encosto nisso.
+
+## 5. A linha do Lucro — o que verifiquei
+
+**Sua hipótese está certa.** Confirmei no código:
+
+**(i) Nada tira dinheiro do Lucro.** Os tipos de lançamento que existem são venda, reposição, mão de obra, custo e investimento — **não existe lançamento de lucro**, e o cálculo dos saldos não tem cofrinho de lucro. Um quarto círculo ficaria em 100% para sempre. A linha é mesmo a forma certa.
+
+**(ii) O valor NÃO existe calculado de um jeito que sirva aqui.** Dois candidatos, os dois errados para este card:
+
+- A composição gravada em cada venda tem ingrediente, mão de obra, custos, investimento, entrega e adicionais — **não tem lucro**. Ele é o que sobra depois de tirar todo o resto.
+- Existe um `lucroLiquido` pronto, mas ele é calculado sobre o **filtro de período do topo da tela** (Este Mês / ano), não sobre a janela de reset do card, e ainda desconta os lançamentos de despesa. Responde outra pergunta e apareceria **contradizendo** o card ao lado.
+
+> **Então isto é mexer em cálculo e precisa da sua aprovação à parte,** como você pediu que eu avisasse. Seria uma soma nova sobre a mesma janela dos círculos: para cada venda paga do período, o valor dela menos as cinco partes já gravadas.
+
+**(iii) Acompanha o período**, sim — "Lucro da semana / da quinzena / do mês" sai do mesmo vocabulário.
+
+**Onde entraria:** uma linha no rodapé do card, logo abaixo da legenda "67% Despesas / 33% Investimento":
+
+> Lucro da semana: $X — fica guardado, nenhum gasto sai daqui.
+
+**Dependência:** se você aprovar a linha do Lucro, a última frase do texto de ajuda muda de "não aparece aqui" para apontar para a linha.
+
+## Como eu sugiro fechar
+
+Itens **1, 2, 3 e 4** são só texto e cor, não encostam em conta nenhuma — posso fazer num commit só assim que você aprovar.
+
+O item **5** eu faria **em commit separado e depois**, porque é o único que cria cálculo novo. Se preferir, dá para deixá-lo de fora por enquanto: o texto de ajuda já avisa que o lucro existe e não aparece aqui, o que resolve a parte da confusão.
+
+Aguardo sua aprovação. Nenhum arquivo foi tocado.
