@@ -362,6 +362,7 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
     const overflowStates: Array<{ elem: Element; overflow: string }> = [];
     const imageHeightStates: Array<{ elem: Element; maxHeight: string }> = [];
     const containerStates: Array<{ elem: Element; maxHeight: string }> = [];
+    const noPrintStates: Array<{ elem: HTMLElement; display: string }> = [];
 
     /**
      * `#quote-pdf-document` agora rola dentro de uma altura limitada (o modal
@@ -383,6 +384,9 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
       minHeight: docElem.style.minHeight,
       maxHeight: docElem.style.maxHeight,
       height: docElem.style.height,
+      width: docElem.style.width,
+      minWidth: docElem.style.minWidth,
+      maxWidth: docElem.style.maxWidth,
     };
 
     /** Devolve a folha ao estado normal. Roda no sucesso e no erro. */
@@ -392,6 +396,12 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
       docElem.style.minHeight = docElemOriginalStyle.minHeight;
       docElem.style.maxHeight = docElemOriginalStyle.maxHeight;
       docElem.style.height = docElemOriginalStyle.height;
+      docElem.style.width = docElemOriginalStyle.width;
+      docElem.style.minWidth = docElemOriginalStyle.minWidth;
+      docElem.style.maxWidth = docElemOriginalStyle.maxWidth;
+      noPrintStates.forEach(({ elem, display }) => {
+        elem.style.display = display;
+      });
 
       overflowStates.forEach(({ elem, overflow }) => {
         (elem as HTMLElement).style.overflow = overflow;
@@ -431,6 +441,27 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
       docElem.style.setProperty('min-height', '0', 'important');
       docElem.style.setProperty('max-height', 'none', 'important');
       docElem.style.setProperty('height', 'auto', 'important');
+
+      // No celular a folha mede ~370px, e o layout com a foto ao lado dos
+      // itens fica espremido (nomes em tres linhas, horario cortado). Durante
+      // a captura ela e montada na largura que tem no computador (668px): as
+      // colunas da folha do cliente nao dependem de breakpoint, entao o
+      // conteudo reflui de verdade para essa largura. No computador a folha
+      // ja tem essa largura e nada muda. Restaurado em `restaurarEstilos`.
+      if (docElem.offsetWidth < 640) {
+        docElem.style.setProperty('width', '668px', 'important');
+        docElem.style.setProperty('min-width', '668px', 'important');
+        docElem.style.setProperty('max-width', 'none', 'important');
+      }
+
+      // `no-print` marca o que so serve na tela ("Alterar Foto", "Remover",
+      // o convite para enviar foto). O CSS de impressao ja os escondia, mas
+      // `toPng` nao passa por ele: saiam no PDF. Escondidos de verdade (e nao
+      // so filtrados da imagem) para a folha encolher no lugar deles.
+      docElem.querySelectorAll<HTMLElement>('.no-print').forEach((elem) => {
+        noPrintStates.push({ elem, display: elem.style.display });
+        elem.style.setProperty('display', 'none', 'important');
+      });
 
       // Wait for all images to load before generating PDF
       const images = docElem.querySelectorAll('img');
@@ -893,7 +924,7 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
         {/* PRINTABLE DOCUMENT BODY */}
         <div
           id="quote-pdf-document"
-          className="p-1 sm:p-1.5 flex-1 min-h-0 overflow-y-auto space-y-1 sm:space-y-2 bg-[#F6F2F5] text-[#241B2B] print:p-1 print:bg-white print:overflow-visible print:flex-none"
+          className="@container p-1 sm:p-1.5 flex-1 min-h-0 overflow-y-auto space-y-1 sm:space-y-2 bg-[#F6F2F5] text-[#241B2B] print:p-1 print:bg-white print:overflow-visible print:flex-none"
         >
           {activeTab === 'cliente' ? (
             /* ======================================================== */
@@ -944,8 +975,19 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
                 </div>
               </div>
 
+              {/* Com foto de referencia: cliente, evento e itens empilhados a
+                  esquerda e a foto (em pe, estilo selfie) a direita, na altura
+                  deles. Sem foto, a direita ficaria vazia no PDF (o convite
+                  para enviar foto e no-print), entao a folha fica como antes,
+                  numa coluna so. As colunas seguem a largura da FOLHA (container
+                  query), nao da janela: um "sm:" responderia a janela, e no
+                  celular nunca ativaria. Na tela do celular elas empilham; no
+                  PDF, montado com 668px em handleDownloadPdf, ficam lado a lado. */}
+              <div className={inspirationImage ? 'grid grid-cols-1 @min-[600px]:grid-cols-[1.15fr_1fr] gap-2.5 items-start' : 'space-y-1 sm:space-y-2'}>
+              <div className={inspirationImage ? 'flex flex-col gap-2.5 min-w-0' : 'space-y-1 sm:space-y-2'}>
+
               {/* Grid 1: Client & Event Information */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 print-avoid-break">
+              <div className={inspirationImage ? 'flex flex-col gap-2.5 print-avoid-break' : 'grid grid-cols-1 sm:grid-cols-2 gap-2.5 print-avoid-break'}>
                 {/* Customer Box */}
                 <div className="bg-white p-3 rounded-[16px] border border-[#E6E1DB] shadow-sm space-y-1.5">
                   <h4 className="text-[9px] font-black uppercase tracking-wider text-[#241B2B] flex items-center gap-1 border-b border-[#E6E1DB] pb-0.5" style={{ fontFamily: "'Manrope', sans-serif", letterSpacing: '.06em' }}>
@@ -1036,10 +1078,12 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
                 )}
               </div>
 
+              </div>
+
               {/* INSPIRATION PHOTO - DISPLAYED IN FULL 100% UNCROPPED VISIBILITY */}
               {inspirationImage ? (
                 <div className="bg-white p-3 rounded-[16px] border-2 border-[#F5B9C6] shadow-sm space-y-2 print-avoid-break">
-                  <div className="flex items-center justify-between gap-2">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
                     <span className="text-[9px] font-black uppercase tracking-wider text-[#241B2B] flex items-center gap-1" style={{ fontFamily: "'Manrope', sans-serif", letterSpacing: '.06em' }}>
                       <Camera className="w-3 h-3 text-[#241B2B]" /> Foto de Referência do Cliente
                     </span>
@@ -1071,20 +1115,14 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
                       src={inspirationImage}
                       alt="Foto de Referência do Cliente"
                       /*
-                       * `max-w-[50%]` reduz a foto a metade da largura do card,
-                       * na tela E no PDF.
-                       *
-                       * Vale para o PDF sem nenhuma mudanca em `handleDownloadPdf`
-                       * porque aquele codigo forca `width: 100% !important` mas
-                       * nunca toca em `max-width` — e em CSS `max-width` vence
-                       * `width`, !important ou nao. Medido: 558x744 antes,
-                       * 279x372 depois, identico nos dois caminhos.
-                       *
-                       * A proporcao fica intacta: so a largura e limitada, e o
-                       * `h-auto` deixa a altura acompanhar. O container e
-                       * `flex justify-center`, entao a foto menor fica centrada.
+                       * A foto ocupa a largura da coluna da direita (layout com
+                       * foto em pe ao lado de cliente/evento/itens). Antes era
+                       * limitada a metade da largura da folha toda, porque
+                       * ficava sozinha numa linha. `handleDownloadPdf` forca
+                       * `width: 100%` e `height: auto` na captura, o que aqui
+                       * da o mesmo resultado da tela.
                        */
-                      className="w-full max-w-[50%] h-auto max-h-[150px] sm:max-h-none object-contain rounded-xl shadow-card inspiration-image"
+                      className="w-full max-w-[60%] @min-[600px]:max-w-none h-auto object-contain rounded-xl shadow-card inspiration-image"
                     />
                   </div>
                 </div>
@@ -1109,6 +1147,7 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
                   </label>
                 </div>
               )}
+              </div>
 
               {/* Total & Payment Badge */}
               <div className="bg-gradient-to-r from-[#3A2350] to-[#A85E86] p-3.5 rounded-[16px] border-2 border-white/20 flex items-center justify-between gap-3 print-avoid-break">
