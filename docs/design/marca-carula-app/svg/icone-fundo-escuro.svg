@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img" aria-label="Carula App">
+  <path d="M85.7 29.4 A40 40 0 1 0 85.7 90.6" fill="none" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round"/>
+  <g transform="rotate(-22 96 60)"><rect x="83" y="52" width="27" height="16" rx="4.5" fill="#F5B9C6"/><circle cx="88.5" cy="60" r="2.6" fill="#141014"/><path d="M93 55.5v9" stroke="#3A2350" stroke-width="1.4" stroke-dasharray="2 2" opacity=".45"/></g>
+</svg>

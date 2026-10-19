@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 130" width="440" height="130" role="img" aria-label="carula APP">
+  <!-- Texto em Manrope 800: precisa da fonte carregada (o app ja carrega). Para
+       uso fora do app (grafica, redes), converter o texto em curvas. -->
+  <text x="10" y="98" font-family="Manrope, sans-serif" font-weight="800" font-size="112" letter-spacing="-6" fill="#FFFFFF">carula</text>
+  <g transform="translate(328 16) rotate(-8)">
+    <rect x="0" y="0" width="104" height="44" rx="12" fill="#F5B9C6"/>
+    <circle cx="16" cy="22" r="5.5" fill="#6E3F72"/>
+    <path d="M28 8v28" stroke="#3A2350" stroke-width="2" stroke-dasharray="4 3" opacity=".35"/>
+    <text x="38" y="31" font-family="Manrope, sans-serif" font-weight="800" font-size="24" letter-spacing="3.5" fill="#3A2350">APP</text>
+  </g>
+</svg>

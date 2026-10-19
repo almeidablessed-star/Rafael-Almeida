@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Editar Produto</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Manrope:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#ffffff}
+a{color:#6E3F72}a:hover{color:#3A2350}
+.card{transition:transform .32s cubic-bezier(.2,.8,.3,1), box-shadow .32s cubic-bezier(.2,.8,.3,1)}
+.card:hover{transform:translateY(-5px) rotate(-.25deg);box-shadow:0 1px 1px rgba(58,35,80,.04), 0 10px 18px -6px rgba(58,35,80,.12), 0 30px 48px -16px rgba(58,35,80,.32)}
+.ink{border:none;outline:none;background:transparent;font-family:'Instrument Serif',serif;font-size:23px;color:#241B2B;padding:2px 0 7px;width:100%;background-image:linear-gradient(90deg,#6E3F72,#C4626F);background-size:0% 2px;background-repeat:no-repeat;background-position:0 100%;transition:background-size .35s ease}
+.ink::placeholder{color:#B3A6B8;font-style:italic}
+.ink:focus{background-size:100% 2px}
+.num{border:none;outline:none;background:transparent;font-family:'Manrope',sans-serif;font-weight:800;color:#241B2B;width:100%;min-width:0}
+.num::placeholder{color:#B3A6B8}
+.chip{transition:transform .18s ease, box-shadow .18s ease}
+.chip:hover{transform:translateY(-2px);box-shadow:0 6px 12px rgba(58,35,80,.18)}
+.btn{transition:transform .22s ease, box-shadow .22s ease}
+.btn:hover{transform:translateY(-3px)}
+@media (prefers-reduced-motion: reduce){.card,.chip,.btn,.ink{transition:none}.card:hover,.chip:hover,.btn:hover{transform:none}}
+</style>
+</helmet>
+<div style="width: 390px; height: 980px; position: relative; overflow: hidden; background: #F6F2F5; font-family: 'Manrope', sans-serif; color: #241B2B; display: flex; flex-direction: column">
+
+  <!-- Cabeçalho roxo (igual ao atual) -->
+  <header style="flex-shrink: 0; padding: 30px 20px 44px; background: linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%); display: flex; align-items: flex-end; justify-content: space-between">
+    <div style="display: flex; flex-direction: column; gap: 4px">
+      <span style="font-size: 10px; font-weight: 800; letter-spacing: .2em; color: rgba(247,220,225,.8)">PRODUTOS</span>
+      <h1 style="margin: 0; font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 28px; line-height: 1.1; color: #FFFFFF">Editar Produto</h1>
+    </div>
+    <button aria-label="Fechar" style="width: 36px; height: 36px; border: none; border-radius: 11px; background: rgba(255,255,255,.16); display: flex; align-items: center; justify-content: center; cursor: pointer">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg>
+    </button>
+  </header>
+
+  <main style="flex: 1; margin-top: -28px; border-radius: 28px 28px 0 0; background: #F6F2F5; padding: 22px 18px 120px; display: flex; flex-direction: column; gap: 14px">
+
+    <!-- Produto -->
+    <section class="card" style="background: #FFFFFF; border-radius: 24px; padding: 16px 18px 18px; box-shadow: 0 1px 1px rgba(58,35,80,.04), 0 6px 12px -4px rgba(58,35,80,.08), 0 20px 34px -14px rgba(58,35,80,.22); display: flex; flex-direction: column; gap: 14px">
+      <label style="display: flex; flex-direction: column; gap: 2px; border-bottom: 1.5px dashed rgba(110,63,114,.25)">
+        <span style="font-size: 9px; font-weight: 800; letter-spacing: .14em; color: #7A6E80">NOME DO PRODUTO <span style="color: #C4626F">*</span></span>
+        <input class="ink" value="Acuca">
+      </label>
+      <label style="display: flex; flex-direction: column; gap: 2px; border-bottom: 1.5px dashed rgba(110,63,114,.25)">
+        <span style="font-size: 9px; font-weight: 800; letter-spacing: .14em; color: #7A6E80">CATEGORIA</span>
+        <input class="ink" placeholder="Massa, Recheio, Cobertura…">
+      </label>
+    </section>
+
+    <!-- Compra -->
+    <section class="card" style="position: relative; overflow: hidden; background: #FFFFFF; border-radius: 24px; box-shadow: 0 1px 1px rgba(58,35,80,.04), 0 6px 12px -4px rgba(58,35,80,.08), 0 20px 34px -14px rgba(58,35,80,.22)">
+      <div style="padding: 16px 18px 14px; display: flex; gap: 10px; align-items: flex-end">
+        <label style="width: 112px; flex-shrink: 0; display: flex; flex-direction: column; gap: 6px">
+          <span style="font-size: 9px; font-weight: 800; letter-spacing: .14em; color: #7A6E80">PREÇO PAGO <span style="color: #C4626F">*</span></span>
+          <span style="position: relative; height: 44px; box-sizing: border-box; border-radius: 6px 15px 15px 6px; background: #FCEFF2; border: 1px solid rgba(196,98,111,.2); display: flex; align-items: center; gap: 4px; padding: 0 12px 0 22px">
+            <span style="position: absolute; left: 9px; top: 50%; transform: translateY(-50%); width: 7px; height: 7px; border-radius: 50%; background: #FFFFFF; box-shadow: inset 0 1px 2px rgba(196,98,111,.4)"></span>
+            <span style="font-size: 15px; font-weight: 800; color: #C4626F">$</span>
+            <input class="num" value="10" inputmode="decimal" style="font-size: 17px; color: #3A2350">
+          </span>
+        </label>
+        <label style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px">
+          <span style="font-size: 9px; font-weight: 800; letter-spacing: .14em; color: #7A6E80">QTD. DA EMBALAGEM <span style="color: #C4626F">*</span></span>
+          <span style="height: 44px; box-sizing: border-box; padding: 4px 4px 4px 14px; border-radius: 15px; background: #F6F2F5; box-shadow: inset 0 1px 3px rgba(58,35,80,.08); display: flex; align-items: center; gap: 8px">
+            <input class="num" value="1000" inputmode="decimal" style="font-size: 17px">
+            <button aria-label="Unidade: gramas" class="chip" style="height: 36px; flex-shrink: 0; border: none; border-radius: 11px; background: #3A2350; padding: 0 9px 0 11px; display: flex; align-items: center; gap: 4px; font-family: inherit; font-size: 13px; font-weight: 800; color: #F5B9C6; cursor: pointer">g
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#F5B9C6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+            </button>
+          </span>
+        </label>
+      </div>
+
+      <div style="position: relative; height: 0; border-top: 1.5px dashed rgba(36,27,43,.12); margin: 0 14px">
+        <div style="position: absolute; left: -23px; top: -9px; width: 16px; height: 16px; border-radius: 50%; background: #F6F2F5"></div>
+        <div style="position: absolute; right: -23px; top: -9px; width: 16px; height: 16px; border-radius: 50%; background: #F6F2F5"></div>
+      </div>
+
+      <div style="padding: 12px 18px 16px; display: flex; align-items: center; justify-content: space-between">
+        <div style="display: flex; flex-direction: column; gap: 2px">
+          <span style="font-size: 9px; font-weight: 800; letter-spacing: .14em; color: #7A6E80">CUSTO POR UNIDADE</span>
+          <span style="font-size: 11px; font-weight: 600; color: #7A6E80">calculado automaticamente</span>
+        </div>
+        <span style="font-size: 18px; font-weight: 800; letter-spacing: -.02em; color: #3A2350">0.0100<span style="font-size: 12px; color: #7A6E80; font-weight: 700"> /g</span></span>
+      </div>
+    </section>
+
+    <!-- Estoque -->
+    <section class="card" style="position: relative; overflow: hidden; background: #FFFFFF; border-radius: 24px; box-shadow: 0 1px 1px rgba(58,35,80,.04), 0 6px 12px -4px rgba(58,35,80,.08), 0 20px 34px -14px rgba(58,35,80,.22)">
+      <div style="padding: 16px 18px 14px; display: flex; align-items: center; gap: 12px">
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 3px">
+          <span style="font-family: 'Instrument Serif', serif; font-size: 21px; line-height: 1.15">Controlar estoque deste produto?</span>
+          <span style="font-size: 11px; font-weight: 600; line-height: 1.45; color: #7A6E80">Desligue para itens frescos comprados na hora (ex: frutas), que não ficam "em estoque".</span>
+        </div>
+        <button role="switch" aria-checked="true" aria-label="Controlar estoque" style="width: 52px; height: 30px; flex-shrink: 0; border: none; border-radius: 999px; background: linear-gradient(120deg, #6E3F72, #A85E86); box-shadow: inset 0 1px 3px rgba(36,27,43,.25); position: relative; cursor: pointer">
+          <span style="position: absolute; right: 3px; top: 3px; width: 24px; height: 24px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 2px 6px rgba(36,27,43,.3)"></span>
+        </button>
+      </div>
+
+      <div style="position: relative; height: 0; border-top: 1.5px dashed rgba(36,27,43,.12); margin: 0 14px">
+        <div style="position: absolute; left: -23px; top: -9px; width: 16px; height: 16px; border-radius: 50%; background: #F6F2F5"></div>
+        <div style="position: absolute; right: -23px; top: -9px; width: 16px; height: 16px; border-radius: 50%; background: #F6F2F5"></div>
+      </div>
+
+      <div style="padding: 14px 18px 18px; display: flex; flex-direction: column; gap: 14px">
+        <label style="display: flex; flex-direction: column; gap: 6px">
+          <span style="display: flex; align-items: center; justify-content: space-between; font-size: 9px; font-weight: 800; letter-spacing: .14em; color: #7A6E80">QUANTO VOCÊ JÁ TEM GUARDADO
+            <span style="width: 18px; height: 18px; border-radius: 50%; background: #F3E9F3; color: #6E3F72; font-size: 10px; letter-spacing: 0; display: flex; align-items: center; justify-content: center">?</span>
+          </span>
+          <span style="height: 44px; box-sizing: border-box; padding: 4px 4px 4px 14px; border-radius: 15px; background: #F6F2F5; box-shadow: inset 0 1px 3px rgba(58,35,80,.08); display: flex; align-items: center; gap: 8px">
+            <input class="num" value="0" inputmode="decimal" style="font-size: 17px">
+            <button aria-label="Unidade: gramas" class="chip" style="height: 36px; flex-shrink: 0; border: none; border-radius: 11px; background: #3A2350; padding: 0 9px 0 11px; display: flex; align-items: center; gap: 4px; font-family: inherit; font-size: 13px; font-weight: 800; color: #F5B9C6; cursor: pointer">g
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#F5B9C6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+            </button>
+          </span>
+          <span style="font-size: 11px; font-weight: 600; line-height: 1.45; color: #7A6E80">Seu estoque de hoje — não o tamanho da embalagem que você compra.</span>
+        </label>
+
+        <label style="display: flex; flex-direction: column; gap: 6px">
+          <span style="display: flex; align-items: center; gap: 6px; font-size: 9px; font-weight: 800; letter-spacing: .14em; color: #C4626F">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#C4626F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 20h20zM12 10v4M12 17v.5"></path></svg>
+            ALERTA MÍNIMO
+          </span>
+          <span style="height: 44px; box-sizing: border-box; padding: 4px 4px 4px 14px; border-radius: 15px; background: #FDF4F5; border: 1px solid rgba(196,98,111,.18); display: flex; align-items: center; gap: 8px">
+            <input class="num" value="400" inputmode="decimal" style="font-size: 17px">
+            <button aria-label="Unidade: gramas" class="chip" style="height: 36px; flex-shrink: 0; border: none; border-radius: 11px; background: #3A2350; padding: 0 9px 0 11px; display: flex; align-items: center; gap: 4px; font-family: inherit; font-size: 13px; font-weight: 800; color: #F5B9C6; cursor: pointer">g
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#F5B9C6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+            </button>
+          </span>
+        </label>
+      </div>
+    </section>
+  </main>
+
+  <!-- Barra de ações -->
+  <footer style="position: absolute; left: 0; right: 0; bottom: 0; box-sizing: border-box; padding: 14px 18px 26px; background: #FFFFFF; border-top: 1px solid rgba(36,27,43,.06); box-shadow: 0 -8px 24px rgba(58,35,80,.07); display: flex; gap: 10px">
+    <button class="btn" style="width: 108px; height: 52px; flex-shrink: 0; border-radius: 16px; border: 1px solid rgba(110,63,114,.18); background: #FFFFFF; box-shadow: 0 4px 12px rgba(58,35,80,.08); font-family: inherit; font-size: 14px; font-weight: 800; color: #3A2350; cursor: pointer">Cancelar</button>
+    <button class="btn" style="flex: 1; height: 52px; border-radius: 16px; border: none; background: #3A2350; box-shadow: 0 10px 20px rgba(58,35,80,.3); font-family: inherit; font-size: 15px; font-weight: 800; color: #F5B9C6; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F5B9C6" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg>
+      Salvar produto
+    </button>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":980}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

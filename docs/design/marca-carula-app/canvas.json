@@ -1,0 +1,99 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "FichaInsumosV2.dc.html": {
+      "h": 1180,
+      "title": "Ficha Técnica · Insumos",
+      "w": 390,
+      "x": 0,
+      "y": 0,
+      "is_interactive": true,
+      "page": "telas"
+    },
+    "FichaPreco.dc.html": {
+      "h": 844,
+      "title": "Ficha Técnica · Preço",
+      "w": 390,
+      "x": 0,
+      "y": 1300,
+      "is_interactive": true,
+      "page": "telas"
+    },
+    "EditarProduto.dc.html": {
+      "h": 980,
+      "title": "Editar Produto",
+      "w": 390,
+      "x": 0,
+      "y": 2264,
+      "is_interactive": true,
+      "page": "telas"
+    },
+    "LogoAnel.dc.html": {
+      "h": 720,
+      "title": "Logo · Opção 1 — Anel (só o C)",
+      "w": 1200,
+      "x": 0,
+      "y": 0,
+      "page": "logo"
+    },
+    "LogoCobertura.dc.html": {
+      "h": 720,
+      "title": "Logo · Opção 2 — Cobertura (Carula)",
+      "w": 1200,
+      "x": 0,
+      "y": 840,
+      "page": "logo"
+    },
+    "LogoEtiqueta.dc.html": {
+      "h": 720,
+      "title": "Logo · Opção 3 — Etiqueta (Carula App)",
+      "w": 1200,
+      "x": 0,
+      "y": 1680,
+      "page": "logo"
+    },
+    "MarcaFinal.dc.html": {
+      "h": 860,
+      "title": "Carula App · Marca final",
+      "w": 1200,
+      "x": 0,
+      "y": 0,
+      "page": "marca"
+    },
+    "IconeC.dc.html": {
+      "h": 660,
+      "title": "Ícone · O C sozinho (4 caminhos)",
+      "w": 1200,
+      "x": 0,
+      "y": -780,
+      "page": "logo"
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-10-19T01:45:18.132Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "view": "canvas",
+    "page": "marca"
+  },
+  "notes": {},
+  "order": [
+    "FichaInsumosV2.dc.html",
+    "FichaPreco.dc.html",
+    "EditarProduto.dc.html",
+    "LogoAnel.dc.html",
+    "LogoCobertura.dc.html",
+    "LogoEtiqueta.dc.html",
+    "IconeC.dc.html",
+    "MarcaFinal.dc.html"
+  ],
+  "pages": [
+    { "id": "telas", "name": "Telas aprovadas" },
+    { "id": "logo", "name": "Logo Carula App" },
+    { "id": "marca", "name": "Marca final" }
+  ],
+  "title": "Pedido Carula Cake"
+}
