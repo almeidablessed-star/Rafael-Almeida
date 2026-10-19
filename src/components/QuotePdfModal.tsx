@@ -34,6 +34,11 @@ import {
   ChevronUp,
   Upload,
   Trash2,
+  Truck,
+  Flower2,
+  Cake,
+  Pencil,
+  Zap,
 } from 'lucide-react';
 
 /**
@@ -771,7 +776,7 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
    * texto da descricao, como sempre foi, e saem SEM preco por item: inventar
    * um rateio do total seria mostrar a cliente um numero que ninguem cobrou.
    */
-  const itensDaFolha: { nome: string; quantidade: number; valorTotal: number | null; adicional?: boolean }[] =
+  const itensDaFolha: { nome: string; quantidade: number; valorTotal: number | null; adicional?: boolean; entrega?: boolean }[] =
     transaction.breakdown?.itens?.length
       ? transaction.breakdown.itens.map((i) => ({
           nome: i.nome,
@@ -797,9 +802,19 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
     // A taxa de entrega tambem soma no total; sem esta linha a conta nao fechava.
     const taxaEntrega = Number(transaction.breakdown.delivery) || 0;
     if (taxaEntrega > 0) {
-      itensDaFolha.push({ nome: 'Taxa de entrega', quantidade: 1, valorTotal: taxaEntrega });
+      itensDaFolha.push({ nome: 'Taxa de entrega', quantidade: 1, valorTotal: taxaEntrega, entrega: true });
     }
   }
+
+  // Avatar da cliente sem foto: as iniciais do nome ("Marina Prado" -> "MP").
+  const iniciaisDaCliente = (transaction.customerName || '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((parte) => parte[0])
+    .filter((_, i, todas) => i === 0 || i === todas.length - 1)
+    .join('')
+    .toUpperCase() || 'C';
 
   // Filter out delivery and fee items for the Kitchen Production sheet
   const recipeItems = itemLines.filter((line) => {
@@ -930,173 +945,174 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
             /* ======================================================== */
             /* TAB 1: FOLHA DO CLIENTE (GROOVY COMPACT 1-PAGE LAYOUT)   */
             /* ======================================================== */
-            <div className="space-y-1 sm:space-y-2">
-              {/* Header Banner - Groovy Brand Identity */}
-              <div className="bg-gradient-to-r from-[#3A2350] to-[#A85E86] rounded-lg p-3.5 text-white shadow-card border border-white/20 print:border-neutral-300 print:bg-white print:text-neutral-900 print-avoid-break">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    {/* `rounded-photo-container` marca as fotos que sao arredondadas
-                        por border-radius + overflow-hidden. A classe existe so para
-                        estas caixas ficarem FORA da remocao generica de
-                        overflow-hidden feita antes da captura do PDF — ver o
-                        comentario no seletor, em `handleDownloadPdf`. Sem ela os 8px
-                        de arredondamento somem e a foto sai quadrada no PDF. */}
-                    <div className="w-12 h-12 rounded-lg bg-white border-2 border-[var(--color-pastry-light-pink)] shadow-card flex items-center justify-center overflow-hidden shrink-0 rounded-photo-container">
-                      {sellerPhotoUrl ? (
-                        <img
-                          src={sellerPhotoUrl}
-                          alt={sellerName || 'Foto da confeitaria'}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <User className="w-6 h-6 text-[var(--color-pastry-chocolate)]" />
-                      )}
-                    </div>
-                    <div>
-                      {/* Sem fallback de nome: perfil incompleto sai em branco.
-                          Um orcamento com o nome de outra confeitaria e pior
-                          do que um orcamento sem nome. */}
-                      {/* So o nome que a confeiteira cadastrou. Saiu daqui a
-                          linha fixa "Confeitaria Artesanal & Bolos de Festa"
-                          com o coracao: era texto do app, igual para todas, no
-                          documento que cada uma manda para a propria cliente. */}
-                      <h2 className="font-bold text-lg sm:text-xl tracking-tight leading-tight text-[var(--color-pastry-chocolate)]">
-                        {sellerName}
-                      </h2>
-                    </div>
-                  </div>
+            <div className="flex flex-col gap-3 p-2 @min-[600px]:p-4" style={{ background: '#F6F2F5', fontFamily: "'Manrope', sans-serif", color: '#241B2B' }}>
+              {/* Visual da "Versao final · combinada" desenhada no Claude Design
+                  (artefato "Pedido Carula Cake"): cabecalho em forma de ticket,
+                  cards brancos com rotulos roxos, foto em pe a direita e o
+                  pagamento em versao clara. Cores e fontes literais porque as
+                  variaveis --color-* nao existem em runtime. */}
 
-                  {/* Seller Contact Info */}
-                  <div className="text-[10px] font-bold text-[var(--color-pastry-chocolate)] text-right space-y-0.5 print:text-neutral-800 shrink-0">
-                    {sellerPhone && <div>📞 {sellerPhone}</div>}
-                    {sellerInstagram && <div>📷 {sellerInstagram}</div>}
-                    {sellerAddress && <div>📍 {sellerAddress}</div>}
+              {/* Cabecalho: nome da confeitaria + contatos do perfil */}
+              <header
+                className="relative flex flex-wrap items-center justify-between gap-x-4 gap-y-2 print-avoid-break"
+                style={{ minHeight: '72px', padding: '12px 18px 12px 28px', borderRadius: '20px', background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)', boxShadow: '0 14px 30px rgba(58,35,80,.3)' }}
+              >
+                <span aria-hidden="true" className="absolute top-1/2 -translate-y-1/2 rounded-full" style={{ left: '-11px', width: '22px', height: '22px', background: '#F6F2F5' }} />
+                <span aria-hidden="true" className="absolute top-1/2 -translate-y-1/2 rounded-full" style={{ right: '-11px', width: '22px', height: '22px', background: '#F6F2F5' }} />
+                <div className="flex items-center gap-3 min-w-0">
+                  {/* Logo so quando a confeitaria cadastrou uma. A classe
+                      `rounded-photo-container` mantem o arredondamento na
+                      captura do PDF — ver o seletor em `handleDownloadPdf`. */}
+                  {sellerPhotoUrl && (
+                    <div className="w-11 h-11 rounded-xl overflow-hidden shrink-0 bg-white rounded-photo-container">
+                      <img src={sellerPhotoUrl} alt={sellerName || 'Logo da confeitaria'} className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                  <div className="flex flex-col gap-0.5 min-w-0" style={{ borderLeft: '2px dashed rgba(245,185,198,.5)', paddingLeft: '14px' }}>
+                    <span style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '.24em', color: 'rgba(247,220,225,.8)' }}>CONFEITARIA</span>
+                    {/* Sem fallback de nome: perfil incompleto sai em branco.
+                        Um orcamento com o nome de outra confeitaria e pior do
+                        que um orcamento sem nome. */}
+                    <span className="truncate" style={{ fontFamily: "'Instrument Serif', serif", fontSize: '32px', lineHeight: 1, color: '#FFFFFF' }}>{sellerName}</span>
                   </div>
                 </div>
-              </div>
-
-              {/* Com foto de referencia: cliente, evento e itens empilhados a
-                  esquerda e a foto (em pe, estilo selfie) a direita, na altura
-                  deles. Sem foto, a direita ficaria vazia no PDF (o convite
-                  para enviar foto e no-print), entao a folha fica como antes,
-                  numa coluna so. As colunas seguem a largura da FOLHA (container
-                  query), nao da janela: um "sm:" responderia a janela, e no
-                  celular nunca ativaria. Na tela do celular elas empilham; no
-                  PDF, montado com 668px em handleDownloadPdf, ficam lado a lado. */}
-              <div className={inspirationImage ? 'grid grid-cols-1 @min-[600px]:grid-cols-[1.15fr_1fr] gap-2.5 items-start' : 'space-y-1 sm:space-y-2'}>
-              <div className={inspirationImage ? 'flex flex-col gap-2.5 min-w-0' : 'space-y-1 sm:space-y-2'}>
-
-              {/* Grid 1: Client & Event Information */}
-              <div className={inspirationImage ? 'flex flex-col gap-2.5 print-avoid-break' : 'grid grid-cols-1 sm:grid-cols-2 gap-2.5 print-avoid-break'}>
-                {/* Customer Box */}
-                <div className="bg-white p-3 rounded-[16px] border border-[#E6E1DB] shadow-sm space-y-1.5">
-                  <h4 className="text-[9px] font-black uppercase tracking-wider text-[#241B2B] flex items-center gap-1 border-b border-[#E6E1DB] pb-0.5" style={{ fontFamily: "'Manrope', sans-serif", letterSpacing: '.06em' }}>
-                    👤 Dados da(o) Cliente Especial
-                  </h4>
-                  <div className="flex items-center gap-2.5">
-                    {/* Mesma marcacao da foto da confeitaria acima: sem ela o
-                        retrato sai QUADRADO no PDF, redondo apenas na tela. */}
-                    <div className="w-11 h-11 rounded-full border-2 border-[var(--color-pastry-light-pink)] overflow-hidden bg-[var(--color-pastry-pink)]/30 flex items-center justify-center shrink-0 shadow-card rounded-photo-container">
-                      {custPhoto ? (
-                        <img
-                          src={custPhoto}
-                          alt={transaction.customerName || 'Cliente'}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <User className="w-6 h-6 text-[var(--color-pastry-chocolate)]/60" />
-                      )}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-bold text-sm text-[var(--color-pastry-chocolate)] leading-tight truncate">
-                        {transaction.customerName || 'Cliente'}
-                      </p>
-                      <p className="text-[11px] font-bold text-[var(--color-pastry-chocolate)]/80 flex items-center gap-1 mt-0.5">
-                        📞 {transaction.customerPhone || 'Não informado'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Event & Delivery Box */}
-                <div className="bg-white p-3 rounded-[16px] border border-[#E6E1DB] shadow-sm space-y-1">
-                  <h4 className="text-[9px] font-black uppercase tracking-wider text-[#241B2B] flex items-center gap-1 border-b border-[#E6E1DB] pb-0.5" style={{ fontFamily: "'Manrope', sans-serif", letterSpacing: '.06em' }}>
-                    📅 Evento & Horário de Entrega
-                  </h4>
-                  <div className="flex items-center justify-between text-xs font-bold text-[var(--color-pastry-chocolate)]">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3 text-[var(--color-pastry-chocolate)]/70" /> Data:{' '}
-                      <strong className="text-[var(--color-pastry-chocolate)] font-bold">
-                        {transaction.eventDate ? formatDateBr(transaction.eventDate) : formatDateBr(transaction.date)}
-                      </strong>
-                    </span>
-                    {transaction.deliveryTime && (
-                      <span className="flex items-center gap-1 bg-[var(--color-pastry-yellow)] text-[var(--color-pastry-chocolate)] px-2 py-0.5 rounded-md font-bold text-[10px]">
-                        <Clock className="w-3 h-3 text-[var(--color-pastry-chocolate)]" /> {transaction.deliveryTime}
+                {(sellerPhone || sellerInstagram || sellerAddress) && (
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { valor: sellerPhone, Icone: Phone },
+                      { valor: sellerInstagram, Icone: Instagram },
+                      { valor: sellerAddress, Icone: MapPin },
+                    ].filter((c) => c.valor).map(({ valor, Icone }) => (
+                      <span key={valor} className="flex items-center gap-1.5" style={{ background: 'rgba(255,255,255,.14)', color: '#FFFFFF', fontSize: '11px', fontWeight: 700, padding: '7px 11px', borderRadius: '11px' }}>
+                        <Icone className="w-3 h-3 shrink-0" style={{ color: '#F5B9C6' }} strokeWidth={2.2} />
+                        {valor}
                       </span>
-                    )}
-                  </div>
-                  <p className="text-[11px] font-medium text-[var(--color-pastry-chocolate)]/80 flex items-center gap-1">
-                    <MapPin className="w-3 h-3 text-[var(--color-pastry-chocolate)]/70 shrink-0" />{' '}
-                    <span>Endereço: {transaction.deliveryAddress || 'Retirada na Confeitaria'}</span>
-                  </p>
-                </div>
-              </div>
-
-              {/* Items Table & Summary */}
-              <div className="bg-white p-3.5 rounded-[16px] border border-[#E6E1DB] shadow-sm space-y-2 print-avoid-break">
-                <div className="flex items-center justify-between border-b border-[#E6E1DB] pb-1">
-                  <h4 className="text-[9px] font-black uppercase tracking-wider text-[#241B2B] flex items-center gap-1" style={{ fontFamily: "'Manrope', sans-serif", letterSpacing: '.06em' }}>
-                    <ShoppingBag className="w-3 h-3 text-[#241B2B]" />
-                    Itens Solicitados
-                  </h4>
-                  <span className="bg-[var(--color-pastry-pink)]/60 text-[var(--color-pastry-chocolate)] text-[10px] font-bold px-2 py-0.5 rounded-full border border-[var(--color-pastry-light-pink)]/60">
-                    Qtd Total: {transaction.quantity}
-                  </span>
-                </div>
-
-                <div className="space-y-1">
-                  {itensDaFolha.map((item, idx) => (
-                    <div key={`item-${idx}-${item.nome}`} className="flex items-center gap-2 text-xs font-bold text-[var(--color-pastry-chocolate)] bg-[var(--color-pastry-cream)]/60 p-2 rounded-xl border border-[var(--color-text-muted)]">
-                      <span className="leading-tight">
-                        {item.adicional && <span className="font-semibold opacity-70">Adicional · </span>}
-                        {item.quantidade > 1 && `${item.quantidade}× `}{item.nome}
-                      </span>
-                      {item.valorTotal !== null && (
-                        <span className="ml-auto shrink-0 tabular-nums">
-                          {formatCurrency(item.valorTotal)}
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-                {transaction.observations && (
-                  <div className="p-2 bg-[var(--color-pastry-yellow)]/60 rounded-xl border border-[var(--color-pastry-light-pink)]/40 text-[11px] font-bold text-[var(--color-pastry-chocolate)]">
-                    <strong>📝 Observações:</strong> "{transaction.observations}"
+                    ))}
                   </div>
                 )}
-              </div>
+              </header>
 
-              </div>
+              {/* Com foto: cliente, evento e itens a esquerda e a foto em pe a
+                  direita, na altura deles. Sem foto, uma coluna so (o convite
+                  para enviar foto e no-print, a direita ficaria vazia no PDF).
+                  As colunas seguem a largura da FOLHA (container query), nao
+                  da janela: um "sm:" responderia a janela e no celular nunca
+                  ativaria. Na tela do celular empilham; no PDF, montado com
+                  668px em handleDownloadPdf, ficam lado a lado. */}
+              <div className={inspirationImage ? 'grid grid-cols-1 @min-[600px]:grid-cols-2 gap-3' : 'flex flex-col gap-3'}>
+                <div className="flex flex-col gap-3 min-w-0">
+                  {/* Cliente */}
+                  <section className="print-avoid-break" style={{ background: '#FFFFFF', borderRadius: '22px', boxShadow: '0 8px 20px rgba(58,35,80,.09)', padding: '14px 18px' }}>
+                    <div className="flex items-center gap-[7px]" style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '.12em', color: '#6E3F72' }}>
+                      <User className="w-[13px] h-[13px]" strokeWidth={2.2} />
+                      DADOS DA(O) CLIENTE
+                    </div>
+                    <div className="flex items-center gap-3 mt-2.5">
+                      {/* Foto da cliente quando existe; senao as iniciais.
+                          Mesma marcacao da logo: sem ela o retrato sai quadrado
+                          no PDF. */}
+                      <div className="w-11 h-11 rounded-full overflow-hidden shrink-0 flex items-center justify-center rounded-photo-container" style={{ background: '#F3E9F3', fontFamily: "'Instrument Serif', serif", fontSize: '20px', color: '#6E3F72' }}>
+                        {custPhoto ? (
+                          <img src={custPhoto} alt={transaction.customerName || 'Cliente'} className="w-full h-full object-cover" />
+                        ) : (
+                          iniciaisDaCliente
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-[3px] min-w-0">
+                        <span className="truncate" style={{ fontFamily: "'Instrument Serif', serif", fontSize: '22px', lineHeight: 1.1 }}>
+                          {transaction.customerName || 'Cliente'}
+                        </span>
+                        <span className="flex items-center gap-[5px]" style={{ fontSize: '11px', fontWeight: 600, color: '#7A6E80' }}>
+                          <Phone className="w-[11px] h-[11px] shrink-0" style={{ color: '#C4626F' }} strokeWidth={2.2} />
+                          {transaction.customerPhone || 'Não informado'}
+                        </span>
+                      </div>
+                    </div>
+                  </section>
 
-              {/* INSPIRATION PHOTO - DISPLAYED IN FULL 100% UNCROPPED VISIBILITY */}
-              {inspirationImage ? (
-                <div className="bg-white p-3 rounded-[16px] border-2 border-[#F5B9C6] shadow-sm space-y-2 print-avoid-break">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="text-[9px] font-black uppercase tracking-wider text-[#241B2B] flex items-center gap-1" style={{ fontFamily: "'Manrope', sans-serif", letterSpacing: '.06em' }}>
-                      <Camera className="w-3 h-3 text-[#241B2B]" /> Foto de Referência do Cliente
-                    </span>
-                    <div className="flex items-center gap-1.5 no-print">
-                      <label className="px-2.5 py-1 rounded-xl bg-[#F5B9C6] hover:bg-[#E8A0B0] text-[#3A2350] font-bold text-[10px] flex items-center gap-1 cursor-pointer transition-colors shadow-sm" style={{ fontFamily: "'Manrope', sans-serif" }}>
+                  {/* Evento & horario de entrega */}
+                  <section className="print-avoid-break" style={{ background: '#FFFFFF', border: '1px solid rgba(36,27,43,.07)', borderRadius: '22px', boxShadow: '0 8px 20px rgba(58,35,80,.09)', padding: '14px 16px' }}>
+                    <span style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '.12em', color: '#6E3F72' }}>EVENTO &amp; HORÁRIO DE ENTREGA</span>
+                    <div className="grid grid-cols-2 gap-2 mt-[9px]">
+                      {[
+                        { rotulo: 'DATA', valor: transaction.eventDate ? formatDateBr(transaction.eventDate) : formatDateBr(transaction.date) },
+                        { rotulo: 'HORÁRIO', valor: transaction.deliveryTime || 'A combinar' },
+                      ].map((c) => (
+                        <div key={c.rotulo} className="flex flex-col gap-px min-w-0" style={{ background: '#F6F2F5', borderRadius: '14px', padding: '8px 12px' }}>
+                          <span style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '.1em', color: '#7A6E80' }}>{c.rotulo}</span>
+                          <span className="truncate" style={{ fontSize: '17px', fontWeight: 800, letterSpacing: '-.02em' }}>{c.valor}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-1.5 mt-2" style={{ fontSize: '11px', fontWeight: 600, color: '#5B4A6B' }}>
+                      <MapPin className="w-3 h-3 shrink-0" style={{ color: '#6E3F72' }} strokeWidth={2.2} />
+                      {transaction.deliveryAddress || 'Retirada na confeitaria'}
+                    </div>
+                  </section>
+
+                  {/* Itens solicitados */}
+                  <section className="flex-1 flex flex-col gap-[7px] print-avoid-break" style={{ background: '#FFFFFF', border: '1px solid rgba(36,27,43,.07)', borderRadius: '22px', boxShadow: '0 8px 20px rgba(58,35,80,.09)', padding: '14px 16px' }}>
+                    <div className="flex items-center justify-between mb-0.5">
+                      <span style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '.12em', color: '#6E3F72' }}>ITENS SOLICITADOS</span>
+                      <span className="whitespace-nowrap" style={{ background: '#F3E9F3', color: '#3A2350', fontSize: '9px', fontWeight: 800, padding: '5px 10px', borderRadius: '999px' }}>
+                        Qtd total: {transaction.quantity}
+                      </span>
+                    </div>
+                    {itensDaFolha.map((item, idx) => {
+                      // Icone e cor por tipo de linha, como no design: produto
+                      // (roxo), adicional (rosa) e taxa de entrega (bege).
+                      const visual = item.entrega
+                        ? { Icone: Truck, fundo: '#F0E2C8', cor: '#5B4A2E' }
+                        : item.adicional
+                          ? { Icone: Flower2, fundo: '#FCEFF2', cor: '#C4626F' }
+                          : { Icone: Cake, fundo: '#3A2350', cor: '#F5B9C6' };
+                      return (
+                        <div key={`item-${idx}-${item.nome}`} className="flex items-center gap-2.5" style={{ border: '1px solid #EDE6EF', borderRadius: '16px', padding: '8px 10px' }}>
+                          <div className="w-[30px] h-[30px] shrink-0 flex items-center justify-center" style={{ borderRadius: '10px', background: visual.fundo }}>
+                            <visual.Icone className="w-[15px] h-[15px]" style={{ color: visual.cor }} strokeWidth={2} />
+                          </div>
+                          <span className="flex-1 min-w-0 leading-tight" style={{ fontSize: '13px', fontWeight: 700 }}>
+                            {item.adicional && <span style={{ fontWeight: 600, color: '#7A6E80' }}>Adicional · </span>}
+                            {item.quantidade > 1 && `${item.quantidade}× `}{item.nome}
+                          </span>
+                          {item.valorTotal !== null && (
+                            <span className="shrink-0 tabular-nums" style={{ fontSize: '14px', fontWeight: 800, letterSpacing: '-.02em' }}>
+                              {formatCurrency(item.valorTotal)}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+                    {transaction.observations && (
+                      <div className="mt-auto flex items-start gap-[7px]" style={{ background: '#FBF6EC', color: '#5B4A2E', borderRadius: '14px', padding: '9px 12px', fontSize: '11px', fontWeight: 600, lineHeight: 1.45 }}>
+                        <Pencil className="w-3 h-3 shrink-0 mt-0.5" strokeWidth={2.2} />
+                        <span><b style={{ fontWeight: 800 }}>Observações:</b> "{transaction.observations}"</span>
+                      </div>
+                    )}
+                  </section>
+                </div>
+
+                {/* Foto de referencia: preenche a coluna da direita na altura
+                    dos cards (object-cover, como no design). Fica fora das
+                    classes `inspiration-image*`, que forcam altura automatica
+                    na captura; `rounded-photo-container` mantem o recorte
+                    arredondado. Na tela estreita vira um retrato 3:4 centrado. */}
+                {inspirationImage ? (
+                  <div className="flex flex-col gap-2 min-w-0">
+                    <section
+                      className="relative overflow-hidden rounded-photo-container aspect-[3/4] w-[70%] mx-auto @min-[600px]:aspect-auto @min-[600px]:w-full @min-[600px]:flex-1"
+                      style={{ minHeight: '200px', borderRadius: '26px', border: '3px solid #FFFFFF', boxShadow: '0 0 0 1.5px #F5B9C6, 0 14px 30px rgba(58,35,80,.16)' }}
+                    >
+                      <img src={inspirationImage} alt="Foto de referência do bolo" className="absolute inset-0 w-full h-full object-cover" />
+                      <span className="absolute" style={{ top: '12px', left: '12px', background: 'rgba(255,255,255,.92)', color: '#3A2350', fontSize: '9px', fontWeight: 800, letterSpacing: '.12em', padding: '6px 11px', borderRadius: '999px', boxShadow: '0 4px 10px rgba(58,35,80,.12)' }}>
+                        FOTO DE REFERÊNCIA
+                      </span>
+                    </section>
+                    <div className="flex items-center justify-center gap-1.5 no-print">
+                      <label className="px-2.5 py-1 rounded-xl bg-[#F5B9C6] hover:bg-[#E8A0B0] text-[#3A2350] font-bold text-[10px] flex items-center gap-1 cursor-pointer transition-colors shadow-sm">
                         <Camera className="w-3 h-3 text-[#3A2350]" />
                         <span>Alterar Foto</span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageUpload}
-                          className="hidden"
-                        />
+                        <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                       </label>
                       <button
                         type="button"
@@ -1109,103 +1125,57 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
                       </button>
                     </div>
                   </div>
-
-                  <div className="w-full rounded-lg overflow-hidden border border-[var(--color-pastry-light-pink)]/50 bg-[var(--color-pastry-cream)]/40 flex items-center justify-center p-1 print:overflow-visible inspiration-image-container">
-                    <img
-                      src={inspirationImage}
-                      alt="Foto de Referência do Cliente"
-                      /*
-                       * A foto ocupa a largura da coluna da direita (layout com
-                       * foto em pe ao lado de cliente/evento/itens). Antes era
-                       * limitada a metade da largura da folha toda, porque
-                       * ficava sozinha numa linha. `handleDownloadPdf` forca
-                       * `width: 100%` e `height: auto` na captura, o que aqui
-                       * da o mesmo resultado da tela.
-                       */
-                      className="w-full max-w-[60%] @min-[600px]:max-w-none h-auto object-contain rounded-xl shadow-card inspiration-image"
-                    />
+                ) : (
+                  <div className="no-print" style={{ background: '#FFFFFF', borderRadius: '22px', border: '2px dashed #F5B9C6' }}>
+                    <label className="flex flex-col items-center justify-center py-5 px-4 cursor-pointer text-center gap-1.5">
+                      <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: '#FCEFF2', color: '#6E3F72' }}>
+                        <Upload className="w-4 h-4" />
+                      </div>
+                      <span className="font-bold text-xs" style={{ color: '#3A2350' }}>+ Adicionar Foto de Referência do Cliente</span>
+                      <span className="text-[10px] max-w-sm" style={{ color: '#7A6E80' }}>
+                        Clique aqui para enviar a foto do modelo/bolo enviada pela cliente.
+                      </span>
+                      <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                    </label>
                   </div>
-                </div>
-              ) : (
-                <div className="bg-white p-3.5 rounded-lg border-2 border-dashed border-[var(--color-pastry-light-pink)] shadow-card no-print hover:bg-[var(--color-pastry-pink)]/10 transition-colors">
-                  <label className="flex flex-col items-center justify-center py-3 cursor-pointer text-center space-y-1.5">
-                    <div className="w-9 h-9 rounded-full bg-[var(--color-pastry-pink)]/60 text-[var(--color-pastry-chocolate)] flex items-center justify-center shadow-card">
-                      <Upload className="w-4.5 h-4.5" />
-                    </div>
-                    <span className="font-bold text-xs text-[var(--color-pastry-chocolate)]">
-                      + Adicionar Foto de Referência do Cliente
-                    </span>
-                    <span className="text-[10px] text-[var(--color-pastry-chocolate)]/70 max-w-sm">
-                      Clique aqui para enviar a foto do modelo/bolo enviada pela cliente (ficará visível inteira na folha).
-                    </span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                    />
-                  </label>
-                </div>
-              )}
+                )}
               </div>
 
-              {/* Total & Payment Badge */}
-              <div className="bg-gradient-to-r from-[#3A2350] to-[#A85E86] p-3.5 rounded-[16px] border-2 border-white/20 flex items-center justify-between gap-3 print-avoid-break">
-                <div>
-                  <span className="text-[9px] font-black uppercase text-white/80 block" style={{ fontFamily: "'Manrope', sans-serif" }}>
-                    Forma de Pagamento:
-                  </span>
-                  <span className="inline-block bg-[#F5B9C6] text-[#3A2350] font-black text-[11px] px-3 py-0.5 rounded-full uppercase shadow-sm">
-                    ⚡ {transaction.paymentMethod === 'cash' ? 'DINHEIRO / ESPÉCIE' : (transaction.paymentMethod ? transaction.paymentMethod.toUpperCase() : 'A COMBINAR')}
+              {/* Pagamento (versao clara do design) */}
+              <section
+                className="relative flex flex-wrap items-center justify-between gap-x-6 gap-y-3 print-avoid-break"
+                style={{ minHeight: '112px', padding: '16px 30px', borderRadius: '22px', background: '#FDF6F8', border: '1px solid rgba(196,98,111,.16)', boxShadow: '0 8px 20px rgba(58,35,80,.09)' }}
+              >
+                <span aria-hidden="true" className="absolute top-1/2 -translate-y-1/2 rounded-full" style={{ left: '-11px', width: '22px', height: '22px', background: '#F6F2F5', border: '1px solid rgba(196,98,111,.16)' }} />
+                <span aria-hidden="true" className="absolute top-1/2 -translate-y-1/2 rounded-full" style={{ right: '-11px', width: '22px', height: '22px', background: '#F6F2F5', border: '1px solid rgba(196,98,111,.16)' }} />
+                <div className="flex flex-col gap-[9px]">
+                  <span style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '.2em', color: '#6E3F72' }}>FORMA DE PAGAMENTO</span>
+                  <span className="self-start flex items-center gap-1.5" style={{ background: '#F5B9C6', color: '#3A2350', fontSize: '10px', fontWeight: 800, letterSpacing: '.08em', padding: '6px 12px', borderRadius: '999px' }}>
+                    <Zap className="w-[11px] h-[11px]" strokeWidth={2.4} />
+                    {transaction.paymentMethod === 'cash' ? 'DINHEIRO / ESPÉCIE' : (transaction.paymentMethod ? transaction.paymentMethod.toUpperCase() : 'A COMBINAR')}
                   </span>
                 </div>
-
-                <div className="text-right space-y-2">
-                  <div>
-                    <span className="text-[9px] font-black uppercase text-white/80 block" style={{ fontFamily: "'Manrope', sans-serif" }}>
-                      VALOR TOTAL DO PEDIDO:
+                <div className="flex flex-col items-end gap-[3px] ml-auto" style={{ borderLeft: '2px dashed rgba(196,98,111,.3)', paddingLeft: '28px' }}>
+                  <span style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '.2em', color: '#6E3F72' }}>VALOR TOTAL DO PEDIDO</span>
+                  <span style={{ fontSize: '40px', fontWeight: 800, letterSpacing: '-.03em', lineHeight: 1.05, color: '#3A2350' }}>
+                    {formatCurrency(transaction.totalValue)}
+                  </span>
+                  {transaction.signalValue ? (
+                    <span className="text-right" style={{ fontSize: '11px', fontWeight: 600, color: '#7A6E80' }}>
+                      Sinal pago <b style={{ color: '#4C7358', fontWeight: 800 }}>{formatCurrency(transaction.signalValue)}</b> · A pagar na entrega <b style={{ color: '#C4626F', fontWeight: 800 }}>{formatCurrency(transaction.totalValue - transaction.signalValue)}</b>
                     </span>
-                    <span className="font-black text-white" style={{ fontSize: '24px', fontFamily: "'Manrope', sans-serif" }}>
-                      {formatCurrency(transaction.totalValue)}
-                    </span>
-                  </div>
-
-                  {transaction.signalValue && (
-                    <div className="border-t border-white/30 pt-1 mt-1">
-                      <div className="flex items-center justify-end gap-2 mb-1">
-                        <span className="text-[9px] font-bold uppercase text-white/80" style={{ fontFamily: "'Manrope', sans-serif" }}>
-                          ✅ Sinal Pago:
-                        </span>
-                        <span className="font-bold text-emerald-200" style={{ fontSize: '14px', fontFamily: "'Manrope', sans-serif" }}>
-                          {formatCurrency(transaction.signalValue)}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-end gap-2">
-                        <span className="text-[9px] font-bold uppercase text-white/80" style={{ fontFamily: "'Manrope', sans-serif" }}>
-                          📋 A Pagar na Entrega:
-                        </span>
-                        <span className="font-bold text-orange-200" style={{ fontSize: '14px', fontFamily: "'Manrope', sans-serif" }}>
-                          {formatCurrency(transaction.totalValue - transaction.signalValue)}
-                        </span>
-                      </div>
-                    </div>
-                  )}
+                  ) : null}
                 </div>
-              </div>
+              </section>
 
-              {/* Footer Note */}
-              <div className="text-center pt-1 border-t border-[var(--color-pastry-light-pink)]/60 print-avoid-break">
-                {/* Nome e telefone vinham fixos aqui ("Carula Cake
-                    Confeitaria", "(781) 420-6892"), aparecendo no orcamento de
-                    toda compradora. Agora seguem o perfil, e somem quando ele
-                    esta vazio. */}
-                <p className="text-[11px] font-bold text-[var(--color-pastry-chocolate)] flex items-center justify-center gap-1">
-                  {sellerName ? `Obrigada(o) por escolher a ${sellerName}! 💕` : 'Obrigada(o) pela preferência! 💕'}
-                </p>
-                <p className="text-[9px] text-[var(--color-pastry-chocolate)]/70 font-medium">
-                  Encomenda feita com amor e carinho{sellerPhone ? ` • Contato: ${sellerPhone}` : ''}
-                </p>
-              </div>
+              {/* Rodape. Nome segue o perfil (antes era fixo "Carula Cake
+                  Confeitaria" para toda compradora) e some quando vazio. */}
+              <footer className="flex flex-col gap-0.5 text-center print-avoid-break" style={{ marginTop: '6px', borderTop: '1px dashed rgba(36,27,43,.14)', paddingTop: '12px' }}>
+                <span style={{ fontFamily: "'Instrument Serif', serif", fontSize: '18px', color: '#3A2350' }}>
+                  {sellerName ? `Obrigada(o) por escolher a ${sellerName}!` : 'Obrigada(o) pela preferência!'}
+                </span>
+                <span style={{ fontSize: '10px', fontWeight: 600, color: '#7A6E80' }}>Encomenda feita com amor e carinho</span>
+              </footer>
             </div>
           ) : (
             /* ======================================================== */
