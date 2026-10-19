@@ -1023,8 +1023,8 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
 
               {/* Cabecalho: nome da confeitaria + contatos do perfil */}
               <header
-                className="relative flex flex-col items-start gap-2.5 print-avoid-break"
-                style={{ minHeight: '72px', padding: '14px 22px 14px 28px', borderRadius: '20px', background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)', boxShadow: '0 14px 30px rgba(58,35,80,.3)' }}
+                className="relative flex flex-col items-start gap-4 print-avoid-break"
+                style={{ minHeight: '72px', padding: '28px 28px 28px 34px', borderRadius: '20px', background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)', boxShadow: '0 14px 30px rgba(58,35,80,.3)' }}
               >
                 <span aria-hidden="true" className="absolute top-1/2 -translate-y-1/2 rounded-full" style={{ left: '-11px', width: '22px', height: '22px', background: '#F6F2F5' }} />
                 <span aria-hidden="true" className="absolute top-1/2 -translate-y-1/2 rounded-full" style={{ right: '-11px', width: '22px', height: '22px', background: '#F6F2F5' }} />
@@ -1038,11 +1038,11 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
                     </div>
                   )}
                   <div className="flex flex-col gap-0.5 min-w-0" style={{ borderLeft: '2px dashed rgba(245,185,198,.5)', paddingLeft: '14px' }}>
-                    <span style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '.24em', color: 'rgba(247,220,225,.8)' }}>CONFEITARIA</span>
+                    <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '.24em', color: 'rgba(247,220,225,.8)' }}>CONFEITARIA</span>
                     {/* Sem fallback de nome: perfil incompleto sai em branco.
                         Um orcamento com o nome de outra confeitaria e pior do
                         que um orcamento sem nome. */}
-                    <span className="truncate" style={{ fontFamily: "'Instrument Serif', serif", fontSize: '32px', lineHeight: 1, color: '#FFFFFF' }}>{sellerName}</span>
+                    <span className="truncate" style={{ fontFamily: "'Instrument Serif', serif", fontSize: '42px', lineHeight: 1, color: '#FFFFFF' }}>{sellerName}</span>
                   </div>
                 </div>
                 {/* Contatos numa linha propria, embaixo do nome: lado a lado, com
@@ -1054,8 +1054,8 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
                       { valor: sellerInstagram, Icone: Instagram },
                       { valor: sellerAddress, Icone: MapPin },
                     ].filter((c) => c.valor).map(({ valor, Icone }) => (
-                      <span key={valor} className="flex items-center gap-1.5" style={{ background: 'rgba(255,255,255,.14)', color: '#FFFFFF', fontSize: '11px', fontWeight: 700, padding: '7px 11px', borderRadius: '11px' }}>
-                        <Icone className="w-3 h-3 shrink-0" style={{ color: '#F5B9C6' }} strokeWidth={2.2} />
+                      <span key={valor} className="flex items-center gap-1.5" style={{ background: 'rgba(255,255,255,.14)', color: '#FFFFFF', fontSize: '13px', fontWeight: 700, padding: '9px 14px', borderRadius: '12px' }}>
+                        <Icone className="w-3.5 h-3.5 shrink-0" style={{ color: '#F5B9C6' }} strokeWidth={2.2} />
                         {valor}
                       </span>
                     ))}
@@ -1078,16 +1078,16 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
               <div className={inspirationImage ? 'grid grid-cols-1 @min-[600px]:grid-cols-2 @min-[600px]:flex-1 gap-3' : 'flex flex-col @min-[600px]:flex-1 gap-3'}>
                 <div className="flex flex-col gap-3 min-w-0">
                   {/* Cliente */}
-                  <section className="print-avoid-break" style={{ background: '#FFFFFF', borderRadius: '22px', boxShadow: '0 8px 20px rgba(58,35,80,.09)', padding: '14px 18px' }}>
-                    <div className="flex items-center gap-[7px]" style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '.12em', color: '#6E3F72' }}>
-                      <User className="w-[13px] h-[13px]" strokeWidth={2.2} />
+                  <section className="print-avoid-break @min-[600px]:flex-1 flex flex-col justify-center" style={{ background: '#FFFFFF', borderRadius: '22px', boxShadow: '0 8px 20px rgba(58,35,80,.09)', padding: '24px 22px' }}>
+                    <div className="flex items-center gap-[7px]" style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '.12em', color: '#6E3F72' }}>
+                      <User className="w-[14px] h-[14px]" strokeWidth={2.2} />
                       DADOS DA(O) CLIENTE
                     </div>
-                    <div className="flex items-center gap-3 mt-2.5">
+                    <div className="flex items-center gap-4 mt-4">
                       {/* Foto da cliente quando existe; senao as iniciais.
                           Mesma marcacao da logo: sem ela o retrato sai quadrado
                           no PDF. */}
-                      <div className="w-11 h-11 rounded-full overflow-hidden shrink-0 flex items-center justify-center rounded-photo-container" style={{ background: '#F3E9F3', fontFamily: "'Instrument Serif', serif", fontSize: '20px', color: '#6E3F72' }}>
+                      <div className="w-[60px] h-[60px] rounded-full overflow-hidden shrink-0 flex items-center justify-center rounded-photo-container" style={{ background: '#F3E9F3', fontFamily: "'Instrument Serif', serif", fontSize: '26px', color: '#6E3F72' }}>
                         {custPhoto ? (
                           <img src={custPhoto} alt={transaction.customerName || 'Cliente'} className="w-full h-full object-cover" />
                         ) : (
@@ -1095,11 +1095,11 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
                         )}
                       </div>
                       <div className="flex flex-col gap-[3px] min-w-0">
-                        <span className="truncate" style={{ fontFamily: "'Instrument Serif', serif", fontSize: '22px', lineHeight: 1.1 }}>
+                        <span className="truncate" style={{ fontFamily: "'Instrument Serif', serif", fontSize: '30px', lineHeight: 1.1 }}>
                           {transaction.customerName || 'Cliente'}
                         </span>
-                        <span className="flex items-center gap-[5px]" style={{ fontSize: '11px', fontWeight: 600, color: '#7A6E80' }}>
-                          <Phone className="w-[11px] h-[11px] shrink-0" style={{ color: '#C4626F' }} strokeWidth={2.2} />
+                        <span className="flex items-center gap-[6px]" style={{ fontSize: '13px', fontWeight: 600, color: '#7A6E80' }}>
+                          <Phone className="w-[13px] h-[13px] shrink-0" style={{ color: '#C4626F' }} strokeWidth={2.2} />
                           {transaction.customerPhone || 'Não informado'}
                         </span>
                       </div>
@@ -1107,21 +1107,21 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
                   </section>
 
                   {/* Evento & horario de entrega */}
-                  <section className="print-avoid-break" style={{ background: '#FFFFFF', border: '1px solid rgba(36,27,43,.07)', borderRadius: '22px', boxShadow: '0 8px 20px rgba(58,35,80,.09)', padding: '14px 16px' }}>
-                    <span style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '.12em', color: '#6E3F72' }}>EVENTO &amp; HORÁRIO DE ENTREGA</span>
-                    <div className="grid grid-cols-2 gap-2 mt-[9px]">
+                  <section className="print-avoid-break @min-[600px]:flex-1 flex flex-col justify-center" style={{ background: '#FFFFFF', border: '1px solid rgba(36,27,43,.07)', borderRadius: '22px', boxShadow: '0 8px 20px rgba(58,35,80,.09)', padding: '24px 20px' }}>
+                    <span style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '.12em', color: '#6E3F72' }}>EVENTO &amp; HORÁRIO DE ENTREGA</span>
+                    <div className="flex flex-col gap-2 mt-3.5">
                       {[
                         { rotulo: 'DATA', valor: transaction.eventDate ? formatDateBr(transaction.eventDate) : formatDateBr(transaction.date) },
                         { rotulo: 'HORÁRIO', valor: transaction.deliveryTime || 'A combinar' },
                       ].map((c) => (
-                        <div key={c.rotulo} className="flex flex-col gap-px min-w-0" style={{ background: '#F6F2F5', borderRadius: '14px', padding: '8px 12px' }}>
-                          <span style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '.1em', color: '#7A6E80' }}>{c.rotulo}</span>
-                          <span className="truncate" style={{ fontSize: '17px', fontWeight: 800, letterSpacing: '-.02em' }}>{c.valor}</span>
+                        <div key={c.rotulo} className="flex items-center justify-between gap-3 min-w-0" style={{ background: '#F6F2F5', borderRadius: '16px', padding: '12px 16px' }}>
+                          <span style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '.1em', color: '#7A6E80' }}>{c.rotulo}</span>
+                          <span className="truncate" style={{ fontSize: '22px', fontWeight: 800, letterSpacing: '-.02em' }}>{c.valor}</span>
                         </div>
                       ))}
                     </div>
-                    <div className="flex items-center gap-1.5 mt-2" style={{ fontSize: '11px', fontWeight: 600, color: '#5B4A6B' }}>
-                      <MapPin className="w-3 h-3 shrink-0" style={{ color: '#6E3F72' }} strokeWidth={2.2} />
+                    <div className="flex items-center gap-1.5 mt-3.5" style={{ fontSize: '13px', fontWeight: 600, color: '#5B4A6B' }}>
+                      <MapPin className="w-3.5 h-3.5 shrink-0" style={{ color: '#6E3F72' }} strokeWidth={2.2} />
                       {transaction.deliveryAddress || 'Retirada na confeitaria'}
                     </div>
                   </section>
@@ -1176,15 +1176,13 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
                 {inspirationImage ? (
                   <div className="flex flex-col gap-2 min-w-0">
                     <section
-                      className="relative overflow-hidden rounded-photo-container aspect-[3/4] w-[70%] mx-auto @min-[600px]:aspect-auto @min-[600px]:w-full @min-[600px]:flex-1"
-                      style={{ minHeight: '200px', borderRadius: '26px', border: '3px solid #FFFFFF', boxShadow: '0 0 0 1.5px #F5B9C6, 0 14px 30px rgba(58,35,80,.16)' }}
+                      className="relative overflow-hidden rounded-photo-container w-[70%] mx-auto @min-[600px]:w-full"
+                      style={{ borderRadius: '26px', border: '3px solid #FFFFFF', boxShadow: '0 0 0 1.5px #F5B9C6, 0 14px 30px rgba(58,35,80,.16)' }}
                     >
-                      {/* A coluna da foto e alta e estreita na folha em pe: com
-                          object-cover o bolo perdia as laterais. A foto vai
-                          INTEIRA (contain) e o resto da coluna e a mesma foto,
-                          ampliada e desfocada, por tras — sem faixa branca. */}
-                      <img src={inspirationImage} alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover" style={{ filter: 'blur(18px) saturate(1.1)', transform: 'scale(1.15)', opacity: 0.55 }} />
-                      <img src={inspirationImage} alt="Foto de referência do bolo" className="absolute inset-0 w-full h-full object-contain" />
+                      {/* Foto no tamanho natural dela, na largura da coluna: sem esticar
+                          nem preencher com desfoque. O espaco que sobra na folha vai
+                          para os cards da esquerda. */}
+                      <img src={inspirationImage} alt="Foto de referência do bolo" className="block w-full h-auto" />
                       <span className="absolute" style={{ top: '12px', left: '12px', background: 'rgba(255,255,255,.92)', color: '#3A2350', fontSize: '9px', fontWeight: 800, letterSpacing: '.12em', padding: '6px 11px', borderRadius: '999px', boxShadow: '0 4px 10px rgba(58,35,80,.12)' }}>
                         FOTO DE REFERÊNCIA
                       </span>
@@ -1270,15 +1268,15 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
               {/* Cabecalho em forma de ticket */}
               <header
                 className="relative flex flex-wrap items-center justify-between gap-x-4 gap-y-2 print-avoid-break"
-                style={{ minHeight: '72px', padding: '12px 18px 12px 28px', borderRadius: '20px', background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)', boxShadow: '0 14px 30px rgba(58,35,80,.3)' }}
+                style={{ minHeight: '72px', padding: '28px 28px 28px 34px', borderRadius: '20px', background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)', boxShadow: '0 14px 30px rgba(58,35,80,.3)' }}
               >
                 <span aria-hidden="true" className="absolute top-1/2 -translate-y-1/2 rounded-full" style={{ left: '-11px', width: '22px', height: '22px', background: '#F6F2F5' }} />
                 <span aria-hidden="true" className="absolute top-1/2 -translate-y-1/2 rounded-full" style={{ right: '-11px', width: '22px', height: '22px', background: '#F6F2F5' }} />
                 <div className="flex flex-col gap-0.5 min-w-0" style={{ borderLeft: '2px dashed rgba(245,185,198,.5)', paddingLeft: '14px' }}>
-                  <span style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '.24em', color: 'rgba(247,220,225,.8)' }}>PRODUÇÃO{sellerName ? ` · ${sellerName.toUpperCase()}` : ''}</span>
-                  <span style={{ fontFamily: "'Instrument Serif', serif", fontSize: '32px', lineHeight: 1, color: '#FFFFFF' }}>Ficha da Cozinha</span>
+                  <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '.24em', color: 'rgba(247,220,225,.8)' }}>PRODUÇÃO{sellerName ? ` · ${sellerName.toUpperCase()}` : ''}</span>
+                  <span style={{ fontFamily: "'Instrument Serif', serif", fontSize: '42px', lineHeight: 1, color: '#FFFFFF' }}>Ficha da Cozinha</span>
                 </div>
-                <span className="flex items-center gap-1.5" style={{ background: 'rgba(255,255,255,.14)', color: '#FFFFFF', fontSize: '11px', fontWeight: 700, padding: '7px 11px', borderRadius: '11px' }}>
+                <span className="flex items-center gap-1.5" style={{ background: 'rgba(255,255,255,.14)', color: '#FFFFFF', fontSize: '13px', fontWeight: 700, padding: '9px 14px', borderRadius: '12px' }}>
                   <ChefHat className="w-3 h-3 shrink-0" style={{ color: '#F5B9C6' }} strokeWidth={2.2} />
                   Uso interno
                 </span>
@@ -1294,13 +1292,13 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
               <div className={inspirationImage ? 'grid grid-cols-1 @min-[600px]:grid-cols-2 @min-[600px]:flex-1 gap-3' : 'flex flex-col @min-[600px]:flex-1 gap-3'}>
                 <div className="flex flex-col gap-3 min-w-0">
                   {/* Cliente */}
-                  <section className="print-avoid-break" style={{ background: '#FFFFFF', borderRadius: '22px', boxShadow: '0 8px 20px rgba(58,35,80,.09)', padding: '14px 18px' }}>
-                    <div className="flex items-center gap-[7px]" style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '.12em', color: '#6E3F72' }}>
-                      <User className="w-[13px] h-[13px]" strokeWidth={2.2} />
+                  <section className="print-avoid-break @min-[600px]:flex-1 flex flex-col justify-center" style={{ background: '#FFFFFF', borderRadius: '22px', boxShadow: '0 8px 20px rgba(58,35,80,.09)', padding: '24px 22px' }}>
+                    <div className="flex items-center gap-[7px]" style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '.12em', color: '#6E3F72' }}>
+                      <User className="w-[14px] h-[14px]" strokeWidth={2.2} />
                       CLIENTE
                     </div>
-                    <div className="flex items-center gap-3 mt-2.5">
-                      <div className="w-11 h-11 rounded-full overflow-hidden shrink-0 flex items-center justify-center rounded-photo-container" style={{ background: '#F3E9F3', fontFamily: "'Instrument Serif', serif", fontSize: '20px', color: '#6E3F72' }}>
+                    <div className="flex items-center gap-4 mt-4">
+                      <div className="w-[60px] h-[60px] rounded-full overflow-hidden shrink-0 flex items-center justify-center rounded-photo-container" style={{ background: '#F3E9F3', fontFamily: "'Instrument Serif', serif", fontSize: '26px', color: '#6E3F72' }}>
                         {custPhoto ? (
                           <img src={custPhoto} alt={transaction.customerName || 'Cliente'} className="w-full h-full object-cover" />
                         ) : (
@@ -1308,12 +1306,12 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
                         )}
                       </div>
                       <div className="flex flex-col gap-[3px] min-w-0">
-                        <span className="truncate" style={{ fontFamily: "'Instrument Serif', serif", fontSize: '22px', lineHeight: 1.1 }}>
+                        <span className="truncate" style={{ fontFamily: "'Instrument Serif', serif", fontSize: '30px', lineHeight: 1.1 }}>
                           {transaction.customerName || 'Cliente'}
                         </span>
                         {transaction.customerPhone && (
-                          <span className="flex items-center gap-[5px]" style={{ fontSize: '11px', fontWeight: 600, color: '#7A6E80' }}>
-                            <Phone className="w-[11px] h-[11px] shrink-0" style={{ color: '#C4626F' }} strokeWidth={2.2} />
+                          <span className="flex items-center gap-[6px]" style={{ fontSize: '13px', fontWeight: 600, color: '#7A6E80' }}>
+                            <Phone className="w-[13px] h-[13px] shrink-0" style={{ color: '#C4626F' }} strokeWidth={2.2} />
                             {transaction.customerPhone}
                           </span>
                         )}
@@ -1322,21 +1320,21 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
                   </section>
 
                   {/* Entrega */}
-                  <section className="print-avoid-break" style={{ background: '#FFFFFF', border: '1px solid rgba(36,27,43,.07)', borderRadius: '22px', boxShadow: '0 8px 20px rgba(58,35,80,.09)', padding: '14px 16px' }}>
-                    <span style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '.12em', color: '#6E3F72' }}>PRONTO PARA ENTREGA</span>
-                    <div className="grid grid-cols-2 gap-2 mt-[9px]">
+                  <section className="print-avoid-break @min-[600px]:flex-1 flex flex-col justify-center" style={{ background: '#FFFFFF', border: '1px solid rgba(36,27,43,.07)', borderRadius: '22px', boxShadow: '0 8px 20px rgba(58,35,80,.09)', padding: '24px 20px' }}>
+                    <span style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '.12em', color: '#6E3F72' }}>PRONTO PARA ENTREGA</span>
+                    <div className="flex flex-col gap-2 mt-3.5">
                       {[
                         { rotulo: 'DATA', valor: transaction.eventDate ? formatDateBr(transaction.eventDate) : formatDateBr(transaction.date) },
                         { rotulo: 'HORÁRIO', valor: transaction.deliveryTime || 'A definir' },
                       ].map((c) => (
-                        <div key={c.rotulo} className="flex flex-col gap-px min-w-0" style={{ background: '#F6F2F5', borderRadius: '14px', padding: '8px 12px' }}>
-                          <span style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '.1em', color: '#7A6E80' }}>{c.rotulo}</span>
-                          <span className="truncate" style={{ fontSize: '17px', fontWeight: 800, letterSpacing: '-.02em' }}>{c.valor}</span>
+                        <div key={c.rotulo} className="flex items-center justify-between gap-3 min-w-0" style={{ background: '#F6F2F5', borderRadius: '16px', padding: '12px 16px' }}>
+                          <span style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '.1em', color: '#7A6E80' }}>{c.rotulo}</span>
+                          <span className="truncate" style={{ fontSize: '22px', fontWeight: 800, letterSpacing: '-.02em' }}>{c.valor}</span>
                         </div>
                       ))}
                     </div>
-                    <div className="flex items-center gap-1.5 mt-2" style={{ fontSize: '11px', fontWeight: 600, color: '#5B4A6B' }}>
-                      <MapPin className="w-3 h-3 shrink-0" style={{ color: '#6E3F72' }} strokeWidth={2.2} />
+                    <div className="flex items-center gap-1.5 mt-3.5" style={{ fontSize: '13px', fontWeight: 600, color: '#5B4A6B' }}>
+                      <MapPin className="w-3.5 h-3.5 shrink-0" style={{ color: '#6E3F72' }} strokeWidth={2.2} />
                       {transaction.deliveryAddress || 'Retirada na confeitaria'}
                     </div>
                   </section>
@@ -1356,15 +1354,13 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
                 {inspirationImage ? (
                   <div className="flex flex-col gap-2 min-w-0">
                     <section
-                      className="relative overflow-hidden rounded-photo-container aspect-[3/4] w-[70%] mx-auto @min-[600px]:aspect-auto @min-[600px]:w-full @min-[600px]:flex-1"
-                      style={{ minHeight: '200px', borderRadius: '26px', border: '3px solid #FFFFFF', boxShadow: '0 0 0 1.5px #F5B9C6, 0 14px 30px rgba(58,35,80,.16)' }}
+                      className="relative overflow-hidden rounded-photo-container w-[70%] mx-auto @min-[600px]:w-full"
+                      style={{ borderRadius: '26px', border: '3px solid #FFFFFF', boxShadow: '0 0 0 1.5px #F5B9C6, 0 14px 30px rgba(58,35,80,.16)' }}
                     >
-                      {/* A coluna da foto e alta e estreita na folha em pe: com
-                          object-cover o bolo perdia as laterais. A foto vai
-                          INTEIRA (contain) e o resto da coluna e a mesma foto,
-                          ampliada e desfocada, por tras — sem faixa branca. */}
-                      <img src={inspirationImage} alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover" style={{ filter: 'blur(18px) saturate(1.1)', transform: 'scale(1.15)', opacity: 0.55 }} />
-                      <img src={inspirationImage} alt="Foto de referência para a decoração" className="absolute inset-0 w-full h-full object-contain" />
+                      {/* Foto no tamanho natural dela, na largura da coluna: sem esticar
+                          nem preencher com desfoque. O espaco que sobra na folha vai
+                          para os cards da esquerda. */}
+                      <img src={inspirationImage} alt="Foto de referência para a decoração" className="block w-full h-auto" />
                       <span className="absolute" style={{ top: '12px', left: '12px', background: 'rgba(255,255,255,.92)', color: '#3A2350', fontSize: '9px', fontWeight: 800, letterSpacing: '.12em', padding: '6px 11px', borderRadius: '999px', boxShadow: '0 4px 10px rgba(58,35,80,.12)' }}>
                         REFERÊNCIA DA DECORAÇÃO
                       </span>
