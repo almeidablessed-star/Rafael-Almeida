@@ -13,6 +13,7 @@ import { useDelayedDelete } from '../hooks/useDelayedDelete';
 import { FieldValidationError } from './FieldValidationError';
 import { normalizeName } from '../utils/fichaMatcher';
 import { areUnitsCompatible, convertQuantity } from '../utils/units';
+import { CARD_COMANDA, ROTULO_COMANDA, CAMPO_TINTA, CAIXA_NUMERO, NUMERO, CHIP_UNIDADE, Picote } from './estiloComanda';
 import { CustomSelect } from './CustomSelect';
 import { CampoComAjuda } from './onboarding/CampoComAjuda';
 import {
@@ -466,39 +467,46 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
           {isAdding && aba !== 'compras' && createPortal(
             <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-neutral-900/80 backdrop-blur-xs p-0 sm:p-4" role="dialog" aria-modal="true">
             <div className="w-full h-full sm:h-auto sm:max-w-[430px] sm:max-h-[90vh] bg-[#F6F2F5] sm:rounded-[24px] overflow-hidden flex flex-col" style={{ boxShadow: '0 30px 70px rgba(58,35,80,0.26)' }}>
-              {/* Cabecalho enxuto: o form inteiro tem que caber na tela sem
-                  rolar, senao o "Alerta minimo" fica escondido e ninguem usa.
-                  O safe-area tira o X de baixo do relogio no iPhone. */}
+              {/* Visual do design "Editar Produto" (Claude Design, artefato
+                  "Pedido Carula Cake"): cabecalho roxo, cards brancos com
+                  rotulos em caixa alta, picote de comanda entre as partes e a
+                  unidade como chip escuro dentro do campo. Medidas mais justas
+                  que as do design para o form continuar cabendo inteiro na
+                  tela do celular, sem rolar. O safe-area tira o X de baixo do
+                  relogio no iPhone. */}
               <div
-                style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)', paddingTop: 'calc(14px + env(safe-area-inset-top, 0px))', paddingBottom: '16px' }}
-                className="px-5 flex items-center justify-between gap-3 flex-shrink-0"
+                style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)', paddingTop: 'calc(14px + env(safe-area-inset-top, 0px))', paddingBottom: '30px' }}
+                className="px-5 flex items-end justify-between gap-3 flex-shrink-0"
               >
                 <div className="flex flex-col gap-1 min-w-0">
-                  <span className="text-[10px] font-bold tracking-[0.16em] uppercase text-white/65">Produtos</span>
-                  <h3 className="text-white leading-tight" style={{ fontFamily: "'Instrument Serif', serif", fontSize: '26px', lineHeight: '1.1' }}>
+                  <span style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '.2em', color: 'rgba(247,220,225,.8)' }}>PRODUTOS</span>
+                  <h3 className="text-white" style={{ fontFamily: "'Instrument Serif', serif", fontSize: '28px', lineHeight: 1.1, fontWeight: 400 }}>
                     {editingId ? 'Editar Produto' : 'Novo Produto'}
                   </h3>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsAdding(false)}
-                  className="w-8 h-8 rounded-[10px] bg-white/15 hover:bg-white/25 flex items-center justify-center text-white transition-colors flex-shrink-0"
+                  className="flex items-center justify-center text-white flex-shrink-0 transition-colors hover:bg-white/25"
+                  style={{ width: '36px', height: '36px', borderRadius: '11px', background: 'rgba(255,255,255,.16)' }}
                   aria-label="Fechar"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-3.5 h-3.5" strokeWidth={2.4} />
                 </button>
               </div>
 
-              <form ref={produtoFormRef} onSubmit={handleSave} noValidate className="flex-1 min-h-0 flex flex-col bg-[#F6F2F5]">
-              <div className="flex-1 overflow-y-auto p-3 sm:p-5 space-y-3">
+              <form ref={produtoFormRef} onSubmit={handleSave} noValidate className="flex-1 min-h-0 flex flex-col" style={{ marginTop: '-18px', borderRadius: '24px 24px 0 0', background: '#F6F2F5', fontFamily: "'Manrope', sans-serif", color: '#241B2B' }}>
+              <div className="flex-1 overflow-y-auto flex flex-col gap-2.5" style={{ padding: '16px 16px 14px' }}>
                 {formError && (
-                  <div className="p-2.5 rounded-xl bg-[#FDF4F5] border border-[rgba(196,98,111,.35)] text-[12px] text-[#C4626F]" style={{ fontFamily: "'Manrope', sans-serif" }}>
+                  <div className="p-2.5 rounded-xl bg-[#FDF4F5] border border-[rgba(196,98,111,.35)] text-[12px] text-[#C4626F]">
                     {formError}
                   </div>
                 )}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white p-3.5 rounded-2xl border border-[#E6E1DB] shadow-card">
-                  <div className="sm:col-span-2">
-                    <label className="block text-xs font-bold text-neutral-900 mb-1">Nome do Produto *</label>
+
+                {/* Produto */}
+                <section className="flex flex-col gap-2.5" style={CARD_COMANDA}>
+                  <label className="flex flex-col" style={{ borderBottom: '1.5px dashed rgba(110,63,114,.25)' }}>
+                    <span style={ROTULO_COMANDA}>NOME DO PRODUTO <span style={{ color: '#C4626F' }}>*</span></span>
                     <input
                       id="produto-nome"
                       type="text" required placeholder="Farinha de Trigo" value={nome}
@@ -506,200 +514,224 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                         setNome(capitalizeFirstLetter(e.target.value));
                         if (invalidFieldId === 'produto-nome') setInvalidFieldId(null);
                       }}
-                      className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-xl text-sm font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
+                      className="w-full bg-transparent outline-none placeholder:italic placeholder:text-[#B3A6B8]"
+                      style={CAMPO_TINTA}
                     />
-                    {invalidFieldId === 'produto-nome' && <FieldValidationError />}
-                  </div>
-
-                  <div className="sm:col-span-2">
-                    <label className="block text-xs font-bold text-neutral-900 mb-1">Categoria</label>
+                  </label>
+                  {invalidFieldId === 'produto-nome' && <FieldValidationError />}
+                  <label className="flex flex-col" style={{ borderBottom: '1.5px dashed rgba(110,63,114,.25)' }}>
+                    <span style={ROTULO_COMANDA}>CATEGORIA</span>
                     <input
-                      type="text" list="categorias-sugeridas" placeholder="Massa, Recheio, Cobertura..." value={categoria}
+                      type="text" list="categorias-sugeridas" placeholder="Massa, Recheio, Cobertura…" value={categoria}
                       onChange={(e) => setCategoria(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-xl text-sm font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
+                      className="w-full bg-transparent outline-none placeholder:italic placeholder:text-[#B3A6B8]"
+                      style={CAMPO_TINTA}
                     />
-                    <datalist id="categorias-sugeridas">
-                      {CATEGORIAS_SUGERIDAS.map((c) => <option key={c} value={c} />)}
-                    </datalist>
-                  </div>
+                  </label>
+                  <datalist id="categorias-sugeridas">
+                    {CATEGORIAS_SUGERIDAS.map((c) => <option key={c} value={c} />)}
+                  </datalist>
+                </section>
 
-                  <div>
-                    <label className="block text-xs font-bold text-neutral-900 mb-1">Preço pago *</label>
-                    <input
-                      id="produto-preco"
-                      type="text" inputMode="decimal" required placeholder="8.00" value={precoPago}
-                      onChange={(e) => {
-                        setPrecoPago(e.target.value);
-                        if (invalidFieldId === 'produto-preco') setInvalidFieldId(null);
-                      }}
-                      className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-xl text-sm font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
-                    />
-                    {invalidFieldId === 'produto-preco' && <FieldValidationError />}
+                {/* Compra: preco pago, embalagem e o custo calculado */}
+                <section className="relative overflow-hidden" style={{ ...CARD_COMANDA, padding: 0 }}>
+                  <div className="flex items-end gap-2.5" style={{ padding: '12px 16px 10px' }}>
+                    <label className="flex flex-col gap-1.5 flex-shrink-0" style={{ width: '112px' }}>
+                      <span style={ROTULO_COMANDA}>PREÇO PAGO <span style={{ color: '#C4626F' }}>*</span></span>
+                      <span className="relative flex items-center gap-1" style={{ height: '42px', boxSizing: 'border-box', borderRadius: '6px 15px 15px 6px', background: '#FCEFF2', border: '1px solid rgba(196,98,111,.2)', padding: '0 10px 0 22px' }}>
+                        <span aria-hidden="true" className="absolute rounded-full" style={{ left: '9px', top: '50%', transform: 'translateY(-50%)', width: '7px', height: '7px', background: '#FFFFFF', boxShadow: 'inset 0 1px 2px rgba(196,98,111,.4)' }} />
+                        <span style={{ fontSize: '15px', fontWeight: 800, color: '#C4626F' }}>{symbol}</span>
+                        <input
+                          id="produto-preco"
+                          type="text" inputMode="decimal" required placeholder="8.00" value={precoPago}
+                          onChange={(e) => {
+                            setPrecoPago(e.target.value);
+                            if (invalidFieldId === 'produto-preco') setInvalidFieldId(null);
+                          }}
+                          className="w-full min-w-0 bg-transparent outline-none placeholder:text-[#B3A6B8]"
+                          style={{ fontSize: '17px', fontWeight: 800, color: '#3A2350' }}
+                        />
+                      </span>
+                    </label>
+                    <label className="flex-1 min-w-0 flex flex-col gap-1.5">
+                      <span style={ROTULO_COMANDA}>QTD. DA EMBALAGEM <span style={{ color: '#C4626F' }}>*</span></span>
+                      <span className="flex items-center gap-2" style={CAIXA_NUMERO}>
+                        <input
+                          id="produto-quantidade-embalagem"
+                          type="text" inputMode="decimal" required placeholder="1000" value={quantidadeEmbalagem}
+                          onChange={(e) => {
+                            setQuantidadeEmbalagem(e.target.value);
+                            if (invalidFieldId === 'produto-quantidade-embalagem') setInvalidFieldId(null);
+                            // Sugere 20% da embalagem como alerta, na MESMA
+                            // unidade dela — o campo de alerta tem unidade
+                            // propria, e sugerir num sistema e gravar noutro ja
+                            // deu problema neste app. 20% porque o vermelho do
+                            // anel dispara em 1,25x o alerta: 20% acende com um
+                            // quarto do pacote ainda na prateleira, cedo o
+                            // bastante para recomprar sem faltar.
+                            if (!alertaTocado) {
+                              const qtd = parseNumeroDigitado(e.target.value);
+                              setNivelMinimoUnidade(unidadeEmbalagem);
+                              setNivelMinimo(
+                                Number.isFinite(qtd) && qtd > 0
+                                  ? String(Math.round(qtd * 0.2 * 100) / 100).replace('.', ',')
+                                  : ''
+                              );
+                            }
+                          }}
+                          className="flex-1 w-full min-w-0 bg-transparent outline-none placeholder:text-[#B3A6B8]"
+                          style={NUMERO}
+                        />
+                        <CustomSelect
+                          value={unidadeEmbalagem}
+                          onChange={(v) => {
+                            setUnidadeEmbalagem(v as any);
+                            // A unidade do alerta tem que acompanhar enquanto ele
+                            // for sugestao: trocar a embalagem para kg e deixar o
+                            // alerta em g transformaria "0,2" em 0,2 g — mil vezes
+                            // menor do que o pretendido, e silenciosamente.
+                            if (!alertaTocado) setNivelMinimoUnidade(v as any);
+                            // O estoque guardado so aceita unidades da mesma
+                            // familia da embalagem (g/kg, ml/L); trocou de familia,
+                            // volta para a unidade da embalagem.
+                            if (!areUnitsCompatible(quantidadeAtualUnidade, v)) setQuantidadeAtualUnidade(v as any);
+                          }}
+                          chip
+                          ariaLabel="Unidade de embalagem"
+                          style={CHIP_UNIDADE}
+                          options={UNIDADES.map((u) => ({ value: u, label: u }))}
+                        />
+                      </span>
+                    </label>
                   </div>
+                  {(invalidFieldId === 'produto-preco' || invalidFieldId === 'produto-quantidade-embalagem') && (
+                    <div style={{ padding: '0 16px 8px' }}><FieldValidationError /></div>
+                  )}
 
-                  <div>
-                    <label className="block text-xs font-bold text-neutral-900 mb-1">Quantidade da embalagem *</label>
-                    <div className="flex gap-2">
-                      <input
-                        id="produto-quantidade-embalagem"
-                        type="text" inputMode="decimal" required placeholder="1000" value={quantidadeEmbalagem}
-                        onChange={(e) => {
-                          setQuantidadeEmbalagem(e.target.value);
-                          if (invalidFieldId === 'produto-quantidade-embalagem') setInvalidFieldId(null);
-                          // Sugere 20% da embalagem como alerta, na MESMA
-                          // unidade dela — o campo de alerta tem unidade
-                          // propria, e sugerir num sistema e gravar noutro ja
-                          // deu problema neste app. 20% porque o vermelho do
-                          // anel dispara em 1,25x o alerta: 20% acende com um
-                          // quarto do pacote ainda na prateleira, cedo o
-                          // bastante para recomprar sem faltar.
-                          if (!alertaTocado) {
-                            const qtd = parseNumeroDigitado(e.target.value);
-                            setNivelMinimoUnidade(unidadeEmbalagem);
-                            setNivelMinimo(
-                              Number.isFinite(qtd) && qtd > 0
-                                ? String(Math.round(qtd * 0.2 * 100) / 100).replace('.', ',')
-                                : ''
-                            );
-                          }
-                        }}
-                        className="flex-1 min-w-0 px-3 py-2 bg-white border border-[#E6E1DB] rounded-xl text-sm font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
-                      />
-                      <CustomSelect
-                        value={unidadeEmbalagem}
-                        onChange={(v) => {
-                          setUnidadeEmbalagem(v as any);
-                          // A unidade do alerta tem que acompanhar enquanto ele
-                          // for sugestao: trocar a embalagem para kg e deixar o
-                          // alerta em g transformaria "0,2" em 0,2 g — mil vezes
-                          // menor do que o pretendido, e silenciosamente.
-                          if (!alertaTocado) setNivelMinimoUnidade(v as any);
-                          // O estoque guardado so aceita unidades da mesma
-                          // familia da embalagem (g/kg, ml/L); trocou de familia,
-                          // volta para a unidade da embalagem.
-                          if (!areUnitsCompatible(quantidadeAtualUnidade, v)) setQuantidadeAtualUnidade(v as any);
-                        }}
-                        compacto
-                        ariaLabel="Unidade de embalagem"
-                        style={{ width: '108px', flexShrink: 0 }}
-                        options={UNIDADES.map((u) => ({ value: u, label: u }))}
-                      />
+                  <Picote />
+
+                  {/* Informacao calculada, nao um campo: o custo por unidade
+                      e o que as fichas usam para somar os insumos. */}
+                  <div className="flex items-center justify-between gap-3" style={{ padding: '10px 16px 12px' }}>
+                    <div className="flex flex-col">
+                      <span style={ROTULO_COMANDA}>CUSTO POR UNIDADE</span>
+                      <span style={{ fontSize: '11px', fontWeight: 600, color: '#7A6E80' }}>calculado automaticamente</span>
                     </div>
-                    {invalidFieldId === 'produto-quantidade-embalagem' && <FieldValidationError />}
-                  </div>
-
-                  {/* Uma linha so, em vez de label + campo desabilitado: e
-                      informacao calculada, e o espaco faz falta para o form
-                      caber inteiro na tela. */}
-                  <p className="sm:col-span-2 text-xs text-neutral-500 -mt-1">
-                    Custo por unidade:{' '}
-                    <span className="font-bold text-neutral-900">
-                      {`${custoPorUnidade({
+                    <span style={{ fontSize: '18px', fontWeight: 800, letterSpacing: '-.02em', color: '#3A2350' }}>
+                      {custoPorUnidade({
                         precoPago: parseNumeroDigitado(precoPago) || 0,
                         quantidadeEmbalagem: parseNumeroDigitado(quantidadeEmbalagem) || 1,
-                      }).toFixed(4)}/${unidadeEmbalagem}`}
+                      }).toFixed(4)}
+                      <span style={{ fontSize: '12px', color: '#7A6E80', fontWeight: 700 }}> /{unidadeEmbalagem}</span>
                     </span>
-                    {' '}· calculado automaticamente
-                  </p>
+                  </div>
+                </section>
 
-                  <div className="sm:col-span-2 flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl border border-[#E6E1DB] bg-white">
-                    <div>
-                      <p className="text-xs font-bold text-neutral-900">Controlar estoque deste produto?</p>
-                      <p className="text-[10px] text-neutral-500 mt-0.5">Desligue para itens frescos comprados na hora (ex: frutas), que não ficam "em estoque".</p>
+                {/* Estoque */}
+                <section className="relative overflow-hidden" style={{ ...CARD_COMANDA, padding: 0 }}>
+                  <div className="flex items-center gap-3" style={{ padding: '12px 16px 10px' }}>
+                    <div className="flex-1 flex flex-col gap-0.5">
+                      <span style={{ fontFamily: "'Instrument Serif', serif", fontSize: '20px', lineHeight: 1.15 }}>Controlar estoque deste produto?</span>
+                      <span style={{ fontSize: '11px', fontWeight: 600, lineHeight: 1.45, color: '#7A6E80' }}>Desligue para itens frescos comprados na hora (ex: frutas), que não ficam "em estoque".</span>
                     </div>
                     <button
                       type="button"
+                      role="switch"
+                      aria-checked={controlaEstoque}
+                      aria-label="Controlar estoque"
                       onClick={() => setControlaEstoque((v) => !v)}
-                      style={{
-                        width: '40px', height: '22px', borderRadius: '11px', border: 'none', cursor: 'pointer', position: 'relative', flexShrink: 0,
-                        background: controlaEstoque ? '#6E3F72' : '#E6E1DB', transition: 'background 0.2s',
-                      }}
+                      className="relative flex-shrink-0"
+                      style={{ width: '52px', height: '30px', border: 'none', borderRadius: '999px', cursor: 'pointer', background: controlaEstoque ? 'linear-gradient(120deg, #6E3F72, #A85E86)' : '#E6E1DB', boxShadow: 'inset 0 1px 3px rgba(36,27,43,.25)', transition: 'background .2s' }}
                     >
-                      <span style={{
-                        position: 'absolute', top: '2px', left: controlaEstoque ? '20px' : '2px', width: '18px', height: '18px',
-                        borderRadius: '50%', background: 'white', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,.2)',
-                      }} />
+                      <span className="absolute rounded-full" style={{ top: '3px', left: controlaEstoque ? '25px' : '3px', width: '24px', height: '24px', background: '#FFFFFF', boxShadow: '0 2px 6px rgba(36,27,43,.3)', transition: 'left .2s' }} />
                     </button>
                   </div>
 
                   {controlaEstoque && (
                     <>
-                      {/* Mesmo rotulo que a Ficha usa para este campo. Ali,
-                          "Quantidade atual em estoque" ficava ao lado do
-                          quanto a receita usa e ja custou um insumo cadastrado
-                          com estoque zero. Aqui o vizinho e outro — o tamanho
-                          da embalagem — mas continuam sendo dois "quantidade"
-                          na mesma tela, e nao ha motivo para as duas telas
-                          chamarem a mesma coisa por nomes diferentes. */}
-                      <div>
-                        <label className="block text-xs font-bold text-neutral-900 mb-1">Quanto você já tem guardado</label>
-                        <div className="flex gap-2">
-                          <input
-                            type="text" inputMode="decimal" placeholder="0" value={quantidadeAtual} onChange={(e) => setQuantidadeAtual(e.target.value)}
-                            className="flex-1 min-w-0 px-3 py-2 bg-white border border-[#E6E1DB] rounded-xl text-sm font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
-                          />
-                          <CustomSelect
-                            value={quantidadeAtualUnidade}
-                            onChange={(v) => setQuantidadeAtualUnidade(v as any)}
-                            compacto
-                            ariaLabel="Unidade do estoque guardado"
-                            style={{ width: '108px', flexShrink: 0 }}
-                            options={UNIDADES.filter((u) => areUnitsCompatible(u, unidadeEmbalagem)).map((u) => ({ value: u, label: u }))}
+                      <Picote />
+                      <div className="flex flex-col gap-2.5" style={{ padding: '10px 16px 12px' }}>
+                        {/* Mesmo rotulo que a Ficha usa para este campo. Ali,
+                            "Quantidade atual em estoque" ficava ao lado do
+                            quanto a receita usa e ja custou um insumo cadastrado
+                            com estoque zero. Aqui o vizinho e outro — o tamanho
+                            da embalagem — mas continuam sendo dois "quantidade"
+                            na mesma tela, e nao ha motivo para as duas telas
+                            chamarem a mesma coisa por nomes diferentes. */}
+                        <div className="flex flex-col gap-1.5">
+                          <span style={ROTULO_COMANDA}>QUANTO VOCÊ JÁ TEM GUARDADO</span>
+                          <span className="flex items-center gap-2" style={CAIXA_NUMERO}>
+                            <input
+                              type="text" inputMode="decimal" placeholder="0" value={quantidadeAtual} onChange={(e) => setQuantidadeAtual(e.target.value)}
+                              aria-label="Quanto você já tem guardado"
+                              className="flex-1 w-full min-w-0 bg-transparent outline-none placeholder:text-[#B3A6B8]"
+                              style={NUMERO}
+                            />
+                            <CustomSelect
+                              value={quantidadeAtualUnidade}
+                              onChange={(v) => setQuantidadeAtualUnidade(v as any)}
+                              chip
+                              ariaLabel="Unidade do estoque guardado"
+                              style={CHIP_UNIDADE}
+                              options={UNIDADES.filter((u) => areUnitsCompatible(u, unidadeEmbalagem)).map((u) => ({ value: u, label: u }))}
+                            />
+                          </span>
+                          <CampoComAjuda
+                            microcopy="Seu estoque de hoje — não o tamanho da embalagem que você compra."
+                            exemploDinamico={
+                              'É quanto você já tem em casa hoje. O campo acima é o tamanho do pacote ' +
+                              'que você costuma comprar (ex.: 1000 g), usado para calcular o custo. ' +
+                              'Pode deixar em zero se ainda não comprou.'
+                            }
                           />
                         </div>
-                        <CampoComAjuda
-                          microcopy="Seu estoque de hoje — não o tamanho da embalagem que você compra."
-                          exemploDinamico={
-                            'É quanto você já tem em casa hoje. O campo acima é o tamanho do pacote ' +
-                            'que você costuma comprar (ex.: 1000 g), usado para calcular o custo. ' +
-                            'Pode deixar em zero se ainda não comprou.'
-                          }
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-neutral-900 mb-1">Alerta mínimo</label>
-                        <div className="flex gap-2">
-                          <input
-                            type="text" inputMode="decimal" placeholder="100" value={nivelMinimo} onChange={(e) => { setNivelMinimo(e.target.value); setAlertaTocado(true); }}
-                            className="flex-1 min-w-0 px-3 py-2 bg-white border border-[#E6E1DB] rounded-xl text-sm font-normal text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#6E3F72] transition-all"
-                          />
-                          <CustomSelect
-                            value={nivelMinimoUnidade}
-                            onChange={(v) => { setNivelMinimoUnidade(v as any); setAlertaTocado(true); }}
-                            compacto
-                            ariaLabel="Unidade do nível mínimo"
-                            style={{ width: '108px', flexShrink: 0 }}
-                            options={UNIDADES.map((u) => ({ value: u, label: u }))}
-                          />
+                        <div className="flex flex-col gap-1.5">
+                          <span className="flex items-center gap-1.5" style={{ ...ROTULO_COMANDA, color: '#C4626F' }}>
+                            <AlertTriangle className="w-[11px] h-[11px]" strokeWidth={2.4} />
+                            ALERTA MÍNIMO
+                          </span>
+                          <span className="flex items-center gap-2" style={{ ...CAIXA_NUMERO, background: '#FDF4F5', border: '1px solid rgba(196,98,111,.18)', boxShadow: 'none' }}>
+                            <input
+                              type="text" inputMode="decimal" placeholder="100" value={nivelMinimo} onChange={(e) => { setNivelMinimo(e.target.value); setAlertaTocado(true); }}
+                              aria-label="Alerta mínimo"
+                              className="flex-1 w-full min-w-0 bg-transparent outline-none placeholder:text-[#B3A6B8]"
+                              style={NUMERO}
+                            />
+                            <CustomSelect
+                              value={nivelMinimoUnidade}
+                              onChange={(v) => { setNivelMinimoUnidade(v as any); setAlertaTocado(true); }}
+                              chip
+                              ariaLabel="Unidade do nível mínimo"
+                              style={CHIP_UNIDADE}
+                              options={UNIDADES.map((u) => ({ value: u, label: u }))}
+                            />
+                          </span>
                         </div>
                       </div>
                     </>
                   )}
-                </div>
-
+                </section>
               </div>
 
-                {/* Rodape fixo no fim da tela, igual ao de Clientes */}
+                {/* Rodape fixo no fim da tela */}
                 <div
                   className="flex-shrink-0 bg-white flex gap-2.5 px-4 pt-3"
-                  style={{ paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))', borderTop: '1px solid rgba(58,35,80,0.08)', boxShadow: '0 -8px 24px rgba(58,35,80,0.07)' }}
+                  style={{ paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))', borderTop: '1px solid rgba(36,27,43,.06)', boxShadow: '0 -8px 24px rgba(58,35,80,0.07)' }}
                 >
                   <button
                     type="button"
                     onClick={() => setIsAdding(false)}
-                    className="px-[18px] py-3 rounded-[11px] text-sm font-semibold transition-colors"
-                    style={{ border: '1px solid rgba(58,35,80,0.16)', color: '#3A2350' }}
+                    className="flex-shrink-0 transition-transform hover:-translate-y-0.5"
+                    style={{ width: '104px', height: '48px', borderRadius: '16px', border: '1px solid rgba(110,63,114,.18)', background: '#FFFFFF', boxShadow: '0 4px 12px rgba(58,35,80,.08)', fontSize: '14px', fontWeight: 800, color: '#3A2350' }}
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-[11px] text-white text-sm font-semibold transition-colors active:scale-95"
-                    style={{ background: '#3A2350', boxShadow: '0 10px 20px rgba(58,35,80,.3)' }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = '#6E3F72'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = '#3A2350'; }}
+                    className="flex-1 flex items-center justify-center gap-2 transition-transform hover:-translate-y-0.5 active:scale-95"
+                    style={{ height: '48px', borderRadius: '16px', border: 'none', background: '#3A2350', boxShadow: '0 10px 20px rgba(58,35,80,.3)', fontSize: '15px', fontWeight: 800, color: '#F5B9C6' }}
                   >
-                    <Check className="w-4 h-4 stroke-[2.5]" />
+                    <Check className="w-4 h-4" strokeWidth={2.6} />
                     Salvar produto
                   </button>
                 </div>

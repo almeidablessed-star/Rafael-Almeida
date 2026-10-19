@@ -18,6 +18,7 @@ import { useDelayedDelete } from '../hooks/useDelayedDelete';
 import { CampoComAjuda } from './onboarding/CampoComAjuda';
 import { FieldValidationError } from './FieldValidationError';
 import { CustomSelect } from './CustomSelect';
+import { CARD_COMANDA, ROTULO_COMANDA, CAMPO_TINTA, CAIXA_NUMERO, NUMERO, CHIP_UNIDADE, ETIQUETA_VALOR, FuroEtiqueta, Picote } from './estiloComanda';
 import {
   RENDIMENTO_UNIDADES,
   comporRendimentoParaGravar,
@@ -45,6 +46,8 @@ import {
   AlertTriangle,
   Star,
   Scale,
+  Clock,
+  ArrowRight,
 } from 'lucide-react';
 
 /**
@@ -1268,29 +1271,42 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
               {/* PASSO 2 — INSUMOS (um bloco por tamanho, todos empilhados —
                   nao um seletor, pra nao perder a visao simultanea que ja
                   existe hoje) */}
-              <div data-step={2} style={{ display: formStep === 2 ? 'flex' : 'none', flexDirection: 'column', gap: '14px' }}>
+              <div data-step={2} style={{ display: formStep === 2 ? 'flex' : 'none', flexDirection: 'column', gap: '14px', fontFamily: "'Manrope', sans-serif", color: '#241B2B' }}>
+                {/* Visual do design "Ficha Tecnica · Insumos" (Claude Design):
+                    cada insumo e uma comanda com numero, nome a tinta, picote,
+                    quantidade com chip de unidade e etiqueta de custo. O que o
+                    design nao trazia e o app ja tinha (titulo de cada tamanho,
+                    aviso de tamanho sem insumos, copiar do tamanho anterior,
+                    cadastrar produto novo, rendimento) segue o mesmo estilo. */}
                 {tamanhos.map((tamanho, index) => (
                   <div key={tamanho.id} className="flex flex-col gap-3">
-                    <div className="text-[13px]" style={{ color: '#7A6E80' }}>
-                      Tamanho <strong style={{ color: '#241B2B' }}>{tamanho.descricao || '(sem nome)'}</strong> · {tamanho.ingredients.length} insumo{tamanho.ingredients.length === 1 ? '' : 's'}
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="whitespace-nowrap" style={{ background: '#3A2350', color: '#F5B9C6', fontSize: '11px', fontWeight: 800, padding: '6px 12px', borderRadius: '999px' }}>
+                        Tamanho · {tamanho.descricao || '(sem nome)'}
+                      </span>
+                      <span style={{ fontSize: '11px', fontWeight: 700, color: '#7A6E80' }}>
+                        {tamanho.ingredients.length} insumo{tamanho.ingredients.length === 1 ? '' : 's'}
+                      </span>
                     </div>
 
-                    <div className="bg-white rounded-2xl p-2 flex flex-col" style={{ boxShadow: '0 8px 20px rgba(58,35,80,.09)' }}>
-                      {tamanho.ingredients.length === 0 && (
-                        <div
-                          className="m-2 p-3 rounded-xl border flex items-start gap-2"
-                          style={{ background: '#FFF6E8', borderColor: '#F0D2A0' }}
-                          role="status"
-                        >
-                          <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" style={{ color: '#B27A16' }} />
-                          <p className="text-xs font-semibold" style={{ color: '#7A5310' }}>
-                            Sem insumos — não vai calcular custo real (CMV) nem baixar estoque.
-                          </p>
-                        </div>
-                      )}
-                      {tamanho.ingredients.map((ing) => (
-                        <div key={ing.id} className="p-2 grid grid-cols-12 gap-1.5 text-xs border-b" style={{ borderColor: 'rgba(58,35,80,0.07)' }}>
-                          <div className="col-span-12">
+                    {tamanho.ingredients.length === 0 && (
+                      <div className="flex items-start gap-2.5" style={{ background: '#FBF6EC', borderRadius: '18px', padding: '12px 14px', border: '1px solid #F0D2A0' }} role="status">
+                        <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" style={{ color: '#B27A16' }} />
+                        <p style={{ fontSize: '12px', fontWeight: 600, color: '#7A5310', lineHeight: 1.45 }}>
+                          Sem insumos — não vai calcular custo real (CMV) nem baixar estoque.
+                        </p>
+                      </div>
+                    )}
+
+                    {tamanho.ingredients.map((ing, ingIndex) => (
+                      <section key={ing.id} className="relative" style={{ ...CARD_COMANDA, padding: 0 }}>
+                        {/* Ingrediente */}
+                        <div className="flex items-end gap-3" style={{ padding: '14px 14px 12px 16px' }}>
+                          <span aria-hidden="true" style={{ fontFamily: "'Instrument Serif', serif", fontSize: '32px', lineHeight: 1, color: '#D6B8E0', paddingBottom: '6px' }}>
+                            {String(ingIndex + 1).padStart(2, '0')}
+                          </span>
+                          <label className="flex-1 min-w-0 flex flex-col" style={{ borderBottom: '1.5px dashed rgba(110,63,114,.25)' }}>
+                            <span style={ROTULO_COMANDA}>INGREDIENTE</span>
                             <StockItemAutocomplete
                               value={ing.name}
                               onChange={(val) => handleUpdateInsumoTamanho(tamanho.id, ing.id, 'name', capitalizeFirstLetter(val))}
@@ -1331,95 +1347,120 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                               }}
                               stockItems={produtosParaAutocomplete}
                               isEnabled={true}
-                              placeholder="Ingrediente (ex: Cacau)"
+                              placeholder="Ex: Cacau em pó"
+                              inputStyle={{ ...CAMPO_TINTA, background: 'transparent', border: 'none', borderRadius: 0, minHeight: 0, outline: 'none' }}
                             />
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveInsumoTamanho(tamanho.id, ing.id)}
+                            aria-label={`Remover insumo ${ingIndex + 1}`}
+                            className="self-center flex items-center justify-center flex-shrink-0 cursor-pointer transition-transform hover:-translate-y-0.5"
+                            style={{ width: '32px', height: '32px', border: 'none', borderRadius: '10px', background: '#FBECEE' }}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" style={{ color: '#C4626F' }} strokeWidth={2} />
+                          </button>
+                        </div>
+
+                        <Picote />
+
+                        {/* Quantidade + custo */}
+                        <div className="flex items-end gap-2.5" style={{ padding: '10px 14px 14px 16px' }}>
+                          <div className="flex-1 min-w-0 flex flex-col gap-1.5">
+                            <span style={ROTULO_COMANDA}>QTD. NA RECEITA</span>
+                            <div className="flex items-center gap-2" style={CAIXA_NUMERO}>
+                              <input
+                                type="text"
+                                inputMode="decimal"
+                                /* "Qtd" sozinho nao dizia de que: perto daqui fica
+                                   "quanto voce ja tem guardado", no cadastro de
+                                   produto novo, e os dois pediam "quantidade". Ja
+                                   houve um insumo cadastrado com estoque zero por
+                                   causa disso. */
+                                placeholder="Ex: 450"
+                                title="Quanto a receita usa deste ingrediente por vez"
+                                aria-label="Quanto a receita usa"
+                                value={ing.quantity || ''}
+                                onChange={(e) => handleUpdateInsumoTamanho(tamanho.id, ing.id, 'quantity', e.target.value)}
+                                className="flex-1 w-full min-w-0 bg-transparent outline-none placeholder:text-[#B3A6B8]"
+                                style={NUMERO}
+                              />
+                              {(() => {
+                                const produtoVinculado = ing.produtoId ? produtos.find((p) => p.id === ing.produtoId) : undefined;
+                                return (
+                                  <CustomSelect
+                                    value={ing.unit}
+                                    onChange={(v) => handleUpdateInsumoTamanho(tamanho.id, ing.id, 'unit', v)}
+                                    chip
+                                    ariaLabel="Unidade do insumo"
+                                    style={CHIP_UNIDADE}
+                                    // `disabled` por opcao preserva a regra que ja
+                                    // existia: unidade incompativel com a embalagem
+                                    // do produto vinculado continua visivel, porem
+                                    // inescolhivel — some-la esconderia o porque.
+                                    options={UNIDADES_INSUMO.map((u) => ({
+                                      value: u,
+                                      label: u,
+                                      disabled: !!produtoVinculado && !areUnitsCompatible(produtoVinculado.unidadeEmbalagem, u),
+                                    }))}
+                                  />
+                                );
+                              })()}
+                            </div>
                           </div>
-                          <div className="col-span-4">
-                            <input
-                              type="text"
-                              inputMode="decimal"
-                              /* "Qtd" sozinho nao dizia de que: a poucos
-                                 centimetros dali fica "quanto voce ja tem
-                                 guardado", no cadastro de produto novo, e os
-                                 dois pediam "quantidade". Ja houve um insumo
-                                 cadastrado com estoque zero por causa disso. */
-                              placeholder="Quanto a receita usa"
-                              title="Quanto a receita usa deste ingrediente por vez"
-                              value={ing.quantity || ''}
-                              onChange={(e) => handleUpdateInsumoTamanho(tamanho.id, ing.id, 'quantity', e.target.value)}
-                              className="w-full px-1.5 py-1 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold text-center"
-                              style={{ fontFamily: "'Manrope', sans-serif" }}
-                            />
+                          <div className="flex flex-col gap-1.5 flex-shrink-0" style={{ width: '92px' }}>
+                            <span style={{ ...ROTULO_COMANDA, textAlign: 'right' }}>CUSTO</span>
+                            <div className="flex items-center justify-end" style={{ ...ETIQUETA_VALOR, paddingRight: '12px' }}>
+                              <FuroEtiqueta />
+                              <span className="tabular-nums" style={{ fontSize: '15px', fontWeight: 800, letterSpacing: '-.02em', color: '#3A2350' }}>
+                                {formatMoney(ing.totalCost || 0)}
+                              </span>
+                            </div>
                           </div>
-                          <div className="col-span-3">
-                            {(() => {
-                              const produtoVinculado = ing.produtoId ? produtos.find((p) => p.id === ing.produtoId) : undefined;
-                              return (
-                                <CustomSelect
-                                  value={ing.unit}
-                                  onChange={(v) => handleUpdateInsumoTamanho(tamanho.id, ing.id, 'unit', v)}
-                                  compacto
-                                  ariaLabel="Unidade do insumo"
-                                  // `disabled` por opcao preserva a regra que ja
-                                  // existia: unidade incompativel com a embalagem
-                                  // do produto vinculado continua visivel, porem
-                                  // inescolhivel — some-la esconderia o porque.
-                                  options={UNIDADES_INSUMO.map((u) => ({
-                                    value: u,
-                                    label: u,
-                                    disabled: !!produtoVinculado && !areUnitsCompatible(produtoVinculado.unidadeEmbalagem, u),
-                                  }))}
-                                />
-                              );
-                            })()}
-                          </div>
-                          <div className="col-span-4 text-right flex flex-col justify-center">
-                            <span className="text-[9px] text-neutral-500 block">Custo</span>
-                            <span className="font-black text-[11px]" style={{ color: '#3A2350' }}>
-                              {formatMoney(ing.totalCost || 0)}
-                            </span>
-                          </div>
-                          <div className="col-span-1 flex justify-end items-center">
+                        </div>
+
+                        {ing.name.trim() !== '' && !ing.produtoId && criandoProdutoInsumo?.insumoId !== ing.id && (
+                          <div style={{ padding: '0 16px 14px' }}>
                             <button
                               type="button"
-                              onClick={() => handleRemoveInsumoTamanho(tamanho.id, ing.id)}
-                              className="p-0.5 text-neutral-400 hover:text-semantic-error-600 cursor-pointer"
+                              onClick={() => handleAbrirCriarProduto(tamanho.id, ing.id, ing.name)}
+                              className="flex items-center gap-1.5 text-left hover:underline cursor-pointer"
+                              style={{ fontSize: '11px', fontWeight: 700, color: '#6E3F72' }}
                             >
-                              <Trash2 className="w-3.5 h-3.5" />
+                              <PlusCircle className="w-3.5 h-3.5 shrink-0" />
+                              "{ing.name}" não está cadastrado ainda — adicionar agora?
                             </button>
                           </div>
+                        )}
 
-                          {ing.name.trim() !== '' && !ing.produtoId && criandoProdutoInsumo?.insumoId !== ing.id && (
-                            <div className="col-span-12 -mt-1">
-                              <button
-                                type="button"
-                                onClick={() => handleAbrirCriarProduto(tamanho.id, ing.id, ing.name)}
-                                className="text-[10px] font-bold hover:underline text-left"
-                                style={{ color: '#6E3F72' }}
-                              >
-                                "{ing.name}" não está cadastrado ainda — adicionar agora?
-                              </button>
-                            </div>
-                          )}
-
-                          {criandoProdutoInsumo?.tamanhoId === tamanho.id && criandoProdutoInsumo?.insumoId === ing.id && (
-                            <div className="col-span-12 rounded-lg border p-3 space-y-2 mt-1 animate-slideUp" style={{ background: '#F6F2F5', borderColor: '#E6E1DB' }}>
-                              <p className="text-[11px] font-bold" style={{ color: '#241B2B' }}>Cadastrar novo produto</p>
-                              <input
-                                type="text"
-                                placeholder="Nome"
-                                value={novoProdutoNome}
-                                onChange={(e) => setNovoProdutoNome(e.target.value)}
-                                className="w-full px-2.5 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs"
-                              />
-                              <input
-                                type="text"
-                                list="categorias-sugeridas-ficha-v2"
-                                placeholder="Categoria (opcional)"
-                                value={novoProdutoCategoria}
-                                onChange={(e) => setNovoProdutoCategoria(e.target.value)}
-                                className="w-full px-2.5 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs"
-                              />
+                        {criandoProdutoInsumo?.tamanhoId === tamanho.id && criandoProdutoInsumo?.insumoId === ing.id && (
+                          <>
+                            <Picote />
+                            <div className="flex flex-col gap-2.5 animate-slideUp" style={{ padding: '12px 16px 16px' }}>
+                              <span style={{ fontFamily: "'Instrument Serif', serif", fontSize: '20px', lineHeight: 1.15 }}>Cadastrar novo produto</span>
+                              <label className="flex flex-col" style={{ borderBottom: '1.5px dashed rgba(110,63,114,.25)' }}>
+                                <span style={ROTULO_COMANDA}>NOME</span>
+                                <input
+                                  type="text"
+                                  placeholder="Nome"
+                                  value={novoProdutoNome}
+                                  onChange={(e) => setNovoProdutoNome(e.target.value)}
+                                  className="w-full bg-transparent outline-none placeholder:italic placeholder:text-[#B3A6B8]"
+                                  style={{ ...CAMPO_TINTA, fontSize: '19px' }}
+                                />
+                              </label>
+                              <label className="flex flex-col" style={{ borderBottom: '1.5px dashed rgba(110,63,114,.25)' }}>
+                                <span style={ROTULO_COMANDA}>CATEGORIA</span>
+                                <input
+                                  type="text"
+                                  list="categorias-sugeridas-ficha-v2"
+                                  placeholder="Categoria (opcional)"
+                                  value={novoProdutoCategoria}
+                                  onChange={(e) => setNovoProdutoCategoria(e.target.value)}
+                                  className="w-full bg-transparent outline-none placeholder:italic placeholder:text-[#B3A6B8]"
+                                  style={{ ...CAMPO_TINTA, fontSize: '19px' }}
+                                />
+                              </label>
                               <datalist id="categorias-sugeridas-ficha-v2">
                                 <option value="Massa" />
                                 <option value="Recheio" />
@@ -1427,110 +1468,139 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                                 <option value="Decoração" />
                                 <option value="Embalagem" />
                               </datalist>
-                              <div className="flex gap-2">
-                                <input
-                                  type="text"
-                                  inputMode="decimal"
-                                  placeholder="Preço pago"
-                                  value={novoProdutoPreco}
-                                  onChange={(e) => setNovoProdutoPreco(e.target.value)}
-                                  /* `min-w-0`: sem isso um item flex nao encolhe
-                                     abaixo do proprio conteudo (min-width: auto e
-                                     o padrao), e com o seletor de unidade ao lado
-                                     em largura fixa a linha estourava — no
-                                     celular os campos saiam do card e a lista de
-                                     unidades abria por cima do fundo da tela. */
-                                  className="flex-1 min-w-0 px-2.5 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs"
-                                />
-                                <input
-                                  type="text"
-                                  inputMode="decimal"
-                                  placeholder="Qtd. embalagem"
-                                  value={novoProdutoQtdEmbalagem}
-                                  onChange={(e) => {
-                                    setNovoProdutoQtdEmbalagem(e.target.value);
-                                    // 20% da embalagem como alerta sugerido, na
-                                    // unidade dela. 20% porque o vermelho do anel
-                                    // dispara em 1,25x o alerta: acende com um
-                                    // quarto do pacote ainda na prateleira.
-                                    if (!novoProdutoAlertaTocado) {
-                                      const qtd = parseNumeroDigitado(e.target.value);
-                                      setNovoProdutoNivelMinimo(
-                                        Number.isFinite(qtd) && qtd > 0
-                                          ? String(Math.round(qtd * 0.2 * 100) / 100).replace('.', ',')
-                                          : ''
-                                      );
-                                    }
-                                  }}
-                                  className="flex-1 min-w-0 px-2.5 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs"
-                                />
-                                <CustomSelect
-                                  value={novoProdutoUnidade}
-                                  onChange={(v) => setNovoProdutoUnidade(v as any)}
-                                  compacto
-                                  ariaLabel="Unidade do produto novo"
-                                  style={{ width: '104px', flexShrink: 0 }}
-                                  options={['g', 'kg', 'ml', 'L', 'un', 'pacote'].map((u) => ({ value: u, label: u }))}
-                                />
+                              <div className="flex items-end gap-2">
+                                <label className="flex flex-col gap-1.5 flex-shrink-0" style={{ width: '104px' }}>
+                                  <span style={ROTULO_COMANDA}>PREÇO PAGO</span>
+                                  <span className="flex items-center gap-1" style={{ ...ETIQUETA_VALOR, padding: '0 10px 0 22px' }}>
+                                    <FuroEtiqueta />
+                                    <span style={{ fontSize: '14px', fontWeight: 800, color: '#C4626F' }}>{symbol}</span>
+                                    <input
+                                      type="text"
+                                      inputMode="decimal"
+                                      placeholder="0"
+                                      aria-label="Preço pago"
+                                      value={novoProdutoPreco}
+                                      onChange={(e) => setNovoProdutoPreco(e.target.value)}
+                                      className="w-full min-w-0 bg-transparent outline-none placeholder:text-[#B3A6B8]"
+                                      style={{ ...NUMERO, fontSize: '16px', color: '#3A2350' }}
+                                    />
+                                  </span>
+                                </label>
+                                <label className="flex-1 min-w-0 flex flex-col gap-1.5">
+                                  <span style={ROTULO_COMANDA}>QTD. EMBALAGEM</span>
+                                  <span className="flex items-center gap-2" style={CAIXA_NUMERO}>
+                                    <input
+                                      type="text"
+                                      inputMode="decimal"
+                                      placeholder="0"
+                                      aria-label="Qtd. embalagem"
+                                      value={novoProdutoQtdEmbalagem}
+                                      onChange={(e) => {
+                                        setNovoProdutoQtdEmbalagem(e.target.value);
+                                        // 20% da embalagem como alerta sugerido, na
+                                        // unidade dela. 20% porque o vermelho do anel
+                                        // dispara em 1,25x o alerta: acende com um
+                                        // quarto do pacote ainda na prateleira.
+                                        if (!novoProdutoAlertaTocado) {
+                                          const qtd = parseNumeroDigitado(e.target.value);
+                                          setNovoProdutoNivelMinimo(
+                                            Number.isFinite(qtd) && qtd > 0
+                                              ? String(Math.round(qtd * 0.2 * 100) / 100).replace('.', ',')
+                                              : ''
+                                          );
+                                        }
+                                      }}
+                                      className="flex-1 w-full min-w-0 bg-transparent outline-none placeholder:text-[#B3A6B8]"
+                                      style={{ ...NUMERO, fontSize: '16px' }}
+                                    />
+                                    <CustomSelect
+                                      value={novoProdutoUnidade}
+                                      onChange={(v) => setNovoProdutoUnidade(v as any)}
+                                      chip
+                                      ariaLabel="Unidade do produto novo"
+                                      style={CHIP_UNIDADE}
+                                      options={['g', 'kg', 'ml', 'L', 'un', 'pacote'].map((u) => ({ value: u, label: u }))}
+                                    />
+                                  </span>
+                                </label>
                               </div>
-                              <div className="flex items-center justify-between">
-                                <label className="text-[10px]" style={{ color: '#7A6E80' }}>Controlar estoque deste produto?</label>
+                              <div className="flex items-center justify-between gap-3">
+                                <span style={{ fontSize: '12px', fontWeight: 700, color: '#5B4A6B' }}>Controlar estoque deste produto?</span>
                                 <button
                                   type="button"
+                                  role="switch"
+                                  aria-checked={novoProdutoControlaEstoque}
+                                  aria-label="Controlar estoque do produto novo"
                                   onClick={() => setNovoProdutoControlaEstoque((v) => !v)}
-                                  style={{ width: '34px', height: '18px', borderRadius: '9px', border: 'none', cursor: 'pointer', position: 'relative', background: novoProdutoControlaEstoque ? '#6E3F72' : '#E6E1DB', flexShrink: 0 }}
+                                  className="relative flex-shrink-0"
+                                  style={{ width: '44px', height: '26px', border: 'none', borderRadius: '999px', cursor: 'pointer', background: novoProdutoControlaEstoque ? 'linear-gradient(120deg, #6E3F72, #A85E86)' : '#E6E1DB', boxShadow: 'inset 0 1px 3px rgba(36,27,43,.25)' }}
                                 >
-                                  <span style={{ position: 'absolute', top: '2px', left: novoProdutoControlaEstoque ? '18px' : '2px', width: '14px', height: '14px', borderRadius: '50%', background: 'white', transition: 'left 0.2s' }} />
+                                  <span className="absolute rounded-full" style={{ top: '3px', left: novoProdutoControlaEstoque ? '21px' : '3px', width: '20px', height: '20px', background: '#FFFFFF', boxShadow: '0 2px 6px rgba(36,27,43,.3)', transition: 'left .2s' }} />
                                 </button>
                               </div>
                               {novoProdutoControlaEstoque && (
-                                <div>
-                                  <input
-                                    type="text"
-                                    inputMode="decimal"
-                                    placeholder="Quanto você já tem guardado"
-                                    value={novoProdutoQtdAtual}
-                                    onChange={(e) => setNovoProdutoQtdAtual(e.target.value)}
-                                    className="w-full px-2.5 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs"
-                                  />
-                                  {/* O "?" explica a diferenca para o campo de
-                                      cima, que e o outro "quanto". Mesmo
-                                      padrao de ajuda ja usado no app. */}
-                                  <CampoComAjuda
-                                    microcopy="Seu estoque de hoje — não o quanto a receita usa."
-                                    exemploDinamico={
-                                      'É quanto você já tem em casa hoje, não quanto a receita usa. ' +
-                                      'Pode deixar vazio se não quiser controlar.'
-                                    }
-                                  />
+                                <div className="flex flex-col gap-2.5">
+                                  <div className="flex flex-col gap-1.5">
+                                    <span style={ROTULO_COMANDA}>QUANTO VOCÊ JÁ TEM GUARDADO</span>
+                                    <span className="flex items-center" style={CAIXA_NUMERO}>
+                                      <input
+                                        type="text"
+                                        inputMode="decimal"
+                                        placeholder="0"
+                                        aria-label="Quanto você já tem guardado"
+                                        value={novoProdutoQtdAtual}
+                                        onChange={(e) => setNovoProdutoQtdAtual(e.target.value)}
+                                        className="flex-1 w-full min-w-0 bg-transparent outline-none placeholder:text-[#B3A6B8]"
+                                        style={{ ...NUMERO, fontSize: '16px' }}
+                                      />
+                                      <span style={{ fontSize: '12px', fontWeight: 800, color: '#7A6E80', paddingRight: '10px' }}>{novoProdutoUnidade}</span>
+                                    </span>
+                                    {/* O "?" explica a diferenca para o campo de
+                                        cima, que e o outro "quanto". Mesmo
+                                        padrao de ajuda ja usado no app. */}
+                                    <CampoComAjuda
+                                      microcopy="Seu estoque de hoje — não o quanto a receita usa."
+                                      exemploDinamico={
+                                        'É quanto você já tem em casa hoje, não quanto a receita usa. ' +
+                                        'Pode deixar vazio se não quiser controlar.'
+                                      }
+                                    />
+                                  </div>
                                   {/* Este campo nao existia aqui: o alerta era
                                       gravado em 0 sem a pessoa ver. Agora vem
                                       sugerido em 20% da embalagem, na unidade
                                       dela, visivel e editavel antes de salvar —
                                       o valor gravado e sempre a escolha dela. */}
-                                  <div className="mt-2">
-                                    <label className="text-[10px] block mb-1" style={{ color: '#7A6E80' }}>
-                                      Avisar quando restar menos de ({novoProdutoUnidade})
-                                    </label>
-                                    <input
-                                      type="text"
-                                      inputMode="decimal"
-                                      placeholder="0"
-                                      value={novoProdutoNivelMinimo}
-                                      onChange={(e) => {
-                                        setNovoProdutoNivelMinimo(e.target.value);
-                                        setNovoProdutoAlertaTocado(true);
-                                      }}
-                                      className="w-full px-2.5 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs"
-                                    />
+                                  <div className="flex flex-col gap-1.5">
+                                    <span className="flex items-center gap-1.5" style={{ ...ROTULO_COMANDA, color: '#C4626F' }}>
+                                      <AlertTriangle className="w-[11px] h-[11px]" strokeWidth={2.4} />
+                                      AVISAR QUANDO RESTAR MENOS DE
+                                    </span>
+                                    <span className="flex items-center" style={{ ...CAIXA_NUMERO, background: '#FDF4F5', border: '1px solid rgba(196,98,111,.18)', boxShadow: 'none' }}>
+                                      <input
+                                        type="text"
+                                        inputMode="decimal"
+                                        placeholder="0"
+                                        aria-label="Alerta mínimo do produto novo"
+                                        value={novoProdutoNivelMinimo}
+                                        onChange={(e) => {
+                                          setNovoProdutoNivelMinimo(e.target.value);
+                                          setNovoProdutoAlertaTocado(true);
+                                        }}
+                                        className="flex-1 w-full min-w-0 bg-transparent outline-none placeholder:text-[#B3A6B8]"
+                                        style={{ ...NUMERO, fontSize: '16px' }}
+                                      />
+                                      <span style={{ fontSize: '12px', fontWeight: 800, color: '#7A6E80', paddingRight: '10px' }}>{novoProdutoUnidade}</span>
+                                    </span>
                                   </div>
                                 </div>
                               )}
-                              <div className="flex justify-end gap-2 pt-1">
+                              <div className="flex gap-2 pt-1">
                                 <button
                                   type="button"
                                   onClick={() => setCriandoProdutoInsumo(null)}
-                                  className="px-3 py-1.5 rounded-lg bg-white border border-[#E6E1DB] text-[11px] font-bold text-neutral-700"
+                                  className="flex-shrink-0"
+                                  style={{ height: '40px', padding: '0 16px', borderRadius: '13px', border: '1px solid rgba(110,63,114,.18)', background: '#FFFFFF', fontSize: '13px', fontWeight: 800, color: '#3A2350' }}
                                 >
                                   Cancelar
                                 </button>
@@ -1538,94 +1608,113 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                                   type="button"
                                   onClick={handleSalvarNovoProdutoInline}
                                   disabled={salvandoNovoProduto || !novoProdutoNome.trim()}
-                                  className="px-3 py-1.5 rounded-lg text-white text-[11px] font-bold disabled:opacity-50"
-                                  style={{ background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)' }}
+                                  className="flex-1 flex items-center justify-center gap-1.5 disabled:opacity-50"
+                                  style={{ height: '40px', borderRadius: '13px', border: 'none', background: '#3A2350', boxShadow: '0 8px 16px rgba(58,35,80,.25)', fontSize: '13px', fontWeight: 800, color: '#F5B9C6' }}
                                 >
+                                  <Check className="w-3.5 h-3.5" strokeWidth={2.6} />
                                   {salvandoNovoProduto ? 'Salvando...' : 'Salvar e usar'}
                                 </button>
                               </div>
                             </div>
-                          )}
-                        </div>
-                      ))}
-                      <div className="p-2 flex items-center justify-between gap-2">
-                        {index > 0 ? (
-                          <button
-                            type="button"
-                            onClick={() => handleCopiarInsumosDoAnterior(tamanho.id)}
-                            className="text-xs font-bold flex items-center gap-1 cursor-pointer"
-                            style={{ color: '#6E3F72' }}
-                          >
-                            <Copy className="w-3 h-3" />
-                            Copiar anterior
-                          </button>
-                        ) : <span />}
+                          </>
+                        )}
+                      </section>
+                    ))}
+
+                    {/* Adicionar insumo (e copiar a lista do tamanho anterior) */}
+                    <div className="flex gap-2">
+                      {index > 0 && (
                         <button
                           type="button"
-                          onClick={() => handleAddInsumoTamanho(tamanho.id)}
-                          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-[10px] text-xs font-bold cursor-pointer transition-colors"
-                          style={{ border: '1.5px solid #6E3F72', color: '#6E3F72', background: 'white' }}
-                          onMouseEnter={(e) => { e.currentTarget.style.background = '#F6F2F5'; }}
-                          onMouseLeave={(e) => { e.currentTarget.style.background = 'white'; }}
+                          onClick={() => handleCopiarInsumosDoAnterior(tamanho.id)}
+                          className="flex items-center justify-center gap-1.5 flex-shrink-0 cursor-pointer transition-transform hover:-translate-y-0.5"
+                          style={{ height: '52px', padding: '0 14px', borderRadius: '18px', border: '1.5px solid rgba(110,63,114,.25)', background: '#FFFFFF', fontSize: '12px', fontWeight: 800, color: '#6E3F72' }}
                         >
-                          <Plus className="w-3.5 h-3.5" strokeWidth={3} />
-                          Adicionar insumo
+                          <Copy className="w-3.5 h-3.5" />
+                          Copiar anterior
                         </button>
-                      </div>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => handleAddInsumoTamanho(tamanho.id)}
+                        className="flex-1 flex items-center justify-center gap-2.5 cursor-pointer transition-transform hover:-translate-y-0.5"
+                        style={{ height: '52px', borderRadius: '18px', border: '1.5px dashed rgba(110,63,114,.35)', background: 'transparent', fontFamily: "'Instrument Serif', serif", fontSize: '20px', color: '#3A2350' }}
+                      >
+                        <span className="flex items-center justify-center" style={{ width: '28px', height: '28px', borderRadius: '10px', background: '#F5B9C6', boxShadow: '0 6px 12px rgba(196,98,111,.3)' }}>
+                          <Plus className="w-3 h-3" style={{ color: '#3A2350' }} strokeWidth={3} />
+                        </span>
+                        Adicionar insumo
+                      </button>
                     </div>
 
-                    <div className="bg-white rounded-2xl p-4 grid grid-cols-3 gap-3" style={{ boxShadow: '0 8px 20px rgba(58,35,80,.09)' }}>
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Horas</label>
-                        <input
-                          type="text"
-                          inputMode="decimal"
-                          placeholder="0"
-                          value={tamanho.horasTrabalho}
-                          onChange={(e) => handleUpdateTamanho(tamanho.id, 'horasTrabalho', e.target.value)}
-                          className="min-w-0 border rounded-[10px] px-2.5 py-2.5 text-sm font-bold text-right"
-                          style={{ borderColor: 'rgba(58,35,80,0.14)', background: '#FAF7FA' }}
-                        />
+                    {/* Mao de obra: relogio HH : MM x valor da hora */}
+                    <section className="relative" style={{ ...CARD_COMANDA, padding: 0 }}>
+                      <div style={{ padding: '14px 16px 12px' }}>
+                        <div className="flex items-center justify-between">
+                          <div className="flex flex-col">
+                            <span style={ROTULO_COMANDA}>TEMPO DE PRODUÇÃO</span>
+                            <span style={{ fontFamily: "'Instrument Serif', serif", fontSize: '23px', lineHeight: 1.15 }}>Mão de obra</span>
+                          </div>
+                          <span className="flex items-center justify-center" style={{ width: '38px', height: '38px', borderRadius: '12px', background: '#F3E9F3' }}>
+                            <Clock className="w-[17px] h-[17px]" style={{ color: '#6E3F72' }} strokeWidth={2.2} />
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 mt-3">
+                          {([
+                            { campo: 'horasTrabalho' as const, rotulo: 'HORAS', modo: 'decimal' as const },
+                            { campo: 'minutosTrabalho' as const, rotulo: 'MINUTOS', modo: 'numeric' as const },
+                          ]).map((c, i) => (
+                            <React.Fragment key={c.campo}>
+                              {i === 1 && <span aria-hidden="true" style={{ fontSize: '24px', fontWeight: 800, color: '#D6B8E0' }}>:</span>}
+                              <label className="flex-1 min-w-0 flex flex-col items-center justify-center" style={{ height: '66px', borderRadius: '18px', background: '#F6F2F5', boxShadow: 'inset 0 1px 3px rgba(58,35,80,.08)' }}>
+                                <input
+                                  type="text"
+                                  inputMode={c.modo}
+                                  placeholder="00"
+                                  aria-label={c.rotulo === 'HORAS' ? 'Horas' : 'Minutos'}
+                                  value={tamanho[c.campo]}
+                                  onChange={(e) => handleUpdateTamanho(tamanho.id, c.campo, e.target.value)}
+                                  className="w-full min-w-0 bg-transparent outline-none text-center placeholder:text-[#B3A6B8]"
+                                  style={{ ...NUMERO, fontSize: '28px', letterSpacing: '-.03em', lineHeight: 1.1 }}
+                                />
+                                <span style={ROTULO_COMANDA}>{c.rotulo}</span>
+                              </label>
+                            </React.Fragment>
+                          ))}
+                          <span aria-hidden="true" style={{ fontSize: '15px', fontWeight: 800, color: '#D6B8E0' }}>×</span>
+                          <label className="flex flex-col items-center justify-center flex-shrink-0" style={{ width: '88px', height: '66px', borderRadius: '18px', background: '#FCEFF2', border: '1px solid rgba(196,98,111,.2)' }}>
+                            <span className="flex items-baseline justify-center w-full" style={{ fontSize: '14px', fontWeight: 800, color: '#3A2350' }}>
+                              {symbol}
+                              <input
+                                type="text"
+                                inputMode="decimal"
+                                placeholder="0"
+                                aria-label={`${symbol} por hora`}
+                                value={tamanho.valorHora}
+                                onChange={(e) => handleUpdateTamanho(tamanho.id, 'valorHora', e.target.value)}
+                                className="bg-transparent outline-none text-center placeholder:text-[#B3A6B8]"
+                                style={{ ...NUMERO, fontSize: '24px', letterSpacing: '-.03em', width: '48px', color: '#3A2350' }}
+                              />
+                            </span>
+                            <span style={{ ...ROTULO_COMANDA, color: '#C4626F' }}>POR HORA</span>
+                          </label>
+                        </div>
                       </div>
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Minutos</label>
-                        <input
-                          type="text"
-                          inputMode="numeric"
-                          placeholder="0"
-                          value={tamanho.minutosTrabalho}
-                          onChange={(e) => handleUpdateTamanho(tamanho.id, 'minutosTrabalho', e.target.value)}
-                          className="min-w-0 border rounded-[10px] px-2.5 py-2.5 text-sm font-bold text-right"
-                          style={{ borderColor: 'rgba(58,35,80,0.14)', background: '#FAF7FA' }}
-                        />
+                      <Picote />
+                      <div className="flex items-center justify-between" style={{ padding: '12px 16px 14px' }}>
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#5B4A6B' }}>Total de mão de obra</span>
+                        <span className="tabular-nums" style={{ fontSize: '22px', fontWeight: 800, letterSpacing: '-.03em', color: '#3A2350' }}>{formatMoney(calcularMaoDeObra(tamanho))}</span>
                       </div>
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>{symbol} / hora</label>
-                        <input
-                          type="text"
-                          inputMode="decimal"
-                          placeholder="0"
-                          value={tamanho.valorHora}
-                          onChange={(e) => handleUpdateTamanho(tamanho.id, 'valorHora', e.target.value)}
-                          className="min-w-0 border rounded-[10px] px-2.5 py-2.5 text-sm font-bold text-right"
-                          style={{ borderColor: 'rgba(58,35,80,0.14)', background: '#FAF7FA' }}
-                        />
-                      </div>
-                      <div className="col-span-3 flex items-center justify-between rounded-[10px] px-3 py-2.5" style={{ background: '#F3E9F3' }}>
-                        <span className="text-xs font-semibold" style={{ color: '#6E3F72' }}>Mão de obra</span>
-                        <span className="text-sm font-bold" style={{ color: '#3A2350' }}>{formatMoney(calcularMaoDeObra(tamanho))}</span>
-                      </div>
-                    </div>
+                    </section>
                   </div>
                 ))}
 
                 {/* Rendimento: veio do Passo 1 para ficar junto de horas e mao
                     de obra. E um campo da FICHA (nao de cada tamanho), entao
                     aparece uma vez so, depois do ultimo tamanho. */}
-                <div className="bg-white rounded-2xl p-4 flex flex-col gap-1.5" style={{ boxShadow: '0 8px 20px rgba(58,35,80,.09)' }}>
-                  <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Rendimento *</label>
-                  <CampoComAjuda microcopy="Quantas porções esse tamanho rende — em fatias, gramas, quilos, unidades ou ml, o que fizer mais sentido pro seu produto. É só uma referência pra você e pra cliente; não entra na conta do custo." />
-                  <div className="flex gap-2">
+                <section className="flex flex-col gap-1.5" style={CARD_COMANDA}>
+                  <span style={ROTULO_COMANDA}>RENDIMENTO <span style={{ color: '#C4626F' }}>*</span></span>
+                  <div className="flex items-center gap-2" style={CAIXA_NUMERO}>
                     <input
                       id="ficha-rendimento"
                       type="text"
@@ -1636,42 +1725,44 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         setYieldInfo(e.target.value);
                         if (invalidFieldId === 'ficha-rendimento') setInvalidFieldId(null);
                       }}
-                      className="flex-1 min-w-0 border rounded-[10px] px-3 py-3 text-[15px]"
-                      style={{ borderColor: 'rgba(58,35,80,0.14)', background: '#FAF7FA' }}
+                      className="flex-1 w-full min-w-0 bg-transparent outline-none placeholder:text-[#B3A6B8]"
+                      style={NUMERO}
                     />
-                    <div className="flex-1 min-w-0">
-                      <CustomSelect
-                        value={selectedYieldUnit}
-                        onChange={handleApplyYieldUnit}
-                        ariaLabel="Unidade de rendimento"
-                        options={[
-                          { value: 'fatias', label: '🍰 Fatias' },
-                          { value: 'gramas', label: '⚖️ Gramas (g)' },
-                          { value: 'quilos', label: '⚖️ Quilos (kg)' },
-                          { value: 'unidades', label: '📦 Unidades' },
-                          { value: 'ml', label: '🥛 ML' },
-                        ]}
-                      />
-                    </div>
+                    <CustomSelect
+                      value={selectedYieldUnit}
+                      onChange={handleApplyYieldUnit}
+                      chip
+                      ariaLabel="Unidade de rendimento"
+                      style={CHIP_UNIDADE}
+                      options={[
+                        { value: 'fatias', label: 'fatias' },
+                        { value: 'gramas', label: 'g' },
+                        { value: 'quilos', label: 'kg' },
+                        { value: 'unidades', label: 'unidades' },
+                        { value: 'ml', label: 'ml' },
+                      ]}
+                    />
                   </div>
                   {invalidFieldId === 'ficha-rendimento' && <FieldValidationError />}
-                </div>
+                  <CampoComAjuda microcopy="Quantas porções esse tamanho rende — em fatias, gramas, quilos, unidades ou ml, o que fizer mais sentido pro seu produto. É só uma referência pra você e pra cliente; não entra na conta do custo." />
+                </section>
               </div>
 
-              {/* PASSO 3 — PREÇO (um bloco por tamanho, mesma quebra ja
-                  implementada hoje: Insumos / Mao de obra / Custo+investimento
-                  / Custo total / Sobra ou Prejuizo / Preco calculado) */}
-              <div data-step={3} style={{ display: formStep === 3 ? 'flex' : 'none', flexDirection: 'column', gap: '14px' }}>
+              {/* PASSO 3 — PREÇO, no visual do design "Ficha Tecnica · Preco"
+                  (Claude Design): um card-comanda por tamanho com o preco de
+                  venda a tinta, os custos com linha pontilhada, o custo total e
+                  o lucro. O que o design nao trazia e o app ja tinha (aviso de
+                  metas mudadas, configurar metas, preco sugerido x atual,
+                  percentual e prejuizo, aviso de precos por tamanho) segue o
+                  mesmo estilo. */}
+              <div data-step={3} style={{ display: formStep === 3 ? 'flex' : 'none', flexDirection: 'column', gap: '14px', fontFamily: "'Manrope', sans-serif", color: '#241B2B' }}>
                 {editingId && fichaDesatualizada(
                   fichas.find((f) => f.id === editingId) || { updatedAt: undefined },
                   ultimaMudancaMetas
                 ) && (
-                  <div
-                    className="rounded-2xl p-3.5 flex items-start gap-2.5"
-                    style={{ background: '#FBF0DD', border: '1px solid rgba(178,122,22,0.25)' }}
-                  >
+                  <div className="flex items-start gap-2.5" style={{ background: '#FBF6EC', borderRadius: '18px', padding: '12px 14px', border: '1px solid rgba(178,122,22,0.25)' }}>
                     <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" style={{ color: '#B27A16' }} />
-                    <p className="text-xs font-semibold" style={{ color: '#7A5310' }}>
+                    <p style={{ fontSize: '12px', fontWeight: 600, color: '#7A5310', lineHeight: 1.45 }}>
                       As metas da empresa (CMV/Investimento/Despesas) mudaram desde que essa ficha foi
                       salva pela última vez. O preço calculado abaixo pode não refletir mais a meta
                       atual — revise se quiser atualizar.
@@ -1698,154 +1789,134 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   const abaixoDaMeta = precoCalculado != null && preco > 0 && preco < precoCalculado.precoSugerido;
 
                   return (
-                    <div key={tamanho.id} className="flex flex-col gap-3">
-                      <div className="text-[13px]" style={{ color: '#7A6E80' }}>
-                        Tamanho <strong style={{ color: '#241B2B' }}>{tamanho.descricao || '(sem nome)'}</strong>
-                      </div>
-
-                      <div className="bg-white rounded-2xl p-[18px] flex flex-col gap-3" style={{ boxShadow: '0 8px 20px rgba(58,35,80,.09)' }}>
-                        <div className="flex flex-col gap-1.5">
-                          <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Preço de venda ({symbol})</label>
+                    <section key={tamanho.id} className="relative" style={{ ...CARD_COMANDA, padding: 0 }}>
+                      {/* Preco de venda */}
+                      <div style={{ padding: '14px 16px' }}>
+                        <div className="flex items-center justify-between gap-2">
+                          <span style={ROTULO_COMANDA}>PREÇO DE VENDA</span>
+                          <span className="whitespace-nowrap truncate" style={{ background: '#F3E9F3', color: '#3A2350', fontSize: '10px', fontWeight: 800, padding: '5px 10px', borderRadius: '999px', maxWidth: '60%' }}>
+                            Tamanho · {tamanho.descricao || '(sem nome)'}
+                          </span>
+                        </div>
+                        <label className="flex items-end gap-2.5 mt-2" style={{ borderBottom: '1.5px dashed rgba(110,63,114,.25)' }}>
+                          <span aria-hidden="true" style={{ fontFamily: "'Instrument Serif', serif", fontSize: '32px', lineHeight: 1, color: '#D6B8E0', paddingBottom: '10px' }}>{symbol}</span>
                           <input
                             type="text"
                             inputMode="decimal"
                             placeholder="0,00"
+                            aria-label={`Preço de venda (${symbol})`}
                             value={tamanho.preco}
                             onChange={(e) => handleUpdateTamanho(tamanho.id, 'preco', e.target.value)}
-                            className="rounded-xl px-4 py-3.5 text-2xl font-bold text-right"
-                            style={{ border: '2px solid #3A2350', background: '#FAF7FA', color: '#241B2B', boxShadow: '0 0 0 3px rgba(58,35,80,0.10)' }}
+                            className="w-full min-w-0 bg-transparent outline-none text-right placeholder:text-[#C9BCCD]"
+                            style={{ fontSize: '42px', fontWeight: 800, letterSpacing: '-.03em', color: '#241B2B', padding: '0 0 6px' }}
                           />
-                        </div>
-
+                        </label>
                         {!estruturaFinanceira?.valido && (
-                          <p className="text-xs" style={{ color: '#9A8FA0' }}>
+                          <p className="mt-2" style={{ fontSize: '11px', fontWeight: 600, color: '#9A8FA0' }}>
                             Configure as metas em Minha Empresa para calcular custo e investimento automaticamente.
                           </p>
                         )}
+                      </div>
 
-                        {/* CUSTOS — as quatro partes, com a nomenclatura
-                            fechada do app: "Despesas", e nao "Despesas
-                            fixas", porque e o mesmo conceito que Minha
-                            Empresa e o Pedido ja chamam assim. */}
-                        <div className="flex flex-col gap-2">
-                          <span
-                            className="text-[10px] font-bold uppercase"
-                            style={{ color: '#9A8FA0', letterSpacing: '0.1em', fontFamily: "'Manrope', sans-serif" }}
-                          >
-                            Custos
-                          </span>
+                      <Picote />
 
-                          <div className="flex flex-col gap-1.5 text-[13px]" style={{ fontFamily: "'Manrope', sans-serif" }}>
-                            {([
-                              ['Insumos', insumos],
-                              ['Mão de obra', mdo],
-                              ['Despesas', cus],
-                              ['Investimento', inv],
-                            ] as const).map(([rotulo, valor]) => (
-                              <div key={rotulo} className="flex justify-between items-baseline" style={{ color: '#7A6E80' }}>
-                                <span>{rotulo}</span>
-                                <span style={{ fontVariantNumeric: 'tabular-nums' }}>{formatMoney(valor)}</span>
-                              </div>
-                            ))}
+                      {/* CUSTOS — as quatro partes, com a nomenclatura fechada do
+                          app: "Despesas", e nao "Despesas fixas", porque e o
+                          mesmo conceito que Minha Empresa e o Pedido ja chamam
+                          assim. */}
+                      <div className="flex flex-col gap-2" style={{ padding: '12px 16px' }}>
+                        <span style={ROTULO_COMANDA}>CUSTOS</span>
+                        {([
+                          ['Insumos', insumos, '#6E3F72'],
+                          ['Mão de obra', mdo, '#C4626F'],
+                          ['Despesas', cus, '#B08D57'],
+                          ['Investimento', inv, '#D6B8E0'],
+                        ] as const).map(([rotulo, valor, cor]) => (
+                          <div key={rotulo} className="flex items-baseline gap-2" style={{ fontSize: '13px', fontWeight: 600, color: '#5B4A6B' }}>
+                            <span aria-hidden="true" className="flex-shrink-0" style={{ width: '8px', height: '8px', borderRadius: '3px', background: cor }} />
+                            {rotulo}
+                            <span aria-hidden="true" className="flex-1" style={{ borderBottom: '1.5px dotted rgba(110,63,114,.25)', transform: 'translateY(-3px)' }} />
+                            <span className="tabular-nums" style={{ fontWeight: 800, color: '#241B2B' }}>{formatMoney(valor)}</span>
                           </div>
-
-                          <div
-                            className="flex justify-between items-baseline pt-2.5 text-[15px] font-bold"
-                            style={{ borderTop: '1px solid #EDE6EF', color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}
-                          >
-                            <span>Custo total</span>
-                            <span style={{ fontVariantNumeric: 'tabular-nums' }}>{formatMoney(custoTotal)}</span>
-                          </div>
+                        ))}
+                        <div className="flex items-center justify-between mt-1" style={{ padding: '10px 14px', borderRadius: '16px', background: '#F6F2F5' }}>
+                          <span style={{ fontFamily: "'Instrument Serif', serif", fontSize: '20px', lineHeight: 1 }}>Custo total</span>
+                          <span className="tabular-nums" style={{ fontSize: '18px', fontWeight: 800, letterSpacing: '-.02em' }}>{formatMoney(custoTotal)}</span>
                         </div>
+                      </div>
 
-                        {/* O lucro ganha card proprio: e a resposta da tela,
-                            nao mais uma linha perdida no meio da lista. */}
+                      <Picote />
+
+                      {/* Lucro (ou prejuizo) */}
+                      <div className="flex flex-col gap-2" style={{ padding: '12px 16px 16px' }}>
                         <div
-                          className="rounded-xl flex justify-between items-center gap-3"
+                          className="flex items-center justify-between gap-3"
                           style={{
                             padding: '12px 14px',
-                            background: noPrejuizo ? '#FDF4F5' : '#EAF6EF',
-                            border: noPrejuizo ? '1px solid #F0D9DD' : '1px solid #CFE8DA',
-                            fontFamily: "'Manrope', sans-serif",
+                            borderRadius: '18px',
+                            background: noPrejuizo ? '#FDF4F5' : 'rgba(169,216,184,.28)',
+                            border: noPrejuizo ? '1px solid rgba(196,98,111,.25)' : '1px solid rgba(76,115,88,.18)',
                           }}
                         >
-                          <span className="text-[13px] font-bold" style={{ color: noPrejuizo ? '#C4626F' : '#2F7D57' }}>
-                            {noPrejuizo ? 'Prejuízo neste preço' : 'Lucro neste preço'}
-                          </span>
-                          <span
-                            className="text-[15px] font-bold"
-                            style={{ color: noPrejuizo ? '#C4626F' : '#2F7D57', fontVariantNumeric: 'tabular-nums' }}
-                          >
-                            {formatMoney(margem)}{preco > 0 && ` (${margemPct.toFixed(0)}%)`}
+                          <div className="flex items-center gap-2.5">
+                            <span className="flex items-center justify-center flex-shrink-0" style={{ width: '32px', height: '32px', borderRadius: '10px', background: noPrejuizo ? '#F5B9C6' : '#A9D8B8' }}>
+                              {noPrejuizo
+                                ? <AlertTriangle className="w-[15px] h-[15px]" style={{ color: '#6E2231' }} strokeWidth={2.4} />
+                                : <TrendingUp className="w-[15px] h-[15px]" style={{ color: '#26402F' }} strokeWidth={2.4} />}
+                            </span>
+                            <div className="flex flex-col">
+                              <span style={{ ...ROTULO_COMANDA, color: noPrejuizo ? '#C4626F' : '#4C7358' }}>{noPrejuizo ? 'PREJUÍZO' : 'LUCRO'}</span>
+                              <span style={{ fontSize: '13px', fontWeight: 700, color: noPrejuizo ? '#6E2231' : '#26402F' }}>
+                                neste preço{preco > 0 && ` · ${margemPct.toFixed(0)}%`}
+                              </span>
+                            </div>
+                          </div>
+                          <span className="tabular-nums" style={{ fontSize: '24px', fontWeight: 800, letterSpacing: '-.03em', color: noPrejuizo ? '#C4626F' : '#26402F' }}>
+                            {formatMoney(margem)}
                           </span>
                         </div>
-
                         {noPrejuizo && (
-                          <p className="text-[11px] leading-relaxed" style={{ color: '#C4626F', fontFamily: "'Manrope', sans-serif" }}>
+                          <p style={{ fontSize: '11px', fontWeight: 600, lineHeight: 1.45, color: '#C4626F' }}>
                             Este tamanho custa mais do que você cobra por ele.
                           </p>
                         )}
 
                         {precoCalculado && (
-                          <div
-                            className="rounded-xl flex flex-col gap-2.5"
-                            style={{ padding: '14px', background: '#FAF7FA', border: '1px solid #F3E9F3', fontFamily: "'Manrope', sans-serif" }}
-                          >
-                            <div className="flex justify-between items-baseline text-[12px]" style={{ color: '#7A6E80' }}>
+                          <div className="flex flex-col gap-2.5" style={{ padding: '12px 14px', borderRadius: '18px', background: '#F6F2F5' }}>
+                            <div className="flex items-baseline justify-between" style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80' }}>
                               <span>Preço atual</span>
-                              <span style={{ fontVariantNumeric: 'tabular-nums' }}>{preco > 0 ? formatMoney(preco) : '—'}</span>
+                              <span className="tabular-nums">{preco > 0 ? formatMoney(preco) : '—'}</span>
                             </div>
-
-                            <div className="flex justify-between items-center gap-3">
-                              <span className="text-[13px] font-bold" style={{ color: '#241B2B' }}>Preço sugerido</span>
-
-                              {/* O numero que esta tela existe para entregar.
-                                  O halo usa `carGlow`, o pulso que ja mora no
-                                  index.css — quem pulsa e o brilho ATRAS, nao
-                                  a pilula: assim o numero nunca treme nem muda
-                                  de tamanho enquanto a pessoa le. */}
+                            <div className="flex items-center justify-between gap-3">
+                              <span style={{ fontFamily: "'Instrument Serif', serif", fontSize: '20px', lineHeight: 1 }}>Preço sugerido</span>
+                              {/* O numero que esta tela existe para entregar. O
+                                  halo usa `carGlow`, o pulso que ja mora no
+                                  index.css — quem pulsa e o brilho ATRAS, nao a
+                                  pilula: o numero nunca treme enquanto a pessoa
+                                  le. */}
                               <span className="relative inline-flex flex-shrink-0">
                                 <span
                                   aria-hidden="true"
                                   className="absolute rounded-full"
-                                  style={{
-                                    inset: '-3px',
-                                    background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)',
-                                    filter: 'blur(7px)',
-                                    opacity: 0.45,
-                                    animation: 'carGlow 2.8s ease-in-out infinite',
-                                  }}
+                                  style={{ inset: '-3px', background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)', filter: 'blur(7px)', opacity: 0.45, animation: 'carGlow 2.8s ease-in-out infinite' }}
                                 />
                                 <span
-                                  className="relative inline-flex items-center gap-1.5 rounded-full text-white font-bold"
-                                  style={{
-                                    padding: '8px 15px',
-                                    fontSize: '15px',
-                                    background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)',
-                                    boxShadow: '0 8px 18px rgba(58,35,80,.32)',
-                                    fontVariantNumeric: 'tabular-nums',
-                                  }}
+                                  className="relative inline-flex items-center gap-1.5 rounded-full tabular-nums"
+                                  style={{ padding: '8px 15px', fontSize: '15px', fontWeight: 800, color: '#FFFFFF', background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)', boxShadow: '0 8px 18px rgba(58,35,80,.32)' }}
                                 >
                                   <Star className="w-3.5 h-3.5 shrink-0" fill="#F5B9C6" strokeWidth={0} />
                                   {formatMoney(precoCalculado.precoSugerido)}
                                 </span>
                               </span>
                             </div>
-
                             {preco > 0 && (
                               abaixoDaMeta ? (
-                                <span
-                                  className="inline-flex items-center gap-1.5 rounded-full font-bold self-start"
-                                  style={{ fontSize: '11px', padding: '5px 11px', background: '#FDF4F5', color: '#C4626F', border: '1px solid #F0D9DD' }}
-                                >
+                                <span className="inline-flex items-center gap-1.5 self-start" style={{ fontSize: '11px', fontWeight: 800, padding: '5px 11px', borderRadius: '999px', background: '#FDF4F5', color: '#C4626F', border: '1px solid rgba(196,98,111,.25)' }}>
                                   <AlertTriangle className="w-3 h-3 shrink-0" />
                                   Abaixo da meta em {formatMoney(precoCalculado.precoSugerido - preco)}
                                 </span>
                               ) : (
-                                <span
-                                  className="inline-flex items-center gap-1.5 rounded-full font-bold self-start"
-                                  style={{ fontSize: '11px', padding: '5px 11px', background: '#EAF6EF', color: '#2F7D57', border: '1px solid #CFE8DA' }}
-                                >
+                                <span className="inline-flex items-center gap-1.5 self-start" style={{ fontSize: '11px', fontWeight: 800, padding: '5px 11px', borderRadius: '999px', background: 'rgba(169,216,184,.28)', color: '#26402F', border: '1px solid rgba(76,115,88,.18)' }}>
                                   <Check className="w-3 h-3 shrink-0" strokeWidth={3} />
                                   Esse preço já cobre a meta sugerida
                                 </span>
@@ -1854,29 +1925,27 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                           </div>
                         )}
                       </div>
-                    </div>
+                    </section>
                   );
                 })}
 
                 {avisosDePreco.length > 0 && (
-                  <div className="p-3.5 rounded-xl border animate-fadeIn" style={{ background: '#FFF6E8', borderColor: '#F0D2A0' }} role="status">
-                    <div className="flex items-start gap-2.5">
-                      <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" style={{ color: '#B27A16' }} />
-                      <div>
-                        <p className="text-xs font-bold mb-1" style={{ color: '#7A5310', fontFamily: "'Manrope', sans-serif" }}>
-                          Confira os preços por tamanho
-                        </p>
-                        <ul className="space-y-0.5">
-                          {avisosDePreco.map((aviso) => (
-                            <li key={aviso} className="text-[11px] leading-relaxed" style={{ color: '#7A5310', fontFamily: "'Manrope', sans-serif" }}>
-                              {aviso}
-                            </li>
-                          ))}
-                        </ul>
-                        <p className="text-[11px] mt-1.5" style={{ color: '#9A7430', fontFamily: "'Manrope', sans-serif" }}>
-                          Se for de propósito, pode salvar normalmente.
-                        </p>
-                      </div>
+                  <div className="flex items-start gap-2.5 animate-fadeIn" style={{ background: '#FBF6EC', borderRadius: '18px', padding: '12px 14px', border: '1px solid #F0D2A0' }} role="status">
+                    <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" style={{ color: '#B27A16' }} />
+                    <div>
+                      <p style={{ fontSize: '12px', fontWeight: 800, color: '#7A5310', marginBottom: '4px' }}>
+                        Confira os preços por tamanho
+                      </p>
+                      <ul className="space-y-0.5">
+                        {avisosDePreco.map((aviso) => (
+                          <li key={aviso} style={{ fontSize: '11px', lineHeight: 1.5, color: '#7A5310' }}>
+                            {aviso}
+                          </li>
+                        ))}
+                      </ul>
+                      <p style={{ fontSize: '11px', marginTop: '6px', color: '#9A7430' }}>
+                        Se for de propósito, pode salvar normalmente.
+                      </p>
                     </div>
                   </div>
                 )}
@@ -1886,14 +1955,14 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 
           {/* Rodape fixo */}
           <div
-            className="flex-shrink-0 bg-white flex gap-2.5 items-center justify-between px-4 pt-4"
-            style={{ paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))', borderTop: '1px solid rgba(58,35,80,0.08)' }}
+            className="flex-shrink-0 bg-white flex gap-2.5 items-center justify-between px-4 pt-3.5"
+            style={{ paddingBottom: 'calc(14px + env(safe-area-inset-bottom, 0px))', borderTop: '1px solid rgba(36,27,43,.06)', boxShadow: '0 -8px 24px rgba(58,35,80,.07)', fontFamily: "'Manrope', sans-serif" }}
           >
             <button
               type="button"
               onClick={() => (formStep === 1 ? setIsCreating(false) : setFormStep((s) => (s - 1) as 1 | 2 | 3))}
-              className="px-[18px] py-3 rounded-[10px] text-sm font-semibold transition-colors"
-              style={{ border: '1px solid rgba(58,35,80,0.16)', color: '#3A2350' }}
+              className="flex-shrink-0 transition-transform hover:-translate-y-0.5"
+              style={{ width: '96px', height: '50px', borderRadius: '16px', border: '1px solid rgba(110,63,114,.18)', background: '#FFFFFF', boxShadow: '0 4px 12px rgba(58,35,80,.08)', fontSize: '14px', fontWeight: 800, color: '#3A2350' }}
             >
               {formStep === 1 ? 'Cancelar' : 'Voltar'}
             </button>
@@ -1909,22 +1978,19 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   }
                   setFormStep((s) => (s + 1) as 1 | 2 | 3);
                 }}
-                className="flex-1 text-center py-3 rounded-[10px] text-white text-sm font-semibold transition-colors"
-                style={{ background: '#3A2350', boxShadow: '0 10px 20px rgba(58,35,80,.3)' }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = '#6E3F72'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = '#3A2350'; }}
+                className="flex-1 flex items-center justify-center gap-2 transition-transform hover:-translate-y-0.5"
+                style={{ height: '50px', borderRadius: '16px', border: 'none', background: '#3A2350', boxShadow: '0 10px 20px rgba(58,35,80,.3)', fontSize: '15px', fontWeight: 800, color: '#F5B9C6' }}
               >
                 Continuar
+                <ArrowRight className="w-4 h-4" strokeWidth={2.4} />
               </button>
             ) : (
               <button
                 key="ficha-confirmar"
                 type="submit"
                 form="form-ficha-stepped"
-                className="flex-1 text-center py-3 rounded-[10px] text-white text-sm font-semibold flex items-center justify-center gap-1.5 transition-colors"
-                style={{ background: '#3A2350', boxShadow: '0 10px 20px rgba(58,35,80,.3)' }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = '#6E3F72'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = '#3A2350'; }}
+                className="flex-1 flex items-center justify-center gap-2 transition-transform hover:-translate-y-0.5"
+                style={{ height: '50px', borderRadius: '16px', border: 'none', background: '#3A2350', boxShadow: '0 10px 20px rgba(58,35,80,.3)', fontSize: '15px', fontWeight: 800, color: '#F5B9C6' }}
                 onClick={(e) => {
                   if (fichaStepChangeIsFresh()) {
                     e.preventDefault();
@@ -1944,7 +2010,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   requestAnimationFrame(() => invalidField?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
                 }}
               >
-                <Check className="w-4 h-4 stroke-[2.5]" />
+                <Check className="w-4 h-4" strokeWidth={2.6} />
                 Salvar ficha técnica
               </button>
             )}

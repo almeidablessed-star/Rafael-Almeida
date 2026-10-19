@@ -9,6 +9,8 @@ interface StockItemAutocompleteProps {
   stockItems: StockItem[];
   isEnabled: boolean;
   placeholder: string;
+  /** Estilos extras do campo, aplicados por cima do visual padrao. */
+  inputStyle?: React.CSSProperties;
 }
 
 export const StockItemAutocomplete: React.FC<StockItemAutocompleteProps> = ({
@@ -18,6 +20,7 @@ export const StockItemAutocomplete: React.FC<StockItemAutocompleteProps> = ({
   stockItems,
   isEnabled,
   placeholder,
+  inputStyle,
 }) => {
   const [showItemList, setShowItemList] = useState(false);
   const [highlightedItem, setHighlightedItem] = useState(-1);
@@ -149,6 +152,7 @@ export const StockItemAutocomplete: React.FC<StockItemAutocompleteProps> = ({
           color: '#241B2B',
           fontFamily: "'Manrope', sans-serif",
           boxSizing: 'border-box',
+          ...inputStyle,
         }}
       />
 

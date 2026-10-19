@@ -48,6 +48,13 @@ interface CustomSelectProps {
   style?: React.CSSProperties;
   /** Texto pequeno em vez do padrao de 14px (campos densos, como unidade). */
   compacto?: boolean;
+  /**
+   * Visual de "chip": botao roxo escuro com a letra rosa, para a unidade
+   * encaixada dentro de um campo (design dos formularios de Produto e Ficha).
+   * A lista abre alinhada a direita, com largura minima, porque o chip e
+   * estreito.
+   */
+  chip?: boolean;
   ariaLabel?: string;
 }
 
@@ -60,6 +67,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
   title,
   style,
   compacto = false,
+  chip = false,
   ariaLabel,
 }) => {
   const [aberto, setAberto] = useState(false);
@@ -171,7 +179,23 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
         aria-haspopup="listbox"
         aria-expanded={aberto}
         aria-label={ariaLabel}
-        style={{
+        style={chip ? {
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '4px',
+          background: '#3A2350',
+          border: 'none',
+          borderRadius: '11px',
+          padding: '0 9px 0 11px',
+          fontSize: '13px',
+          fontWeight: 800,
+          color: '#F5B9C6',
+          cursor: disabled ? 'not-allowed' : 'pointer',
+          opacity: disabled ? 0.5 : 1,
+        } : {
           width: '100%',
           display: 'flex',
           alignItems: 'center',
@@ -193,7 +217,13 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {rotulo}
         </span>
-        <span style={{ fontSize: '10px', color: '#7A6E80', flexShrink: 0 }}>▼</span>
+        {chip ? (
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#F5B9C6" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}>
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        ) : (
+          <span style={{ fontSize: '10px', color: '#7A6E80', flexShrink: 0 }}>▼</span>
+        )}
       </button>
 
       {aberto && !disabled && (
@@ -204,8 +234,9 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
           style={{
             position: 'absolute',
             top: 'calc(100% + 6px)',
-            left: 0,
+            left: chip ? 'auto' : 0,
             right: 0,
+            minWidth: chip ? '96px' : undefined,
             zIndex: 50,
             background: '#FFFFFF',
             border: '1px solid #E6E1DB',
