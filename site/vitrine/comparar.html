@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Referência × Carula</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Kaushan+Script&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Comparação: referência e versão Carula lado a lado, em pares */
+  --creme: #F8F1E4; --choc: #2B2420; --coral: #E8452B; --suave: #7A6A5F; --rotulo: #8C7F73; --rosa: #F5C6CE;
+  --display: 'Bagel Fat One', 'Arial Black', sans-serif; --script: 'Kaushan Script', cursive; --body: 'Poppins', system-ui, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--creme); color: var(--choc); font-family: var(--body);
+  padding-block: 44px 72px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header { max-width: 760px; margin: 0 auto 36px; text-align: center; }
+h1 { font-family: var(--script); font-weight: 400; font-size: clamp(2.2rem, 8vw, 3.4rem); line-height: 1.05; margin: 0; }
+header p { color: var(--suave); line-height: 1.7; margin: 12px auto 0; max-width: 56ch; }
+.open { display: inline-block; margin-top: 22px; background: var(--coral); color: var(--creme); text-decoration: none; font: 500 .8rem/1 var(--body);
+  letter-spacing: .14em; text-transform: uppercase; padding: 1.05rem 1.6rem; border-radius: 999px; transition: background .2s; }
+.open:hover { background: #d63b22; }
+.pair { max-width: 1180px; margin: 0 auto 56px; display: grid; gap: 18px; }
+.pair h2 { font: 600 .74rem var(--body); letter-spacing: .2em; text-transform: uppercase; color: var(--rotulo); margin: 0 0 4px; text-align: center; }
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+figure { margin: 0; display: grid; gap: 10px; }
+figure img { width: 100%; height: auto; display: block; border-radius: 14px; box-shadow: 0 1px 0 rgba(43, 36, 32, .08), 0 18px 34px -18px rgba(43, 36, 32, .35); }
+figcaption { font-size: .8rem; font-weight: 600; text-align: center; }
+figcaption span { display: block; font-weight: 400; color: var(--suave); margin-top: 2px; }
+.narrow { max-width: 760px; }
+ul.notes { max-width: 640px; margin: 0 auto; padding-left: 1.1rem; color: var(--suave); line-height: 1.75; font-size: .95rem; }
+ul.notes b { color: var(--choc); font-weight: 600; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Referência × Carula</h1>
+  <p>A versão nova segue a vitrine de confeitaria das referências: fundo rosa, bolos de verdade em suportes dos dois lados, título em letra cursiva no centro e uma fileira de fotos logo abaixo.</p>
+  <a class="open" href="index.html">Abrir o site</a>
+</header>
+<section class="pair">
+  <h2>No computador</h2>
+  <div class="cols">
+    <figure><img src="ref/referencia-1.webp" alt="Referência: site de confeitaria com fundo rosa e bolos em suportes" width="832" height="1472"><figcaption>Referência<span>a que você mandou</span></figcaption></figure>
+    <figure><img src="ref/carula-desktop.webp" alt="Versão Carula Cake no computador" width="900" height="1437"><figcaption>Carula Cake<span>fotos reais da Camila</span></figcaption></figure>
+  </div>
+</section>
+<section class="pair narrow">
+  <h2>No celular</h2>
+  <div class="cols">
+    <figure><img src="ref/referencia-2.webp" alt="Segunda referência: confeitaria com logo centralizado e fileira de bolos" width="832" height="1472"><figcaption>Referência 2<span>logo no centro do menu</span></figcaption></figure>
+    <figure><img src="ref/carula-celular.webp" alt="Versão Carula Cake no celular" width="480" height="1038"><figcaption>Carula Cake<span>capa no celular</span></figcaption></figure>
+  </div>
+</section>
+<ul class="notes">
+  <li><b>Da referência 1:</b> parede rosa, bolos em suportes à esquerda e à direita, frase em cursiva no meio, botão principal cheio e secundário com contorno.</li>
+  <li><b>Da referência 2:</b> logo no centro do menu, com os links dos dois lados, e a fileira de fotos sem moldura.</li>
+  <li><b>Mantido do seu briefing:</b> paleta, as três fontes, o menu hambúrguer no celular e a rolagem suave.</li>
+</ul>
+</body>
+</html>

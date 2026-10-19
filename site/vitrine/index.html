@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Carula Cake · Confeitaria artesanal</title>
+<meta name="description" content="Bolos artesanais feitos à mão no North Shore, Massachusetts, desde 2024. Cada sabor leva o nome de uma mulher.">
+<script>document.documentElement.classList.add('js')</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Kaushan+Script&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --creme: #F8F1E4;
+  --choc: #2B2420;
+  --coral: #E8452B;
+  --suave: #7A6A5F;
+  --rotulo: #8C7F73;
+  --rosa: #F5C6CE;
+  --roxo: #8E5CF0;
+  --verde: #D6E4CC;
+  --lavanda: #D8CDEB;
+  --display: 'Bagel Fat One', 'Arial Black', sans-serif;
+  --script: 'Kaushan Script', 'Brush Script MT', cursive;
+  --body: 'Poppins', system-ui, sans-serif;
+  --gutter: max(16px, env(safe-area-inset-left, 0px));
+  --ease: cubic-bezier(.2, .7, .2, 1);
+  color-scheme: light;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body { background: var(--creme); color: var(--choc); font-family: var(--body); overflow-x: clip; -webkit-font-smoothing: antialiased; }
+body.menu-open { overflow: hidden; }
+img { display: block; max-width: 100%; height: auto; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--coral); outline-offset: 4px; border-radius: 6px; }
+
+/* ---------- Faixa e topo ---------- */
+.strip { background: var(--choc); color: var(--creme); text-align: center; font-size: .74rem; letter-spacing: .04em;
+  padding: .55rem var(--gutter); padding-top: max(.55rem, env(safe-area-inset-top)); }
+.strip a { text-decoration: none; font-weight: 600; white-space: nowrap; }
+.nav { position: sticky; top: 0; z-index: 40; background: var(--creme); border-bottom: 1px solid rgba(43, 36, 32, .1);
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 10px var(--gutter); }
+.nav .logo img { height: 58px; width: auto; }
+.links { display: none; gap: 2.2rem; font-size: .82rem; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; }
+.links a { text-decoration: none; padding: .4rem 0; background: linear-gradient(var(--coral), var(--coral)) 0 100% / 0 1.5px no-repeat; transition: background-size .35s var(--ease); }
+.links a:hover { background-size: 100% 1.5px; }
+.links.l { justify-self: end; margin-right: 2.6rem; }
+.links.r { justify-self: start; margin-left: 2.6rem; }
+.burger { grid-column: 3; justify-self: end; width: 46px; height: 46px; border: 0; border-radius: 50%; background: var(--rosa); cursor: pointer;
+  display: grid; place-content: center; gap: 5px; transition: background .25s; }
+.burger:hover { background: #f1b7c1; }
+.burger span { display: block; width: 20px; height: 2px; border-radius: 2px; background: var(--choc); transition: transform .35s var(--ease), opacity .2s; }
+.menu-open .burger span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.menu-open .burger span:nth-child(2) { opacity: 0; }
+.menu-open .burger span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+.nav .logo { grid-column: 2; }
+
+.menu { position: fixed; inset: 0; z-index: 35; background: var(--creme); display: grid; align-content: center; justify-items: center; gap: 2rem;
+  padding: 120px var(--gutter) 48px; opacity: 0; visibility: hidden; transition: opacity .35s var(--ease), visibility .35s; }
+.menu-open .menu { opacity: 1; visibility: visible; }
+.menu ul { list-style: none; display: grid; gap: .4rem; text-align: center; }
+.menu ul a { text-decoration: none; font-size: 1.7rem; font-weight: 500; display: inline-block; padding: .3rem 0; transition: color .2s; }
+.menu ul a:hover { color: var(--coral); }
+.menu-open .menu li { animation: up .5s var(--ease) both; }
+.menu li:nth-child(2) { animation-delay: .04s !important; } .menu li:nth-child(3) { animation-delay: .08s !important; }
+.menu li:nth-child(4) { animation-delay: .12s !important; } .menu li:nth-child(5) { animation-delay: .16s !important; }
+.menu li:nth-child(6) { animation-delay: .2s !important; }
+.menu .contact { text-align: center; color: var(--suave); font-size: .9rem; line-height: 1.8; }
+
+/* ---------- Capa: vitrine ---------- */
+.hero { position: relative; overflow: hidden; background: var(--rosa); height: clamp(640px, calc(100svh - 112px), 860px); isolation: isolate; }
+.table { position: absolute; left: 0; right: 0; bottom: 0; height: 24%; background: var(--creme); z-index: 0; }
+.table::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 10px; background: rgba(43, 36, 32, .06); }
+.hero-text { position: absolute; z-index: 5; left: 0; right: 0; top: 0; padding: 34px var(--gutter) 0; display: grid; justify-items: center; text-align: center; gap: 14px; }
+.eyebrow { font-size: .72rem; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--choc); opacity: .75; }
+h1 { font-family: var(--script); font-weight: 400; font-size: clamp(2.6rem, 11vw, 5.4rem); line-height: 1.02; color: var(--choc); text-wrap: balance; }
+h1 em { font-style: normal; color: var(--coral); }
+.hero-text p.lede { max-width: 36ch; font-size: .95rem; line-height: 1.65; color: var(--choc); opacity: .8; }
+.ctas { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; font: 500 .82rem/1 var(--body); letter-spacing: .14em;
+  text-transform: uppercase; padding: 1.05rem 1.6rem; border-radius: 999px; border: 1.5px solid var(--choc); transition: background .25s, color .25s, transform .25s var(--ease); }
+.btn:hover { transform: translateY(-2px); }
+.btn-main { background: var(--coral); border-color: var(--coral); color: var(--creme); }
+.btn-main:hover { background: #d63b22; border-color: #d63b22; }
+.btn-alt { background: transparent; color: var(--choc); }
+.btn-alt:hover { background: var(--choc); color: var(--creme); }
+
+.cake { position: absolute; bottom: var(--b); height: var(--h); z-index: var(--z, 2); animation: rise 1s var(--ease) both; animation-delay: var(--dl, 0s); }
+.cake img { height: 100%; width: auto; max-width: none; filter: drop-shadow(0 10px 10px rgba(43, 36, 32, .14)); }
+.cake::after { content: ''; position: absolute; z-index: -1; left: 18%; right: 18%; bottom: -1.5%; height: 7%; border-radius: 50%; background: rgba(43, 36, 32, .32); filter: blur(7px); }
+.c-dri { display: none; }
+.c-pistache { display: none; }
+.c-vintage { --h: 34%; --b: 14%; left: -17%; --z: 2; --dl: .25s; }
+.c-lambeth { --h: 39%; --b: 8%; left: 50%; translate: -50% 0; --z: 3; --dl: .1s; }
+.c-oceano { --h: 34%; --b: 14%; right: -17%; --z: 2; --dl: .25s; }
+@keyframes rise { from { opacity: 0; transform: translateY(26px); } }
+@keyframes up { from { opacity: 0; transform: translateY(18px); } }
+.hero-text > * { animation: up .9s var(--ease) both; }
+.hero-text > :nth-child(2) { animation-delay: .08s; } .hero-text > :nth-child(3) { animation-delay: .16s; } .hero-text > :nth-child(4) { animation-delay: .24s; }
+
+/* ---------- Coleção ---------- */
+.collection { padding: 84px var(--gutter) 96px; text-align: center; scroll-margin-top: 80px; }
+.collection .eyebrow { color: var(--coral); opacity: 1; }
+h2 { font-family: var(--display); font-weight: 400; font-size: clamp(2rem, 7vw, 3.1rem); line-height: 1.05; margin-top: 10px; letter-spacing: .005em; text-wrap: balance; }
+.sub { font-family: var(--script); color: var(--coral); font-size: clamp(1.35rem, 5vw, 1.8rem); margin-top: 8px; }
+.collection .txt { max-width: 54ch; margin: 18px auto 0; color: var(--suave); line-height: 1.75; }
+.row { max-width: 1180px; margin: 44px auto 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.row figure { overflow: hidden; border-radius: 18px; background: #F2EDE7; aspect-ratio: 3 / 4; }
+.row img { width: 100%; height: 100%; object-fit: cover; transition: transform .8s var(--ease); }
+.row figure:hover img { transform: scale(1.05); }
+.collection .btn { margin-top: 40px; }
+
+.soon { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 0 var(--gutter) 80px; }
+.soon span { scroll-margin-top: 100px; border: 1px dashed var(--rotulo); color: var(--suave); border-radius: 999px; padding: .55rem 1rem; font-size: .82rem; }
+
+footer { background: var(--choc); color: var(--creme); text-align: center; padding: 56px var(--gutter) max(56px, env(safe-area-inset-bottom)); display: grid; gap: 18px; justify-items: center; scroll-margin-top: 80px; }
+footer img { width: 150px; }
+footer .info { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 26px; font-size: .9rem; }
+footer .info a { text-decoration: none; font-weight: 600; }
+footer small { color: var(--rotulo); font-size: .76rem; }
+
+.js .reveal { opacity: 0; transform: translateY(24px); transition: opacity .9s var(--ease), transform .9s var(--ease); }
+.js .reveal.in { opacity: 1; transform: none; }
+
+@media (min-width: 700px) {
+  .row { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+  .hero-text { top: 0; bottom: 24%; align-content: center; padding-top: 0; }
+  .c-dri { display: block; --h: 37%; --b: 17%; left: 1%; --z: 1; --dl: .35s; }
+  .c-vintage { --h: 46%; --b: 12%; left: 10%; --dl: .2s; }
+  .c-lambeth { display: none; }
+  .c-oceano { --h: 46%; --b: 12%; right: 10%; --dl: .2s; }
+  .c-pistache { display: block; --h: 32%; --b: 17%; right: 0; --z: 1; --dl: .35s; }
+  .hero-text { padding-inline: 28%; }
+  h1 { font-size: clamp(3.4rem, 5.6vw, 5.2rem); }
+}
+@media (min-width: 700px) and (max-width: 1099px) {
+  .c-dri, .c-pistache { display: none; }
+  .c-vintage { --h: 34%; left: -4%; }
+  .c-oceano { --h: 34%; right: -4%; }
+  .hero-text { padding-inline: 26%; }
+}
+@media (min-width: 1100px) {
+  .burger { display: none; }
+  .links { display: flex; }
+  .nav .logo img { height: 68px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .js .reveal { opacity: 1; transform: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="strip">Pedidos com 5 dias de antecedência · <a href="tel:+17814206892">(781) 420-6892</a></div>
+
+<header class="nav">
+  <nav class="links l" aria-label="Seções">
+    <a href="#sobre">Sobre</a><a href="#cardapio">Cardápio</a><a href="#galeria">Galeria</a>
+  </nav>
+  <a class="logo" href="#capa" aria-label="Carula Cake, voltar ao início"><img src="img/logo-carula.webp" alt="Carula Cake Confeitaria" width="900" height="524"></a>
+  <nav class="links r" aria-label="Contato">
+    <a href="#instagram">Instagram</a><a href="#contato">Contato</a>
+  </nav>
+  <button class="burger" aria-label="Abrir menu" aria-expanded="false" aria-controls="menu"><span></span><span></span><span></span></button>
+</header>
+
+<div class="menu" id="menu">
+  <ul>
+    <li><a href="#capa">Início</a></li>
+    <li><a href="#sobre">Sobre</a></li>
+    <li><a href="#cardapio">Cardápio</a></li>
+    <li><a href="#galeria">Galeria</a></li>
+    <li><a href="#instagram">Instagram</a></li>
+    <li><a href="#contato">Contato</a></li>
+  </ul>
+  <p class="contact">(781) 420-6892<br>@carula.cake · North Shore, MA</p>
+</div>
+
+<main>
+  <section class="hero" id="capa">
+    <div class="table" aria-hidden="true"></div>
+    <div class="hero-text">
+      <p class="eyebrow">Confeitaria artesanal · North Shore, MA</p>
+      <h1>Onde há um bolo, há uma <em>história</em></h1>
+      <p class="lede">Bolos feitos à mão, com quatro camadas de massa e três de recheio. Desde 2024.</p>
+      <div class="ctas">
+        <a class="btn btn-main" href="#cardapio">Ver cardápio</a>
+        <a class="btn btn-alt" href="#contato">Encomendar</a>
+      </div>
+    </div>
+    <div class="cake c-dri"><img src="img/bolo-dri.webp" alt="" width="657" height="900"></div>
+    <div class="cake c-vintage"><img src="img/bolo-vintage.webp" alt="Bolo vintage verde com babados rosa e laranja" width="761" height="840"></div>
+    <div class="cake c-lambeth"><img src="img/bolo-lambeth.webp" alt="Bolo rosa em camadas com rosinhas de chantilly" width="830" height="838"></div>
+    <div class="cake c-oceano"><img src="img/bolo-oceano.webp" alt="Bolo verde-água com ondas de chantilly" width="777" height="841"></div>
+    <div class="cake c-pistache"><img src="img/bolo-pistache.webp" alt="" width="811" height="636"></div>
+  </section>
+
+  <section class="collection" id="cardapio">
+    <p class="eyebrow reveal">Cardápio</p>
+    <h2 class="reveal">16 Mulheres, 16 Histórias</h2>
+    <p class="sub reveal">cada sabor leva o nome de uma mulher</p>
+    <p class="txt reveal">Os sabores da Carula ganharam nomes de mulheres que inspiraram a Camila: clientes, amigas e família. Escolha o tamanho, escolha a história.</p>
+    <div class="row">
+      <figure class="reveal"><img src="img/foto-lambeth.webp" alt="Bolo rosa em camadas com rosinhas" width="720" height="960" loading="lazy"></figure>
+      <figure class="reveal" style="transition-delay:.08s"><img src="img/foto-oceano.webp" alt="Bolo verde-água com ondas de chantilly" width="720" height="960" loading="lazy"></figure>
+      <figure class="reveal" style="transition-delay:.16s"><img src="img/foto-vintage.webp" alt="Bolo vintage verde com babados" width="720" height="960" loading="lazy"></figure>
+      <figure class="reveal" style="transition-delay:.24s"><img src="img/foto-dri.webp" alt="Bolo branco com flores naturais" width="720" height="960" loading="lazy"></figure>
+    </div>
+    <a class="btn btn-alt reveal" href="#cardapio">Ver os 16 sabores</a>
+  </section>
+
+  <div class="soon" aria-label="Seções em construção">
+    <span id="sobre">Sobre · em construção</span>
+    <span id="galeria">Galeria · em construção</span>
+    <span id="instagram">Instagram · em construção</span>
+  </div>
+</main>
+
+<footer id="contato">
+  <img src="img/logo-carula.webp" alt="Carula Cake Confeitaria" width="900" height="524" loading="lazy">
+  <div class="info">
+    <a href="tel:+17814206892">(781) 420-6892</a>
+    <a href="https://www.instagram.com/carula.cake/" target="_blank" rel="noopener">@carula.cake</a>
+    <span>North Shore, MA</span>
+  </div>
+  <small>Pagamento via Zelle ou dinheiro · 50% para confirmar o pedido</small>
+</footer>
+
+<script>
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const burger = document.querySelector('.burger');
+  const setMenu = open => {
+    document.body.classList.toggle('menu-open', open);
+    burger.setAttribute('aria-expanded', open);
+    burger.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu');
+  };
+  burger.addEventListener('click', () => setMenu(!document.body.classList.contains('menu-open')));
+  addEventListener('keydown', e => { if (e.key === 'Escape') setMenu(false); });
+  document.querySelectorAll('a[href^="#"]').forEach(a => a.addEventListener('click', e => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (!target) return;
+    e.preventDefault();
+    setMenu(false);
+    target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+  }));
+
+  // Revela ao rolar; sem JS ou com movimento reduzido, tudo já aparece.
+  const items = document.querySelectorAll('.reveal');
+  if (reduce || !('IntersectionObserver' in window)) { items.forEach(el => el.classList.add('in')); return; }
+  const io = new IntersectionObserver(entries => entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  }), { rootMargin: '0px 0px -8% 0px' });
+  items.forEach(el => io.observe(el));
+})();
+</script>
+</body>
+</html>
