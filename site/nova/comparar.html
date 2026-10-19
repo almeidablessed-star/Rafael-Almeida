@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Site antigo × site novo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Kaushan+Script&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Comparação: site antigo e site novo lado a lado, em pares */
+  --creme: #F8F1E4; --choc: #2B2420; --coral: #E8452B; --suave: #7A6A5F; --rotulo: #8C7F73; --rosa: #F5C6CE;
+  --rosa-claro: #F7E2DE;
+  --display: 'Bagel Fat One', 'Arial Black', sans-serif; --script: 'Kaushan Script', cursive; --body: 'Poppins', system-ui, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--rosa-claro); color: var(--choc); font-family: var(--body);
+  padding-block: 44px 72px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header { max-width: 760px; margin: 0 auto 36px; text-align: center; }
+h1 { font-family: var(--display); font-weight: 400; color: var(--coral); font-size: clamp(2rem, 7vw, 3rem); line-height: 1.05; margin: 0; }
+header .s { font-family: var(--script); font-size: clamp(1.3rem, 5vw, 1.6rem); margin: 8px 0 0; }
+header p.t { color: var(--suave); line-height: 1.7; margin: 14px auto 0; max-width: 56ch; }
+.open { display: inline-block; margin-top: 22px; background: var(--coral); color: var(--creme); text-decoration: none; font-weight: 600; font-size: .95rem;
+  padding: 14px 26px; border-radius: 999px; transition: transform .2s, background .2s; }
+.open:hover { background: #d63b22; transform: translateY(-2px); }
+.pair { max-width: 1180px; margin: 0 auto 52px; }
+.pair h2 { font: 600 .74rem var(--body); letter-spacing: .2em; text-transform: uppercase; color: var(--rotulo); margin: 0 0 16px; text-align: center; }
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+.narrow { max-width: 760px; }
+figure { margin: 0; display: grid; gap: 10px; }
+figure img { width: 100%; height: auto; display: block; border-radius: 16px; box-shadow: 0 1px 2px rgba(43, 36, 32, .06), 0 16px 30px -16px rgba(43, 36, 32, .35); }
+figcaption { font-size: .82rem; font-weight: 600; text-align: center; }
+figcaption span { display: block; font-weight: 400; color: var(--suave); }
+.notes { max-width: 680px; margin: 0 auto; display: grid; gap: 10px; }
+.notes div { background: var(--creme); border-radius: 18px; padding: 16px 18px; line-height: 1.65; font-size: .93rem; color: var(--suave);
+  box-shadow: 0 1px 2px rgba(43, 36, 32, .06), 0 10px 24px -14px rgba(43, 36, 32, .25); }
+.notes b { color: var(--choc); font-weight: 600; display: block; margin-bottom: 2px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Site antigo × site novo</h1>
+  <p class="s">a mesma Carula, com roupa nova</p>
+  <p class="t">Mantive a estrutura do seu bio.site: xadrez no topo, logo redondo, nome, ícones das redes e os botões com as ilustrações. Embaixo, a página continua com Sobre, o cardápio completo, a galeria, o Instagram e o contato.</p>
+  <a class="open" href="index.html">Abrir o site novo</a>
+</header>
+<section class="pair narrow">
+  <h2>No celular</h2>
+  <div class="cols">
+    <figure><img src="ref/antigo-celular.webp" alt="Site antigo da Carula Cake no celular" width="480" height="1038"><figcaption>Antigo<span>bio.site/carula.cake</span></figcaption></figure>
+    <figure><img src="ref/novo-celular.webp" alt="Site novo da Carula Cake no celular" width="480" height="1038"><figcaption>Novo<span>primeira tela</span></figcaption></figure>
+  </div>
+</section>
+<section class="pair">
+  <h2>No computador</h2>
+  <div class="cols">
+    <figure><img src="ref/antigo-desktop.webp" alt="Site antigo da Carula Cake no computador" width="900" height="562"><figcaption>Antigo</figcaption></figure>
+    <figure><img src="ref/novo-desktop.webp" alt="Site novo da Carula Cake no computador" width="900" height="562"><figcaption>Novo</figcaption></figure>
+  </div>
+</section>
+<div class="notes">
+  <div><b>O que ficou igual</b>Xadrez ondulado no topo, logo redondo sobre a curva, nome em coral, ícones de Instagram, Pinterest, TikTok e WhatsApp, e os mesmos botões com as ilustrações de bolo, brigadeiro, biscoito e cupcake.</div>
+  <div><b>O que ficou novo</b>Xadrez nas cores da paleta, fundo rosa liso no lugar do degradê, botões com sombra suave e uma linha explicando cada um, e o WhatsApp em destaque como botão principal.</div>
+  <div><b>O que agora fica dentro do site</b>Os botões Bolos, Brigadeiros, Biscoitos e Cupcakes levavam para o cardápio no Canva. Agora rolam até o cardápio na própria página, com tamanhos, preços e os 16 sabores.</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Carula Cake · Confeitaria artesanal</title>
+<meta name="description" content="Bolos, brigadeiros, cupcakes e biscoitos decorados feitos à mão no North Shore, Massachusetts. Cada sabor de bolo leva o nome de uma mulher.">
+<meta name="theme-color" content="#F5C6CE">
+<script>document.documentElement.classList.add('js')</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Kaushan+Script&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --creme: #F8F1E4;
+  --choc: #2B2420;
+  --coral: #E8452B;
+  --suave: #7A6A5F;
+  --rotulo: #8C7F73;
+  --rosa: #F5C6CE;
+  --roxo: #8E5CF0;
+  --verde: #D6E4CC;
+  --lavanda: #D8CDEB;
+  --rosa-claro: color-mix(in srgb, var(--rosa) 32%, var(--creme));
+  --linha: rgba(43, 36, 32, .12);
+  --sombra: 0 1px 2px rgba(43, 36, 32, .06), 0 10px 24px -12px rgba(43, 36, 32, .22);
+  --display: 'Bagel Fat One', 'Arial Black', sans-serif;
+  --script: 'Kaushan Script', 'Brush Script MT', cursive;
+  --body: 'Poppins', system-ui, sans-serif;
+  --ease: cubic-bezier(.2, .7, .2, 1);
+  color-scheme: light;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body { background: var(--creme); color: var(--choc); font-family: var(--body); line-height: 1.5; overflow-x: clip; -webkit-font-smoothing: antialiased; }
+body.menu-open { overflow: hidden; }
+img { display: block; max-width: 100%; height: auto; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--coral); outline-offset: 3px; border-radius: 8px; }
+.wrap { width: 100%; max-width: 980px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+h2 { font-family: var(--display); font-weight: 400; font-size: clamp(2rem, 7vw, 2.8rem); line-height: 1.05; text-align: center; text-wrap: balance; }
+.kicker { font-family: var(--script); color: var(--coral); font-size: clamp(1.3rem, 5vw, 1.65rem); text-align: center; margin-top: 6px; }
+.lead { color: var(--suave); text-align: center; max-width: 52ch; margin: 14px auto 0; line-height: 1.7; }
+section { padding: 76px 0; scroll-margin-top: 10px; }
+
+/* ---------- Menu ---------- */
+.burger { position: fixed; z-index: 50; top: max(14px, env(safe-area-inset-top)); right: max(14px, env(safe-area-inset-right));
+  width: 48px; height: 48px; border-radius: 50%; border: 0; background: var(--creme); box-shadow: var(--sombra); cursor: pointer;
+  display: grid; place-content: center; gap: 5px; transition: transform .25s var(--ease); }
+.burger:hover { transform: scale(1.05); }
+.burger span { display: block; width: 20px; height: 2px; border-radius: 2px; background: var(--choc); transition: transform .35s var(--ease), opacity .2s; }
+.menu-open .burger span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.menu-open .burger span:nth-child(2) { opacity: 0; }
+.menu-open .burger span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+.menu { position: fixed; inset: 0; z-index: 45; background: var(--rosa-claro); display: grid; place-content: center; justify-items: center; gap: 28px;
+  padding: 90px 24px 40px; opacity: 0; visibility: hidden; transition: opacity .35s var(--ease), visibility .35s; }
+.menu-open .menu { opacity: 1; visibility: visible; }
+.menu ul { list-style: none; display: grid; gap: 6px; text-align: center; }
+.menu ul a { display: inline-block; text-decoration: none; font-family: var(--display); font-size: 2rem; padding: 4px 0; transition: color .2s; }
+.menu ul a:hover { color: var(--coral); }
+.menu p { color: var(--suave); font-size: .9rem; text-align: center; }
+
+/* ---------- Capa (estrutura do bio.site, roupa nova) ---------- */
+.capa { background: var(--rosa-claro); padding-bottom: 64px; }
+.banner { position: relative; height: clamp(200px, 34vw, 320px); overflow: hidden; clip-path: ellipse(85% 100% at 50% 0); }
+.banner img { position: absolute; inset: -4%; width: 108%; height: 108%; max-width: none; object-fit: cover; animation: drift 40s ease-in-out infinite alternate; }
+@keyframes drift { to { transform: translate(-3%, -2%); } }
+.perfil { display: grid; justify-items: center; text-align: center; margin-top: -72px; position: relative; }
+.avatar { width: 136px; height: 136px; border-radius: 50%; background: var(--creme); padding: 6px; box-shadow: var(--sombra); }
+.avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+h1 { font-family: var(--display); font-weight: 400; color: var(--coral); font-size: clamp(2.4rem, 10vw, 3.2rem); line-height: 1; margin-top: 18px; }
+.perfil .frase { font-family: var(--script); color: var(--choc); font-size: clamp(1.3rem, 5.4vw, 1.6rem); margin-top: 8px; }
+.perfil .local { font-size: .72rem; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--rotulo); margin-top: 10px; }
+.social { list-style: none; display: flex; gap: 10px; margin-top: 20px; }
+.social a { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; color: var(--coral); background: var(--creme);
+  box-shadow: var(--sombra); transition: transform .25s var(--ease), background .25s, color .25s; }
+.social a:hover { transform: translateY(-3px); background: var(--coral); color: var(--creme); }
+.social svg { width: 22px; height: 22px; }
+.links { display: grid; gap: 12px; max-width: 560px; margin: 34px auto 0; }
+.pill { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 14px; text-decoration: none; background: var(--creme);
+  border-radius: 999px; padding: 8px 20px 8px 8px; box-shadow: var(--sombra); transition: transform .3s var(--ease), box-shadow .3s; }
+.pill:hover { transform: translateY(-3px); box-shadow: 0 2px 4px rgba(43, 36, 32, .06), 0 18px 32px -14px rgba(43, 36, 32, .3); }
+.pill:active { transform: scale(.98); }
+.pill img { width: 58px; height: 58px; border-radius: 50%; }
+.pill b { display: block; font-weight: 600; font-size: 1rem; }
+.pill small { display: block; color: var(--suave); font-size: .8rem; margin-top: 1px; }
+.pill svg { width: 20px; height: 20px; color: var(--coral); transition: transform .3s var(--ease); }
+.pill:hover svg { transform: translateX(4px); }
+.pill.destaque { background: var(--coral); color: var(--creme); }
+.pill.destaque small { color: var(--rosa); }
+.pill.destaque svg { color: var(--creme); }
+
+/* ---------- Sobre ---------- */
+.sobre .wrap { display: grid; gap: 36px; justify-items: center; }
+.foto-arco { width: min(72vw, 300px); aspect-ratio: 380 / 482; border-radius: 999px 999px 24px 24px; overflow: hidden; box-shadow: var(--sombra);
+  outline: 1.5px solid var(--coral); outline-offset: 8px; }
+.foto-arco img { width: 100%; height: 100%; object-fit: cover; }
+.sobre-texto { max-width: 52ch; text-align: center; }
+.sobre-texto h2 { text-align: inherit; }
+.sobre-texto .kicker { text-align: inherit; }
+.sobre-texto p.t { color: var(--suave); line-height: 1.8; margin-top: 14px; }
+
+/* ---------- Cardápio ---------- */
+.cardapio { background: var(--rosa-claro); }
+.bloco { margin-top: 48px; }
+.bloco h3 { font-size: .74rem; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--rotulo); text-align: center; margin-bottom: 16px; }
+.tabela-wrap { overflow-x: auto; background: var(--creme); border-radius: 22px; box-shadow: var(--sombra); }
+table { width: 100%; border-collapse: collapse; font-size: .9rem; font-variant-numeric: tabular-nums; }
+th, td { padding: 13px 12px; text-align: left; border-bottom: 1px solid var(--linha); }
+th:first-child, td:first-child { padding-left: 18px; }
+th:last-child, td:last-child { padding-right: 18px; }
+tr:last-child td { border-bottom: 0; }
+th { font-size: .62rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--rotulo); }
+th:not(:first-child), td:not(:first-child) { text-align: right; }
+td small { display: block; color: var(--suave); font-size: .78rem; }
+.nota { color: var(--suave); font-size: .85rem; text-align: center; margin-top: 12px; }
+.grupos { display: grid; gap: 18px; }
+.grupo { background: var(--creme); border-radius: 22px; padding: 22px 20px 10px; box-shadow: var(--sombra); }
+.grupo h4 { font-family: var(--script); font-weight: 400; color: var(--coral); font-size: 1.45rem; margin-bottom: 4px; }
+.sabor { padding: 12px 0; border-top: 1px solid var(--linha); }
+.sabor:first-of-type { border-top: 0; }
+.sabor .nome { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.sabor .nome strong { font-family: var(--display); font-weight: 400; font-size: 1.25rem; }
+.sabor .nome span { font-weight: 600; font-size: .92rem; }
+.tag { font-style: normal; font-size: .62rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; border-radius: 999px; padding: 3px 8px; }
+.tag.e { background: var(--lavanda); }
+.tag.p { background: var(--verde); }
+.sabor p { color: var(--suave); font-size: .86rem; line-height: 1.6; margin-top: 3px; }
+.legenda { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin-top: 14px; font-size: .8rem; color: var(--suave); align-items: center; }
+.doces { display: grid; gap: 14px; }
+.doce { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; background: var(--creme); border-radius: 22px; padding: 14px; box-shadow: var(--sombra); }
+.doce img { width: 72px; height: 72px; border-radius: 50%; }
+.doce b { font-weight: 600; }
+.doce p { color: var(--suave); font-size: .86rem; }
+.doce a { display: inline-block; margin-top: 4px; font-size: .82rem; font-weight: 600; color: var(--coral); text-decoration: none; }
+.info { display: grid; gap: 10px; list-style: none; max-width: 640px; margin: 0 auto; }
+.info li { background: var(--creme); border-radius: 16px; padding: 14px 18px; box-shadow: var(--sombra); font-size: .9rem; }
+.info li b { font-weight: 600; }
+.acrescimos { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.acrescimos span { background: var(--creme); border-radius: 999px; padding: 8px 14px; font-size: .85rem; box-shadow: var(--sombra); }
+
+/* ---------- Galeria ---------- */
+.fotos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 36px; }
+.fotos figure { position: relative; overflow: hidden; border-radius: 20px; aspect-ratio: 3 / 4; background: #F2EDE7; }
+.fotos img { width: 100%; height: 100%; object-fit: cover; transition: transform .9s var(--ease); }
+.fotos figure:hover img { transform: scale(1.06); }
+.fotos figure:first-child { grid-column: span 2; aspect-ratio: 4 / 3; }
+
+/* ---------- Instagram ---------- */
+.insta { text-align: center; }
+.insta-card { max-width: 560px; margin: 0 auto; background: var(--rosa-claro); border-radius: 28px; padding: 36px 22px; display: grid; justify-items: center; gap: 10px; }
+.insta-card img { width: 88px; height: 88px; border-radius: 50%; box-shadow: var(--sombra); }
+.insta-card .arroba { font-family: var(--display); font-size: 1.8rem; color: var(--choc); margin-top: 6px; }
+.insta-card p { color: var(--suave); max-width: 40ch; }
+.btn { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; background: var(--coral); color: var(--creme); font-weight: 600; font-size: .95rem;
+  border-radius: 999px; padding: 14px 24px; margin-top: 10px; transition: transform .25s var(--ease), background .25s; }
+.btn:hover { transform: translateY(-2px); background: #d63b22; }
+.btn svg { width: 20px; height: 20px; }
+.outras { display: flex; gap: 18px; justify-content: center; margin-top: 8px; font-size: .88rem; }
+.outras a { font-weight: 600; text-decoration: none; color: var(--choc); }
+
+/* ---------- Rodapé ---------- */
+footer { background: var(--choc); color: var(--creme); text-align: center; padding: 56px 0 max(48px, env(safe-area-inset-bottom)); scroll-margin-top: 10px; }
+footer .wrap { display: grid; gap: 14px; justify-items: center; }
+footer img { width: 160px; }
+footer .tel { font-family: var(--display); font-size: 1.7rem; text-decoration: none; }
+footer p { color: var(--rotulo); font-size: .85rem; }
+footer .rede { display: flex; gap: 18px; font-size: .9rem; flex-wrap: wrap; justify-content: center; }
+footer .rede a { text-decoration: none; font-weight: 600; }
+
+/* ---------- Entrada suave ---------- */
+.capa .perfil > *, .capa .pill { animation: sobe .8s var(--ease) both; }
+.capa .perfil > :nth-child(2) { animation-delay: .06s; } .capa .perfil > :nth-child(3) { animation-delay: .12s; }
+.capa .perfil > :nth-child(4) { animation-delay: .18s; } .capa .perfil > :nth-child(5) { animation-delay: .24s; }
+.capa .pill:nth-child(1) { animation-delay: .3s; } .capa .pill:nth-child(2) { animation-delay: .36s; } .capa .pill:nth-child(3) { animation-delay: .42s; }
+.capa .pill:nth-child(4) { animation-delay: .48s; } .capa .pill:nth-child(5) { animation-delay: .54s; }
+@keyframes sobe { from { opacity: 0; transform: translateY(16px); } }
+.js .reveal { opacity: 0; transform: translateY(22px); transition: opacity .8s var(--ease), transform .8s var(--ease); }
+.js .reveal.in { opacity: 1; transform: none; }
+
+@media (min-width: 760px) {
+  .avatar { width: 164px; height: 164px; }
+  .perfil { margin-top: -86px; }
+  th { font-size: .72rem; letter-spacing: .12em; }
+  table { font-size: .95rem; }
+  .sobre .wrap { grid-template-columns: auto 1fr; align-items: center; gap: 64px; justify-items: start; }
+  .sobre-texto { text-align: left; }
+  .grupos { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+  .doces { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .doce { grid-template-columns: 1fr; justify-items: center; text-align: center; padding: 24px 18px; }
+  .fotos { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .fotos figure:first-child { grid-column: auto; aspect-ratio: 3 / 4; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .js .reveal { opacity: 1; transform: none; }
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-insta" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/></g><circle cx="17.2" cy="6.8" r="1.2" fill="currentColor"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3.5a8.5 8.5 0 0 0-3.1 16.4"/><path d="M9.3 20.5 11.6 11"/><path d="M10.4 15.6c.6.5 1.3.8 2.1.8 2.6 0 4.4-2.3 4.4-5.1 0-2.6-2.2-4.6-5-4.6-3.1 0-5.2 2.2-5.2 4.8 0 1 .4 2 1 2.6"/></g></symbol>
+  <symbol id="i-tiktok" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3.5v11a3.8 3.8 0 1 1-3.8-3.8"/><path d="M14 3.5c.4 2.6 2.4 4.4 5 4.6"/></g></symbol>
+  <symbol id="i-whats" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 20l1.3-3.9A8.5 8.5 0 1 1 8.2 19z"/><path d="M9 8.5c0 3.4 3 6.5 6.5 6.5l1-1.6-2.2-1-1 .9a5 5 0 0 1-2.6-2.6l.9-1-1-2.2z"/></g></symbol>
+  <symbol id="i-seta" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+
+<button class="burger" aria-label="Abrir menu" aria-expanded="false" aria-controls="menu"><span></span><span></span><span></span></button>
+<nav class="menu" id="menu" aria-label="Menu">
+  <ul>
+    <li><a href="#capa">Início</a></li>
+    <li><a href="#sobre">Sobre</a></li>
+    <li><a href="#cardapio">Cardápio</a></li>
+    <li><a href="#galeria">Galeria</a></li>
+    <li><a href="#instagram">Instagram</a></li>
+    <li><a href="#contato">Contato</a></li>
+  </ul>
+  <p>(781) 420-6892 · North Shore, MA</p>
+</nav>
+
+<header class="capa" id="capa">
+  <div class="banner" aria-hidden="true"><img src="img/xadrez-banner.webp" alt="" width="2400" height="900"></div>
+  <div class="wrap">
+    <div class="perfil">
+      <div class="avatar"><img src="img/logo-c.webp" alt="Logo da Carula Cake" width="360" height="360"></div>
+      <h1>Carula Cake</h1>
+      <p class="frase">onde há um bolo, há uma história</p>
+      <p class="local">Confeitaria artesanal · North Shore, MA</p>
+      <ul class="social">
+        <li><a href="https://www.instagram.com/carula.cake" target="_blank" rel="noopener" aria-label="Instagram"><svg aria-hidden="true"><use href="#i-insta"/></svg></a></li>
+        <li><a href="https://www.pinterest.com/carulac/" target="_blank" rel="noopener" aria-label="Pinterest"><svg aria-hidden="true"><use href="#i-pin"/></svg></a></li>
+        <li><a href="https://www.tiktok.com/@carula.cake" target="_blank" rel="noopener" aria-label="TikTok"><svg aria-hidden="true"><use href="#i-tiktok"/></svg></a></li>
+        <li><a class="wa" href="#" target="_blank" rel="noopener" aria-label="WhatsApp"><svg aria-hidden="true"><use href="#i-whats"/></svg></a></li>
+      </ul>
+    </div>
+    <nav class="links" aria-label="Atalhos">
+      <a class="pill destaque wa" href="#" target="_blank" rel="noopener"><img src="img/icone-whatsapp.webp" alt="" width="240" height="240"><span><b>Fazer uma encomenda</b><small>WhatsApp · (781) 420-6892</small></span><svg aria-hidden="true"><use href="#i-seta"/></svg></a>
+      <a class="pill" href="#bolos"><img src="img/icone-bolos.webp" alt="" width="240" height="240"><span><b>Bolos</b><small>16 sabores com nomes de mulheres</small></span><svg aria-hidden="true"><use href="#i-seta"/></svg></a>
+      <a class="pill" href="#doces"><img src="img/icone-brigadeiros.webp" alt="" width="240" height="240"><span><b>Brigadeiros</b><small>12, 24, 50 ou 100 unidades</small></span><svg aria-hidden="true"><use href="#i-seta"/></svg></a>
+      <a class="pill" href="#doces"><img src="img/icone-biscoitos.webp" alt="" width="240" height="240"><span><b>Biscoitos decorados</b><small>sob encomenda</small></span><svg aria-hidden="true"><use href="#i-seta"/></svg></a>
+      <a class="pill" href="#doces"><img src="img/icone-cupcake.webp" alt="" width="240" height="240"><span><b>Cupcakes</b><small>caixa com 6 unidades</small></span><svg aria-hidden="true"><use href="#i-seta"/></svg></a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="sobre" id="sobre">
+    <div class="wrap">
+      <div class="foto-arco reveal"><img src="img/camila.webp" alt="Camila decorando um bolo verde" width="380" height="482" loading="lazy"></div>
+      <div class="sobre-texto reveal">
+        <h2>Sobre a Carula</h2>
+        <p class="kicker">uma homenagem à minha avó</p>
+        <p class="t">A Carula Cake nasceu da minha paixão pela confeitaria e representa hoje uma homenagem à memória da minha avó, que me inspirou desde cedo a valorizar o cuidado em cada detalhe.</p>
+        <p class="t">Sou Camila, tenho 32 anos e sou natural do interior de São Paulo. Desde a infância, aprendi a importância de dedicar atenção e carinho a tudo o que faço, um valor que aplico em cada criação e em cada pedido entregue.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="cardapio" id="cardapio">
+    <div class="wrap">
+      <h2 class="reveal" id="bolos">16 Mulheres, 16 Histórias</h2>
+      <p class="kicker reveal">onde há um bolo, há uma história</p>
+      <p class="lead reveal">Nossos sabores têm nomes de mulheres que inspiraram a Camila. Comece escolhendo o tamanho do bolo e depois a história.</p>
+
+      <div class="bloco reveal">
+        <h3>1. Escolha o tamanho</h3>
+        <div class="tabela-wrap">
+          <table>
+            <thead><tr><th>Tamanho</th><th>Tradicional</th><th>Especial</th><th>Premium</th></tr></thead>
+            <tbody>
+              <tr><td>10 cm<small>bento cake</small></td><td>$45</td><td>$50</td><td>$55</td></tr>
+              <tr><td>15 cm<small>até 12 fatias</small></td><td>$100</td><td>$112</td><td>$125</td></tr>
+              <tr><td>20 cm<small>até 24 fatias</small></td><td>$135</td><td>$147</td><td>$160</td></tr>
+              <tr><td>25 cm<small>até 35 fatias</small></td><td>$180</td><td>$195</td><td>$210</td></tr>
+              <tr><td>30 cm<small>até 50 fatias</small></td><td>$250</td><td>$280</td><td>$310</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="nota">Quatro camadas de massa e três de recheio, com cerca de 12 cm de altura.</p>
+      </div>
+
+      <div class="bloco">
+        <h3 class="reveal">2. Escolha o sabor</h3>
+        <div class="grupos">
+          <div class="grupo reveal">
+            <h4>Amo fruta</h4>
+            <div class="sabor"><div class="nome"><strong>Francielle</strong><span>Blueberry e limão</span></div><p>Massa branca com blueberry, brigadeiro suave de limão siciliano e geleia artesanal de blueberry.</p></div>
+            <div class="sabor"><div class="nome"><strong>Kaenny</strong><span>Pistache e frutas vermelhas</span><i class="tag e">Especial</i></div><p>Massa branca com pistache, brigadeiro de pistache e ganache de frutas vermelhas.</p></div>
+          </div>
+          <div class="grupo reveal">
+            <h4>Sou formiga</h4>
+            <div class="sabor"><div class="nome"><strong>Fernanda</strong><span>Ninho com Nutella</span></div><p>Massa branca com brigadeiro cremoso de ninho e Nutella pura.</p></div>
+            <div class="sabor"><div class="nome"><strong>Matilda</strong><span>Puro chocolate</span><i class="tag e">Especial</i></div><p>Seis camadas de massa de chocolate com fudge de chocolate belga.</p></div>
+            <div class="sabor"><div class="nome"><strong>Klicya</strong><span>Estilo Ferrero</span><i class="tag p">Premium</i></div><p>Massa densa de chocolate com avelã, mousse Ferrero e ganache de Nutella.</p></div>
+            <div class="sabor"><div class="nome"><strong>Isabel</strong><span>Cookies 'n cream</span></div><p>Massa branca com Oreo e brigadeiro de Oreo com Nutella pura.</p></div>
+            <div class="sabor"><div class="nome"><strong>Any</strong><span>Pistache e belga</span></div><p>Massa branca com brigadeiro belga e brigadeiro de pistache.</p></div>
+          </div>
+          <div class="grupo reveal">
+            <h4>Clássicos</h4>
+            <div class="sabor"><div class="nome"><strong>Lauren</strong><span>Coco, abacaxi e doce de leite</span></div><p>Massa branca com mousse de coco, doce de leite e compota de abacaxi.</p></div>
+            <div class="sabor"><div class="nome"><strong>Morgana</strong><span>Strogonoff de nozes</span><i class="tag p">Premium</i></div><p>Massa branca com strogonoff de nozes e raspas de laranja.</p></div>
+            <div class="sabor"><div class="nome"><strong>Amanda</strong><span>Red velvet</span><i class="tag e">Especial</i></div><p>Massa de buttermilk red velvet, brigadeiro de cream cheese com ganache de limão e geleia artesanal de frutas vermelhas.</p></div>
+            <div class="sabor"><div class="nome"><strong>Vanessa</strong><span>Mil folhas de morango</span><i class="tag e">Especial</i></div><p>Massa branca, brigadeiro branco, mil folhas, mousse de ninho e morangos frescos.</p></div>
+          </div>
+          <div class="grupo reveal">
+            <h4>Sofisticados</h4>
+            <div class="sabor"><div class="nome"><strong>Adriana</strong><span>Brie, damasco e nozes</span><i class="tag p">Premium</i></div><p>Massa branca com brigadeiro de queijo brie, geleia artesanal de damasco e farofa de nozes.</p></div>
+            <div class="sabor"><div class="nome"><strong>Karina</strong><span>Figo com nozes</span><i class="tag p">Premium</i></div><p>Massa branca com strogonoff de nozes, geleia de figo seco e brigadeiro de blue cheese.</p></div>
+            <div class="sabor"><div class="nome"><strong>Alexia</strong><span>Estilo tiramisù</span><i class="tag e">Especial</i></div><p>Seis camadas de massa com brigadeiro de mascarpone e ganache de café.</p></div>
+          </div>
+          <div class="grupo reveal">
+            <h4>Duo · massa branca ou chocolate</h4>
+            <div class="sabor"><div class="nome"><strong>Letícia</strong><span>Estilo Franuí</span></div><p>Brigadeiro branco, ganache de Nutella e geleia de framboesa.</p></div>
+            <div class="sabor"><div class="nome"><strong>Maria</strong><span>Maracujá</span><i class="tag e">Especial</i></div><p>Mousse de maracujá, ganache de Nutella e geleia de maracujá.</p></div>
+          </div>
+        </div>
+        <p class="legenda reveal">Sem etiqueta: Tradicional <i class="tag e">Especial</i> <i class="tag p">Premium</i></p>
+      </div>
+
+      <div class="bloco reveal">
+        <h3>Acréscimos</h3>
+        <div class="acrescimos"><span>Flores secas ou frescas</span><span>Modelagem em pasta</span><span>Docinhos enrolados</span><span>Shag cake</span><span>Vintage cake</span><span>Macarons</span></div>
+        <p class="nota">Bolos de andar: fale com a gente para consultar valores.</p>
+      </div>
+
+      <div class="bloco" id="doces">
+        <h3 class="reveal">Doces</h3>
+        <div class="doces">
+          <div class="doce reveal"><img src="img/icone-brigadeiros.webp" alt="" width="240" height="240" loading="lazy"><div><b>Brigadeiros</b><p>12, 24, 50 ou 100 unidades</p><a class="wa" href="#" target="_blank" rel="noopener">Pedir pelo WhatsApp</a></div></div>
+          <div class="doce reveal"><img src="img/icone-cupcake.webp" alt="" width="240" height="240" loading="lazy"><div><b>Cupcakes</b><p>Caixa com 6 unidades</p><a class="wa" href="#" target="_blank" rel="noopener">Pedir pelo WhatsApp</a></div></div>
+          <div class="doce reveal"><img src="img/icone-biscoitos.webp" alt="" width="240" height="240" loading="lazy"><div><b>Biscoitos decorados</b><p>Sob encomenda</p><a class="wa" href="#" target="_blank" rel="noopener">Pedir pelo WhatsApp</a></div></div>
+        </div>
+      </div>
+
+      <div class="bloco reveal">
+        <h3>Como encomendar</h3>
+        <ul class="info">
+          <li><b>5 dias de antecedência</b> no mínimo para cada pedido.</li>
+          <li><b>50% do valor</b> para confirmar; o restante na retirada.</li>
+          <li><b>Entrega</b> com taxa de $1.50 por milha. Retirada combinada no pedido.</li>
+          <li><b>Pagamento</b> por Zelle ou dinheiro.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="galeria" id="galeria">
+    <div class="wrap">
+      <h2 class="reveal">Galeria</h2>
+      <p class="kicker reveal">alguns bolos que já contaram histórias</p>
+      <div class="fotos">
+        <figure class="reveal"><img src="img/foto-lambeth.webp" alt="Bolo rosa em camadas com rosinhas" width="720" height="960" loading="lazy"></figure>
+        <figure class="reveal"><img src="img/foto-oceano.webp" alt="Bolo verde-água com ondas de chantilly" width="720" height="960" loading="lazy"></figure>
+        <figure class="reveal"><img src="img/foto-vintage.webp" alt="Bolo vintage verde com babados" width="720" height="960" loading="lazy"></figure>
+        <figure class="reveal"><img src="img/foto-dri.webp" alt="Bolo branco com flores naturais" width="720" height="960" loading="lazy"></figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="insta" id="instagram">
+    <div class="wrap">
+      <div class="insta-card reveal">
+        <img src="img/logo-c.webp" alt="" width="360" height="360" loading="lazy">
+        <p class="arroba">@carula.cake</p>
+        <p>Os bolos da semana, os bastidores e as novidades aparecem primeiro no Instagram.</p>
+        <a class="btn" href="https://www.instagram.com/carula.cake" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-insta"/></svg>Seguir no Instagram</a>
+        <div class="outras"><a href="https://www.tiktok.com/@carula.cake" target="_blank" rel="noopener">TikTok</a><a href="https://www.pinterest.com/carulac/" target="_blank" rel="noopener">Pinterest</a></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer id="contato">
+  <div class="wrap">
+    <img src="img/logo-carula.webp" alt="Carula Cake Confeitaria" width="900" height="524" loading="lazy">
+    <a class="tel" href="tel:+17814206892">(781) 420-6892</a>
+    <div class="rede">
+      <a class="wa" href="#" target="_blank" rel="noopener">WhatsApp</a>
+      <a href="https://www.instagram.com/carula.cake" target="_blank" rel="noopener">Instagram</a>
+      <span>North Shore, MA</span>
+    </div>
+    <p>Confeitaria artesanal desde 2024</p>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const msg = 'Olá! Adoraria saber se você tem disponibilidade para uma encomenda no dia (data)';
+  document.querySelectorAll('a.wa').forEach(a => { a.href = 'https://wa.me/17814206892?text=' + encodeURIComponent(msg); });
+
+  const burger = document.querySelector('.burger');
+  const setMenu = open => {
+    document.body.classList.toggle('menu-open', open);
+    burger.setAttribute('aria-expanded', open);
+    burger.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu');
+  };
+  burger.addEventListener('click', () => setMenu(!document.body.classList.contains('menu-open')));
+  addEventListener('keydown', e => { if (e.key === 'Escape') setMenu(false); });
+  document.querySelectorAll('a[href^="#"]').forEach(a => a.addEventListener('click', e => {
+    const id = a.getAttribute('href');
+    const target = id.length > 1 && document.querySelector(id);
+    if (!target) return;
+    e.preventDefault();
+    setMenu(false);
+    target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+  }));
+
+  const items = document.querySelectorAll('.reveal');
+  if (reduce || !('IntersectionObserver' in window)) { items.forEach(el => el.classList.add('in')); return; }
+  const io = new IntersectionObserver(entries => entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  }), { rootMargin: '0px 0px -6% 0px' });
+  items.forEach(el => io.observe(el));
+})();
+</script>
+</body>
+</html>
