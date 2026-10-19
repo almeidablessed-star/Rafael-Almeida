@@ -1115,7 +1115,11 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
           com contador), mesmas categorias/labels/contagens reais de sempre —
           antes eram 5 blocos quase identicos repetidos a mao, um por
           categoria. */}
-      <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+      {/* A fileira rola para o lado, e area com rolagem corta o que passa da
+          borda: a sombra do chip escolhido (desce ~24px) era cortada reta,
+          num retangulo. A folga interna abriga a sombra inteira; a margem
+          negativa devolve os chips ao mesmo lugar de antes. */}
+      <div className="flex gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none', padding: '6px 18px 26px', margin: '-6px -18px -22px' }}>
         {(Object.keys(CATEGORY_LABELS) as Array<keyof typeof CATEGORY_LABELS>).map((key) => {
           const cat = CATEGORY_LABELS[key];
           const isActive = selectedCategory === key;
