@@ -11,7 +11,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Kaushan+Script&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-@font-face { font-family: 'Carula Groove'; src: url(fonts/carula-groove-suave.woff2) format('woff2'); font-display: swap; }
 :root {
   --creme: #F8F1E4;
   --choc: #2B2420;
@@ -26,7 +25,6 @@
   --linha: rgba(43, 36, 32, .12);
   --sombra: 0 1px 2px rgba(43, 36, 32, .06), 0 10px 24px -12px rgba(43, 36, 32, .22);
   --display: 'Bagel Fat One', 'Arial Black', sans-serif;
-  --groove: 'Carula Groove', 'Bagel Fat One', sans-serif;
   --script: 'Kaushan Script', 'Brush Script MT', cursive;
   --body: 'Poppins', system-ui, sans-serif;
   --ease: cubic-bezier(.2, .7, .2, 1);
@@ -41,7 +39,6 @@ a { color: inherit; }
 :focus-visible { outline: 2px solid var(--coral); outline-offset: 3px; border-radius: 8px; }
 .wrap { width: 100%; max-width: 980px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
 h2 { font-family: var(--display); font-weight: 400; font-size: clamp(2rem, 7vw, 2.8rem); line-height: 1.05; text-align: center; text-wrap: balance; }
-h2.groove { font-family: var(--groove); font-size: clamp(2.3rem, 9vw, 3.6rem); color: var(--coral); }
 .kicker { font-family: var(--script); color: var(--coral); font-size: clamp(1.3rem, 5vw, 1.65rem); text-align: center; margin-top: 6px; }
 .lead { color: var(--suave); text-align: center; max-width: 52ch; margin: 14px auto 0; line-height: 1.7; }
 section { padding: 76px 0; scroll-margin-top: 10px; }
@@ -265,7 +262,7 @@ footer .rede a { text-decoration: none; font-weight: 600; }
 
   <section class="cardapio" id="cardapio">
     <div class="wrap">
-      <h2 class="reveal groove" id="bolos">16 Mulheres, 16 Histórias</h2>
+      <h2 class="reveal" id="bolos">16 Mulheres, 16 Histórias</h2>
       <p class="kicker reveal">cada sabor leva o nome de uma mulher</p>
       <p class="lead reveal">Nossos sabores têm nomes de mulheres que inspiraram a Camila. Comece escolhendo o tamanho do bolo e depois a história.</p>
 
