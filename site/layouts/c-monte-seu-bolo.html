@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Carula Cake · Layout C · Monte seu bolo</title>
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Kaushan+Script&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+<style>
+/* C · Monte seu bolo: a página é o próprio pedido, passo a passo, e termina no WhatsApp */
+.capa { position: relative; background: var(--rosa-claro); padding-top: 16px; padding-bottom: 0; overflow: hidden; }
+.capa .burger { position: absolute; top: 14px; right: 14px; z-index: 2; }
+.capa .marca { position: relative; z-index: 1; }
+.capa .marca .c { width: 88px; height: 88px; }
+.capa .marca .nome { width: min(70vw, 290px); }
+.palco { position: relative; height: 230px; margin-top: 14px; }
+.palco .mesa { position: absolute; left: -10%; right: -10%; bottom: 0; height: 64px; background: var(--creme); border-radius: 50% 50% 0 0 / 100% 100% 0 0; }
+.palco img { position: absolute; bottom: 20px; height: auto; filter: drop-shadow(0 12px 10px rgba(43, 36, 32, .18)); }
+.palco .meio { left: 50%; translate: -50% 0; width: 54%; z-index: 2; }
+.palco .esq { left: -10%; width: 36%; bottom: 34px; }
+.palco .dir { right: -10%; width: 36%; bottom: 34px; }
+
+.passos { padding-top: 26px; padding-bottom: 150px; display: grid; gap: 22px; }
+.passos > h2 { font-family: var(--groove); color: var(--coral); font-size: 1.9rem; text-align: center; }
+.passos > p { text-align: center; color: var(--suave); font-size: .9rem; margin-top: -14px; }
+.passo { background: var(--creme); border-radius: 24px; padding: 18px 16px; box-shadow: var(--sombra); }
+.passo .n { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.passo .n i { width: 28px; height: 28px; border-radius: 50%; background: var(--coral); color: var(--creme); display: grid; place-items: center; font-style: normal; font-weight: 600; font-size: .85rem; }
+.passo .n b { font-weight: 600; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { border: 1.5px solid var(--linha); border-radius: 16px; padding: 9px 12px; font-size: .84rem; line-height: 1.25; }
+.chip small { display: block; color: var(--suave); font-size: .72rem; }
+.chip.on { border-color: var(--coral); background: #FCE9E4; }
+.grupo { font-size: .66rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--rotulo); margin: 12px 0 8px; }
+.grupo:first-of-type { margin-top: 0; }
+.sabor.on b { color: var(--coral); }
+.sabor b { font-family: var(--display); font-weight: 400; font-size: 1.05rem; }
+.hist { margin-top: 12px; background: var(--rosa-claro); border-radius: 16px; padding: 12px 14px; font-size: .84rem; color: var(--suave); }
+.hist b { color: var(--choc); }
+.data { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; text-align: center; }
+.data span { border-radius: 14px; padding: 8px 0; font-size: .8rem; border: 1.5px solid var(--linha); }
+.data span small { display: block; font-size: .64rem; color: var(--suave); text-transform: uppercase; }
+.data span.off { opacity: .35; }
+.data span.on { border-color: var(--coral); background: #FCE9E4; }
+.nota { font-size: .76rem; color: var(--suave); margin-top: 10px; }
+
+.resumo { position: fixed; left: 10px; right: 10px; bottom: max(10px, env(safe-area-inset-bottom)); z-index: 10; background: var(--choc); color: var(--creme);
+  border-radius: 24px; padding: 14px 14px 14px 18px; display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; box-shadow: 0 18px 36px -12px rgba(43, 36, 32, .5); }
+.resumo small { display: block; font-size: .72rem; opacity: .7; }
+.resumo b { font-weight: 600; font-size: .95rem; }
+.resumo .zap { padding: 13px 16px; font-size: .88rem; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-whats" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 20l1.3-3.9A8.5 8.5 0 1 1 8.2 19z"/><path d="M9 8.5c0 3.4 3 6.5 6.5 6.5l1-1.6-2.2-1-1 .9a5 5 0 0 1-2.6-2.6l.9-1-1-2.2z"/></g></symbol>
+</svg>
+
+<header class="capa">
+  <span class="burger" aria-hidden="true"><span></span><span></span><span></span></span>
+  <div class="marca gut">
+    <div class="c"><img src="img/logo-c.webp" alt="" width="360" height="360"></div>
+    <img class="nome" src="img/carula-cake-coral.svg" alt="Carula Cake" width="932" height="575">
+  </div>
+  <div class="palco" aria-hidden="true">
+    <div class="mesa"></div>
+    <img class="esq" src="img/bolo-vintage.webp" alt="" width="761" height="840">
+    <img class="meio" src="img/bolo-lambeth.webp" alt="" width="830" height="838">
+    <img class="dir" src="img/bolo-oceano.webp" alt="" width="777" height="841">
+  </div>
+</header>
+
+<main class="passos gut">
+  <h2>Monte seu bolo</h2>
+  <p>Três escolhas e o pedido vai pronto para o WhatsApp.</p>
+
+  <section class="passo">
+    <div class="n"><i>1</i><b>Tamanho</b></div>
+    <div class="chips">
+      <span class="chip">10 cm<small>bento</small></span>
+      <span class="chip on">15 cm<small>até 12 fatias</small></span>
+      <span class="chip">20 cm<small>até 24</small></span>
+      <span class="chip">25 cm<small>até 35</small></span>
+      <span class="chip">30 cm<small>até 50</small></span>
+    </div>
+  </section>
+
+  <section class="passo">
+    <div class="n"><i>2</i><b>Sabor · 16 mulheres</b></div>
+    <p class="grupo">Amo fruta</p>
+    <div class="chips"><span class="chip sabor"><b>Francielle</b><small>blueberry e limão</small></span><span class="chip sabor on"><b>Kaenny</b><small>pistache e frutas vermelhas</small></span></div>
+    <p class="grupo">Sou formiga</p>
+    <div class="chips"><span class="chip sabor"><b>Fernanda</b><small>ninho e Nutella</small></span><span class="chip sabor"><b>Matilda</b><small>puro chocolate</small></span><span class="chip sabor"><b>Klicya</b><small>estilo Ferrero</small></span></div>
+    <div class="hist"><b>Por que Kaenny?</b> Pistache é o sabor favorito dela, uma amiga cheia de amigos que um dia comprou um bolo para o chá de bebê de um casal recém-chegado.</div>
+  </section>
+
+  <section class="passo">
+    <div class="n"><i>3</i><b>Data</b></div>
+    <div class="data">
+      <span class="off"><small>ter</small>21</span><span class="off"><small>qua</small>22</span><span class="off"><small>qui</small>23</span><span class="on"><small>sáb</small>25</span><span><small>dom</small>26</span>
+    </div>
+    <p class="nota">Pedidos com 5 dias de antecedência · 50% para confirmar.</p>
+  </section>
+</main>
+
+<div class="resumo">
+  <div><small>Seu pedido</small><b>Kaenny · 15 cm · $112</b></div>
+  <a class="zap" href="#"><svg aria-hidden="true"><use href="#i-whats"/></svg>Enviar</a>
+</div>
+</body>
+</html>

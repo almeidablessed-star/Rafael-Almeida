@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Carula Cake · Layout B · Mosaico</title>
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Kaushan+Script&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+<style>
+/* B · Mosaico: blocos de tamanhos diferentes, como uma caixa de doces sortidos */
+.topo { display: flex; justify-content: space-between; align-items: center; padding-top: 14px; }
+.topo .c { width: 48px; height: 48px; border-radius: 50%; box-shadow: var(--sombra); }
+.capa { padding-top: 10px; text-align: center; }
+.capa .nome { width: min(80vw, 340px); margin: 0 auto; }
+.capa .script { font-size: 1.35rem; margin-top: 6px; }
+
+.mosaico { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding-top: 22px; padding-bottom: 40px; }
+.bloco { position: relative; border-radius: 24px; overflow: hidden; padding: 16px; min-height: 150px; display: flex; flex-direction: column; justify-content: flex-end; }
+.bloco h2 { font-size: 1.3rem; }
+.bloco p { font-size: .8rem; margin-top: 2px; }
+.bloco .seta { position: absolute; top: 14px; right: 14px; width: 30px; height: 30px; border-radius: 50%; background: var(--creme); display: grid; place-items: center; font-size: .9rem; }
+
+.bolos { grid-column: span 2; min-height: 330px; background: var(--foto); color: var(--choc); padding: 0; }
+.bolos img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 35%; }
+.bolos .rot { position: relative; margin: 14px; background: var(--creme); border-radius: 18px; padding: 12px 14px; }
+.bolos .rot h2 { font-family: var(--groove); color: var(--coral); font-size: 1.4rem; }
+.bolos .rot p { color: var(--suave); }
+
+.brig { background: var(--rosa); grid-row: span 2; min-height: 260px; }
+.brig img, .cup img, .bisc img { width: 86px; height: 86px; border-radius: 50%; margin-bottom: auto; }
+.cup { background: var(--lavanda); }
+.bisc { background: var(--verde); }
+.bisc img, .cup img { width: 58px; height: 58px; }
+
+.sobre { grid-column: span 2; background: var(--rosa-claro); flex-direction: row; align-items: center; gap: 14px; justify-content: flex-start; min-height: 0; }
+.sobre img { width: 92px; border-radius: 999px 999px 14px 14px; aspect-ratio: 380 / 482; object-fit: cover; flex: none; }
+.sobre p { color: var(--suave); }
+.sobre .script { color: var(--coral); font-size: 1rem; margin-top: 6px; }
+
+.insta { background: var(--coral); color: var(--creme); }
+.insta h2 { font-size: 1.15rem; }
+.pedido { background: var(--choc); color: var(--creme); }
+.pedido h2 { font-size: 1.15rem; }
+.pedido p, .insta p { opacity: .85; }
+.pedido .seta, .insta .seta { background: rgba(248, 241, 228, .16); color: var(--creme); }
+
+.galeria { grid-column: span 2; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 0; min-height: 0; border-radius: 24px; }
+.galeria img { aspect-ratio: 1; object-fit: cover; background: var(--foto); }
+</style>
+</head>
+<body>
+<header class="topo gut">
+  <img class="c" src="img/logo-c.webp" alt="Carula Cake" width="360" height="360">
+  <span class="burger" aria-hidden="true"><span></span><span></span><span></span></span>
+</header>
+
+<section class="capa gut">
+  <img class="nome" src="img/carula-cake-coral.svg" alt="Carula Cake" width="932" height="575">
+  <p class="script">onde há um bolo, há uma história</p>
+</section>
+
+<main class="mosaico gut">
+  <a class="bloco bolos" href="#"><img src="img/foto-lambeth.webp" alt="" width="720" height="960"><span class="seta">→</span>
+    <div class="rot"><h2>16 Mulheres, 16 Histórias</h2><p>Os bolos · 5 tamanhos · a partir de $45</p></div></a>
+  <a class="bloco brig" href="#"><img src="img/icone-brigadeiros.webp" alt="" width="240" height="240"><span class="seta">→</span><h2>Brigadeiros</h2><p>12, 24, 50 ou 100</p></a>
+  <a class="bloco cup" href="#"><img src="img/icone-cupcake.webp" alt="" width="240" height="240"><h2>Cupcakes</h2><p>caixa com 6</p></a>
+  <a class="bloco bisc" href="#"><img src="img/icone-biscoitos.webp" alt="" width="240" height="240"><h2>Biscoitos</h2><p>decorados</p></a>
+  <a class="bloco sobre" href="#"><img src="img/camila.webp" alt="" width="380" height="482"><div><h2>Sobre a Camila</h2><p>Confeiteira do interior de SP, fazendo bolos no North Shore desde 2024.</p><p class="script">uma homenagem à avó</p></div></a>
+  <a class="bloco insta" href="#"><span class="seta">→</span><h2>@carula.cake</h2><p>Instagram</p></a>
+  <a class="bloco pedido" href="#"><span class="seta">→</span><h2>Encomendar</h2><p>WhatsApp · 5 dias antes</p></a>
+  <div class="bloco galeria">
+    <img src="img/foto-oceano.webp" alt="" width="720" height="960"><img src="img/foto-vintage.webp" alt="" width="720" height="960"><img src="img/foto-dri.webp" alt="" width="720" height="960">
+  </div>
+</main>
+</body>
+</html>

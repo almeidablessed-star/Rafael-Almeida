@@ -1,0 +1,37 @@
+/* Base comum às três propostas de layout (celular primeiro) */
+@font-face { font-family: 'Carula Groove'; src: url(../fontes/carula-groove-suave.woff2) format('woff2'); font-display: swap; }
+:root {
+  --creme: #F8F1E4; --choc: #2B2420; --coral: #E8452B; --suave: #7A6A5F; --rotulo: #8C7F73;
+  --rosa: #F5C6CE; --roxo: #8E5CF0; --verde: #D6E4CC; --lavanda: #D8CDEB;
+  --rosa-claro: #F7E2DE; --foto: #F2EDE7; --linha: rgba(43, 36, 32, .12);
+  --sombra: 0 1px 2px rgba(43, 36, 32, .06), 0 10px 24px -12px rgba(43, 36, 32, .22);
+  --display: 'Bagel Fat One', 'Arial Black', sans-serif;
+  --groove: 'Carula Groove', 'Bagel Fat One', sans-serif;
+  --script: 'Kaushan Script', cursive;
+  --body: 'Poppins', system-ui, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--creme); color: var(--choc); font-family: var(--body); line-height: 1.5; overflow-x: clip; -webkit-font-smoothing: antialiased; }
+img { display: block; max-width: 100%; height: auto; }
+a { color: inherit; text-decoration: none; }
+.gut { padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+.eyebrow { font-size: .68rem; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--rotulo); }
+.script { font-family: var(--script); color: var(--coral); }
+h2 { font-family: var(--display); font-weight: 400; line-height: 1.05; }
+
+/* Topo comum: C rosa no centro e letreiro embaixo */
+.marca { display: grid; justify-items: center; text-align: center; }
+.marca .c { width: 112px; height: 112px; border-radius: 50%; background: var(--creme); padding: 5px; box-shadow: var(--sombra); }
+.marca .c img { border-radius: 50%; }
+.marca .nome { width: min(78vw, 330px); margin-top: 8px; }
+
+.burger { width: 44px; height: 44px; border-radius: 50%; background: var(--creme); box-shadow: var(--sombra); display: grid; place-content: center; gap: 5px; }
+.burger span { display: block; width: 18px; height: 2px; border-radius: 2px; background: var(--choc); }
+
+.zap { display: flex; align-items: center; justify-content: center; gap: 10px; background: var(--coral); color: var(--creme);
+  font-weight: 600; font-size: .95rem; border-radius: 999px; padding: 15px 22px; }
+.zap svg { width: 20px; height: 20px; }
+.tag { font-size: .6rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; border-radius: 999px; padding: 3px 8px; font-style: normal; }
+.tag.e { background: var(--lavanda); }
+.tag.p { background: var(--verde); }
