@@ -65,14 +65,23 @@ section { padding: 76px 0; scroll-margin-top: 10px; }
 
 /* ---------- Capa (estrutura do bio.site, roupa nova) ---------- */
 .capa { background: var(--rosa-claro); padding-bottom: 64px; }
-.banner { position: relative; height: clamp(200px, 34vw, 320px); overflow: hidden; clip-path: ellipse(85% 100% at 50% 0); }
+.banner { position: relative; height: clamp(230px, 40vw, 380px); overflow: hidden; clip-path: ellipse(85% 100% at 50% 0); }
 .banner img { position: absolute; inset: -4%; width: 108%; height: 108%; max-width: none; object-fit: cover; animation: drift 40s ease-in-out infinite alternate; }
 @keyframes drift { to { transform: translate(-3%, -2%); } }
-.perfil { display: grid; justify-items: center; text-align: center; margin-top: -72px; position: relative; }
-.avatar { width: 136px; height: 136px; border-radius: 50%; background: var(--creme); padding: 6px; box-shadow: var(--sombra); }
-.avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-h1 { margin-top: 10px; line-height: 0; }
-h1 img { width: clamp(260px, 80vw, 470px); height: auto; }
+.perfil { display: grid; justify-items: center; text-align: center; margin-top: calc(-1 * clamp(120px, 24vw, 210px)); position: relative; }
+/* Letreiro 3D: entra crescendo, flutua, inclina com o mouse e recebe um brilho que passa */
+h1.letreiro { line-height: 0; perspective: 1000px; position: relative; z-index: 2; }
+.letreiro .tilt { display: inline-block; transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform .7s var(--ease); }
+.letreiro .flutua { position: relative; display: inline-block; width: clamp(300px, 90vw, 600px);
+  animation: entra 1.1s cubic-bezier(.2, 1.35, .4, 1) .1s both, flutua 5.5s ease-in-out 1.3s infinite alternate; }
+.letreiro img { width: 100%; height: auto; }
+.letreiro .brilho { position: absolute; inset: 0; pointer-events: none;
+  -webkit-mask: url(img/letreiro-mascara.webp) 0 0 / 100% 100% no-repeat; mask: url(img/letreiro-mascara.webp) 0 0 / 100% 100% no-repeat;
+  background: linear-gradient(115deg, transparent 0 43%, rgba(255, 255, 255, .45) 48%, rgba(255, 255, 255, .7) 50%, rgba(255, 255, 255, .45) 52%, transparent 57% 100%) 130% 0 / 280% 100% no-repeat;
+  animation: brilho 7s ease-in-out 1.8s infinite; }
+@keyframes entra { from { opacity: 0; transform: translateY(46px) scale(.78); } }
+@keyframes flutua { to { transform: translateY(-9px) rotate(-1deg); } }
+@keyframes brilho { 0% { background-position: 130% 0; } 30%, 100% { background-position: -30% 0; } }
 .perfil .frase { font-family: var(--script); color: var(--choc); font-size: clamp(1.3rem, 5.4vw, 1.6rem); margin-top: 8px; }
 .perfil .local { font-size: .72rem; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--rotulo); margin-top: 10px; }
 .social { list-style: none; display: flex; gap: 10px; margin-top: 20px; }
@@ -183,8 +192,6 @@ footer .rede a { text-decoration: none; font-weight: 600; }
 .js .reveal.in { opacity: 1; transform: none; }
 
 @media (min-width: 760px) {
-  .avatar { width: 164px; height: 164px; }
-  .perfil { margin-top: -86px; }
   th { font-size: .72rem; letter-spacing: .12em; }
   table { font-size: .95rem; }
   .sobre .wrap { grid-template-columns: auto 1fr; align-items: center; gap: 64px; justify-items: start; }
@@ -229,8 +236,10 @@ footer .rede a { text-decoration: none; font-weight: 600; }
   <div class="banner" aria-hidden="true"><img src="img/xadrez-banner.webp" alt="" width="2400" height="900"></div>
   <div class="wrap">
     <div class="perfil">
-      <div class="avatar"><img src="img/logo-c.webp" alt="Logo da Carula Cake" width="360" height="360"></div>
-      <h1><img src="img/carula-cake-coral.svg" alt="Carula Cake" width="932" height="575"></h1>
+      <h1 class="letreiro"><span class="tilt"><span class="flutua">
+        <img src="img/letreiro-3d.webp" srcset="img/letreiro-3d-968.webp 968w, img/letreiro-3d.webp 1936w" sizes="(max-width: 660px) 90vw, 600px" alt="Carula Cake" width="1936" height="1170">
+        <span class="brilho" aria-hidden="true"></span>
+      </span></span></h1>
       <p class="frase">onde há um bolo, há uma história</p>
       <p class="local">Confeitaria artesanal · North Shore, MA</p>
       <ul class="social">
@@ -412,6 +421,19 @@ footer .rede a { text-decoration: none; font-weight: 600; }
     setMenu(false);
     target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
   }));
+
+  // Letreiro inclina na direção do mouse (só em telas com mouse)
+  const tilt = document.querySelector('.letreiro .tilt');
+  if (tilt && !reduce && matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    const capa = document.querySelector('.capa');
+    capa.addEventListener('pointermove', e => {
+      const r = tilt.getBoundingClientRect();
+      const x = (e.clientX - (r.left + r.width / 2)) / innerWidth, y = (e.clientY - (r.top + r.height / 2)) / innerHeight;
+      tilt.style.setProperty('--ry', (x * 18).toFixed(2) + 'deg');
+      tilt.style.setProperty('--rx', (-y * 14).toFixed(2) + 'deg');
+    });
+    capa.addEventListener('pointerleave', () => { tilt.style.removeProperty('--rx'); tilt.style.removeProperty('--ry'); });
+  }
 
   const items = document.querySelectorAll('.reveal');
   if (reduce || !('IntersectionObserver' in window)) { items.forEach(el => el.classList.add('in')); return; }
