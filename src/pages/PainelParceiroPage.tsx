@@ -146,7 +146,7 @@ export const PainelParceiroPage: React.FC = () => {
         className="px-5"
         style={{
           background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
-          paddingTop: 'calc(24px + env(safe-area-inset-top, 0px))',
+          paddingTop: 'calc(24px + env(safe-area-inset-top, 0px) + var(--topo-ios27, 0px))',
           paddingBottom: '44px',
         }}
       >

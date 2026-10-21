@@ -252,7 +252,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           // padding, para que o gradiente seja um só (sem emenda) e o conteudo
           // fique exatamente onde estava. Altura cresce o mesmo tanto que a
           // margem sobe, entao nada abaixo do card se move.
-          paddingTop: 'calc(8px + env(safe-area-inset-top, 0px))',
+          paddingTop: 'calc(8px + env(safe-area-inset-top, 0px) + var(--topo-ios27, 0px))',
           boxShadow: '0 30px 70px rgba(58,35,80,0.26)',
           marginLeft: 'calc(-0.5 * var(--app-bleed) + 50%)',
           marginRight: 'calc(-0.5 * var(--app-bleed) + 50%)',
@@ -395,7 +395,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           data-logo-inicio
           className="absolute left-1/2 -translate-x-1/2 z-20 whitespace-nowrap"
           style={{
-            top: 'calc(env(safe-area-inset-top, 0px) + 14px)',
+            top: 'calc(env(safe-area-inset-top, 0px) + var(--topo-ios27, 0px) + 14px)',
           }}
         >
           <LogoCarulaApp fundo="roxo" tamanho={31} />

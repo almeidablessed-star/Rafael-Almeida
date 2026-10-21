@@ -1054,7 +1054,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
           style={{
             background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
             borderRadius: '0px 0px 0px 0px',
-            paddingTop: 'calc(40px + env(safe-area-inset-top, 0px))',
+            paddingTop: 'calc(40px + env(safe-area-inset-top, 0px) + var(--topo-ios27, 0px))',
             paddingBottom: '120px',
           }}
         >
@@ -1167,7 +1167,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         >
           {/* Cabecalho gradiente com navegacao de passos */}
           <div
-            style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 55%, #A85E86 100%)', paddingTop: 'calc(18px + env(safe-area-inset-top, 0px))' }}
+            style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 55%, #A85E86 100%)', paddingTop: 'calc(18px + env(safe-area-inset-top, 0px) + var(--topo-ios27, 0px))' }}
             className="px-5 pb-4 flex flex-col gap-3.5 flex-shrink-0"
           >
             <div className="flex items-center justify-between">

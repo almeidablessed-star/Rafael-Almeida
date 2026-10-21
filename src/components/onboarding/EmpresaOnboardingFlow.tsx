@@ -247,7 +247,7 @@ export const EmpresaOnboardingFlow: React.FC = () => {
         style={{
           background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
           padding: '20px',
-          paddingTop: 'calc(20px + env(safe-area-inset-top, 0px))',
+          paddingTop: 'calc(20px + env(safe-area-inset-top, 0px) + var(--topo-ios27, 0px))',
           paddingBottom: '120px',
         }}
       >

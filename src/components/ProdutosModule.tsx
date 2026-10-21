@@ -372,7 +372,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
       >
         <div
           className="px-5 flex flex-col gap-2"
-          style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)', paddingTop: 'calc(24px + env(safe-area-inset-top, 0px))', paddingBottom: '90px' }}
+          style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)', paddingTop: 'calc(24px + env(safe-area-inset-top, 0px) + var(--topo-ios27, 0px))', paddingBottom: '90px' }}
         >
           {/* `visibility: hidden` (nao renderizacao condicional) para o badge
               sempre ocupar o mesmo espaco no cabecalho: escondendo o elemento
@@ -475,7 +475,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                   tela do celular, sem rolar. O safe-area tira o X de baixo do
                   relogio no iPhone. */}
               <div
-                style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)', paddingTop: 'calc(14px + env(safe-area-inset-top, 0px))', paddingBottom: '30px' }}
+                style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)', paddingTop: 'calc(14px + env(safe-area-inset-top, 0px) + var(--topo-ios27, 0px))', paddingBottom: '30px' }}
                 className="px-5 flex items-end justify-between gap-3 flex-shrink-0"
               >
                 <div className="flex flex-col gap-1 min-w-0">
