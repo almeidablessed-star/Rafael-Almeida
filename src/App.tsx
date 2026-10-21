@@ -11,6 +11,7 @@ import {
 import { filterTransactionsByPeriod, calculateSummary } from './utils/financialEngine';
 import { getTodayIso, formatDateBr } from './utils/formatters';
 import { useDelayedDelete } from './hooks/useDelayedDelete';
+import { useCorDaBarraDoSistema } from './hooks/useCorDaBarraDoSistema';
 import { useFichasTecnicas } from './context/FichasTecnicasContext';
 import { useProdutos } from './context/ProdutosContext';
 import { useTransacoes } from './context/TransacoesContext';
@@ -122,6 +123,7 @@ function AppContent() {
     }
     return saved || 'dashboard';
   });
+  useCorDaBarraDoSistema(activeTab);
 
   // Period filter state
   const [period, setPeriod] = useState<TimePeriod>('mes'); // Default to 'Este Mês'
