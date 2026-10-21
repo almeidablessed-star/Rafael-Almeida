@@ -537,6 +537,27 @@ function AppContent() {
 
   return (
       <div className="min-h-screen text-[var(--color-ink)] flex flex-col font-sans" style={{ overflow: 'hidden' }}>
+        {/* Faixa atras da hora e da bateria (so existe onde ha area segura: iPhone
+            com o app instalado). O app pede `black-translucent`, entao o conteudo
+            passa por baixo da barra do sistema; a partir do iOS 27 o sistema
+            embaca e ilumina o que passa ali, e o cabecalho roxo virava um brilho.
+            Uma faixa solida, fixa, no tom da borda de cima do cabecalho (o
+            degrade de 155 graus rente ao topo vai de #3A2350 a ~#5D3667) deixa
+            o sistema sem nada para embacar e mantem a hora legivel ao rolar.
+            No Android e no navegador a area segura e 0 e a faixa nao aparece. */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 'env(safe-area-inset-top, 0px)',
+            background: 'linear-gradient(90deg, #3A2350 0%, #5D3667 100%)',
+            zIndex: 60,
+            pointerEvents: 'none',
+          }}
+        />
 
         {/* Main Screen Container */}
         <main className="flex-1 max-w-full w-full mx-auto px-0 pb-20 bottom-nav-safe" style={{
