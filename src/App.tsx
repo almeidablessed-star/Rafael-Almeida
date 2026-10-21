@@ -541,8 +541,7 @@ function AppContent() {
             com o app instalado). O app pede `black-translucent`, entao o conteudo
             passa por baixo da barra do sistema; a partir do iOS 27 o sistema
             embaca e ilumina o que passa ali, e o cabecalho roxo virava um brilho.
-            Uma faixa solida, fixa, no tom da borda de cima do cabecalho (o
-            degrade de 155 graus rente ao topo vai de #3A2350 a ~#5D3667) deixa
+            Uma faixa solida, fixa, no tom da borda de cima do cabecalho deixa
             o sistema sem nada para embacar e mantem a hora legivel ao rolar.
             No Android e no navegador a area segura e 0 e a faixa nao aparece. */}
         <div
@@ -553,7 +552,10 @@ function AppContent() {
             left: 0,
             right: 0,
             height: 'env(safe-area-inset-top, 0px)',
-            background: 'linear-gradient(90deg, #3A2350 0%, #5D3667 100%)',
+            // Cor SOLIDA, nao degrade: o WebKit so troca o brilho pela cor de uma
+            // faixa fixa no topo (>10px, >=90% da largura) se ela tiver
+            // background-color. Com degrade (que e background-image) ele ignorava.
+            backgroundColor: '#4F2E5E',
             zIndex: 60,
             pointerEvents: 'none',
           }}
