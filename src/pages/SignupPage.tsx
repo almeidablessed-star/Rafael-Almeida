@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Mail, Lock, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { CarulaLogo } from '../components/CarulaLogo';
+import { IconeCarulaApp } from '../components/IconeCarulaApp';
+import { LogoCarulaApp } from '../components/LogoCarulaApp';
 
 interface SignupPageProps {
   onLoginClick: () => void;
@@ -63,7 +64,10 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onLoginClick }) => {
     <div className="min-h-screen flex flex-col justify-center items-center p-6 bg-gradient-to-b from-[#F5F5F5] to-white">
       <div className="w-full max-w-md">
         <div className="mb-12 flex justify-center">
-          <CarulaLogo />
+          <div className="flex flex-col items-center gap-4">
+            <IconeCarulaApp tamanho={76} />
+            <LogoCarulaApp fundo="claro" tamanho={40} />
+          </div>
         </div>
 
         <h1 className="text-3xl font-bold text-center mb-2">Criar Conta</h1>

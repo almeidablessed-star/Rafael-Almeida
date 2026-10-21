@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { User, Store, DollarSign, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
-import { CarulaLogo } from '../components/CarulaLogo';
+import { LogoCarulaApp } from '../components/LogoCarulaApp';
 import { CustomSelect } from '../components/CustomSelect';
 
 export const SetupProfilePage: React.FC = () => {
@@ -62,7 +62,7 @@ export const SetupProfilePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#EDE7DC]">
+    <div className="min-h-screen bg-[#F6F2F5]">
       {/* Cabecalho gradiente — mesmo padrao do topo do onboarding financeiro
           e do Dashboard, em vez do cinza generico que esta tela usava
           sozinha (unica pagina fora do padrao visual validado do app). */}
@@ -72,13 +72,14 @@ export const SetupProfilePage: React.FC = () => {
           background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)',
           padding: '20px',
           paddingTop: 'calc(20px + env(safe-area-inset-top, 0px))',
-          paddingBottom: '28px',
-          boxShadow: '0 30px 70px rgba(58,35,80,0.26)',
-          borderRadius: '0px 0px 32px 32px',
+          // O roxo desce reto e o painel claro abaixo sobe por cima dele com
+          // os cantos arredondados — mesmo encaixe do topo do Inicio
+          // (Dashboard: painel #F6F2F5 com marginTop -44px e raio 28px).
+          paddingBottom: '64px',
         }}
       >
         <div className="flex justify-center mb-3">
-          <CarulaLogo />
+          <LogoCarulaApp fundo="roxo" tamanho={34} />
         </div>
         <div className="font-serif-display text-[26px] text-white text-center leading-[1.2]">
           Bem-vinda(o)! 🎉
@@ -89,9 +90,13 @@ export const SetupProfilePage: React.FC = () => {
       </div>
 
       {/* Card de conteudo — mesmo card claro do onboarding */}
-      <div className="max-w-sm mx-auto px-4 -mt-4 relative z-10 pb-10">
+      <div
+        className="relative z-10"
+        style={{ background: '#F6F2F5', marginTop: '-44px', paddingTop: '20px', borderRadius: '28px 28px 0 0' }}
+      >
+      <div className="max-w-sm mx-auto px-4 pb-10">
         <div
-          className="bg-[#F6F2F5] rounded-2xl p-5"
+          className="bg-white rounded-2xl p-5"
           style={{ boxShadow: '0 8px 20px rgba(58,35,80,0.09)' }}
         >
           <form onSubmit={handleSubmit} className="space-y-3">
@@ -170,6 +175,7 @@ export const SetupProfilePage: React.FC = () => {
           Sair
         </button>
         </div>
+      </div>
       </div>
     </div>
   );

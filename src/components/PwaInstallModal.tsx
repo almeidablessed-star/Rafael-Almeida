@@ -1,11 +1,31 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
-import { X, Share, PlusSquare, Smartphone, CheckCircle } from 'lucide-react';
+import { X, Share, PlusSquare, Smartphone, CheckCircle, MoreHorizontal, MoreVertical } from 'lucide-react';
 
 interface PwaInstallModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
+
+const PASSOS: { aparelho: string; passos: { titulo: string; detalhe: string; icone: React.ReactNode }[] }[] = [
+  {
+    aparelho: 'iPhone (Safari)',
+    passos: [
+      { titulo: 'Toque nos três pontinhos', detalhe: 'Na barra do Safari, embaixo da tela.', icone: <MoreHorizontal className="w-4 h-4 text-neutral-700" /> },
+      { titulo: 'Toque em "Compartilhar"', detalhe: 'É o quadradinho com a setinha para cima.', icone: <Share className="w-4 h-4 text-blue-500" /> },
+      { titulo: 'Toque em "Ver mais" e escolha "Adicionar à Tela de Início"', detalhe: '"Ver mais" é a setinha para baixo; o item tem o quadrado com "+".', icone: <PlusSquare className="w-4 h-4 text-neutral-700" /> },
+      { titulo: 'Toque em "Adicionar"', detalhe: 'Pronto! O ícone do Carula App aparece junto com os seus aplicativos.', icone: <CheckCircle className="w-4 h-4 text-emerald-500" /> },
+    ],
+  },
+  {
+    aparelho: 'Android (Chrome)',
+    passos: [
+      { titulo: 'Toque nos três pontinhos', detalhe: 'No canto de cima do Chrome.', icone: <MoreVertical className="w-4 h-4 text-neutral-700" /> },
+      { titulo: 'Escolha "Adicionar à tela inicial" ou "Instalar app"', detalhe: 'O nome muda conforme o celular; os dois fazem a mesma coisa.', icone: <PlusSquare className="w-4 h-4 text-neutral-700" /> },
+      { titulo: 'Confirme em "Adicionar" ou "Instalar"', detalhe: 'Pronto! O ícone do Carula App aparece na tela inicial.', icone: <CheckCircle className="w-4 h-4 text-emerald-500" /> },
+    ],
+  },
+];
 
 export const PwaInstallModal: React.FC<PwaInstallModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
@@ -37,59 +57,35 @@ export const PwaInstallModal: React.FC<PwaInstallModalProps> = ({ isOpen, onClos
           </button>
         </div>
 
-        {/* Step-by-step instructions for iPhone Safari */}
+        {/* Passo a passo nos dois celulares. O caminho do iPhone e o do iOS
+            atual: o Compartilhar mora dentro do menu "•••" do Safari, e o
+            "Adicionar à Tela de Início" so aparece depois de "Ver mais". */}
         <div className="space-y-3 py-1">
           <p className="text-xs text-neutral-600 font-medium">
-            Siga os 3 passos simples abaixo no Safari do seu iPhone para ter o Carula Confeitaria como um aplicativo de tela cheia:
+            Não precisa baixar nada da loja. Siga os passos do seu celular para ter o Carula App como um aplicativo de tela cheia:
           </p>
 
-          {/* Step 1 */}
-          <div className="flex items-start gap-3 p-3 bg-neutral-50 rounded-lg border border-neutral-200/80">
-            <div className="w-7 h-7 rounded-full bg-pink-500 text-white font-bold text-xs flex items-center justify-center shrink-0">
-              1
-            </div>
-            <div>
-              <span className="font-bold text-xs text-neutral-800 block flex items-center gap-1">
-                Toque no botão Compartilhar
-                <Share className="w-4 h-4 text-blue-500" />
+          {PASSOS.map((grupo) => (
+            <div key={grupo.aparelho} className="space-y-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-500 block">
+                {grupo.aparelho}
               </span>
-              <p className="text-[11px] text-neutral-500 mt-0.5">
-                No menu do seu navegador (na parte inferior da tela do Safari).
-              </p>
+              {grupo.passos.map((passo, i) => (
+                <div key={i} className="flex items-start gap-3 p-3 bg-neutral-50 rounded-lg border border-neutral-200/80">
+                  <div className="w-7 h-7 rounded-full bg-pink-500 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                    {i + 1}
+                  </div>
+                  <div>
+                    <span className="font-bold text-xs text-neutral-800 block flex items-center gap-1">
+                      {passo.titulo}
+                      {passo.icone}
+                    </span>
+                    <p className="text-[11px] text-neutral-500 mt-0.5">{passo.detalhe}</p>
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
-
-          {/* Step 2 */}
-          <div className="flex items-start gap-3 p-3 bg-neutral-50 rounded-lg border border-neutral-200/80">
-            <div className="w-7 h-7 rounded-full bg-pink-500 text-white font-bold text-xs flex items-center justify-center shrink-0">
-              2
-            </div>
-            <div>
-              <span className="font-bold text-xs text-neutral-800 block flex items-center gap-1">
-                Selecione "Adicionar à Tela de Início"
-                <PlusSquare className="w-4 h-4 text-neutral-700" />
-              </span>
-              <p className="text-[11px] text-neutral-500 mt-0.5">
-                Role o menu para baixo até encontrar o ícone do quadrado com um mais "+".
-              </p>
-            </div>
-          </div>
-
-          {/* Step 3 */}
-          <div className="flex items-start gap-3 p-3 bg-neutral-50 rounded-lg border border-neutral-200/80">
-            <div className="w-7 h-7 rounded-full bg-pink-500 text-white font-bold text-xs flex items-center justify-center shrink-0">
-              3
-            </div>
-            <div>
-              <span className="font-bold text-xs text-neutral-800 block flex items-center gap-1">
-                Toque em "Adicionar"
-                <CheckCircle className="w-4 h-4 text-emerald-500" />
-              </span>
-              <p className="text-[11px] text-neutral-500 mt-0.5">
-                Pronto! O ícone do app aparecerá na tela do seu iPhone como um aplicativo nativo.
-              </p>
-            </div>
-          </div>
+          ))}
         </div>
 
         {/* Close button */}

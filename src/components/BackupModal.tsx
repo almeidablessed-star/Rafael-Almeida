@@ -51,7 +51,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
     const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(paraExportar, null, 2));
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute('href', dataStr);
-    downloadAnchor.setAttribute('download', `carulaconfeitaria_backup_${Date.now()}.json`);
+    downloadAnchor.setAttribute('download', `carula-app_backup_${Date.now()}.json`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
@@ -66,7 +66,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
       try {
         const parsed = JSON.parse(event.target?.result as string);
         if (!Array.isArray(parsed)) {
-          alert('Arquivo inválido. O arquivo de backup deve ser no formato JSON do Carula Confeitaria.');
+          alert('Arquivo inválido. O arquivo de backup deve ser no formato JSON do Carula App.');
           return;
         }
 

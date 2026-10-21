@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Mail, Lock, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { CarulaLogo } from '../components/CarulaLogo';
+import { IconeCarulaApp } from '../components/IconeCarulaApp';
+import { LogoCarulaApp } from '../components/LogoCarulaApp';
 import { HOTMART_URL } from '../config/hotmart';
 
 interface LoginPageProps {
@@ -35,7 +36,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onVerifyOtpClick, onForgot
     <div className="min-h-screen flex flex-col justify-center items-center p-6 bg-gradient-to-b from-[#F5F5F5] to-white">
       <div className="w-full max-w-md">
         <div className="mb-12 flex justify-center">
-          <CarulaLogo />
+          <div className="flex flex-col items-center gap-4">
+            <IconeCarulaApp tamanho={76} />
+            <LogoCarulaApp fundo="claro" tamanho={40} />
+          </div>
         </div>
 
         {/* Feminino primeiro, masculino entre parenteses: o publico do app e

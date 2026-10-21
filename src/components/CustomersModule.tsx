@@ -4,6 +4,7 @@ import { Customer, CustomerEvent } from '../types';
 import { formatDateBr, formatDayMonthOnly } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
 import { useCustomers } from '../context/CustomersContext';
+import { useAuth } from '../context/AuthContext';
 import { useDelayedDelete } from '../hooks/useDelayedDelete';
 import { compressImageFile } from '../utils/imageCompression';
 import { capitalizeFirstLetter } from '../utils/textCase';
@@ -58,7 +59,7 @@ export const UNIVERSAL_HOLIDAYS: UniversalHoliday[] = [
     date2026: '2026-01-01',
     country: 'Universal',
     messageTemplate:
-      'Olá, {nome}! 🥂✨ Prepare-se para a virada de ano! Encomende o bolo da sua festa com a Carula Cake para começar o ano adoçado!',
+      'Olá, {nome}! 🥂✨ Prepare-se para a virada de ano! Encomende o bolo da sua festa para começar o ano adoçado!',
   },
   {
     id: 'h1',
@@ -66,7 +67,7 @@ export const UNIVERSAL_HOLIDAYS: UniversalHoliday[] = [
     date2026: '2026-02-14',
     country: 'EUA',
     messageTemplate:
-      "Olá, {nome}! 💖 O Valentine's Day está chegando! 🍫✨ Gostaria de encomendar um bolo especial ou doces artesanais da Carula Cake para comemorar?",
+      "Olá, {nome}! 💖 O Valentine's Day está chegando! 🍫✨ Gostaria de encomendar um bolo especial ou doces artesanais para comemorar?",
   },
   {
     id: 'h1b',
@@ -74,7 +75,7 @@ export const UNIVERSAL_HOLIDAYS: UniversalHoliday[] = [
     date2026: '2026-04-05',
     country: 'Universal',
     messageTemplate:
-      'Olá, {nome}! 🐰🍫 A Páscoa vem aí! Nossos ovos de colher, bolos de Páscoa e sobremesas especiais já estão com encomendas abertas na Carula Cake!',
+      'Olá, {nome}! 🐰🍫 A Páscoa vem aí! Nossos ovos de colher, bolos de Páscoa e sobremesas especiais já estão com encomendas abertas!',
   },
   {
     id: 'h2',
@@ -82,7 +83,7 @@ export const UNIVERSAL_HOLIDAYS: UniversalHoliday[] = [
     date2026: '2026-05-10',
     country: 'Universal',
     messageTemplate:
-      'Olá, {nome}! 🌸 O Dia das Mães está se aproximando! 💕 Surpreenda quem você ama com uma caixa de doces ou bolo especial da Carula Cake!',
+      'Olá, {nome}! 🌸 O Dia das Mães está se aproximando! 💕 Surpreenda quem você ama com uma caixa de doces ou bolo especial!',
   },
   {
     id: 'h3',
@@ -90,7 +91,7 @@ export const UNIVERSAL_HOLIDAYS: UniversalHoliday[] = [
     date2026: '2026-06-12',
     country: 'BR',
     messageTemplate:
-      'Olá, {nome}! ❤️ O Dia dos Namorados no Brasil está chegando! 🍰✨ Garanta sua caixa de doces ou bolo de festa com a Carula Cake!',
+      'Olá, {nome}! ❤️ O Dia dos Namorados no Brasil está chegando! 🍰✨ Garanta sua caixa de doces ou bolo de festa!',
   },
   {
     id: 'h3b',
@@ -98,7 +99,7 @@ export const UNIVERSAL_HOLIDAYS: UniversalHoliday[] = [
     date2026: '2026-06-24',
     country: 'BR',
     messageTemplate:
-      'Olá, {nome}! 🌽🔥 A época de Festa Junina chegou! Bolos caseiros de milho, fubá cremoso e paçoca fresquinhos da Carula Cake para o seu arraial!',
+      'Olá, {nome}! 🌽🔥 A época de Festa Junina chegou! Bolos caseiros de milho, fubá cremoso e paçoca fresquinhos para o seu arraial!',
   },
   {
     id: 'h4',
@@ -106,7 +107,7 @@ export const UNIVERSAL_HOLIDAYS: UniversalHoliday[] = [
     date2026: '2026-06-21',
     country: 'EUA',
     messageTemplate:
-      'Olá, {nome}! 👔 O Dia dos Pais (EUA) vem aí! ✨ Encomende um bolo delicioso da Carula Cake para presentear seu pai!',
+      'Olá, {nome}! 👔 O Dia dos Pais (EUA) vem aí! ✨ Encomende um bolo delicioso para presentear seu pai!',
   },
   {
     id: 'h5',
@@ -114,7 +115,7 @@ export const UNIVERSAL_HOLIDAYS: UniversalHoliday[] = [
     date2026: '2026-07-26',
     country: 'BR',
     messageTemplate:
-      'Olá, {nome}! 👵👴 O Dia dos Avós está chegando! 💕 Demonstre todo seu amor com os doces e bolos especiais da Carula Cake!',
+      'Olá, {nome}! 👵👴 O Dia dos Avós está chegando! 💕 Demonstre todo seu amor com os doces e bolos especiais!',
   },
   {
     id: 'h6',
@@ -122,7 +123,7 @@ export const UNIVERSAL_HOLIDAYS: UniversalHoliday[] = [
     date2026: '2026-08-09',
     country: 'BR',
     messageTemplate:
-      'Olá, {nome}! 👔 O Dia dos Pais no Brasil está chegando! 🎉 Garanta a sobremesa perfeita com a Carula Cake para o almoço em família!',
+      'Olá, {nome}! 👔 O Dia dos Pais no Brasil está chegando! 🎉 Garanta a sobremesa perfeita para o almoço em família!',
   },
   {
     id: 'h6b',
@@ -130,7 +131,7 @@ export const UNIVERSAL_HOLIDAYS: UniversalHoliday[] = [
     date2026: '2026-10-12',
     country: 'BR',
     messageTemplate:
-      'Olá, {nome}! 🎈🧸 O Dia das Crianças está se aproximando! Que tal encomendar um bolo divertido e colorido da Carula Cake para festejar?',
+      'Olá, {nome}! 🎈🧸 O Dia das Crianças está se aproximando! Que tal encomendar um bolo divertido e colorido para festejar?',
   },
   {
     id: 'h6c',
@@ -146,7 +147,7 @@ export const UNIVERSAL_HOLIDAYS: UniversalHoliday[] = [
     date2026: '2026-10-31',
     country: 'EUA',
     messageTemplate:
-      'Olá, {nome}! 🎃👻 Halloween se aproximando! Encomende cupcakes temáticos e bolos assustadoramente deliciosos na Carula Cake!',
+      'Olá, {nome}! 🎃👻 Halloween se aproximando! Encomende cupcakes temáticos e bolos assustadoramente deliciosos!',
   },
   {
     id: 'h7',
@@ -154,7 +155,7 @@ export const UNIVERSAL_HOLIDAYS: UniversalHoliday[] = [
     date2026: '2026-11-26',
     country: 'EUA',
     messageTemplate:
-      'Olá, {nome}! 🍂 O Thanksgiving está se aproximando! 🥧✨ Deixe sua ceia ainda mais gostosa com os bolos e sobremesas da Carula Cake!',
+      'Olá, {nome}! 🍂 O Thanksgiving está se aproximando! 🥧✨ Deixe sua ceia ainda mais gostosa com os nossos bolos e sobremesas!',
   },
   {
     id: 'h8',
@@ -162,7 +163,7 @@ export const UNIVERSAL_HOLIDAYS: UniversalHoliday[] = [
     date2026: '2026-12-25',
     country: 'Universal',
     messageTemplate:
-      'Olá, {nome}! 🎄✨ O Natal vem aí! Nossas encomendas para a ceia já estão abertas. Reserve seu bolo especial da Carula Cake com antecedência!',
+      'Olá, {nome}! 🎄✨ O Natal vem aí! Nossas encomendas para a ceia já estão abertas. Reserve seu bolo especial com antecedência!',
   },
 ];
 
@@ -203,6 +204,7 @@ const DEFAULT_CUSTOMERS: Customer[] = [
 
 export const CustomersModule: React.FC = () => {
   const { customers: customersDoContexto, isLoading: isLoadingCustomers, error: customersError, addCustomer, updateCustomer, deleteCustomer, fetchCustomerPhoto } = useCustomers();
+  const { userProfile } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -459,13 +461,19 @@ export const CustomersModule: React.FC = () => {
         .replace('{nome}', customer.name)
         .replace('{data_sem_ano}', dateFormatted);
     } else if (isCustomerOwnBirthday) {
-      bodyMsg = `Olá, ${customer.name}! 🎉🎂 Parabéns pelo seu aniversário! Que o seu novo ano venha recheado de paz, saúde e muitas alegrias! 💖✨ Para comemorar essa data tão especial, que tal garantir um bolo bem delicioso e personalizado com a Carula Cake?`;
+      bodyMsg = `Olá, ${customer.name}! 🎉🎂 Parabéns pelo seu aniversário! Que o seu novo ano venha recheado de paz, saúde e muitas alegrias! 💖✨ Para comemorar essa data tão especial, que tal garantir um bolo bem delicioso e personalizado?`;
     } else {
-      bodyMsg = `Olá, ${customer.name}! ✨ Tudo bem? Vi que a data especial (${eventTitle}) está se aproximando (${dateFormatted})! 🎂 Gostaria de garantir sua encomenda de bolo ou doces com a Carula Cake para comemorar essa data?`;
+      bodyMsg = `Olá, ${customer.name}! ✨ Tudo bem? Vi que a data especial (${eventTitle}) está se aproximando (${dateFormatted})! 🎂 Gostaria de garantir sua encomenda de bolo ou doces para comemorar essa data?`;
     }
 
+    // Assinatura com o nome do negocio DE QUEM USA o app (perfil > Nome da
+    // Confeitaria). As mensagens prontas diziam "com a Carula Cake" — o nome
+    // da confeitaria de teste ia para as clientes de todas as usuarias. Sem
+    // nome no perfil, a mensagem sai sem assinatura, e o texto continua
+    // fazendo sentido porque nenhuma frase depende do nome.
+    const nomeNegocio = userProfile?.nome_confeitaria?.trim();
     // Pure message strictly WITHOUT menu Canva link attached (as explicitly requested!)
-    const fullMessage = bodyMsg;
+    const fullMessage = nomeNegocio ? `${bodyMsg}\n\n— ${nomeNegocio}` : bodyMsg;
 
     if (!forceModal && waPreference !== 'ask') {
       executeSendWhatsApp(customer.phone, fullMessage, waPreference);
