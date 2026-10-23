@@ -48,6 +48,7 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { compressImageFile } from '../utils/imageCompression';
+import CampoData from './CampoData';
 
 const NOVO_REGISTRO_REDESIGN_HABILITADO = true;
 
@@ -1387,13 +1388,12 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       salvar pula de volta para este passo (ver [data-step]). */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     <label style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80' }}>Data da entrega</label>
-                    <input
+                    <CampoData
                       id="pedido-data-entrega"
-                      type="date"
                       required
                       value={eventDate}
-                      onChange={(e) => {
-                        setEventDate(e.target.value);
+                      onChange={(v) => {
+                        setEventDate(v);
                         setEventDateTouched(true);
                         if (invalidFieldId === 'pedido-data-entrega') setInvalidFieldId(null);
                       }}
@@ -2050,13 +2050,12 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                 <label className="block text-xs font-bold mb-1" style={{ color: '#3A2350' }}>
                   Data do Lançamento
                 </label>
-                <input
+                <CampoData
                   id="despesa-data"
-                  type="date"
                   required
                   value={date}
-                  onChange={(e) => {
-                    setDate(e.target.value);
+                  onChange={(v) => {
+                    setDate(v);
                     if (invalidFieldId === 'despesa-data') setInvalidFieldId(null);
                   }}
                   className="w-full focus:outline-none"
@@ -2266,11 +2265,10 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                 <label className="block text-xs font-bold text-neutral-700 mb-1">
                   Data do Lançamento
                 </label>
-                <input
-                  type="date"
+                <CampoData
                   required
                   value={date}
-                  onChange={(e) => setDate(e.target.value)}
+                  onChange={setDate}
                   className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-300 rounded-lg text-sm font-medium text-neutral-800 focus:outline-none focus:ring-2 focus:ring-pink-400"
                 />
               </div>

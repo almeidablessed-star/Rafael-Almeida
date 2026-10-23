@@ -31,6 +31,7 @@ import {
   CheckCircle2,
   Package,
 } from 'lucide-react';
+import CampoData from './CampoData';
 
 interface BalancesAndExpensesModuleProps {
   transactions: Transaction[];
@@ -426,12 +427,11 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
               <label style={{ fontSize: '10.5px', fontWeight: 800, color: '#5B4A6B', fontFamily: "'Manrope', sans-serif" }}>
                 Data da Compra
               </label>
-              <input
+              <CampoData
                 id="compra-data"
-                type="date"
                 value={date}
-                onChange={(e) => {
-                  setDate(e.target.value);
+                onChange={(v) => {
+                  setDate(v);
                   if (invalidFieldId === 'compra-data') setInvalidFieldId(null);
                 }}
                 style={{ padding: '11px 13px', background: '#FAF7FA', border: '1px solid rgba(36,27,43,.08)', borderRadius: '14px', fontSize: '11px', color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}

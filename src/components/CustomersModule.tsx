@@ -36,6 +36,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
+import CampoData from './CampoData';
 
 export const MENU_CANVA_URL =
   'https://www.canva.com/design/DAG--k_X91E/3m0qL5l-K1_O9n2KzR6oAQ/view?utm_content=DAG--k_X91E&utm_campaign=designshare&utm_medium=link2&utm_source=unspecified';
@@ -800,10 +801,9 @@ export const CustomersModule: React.FC = () => {
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Aniversário</label>
-                  <input
-                    type="date"
+                  <CampoData
                     value={eventDate}
-                    onChange={(e) => setEventDate(e.target.value)}
+                    onChange={setEventDate}
                     className="border rounded-[10px] px-3 py-3 text-[15px]"
                     style={{ borderColor: 'rgba(58,35,80,0.14)', background: '#FAF7FA', color: '#241B2B' }}
                   />
@@ -851,10 +851,10 @@ export const CustomersModule: React.FC = () => {
                         onChange={(e) => handleUpdateExtraEvent(ev.id, 'title', e.target.value)}
                         className="flex-1 min-w-0 text-sm font-semibold bg-transparent focus:outline-none"
                       />
-                      <input
-                        type="date"
+                      <CampoData
                         value={ev.date}
-                        onChange={(e) => handleUpdateExtraEvent(ev.id, 'date', e.target.value)}
+                        onChange={(v) => handleUpdateExtraEvent(ev.id, 'date', v)}
+                        semIcone
                         className="text-xs font-semibold bg-transparent focus:outline-none"
                         style={{ color: '#A096A6' }}
                       />

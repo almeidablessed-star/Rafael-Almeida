@@ -1,6 +1,7 @@
 import React from 'react';
 import { TimePeriod } from '../types';
 import { Calendar, ChevronDown } from 'lucide-react';
+import CampoData from './CampoData';
 
 interface PeriodSelectorProps {
   period: TimePeriod;
@@ -62,10 +63,9 @@ export const PeriodSelector: React.FC<PeriodSelectorProps> = ({
             <label className="block text-[11px] font-semibold text-neutral-500 mb-1">
               Data Inicial:
             </label>
-            <input
-              type="date"
+            <CampoData
               value={customStartDate}
-              onChange={(e) => onCustomDatesChange(e.target.value, customEndDate)}
+              onChange={(v) => onCustomDatesChange(v, customEndDate)}
               className="w-full px-2.5 py-1.5 bg-slate-50 border border-neutral-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-pink-300"
             />
           </div>
@@ -73,10 +73,9 @@ export const PeriodSelector: React.FC<PeriodSelectorProps> = ({
             <label className="block text-[11px] font-semibold text-neutral-500 mb-1">
               Data Final:
             </label>
-            <input
-              type="date"
+            <CampoData
               value={customEndDate}
-              onChange={(e) => onCustomDatesChange(customStartDate, e.target.value)}
+              onChange={(v) => onCustomDatesChange(customStartDate, v)}
               className="w-full px-2.5 py-1.5 bg-slate-50 border border-neutral-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-pink-300"
             />
           </div>
