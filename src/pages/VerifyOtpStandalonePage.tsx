@@ -33,7 +33,10 @@ export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = (
   const avisarFaltaEmail = () => {
     setAvisoReenvio(null);
     setFaltaEmail(true);
-    emailRef.current?.focus();
+    // Centraliza o campo antes de focar: com o teclado aberto, o campo e o
+    // aviso logo abaixo dele ficam na parte visivel da tela.
+    emailRef.current?.scrollIntoView({ block: 'center' });
+    emailRef.current?.focus({ preventScroll: true });
   };
 
   /**
@@ -378,6 +381,14 @@ export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = (
               onFocus={(e) => e.currentTarget.style.borderColor = '#6E3F72'}
               onBlur={(e) => e.currentTarget.style.borderColor = '#e5e7eb'}
             />
+            {/* Logo abaixo do campo, e nao do botao: o cursor vai para o
+                e-mail e, no celular, o teclado sobe e cobre a parte de baixo
+                da tela. Colado ao campo, o aviso fica a vista junto com ele. */}
+            {faltaEmail && (
+              <p role="alert" style={{ marginTop: '8px', fontSize: '12px', color: '#C85A54', fontWeight: 600, lineHeight: 1.5 }}>
+                Digite seu e-mail aqui para receber um novo código.
+              </p>
+            )}
           </div>
 
           {/* OTP Input */}
@@ -450,13 +461,6 @@ export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = (
               </button>
             );
           })()}
-          {/* Na etapa do e-mail o "Nao recebi" esta escondido: o aviso fica
-              logo abaixo do botao que a pessoa acabou de tocar. */}
-          {faltaEmail && duasEtapas && etapa === 'email' && (
-            <p role="alert" style={{ marginTop: '10px', fontSize: '12px', color: '#C85A54', fontWeight: 600, textAlign: 'center', lineHeight: 1.5 }}>
-              Digite seu e-mail acima para receber um novo código.
-            </p>
-          )}
         </form>
 
         {/* Reenvio. Fica fora do <form> para nao disparar o submit.
@@ -485,11 +489,6 @@ export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = (
           >
             {reenviando ? 'Enviando...' : 'Não recebi o código'}
           </button>
-          {faltaEmail && !(duasEtapas && etapa === 'email') && (
-            <p role="alert" style={{ marginTop: '8px', fontSize: '12px', color: '#C85A54', fontWeight: 600, lineHeight: 1.5 }}>
-              Digite seu e-mail acima para receber um novo código.
-            </p>
-          )}
           {avisoReenvio && (
             <p style={{ marginTop: '8px', fontSize: '12px', color: '#7A6E80', lineHeight: 1.5 }}>
               {avisoReenvio}
