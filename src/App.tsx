@@ -502,12 +502,11 @@ function AppContent() {
     }
   };
 
+  // Sem try/catch aqui de proposito: quem avisa e o BackupModal. Antes este
+  // handler mostrava o erro e engolia, o modal entendia que tinha dado certo e
+  // mostrava "restaurado com sucesso" logo depois do alerta de erro.
   const handleRestoreTransactions = async (txs: Transaction[]) => {
-    try {
-      await substituirTudo(txs);
-    } catch (err: any) {
-      alert(`⚠️ Não foi possível restaurar o backup:\n\n${err?.message || err}`);
-    }
+    await substituirTudo(txs);
   };
 
   const handleClearAll = async () => {
@@ -680,6 +679,7 @@ function AppContent() {
         onClose={() => setIsBackupModalOpen(false)}
         onRestoreTransactions={handleRestoreTransactions}
         onClearAll={handleClearAll}
+        totalAtual={transactions.length}
       />
 
       {/* Login Modal */}

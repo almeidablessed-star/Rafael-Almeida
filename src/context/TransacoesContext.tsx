@@ -368,20 +368,20 @@ export const TransacoesProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
     try {
       setError(null);
-      const { error: delError } = await supabase
-        .from('transacoes')
-        .delete()
-        .eq('usuaria_id', user.id);
-      if (delError) throw delError;
-
-      if (novas.length > 0) {
-        const linhas = novas.map((tx) => ({
-          usuaria_id: user.id,
-          ...mapTransactionToSupabase(tx),
-        }));
-        const { error: insError } = await supabase.from('transacoes').insert(linhas);
-        if (insError) throw insError;
-      }
+      // Apagar e gravar acontecem numa transacao so, dentro da funcao
+      // `restaurar_backup_transacoes` (supabase/migrations/20261023120000_...).
+      // Antes eram duas chamadas: se a gravacao falhasse depois do delete, os
+      // lancamentos ja tinham sumido. Agora qualquer erro desfaz tudo.
+      //
+      // Sem `usuaria_id` nas linhas: a funcao usa sempre `auth.uid()`.
+      // `created_at` vai junto para o lancamento restaurado nao contar como
+      // "lancado hoje" nos numeros da semana.
+      const linhas = novas.map((tx) => ({
+        ...mapTransactionToSupabase(tx),
+        created_at: tx.createdAt ? new Date(tx.createdAt).toISOString() : null,
+      }));
+      const { error: rpcError } = await supabase.rpc('restaurar_backup_transacoes', { linhas });
+      if (rpcError) throw rpcError;
 
       await fetchTransacoes();
     } catch (err: any) {
