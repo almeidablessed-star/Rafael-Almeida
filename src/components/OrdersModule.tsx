@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Transaction, TransactionType } from '../types';
-import { formatCurrency, formatDateBr } from '../utils/formatters';
+import { formatCurrency, formatDateBr, getTodayIso } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
 import { QuotePdfModal } from './QuotePdfModal';
 import {
@@ -36,10 +36,33 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
   const [statusFilter, setStatusFilter] = useState<'todos' | 'pago' | 'pendente'>('todos');
   const [quoteTx, setQuoteTx] = useState<Transaction | null>(null);
 
+  const [vista, setVista] = useState<'proximos' | 'historico'>('proximos');
+
   // Filter sales/orders only
   const sales = transactions.filter((t) => t.type === 'venda');
 
-  const filteredSales = sales.filter((s) => {
+  // Proximos x Historico. Antes a lista mostrava todo pedido ja lancado, para
+  // sempre, e a tela so crescia. Agora o pedido vai para o Historico no dia
+  // SEGUINTE ao da entrega (no proprio dia ele ainda precisa estar a vista) —
+  // a nao ser que ainda falte receber dinheiro dele: pedido atrasado sem
+  // pagamento continua em Proximos, marcado, para nao ser esquecido.
+  // Nada e apagado nem gravado: e so um filtro da tela pela data da entrega.
+  const hoje = getTodayIso();
+  const faltaReceber = (s: Transaction) =>
+    s.paymentStatus === 'pendente' ||
+    (!!s.signalValue && Number(s.signalValue) < (s.totalValue || 0));
+  const estaNoHistorico = (s: Transaction) => !!s.date && s.date < hoje && !faltaReceber(s);
+  const proximos = sales.filter((s) => !estaNoHistorico(s));
+  const historico = sales.filter(estaNoHistorico);
+  // Proximos: a entrega mais perto primeiro. Historico: o mais recente primeiro.
+  const salesDaVista = (vista === 'historico' ? historico : proximos)
+    .slice()
+    .sort((a, b) => {
+      const ordem = (a.date || '').localeCompare(b.date || '');
+      return vista === 'historico' ? -ordem : ordem;
+    });
+
+  const filteredSales = salesDaVista.filter((s) => {
     const matchesSearch =
       s.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (s.customerName && s.customerName.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -69,8 +92,10 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
       return acc + remainingAmount;
     }, 0);
 
-  const pendingCount = sales.filter((s) => s.paymentStatus === 'pendente').length;
-  const paidCount = sales.filter((s) => (s.paymentStatus || 'pago') === 'pago').length;
+  // Contagens dos filtros de status: so da vista aberta, para o numero bater
+  // com os cards que aparecem embaixo.
+  const pendingCount = salesDaVista.filter((s) => s.paymentStatus === 'pendente').length;
+  const paidCount = salesDaVista.filter((s) => (s.paymentStatus || 'pago') === 'pago').length;
 
   return (
     <div className="space-y-4 animate-fadeIn pb-8">
@@ -218,6 +243,37 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
           }}
         >
 
+      {/* Proximos / Historico */}
+      <div
+        className="grid grid-cols-2"
+        style={{ background: '#EDE5EC', borderRadius: '999px', padding: '4px', gap: '4px' }}
+      >
+        {([
+          { id: 'proximos', label: 'Próximos', total: proximos.length },
+          { id: 'historico', label: 'Histórico', total: historico.length },
+        ] as const).map((op) => (
+          <button
+            key={op.id}
+            type="button"
+            onClick={() => setVista(op.id)}
+            className="transition-all cursor-pointer"
+            style={{
+              fontSize: '12px',
+              fontWeight: vista === op.id ? 800 : 600,
+              fontFamily: "'Manrope', sans-serif",
+              color: vista === op.id ? '#3A2350' : '#7A6E80',
+              background: vista === op.id ? '#fff' : 'transparent',
+              boxShadow: vista === op.id ? '0 4px 10px rgba(58,35,80,.1)' : 'none',
+              border: 'none',
+              borderRadius: '999px',
+              padding: '9px 0',
+            }}
+          >
+            {op.label} ({op.total})
+          </button>
+        ))}
+      </div>
+
       {/* Search & Filters */}
       <div className="flex flex-col gap-[11px]">
         <div className="relative">
@@ -257,7 +313,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
               marginBottom: statusFilter === 'todos' ? '-1px' : '0',
             }}
           >
-            Todos ({sales.length})
+            Todos ({salesDaVista.length})
           </button>
 
           <button
@@ -305,7 +361,28 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
 
       {/* Orders List */}
       <div className="space-y-2.5">
-        {filteredSales.length === 0 ? (
+        {filteredSales.length === 0 && sales.length > 0 ? (
+          // Ha pedidos, so nao nesta vista (ou na busca/filtro): o convite
+          // "Lance seu primeiro pedido" abaixo seria falso aqui.
+          <div
+            className="text-center"
+            style={{
+              background: '#fff',
+              border: '1px solid rgba(58,35,80,0.1)',
+              borderRadius: '20px',
+              padding: '28px 20px',
+              fontSize: '13px',
+              color: '#7A6E80',
+              fontFamily: "'Manrope', sans-serif",
+            }}
+          >
+            {searchTerm || statusFilter !== 'todos'
+              ? 'Nenhum pedido encontrado com esse filtro.'
+              : vista === 'historico'
+              ? 'Nenhum pedido no histórico ainda. Os pedidos entregues e pagos vêm para cá no dia seguinte à entrega.'
+              : 'Nenhum pedido para os próximos dias.'}
+          </div>
+        ) : filteredSales.length === 0 ? (
           <div
             className="flex flex-col items-center gap-2.5 text-center"
             style={{
@@ -419,6 +496,14 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                           ✅ Pago
                         </span>
                       )}
+
+                      {/* So acontece em Proximos: a entrega ja passou e o
+                          pedido so continua aqui porque falta receber. */}
+                      {!!tx.date && tx.date < hoje && faltaReceber(tx) && (
+                        <span className="rounded-full flex items-center gap-1" style={{ fontSize: '9px', fontWeight: 800, color: '#7A2E3A', background: '#F6D5DA', padding: '5px 10px', fontFamily: "'Manrope', sans-serif" }}>
+                          Atrasado · falta receber
+                        </span>
+                      )}
                     </div>
 
                     <div style={{ fontSize: '10px', color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
@@ -456,7 +541,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                         <button
                           onClick={(e) => { e.stopPropagation(); onTogglePaymentStatus(tx); }}
                           className="rounded-full transition-all flex items-center gap-1 cursor-pointer active:scale-95 hover:translate-y-[-2px]"
-                          style={{ fontSize: '10px', fontWeight: 800, color: '#26402F', background: '#A9D8B8', padding: '7px 12px', fontFamily: "'Manrope', sans-serif" }}
+                          style={{ fontSize: '9px', fontWeight: 800, color: '#26402F', background: '#A9D8B8', padding: '5px 10px', fontFamily: "'Manrope', sans-serif" }}
                           title="Clique para marcar este pedido como PAGO"
                         >
                           <span>✅ Pago</span>
@@ -465,7 +550,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                         <button
                           onClick={(e) => { e.stopPropagation(); onTogglePaymentStatus(tx); }}
                           className="rounded-full transition-all flex items-center gap-1 cursor-pointer active:scale-95 hover:translate-y-[-2px]"
-                          style={{ fontSize: '10px', fontWeight: 700, color: '#5B4A2E', background: '#F0E2C8', padding: '7px 12px', fontFamily: "'Manrope', sans-serif" }}
+                          style={{ fontSize: '9px', fontWeight: 700, color: '#5B4A2E', background: '#F0E2C8', padding: '5px 10px', fontFamily: "'Manrope', sans-serif" }}
                           title="Clique para alterar este pedido para PENDENTE"
                         >
                           <span>Pendente</span>
