@@ -614,7 +614,7 @@ function AppContent() {
 
         {activeTab === 'custos' && (
           <CostsModule
-            transactions={filteredTransactions}
+            transactions={transacoesVisiveis}
             onOpenAddModal={(type) => handleOpenAddModal(type || 'custo')}
             onEditTransaction={handleOpenEditModal}
             onDeleteTransaction={handleRequestDelete}

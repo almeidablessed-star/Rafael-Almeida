@@ -4,6 +4,9 @@ import { formatCurrency, formatDateBr, getCostCategoryLabel, getLaborPeriodLabel
 import { useCurrency } from '../context/CurrencyContext';
 import { Receipt, Sparkles, Search, Calendar, Trash2, Edit3, Tag, Users, PlusCircle, ArrowRight } from 'lucide-react';
 import { MinhaEmpresaCard } from './MinhaEmpresaCard';
+import { useCosts } from '../context/CostsContext';
+import { calculateWeeklyBalances } from '../utils/financialEngine';
+import { rotulos } from '../utils/periodoReset';
 
 interface CostsModuleProps {
   transactions: Transaction[];
@@ -32,15 +35,21 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
   );
   const laborTxs = transactions.filter((t) => t.type === 'maodeobra');
 
-  const totalCustos = costAndInvTxs
-    .filter((t) => t.type === 'custo' || t.category === 'fixo' || t.category === 'variavel')
-    .reduce((acc, curr) => acc + (curr.totalValue || 0), 0);
-
-  const totalInvestimentos = costAndInvTxs
-    .filter((t) => t.type === 'investimento' || t.category === 'investimento')
-    .reduce((acc, curr) => acc + (curr.totalValue || 0), 0);
-
-  const totalLabor = laborTxs.reduce((acc, curr) => acc + (curr.totalValue || 0), 0);
+  // A lista abaixo recebe TODOS os gastos avulsos. Antes ela vinha recortada
+  // pelo mes da data ESCOLHIDA no lancamento, enquanto o Inicio desconta pela
+  // data em que foi LANCADO: um gasto lancado hoje com data do mes que vem
+  // tirava dinheiro do saldo e nao aparecia em lista nenhuma para conferir ou
+  // editar.
+  //
+  // Os totais usam o mesmo calculo do Inicio (`calculateWeeklyBalances`, mesmo
+  // periodo de reset), para que o numero daqui seja o mesmo que foi descontado
+  // la — e nao uma segunda conta que pode discordar.
+  const { administrativeCosts } = useCosts();
+  const periodoReset = administrativeCosts?.periodoReset ?? 'semanal';
+  const gastosDoPeriodo = calculateWeeklyBalances(transactions, [], periodoReset);
+  const totalInvestimentos = gastosDoPeriodo.investimento.totalSpent;
+  const totalCustos = gastosDoPeriodo.custoEInvestimento.totalSpent - totalInvestimentos;
+  const totalLabor = gastosDoPeriodo.maodeobra.totalSpent;
 
   const filteredItems = (() => {
     if (activeTab === 'maodeobra') {
@@ -213,6 +222,9 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
             </div>
           ))}
         </div>
+        <p style={{ fontSize: '10px', color: '#9A8FA0', margin: 0 }}>
+          Gasto {rotulos(periodoReset).nessePeriodo}, contando pelo dia em que foi lançado — o mesmo valor descontado no Início.
+        </p>
 
         {/* Action Button */}
         <button
