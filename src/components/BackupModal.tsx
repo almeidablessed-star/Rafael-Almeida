@@ -102,6 +102,22 @@ export const validarBackup = (dado: unknown): ResultadoValidacaoBackup => {
 
 const dataBr = (iso: string) => iso.split('-').reverse().join('/');
 
+/** Acima disto a restauracao pode nao passar de uma vez (medido em 23/10/2026:
+ * 22 MB passou; 35 MB foi barrado no gateway; 52 MB estourou o tempo do banco). */
+const LIMITE_AVISO_BYTES = 20 * 1024 * 1024;
+
+/**
+ * Falha sem resposta do servidor (rede caiu, gateway recusou sem cabecalho).
+ *
+ * Nesse caso o app NAO sabe se o banco chegou a gravar: a conexao pode ter
+ * caido depois do commit. Erro que o banco devolveu traz `code` (ex.: 57014
+ * tempo esgotado, P0001 recusa da funcao) e prova que nada foi gravado. Os
+ * textos sao os de cada navegador: Chrome "Failed to fetch", Safari "Load
+ * failed", Firefox "NetworkError when attempting to fetch resource".
+ */
+const ehFalhaSemResposta = (err: any) =>
+  !err?.code && /failed to fetch|load failed|networkerror/i.test(String(err?.message || err));
+
 export const BackupModal: React.FC<BackupModalProps> = ({
   isOpen,
   onExportTransactions,
@@ -114,6 +130,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
   const [isExporting, setIsExporting] = useState(false);
   // Arquivo ja conferido, esperando a confeiteira confirmar a troca.
   const [restauracaoPendente, setRestauracaoPendente] = useState<Transaction[] | null>(null);
+  const [tamanhoArquivo, setTamanhoArquivo] = useState(0);
   const [isRestoring, setIsRestoring] = useState(false);
 
   if (!isOpen) return null;
@@ -164,6 +181,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
         alert(resultado.erro);
         return;
       }
+      setTamanhoArquivo(file.size);
       setRestauracaoPendente(resultado.itens);
     };
     reader.readAsText(file);
@@ -179,9 +197,14 @@ export const BackupModal: React.FC<BackupModalProps> = ({
       setRestauracaoPendente(null);
       onClose();
     } catch (err: any) {
-      // A troca acontece numa transacao so no banco: se falhou, nada foi
-      // apagado.
-      alert(`Não foi possível restaurar o backup. Seus lançamentos continuam como estavam.\n\n${err?.message || err}`);
+      if (ehFalhaSemResposta(err)) {
+        // Sem resposta nao da para afirmar que nada mudou.
+        alert('Não foi possível confirmar a restauração. Confira seus lançamentos antes de tentar de novo.');
+      } else {
+        // O banco respondeu com erro, e a troca e uma transacao so: nada foi
+        // apagado.
+        alert(`Não foi possível restaurar o backup. Seus lançamentos continuam como estavam.\n\n${err?.message || err}`);
+      }
     } finally {
       setIsRestoring(false);
     }
@@ -250,6 +273,11 @@ export const BackupModal: React.FC<BackupModalProps> = ({
               )}
               . Os atuais serão apagados e trocados pelos do arquivo.
             </p>
+            {tamanhoArquivo > LIMITE_AVISO_BYTES && (
+              <p className="text-xs text-amber-900 bg-amber-50 border border-amber-200 rounded-lg p-3 leading-relaxed">
+                Este backup é grande e pode não restaurar de uma vez. Se falhar, nada será apagado.
+              </p>
+            )}
             <p className="text-xs text-amber-900 bg-amber-50 border border-amber-200 rounded-lg p-3 leading-relaxed">
               Os pedidos restaurados perdem o vínculo com o estoque: se você cancelar um deles
               depois, os insumos não voltam sozinhos para o estoque.
