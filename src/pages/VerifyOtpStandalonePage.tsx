@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { Lock, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
@@ -24,6 +24,18 @@ export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = (
   const [reenviando, setReenviando] = useState(false);
   const [avisoReenvio, setAvisoReenvio] = useState<string | null>(null);
 
+  // Campo de e-mail vazio ao pedir codigo. Antes o botao "Nao recebi o codigo"
+  // simplesmente nao fazia nada, e o "Enviar codigo" ficava apagado sem dizer
+  // por que. So depende do campo vazio, nunca da resposta do servidor: nao
+  // revela quem e cliente.
+  const [faltaEmail, setFaltaEmail] = useState(false);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const avisarFaltaEmail = () => {
+    setAvisoReenvio(null);
+    setFaltaEmail(true);
+    emailRef.current?.focus();
+  };
+
   /**
    * Duas etapas, SO no "esqueci minha senha".
    *
@@ -40,14 +52,20 @@ export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = (
   const [etapa, setEtapa] = useState<'email' | 'codigo'>(duasEtapas ? 'email' : 'codigo');
 
   const naoRecebi = async () => {
-    if (!email) return;
+    // trim(): so espacos tambem conta como vazio (a funcao recebia "" e a tela
+    // dizia "enviamos" sem nada ter sido enviado).
+    const emailLimpo = email.trim();
+    if (!emailLimpo) {
+      avisarFaltaEmail();
+      return;
+    }
     setReenviando(true);
     setAvisoReenvio(null);
     try {
       await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/resend-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email }),
+        body: JSON.stringify({ email: emailLimpo }),
       });
     } catch {
       // Silencio de proposito: mesmo uma falha de rede nao deve virar sinal.
@@ -66,7 +84,10 @@ export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = (
    */
   const enviarCodigo = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return;
+    if (!email.trim()) {
+      avisarFaltaEmail();
+      return;
+    }
     setError(null);
     await naoRecebi();
     setEtapa('codigo');
@@ -75,7 +96,7 @@ export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = (
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email || !otp || otp.length !== 6) {
+    if (!email.trim() || !otp || otp.length !== 6) {
       setError('Digite seu e-mail e o código de 6 dígitos');
       return;
     }
@@ -88,7 +109,7 @@ export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = (
       const response = await fetch('https://inqyobsjuztztvafpzxn.supabase.co/functions/v1/swift-responder', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, code: otp }),
+        body: JSON.stringify({ email: email.trim(), code: otp }),
       });
 
       const data = await response.json();
@@ -336,9 +357,13 @@ export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = (
               Seu E-mail
             </label>
             <input
+              ref={emailRef}
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setFaltaEmail(false);
+              }}
               placeholder="seu@email.com"
               style={{
                 width: '100%',
@@ -396,9 +421,11 @@ export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = (
           {/* Submit Button */}
           {(() => {
             const enviando = duasEtapas && etapa === 'email';
+            // "Enviar codigo" fica clicavel com o campo vazio: o clique mostra
+            // o aviso em vez de o botao ficar apagado sem explicacao.
             const bloqueado = enviando
-              ? (reenviando || !email)
-              : (isLoading || !email || otp.length !== 6);
+              ? reenviando
+              : (isLoading || !email.trim() || otp.length !== 6);
             return (
               <button
                 type="submit"
@@ -423,6 +450,13 @@ export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = (
               </button>
             );
           })()}
+          {/* Na etapa do e-mail o "Nao recebi" esta escondido: o aviso fica
+              logo abaixo do botao que a pessoa acabou de tocar. */}
+          {faltaEmail && duasEtapas && etapa === 'email' && (
+            <p role="alert" style={{ marginTop: '10px', fontSize: '12px', color: '#C85A54', fontWeight: 600, textAlign: 'center', lineHeight: 1.5 }}>
+              Digite seu e-mail acima para receber um novo código.
+            </p>
+          )}
         </form>
 
         {/* Reenvio. Fica fora do <form> para nao disparar o submit.
@@ -451,6 +485,11 @@ export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = (
           >
             {reenviando ? 'Enviando...' : 'Não recebi o código'}
           </button>
+          {faltaEmail && !(duasEtapas && etapa === 'email') && (
+            <p role="alert" style={{ marginTop: '8px', fontSize: '12px', color: '#C85A54', fontWeight: 600, lineHeight: 1.5 }}>
+              Digite seu e-mail acima para receber um novo código.
+            </p>
+          )}
           {avisoReenvio && (
             <p style={{ marginTop: '8px', fontSize: '12px', color: '#7A6E80', lineHeight: 1.5 }}>
               {avisoReenvio}
