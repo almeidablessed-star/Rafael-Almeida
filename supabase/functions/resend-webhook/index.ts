@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { Resend } from 'https://cdn.jsdelivr.net/npm/resend@latest/+esm';
+import { Resend } from 'https://cdn.jsdelivr.net/npm/resend@6.34.1/+esm';
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
@@ -124,7 +124,7 @@ async function avisarFalhaDeEmail(
     ];
 
     await resend.emails.send({
-      from: `Carula Confeitaria <${remetente}>`,
+      from: `Carula App <${remetente}>`,
       to: alerta,
       subject: '[Carula] E-mail nao entregue (destinatario_assincrono)',
       text: linhas.join('\n'),

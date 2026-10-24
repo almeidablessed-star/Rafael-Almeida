@@ -25,6 +25,7 @@ const supabase = createClient(
 const ORIGENS_PERMITIDAS = [
   Deno.env.get('APP_URL'),
   'https://rafael-almeida-nine.vercel.app',
+  'https://app.carulaconfeitaria.com.br',
   'https://carulaconfeitaria.com.br',
   'https://www.carulaconfeitaria.com.br',
   'http://localhost:3000',

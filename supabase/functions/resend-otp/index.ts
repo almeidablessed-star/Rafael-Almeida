@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { Resend } from 'https://cdn.jsdelivr.net/npm/resend@latest/+esm';
+import { Resend } from 'https://cdn.jsdelivr.net/npm/resend@6.34.1/+esm';
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
@@ -70,7 +70,7 @@ async function avisarFalhaDeEmail(
     ];
 
     await resend.emails.send({
-      from: `Carula Confeitaria <${remetente}>`,
+      from: `Carula App <${remetente}>`,
       to: alerta,
       subject: `[Carula] E-mail nao entregue (${classe})`,
       text: linhas.join('\n'),
@@ -174,26 +174,31 @@ async function acharUsuaria(email: string): Promise<{ id: string; email: string 
   return null;
 }
 
+/** Para onde vao as respostas aos e-mails: o dominio do remetente nao tem caixa de entrada. */
+const RESPONDER_PARA = 'suportecarulaapp@gmail.com';
+
 function corpoDoEmail(codigo: string, appUrl: string): string {
   return `
-    <div style="font-family: 'Manrope', sans-serif; max-width: 500px; margin: 0 auto;">
+    <div style="font-family: 'Manrope', Arial, sans-serif; max-width: 500px; margin: 0 auto;">
       <div style="background: linear-gradient(140deg, #6E3F72, #A85E86); padding: 20px; border-radius: 20px 20px 0 0; text-align: center;">
-        <h1 style="color: white; margin: 0; font-size: 24px;">🎂 Carula Confeitaria</h1>
+        <h1 style="color: white; margin: 0; font-size: 24px;">Carula App</h1>
       </div>
       <div style="background: white; padding: 40px; border-radius: 0 0 20px 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
-        <h2 style="color: #241B2B; margin-top: 0;">Seu novo código</h2>
-        <div style="background: #f5f5f5; padding: 30px; border-radius: 12px; text-align: center; margin: 30px 0;">
+        <p style="color: #241B2B; font-size: 16px; line-height: 1.6; margin-top: 0;">Aqui está o código que você pediu:</p>
+        <div style="background: #f5f5f5; padding: 30px; border-radius: 12px; text-align: center; margin: 24px 0;">
           <p style="color: #999; font-size: 12px; margin: 0 0 10px 0;">CÓDIGO DE ACESSO</p>
           <p style="color: #6E3F72; font-size: 48px; font-weight: bold; margin: 0; letter-spacing: 8px;">${codigo}</p>
-          <p style="color: #999; font-size: 12px; margin: 10px 0 0 0;">Este código expira em 30 minutos</p>
+          <p style="color: #999; font-size: 12px; margin: 10px 0 0 0;">Vale por 30 minutos</p>
         </div>
         <p style="color: #666; line-height: 1.6;">
-          <strong>Use sempre o código mais recente.</strong> Se você pediu mais de um,
-          os anteriores deixaram de valer.
+          <strong>Use sempre o código mais recente:</strong> os anteriores deixaram de valer.
         </p>
-        <p style="color: #666; line-height: 1.6;">Acesse <strong>${appUrl}</strong> e digite o código.</p>
-        <p style="color: #999; font-size: 12px; text-align: center; margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
-          Se você não pediu este código, ignore este e-mail.
+        <p style="color: #666; line-height: 1.6;">Abra o Carula App e digite o código.</p>
+        <p style="text-align: center; margin: 28px 0;">
+          <a href="${appUrl}" style="display: inline-block; background: #4F2E5E; color: #ffffff; text-decoration: none; font-weight: bold; padding: 14px 28px; border-radius: 12px;">Abrir o Carula App</a>
+        </p>
+        <p style="color: #6B6B6B; font-size: 12px; text-align: center; margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
+          Não foi você que pediu? Pode ignorar: sua senha continua a mesma.
         </p>
       </div>
     </div>
@@ -271,9 +276,10 @@ Deno.serve(async (req) => {
     const appUrl = Deno.env.get('APP_URL') || 'https://rafael-almeida-nine.vercel.app';
     const envio = resend.emails
       .send({
-        from: `Carula Confeitaria <${Deno.env.get('RESEND_FROM')}>`,
+        from: `Carula App <${Deno.env.get('RESEND_FROM')}>`,
         to: usuaria.email,
-        subject: 'Seu novo código de acesso - Carula Confeitaria',
+        replyTo: RESPONDER_PARA,
+        subject: 'Seu novo código do Carula App',
         html: corpoDoEmail(codigo, appUrl),
       })
       .then(async (r: any) => {
