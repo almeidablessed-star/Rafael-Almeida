@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 /**
  * Dropdown no visual do app, substituindo o `<select>` nativo.
@@ -79,13 +80,64 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
   const rotulo = selecionada?.label ?? placeholder;
   const semEscolha = !selecionada;
 
-  /** Fecha ao clicar fora — mesmo padrao do seletor de moeda original. */
+  /**
+   * Posicao da lista na TELA, nao dentro do campo.
+   *
+   * A lista era `position: absolute` dentro do proprio campo, e qualquer
+   * cartao com `overflow: hidden` em volta a cortava: no cadastro de produto,
+   * no celular, a lista de unidades abria dentro do cartao do preco e so o
+   * "g" e meio "kg" ficavam visiveis — as outras unidades nao dava para tocar
+   * (relato do Rafael, 25/10/2026). Agora ela vai num portal no <body>, com
+   * `position: fixed` calculado a partir do botao, e abre para CIMA quando nao
+   * cabe embaixo.
+   */
+  const [posicao, setPosicao] = useState<React.CSSProperties | null>(null);
+
+  useLayoutEffect(() => {
+    if (!aberto) {
+      setPosicao(null);
+      return;
+    }
+    const calcular = () => {
+      const caixa = caixaRef.current;
+      if (!caixa) return;
+      const r = caixa.getBoundingClientRect();
+      const margem = 8;
+      const alturaDesejada = Math.min(280, options.length * 46 + 12);
+      const espacoAbaixo = window.innerHeight - r.bottom - margem;
+      const espacoAcima = r.top - margem;
+      const paraCima = espacoAbaixo < alturaDesejada && espacoAcima > espacoAbaixo;
+      const maxHeight = Math.max(120, Math.min(280, (paraCima ? espacoAcima : espacoAbaixo) - 6));
+      setPosicao({
+        ...(paraCima ? { bottom: window.innerHeight - r.top + 6 } : { top: r.bottom + 6 }),
+        // Chip: alinhada pela direita do botao, como antes. Campo normal:
+        // mesma largura do campo.
+        ...(chip
+          ? { right: Math.max(margem, window.innerWidth - r.right), minWidth: '96px' }
+          : { left: r.left, width: r.width }),
+        maxHeight,
+      });
+    };
+    calcular();
+    // A tela rola por baixo (formulario em tela cheia) e o teclado do celular
+    // muda a altura: a lista acompanha o botao em vez de ficar parada.
+    window.addEventListener('scroll', calcular, true);
+    window.addEventListener('resize', calcular);
+    return () => {
+      window.removeEventListener('scroll', calcular, true);
+      window.removeEventListener('resize', calcular);
+    };
+  }, [aberto, chip, options.length]);
+
+  /** Fecha ao clicar fora — mesmo padrao do seletor de moeda original. A
+   * lista agora vive fora da caixa (portal), entao tocar nela tambem conta
+   * como "dentro". */
   useEffect(() => {
     if (!aberto) return;
     const aoClicarFora = (e: MouseEvent) => {
-      if (caixaRef.current && !caixaRef.current.contains(e.target as Node)) {
-        setAberto(false);
-      }
+      const alvo = e.target as Node;
+      if (caixaRef.current?.contains(alvo) || listaRef.current?.contains(alvo)) return;
+      setAberto(false);
     };
     document.addEventListener('mousedown', aoClicarFora);
     return () => document.removeEventListener('mousedown', aoClicarFora);
@@ -226,18 +278,18 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
         )}
       </button>
 
-      {aberto && !disabled && (
+      {aberto && !disabled && posicao && createPortal(
         <div
           ref={listaRef}
           role="listbox"
           aria-label={ariaLabel}
           style={{
-            position: 'absolute',
-            top: 'calc(100% + 6px)',
-            left: chip ? 'auto' : 0,
-            right: 0,
-            minWidth: chip ? '96px' : undefined,
-            zIndex: 50,
+            position: 'fixed',
+            ...posicao,
+            // Acima dos modais do app (z-[99999]), de onde quase todo
+            // seletor e aberto — mesmo nivel do calendario (CampoData).
+            zIndex: 100000,
+            fontFamily: "'Manrope', sans-serif",
             background: '#FFFFFF',
             border: '1px solid #E6E1DB',
             borderRadius: '12px',
@@ -246,8 +298,8 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
             flexDirection: 'column',
             gap: '2px',
             boxShadow: '0 20px 36px rgba(58,35,80,0.18)',
-            // Lista longa rola dentro de si em vez de vazar pela tela.
-            maxHeight: '280px',
+            // Lista longa rola dentro de si em vez de vazar pela tela
+            // (`maxHeight` vem de `posicao`, conforme o espaco disponivel).
             overflowY: 'auto',
           }}
         >
@@ -285,7 +337,8 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
               </div>
             );
           })}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
