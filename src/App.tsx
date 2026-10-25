@@ -314,11 +314,18 @@ function AppContent() {
     setIsFormModalOpen(true);
   };
 
-  const handleAddCompra = async (txData: Omit<Transaction, 'id' | 'createdAt'>) => {
+  /**
+   * Devolve se gravou. A aba Compras limpava o formulario e mostrava "Despesa
+   * lancada!" sem saber o resultado: quando o banco recusava, a pessoa via o
+   * alerta e o sucesso ao mesmo tempo, e o que tinha digitado sumia.
+   */
+  const handleAddCompra = async (txData: Omit<Transaction, 'id' | 'createdAt'>): Promise<boolean> => {
     try {
       await addTransacao(txData);
+      return true;
     } catch (err: any) {
-      alert(`⚠️ Não foi possível gravar o lançamento:\n\n${err?.message || err}`);
+      alert(`⚠️ Não foi possível gravar o lançamento:\n\n${err?.message || err}\n\nNada foi salvo.`);
+      return false;
     }
   };
 
@@ -370,21 +377,30 @@ function AppContent() {
     );
   };
 
+  /**
+   * Devolve se o lancamento foi gravado. A janela de lancamento fechava logo
+   * depois de chamar isto, sem esperar: quando o banco recusava, aparecia o
+   * alerta, mas a janela ja tinha fechado e levado embora tudo o que a pessoa
+   * digitou. Agora ela so fecha com `true`.
+   *
+   * `true` tambem quando o pedido gravou e so a baixa de estoque deu aviso: o
+   * pedido existe, e reabrir a janela levaria a grava-lo duas vezes.
+   */
   const handleSaveTransaction = async (
     txData: Omit<Transaction, 'id' | 'createdAt'>,
     editingId?: string
-  ) => {
+  ): Promise<boolean> => {
     if (editingId) {
       const existing = transactions.find((t) => t.id === editingId);
-      if (!existing) return;
+      if (!existing) return false;
 
       const updated: Transaction = { ...existing, ...txData };
 
       try {
         await updateTransacao(editingId, updated);
       } catch (err: any) {
-        alert(`⚠️ Não foi possível salvar o lançamento:\n\n${err?.message || err}`);
-        return;
+        alert(`⚠️ Não foi possível salvar o lançamento:\n\n${err?.message || err}\n\nNada foi alterado.`);
+        return false;
       }
 
       // Vendas reequilibram o estoque na edicao: devolve o que a versao antiga
@@ -437,23 +453,24 @@ function AppContent() {
           );
         }
       }
-      return;
+      return true;
     }
 
     // Validação defensiva: se é venda mas fichaItems chegou vazio, bloqueia
     // submit e avisa. Impede que a venda seja registrada sem dar baixa no estoque.
     if (txData.type === 'venda' && (!txData.fichaItems || txData.fichaItems.length === 0)) {
       alert('⚠️ Erro: nenhum produto foi vinculado à ficha técnica. Verifique se os produtos estão cadastrados e tente novamente.');
-      return;
+      return false;
     }
 
     if (txData.type !== 'venda') {
       try {
         await addTransacao(txData);
+        return true;
       } catch (err: any) {
-        alert(`⚠️ Não foi possível gravar o lançamento:\n\n${err?.message || err}`);
+        alert(`⚠️ Não foi possível gravar o lançamento:\n\n${err?.message || err}\n\nNada foi salvo.`);
+        return false;
       }
-      return;
     }
 
     // A venda e gravada ANTES da baixa, de proposito. Se a rede cair no meio,
@@ -464,7 +481,7 @@ function AppContent() {
       criada = await addTransacao(txData);
     } catch (err: any) {
       alert(`⚠️ Não foi possível gravar o pedido:\n\n${err?.message || err}\n\nNada foi salvo.`);
-      return;
+      return false;
     }
 
     try {
@@ -479,6 +496,7 @@ function AppContent() {
           `Nenhum insumo foi debitado. Confira a aba Produtos.`
       );
     }
+    return true;
   };
 
   const handleRequestDelete = (tx: Transaction) => {
@@ -637,9 +655,10 @@ function AppContent() {
           setIsFormModalOpen(false);
           setPrefilledDate(null);
         }}
-        onSave={(tx, editingId) => {
-          handleSaveTransaction(tx, editingId);
-          setPrefilledDate(null);
+        onSave={async (tx, editingId) => {
+          const gravou = await handleSaveTransaction(tx, editingId);
+          if (gravou) setPrefilledDate(null);
+          return gravou;
         }}
       />
 

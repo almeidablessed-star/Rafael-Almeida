@@ -109,7 +109,11 @@ interface TransactionFormModalProps {
   prefilledDate?: string | null;
   fichas: FichaTecnica[]; // Fichas já carregadas do contexto App
   onClose: () => void;
-  onSave: (tx: Omit<Transaction, 'id' | 'createdAt'>, editingId?: string) => void;
+  /**
+   * Devolve se gravou. A janela so fecha com `true`: antes fechava sem esperar,
+   * e um lancamento recusado pelo banco levava embora tudo o que foi digitado.
+   */
+  onSave: (tx: Omit<Transaction, 'id' | 'createdAt'>, editingId?: string) => Promise<boolean>;
 }
 
 export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
@@ -1018,21 +1022,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       // reescritas (a edicao deles fica bloqueada). Eles seguem funcionando.
       const notesStr = notes.trim();
 
-      // Trigger celebration confetti on new Sale!
-      if (!editingTransaction) {
-        try {
-          confetti({
-            particleCount: 50,
-            spread: 60,
-            origin: { y: 0.7 },
-            colors: ['#34d399', '#f472b6', '#fbbf24'],
-          });
-        } catch (e) {
-          // Safe fail
-        }
-      }
-
-      onSave(
+      const pedidoGravou = await onSave(
         {
           type: 'venda',
           description: descStr,
@@ -1130,6 +1120,24 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
         editingTransaction?.id
       );
 
+      // Recusado pelo banco: o alerta com o motivo ja apareceu (App); a janela
+      // fica aberta com tudo o que foi preenchido, para tentar de novo.
+      if (!pedidoGravou) return;
+
+      // Confete so depois que o pedido gravou de verdade.
+      if (!editingTransaction) {
+        try {
+          confetti({
+            particleCount: 50,
+            spread: 60,
+            origin: { y: 0.7 },
+            colors: ['#34d399', '#f472b6', '#fbbf24'],
+          });
+        } catch (e) {
+          // Safe fail
+        }
+      }
+
       onClose();
       return;
     }
@@ -1155,7 +1163,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
     // comparava com 'venda', uma condicao que nunca podia ser verdadeira.
     const parsedSignalValue = undefined;
 
-    onSave(
+    const gravou = await onSave(
       {
         type,
         description: description.trim(),
@@ -1171,6 +1179,8 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       },
       editingTransaction?.id
     );
+
+    if (!gravou) return;
 
     onClose();
     setIsSaving(false);

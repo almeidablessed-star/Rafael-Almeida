@@ -125,7 +125,7 @@ const getThresholdDelta = (unit: string): number => {
 interface ProdutosModuleProps {
   /** Repassados direto para o BalancesAndExpensesModule embutido na aba Compras. */
   transactions: Transaction[];
-  onAddTransaction: (txData: Omit<Transaction, 'id' | 'createdAt'>) => void;
+  onAddTransaction: (txData: Omit<Transaction, 'id' | 'createdAt'>) => Promise<boolean>;
   onEditTransaction: (tx: Transaction) => void;
   onDeleteTransaction: (tx: Transaction) => void;
   /**

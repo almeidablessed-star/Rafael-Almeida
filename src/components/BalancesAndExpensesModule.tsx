@@ -54,7 +54,8 @@ const NOTA_POR_COFRINHO: Record<CofrinhoDeCompra, string> = {
 
 interface BalancesAndExpensesModuleProps {
   transactions: Transaction[];
-  onAddTransaction: (txData: Omit<Transaction, 'id' | 'createdAt'>) => void;
+  /** Devolve se gravou: so com `true` o formulario limpa e mostra sucesso. */
+  onAddTransaction: (txData: Omit<Transaction, 'id' | 'createdAt'>) => Promise<boolean>;
   onEditTransaction: (tx: Transaction) => void;
   onDeleteTransaction: (tx: Transaction) => void;
   /**
@@ -104,7 +105,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
   // mais chamados aqui — o rastro de entrada por compra fica na propria
   // transacao (`produto_id`), sem duplicar num `estoque_movimentos` que agora
   // pertence a um sistema paralelo em fase de aposentadoria.
-  const { produtos, addProduto, updateProduto, custoPorUnidade } = useProdutos();
+  const { produtos, addProduto, updateProduto, deleteProduto, custoPorUnidade } = useProdutos();
 
   const produtosParaAutocomplete: StockItem[] = produtos.map((p) => ({
     id: String(p.id),
@@ -177,6 +178,11 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
     // quando o produto tem `controlaEstoque` ativado — itens de referencia de
     // preco (ex: fruta fresca) recebem so o preco atualizado.
     let produtoIdParaTransacao: number | undefined;
+    // Como voltar o catalogo ao que era se a COMPRA nao gravar. O produto e
+    // atualizado antes do lancamento (o lancamento precisa do id dele), entao
+    // uma compra recusada pelo banco deixava o estoque somado sem compra
+    // nenhuma registrada.
+    let desfazerProduto: (() => Promise<unknown>) | null = null;
 
     if (hasItemQty) {
       try {
@@ -203,6 +209,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
                   `Ajuste a unidade na aba Produtos ou informe a compra na mesma unidade do cadastro.`
               );
             } else {
+              desfazerProduto = () => updateProduto(existing.id, existing);
               await updateProduto(existing.id, {
                 ...existing,
                 quantidadeAtual: saldoConvertido + itemQtyNum,
@@ -214,6 +221,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
           } else {
             // Sem controle de estoque: so atualiza o preco de referencia, no
             // mesmo formato desta compra (ex: "R$15 a bandeja de 500g").
+            desfazerProduto = () => updateProduto(existing.id, existing);
             await updateProduto(existing.id, {
               ...existing,
               precoPago: valNum,
@@ -235,6 +243,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
             nivelMinimoUnidade: itemUnit,
           });
           produtoIdParaTransacao = novo.id;
+          desfazerProduto = () => deleteProduto(novo.id);
         }
       } catch (err) {
         console.error('Erro ao atualizar produto:', err);
@@ -242,7 +251,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
       }
     }
 
-    onAddTransaction({
+    const gravou = await onAddTransaction({
       type: category as TransactionType,
       description: description.trim(),
       quantity: 1,
@@ -253,6 +262,21 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
       notes: `Compra registrada em ${NOTA_POR_COFRINHO[category]}${hasItemQty ? ` - Item: ${description.trim()} (${itemQtyNum}${itemUnit})` : ''}`,
       produtoId: produtoIdParaTransacao,
     });
+
+    if (!gravou) {
+      // O alerta com o motivo ja apareceu (App.handleAddCompra). Aqui: devolve
+      // o produto ao que era e mantem o que foi digitado, para tentar de novo
+      // sem redigitar. Sem "Despesa lancada!".
+      if (desfazerProduto) {
+        try {
+          await desfazerProduto();
+        } catch (err) {
+          console.error('Erro ao desfazer o produto da compra que falhou:', err);
+          alert('A compra não foi salva, e o estoque deste item pode ter mudado. Confira na aba Produtos.');
+        }
+      }
+      return;
+    }
 
     // Reset form
     setDescription('');
