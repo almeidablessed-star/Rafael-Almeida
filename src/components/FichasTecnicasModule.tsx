@@ -2285,10 +2285,21 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
             const custosTotal = custoTotal + investimentoTotal;
             const totalCosts = repoTotal + maoDeObraTotal + custosTotal;
 
-            // Calcular stroke-dasharray para cada segmento (protegido contra divisão por zero)
-            const repoLength = totalCosts > 0 ? (repoTotal / totalCosts) * circumference : 0;
-            const maoLength = totalCosts > 0 ? (maoDeObraTotal / totalCosts) * circumference : 0;
-            const custosLength = totalCosts > 0 ? (custosTotal / totalCosts) * circumference : 0;
+            // Lucro = o que sobra do preco depois das tres partes. O card so
+            // mostrava as tres, e quem somava nao chegava no preco (R$ 5,00 +
+            // 31,00 + 6,87 contra R$ 71,45) sem saber por que. Negativo e
+            // prejuizo: o preco nao cobre o custo.
+            const precoTamanho = tamanhoSelecionado.preco || 0;
+            const lucroTotal = precoTamanho > 0 ? precoTamanho - totalCosts : 0;
+
+            // O anel agora mede contra o PRECO (quando ha preco): as quatro
+            // fatias somadas fecham a volta. Se o preco nao cobre os custos, a
+            // base vira os custos e nao sobra fatia de lucro.
+            const baseAnel = Math.max(precoTamanho, totalCosts);
+            const repoLength = baseAnel > 0 ? (repoTotal / baseAnel) * circumference : 0;
+            const maoLength = baseAnel > 0 ? (maoDeObraTotal / baseAnel) * circumference : 0;
+            const custosLength = baseAnel > 0 ? (custosTotal / baseAnel) * circumference : 0;
+            const lucroLength = baseAnel > 0 && lucroTotal > 0 ? (lucroTotal / baseAnel) * circumference : 0;
 
             return (
               <div
@@ -2412,17 +2423,52 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   />
                 </div>
 
-                {/* GAUGE E LEGENDA */}
+                {/* PRECO + GAUGE E LEGENDA
+                    Opcao B (25/10/2026): o preco ficava em 11px no meio do
+                    anel e, no celular, passava despercebido. Agora e a primeira
+                    linha do bloco, em destaque, e o centro do anel fica vazio.
+                    "Sugestao de preco" enquanto nao ha preco confirmado. */}
                 <div
                   style={{
                     display: 'flex',
-                    alignItems: 'center',
-                    gap: '14px',
+                    flexDirection: 'column',
+                    gap: '10px',
                     background: '#FAF7FA',
                     borderRadius: '18px',
-                    padding: '14px',
+                    padding: '12px 14px 14px',
                   }}
                 >
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'baseline',
+                      justifyContent: 'space-between',
+                      gap: '8px',
+                      paddingBottom: '8px',
+                      borderBottom: '1px solid rgba(36,27,43,.08)',
+                      fontFamily: "'Manrope', sans-serif",
+                    }}
+                  >
+                    <span style={{ fontSize: '10px', fontWeight: 800, color: '#7A6E80', letterSpacing: '.04em', textTransform: 'uppercase' }}>
+                      {tamanhoSelecionado.preco ? 'Preço de venda' : 'Sugestão de preço'}
+                    </span>
+                    {/* Inter com algarismos de largura igual: a fonte de numero
+                        mais comum em app, desenhada para tela pequena. Pedido do
+                        Rafael: em Manrope o valor ficava "com cara de Word". */}
+                    <span
+                      style={{
+                        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+                        fontSize: '22px',
+                        fontWeight: 700,
+                        color: '#241B2B',
+                        letterSpacing: '-0.02em',
+                        fontVariantNumeric: 'tabular-nums',
+                      }}
+                    >
+                      {formatMoney(tamanhoSelecionado.preco || 0)}
+                    </span>
+                  </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                   {/* SVG GAUGE */}
                   <div
                     style={{
@@ -2468,50 +2514,18 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         strokeDasharray={`${isFinite(custosLength) ? custosLength : 0} ${circumference}`}
                         strokeDashoffset={-((isFinite(repoLength) ? repoLength : 0) + (isFinite(maoLength) ? maoLength : 0))}
                       ></circle>
+                      {/* Lucro - verde */}
+                      <circle
+                        cx="41"
+                        cy="41"
+                        r="35"
+                        fill="none"
+                        stroke="#3E9B5F"
+                        strokeWidth="10"
+                        strokeDasharray={`${isFinite(lucroLength) ? lucroLength : 0} ${circumference}`}
+                        strokeDashoffset={-((isFinite(repoLength) ? repoLength : 0) + (isFinite(maoLength) ? maoLength : 0) + (isFinite(custosLength) ? custosLength : 0))}
+                      ></circle>
                     </svg>
-                    {/* TEXTO NO CENTRO DO GAUGE */}
-                    <div
-                      style={{
-                        position: 'absolute',
-                        inset: 0,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        lineHeight: 1,
-                      }}
-                    >
-                      {/* "SUGESTÃO" so faz sentido antes do preco ser
-                          confirmado (Passo 3, ainda uma proposta de calculo).
-                          Depois que a ficha e salva com preco > 0, esse ja e
-                          o preco real do bolo — manter a palavra aqui dava a
-                          entender que a confeiteira nunca tinha decidido o
-                          preco de venda. */}
-                      {!tamanhoSelecionado.preco && (
-                        <span
-                          style={{
-                            fontSize: '8px',
-                            fontWeight: 800,
-                            color: '#8A7E90',
-                            letterSpacing: '.03em',
-                            fontFamily: "'Manrope', sans-serif",
-                          }}
-                        >
-                          SUGESTÃO
-                        </span>
-                      )}
-                      <span
-                        style={{
-                          fontSize: '11px',
-                          fontWeight: 800,
-                          color: '#241B2B',
-                          marginTop: '3px',
-                          fontFamily: "'Manrope', sans-serif",
-                        }}
-                      >
-                        {formatMoney(tamanhoSelecionado.preco || 0)}
-                      </span>
-                    </div>
                   </div>
 
                   {/* LEGENDA */}
@@ -2534,7 +2548,16 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                       Custos Op.
                       <span style={{ color: '#241B2B', marginLeft: 'auto', fontWeight: 400 }}>{formatMoney(custosTotal)}</span>
                     </span>
+                    {/* Lucro: so quando ha preco — sem preco nao ha o que sobrar. */}
+                    {precoTamanho > 0 && (
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '10px', color: lucroTotal < 0 ? '#C4626F' : '#2E7A4A' }}>
+                        <span style={{ width: '9px', height: '9px', borderRadius: '3px', background: lucroTotal < 0 ? '#C4626F' : '#3E9B5F', flexShrink: 0 }}></span>
+                        {lucroTotal < 0 ? 'Prejuízo' : 'Lucro'}
+                        <span style={{ marginLeft: 'auto', fontWeight: 400 }}>{formatMoney(lucroTotal)}</span>
+                      </span>
+                    )}
                   </div>
+                </div>
                 </div>
 
                 {/* INSUMOS EXPANDÍVEL + rendimento ao lado */}
