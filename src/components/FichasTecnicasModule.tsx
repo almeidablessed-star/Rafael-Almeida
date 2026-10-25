@@ -2458,8 +2458,8 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                     <span
                       style={{
                         fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-                        fontSize: '22px',
-                        fontWeight: 700,
+                        fontSize: '16px',
+                        fontWeight: 500,
                         color: '#241B2B',
                         letterSpacing: '-0.02em',
                         fontVariantNumeric: 'tabular-nums',
