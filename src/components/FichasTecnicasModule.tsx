@@ -281,19 +281,28 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   const [yieldInfo, setYieldInfo] = useState('');
   const [selectedYieldUnit, setSelectedYieldUnit] = useState<string>('fatias');
 
+  /**
+   * Troca a unidade do rendimento — e reescreve a de TODAS as linhas.
+   *
+   * O rendimento agora e por tamanho, mas a unidade e uma so para a ficha.
+   * Sem reescrever, uma ficha carregada com "50 fatias" ficaria com o texto
+   * antigo quando a pessoa trocasse para gramas: a chave mudaria na tela e o
+   * valor gravado continuaria dizendo "fatias".
+   *
+   * So o numero sobrevive da linha; texto livre ("meia travessa") fica como
+   * esta, porque ali a pessoa escreveu a unidade com as proprias palavras.
+   */
   const handleApplyYieldUnit = (unitKey: string) => {
     setSelectedYieldUnit(unitKey);
     const label = RENDIMENTO_UNIDADES[unitKey] || unitKey;
-    if (!yieldInfo || yieldInfo.trim() === '') {
-      setYieldInfo(`10 ${label}`);
-      return;
-    }
-    const match = yieldInfo.match(/^[\d.,]+/);
-    if (match) {
-      setYieldInfo(`${match[0]} ${label}`);
-    } else {
-      setYieldInfo(`${yieldInfo} ${label}`);
-    }
+    setTamanhos((prev) =>
+      prev.map((t) => {
+        const texto = (t.rendimento || '').trim();
+        if (!texto) return t;
+        const numero = texto.match(/^[\d.,]+/);
+        return numero ? { ...t, rendimento: numero[0] + ' ' + label } : t;
+      })
+    );
   };
   // Lista da ficha, hoje so um espelho do primeiro tamanho na gravacao. Nasce
   // vazia: antes vinha com "Farinha de Trigo 200 g" de uma ficha de exemplo,
@@ -309,6 +318,8 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     id: string;
     descricao: string;
     preco: string;
+    /** Texto do rendimento DESTE tamanho, ja com a unidade. */
+    rendimento: string;
     horasTrabalho: string;
     // Minutos alem das horas cheias. Na tela sao dois campos; no banco segue
     // um numero so de horas (1 h 30 min = 1,5), sem mudar o formato gravado.
@@ -322,9 +333,9 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     // Tamanhos em branco. Antes nasciam com preco 55/75/90 e custos 20/5/5 —
     // numeros de uma ficha de exemplo de outra fase. Quem nao reparasse
     // cadastrava um bolo com o preco de um bolo que nunca existiu.
-    { id: 'ts-1', descricao: '1', preco: '', horasTrabalho: '', minutosTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '', custoCost: '', investimentoCost: '' },
-    { id: 'ts-2', descricao: '2', preco: '', horasTrabalho: '', minutosTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '', custoCost: '', investimentoCost: '' },
-    { id: 'ts-3', descricao: '3', preco: '', horasTrabalho: '', minutosTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '', custoCost: '', investimentoCost: '' },
+    { id: 'ts-1', descricao: '1', preco: '', rendimento: '', horasTrabalho: '', minutosTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '', custoCost: '', investimentoCost: '' },
+    { id: 'ts-2', descricao: '2', preco: '', rendimento: '', horasTrabalho: '', minutosTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '', custoCost: '', investimentoCost: '' },
+    { id: 'ts-3', descricao: '3', preco: '', rendimento: '', horasTrabalho: '', minutosTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '', custoCost: '', investimentoCost: '' },
   ]);
 
   // Fichas são agora gerenciadas pelo hook useFichasTecnicas (salva no Supabase)
@@ -432,7 +443,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     // formulario a toa e sugeria que era preciso preencher os tres. Quem
     // precisa de mais usa o "+ Adicionar", um de cada vez.
     setTamanhos([
-      { id: 'ts-1', descricao: '', preco: '', horasTrabalho: '', minutosTrabalho: '', valorHora: tarifaSugerida, ingredients: [], maoDeObraCost: '', custoCost: '', investimentoCost: '' },
+      { id: 'ts-1', descricao: '', preco: '', rendimento: '', horasTrabalho: '', minutosTrabalho: '', valorHora: tarifaSugerida, ingredients: [], maoDeObraCost: '', custoCost: '', investimentoCost: '' },
     ]);
     setEditingId(null);
     setInvalidFieldId(null);
@@ -457,7 +468,9 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     // O seletor abre na unidade que o proprio texto gravado declara ("500 g"
     // abre em Gramas). Sem isto ele abriria em Fatias — ou na unidade que
     // sobrou da ficha anterior — e salvar converteria gramas em fatias.
-    setSelectedYieldUnit(deduzirUnidadeDoRendimento(ficha.yieldInfo));
+    setSelectedYieldUnit(
+      deduzirUnidadeDoRendimento(ficha.tamanhos?.[0]?.rendimento || ficha.yieldInfo)
+    );
     setIngredients(ficha.ingredients || []);
 
     // Carregar tamanhos da ficha, convertendo para string
@@ -467,6 +480,9 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
           id: t.id,
           descricao: t.descricao,
           preco: (t.preco || 0).toString(),
+          // Tamanho de ficha antiga nao tem rendimento proprio: abre com o da
+          // FICHA, para a confeiteira encontrar o que ja tinha e so ajustar.
+          rendimento: (t.rendimento || ficha.yieldInfo || '').trim(),
           // Ficha antiga nao tem horas nem tarifa: os campos abrem VAZIOS e o
           // `maoDeObraCost` gravado e preservado como esta. Preencher com zero
           // faria a conta zerar a mao de obra que ela ja tinha definido.
@@ -487,9 +503,9 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     } else {
       // Se não há tamanhos, usar padrão
       setTamanhos([
-        { id: 'ts-1', descricao: '1', preco: '0', horasTrabalho: '', minutosTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '0', custoCost: '0', investimentoCost: '0' },
-        { id: 'ts-2', descricao: '2', preco: '0', horasTrabalho: '', minutosTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '0', custoCost: '0', investimentoCost: '0' },
-        { id: 'ts-3', descricao: '3', preco: '0', horasTrabalho: '', minutosTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '0', custoCost: '0', investimentoCost: '0' },
+        { id: 'ts-1', descricao: '1', preco: '0', rendimento: '', horasTrabalho: '', minutosTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '0', custoCost: '0', investimentoCost: '0' },
+        { id: 'ts-2', descricao: '2', preco: '0', rendimento: '', horasTrabalho: '', minutosTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '0', custoCost: '0', investimentoCost: '0' },
+        { id: 'ts-3', descricao: '3', preco: '0', rendimento: '', horasTrabalho: '', minutosTrabalho: '', valorHora: '', ingredients: [], maoDeObraCost: '0', custoCost: '0', investimentoCost: '0' },
       ]);
     }
 
@@ -797,6 +813,9 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
           id: newId,
           descricao: '',
           preco: '0',
+          // Nasce vazio: o rendimento muda de um tamanho para o outro, que e
+          // justamente o motivo de ele ter saido do nivel da ficha.
+          rendimento: '',
           // Repete a tarifa do tamanho anterior: quem cadastra varios tamanhos do
           // mesmo bolo costuma cobrar a mesma hora, e so as horas mudam.
           horasTrabalho: '',
@@ -838,6 +857,8 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         id: t.id,
         descricao: t.descricao,
         preco: parseNumeroDigitado(t.preco) || 0,
+        // Rendimento DESTE tamanho, composto com a unidade escolhida no card.
+        rendimento: comporRendimentoParaGravar(t.rendimento, selectedYieldUnit) || undefined,
         horasTrabalho: horas > 0 ? horas : undefined,
         valorHora: tarifa > 0 ? tarifa : undefined,
         // Insumos deste tamanho, sem as linhas em branco que ficaram por engano.
@@ -860,7 +881,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
       // Numero digitado + unidade do seletor, sempre — nao so quando alguem
       // abre o seletor e clica. A unidade nao tem coluna propria, entao ou ela
       // entra aqui no texto ou se perde. Ver [[comporRendimentoParaGravar]].
-      yieldInfo: comporRendimentoParaGravar(yieldInfo, selectedYieldUnit) || undefined,
+      // Espelho do PRIMEIRO tamanho, no mesmo molde da lista de insumos: o
+      // rendimento que vale agora e o de cada tamanho, e este campo so atende
+      // quem ainda le o antigo (folha de orcamento e fichas nao migradas).
+      yieldInfo: tamanhosData[0]?.rendimento || undefined,
       tamanhos: tamanhosData,
       // A lista da FICHA vira um espelho do primeiro tamanho. A lista que vale
       // e a de cada tamanho; esta so atende quem ainda le o campo antigo (a
@@ -1323,24 +1347,69 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                     )}
                   </div>
                   <CampoComAjuda microcopy="Se o mesmo bolo sai em mais de um tamanho (P/M/G, por exemplo), adicione todos aqui em vez de criar uma ficha nova pra cada um. Os insumos continuam os mesmos — só a quantidade de cada um muda por tamanho, no Passo 2." />
+                  {/* Cabecalho das colunas: diz o que e cada campo da linha e
+                      hospeda a unidade, que vale para a ficha inteira. Uma
+                      unidade por linha seria mais preciso no papel, mas na
+                      pratica todos os tamanhos do mesmo bolo rendem na mesma
+                      unidade, e tres seletores empilhados comiam o terco. */}
+                  <div className="flex items-center gap-2.5">
+                    <span className="flex-1 min-w-0 text-[10px] font-bold uppercase" style={{ color: '#9A8FA0', letterSpacing: '.08em' }}>
+                      Tamanho
+                    </span>
+                    <div className="flex items-center gap-1.5" style={{ width: '38%' }}>
+                      <span className="text-[10px] font-bold uppercase" style={{ color: '#9A8FA0', letterSpacing: '.08em' }}>
+                        Rende
+                      </span>
+                      <CustomSelect
+                        value={selectedYieldUnit}
+                        onChange={handleApplyYieldUnit}
+                        chip
+                        ariaLabel="Unidade de rendimento"
+                        options={[
+                          { value: 'fatias', label: 'fatias' },
+                          { value: 'gramas', label: 'g' },
+                          { value: 'quilos', label: 'kg' },
+                          { value: 'unidades', label: 'unidades' },
+                          { value: 'ml', label: 'ml' },
+                        ]}
+                      />
+                    </div>
+                    {tamanhos.length > 1 && <span style={{ width: 24 }} />}
+                  </div>
+
                   {tamanhos.map((tamanho) => (
                     <div key={tamanho.id} className="flex items-center gap-2.5">
                       <input
                         type="text"
-                        placeholder="Ex: 20 cm, 15 fatias"
+                        placeholder="Ex: 20 cm"
                         value={tamanho.descricao}
                         onChange={(e) => handleUpdateTamanho(tamanho.id, 'descricao', e.target.value)}
                         className="flex-1 min-w-0 border rounded-[10px] px-3 py-2.5 text-sm font-semibold"
                         style={{ borderColor: 'rgba(58,35,80,0.14)', background: '#FAF7FA' }}
                       />
+                      {/* O rendimento de CADA tamanho. Antes era um campo unico
+                          no fim do Passo 2: longe da decisao e facil de pular,
+                          e obrigava a repetir o mesmo numero de fatias para um
+                          bolo de 12 cm e um de 30 cm. */}
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        placeholder="Ex: 50"
+                        aria-label={`Rendimento do tamanho ${tamanho.descricao || '(sem nome)'}`}
+                        value={tamanho.rendimento}
+                        onChange={(e) => handleUpdateTamanho(tamanho.id, 'rendimento', e.target.value)}
+                        className="border rounded-[10px] px-3 py-2.5 text-sm font-semibold min-w-0"
+                        style={{ width: '38%', borderColor: 'rgba(58,35,80,0.14)', background: '#FAF7FA' }}
+                      />
                       {tamanhos.length > 1 && (
                         <button
                           type="button"
                           onClick={() => handleRemoveTamanho(tamanho.id)}
-                          className="text-xs font-bold flex-shrink-0"
-                          style={{ color: '#C4626F' }}
+                          aria-label={`Remover tamanho ${tamanho.descricao || '(sem nome)'}`}
+                          className="flex-shrink-0 flex items-center justify-center rounded-full"
+                          style={{ width: 24, height: 24, background: '#FDF4F5', color: '#C4626F', fontSize: 14, fontWeight: 800, lineHeight: 1 }}
                         >
-                          Remover
+                          ×
                         </button>
                       )}
                     </div>
@@ -1794,43 +1863,6 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   </div>
                 ))}
 
-                {/* Rendimento: veio do Passo 1 para ficar junto de horas e mao
-                    de obra. E um campo da FICHA (nao de cada tamanho), entao
-                    aparece uma vez so, depois do ultimo tamanho. */}
-                <section className="flex flex-col gap-1.5" style={CARD_COMANDA}>
-                  <span style={ROTULO_COMANDA}>RENDIMENTO <span style={{ color: '#C4626F' }}>*</span></span>
-                  <div className="flex items-center gap-2" style={CAIXA_NUMERO}>
-                    <input
-                      id="ficha-rendimento"
-                      type="text"
-                      required
-                      placeholder="Ex: 10 ou 500"
-                      value={yieldInfo}
-                      onChange={(e) => {
-                        setYieldInfo(e.target.value);
-                        if (invalidFieldId === 'ficha-rendimento') setInvalidFieldId(null);
-                      }}
-                      className="flex-1 w-full min-w-0 bg-transparent outline-none placeholder:text-[#B3A6B8]"
-                      style={NUMERO}
-                    />
-                    <CustomSelect
-                      value={selectedYieldUnit}
-                      onChange={handleApplyYieldUnit}
-                      chip
-                      ariaLabel="Unidade de rendimento"
-                      style={CHIP_UNIDADE}
-                      options={[
-                        { value: 'fatias', label: 'fatias' },
-                        { value: 'gramas', label: 'g' },
-                        { value: 'quilos', label: 'kg' },
-                        { value: 'unidades', label: 'unidades' },
-                        { value: 'ml', label: 'ml' },
-                      ]}
-                    />
-                  </div>
-                  {invalidFieldId === 'ficha-rendimento' && <FieldValidationError />}
-                  <CampoComAjuda microcopy="Quantas porções esse tamanho rende — em fatias, gramas, quilos, unidades ou ml, o que fizer mais sentido pro seu produto. É só uma referência pra você e pra cliente; não entra na conta do custo." />
-                </section>
               </div>
 
               {/* PASSO 3 — PREÇO, no visual do design "Ficha Tecnica · Preco"
@@ -2241,6 +2273,8 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
             // `insumosDeTamanhoOpcao` ja traz a rede: tamanho sem lista propria
             // (ficha antiga) continua caindo na lista da ficha, como hoje.
             const ingList = insumosDeTamanhoOpcao(ficha, tamanhoSelecionado);
+            const rendimentoDoTamanho =
+              (tamanhoSelecionado?.rendimento || ficha.yieldInfo || '').trim();
 
             // Calcula os segmentos do gauge com base nos custos do tamanho selecionado
             const circumference = 2 * Math.PI * 35;
@@ -2534,11 +2568,12 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   Ver {ingList.length} Insumos
                 </button>
 
-                {/* So exibe o rendimento que a confeiteira gravou na ficha (no
-                    Passo 2 do form). Ficha sem rendimento nao mostra nada: o
-                    fallback de `formatRendimentoParaExibir` usaria o nome do
-                    tamanho ("1kg") e pareceria que o bolo "rende 1kg". */}
-                {ficha.yieldInfo?.trim() && (
+                {/* Rendimento DO TAMANHO escolhido, com o da ficha como rede
+                    para quem ainda nao reabriu a ficha depois da mudanca.
+                    Ficha sem rendimento nenhum nao mostra nada: o fallback de
+                    `formatRendimentoParaExibir` usaria o nome do tamanho
+                    ("1kg") e pareceria que o bolo "rende 1kg". */}
+                {rendimentoDoTamanho && (
                   <span
                     style={{
                       background: '#F6F2F5',
@@ -2553,7 +2588,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                     }}
                   >
                     <Scale className="w-3 h-3" />
-                    Rende {ficha.yieldInfo.trim()}
+                    Rende {rendimentoDoTamanho}
                   </span>
                 )}
                 </div>

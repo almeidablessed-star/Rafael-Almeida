@@ -37,6 +37,7 @@ interface SupabaseFichaTecnica {
     quantidade?: number;
     horasTrabalho?: number;
     valorHora?: number;
+    rendimento?: string | null;
     ingredients?: IngredientUsage[];
     maoDeObraCost?: number;
     custoCost?: number;
@@ -118,6 +119,11 @@ const mapFichaToSupabase = (ficha: Omit<FichaTecnica, 'id' | 'createdAt'>) => ({
     // os campos de origem em branco — a conta perdia a memoria de si mesma.
     horasTrabalho: t.horasTrabalho ?? null,
     valorHora: t.valorHora ?? null,
+    // Rendimento DESTE tamanho. Sem grava-lo aqui ele existiria so na tela e
+    // sumiria ao salvar — o mesmo descarte silencioso que ja aconteceu com
+    // horas, tarifa e a lista de insumos. Este mapeador e um whitelist: campo
+    // novo no tipo que nao for citado aqui nao chega ao banco.
+    rendimento: t.rendimento ?? null,
     // Insumos DESTE tamanho. Sem grava-los aqui, a lista por tamanho existiria
     // so na tela e a baixa de estoque continuaria usando a da ficha — o mesmo
     // descarte silencioso que acabou de acontecer com horas e tarifa.

@@ -367,6 +367,18 @@ export interface TamanhoOpcao {
   valorHora?: number;
 
   /**
+   * Quanto ESTE tamanho rende, ja com a unidade ("50 fatias", "500 g").
+   *
+   * Era um campo unico da ficha (`yieldInfo`), o que obrigava a mentir em
+   * quase todos: um bolo de 12 cm e um de 30 cm nao rendem o mesmo numero de
+   * fatias. `yieldInfo` continua existindo como espelho do primeiro tamanho,
+   * para quem ainda le o campo antigo.
+   *
+   * Opcional: tamanho de ficha antiga nao tem, e cai no `yieldInfo` da ficha.
+   */
+  rendimento?: string;
+
+  /**
    * Insumos DESTE tamanho, com as quantidades dele.
    *
    * Um bolo de 10 fatias e um de 30 nao consomem a mesma coisa. Ate aqui a
