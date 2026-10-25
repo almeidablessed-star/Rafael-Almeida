@@ -24,7 +24,7 @@ interface BackupModalProps {
   totalAtual: number;
 }
 
-const TIPOS_VALIDOS = ['venda', 'reposicao', 'maodeobra', 'custo', 'investimento'];
+const TIPOS_VALIDOS = ['venda', 'reposicao', 'maodeobra', 'custo', 'investimento', 'lucro'];
 
 const vazio = (v: unknown) => v === undefined || v === null || v === '';
 

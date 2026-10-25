@@ -476,6 +476,7 @@ export const calculateSummary = (filteredTxs: Transaction[]): SummaryTotals => {
   let totalMaoDeObra = 0;
   let totalCustos = 0;
   let totalInvestimento = 0;
+  let totalRetiradaLucro = 0;
 
   filteredTxs.forEach((tx) => {
     const val = Number(tx.totalValue) || 0;
@@ -508,11 +509,15 @@ export const calculateSummary = (filteredTxs: Transaction[]): SummaryTotals => {
       case 'investimento':
         totalInvestimento += val;
         break;
+      case 'lucro':
+        // Compra paga com o lucro: e dinheiro que saiu do caixa como as outras.
+        totalRetiradaLucro += val;
+        break;
     }
   });
 
-  const totalSaidas = totalReposicao + totalMaoDeObra + totalCustos + totalInvestimento;
-  const lucroLiquido = totalVendas - totalReposicao - totalMaoDeObra - totalCustos - totalInvestimento;
+  const totalSaidas = totalReposicao + totalMaoDeObra + totalCustos + totalInvestimento + totalRetiradaLucro;
+  const lucroLiquido = totalVendas - totalSaidas;
 
   return {
     totalVendas,
@@ -543,7 +548,14 @@ export interface SystemBalances {
   reposicao: CategoryBalance;
   maodeobra: CategoryBalance;
   investimento: CategoryBalance;
+  /** So a parte de despesas (`custo`), sem o investimento. */
+  custo: CategoryBalance;
   custoEInvestimento: CategoryBalance;
+  /**
+   * O que sobra de cada venda recebida depois das outras quatro partes, menos
+   * as compras pagas com o lucro (tipo `lucro`, aba Compras).
+   */
+  lucro: CategoryBalance;
   paidSalesCount: number;
   totalExpensesCount: number;
   totalPaidSales: number;
@@ -622,6 +634,7 @@ export function calculateWeeklyBalances(
   let maodeobraSpent = 0;
   let custoSpent = 0;
   let investimentoSpent = 0;
+  let lucroSpent = 0;
   let totalExpensesCount = 0;
   let totalExpensesAmount = 0;
 
@@ -687,12 +700,23 @@ export function calculateWeeklyBalances(
       totalExpensesCount += 1;
       totalExpensesAmount += val;
       investimentoSpent += val;
+    } else if (tx.type === 'lucro') {
+      totalExpensesCount += 1;
+      totalExpensesAmount += val;
+      lucroSpent += val;
     }
   }
 
   const saldoReposicao = reposicaoInflow - reposicaoSpent;
   const saldoMaodeobra = maodeobraInflow - maodeobraSpent;
   const saldoInvestimento = investimentoInflow - investimentoSpent;
+  const saldoCusto = custoInflow - custoSpent;
+  // O lucro nao tem fatia propria gravada na venda: e o que sobra do dinheiro
+  // recebido depois das quatro partes acima, na MESMA base — por isso os cinco
+  // cofrinhos somados fecham com o caixa recebido no periodo.
+  const lucroInflow =
+    totalPaidSalesAmount - reposicaoInflow - maodeobraInflow - custoInflow - investimentoInflow;
+  const saldoLucro = lucroInflow - lucroSpent;
 
   const combinedInflow = custoInflow + investimentoInflow;
   const combinedSpent = custoSpent + investimentoSpent;
@@ -716,6 +740,18 @@ export function calculateWeeklyBalances(
       totalSpent: investimentoSpent,
       currentBalance: saldoInvestimento,
       isNegative: saldoInvestimento < 0,
+    },
+    custo: {
+      accumulatedInflow: custoInflow,
+      totalSpent: custoSpent,
+      currentBalance: saldoCusto,
+      isNegative: saldoCusto < 0,
+    },
+    lucro: {
+      accumulatedInflow: lucroInflow,
+      totalSpent: lucroSpent,
+      currentBalance: saldoLucro,
+      isNegative: saldoLucro < 0,
     },
     custoEInvestimento: {
       accumulatedInflow: combinedInflow,

@@ -101,7 +101,8 @@ export interface DespesaEmpresa {
   ordem: number;
 }
 
-export type TransactionType = 'venda' | 'reposicao' | 'maodeobra' | 'custo' | 'investimento';
+// 'lucro' = compra paga com o dinheiro do cofrinho do Lucro (aba Compras).
+export type TransactionType = 'venda' | 'reposicao' | 'maodeobra' | 'custo' | 'investimento' | 'lucro';
 
 export type PaymentMethod = 'zelle' | 'cash' | 'pix' | 'dinheiro' | 'cartao_credito' | 'cartao_debito' | 'transferencia' | 'outro';
 

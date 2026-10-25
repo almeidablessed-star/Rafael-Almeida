@@ -33,6 +33,25 @@ import {
 } from 'lucide-react';
 import CampoData from './CampoData';
 
+/**
+ * Os cofrinhos de onde uma compra desta tela pode sair. O valor e o proprio
+ * `tipo` gravado no lancamento. `lucro` entrou em 25/10/2026: quem gastou o
+ * investimento e esta com pouca reposicao pode pagar com o que sobrou do lucro.
+ */
+type CofrinhoDeCompra = 'reposicao' | 'investimento' | 'lucro';
+
+const COFRINHOS_DE_COMPRA: { id: CofrinhoDeCompra; botao: string; filtro: string; selo: string; corSelo: string; fundoSelo: string }[] = [
+  { id: 'reposicao', botao: '🔄 Reposição', filtro: 'Reposição', selo: '🔄 Reposição', corSelo: '#4A3556', fundoSelo: '#F3E9F3' },
+  { id: 'investimento', botao: '📈 Investimento', filtro: 'Investimento', selo: '📈 Investimento', corSelo: '#2F4A6B', fundoSelo: '#E9EFF7' },
+  { id: 'lucro', botao: '💰 Lucro', filtro: 'Lucro', selo: '💰 Pago com o lucro', corSelo: '#26402F', fundoSelo: '#E3F2E7' },
+];
+
+const NOTA_POR_COFRINHO: Record<CofrinhoDeCompra, string> = {
+  reposicao: 'Reposição de Insumos',
+  investimento: 'Investimento',
+  lucro: 'Lucro',
+};
+
 interface BalancesAndExpensesModuleProps {
   transactions: Transaction[];
   onAddTransaction: (txData: Omit<Transaction, 'id' | 'createdAt'>) => void;
@@ -73,8 +92,13 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
   //
   // O que saiu da conta: mao de obra (gasta pela aba Empresa) e a parte de
   // despesas fixas. Esse dinheiro continua existindo, so nao e gasto por aqui.
+  //
+  // Desde 25/10/2026 o Lucro tambem e gasto por aqui (terceira opcao do
+  // formulario), entao entra na soma junto com os outros dois.
   const saldoTotalDisponivel =
-    (balances.reposicao.currentBalance || 0) + (balances.investimento.currentBalance || 0);
+    (balances.reposicao.currentBalance || 0) +
+    (balances.investimento.currentBalance || 0) +
+    (balances.lucro.currentBalance || 0);
   // Compras agora referencia o catalogo Produtos (spec Modulo Produtos, secao
   // 2.2) em vez de Estoque diretamente. `estoque`/`registrarEntrada` nao sao
   // mais chamados aqui — o rastro de entrada por compra fica na propria
@@ -95,7 +119,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
 
   // Form state for quick expense logging
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState<'reposicao' | 'investimento'>('reposicao');
+  const [category, setCategory] = useState<CofrinhoDeCompra>('reposicao');
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(getTodayIso());
   const [showSuccessToast, setShowSuccessToast] = useState(false);
@@ -108,7 +132,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
   const [itemUnit, setItemUnit] = useState<'g' | 'kg' | 'ml' | 'L' | 'un' | 'pacote'>('g');
 
   // History filtering
-  const [selectedFilter, setSelectedFilter] = useState<'todos' | 'reposicao' | 'investimento'>('todos');
+  const [selectedFilter, setSelectedFilter] = useState<'todos' | CofrinhoDeCompra>('todos');
   const [searchTerm, setSearchTerm] = useState('');
 
 
@@ -226,7 +250,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
       totalValue: valNum,
       date: date || getTodayIso(),
       paymentStatus: 'pago',
-      notes: `Compra registrada em ${category === 'reposicao' ? 'Reposição de Insumos' : 'Investimento'}${hasItemQty ? ` - Item: ${description.trim()} (${itemQtyNum}${itemUnit})` : ''}`,
+      notes: `Compra registrada em ${NOTA_POR_COFRINHO[category]}${hasItemQty ? ` - Item: ${description.trim()} (${itemQtyNum}${itemUnit})` : ''}`,
       produtoId: produtoIdParaTransacao,
     });
 
@@ -240,9 +264,9 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
     setTimeout(() => setShowSuccessToast(false), 3000);
   };
 
-  // Filter expenses list (only real expenses under reposicao or investimento)
+  // Filter expenses list (only real expenses under reposicao, investimento or lucro)
   const expenseTransactions = transactions.filter(
-    (tx) => tx.type === 'reposicao' || tx.type === 'investimento'
+    (tx) => tx.type === 'reposicao' || tx.type === 'investimento' || tx.type === 'lucro'
   );
 
   const filteredExpenses = expenseTransactions.filter((tx) => {
@@ -307,6 +331,18 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
           negativo={balances.investimento.isNegative}
         />
       </div>
+      {/* Lucro na versao baixa, embaixo dos dois: tres cartoes grandes lado a
+          lado nao cabem nesta tela em 360px (o terceiro saia pela direita). */}
+      <div className="flex mx-5" style={{ marginTop: '10px' }}>
+        <CardDeSaldo
+          compacto
+          destaque
+          nome="LUCRO"
+          saldo={balances.lucro.currentBalance || 0}
+          entrou={balances.lucro.accumulatedInflow || 0}
+          negativo={balances.lucro.isNegative}
+        />
+      </div>
 
       {/* REGISTRATION FORM FOR REAL PURCHASES / EXPENSES */}
       <div className="bg-white mx-5" style={{ borderRadius: '24px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '13px', boxShadow: '0 8px 20px rgba(58,35,80,.09)', marginTop: '20px' }}>
@@ -347,55 +383,36 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
             <label style={{ fontSize: '10.5px', fontWeight: 800, color: '#5B4A6B', fontFamily: "'Manrope', sans-serif" }}>
-              Categoria da Compra
+              De onde sai o dinheiro
             </label>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button
-                type="button"
-                onClick={() => setCategory('reposicao')}
-                style={{
-                  flex: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px',
-                  padding: '10px',
-                  borderRadius: '14px',
-                  background: category === 'reposicao' ? '#F3E9F3' : '#FAF7FA',
-                  border: category === 'reposicao' ? '1.5px solid #B892BE' : '1.5px solid rgba(36,27,43,.1)',
-                  color: category === 'reposicao' ? '#4A3556' : '#7A6E80',
-                  fontSize: '11px',
-                  fontWeight: category === 'reposicao' ? 800 : 700,
-                  cursor: 'pointer',
-                  transition: 'transform .2s ease',
-                  fontFamily: "'Manrope', sans-serif",
-                }}
-              >
-                🔄 Reposição
-              </button>
-              <button
-                type="button"
-                onClick={() => setCategory('investimento')}
-                style={{
-                  flex: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px',
-                  padding: '10px',
-                  borderRadius: '14px',
-                  background: category === 'investimento' ? '#F3E9F3' : '#FAF7FA',
-                  border: category === 'investimento' ? '1.5px solid #B892BE' : '1.5px solid rgba(36,27,43,.1)',
-                  color: category === 'investimento' ? '#4A3556' : '#7A6E80',
-                  fontSize: '11px',
-                  fontWeight: category === 'investimento' ? 800 : 700,
-                  cursor: 'pointer',
-                  transition: 'transform .2s ease',
-                  fontFamily: "'Manrope', sans-serif",
-                }}
-              >
-                📈 Investimento
-              </button>
+              {COFRINHOS_DE_COMPRA.map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => setCategory(c.id)}
+                  style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    padding: '10px 4px',
+                    borderRadius: '14px',
+                    background: category === c.id ? '#F3E9F3' : '#FAF7FA',
+                    border: category === c.id ? '1.5px solid #B892BE' : '1.5px solid rgba(36,27,43,.1)',
+                    color: category === c.id ? '#4A3556' : '#7A6E80',
+                    fontSize: '11px',
+                    fontWeight: category === c.id ? 800 : 700,
+                    cursor: 'pointer',
+                    transition: 'transform .2s ease',
+                    fontFamily: "'Manrope', sans-serif",
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {c.botao}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -542,46 +559,29 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
             >
               Todos ({expenseTransactions.length})
             </button>
-            <button
-              onClick={() => setSelectedFilter('reposicao')}
-              style={{
-                flex: 1,
-                textAlign: 'center',
-                fontSize: '10.5px',
-                fontWeight: selectedFilter === 'reposicao' ? 800 : 600,
-                color: selectedFilter === 'reposicao' ? '#FFFFFF' : '#6B5F71',
-                background: selectedFilter === 'reposicao' ? '#3A2350' : 'transparent',
-                borderRadius: '9px',
-                padding: '7px 0',
-                border: 'none',
-                boxShadow: selectedFilter === 'reposicao' ? '0 4px 10px rgba(58,35,80,.28)' : 'none',
-                cursor: 'pointer',
-                transition: 'background .2s ease',
-                fontFamily: "'Manrope', sans-serif",
-              }}
-            >
-              Reposição
-            </button>
-            <button
-              onClick={() => setSelectedFilter('investimento')}
-              style={{
-                flex: 1,
-                textAlign: 'center',
-                fontSize: '10.5px',
-                fontWeight: selectedFilter === 'investimento' ? 800 : 600,
-                color: selectedFilter === 'investimento' ? '#FFFFFF' : '#6B5F71',
-                background: selectedFilter === 'investimento' ? '#3A2350' : 'transparent',
-                borderRadius: '9px',
-                padding: '7px 0',
-                border: 'none',
-                boxShadow: selectedFilter === 'investimento' ? '0 4px 10px rgba(58,35,80,.28)' : 'none',
-                cursor: 'pointer',
-                transition: 'background .2s ease',
-                fontFamily: "'Manrope', sans-serif",
-              }}
-            >
-              Investimento
-            </button>
+            {COFRINHOS_DE_COMPRA.map((c) => (
+              <button
+                key={c.id}
+                onClick={() => setSelectedFilter(c.id)}
+                style={{
+                  flex: 1,
+                  textAlign: 'center',
+                  fontSize: '10.5px',
+                  fontWeight: selectedFilter === c.id ? 800 : 600,
+                  color: selectedFilter === c.id ? '#FFFFFF' : '#6B5F71',
+                  background: selectedFilter === c.id ? '#3A2350' : 'transparent',
+                  borderRadius: '9px',
+                  padding: '7px 0',
+                  border: 'none',
+                  boxShadow: selectedFilter === c.id ? '0 4px 10px rgba(58,35,80,.28)' : 'none',
+                  cursor: 'pointer',
+                  transition: 'background .2s ease',
+                  fontFamily: "'Manrope', sans-serif",
+                }}
+              >
+                {c.filtro}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -617,7 +617,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '9px' }}>
             {filteredExpenses.map((tx) => {
-              const isReposicao = tx.type === 'reposicao';
+              const cofrinho = COFRINHOS_DE_COMPRA.find((c) => c.id === tx.type) ?? COFRINHOS_DE_COMPRA[0];
 
               return (
                 <div
@@ -648,15 +648,15 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
                         style={{
                           fontSize: '9px',
                           fontWeight: 800,
-                          color: isReposicao ? '#4A3556' : '#2F4A6B',
-                          background: isReposicao ? '#F3E9F3' : '#E9EFF7',
+                          color: cofrinho.corSelo,
+                          background: cofrinho.fundoSelo,
                           padding: '3px 8px',
                           borderRadius: '999px',
                           textTransform: 'uppercase',
                           fontFamily: "'Manrope', sans-serif",
                         }}
                       >
-                        {isReposicao ? '🔄 Reposição' : '📈 Investimento'}
+                        {cofrinho.selo}
                       </span>
                       <span style={{ fontSize: '12px', fontWeight: 800, color: '#241B2B', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: "'Manrope', sans-serif" }}>
                         {tx.description}

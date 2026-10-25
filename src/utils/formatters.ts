@@ -187,5 +187,14 @@ export const getTransactionTypeDetails = (type: TransactionType) => {
         icon: 'Sparkles',
         isPositive: false,
       };
+    case 'lucro':
+      return {
+        label: 'Pago com o Lucro',
+        plural: 'Pago com o Lucro',
+        color: 'text-emerald-700 bg-emerald-50 border-emerald-200',
+        badgeBg: 'bg-emerald-100 text-emerald-800',
+        icon: 'PiggyBank',
+        isPositive: false,
+      };
   }
 };

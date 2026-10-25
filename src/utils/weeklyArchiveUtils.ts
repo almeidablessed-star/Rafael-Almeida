@@ -99,7 +99,7 @@ export function calculateWeeklyTotals(transactions: Transaction[]) {
       } else {
         aReceber += tx.totalValue;
       }
-    } else if (tx.type === 'reposicao' || tx.type === 'maodeobra' || tx.type === 'custo' || tx.type === 'investimento') {
+    } else if (tx.type === 'reposicao' || tx.type === 'maodeobra' || tx.type === 'custo' || tx.type === 'investimento' || tx.type === 'lucro') {
       saldos += tx.totalValue;
       lucroLiquido -= tx.totalValue;
     }

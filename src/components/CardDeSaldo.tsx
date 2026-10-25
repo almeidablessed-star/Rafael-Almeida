@@ -20,8 +20,56 @@ export const CardDeSaldo: React.FC<{
   /** Quanto entrou nesta parte no periodo, mostrado embaixo. */
   entrou: number;
   negativo: boolean;
-}> = ({ nome, saldo, entrou, negativo }) => {
+  /**
+   * Versao baixa, em linha (nome a esquerda, valor a direita), para a segunda
+   * fila do Inicio — Investimento e Lucro, dois por linha.
+   */
+  compacto?: boolean;
+  /** Fundo verde-claro do Lucro, para ele se distinguir dos outros. */
+  destaque?: boolean;
+}> = ({ nome, saldo, entrou, negativo, compacto = false, destaque = false }) => {
   const { formatCurrency: formatMoney } = useCurrency();
+
+  if (compacto) {
+    return (
+      <div
+        className="flex-1 min-w-0 rounded-[18px] transition-all duration-300"
+        style={{
+          background: destaque && !negativo ? '#EEF7F0' : '#FFFFFF',
+          boxShadow: '0 8px 20px rgba(58,35,80,0.08)',
+          padding: '10px 12px',
+          fontFamily: "'Manrope', sans-serif",
+        }}
+      >
+        {/* flex-wrap: em tela de 360px, "INVESTIMENTO" + "-R$ 113,60" nao cabem
+            na mesma linha e o valor passava da borda do cartao. Assim ele desce
+            para a linha de baixo, alinhado a direita. */}
+        <div className="flex flex-wrap items-baseline justify-between" style={{ columnGap: '8px' }}>
+          <span
+            className="text-[9px] uppercase tracking-[0.05em]"
+            style={{ color: destaque && !negativo ? '#3F6B4C' : '#7A6E80', fontWeight: 800 }}
+          >
+            {nome}
+          </span>
+          <span
+            className="text-[15px]"
+            style={{
+              color: negativo ? '#C4626F' : destaque ? '#26402F' : '#241B2B',
+              fontWeight: 800,
+              letterSpacing: '-0.02em',
+              whiteSpace: 'nowrap',
+              marginLeft: 'auto',
+            }}
+          >
+            {formatMoney(saldo || 0)}
+          </span>
+        </div>
+        <div className="text-[9.5px] mt-0.5" style={{ color: '#9A8FA0' }}>
+          de {formatMoney(entrou || 0)} que entraram
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

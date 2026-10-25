@@ -194,49 +194,27 @@ export const Dashboard: React.FC<DashboardProps> = ({
     balances.maodeobra.accumulatedInflow <= 0 &&
     balances.custoEInvestimento.accumulatedInflow <= 0;
 
-  // O cartao "Despesas + Investimento" soma os dois numa pilha so, e a legenda
-  // abaixo dele desfaz a soma. Ate aqui ela repartia pela proporcao das METAS
-  // configuradas em Minha Empresa — uma ESTIMATIVA apresentada com cara de
-  // fato: gastar tudo de investimento e nada de despesas nao mexia num
-  // milimetro dos dois numeros.
+  // Cinco cofrinhos (25/10/2026, pedido do Rafael). Antes eram tres, com
+  // "Despesas + Investimento" numa pilha so e uma legenda embaixo desfazendo a
+  // soma; o lucro aparecia so numa frase. Despesa e investimento sao dinheiro
+  // para coisas diferentes, e o lucro passou a poder ser gasto pela aba Compras
+  // (tipo `lucro`) — entao virou cofrinho tambem.
   //
-  // Agora sao os valores REAIS, os mesmos que a aba Compras ja mostra no
-  // cartao de Investimento — as duas telas passam a dizer a mesma coisa sobre
-  // o mesmo dinheiro.
+  // Todos vem de `calculateWeeklyBalances`, na mesma base (dinheiro recebido no
+  // periodo): os cinco somados fecham com o caixa recebido.
   //
-  // Despesas sai por subtracao, e isso e exato, nao aproximacao: a pilha e
-  // (entrou custo + entrou investimento) − (gastou custo + gastou
-  // investimento), entao tirar a parte de investimento devolve exatamente a de
-  // custo. Sem divisao, nao ha centavo perdido no arredondamento.
-  const saldoCustoEInvestimento = balances.custoEInvestimento.currentBalance || 0;
-  const saldoInvestimento = balances.investimento.currentBalance || 0;
-  const saldoDespesas = saldoCustoEInvestimento - saldoInvestimento;
-
-  // Os tres cartoes sao identicos em estrutura; so mudam nome, saldo e quanto
-  // entrou. Descrever uma vez evita tres blocos quase iguais se desencontrarem
-  // na proxima edicao, que foi o que aconteceu com os aneis.
+  // Fila de cima: as tres partes que pagam o dia a dia, no tamanho de sempre.
+  // Fila de baixo, menores: Investimento e Lucro.
   const cartoesDeSaldo = [
     { nome: 'REPOSIÇÃO', saldo: balances.reposicao },
     { nome: 'MÃO DE OBRA', saldo: balances.maodeobra },
-    { nome: 'DESPESAS + INVESTIMENTO', saldo: balances.custoEInvestimento },
+    { nome: 'DESPESAS', saldo: balances.custo },
   ];
 
-  // O lucro e a quinta parte de cada venda, e era a unica que o card nunca
-  // mostrava — quem somasse os tres cartoes nao chegava no dinheiro recebido e
-  // nao tinha como saber por que. Nao ganha cartao proprio porque nenhum
-  // lancamento sai do lucro: um cofrinho dele ficaria sempre cheio.
-  //
-  // E o que sobra depois das quatro partes ja exibidas, sobre a MESMA base:
-  // dinheiro recebido no periodo. Por isso fecha — cartoes + lucro = caixa.
-  // Nao usa o `lucroLiquido` que ja existe no app: aquele soma outra janela (o
-  // seletor do topo da tela) e ainda desconta as despesas lancadas, entao
-  // apareceria aqui contradizendo os cartoes ao lado.
-  const lucroRecebidoNoPeriodo =
-    (balances.totalPaidSales || 0) -
-    (balances.reposicao.accumulatedInflow || 0) -
-    (balances.maodeobra.accumulatedInflow || 0) -
-    (balances.custoEInvestimento.accumulatedInflow || 0);
-  const lucroNegativo = lucroRecebidoNoPeriodo < 0;
+  // Prejuizo e quando a PARTE de lucro das vendas ja nasce negativa: os pedidos
+  // sairam por menos do que custaram. Chamar isso de "lucro" seria mentir na
+  // cor certa, entao o nome do cartao muda junto.
+  const lucroNegativo = (balances.lucro.accumulatedInflow || 0) < 0;
 
   return (
     <div className="space-y-0 pb-8 animate-fadeIn">
@@ -507,19 +485,18 @@ export const Dashboard: React.FC<DashboardProps> = ({
               microcopy={`O que já chegou das vendas − o que você já gastou ${vocab.nessePeriodo}.`}
               exemploDinamico={
                 'Aqui só conta o dinheiro que já chegou. Cada cartão é um cofrinho: ' +
-                'quando um pagamento entra, o app separa ele em partes — o ingrediente, ' +
-                'o seu trabalho, e as contas e o investimento da empresa. Pedido ainda ' +
+                'quando um pagamento entra, o app separa ele em cinco partes — o ingrediente, ' +
+                'o seu trabalho, as contas da empresa, o investimento e o lucro. Pedido ainda ' +
                 'pendente não entra; pedido pago só em parte entra na proporção do que ' +
                 'foi recebido. O valor grande é o que sobra para gastar naquela parte.'
               }
             />
           </div>
 
-          {/* Tres cartoes em DINHEIRO. Antes eram aneis com porcentagem; ver o
-              comentario em `nadaEntrouNoPeriodo` para o motivo de terem saido.
-              O saldo fica em destaque e, embaixo, quanto entrou naquela parte —
-              e o "de quanto" que a porcentagem tentava dizer, agora numa
-              grandeza que se compara entre cartoes: dinheiro. */}
+          {/* Cinco cofrinhos em DINHEIRO (ver `cartoesDeSaldo`). Fila de cima:
+              Reposicao, Mao de obra e Despesas, no tamanho de sempre. Fila de
+              baixo, em versao baixa: Investimento e Lucro. O saldo fica em
+              destaque e, embaixo, quanto entrou naquela parte. */}
           <div className="flex gap-3 w-full">
             {cartoesDeSaldo.map(({ nome, saldo }) => (
               <CardDeSaldo
@@ -531,6 +508,23 @@ export const Dashboard: React.FC<DashboardProps> = ({
               />
             ))}
           </div>
+          <div className="flex gap-3 w-full">
+            <CardDeSaldo
+              compacto
+              nome="INVESTIMENTO"
+              saldo={balances.investimento.currentBalance || 0}
+              entrou={balances.investimento.accumulatedInflow || 0}
+              negativo={balances.investimento.isNegative}
+            />
+            <CardDeSaldo
+              compacto
+              destaque
+              nome={lucroNegativo ? 'PREJUÍZO' : 'LUCRO'}
+              saldo={balances.lucro.currentBalance || 0}
+              entrou={balances.lucro.accumulatedInflow || 0}
+              negativo={balances.lucro.isNegative}
+            />
+          </div>
 
           {/* Tres zeros sozinhos parecem "gastou tudo". Esta frase diz em
               palavras que o motivo e outro: nao chegou dinheiro. So quando os
@@ -541,34 +535,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </p>
           )}
 
-          {/* Desfaz a pilha "Despesas + Investimento" nos valores REAIS de cada
-              um — o mesmo numero que a aba Compras mostra no cartao de
-              Investimento. Mesmo formato de la, para as duas telas se lerem
-              igual. */}
-          <p className="text-[10px]" style={{ color: '#9A8FA0' }}>
-            Despesas {formatMoney(saldoDespesas)} · Investimento {formatMoney(saldoInvestimento)}
-          </p>
-
-          {/* A quinta parte da venda. Some quando nao houve pagamento nenhum:
-              "Lucro: $0,00" numa semana sem venda nao informa nada, e a frase
-              de cima ja explicou o vazio.
-
-              No negativo a palavra muda junto com a cor: "fica guardado" seria
-              falso — nao ha nada guardado, os pedidos sairam por menos do que
-              custaram, e chamar isso de lucro seria mentir na cor certa. */}
-          {!nadaEntrouNoPeriodo && (
-            <p className="text-[10px]" style={{ color: lucroNegativo ? '#C4626F' : '#9A8FA0' }}>
-              {lucroNegativo ? (
-                <>
-                  Prejuízo {vocab.daPeriodo}: {formatMoney(lucroRecebidoNoPeriodo)} — os pedidos
-                  saíram por menos do que custaram.
-                </>
-              ) : (
-                <>
-                  Lucro {vocab.daPeriodo}: {formatMoney(lucroRecebidoNoPeriodo)} — fica guardado,
-                  nenhum gasto sai daqui.
-                </>
-              )}
+          {/* Prejuizo: a frase diz em palavras o que o vermelho do cartao
+              mostra, porque "lucro negativo" sozinho nao explica a causa. */}
+          {!nadaEntrouNoPeriodo && lucroNegativo && (
+            <p className="text-[10px]" style={{ color: '#C4626F' }}>
+              Prejuízo {vocab.daPeriodo}: os pedidos saíram por menos do que custaram.
             </p>
           )}
         </div>
