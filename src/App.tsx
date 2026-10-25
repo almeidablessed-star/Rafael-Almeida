@@ -31,7 +31,6 @@ import {
 import { useAuth } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { PainelParceiroPage } from './pages/PainelParceiroPage';
-import { Header } from './components/Header';
 import { BottomNav } from './components/BottomNav';
 import { PeriodSelector } from './components/PeriodSelector';
 import { Dashboard } from './components/Dashboard';

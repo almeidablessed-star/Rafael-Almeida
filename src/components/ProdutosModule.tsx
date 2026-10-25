@@ -216,6 +216,14 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
    * errado depois.
    */
   const [alertaTocado, setAlertaTocado] = useState(false);
+  /**
+   * So no cadastro NOVO: "acabei de comprar esta embalagem" soma a embalagem
+   * ao que ja estava guardado. Pedido do Rafael (19/10 e 25/10/2026): quem
+   * cadastra a farinha logo depois de comprar esperava 2 kg guardados + 1 kg
+   * comprado = 3 kg, e o app gravava 2 kg. So mexe no estoque; o gasto da
+   * compra continua sendo lancado pela aba Compras.
+   */
+  const [acabeiDeComprar, setAcabeiDeComprar] = useState(false);
 
   /** Produto duplicado achado ao salvar (criar ou renomear) — guarda os dados
    * prontos pra salvar, pra "Criar mesmo assim" nao precisar remontar tudo. */
@@ -234,6 +242,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
       setNivelMinimoUnidade('g');
       setQuantidadeAtualUnidade('g');
       setAlertaTocado(false);
+      setAcabeiDeComprar(false);
       setEditingId(null);
     }
   }, [isAdding]);
@@ -283,7 +292,9 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
     const precoNum = parseNumeroDigitado(precoPago) || 0;
     const qtdEmbalagemNum = parseNumeroDigitado(quantidadeEmbalagem) || 1;
     const qtdAtualDigitada = parseNumeroDigitado(quantidadeAtual) || 0;
-    const qtdAtualNum = convertQuantity(qtdAtualDigitada, quantidadeAtualUnidade, unidadeEmbalagem) ?? qtdAtualDigitada;
+    const qtdGuardada = convertQuantity(qtdAtualDigitada, quantidadeAtualUnidade, unidadeEmbalagem) ?? qtdAtualDigitada;
+    // A embalagem ja esta na unidade em que o estoque e gravado.
+    const qtdAtualNum = !editingId && acabeiDeComprar ? qtdGuardada + qtdEmbalagemNum : qtdGuardada;
     const nivelMinNum = parseNumeroDigitado(nivelMinimo) || 0;
 
     const data: Omit<Produto, 'id'> = {
@@ -684,6 +695,24 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                               'Pode deixar em zero se ainda não comprou.'
                             }
                           />
+                          {!editingId && (
+                            <label className="flex items-start gap-2 cursor-pointer" style={{ fontSize: '12px', color: '#241B2B', fontFamily: "'Manrope', sans-serif", marginTop: '2px' }}>
+                              <input
+                                type="checkbox"
+                                checked={acabeiDeComprar}
+                                onChange={(e) => setAcabeiDeComprar(e.target.checked)}
+                                style={{ marginTop: '2px', accentColor: '#6E3F72', width: '16px', height: '16px', flexShrink: 0 }}
+                              />
+                              <span>
+                                Acabei de comprar esta embalagem
+                                {(parseNumeroDigitado(quantidadeEmbalagem) || 0) > 0 && (
+                                  <span style={{ color: '#7A6E80' }}>
+                                    {' '}— somar {quantidadeEmbalagem} {unidadeEmbalagem} ao que já tenho
+                                  </span>
+                                )}
+                              </span>
+                            </label>
+                          )}
                         </div>
                         <div className="flex flex-col gap-1.5">
                           <span className="flex items-center gap-1.5" style={{ ...ROTULO_COMANDA, color: '#C4626F' }}>

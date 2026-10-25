@@ -4,9 +4,11 @@
    Carula Confeitaria — camada visual do redesign
    ================================================================ */
 
-/* === GOOGLE FONTS === */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fredoka:wght@500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap');
+/* === GOOGLE FONTS ===
+   Manrope e Instrument Serif vem do <link> no index.html. Os dois @import
+   que ficavam aqui nunca carregaram (vinham depois de outras regras, e o
+   CSS ignora @import fora do topo) e o build avisava toda vez. Foram
+   removidos sem mudar nada na tela. */
 
 :root {
   /* === BRAND COLORS === */

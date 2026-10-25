@@ -1,7 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { toPng } from 'html-to-image';
-import jsPDF from 'jspdf';
 import { Transaction } from '../types';
 import { formatCurrency, formatDateBr } from '../utils/formatters';
 import { useAuth } from '../context/AuthContext';
@@ -658,6 +656,14 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
         // enviar ao cliente, nao para imprimir.
         // Fontes embutidas por nos, nao pela autodetecao da biblioteca — ver
         // o comentario em `buildFontEmbedCss` no topo do arquivo.
+        // As duas bibliotecas do PDF so carregam aqui, quando alguem gera um
+        // PDF: no import do topo elas iam no arquivo principal do app e
+        // pesavam na primeira abertura de toda usuaria, mesmo de quem nunca
+        // gera PDF (auditoria pre-venda, item "arquivo principal grande").
+        const [{ toPng }, { default: jsPDF }] = await Promise.all([
+          import('html-to-image'),
+          import('jspdf'),
+        ]);
         const fontEmbedCSS = await getFontEmbedCssCached();
 
         const capturaFolha = {

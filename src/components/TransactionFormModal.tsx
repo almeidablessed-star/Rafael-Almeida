@@ -49,6 +49,7 @@ import {
 import confetti from 'canvas-confetti';
 import { compressImageFile } from '../utils/imageCompression';
 import CampoData from './CampoData';
+import { exemplosContato } from '../utils/exemplosContato';
 
 const NOVO_REGISTRO_REDESIGN_HABILITADO = true;
 
@@ -124,7 +125,8 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   // Clientes grava via useCustomers.
   const { customers: storedCustomers, fetchCustomerPhoto } = useCustomers();
   const { fetchTransacaoFotos } = useTransacoes();
-  const { formatCurrency: formatMoney, symbol: currencySymbol } = useCurrency();
+  const { formatCurrency: formatMoney, symbol: currencySymbol, currency } = useCurrency();
+  const exemplos = exemplosContato(currency);
 
   const [type, setType] = useState<TransactionType>(initialType);
   const [isSaving, setIsSaving] = useState(false);
@@ -1365,7 +1367,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                     <label style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80' }}>Telefone / WhatsApp</label>
                     <input
                       type="text"
-                      placeholder="(781) 420-6892"
+                      placeholder={exemplos.telefone}
                       value={customerPhone}
                       onChange={(e) => setCustomerPhone(e.target.value)}
                       style={{ border: '1px solid rgba(58,35,80,0.14)', borderRadius: '10px', padding: '12px', fontSize: '15px', background: '#FAF7FA' }}
@@ -1376,7 +1378,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                     <label style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80' }}>Endereço de entrega</label>
                     <input
                       type="text"
-                      placeholder="Ex: 103 Cabot St, Beverly"
+                      placeholder={`Ex: ${exemplos.rua}, ${exemplos.cidades.split(",")[0]}`}
                       value={deliveryAddress}
                       onChange={(e) => setDeliveryAddress(e.target.value)}
                       style={{ border: '1px solid rgba(58,35,80,0.14)', borderRadius: '10px', padding: '12px', fontSize: '15px', background: '#FAF7FA' }}

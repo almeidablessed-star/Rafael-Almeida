@@ -77,8 +77,8 @@ export const ResetPasswordPage: React.FC = () => {
     if (!password || !confirmPassword) {
       return 'Preencha os dois campos';
     }
-    if (password.length < 6) {
-      return 'A senha deve ter no mínimo 6 caracteres';
+    if (password.length < 8) {
+      return 'A senha deve ter no mínimo 8 caracteres';
     }
     if (password !== confirmPassword) {
       return 'As senhas não conferem';
@@ -348,7 +348,7 @@ export const ResetPasswordPage: React.FC = () => {
           textAlign: 'center',
           marginTop: '20px',
         }}>
-          A senha deve ter no mínimo 6 caracteres
+          A senha deve ter no mínimo 8 caracteres
         </p>
 
         <button

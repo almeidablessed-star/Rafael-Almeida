@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { Customer, CustomerEvent } from '../types';
 import { formatDateBr, formatDayMonthOnly } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
+import { exemplosContato } from '../utils/exemplosContato';
 import { useCustomers } from '../context/CustomersContext';
 import { useAuth } from '../context/AuthContext';
 import { useDelayedDelete } from '../hooks/useDelayedDelete';
@@ -206,6 +207,8 @@ const DEFAULT_CUSTOMERS: Customer[] = [
 export const CustomersModule: React.FC = () => {
   const { customers: customersDoContexto, isLoading: isLoadingCustomers, error: customersError, addCustomer, updateCustomer, deleteCustomer, fetchCustomerPhoto } = useCustomers();
   const { userProfile } = useAuth();
+  const { currency } = useCurrency();
+  const exemplos = exemplosContato(currency);
   const [searchTerm, setSearchTerm] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -788,7 +791,7 @@ export const CustomersModule: React.FC = () => {
                     id="cliente-telefone"
                     type="text"
                     required
-                    placeholder="Ex: (781) 420-6892"
+                    placeholder={`Ex: ${exemplos.telefone}`}
                     value={phone}
                     onChange={(e) => {
                       setPhone(e.target.value);
@@ -879,7 +882,7 @@ export const CustomersModule: React.FC = () => {
                   <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Endereço</label>
                   <input
                     type="text"
-                    placeholder="Ex: 103 Cabot St"
+                    placeholder={`Ex: ${exemplos.rua}`}
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     className="border rounded-[10px] px-3 py-3 text-[15px]"
@@ -890,7 +893,7 @@ export const CustomersModule: React.FC = () => {
                   <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Cidade</label>
                   <input
                     type="text"
-                    placeholder="Ex: Beverly, Boston, Somerville..."
+                    placeholder={`Ex: ${exemplos.cidades}`}
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
                     className="border rounded-[10px] px-3 py-3 text-[15px]"

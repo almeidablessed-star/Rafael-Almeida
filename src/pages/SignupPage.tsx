@@ -43,8 +43,8 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onLoginClick }) => {
       return;
     }
 
-    if (password.length < 6) {
-      setError('A senha deve ter no mínimo 6 caracteres');
+    if (password.length < 8) {
+      setError('A senha deve ter no mínimo 8 caracteres');
       return;
     }
 
