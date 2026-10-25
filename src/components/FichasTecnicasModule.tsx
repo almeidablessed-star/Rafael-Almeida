@@ -2110,7 +2110,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
             referencia de preco), so garante que a decisao foi consciente —
             sem isso a ficha calcula CMV como zero em silencio. */}
         {confirmandoAvancarSemInsumos && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/60 backdrop-blur-xs p-4 animate-fadeIn" role="dialog" aria-modal="true">
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-neutral-900/60 backdrop-blur-xs p-4 animate-fadeIn" role="dialog" aria-modal="true">
             <div className="w-full max-w-sm bg-white rounded-xl shadow-highlight overflow-hidden animate-scaleUp">
               <div className="p-5 text-center">
                 <div

@@ -350,7 +350,7 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
       {/* Modal: Detalhes dos Pedidos do Dia */}
       {detailsDayStr && (
         <div
-          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 animate-fadeIn"
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-[99999] animate-fadeIn"
           onClick={() => setDetailsDayStr(null)}
         >
           <div
@@ -396,7 +396,7 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
       {/* Dialog: Confirmar Lançamento de Pedido em Dia Vazio */}
       {confirmEmptyDayStr && (
         <div
-          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 animate-fadeIn"
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-[99999] animate-fadeIn"
           onClick={() => setConfirmEmptyDayStr(null)}
         >
           <div

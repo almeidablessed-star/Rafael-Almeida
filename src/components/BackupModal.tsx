@@ -227,7 +227,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
                 Gerenciar Dados e Backup
               </h3>
               <p className="text-xs text-neutral-500">
-                Seus dados ficam 100% seguros salvos no seu celular
+                Seus lançamentos ficam guardados na sua conta
               </p>
             </div>
           </div>
@@ -330,7 +330,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
                 <span className="text-[11px] text-neutral-500">
                   {isExporting
                     ? 'Buscando as fotos dos pedidos — pode levar alguns segundos'
-                    : 'Salva um arquivo .json com todos os seus lançamentos'}
+                    : 'Salva um arquivo .json com todos os seus lançamentos (clientes, fichas e produtos não entram)'}
                 </span>
               </div>
             </div>

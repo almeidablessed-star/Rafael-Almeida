@@ -33,7 +33,7 @@ export const DuplicateNameWarningModal: React.FC<DuplicateNameWarningModalProps>
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/60 backdrop-blur-xs p-4 animate-fadeIn" role="dialog" aria-modal="true">
+    <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-neutral-900/60 backdrop-blur-xs p-4 animate-fadeIn" role="dialog" aria-modal="true">
       <div
         className="w-full max-w-sm bg-white overflow-hidden animate-scaleUp"
         style={{ borderRadius: '24px', boxShadow: '0 8px 20px rgba(58,35,80,0.09)', border: '1px solid rgba(58,35,80,0.08)' }}
