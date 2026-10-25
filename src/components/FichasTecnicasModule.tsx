@@ -2,6 +2,7 @@
 import { createPortal } from 'react-dom';
 import { FichaTecnica, IngredientUsage, Transaction, TamanhoOpcao, StockItem, Produto } from '../types';
 import { formatCurrency, parseNumeroDigitado } from '../utils/formatters';
+import { insumosDeTamanhoOpcao } from '../utils/fichaInsumos';
 import { useCurrency } from '../context/CurrencyContext';
 import { useFichasTecnicas } from '../context/FichasTecnicasContext';
 import { useProdutos } from '../context/ProdutosContext';
@@ -2226,9 +2227,20 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
             const getTamanhoDisplay = (tamanho: any, index: number) =>
               (tamanho.descricao || '').trim() || String(index + 1);
 
-            const ingList = ficha.ingredients || [];
             const isExpanded = expandedFichaId === ficha.id;
             const tamanhoSelecionado = getTamanhoSelecionado(ficha, selectedTamanhoIdByFicha[ficha.id]);
+
+            // Insumos DO TAMANHO escolhido, nao os da ficha.
+            //
+            // `ficha.ingredients` e um espelho do PRIMEIRO tamanho (ver o
+            // salvamento, mais acima): usando ela, trocar de 15 para 25 cm mudava
+            // mao de obra e custo, mas a reposicao ficava congelada na do 15 — e
+            // a lista aberta logo abaixo mostrava os ingredientes errados junto.
+            // Quem usa isso para decidir preco decidia pelo numero do menor.
+            //
+            // `insumosDeTamanhoOpcao` ja traz a rede: tamanho sem lista propria
+            // (ficha antiga) continua caindo na lista da ficha, como hoje.
+            const ingList = insumosDeTamanhoOpcao(ficha, tamanhoSelecionado);
 
             // Calcula os segmentos do gauge com base nos custos do tamanho selecionado
             const circumference = 2 * Math.PI * 35;
