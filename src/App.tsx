@@ -72,56 +72,10 @@ function AppContent() {
     limparTudo,
     fetchTransacoesComFotos,
   } = useTransacoes();
-  const [activeTab, setActiveTab] = useState<TabType>(() => {
-    const saved = localStorage.getItem('carula_activeTab') as TabType | null;
-    // Abas "Saldos" (renomeada para "Compras") e depois "Compras" e "Estoque"
-    // sairam do rodape (substituidas pelos filtros dentro de Produtos): quem
-    // tinha alguma delas salva como ultima aberta cairia numa tela em branco,
-    // ja que nenhum branch de activeTab casa mais com esses valores.
-    if (saved === 'saldos' || saved === 'compras' || saved === 'estoque') {
-      localStorage.setItem('carula_activeTab', 'produtos');
-      return 'produtos';
-    }
-    // `semana` era a aba "Fechamento da Semana" (WeeklyClosingModule), removida
-    // como codigo morto. Ela ja nao tinha botao no rodape havia tempo, mas quem
-    // a deixou salva como ultima aberta continuava caindo nela ao abrir o app —
-    // era a UNICA forma de alcanca-la. Sem esta linha, essas contas abririam
-    // numa tela em branco depois da remocao, exatamente o defeito que a
-    // migracao acima foi escrita para evitar.
-    //
-    // Vai para o Inicio, e nao para Produtos: o fechamento semanal era um
-    // resumo de faturamento, e quem o consultava procura hoje o card "Meta da
-    // Semana" e "Saldos & Divisao" do Dashboard.
-    if (saved === 'semana') {
-      localStorage.setItem('carula_activeTab', 'dashboard');
-      return 'dashboard';
-    }
-    // Mesmo caso de `semana`, para as tres telas irmas removidas na mesma
-    // limpeza: `vendas` (SalesModule), `reposicao` (RestockModule) e
-    // `historico` (HistoryModule). Nenhuma tinha botao no rodape, e a unica
-    // forma de chegar nelas era justamente esta chave — por isso a migracao
-    // nao e opcional.
-    //
-    // Cada uma vai para onde o assunto dela mora hoje:
-    // - `vendas` era a lista de vendas   -> Pedidos, que cumpre esse papel;
-    // - `reposicao` era a lista de compras de insumo -> Produtos, onde Compras
-    //   virou um filtro interno;
-    // - `historico` era a lista de todos os lancamentos -> Inicio, porque nao
-    //   existe mais uma tela unica equivalente e o Dashboard e o ponto neutro.
-    if (saved === 'vendas') {
-      localStorage.setItem('carula_activeTab', 'pedidos');
-      return 'pedidos';
-    }
-    if (saved === 'reposicao') {
-      localStorage.setItem('carula_activeTab', 'produtos');
-      return 'produtos';
-    }
-    if (saved === 'historico') {
-      localStorage.setItem('carula_activeTab', 'dashboard');
-      return 'dashboard';
-    }
-    return saved || 'dashboard';
-  });
+  // O app abre SEMPRE no Inicio (pedido do Rafael, 26/10/2026). Antes a
+  // ultima aba aberta ficava salva no aparelho (`carula_activeTab`) e o app
+  // reabria nela; essa chave deixou de ser usada e e apagada uma vez abaixo.
+  const [activeTab, setActiveTab] = useState<TabType>('dashboard');
   useCorDaBarraDoSistema(activeTab);
 
   // Period filter state
@@ -191,10 +145,14 @@ function AppContent() {
   // As transacoes chegam do TransacoesProvider, que busca ao logar. Nao ha mais
   // carga na montagem nem estado local: o provider e a fonte.
 
-  // Persist active tab to localStorage
+  // Limpa a chave antiga da ultima aba aberta, que nao e mais lida.
   useEffect(() => {
-    localStorage.setItem('carula_activeTab', activeTab);
-  }, [activeTab]);
+    try {
+      localStorage.removeItem('carula_activeTab');
+    } catch {
+      // Navegador sem localStorage (aba anonima restrita): nada a limpar.
+    }
+  }, []);
 
   // Fecha o modal de transacao ao trocar de aba: ele e um overlay fixed
   // inset-0 z-[99999] renderizado via portal, sem nenhuma ligacao com
