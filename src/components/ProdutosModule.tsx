@@ -81,14 +81,38 @@ const getPercentageBasedOnThreshold = (quantity: number, minThreshold: number): 
   return Math.min(100, 25 + slack);
 };
 
+/**
+ * Etiqueta do card do Estoque, em palavras do dia a dia. Antes era
+ * Critico/Alerta/Atencao/Normal/Alto, e "Alerta" (ate 25% acima do minimo)
+ * parecia "ja passou do limite" para quem tinha 4,7 kg com aviso em 4 kg. As
+ * faixas sao as mesmas de `getColorBasedOnThreshold`.
+ */
 const getStatusLabel = (quantity: number, minThreshold: number): string => {
-  if (quantity < minThreshold) return 'Crítico';
-  if (minThreshold <= 0) return quantity > 0 ? 'Alto' : 'Crítico';
+  if (quantity < minThreshold) return 'Comprar já';
+  if (minThreshold <= 0) return quantity > 0 ? 'Tranquilo' : 'Comprar já';
   const slack = ((quantity - minThreshold) / minThreshold) * 100;
-  if (slack < 25) return 'Alerta';
-  if (slack < 50) return 'Atenção';
-  if (slack < 75) return 'Normal';
-  return 'Alto';
+  if (slack < 25) return 'Perto de acabar';
+  if (slack < 50) return 'De olho';
+  return 'Tranquilo';
+};
+
+/**
+ * Arredonda para 2 casas sem o tropeco do ponto flutuante: 4,725 vira 4,73, e
+ * nao 4,72 (4,725 * 100 da 472,4999...). Passa antes pelas 3 casas, que sao
+ * exatas para quantidades digitadas em g/ml convertidas para kg/L.
+ */
+const arredonda2 = (valor: number): number => Math.round(Math.round(valor * 1000) / 10) / 100;
+
+/**
+ * A frase do card: quanto falta para o aviso, na unidade do aviso. Curta de
+ * proposito: no celular de 360px ela cabe numa linha so ao lado dos botoes.
+ */
+const fraseDoAviso = (quantity: number, minThreshold: number, unidade: string): string => {
+  if (minThreshold <= 0) return 'Sem aviso de compra';
+  const diferenca = arredonda2(quantity - minThreshold);
+  if (diferenca > 0) return `${formatQuantity(diferenca)} ${unidade} até o aviso`;
+  if (diferenca === 0) return 'Chegou no aviso';
+  return `${formatQuantity(-diferenca)} ${unidade} abaixo`;
 };
 
 const getCriticalityRank = (quantity: number, minThreshold: number): number => {
@@ -901,6 +925,9 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                 const colors = getColorBasedOnThreshold(qtdNormalizada, min);
                 const displayPercentage = getPercentageBasedOnThreshold(qtdNormalizada, min);
                 const isCritical = qtdNormalizada < min || (min <= 0 && qtdNormalizada <= 0);
+                // Quantidade e aviso na MESMA unidade (a do aviso): "4.725 g"
+                // ao lado de "4 kg" obrigava a fazer a conta de cabeca.
+                const unidadeDoAviso = p.nivelMinimoUnidade || p.unidadeEmbalagem;
 
                 return (
                   <div
@@ -912,8 +939,8 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                       <path d="M8 60a30 30 0 0 1 60 0" fill="none" stroke="#F1ECF2" strokeWidth="10" strokeLinecap="round" />
                       <path d="M8 60a30 30 0 0 1 60 0" fill="none" stroke={colors.stroke} strokeWidth="10" strokeLinecap="round"
                         strokeDasharray={`${displayPercentage * (Math.PI * 30 / 100)} ${Math.PI * 30}`} />
-                      <text x="38" y="58" textAnchor="middle" fontSize="12" fontWeight="900" fill={colors.stroke} fontFamily="'Manrope', sans-serif">
-                        {Math.round(displayPercentage)}%
+                      <text x="38" y="58" textAnchor="middle" fontSize="11" fontWeight="900" fill={colors.stroke} fontFamily="'Manrope', sans-serif">
+                        {formatQuantity(arredonda2(qtdNormalizada))} {unidadeDoAviso}
                       </text>
                     </svg>
 
@@ -933,7 +960,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                       </div>
 
                       <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-[10.5px]" style={{ color: '#7A6E80' }}>Alerta quando menor que:</span>
+                        <span className="text-[10.5px]" style={{ color: '#7A6E80' }}>Avisar abaixo de:</span>
                         <div className="flex items-center" style={{ background: '#F6F2F5', border: '1px solid rgba(36,27,43,.08)', borderRadius: '10px', padding: '2px' }}>
                           <button
                             onClick={() => handleQuickAdjustThreshold(p, -getThresholdDelta(p.nivelMinimoUnidade || 'g'))}
@@ -952,8 +979,8 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                       </div>
 
                       <div className="flex items-center justify-between gap-2 mt-0.5">
-                        <div style={{ fontSize: '13px', fontWeight: 800, color: '#241B2B', background: '#F6F2F5', border: '1px solid rgba(36,27,43,.08)', borderRadius: '12px', padding: '7px 14px', whiteSpace: 'nowrap' }}>
-                          {formatQuantity(qtd)} <span style={{ fontSize: '10px', fontWeight: 600, color: '#8A7E90' }}>{p.unidadeEmbalagem}</span>
+                        <div style={{ fontSize: '11px', fontWeight: 800, color: colors.text, background: '#F6F2F5', border: '1px solid rgba(36,27,43,.08)', borderRadius: '12px', padding: '7px 9px', whiteSpace: 'nowrap', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {fraseDoAviso(qtdNormalizada, min, unidadeDoAviso)}
                         </div>
                         <div className="flex items-center gap-1">
                           <button onClick={() => handleOpenEdit(p)} className="hover:bg-[#EFE6F0] transition-colors" style={{ width: '28px', height: '28px', borderRadius: '9px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
