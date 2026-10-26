@@ -131,3 +131,53 @@ export const compressImageFile = (file: File): Promise<string> =>
 
     reader.readAsDataURL(file);
   });
+
+/** Lado da miniatura, em px. A lista mostra a foto num circulo de ~44 px; o
+ * dobro cobre tela retina. */
+const LADO_MINIATURA = 96;
+
+/**
+ * Miniatura quadrada (recorte do centro) de uma foto ja guardada como data URI.
+ *
+ * A lista de clientes nao carrega a foto inteira (cada uma tem 70 a 600 KB em
+ * base64, e a lista inteira passava de 2,7 MB numa conta de 10 clientes). Ela
+ * carrega esta miniatura, de uns 4 a 8 KB, gravada ao lado da foto.
+ *
+ * Devolve null se a imagem nao puder ser desenhada — a lista volta a mostrar a
+ * inicial do nome, como antes.
+ */
+export const gerarMiniatura = (dataUrl: string): Promise<string | null> =>
+  new Promise((resolve) => {
+    const img = new Image();
+    img.onerror = () => resolve(null);
+    img.onload = () => {
+      try {
+        const lado = Math.min(img.width, img.height);
+        const canvas = document.createElement('canvas');
+        canvas.width = LADO_MINIATURA;
+        canvas.height = LADO_MINIATURA;
+        const ctx = canvas.getContext('2d');
+        if (!ctx || lado === 0) {
+          resolve(null);
+          return;
+        }
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, LADO_MINIATURA, LADO_MINIATURA);
+        ctx.drawImage(
+          img,
+          (img.width - lado) / 2,
+          (img.height - lado) / 2,
+          lado,
+          lado,
+          0,
+          0,
+          LADO_MINIATURA,
+          LADO_MINIATURA
+        );
+        resolve(canvas.toDataURL('image/jpeg', 0.75));
+      } catch {
+        resolve(null);
+      }
+    };
+    img.src = dataUrl;
+  });

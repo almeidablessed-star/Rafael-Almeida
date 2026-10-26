@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { gerarMiniatura } from '../utils/imageCompression';
 import { useAuth } from './AuthContext';
 import { Customer, CustomerEvent } from '../types';
 
@@ -33,6 +34,7 @@ interface SupabaseCustomer {
   telefone: string;
   endereco?: string;
   photoUrl?: string;
+  foto_mini?: string | null;
   city?: string;
   notes?: string;
   eventDate?: string;
@@ -59,6 +61,7 @@ const mapSupabaseToCustomer = (data: SupabaseCustomer): Customer => ({
   name: data.nome,
   phone: data.telefone,
   photoUrl: data.photoUrl,
+  fotoMini: data.foto_mini || undefined,
   eventDate: data.eventDate,
   recurringEventTitle: data.recurringEventTitle,
   additionalEvents: data.additionalEvents || undefined,
@@ -68,10 +71,22 @@ const mapSupabaseToCustomer = (data: SupabaseCustomer): Customer => ({
   createdAt: new Date(data.created_at).getTime(),
 });
 
+/**
+ * Foto e miniatura andam juntas, e `undefined` quer dizer "a foto nao foi
+ * carregada nesta tela": as duas colunas ficam de FORA do update e o banco
+ * mantem o que tinha. Antes `undefined` virava NULL, entao salvar a edicao
+ * antes de a foto terminar de carregar (~2 s) apagava a foto da cliente.
+ * Mesmo cuidado de `fotoOuOmitida` em TransacoesContext.
+ */
+const fotoEMiniatura = async (photoUrl: string | undefined) => {
+  if (photoUrl === undefined) return {};
+  if (!photoUrl) return { photoUrl: null, foto_mini: null };
+  return { photoUrl, foto_mini: await gerarMiniatura(photoUrl) };
+};
+
 const mapCustomerToSupabase = (customer: Omit<Customer, 'id' | 'createdAt'>) => ({
   nome: customer.name,
   telefone: customer.phone,
-  photoUrl: customer.photoUrl || null,
   eventDate: customer.eventDate || null,
   recurringEventTitle: customer.recurringEventTitle || null,
   additionalEvents: customer.additionalEvents || [],
@@ -105,18 +120,66 @@ export const CustomersProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
       const { data, error: fetchError } = await supabase
         .from('clientes')
-        .select('id,usuaria_id,nome,telefone,endereco,city,notes,eventDate,recurringEventTitle,additionalEvents,created_at')
+        // Sem `photoUrl` (a foto inteira, pesada) mas COM `foto_mini`: a lista
+        // mostra a miniatura. Ate 25/10/2026 a lista vinha sem foto nenhuma, e
+        // a foto so aparecia depois de abrir "Editar" — e sumia ao reabrir.
+        .select('id,usuaria_id,nome,telefone,endereco,city,notes,eventDate,recurringEventTitle,additionalEvents,created_at,foto_mini')
         .eq('usuaria_id', user.id)
         .order('created_at', { ascending: false });
 
       if (fetchError) throw fetchError;
 
       setCustomers(data?.map(mapSupabaseToCustomer) || []);
+      void gerarMiniaturasQueFaltam();
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar clientes');
       console.error('Error fetching customers:', err);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  /**
+   * Clientes cadastradas antes da miniatura existir: tem foto, mas `foto_mini`
+   * vazia. Uma vez por sessao, busca a foto de cada uma (so dessas), gera a
+   * miniatura e grava — depois disso a lista ja as mostra com foto. Uma por
+   * vez, para nao baixar todas as fotos pesadas ao mesmo tempo no 4G.
+   */
+  const miniaturasEmAndamentoRef = useRef(false);
+  const gerarMiniaturasQueFaltam = async () => {
+    if (!user || miniaturasEmAndamentoRef.current) return;
+    miniaturasEmAndamentoRef.current = true;
+    try {
+      const { data: pendentes, error: erroPendentes } = await supabase
+        .from('clientes')
+        .select('id')
+        .eq('usuaria_id', user.id)
+        .not('photoUrl', 'is', null)
+        .is('foto_mini', null);
+      if (erroPendentes || !pendentes) return;
+
+      for (const { id } of pendentes) {
+        const { data: linha } = await supabase
+          .from('clientes')
+          .select('photoUrl')
+          .eq('id', id)
+          .eq('usuaria_id', user.id)
+          .single();
+        if (!linha?.photoUrl) continue;
+        const mini = await gerarMiniatura(linha.photoUrl);
+        if (!mini) continue;
+        const { error: erroGravar } = await supabase
+          .from('clientes')
+          .update({ foto_mini: mini })
+          .eq('id', id)
+          .eq('usuaria_id', user.id);
+        if (erroGravar) continue;
+        setCustomers((prev) => prev.map((c) => (c.id === String(id) ? { ...c, fotoMini: mini } : c)));
+      }
+    } catch (err) {
+      console.error('Erro ao gerar miniaturas das clientes:', err);
+    } finally {
+      miniaturasEmAndamentoRef.current = false;
     }
   };
 
@@ -147,7 +210,7 @@ export const CustomersProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       setError(null);
       const { data, error: insertError } = await supabase
         .from('clientes')
-        .insert([{ usuaria_id: user.id, ...mapCustomerToSupabase(customerData) }])
+        .insert([{ usuaria_id: user.id, ...mapCustomerToSupabase(customerData), ...(await fotoEMiniatura(customerData.photoUrl)) }])
         .select()
         .single();
 
@@ -171,7 +234,7 @@ export const CustomersProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       setError(null);
       const { data, error: updateError } = await supabase
         .from('clientes')
-        .update(mapCustomerToSupabase(customerData))
+        .update({ ...mapCustomerToSupabase(customerData), ...(await fotoEMiniatura(customerData.photoUrl)) })
         .eq('id', parseInt(id))
         .eq('usuaria_id', user.id)
         .select()

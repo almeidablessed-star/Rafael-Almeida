@@ -242,6 +242,15 @@ export const CustomersModule: React.FC = () => {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [photoUrl, setPhotoUrl] = useState('');
+  /**
+   * A foto da cliente em edicao ja chegou do banco (ou nao ha foto a buscar)?
+   * Enquanto nao, salvar manda a foto como "nao carregada" e o banco mantem a
+   * que tem — antes, salvar nesse intervalo de ~2 s apagava a foto.
+   */
+  const [fotoCarregada, setFotoCarregada] = useState(true);
+  /** Cliente cuja foto esta sendo buscada; evita que a foto de uma caia no
+   * formulario de outra quando se abre duas em seguida. */
+  const fotoDaClienteRef = useRef<string | null>(null);
   const [eventDate, setEventDate] = useState('');
   const [recurringEventTitle, setRecurringEventTitle] = useState('Aniversário');
   const [additionalEvents, setAdditionalEvents] = useState<CustomerEvent[]>([]);
@@ -260,6 +269,8 @@ export const CustomersModule: React.FC = () => {
     setName('');
     setPhone('');
     setPhotoUrl('');
+    setFotoCarregada(true);
+    fotoDaClienteRef.current = null;
     setEventDate('');
     setRecurringEventTitle('Aniversário');
     setAdditionalEvents([]);
@@ -285,8 +296,16 @@ export const CustomersModule: React.FC = () => {
     setInvalidFieldId(null);
 
     if (!c.photoUrl) {
+      setFotoCarregada(false);
+      fotoDaClienteRef.current = c.id;
       const photo = await fetchCustomerPhoto(c.id);
+      // Outra cliente foi aberta enquanto esta foto vinha: descarta.
+      if (fotoDaClienteRef.current !== c.id) return;
       if (photo) setPhotoUrl(photo);
+      setFotoCarregada(true);
+    } else {
+      setFotoCarregada(true);
+      fotoDaClienteRef.current = null;
     }
   };
 
@@ -341,7 +360,10 @@ export const CustomersModule: React.FC = () => {
     const customerData: Omit<Customer, 'id' | 'createdAt'> = {
       name: name.trim(),
       phone: phone.trim(),
-      photoUrl: photoUrl || undefined,
+      // `undefined` = "nao mexer na foto" (ver `fotoEMiniatura` no
+      // CustomersContext). So quando a foto ainda nao chegou do banco e a
+      // pessoa nao escolheu outra; nesse caso a foto gravada fica como esta.
+      photoUrl: photoUrl ? photoUrl : fotoCarregada ? '' : undefined,
       eventDate: eventDate || undefined,
       recurringEventTitle: recurringEventTitle.trim() || 'Aniversário',
       additionalEvents: additionalEvents.filter((ev) => ev.title && ev.date),
@@ -1044,8 +1066,10 @@ export const CustomersModule: React.FC = () => {
                       flexShrink: 0,
                     }}
                   >
-                    {c.photoUrl ? (
-                      <img src={c.photoUrl} alt={c.name} className="w-full h-full object-cover" style={{ borderRadius: '50%' }} />
+                    {/* Miniatura primeiro: e ela que vem na lista. A foto inteira
+                        so existe aqui logo depois de editar nesta sessao. */}
+                    {c.fotoMini || c.photoUrl ? (
+                      <img src={c.fotoMini || c.photoUrl} alt={c.name} className="w-full h-full object-cover" style={{ borderRadius: '50%' }} />
                     ) : (
                       c.name.charAt(0).toUpperCase()
                     )}

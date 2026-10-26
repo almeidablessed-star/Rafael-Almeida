@@ -134,6 +134,9 @@ export interface Customer {
   name: string;
   phone: string;
   photoUrl?: string; // Base64 or image URL of customer
+  /** Miniatura 96x96 da foto (coluna `foto_mini`), so para a lista. A foto
+   * inteira nao vem na lista; ver CustomersContext. */
+  fotoMini?: string;
   eventDate?: string; // YYYY-MM-DD
   recurringEventTitle?: string; // e.g. "Aniversário"
   additionalEvents?: CustomerEvent[];
