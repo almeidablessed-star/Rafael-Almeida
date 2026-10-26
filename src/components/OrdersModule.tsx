@@ -429,6 +429,9 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
         ) : (
           filteredSales.map((tx) => {
             const isPending = tx.paymentStatus === 'pendente';
+            // Com sinal o card ganha uma linha a mais; os respiros encolhem o
+            // mesmo tanto para ele ficar da altura de um card sem sinal.
+            const temSinal = !!tx.signalValue;
 
             return (
               <div
@@ -476,8 +479,8 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
 
                 {/* Content */}
                 <div
-                  className="flex flex-col items-start justify-between gap-[9px]"
-                  style={{ padding: '16px 18px 16px 22px' }}
+                  className={`flex flex-col items-start justify-between ${temSinal ? 'gap-[5px]' : 'gap-[9px]'}`}
+                  style={{ padding: temSinal ? '13px 18px 8px 22px' : '16px 18px 16px 22px' }}
                 >
 
                   <div className="flex-1 min-w-0 space-y-2">
@@ -511,18 +514,15 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                     </div>
                   </div>
 
-                  <div
-                    className="flex flex-row items-center justify-between w-full shrink-0 gap-3 border-t border-dashed border-[rgba(36,27,43,0.14)] pt-[11px]"
-                  >
+                  <div className={`w-full shrink-0 border-t border-dashed border-[rgba(36,27,43,0.14)] ${temSinal ? 'pt-[8px]' : 'pt-[11px]'}`}>
+                  {/* Valor e botoes sempre na mesma linha; o sinal vai para a
+                      linha de baixo, inteira, em vez de espremer ao lado dos
+                      botoes e quebrar em varias linhas. */}
+                  <div className="flex flex-row items-center justify-between w-full gap-3">
                     <div className="text-left">
                       <span className="font-black text-[var(--color-ink)]" style={{ fontSize: '17px', fontWeight: 800, color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>
                         {formatMoney(tx.totalValue)}
                       </span>
-                      {tx.signalValue && (
-                        <div style={{ fontSize: '11px', color: '#7A6E80', fontFamily: "'Manrope', sans-serif", marginTop: '4px' }}>
-                          💰 Sinal: {formatMoney(tx.signalValue)} | Restante: {formatMoney((tx.totalValue || 0) - (tx.signalValue || 0))}
-                        </div>
-                      )}
                     </div>
 
                     <div className="flex items-center gap-[6px]">
@@ -541,7 +541,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                         <button
                           onClick={(e) => { e.stopPropagation(); onTogglePaymentStatus(tx); }}
                           className="rounded-full transition-all flex items-center gap-1 cursor-pointer active:scale-95 hover:translate-y-[-2px]"
-                          style={{ fontSize: '9px', fontWeight: 800, color: '#26402F', background: '#A9D8B8', padding: '5px 10px', fontFamily: "'Manrope', sans-serif" }}
+                          style={{ fontSize: '9px', fontWeight: 800, color: '#26402F', background: '#A9D8B8', width: '53px', padding: '5px 0', justifyContent: 'center', whiteSpace: 'nowrap', fontFamily: "'Manrope', sans-serif" }}
                           title="Clique para marcar este pedido como PAGO"
                         >
                           <span>✅ Pago</span>
@@ -550,7 +550,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                         <button
                           onClick={(e) => { e.stopPropagation(); onTogglePaymentStatus(tx); }}
                           className="rounded-full transition-all flex items-center gap-1 cursor-pointer active:scale-95 hover:translate-y-[-2px]"
-                          style={{ fontSize: '9px', fontWeight: 700, color: '#5B4A2E', background: '#F0E2C8', padding: '5px 10px', fontFamily: "'Manrope', sans-serif" }}
+                          style={{ fontSize: '9px', fontWeight: 700, color: '#5B4A2E', background: '#F0E2C8', width: '53px', padding: '5px 0', justifyContent: 'center', whiteSpace: 'nowrap', fontFamily: "'Manrope', sans-serif" }}
                           title="Clique para alterar este pedido para PENDENTE"
                         >
                           <span>Pendente</span>
@@ -583,6 +583,12 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                       </button>
                     )}
                     </div>
+                  </div>
+                  {temSinal && (
+                    <div style={{ fontSize: '10px', lineHeight: '13px', color: '#7A6E80', fontFamily: "'Manrope', sans-serif", marginTop: '5px' }}>
+                      💰 Sinal: {formatMoney(tx.signalValue)} | Restante: {formatMoney((tx.totalValue || 0) - (tx.signalValue || 0))}
+                    </div>
+                  )}
                   </div>
                 </div>
               </div>
