@@ -745,24 +745,28 @@ export const CustomersModule: React.FC = () => {
             className="w-full h-full sm:h-auto sm:max-w-[430px] sm:max-h-[90vh] bg-[#F6F2F5] sm:rounded-[24px] overflow-hidden flex flex-col"
             style={{ boxShadow: '0 30px 70px rgba(58,35,80,0.26)' }}
           >
-            {/* Cabecalho gradiente — mesmo padrao validado do resto do app */}
+            {/* Cabecalho gradiente — topo e titulo iguais ao "Editar Produto":
+                o safe-area + `--topo-ios27` descem o titulo para baixo do
+                relogio e do brilho do iOS 27 no app instalado. */}
             <div
-              style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 55%, #A85E86 100%)' }}
-              className="px-[18px] pt-[18px] pb-5 flex flex-col gap-4 flex-shrink-0"
+              style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)', paddingTop: 'calc(14px + env(safe-area-inset-top, 0px) + var(--topo-ios27, 0px))' }}
+              className="px-5 pb-5 flex flex-col gap-4 flex-shrink-0"
             >
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-[10px] font-bold tracking-[0.16em] uppercase text-white/65">Clientes</span>
-                  <span className="font-serif-display text-2xl leading-tight text-white">
+              <div className="flex items-end justify-between gap-3">
+                <div className="flex flex-col gap-1 min-w-0">
+                  <span style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '.2em', color: 'rgba(247,220,225,.8)' }}>CLIENTES</span>
+                  <h3 className="text-white" style={{ fontFamily: "'Instrument Serif', serif", fontSize: '28px', lineHeight: 1.1, fontWeight: 400 }}>
                     {editingId ? 'Editar Cadastro' : 'Nova(o) Cliente'}
-                  </span>
+                  </h3>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsFormOpen(false)}
-                  className="w-8 h-8 rounded-[10px] bg-white/15 hover:bg-white/25 flex items-center justify-center text-white transition-colors flex-shrink-0"
+                  className="flex items-center justify-center text-white flex-shrink-0 transition-colors hover:bg-white/25"
+                  style={{ width: '36px', height: '36px', borderRadius: '11px', background: 'rgba(255,255,255,.16)' }}
+                  aria-label="Fechar"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-3.5 h-3.5" strokeWidth={2.4} />
                 </button>
               </div>
               <div className="flex items-center gap-3.5">
