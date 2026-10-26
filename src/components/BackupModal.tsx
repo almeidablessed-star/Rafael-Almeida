@@ -2,19 +2,16 @@ import React, { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Transaction } from '../types';
 import { X, Download, Upload, Trash2, Database, ShieldCheck } from 'lucide-react';
+import {
+  BackupCompleto,
+  ehBackupCompleto,
+  montarBackupCompleto,
+  restaurarBackupCompleto,
+  validarBackupCompleto,
+} from '../utils/backupCompleto';
 
 interface BackupModalProps {
   isOpen: boolean;
-  /**
-   * Busca os lancamentos COM as fotos, so na hora de exportar.
-   *
-   * Antes o modal exportava a lista que ja estava em memoria, mas ela nao
-   * carrega mais `cliente_foto_url` nem `imagem_inspiracao`
-   * (ver `COLUNAS_SEM_FOTO`). Exportar direto dela geraria
-   * um arquivo sem fotos — e como a restauracao apaga tudo e regrava a partir
-   * do arquivo, restaurar esse backup apagaria as fotos de forma irreversivel.
-   */
-  onExportTransactions: () => Promise<Transaction[]>;
   onClose: () => void;
   // Assincronos desde que as transacoes passaram a viver no Supabase: o aviso
   // de sucesso precisa esperar a gravacao, nao adiantar-se a ela.
@@ -120,7 +117,6 @@ const ehFalhaSemResposta = (err: any) =>
 
 export const BackupModal: React.FC<BackupModalProps> = ({
   isOpen,
-  onExportTransactions,
   onClose,
   onRestoreTransactions,
   onClearAll,
@@ -130,6 +126,8 @@ export const BackupModal: React.FC<BackupModalProps> = ({
   const [isExporting, setIsExporting] = useState(false);
   // Arquivo ja conferido, esperando a confeiteira confirmar a troca.
   const [restauracaoPendente, setRestauracaoPendente] = useState<Transaction[] | null>(null);
+  // Backup completo (versao 2) ja conferido, esperando a confirmacao.
+  const [completoPendente, setCompletoPendente] = useState<BackupCompleto | null>(null);
   const [tamanhoArquivo, setTamanhoArquivo] = useState(0);
   const [isRestoring, setIsRestoring] = useState(false);
   /**
@@ -190,9 +188,9 @@ export const BackupModal: React.FC<BackupModalProps> = ({
 
   const exportJsonBackup = async () => {
     setIsExporting(true);
-    let paraExportar: Transaction[];
+    let paraExportar: BackupCompleto;
     try {
-      paraExportar = await onExportTransactions();
+      paraExportar = await montarBackupCompleto();
     } catch (err: any) {
       // Melhor nao gerar arquivo nenhum do que gerar um backup incompleto: a
       // restauracao regrava a partir dele e o que faltar sera perdido.
@@ -233,6 +231,17 @@ export const BackupModal: React.FC<BackupModalProps> = ({
       }
       // Nada e apagado aqui: o arquivo so e conferido. A troca so acontece
       // depois da confirmacao, em `confirmarRestauracao`.
+      if (ehBackupCompleto(parsed)) {
+        const erro = validarBackupCompleto(parsed);
+        if (erro) {
+          alert(erro);
+          return;
+        }
+        setTamanhoArquivo(file.size);
+        setCompletoPendente(parsed);
+        return;
+      }
+      // Arquivo antigo (versao 1): so lancamentos, pelo caminho de sempre.
       const resultado = validarBackup(parsed);
       if (!resultado.ok || !resultado.itens) {
         alert(resultado.erro);
@@ -267,7 +276,34 @@ export const BackupModal: React.FC<BackupModalProps> = ({
     }
   };
 
+  const confirmarRestauracaoCompleta = async () => {
+    if (!completoPendente) return;
+    setIsRestoring(true);
+    try {
+      const r = await restaurarBackupCompleto(completoPendente);
+      alert(
+        `Backup restaurado com sucesso!\n\n${r.fichas} ficha(s), ${r.produtos} produto(s), ` +
+          `${r.clientes} cliente(s) e ${r.transacoes} lançamento(s).`
+      );
+      // Clientes, fichas, produtos, empresa e lancamentos vivem em contextos
+      // diferentes: recarregar o app busca tudo de novo de uma vez.
+      window.location.reload();
+    } catch (err: any) {
+      if (ehFalhaSemResposta(err)) {
+        alert('Não foi possível confirmar a restauração. Confira seus dados antes de tentar de novo.');
+      } else {
+        // O banco respondeu com erro, e a troca e uma transacao so: nada foi
+        // apagado.
+        alert(`Não foi possível restaurar o backup. Seus dados continuam como estavam.\n\n${err?.message || err}`);
+      }
+      setIsRestoring(false);
+    }
+  };
+
   const datasDoArquivo = (restauracaoPendente || []).map((t) => t.date).sort();
+  const dataDoCompleto = completoPendente?.criadoEm
+    ? new Date(completoPendente.criadoEm).toLocaleDateString('pt-BR')
+    : null;
 
   return createPortal(
     <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-neutral-900/80 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto">
@@ -293,6 +329,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
               // O modal fica montado fechado; sem isto a confirmacao pendente
               // reapareceria na proxima vez que ele abrisse.
               setRestauracaoPendente(null);
+              setCompletoPendente(null);
               setArquivoPronto(null);
               onClose();
             }}
@@ -335,6 +372,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
             </button>
             <span className="text-[11px]" style={{ color: '#7A6E80' }}>
               Escolha "Salvar em Arquivos", ou envie para o seu WhatsApp ou e-mail.
+              Guarde num lugar só seu: o arquivo tem os contatos das suas clientes.
             </span>
           </div>
         )}
@@ -391,8 +429,67 @@ export const BackupModal: React.FC<BackupModalProps> = ({
           </div>
         )}
 
+        {/* Confirmacao do backup completo (versao 2). */}
+        {completoPendente && (
+          <div className="space-y-3 pt-1">
+            <h4 className="font-bold text-sm text-neutral-900">Substituir todos os seus dados?</h4>
+            <p className="text-xs text-neutral-700 leading-relaxed">
+              O arquivo{dataDoCompleto ? <> é de <strong>{dataDoCompleto}</strong> e</> : ''} tem:
+            </p>
+            <ul className="text-xs text-neutral-800 leading-relaxed bg-neutral-50 border border-neutral-200 rounded-lg p-3 space-y-0.5">
+              <li><strong>{completoPendente.fichas?.length || 0}</strong> ficha(s) técnica(s)</li>
+              <li><strong>{completoPendente.produtos?.length || 0}</strong> produto(s) do estoque</li>
+              <li><strong>{completoPendente.clientes?.length || 0}</strong> cliente(s)</li>
+              <li><strong>{completoPendente.transacoes?.length || 0}</strong> lançamento(s)</li>
+              <li>Minha Empresa: custos fixos, metas e dados da confeitaria</li>
+            </ul>
+            <p className="text-xs text-neutral-700 leading-relaxed">
+              Tudo o que você tem agora será apagado e trocado pelo que está no arquivo.
+            </p>
+            <p className="text-xs text-amber-900 bg-amber-50 border border-amber-200 rounded-lg p-3 leading-relaxed">
+              <strong>As fotos não voltam:</strong> o backup não guarda fotos. Fichas, clientes e pedidos
+              voltam completos, mas sem as imagens.
+            </p>
+            {tamanhoArquivo > LIMITE_AVISO_BYTES && (
+              <p className="text-xs text-amber-900 bg-amber-50 border border-amber-200 rounded-lg p-3 leading-relaxed">
+                Este backup é grande e pode não restaurar de uma vez. Se falhar, nada será apagado.
+              </p>
+            )}
+            <p className="text-xs text-amber-900 bg-amber-50 border border-amber-200 rounded-lg p-3 leading-relaxed">
+              O histórico de movimentos do estoque é apagado. A quantidade de cada produto volta como
+              estava no dia do backup.
+            </p>
+            <button
+              onClick={exportJsonBackup}
+              disabled={isExporting || isRestoring}
+              className="w-full p-3 bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 rounded-lg flex items-center gap-3 text-left transition-all active:scale-98 disabled:opacity-60"
+            >
+              <Download className="w-5 h-5 text-pink-500 shrink-0" />
+              <span className="font-bold text-xs text-neutral-800">
+                {isExporting ? 'Preparando cópia...' : 'Antes, baixar uma cópia do que tenho agora'}
+              </span>
+            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setCompletoPendente(null)}
+                disabled={isRestoring}
+                className="flex-1 p-3 bg-white border border-[#E6E1DB] rounded-lg font-bold text-xs text-neutral-700 disabled:opacity-60"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmarRestauracaoCompleta}
+                disabled={isRestoring || isExporting}
+                className="flex-1 p-3 bg-rose-600 hover:bg-rose-700 rounded-lg font-bold text-xs text-white disabled:opacity-60 disabled:cursor-wait"
+              >
+                {isRestoring ? 'Restaurando...' : 'Substituir pelo arquivo'}
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Actions List */}
-        <div className={restauracaoPendente ? 'hidden' : 'space-y-2 pt-1'}>
+        <div className={restauracaoPendente || completoPendente ? 'hidden' : 'space-y-2 pt-1'}>
           {/* Download Backup */}
           <button
             onClick={exportJsonBackup}
@@ -409,8 +506,8 @@ export const BackupModal: React.FC<BackupModalProps> = ({
                 </span>
                 <span className="text-[11px] text-neutral-500">
                   {isExporting
-                    ? 'Buscando as fotos dos pedidos — pode levar alguns segundos'
-                    : 'Salva um arquivo .json com todos os seus lançamentos (clientes, fichas e produtos não entram)'}
+                    ? 'Juntando seus dados — pode levar alguns segundos'
+                    : 'Salva um arquivo .json com fichas, produtos, clientes, Minha Empresa e lançamentos (as fotos não entram)'}
                 </span>
               </div>
             </div>
@@ -428,7 +525,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
                   Restaurar Backup de Arquivo
                 </span>
                 <span className="text-[11px] text-neutral-500">
-                  Carregar lançamentos a partir de um arquivo de backup
+                  Trocar seus dados pelos de um arquivo de backup
                 </span>
               </div>
             </div>

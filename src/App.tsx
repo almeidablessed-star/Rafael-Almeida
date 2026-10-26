@@ -86,7 +86,6 @@ function AppContent() {
     deleteTransacao,
     substituirTudo,
     limparTudo,
-    fetchTransacoesComFotos,
   } = useTransacoes();
   // O app abre SEMPRE no Inicio (pedido do Rafael, 26/10/2026). Antes a
   // ultima aba aberta ficava salva no aparelho (`carula_activeTab`) e o app
@@ -674,7 +673,6 @@ function AppContent() {
       {/* Backup and Data Management Modal */}
       <BackupModal
         isOpen={isBackupModalOpen}
-        onExportTransactions={fetchTransacoesComFotos}
         onClose={() => setIsBackupModalOpen(false)}
         onRestoreTransactions={handleRestoreTransactions}
         onClearAll={handleClearAll}
