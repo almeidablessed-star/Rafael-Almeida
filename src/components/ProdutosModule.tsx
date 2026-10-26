@@ -381,40 +381,39 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
           marginTop: 'calc(0px - env(safe-area-inset-top, 0px))',
         }}
       >
+        {/* Mesmas medidas do cabecalho de Fichas, Clientes e Empresa: 40 px de
+            topo, titulo em 31 px e 120 px de roxo abaixo, com a folha subindo
+            70 px. Antes este tinha 24 px, titulo em 29 px, uma linha so para o
+            selo de estoque baixo acima do titulo e um texto de apoio embaixo —
+            a folha comecava ~40 px mais abaixo que nas outras abas (pedido do
+            Rafael, 26/10/2026). */}
         <div
-          className="px-5 flex flex-col gap-2"
-          style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)', paddingTop: 'calc(24px + env(safe-area-inset-top, 0px) + var(--topo-ios27, 0px))', paddingBottom: '90px' }}
+          className="px-5 flex items-center justify-between gap-3"
+          style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)', paddingTop: 'calc(40px + env(safe-area-inset-top, 0px) + var(--topo-ios27, 0px))', paddingBottom: '120px' }}
         >
-          {/* `visibility: hidden` (nao renderizacao condicional) para o badge
-              sempre ocupar o mesmo espaco no cabecalho: escondendo o elemento
-              via `&&` em vez disso, o container encolhia sem o badge (Todos/
-              Compras) e crescia com ele (Estoque com item critico), num
-              "pulo" perceptivel de layout ao trocar de aba. */}
-          <div className="flex items-center justify-end gap-2.5">
-            <span
-              className="inline-flex items-center gap-1 text-[9px] font-extrabold uppercase px-2.5 py-1 rounded-full whitespace-nowrap shrink-0"
-              style={{
-                background: '#C4626F',
-                color: '#FFF8F6',
-                visibility: aba === 'estoque' && lowStockCount > 0 ? 'visible' : 'hidden',
-              }}
-            >
-              <AlertTriangle className="w-2.5 h-2.5" style={{ strokeWidth: 2.5 }} />
-              {lowStockCount || 0} {lowStockCount === 1 ? 'Estoque Baixo' : 'Estoques Baixos'}
-            </span>
-          </div>
-          <span className="text-white leading-tight" style={{ fontFamily: "'Instrument Serif', serif", fontSize: '29px', lineHeight: '1.1' }}>
+          <span className="text-white leading-tight flex-1" style={{ fontFamily: "'Instrument Serif', serif", fontSize: '31px', lineHeight: '1.1' }}>
             Produtos
           </span>
-          <span className="text-[11px] leading-relaxed" style={{ color: 'rgba(247,220,225,.8)' }}>
-            Catálogo único de ingredientes, embalagens e decoração — a mesma fonte usada nas Fichas e nas Compras.
+          {/* Selo de estoque baixo na MESMA linha do titulo, a direita. Continua
+              com `visibility: hidden` (nao `&&`) para nao mexer em nada ao
+              trocar de aba interna. */}
+          <span
+            className="inline-flex items-center gap-1 text-[9px] font-extrabold uppercase px-2.5 py-1 rounded-full whitespace-nowrap shrink-0"
+            style={{
+              background: '#C4626F',
+              color: '#FFF8F6',
+              visibility: aba === 'estoque' && lowStockCount > 0 ? 'visible' : 'hidden',
+            }}
+          >
+            <AlertTriangle className="w-2.5 h-2.5" style={{ strokeWidth: 2.5 }} />
+            {lowStockCount || 0} {lowStockCount === 1 ? 'Estoque Baixo' : 'Estoques Baixos'}
           </span>
         </div>
 
         <div
           className="flex flex-col gap-4"
           style={{
-            marginTop: '-56px', background: '#F6F2F5', borderRadius: '28px 28px 0 0', position: 'relative', padding: '20px',
+            marginTop: '-70px', background: '#F6F2F5', borderRadius: '28px 28px 0 0', position: 'relative', padding: '20px',
             marginLeft: 'calc(-0.5 * var(--app-bleed) + 50%)', marginRight: 'calc(-0.5 * var(--app-bleed) + 50%)',
             paddingLeft: 'calc(20px + max(0px, env(safe-area-inset-left)))', paddingRight: 'calc(20px + max(0px, env(safe-area-inset-right)))',
           }}
