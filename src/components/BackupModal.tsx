@@ -132,8 +132,61 @@ export const BackupModal: React.FC<BackupModalProps> = ({
   const [restauracaoPendente, setRestauracaoPendente] = useState<Transaction[] | null>(null);
   const [tamanhoArquivo, setTamanhoArquivo] = useState(0);
   const [isRestoring, setIsRestoring] = useState(false);
+  /**
+   * Arquivo de backup ja montado, esperando o segundo toque (so no celular).
+   *
+   * No iPhone o download so e aceito no INSTANTE do toque. A copia leva alguns
+   * segundos para ser montada (busca as fotos dos pedidos), e o download
+   * disparado depois disso era bloqueado em silencio — a tela so piscava. Por
+   * isso no celular sao dois toques: o primeiro prepara, o segundo ("Salvar
+   * arquivo") salva na hora, abrindo a tela de compartilhar do sistema
+   * (Salvar em Arquivos, WhatsApp, e-mail).
+   */
+  const [arquivoPronto, setArquivoPronto] = useState<File | null>(null);
 
   if (!isOpen) return null;
+
+  /** Toque na tela, e nao mouse: celular ou tablet. */
+  const ehCelular = () => typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
+
+  /**
+   * Download comum, pelo navegador. Blob em vez do `data:` antigo: o link
+   * `data:` de varios MB (as fotos vao junto) e ignorado pelo app instalado na
+   * tela inicial do iPhone e pesa na memoria de qualquer celular.
+   */
+  const baixarArquivo = (arquivo: File) => {
+    const url = URL.createObjectURL(arquivo);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = arquivo.name;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    // Da tempo do navegador comecar o download antes de liberar a memoria.
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+  };
+
+  /** Segundo toque no celular: compartilha (ou baixa) o arquivo ja pronto. */
+  const salvarArquivoPronto = async () => {
+    if (!arquivoPronto) return;
+    const arquivo = arquivoPronto;
+    if (typeof navigator.canShare === 'function' && navigator.canShare({ files: [arquivo] })) {
+      try {
+        await navigator.share({ files: [arquivo], title: 'Backup Carula App' });
+        setArquivoPronto(null);
+      } catch (err: any) {
+        // Fechar a tela de compartilhar sem escolher nada nao e erro: o
+        // arquivo continua pronto para tentar de novo.
+        if (err?.name !== 'AbortError') {
+          baixarArquivo(arquivo);
+          setArquivoPronto(null);
+        }
+      }
+      return;
+    }
+    baixarArquivo(arquivo);
+    setArquivoPronto(null);
+  };
 
   const exportJsonBackup = async () => {
     setIsExporting(true);
@@ -149,13 +202,17 @@ export const BackupModal: React.FC<BackupModalProps> = ({
       setIsExporting(false);
     }
 
-    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(paraExportar, null, 2));
-    const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute('href', dataStr);
-    downloadAnchor.setAttribute('download', `carula-app_backup_${Date.now()}.json`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
+    const arquivo = new File(
+      [JSON.stringify(paraExportar, null, 2)],
+      `carula-app_backup_${Date.now()}.json`,
+      { type: 'application/json' }
+    );
+    // Computador: baixa direto, como sempre. Celular: espera o segundo toque.
+    if (ehCelular()) {
+      setArquivoPronto(arquivo);
+    } else {
+      baixarArquivo(arquivo);
+    }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -236,6 +293,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
               // O modal fica montado fechado; sem isto a confirmacao pendente
               // reapareceria na proxima vez que ele abrisse.
               setRestauracaoPendente(null);
+              setArquivoPronto(null);
               onClose();
             }}
             disabled={isRestoring}
@@ -258,6 +316,28 @@ export const BackupModal: React.FC<BackupModalProps> = ({
             aparecem em todos os aparelhos onde você entrar. Só você tem acesso.
           </span>
         </div>
+
+        {/* Segundo toque do backup no celular (ver `arquivoPronto`). Fica aqui
+            em cima para aparecer tanto na lista de acoes quanto na confirmacao
+            de restauracao ("Antes, baixar uma copia..."). */}
+        {arquivoPronto && (
+          <div className="rounded-lg p-3 flex flex-col gap-2.5" style={{ background: '#F3E9F3', border: '1px solid #E2CFE4' }}>
+            <span className="text-xs font-bold" style={{ color: '#3A2350' }}>
+              Cópia pronta ({Math.max(1, Math.round(arquivoPronto.size / 1024))} KB)
+            </span>
+            <button
+              onClick={salvarArquivoPronto}
+              className="w-full p-3 rounded-lg flex items-center justify-center gap-2 font-bold text-xs active:scale-98"
+              style={{ background: '#3A2350', color: '#F5B9C6' }}
+            >
+              <Download className="w-4 h-4" />
+              Salvar arquivo
+            </button>
+            <span className="text-[11px]" style={{ color: '#7A6E80' }}>
+              Escolha "Salvar em Arquivos", ou envie para o seu WhatsApp ou e-mail.
+            </span>
+          </div>
+        )}
 
         {/* Confirmacao da restauracao: aparece no lugar da lista de acoes
             depois que o arquivo passou na conferencia. Cores com escalas reais
