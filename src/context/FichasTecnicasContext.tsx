@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { gerarMiniatura } from '../utils/imageCompression';
 import { useAuth } from './AuthContext';
 import { FichaTecnica, IngredientUsage } from '../types';
 
@@ -29,6 +30,7 @@ interface SupabaseFichaTecnica {
   nome_produto: string;
   categoria: string;
   foto_url?: string;
+  foto_mini?: string | null;
   rendimento?: string | null;
   tamanhos: Array<{
     id: string;
@@ -90,6 +92,7 @@ const mapSupabaseToFicha = (data: SupabaseFichaTecnica): FichaTecnica => {
     name: data.nome_produto,
     category: normalizedCategory as any,
     imageUrl: data.foto_url,
+    fotoMini: data.foto_mini || undefined,
     yieldInfo: data.rendimento || undefined,
     tamanhos: tamanhos,
     ingredients: data.insumos || [],
@@ -104,10 +107,29 @@ const mapSupabaseToFicha = (data: SupabaseFichaTecnica): FichaTecnica => {
   };
 };
 
+/** Lado da miniatura da ficha: o card mostra a foto em 72 px; o dobro cobre
+ * tela retina. */
+const LADO_MINI_FICHA = 144;
+
+/**
+ * Foto e miniatura andam juntas, e `undefined` quer dizer "a foto nao foi
+ * carregada nesta tela": as duas colunas ficam de FORA do update e o banco
+ * mantem o que tinha. Antes, salvar a edicao antes de a foto terminar de
+ * carregar gravava a foto generica de bolo no lugar da verdadeira.
+ *
+ * Foto que nao e data URI (o link da foto generica) ja e leve: vira a propria
+ * miniatura.
+ */
+const fotoEMiniaturaDaFicha = async (imageUrl: string | undefined) => {
+  if (imageUrl === undefined) return {};
+  if (!imageUrl) return { foto_url: null, foto_mini: null };
+  const foto_mini = imageUrl.startsWith('data:') ? await gerarMiniatura(imageUrl, LADO_MINI_FICHA) : imageUrl;
+  return { foto_url: imageUrl, foto_mini };
+};
+
 const mapFichaToSupabase = (ficha: Omit<FichaTecnica, 'id' | 'createdAt'>) => ({
   nome_produto: ficha.name,
   categoria: ficha.category,
-  foto_url: ficha.imageUrl || null,
   rendimento: ficha.yieldInfo || null,
   tamanhos: (ficha.tamanhos || []).map(t => ({
     id: t.id,
@@ -166,7 +188,10 @@ export const FichasTecnicasProvider: React.FC<{ children: React.ReactNode }> = (
 
       const { data, error: fetchError } = await supabase
         .from('fichas_tecnicas')
-        .select('id,usuaria_id,nome_produto,categoria,rendimento,tamanhos,insumos,mao_de_obra,custo,reposicao,investimento,created_at,updated_at')
+        // Sem `foto_url` (a foto inteira, pesada) mas COM `foto_mini`: a lista
+        // mostra a miniatura, que vem junto, de uma vez. Antes a aba buscava
+        // as fotos inteiras uma a uma a cada volta (~7 MB, 3 a 4 s).
+        .select('id,usuaria_id,nome_produto,categoria,rendimento,tamanhos,insumos,mao_de_obra,custo,reposicao,investimento,created_at,updated_at,foto_mini')
         .eq('usuaria_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -183,6 +208,7 @@ export const FichasTecnicasProvider: React.FC<{ children: React.ReactNode }> = (
       //
       // Vazio agora significa vazio; erro agora aparece como erro.
       setFichas((data || []).map(mapSupabaseToFicha));
+      void gerarMiniaturasQueFaltam();
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar fichas técnicas');
       console.error('Error fetching fichas:', err);
@@ -199,7 +225,7 @@ export const FichasTecnicasProvider: React.FC<{ children: React.ReactNode }> = (
       setError(null);
       const { data, error: insertError } = await supabase
         .from('fichas_tecnicas')
-        .insert([{ usuaria_id: user.id, ...mapFichaToSupabase(fichaData) }])
+        .insert([{ usuaria_id: user.id, ...mapFichaToSupabase(fichaData), ...(await fotoEMiniaturaDaFicha(fichaData.imageUrl)) }])
         .select()
         .single();
 
@@ -223,7 +249,7 @@ export const FichasTecnicasProvider: React.FC<{ children: React.ReactNode }> = (
       setError(null);
       const { data, error: updateError } = await supabase
         .from('fichas_tecnicas')
-        .update(mapFichaToSupabase(fichaData))
+        .update({ ...mapFichaToSupabase(fichaData), ...(await fotoEMiniaturaDaFicha(fichaData.imageUrl)) })
         .eq('id', parseInt(id))
         .eq('usuaria_id', user.id)
         .select()
@@ -293,6 +319,49 @@ export const FichasTecnicasProvider: React.FC<{ children: React.ReactNode }> = (
     } catch (err: any) {
       setError(err.message || 'Erro ao restaurar ficha técnica');
       throw err;
+    }
+  };
+
+  /**
+   * Fichas salvas antes da miniatura existir: tem foto, mas `foto_mini` vazia.
+   * Uma vez por sessao, busca a foto de cada uma (so dessas), gera a
+   * miniatura e grava. Uma por vez, para nao baixar todas de uma vez no 4G.
+   */
+  const miniaturasEmAndamentoRef = useRef(false);
+  const gerarMiniaturasQueFaltam = async () => {
+    if (!user || miniaturasEmAndamentoRef.current) return;
+    miniaturasEmAndamentoRef.current = true;
+    try {
+      const { data: pendentes, error: erroPendentes } = await supabase
+        .from('fichas_tecnicas')
+        .select('id')
+        .eq('usuaria_id', user.id)
+        .not('foto_url', 'is', null)
+        .is('foto_mini', null);
+      if (erroPendentes || !pendentes) return;
+
+      for (const { id } of pendentes) {
+        const { data: linha } = await supabase
+          .from('fichas_tecnicas')
+          .select('foto_url')
+          .eq('id', id)
+          .eq('usuaria_id', user.id)
+          .single();
+        if (!linha?.foto_url) continue;
+        const { foto_mini } = (await fotoEMiniaturaDaFicha(linha.foto_url)) as { foto_mini?: string | null };
+        if (!foto_mini) continue;
+        const { error: erroGravar } = await supabase
+          .from('fichas_tecnicas')
+          .update({ foto_mini })
+          .eq('id', id)
+          .eq('usuaria_id', user.id);
+        if (erroGravar) continue;
+        setFichas((prev) => prev.map((f) => (f.id === String(id) ? { ...f, fotoMini: foto_mini } : f)));
+      }
+    } catch (err) {
+      console.error('Erro ao gerar miniaturas das fichas:', err);
+    } finally {
+      miniaturasEmAndamentoRef.current = false;
     }
   };
 

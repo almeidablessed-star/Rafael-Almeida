@@ -409,6 +409,9 @@ export interface FichaTecnica {
   name: string;
   category: 'bolos' | 'doces' | 'salgados' | 'saudaveis' | 'kids';
   imageUrl?: string;
+  /** Miniatura 144x144 da foto (coluna `foto_mini`), so para a lista de
+   * fichas. A foto inteira nao vem na lista; ver FichasTecnicasContext. */
+  fotoMini?: string;
   yieldInfo?: string; // Rendimento da receita (ex: "10 fatias")
   tamanhos: TamanhoOpcao[]; // Lista de tamanhos com preços
   ingredients: IngredientUsage[];

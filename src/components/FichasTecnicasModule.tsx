@@ -256,34 +256,20 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   const [expandedTamanhosId, setExpandedTamanhosId] = useState<string | null>(null);
   const [selectedTamanhoIdByFicha, setSelectedTamanhoIdByFicha] = useState<Record<string, string>>({}); // Rastreia tamanho selecionado por ficha
 
-  // `fetchFichas` (FichasTecnicasContext) nao traz `foto_url` na listagem —
-  // mesmo motivo do perfil e da cliente: evitar carregar um data URI pesado
-  // pra cada linha so pra montar a lista. Isso deixava a foto do bolo em
-  // branco na lista principal, e so aparecia depois de abrir "Editar" (que
-  // busca sob demanda via `fetchFichaPhoto`). Mesma correcao aplicada aqui:
-  // busca sob demanda a partir da propria lista, uma vez por ficha, cacheada
-  // neste estado local.
-  const [fichaPhotos, setFichaPhotos] = useState<Record<string, string>>({});
+  // A lista nao traz a foto inteira (`foto_url`), so a miniatura (`foto_mini`),
+  // que ja vem com as fichas — ver FichasTecnicasContext. Antes esta tela
+  // buscava cada foto inteira, uma por vez, guardava so enquanto a aba estava
+  // aberta e repetia tudo a cada volta: ~7 MB e 3 a 4 s numa conta de 22 fichas.
 
-  useEffect(() => {
-    const semFoto = fichas.filter((f) => !f.imageUrl && !fichaPhotos[f.id]);
-    if (semFoto.length === 0) return;
-
-    let cancelado = false;
-    (async () => {
-      for (const ficha of semFoto) {
-        const url = await fetchFichaPhoto(ficha.id);
-        if (!cancelado && url) {
-          setFichaPhotos((prev) => (prev[ficha.id] ? prev : { ...prev, [ficha.id]: url }));
-        }
-      }
-    })();
-
-    return () => {
-      cancelado = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fichas]);
+  /**
+   * A foto da ficha em edicao ja chegou do banco? Enquanto nao, salvar manda a
+   * foto como "nao carregada" e o banco mantem a que tem — antes, salvar nesse
+   * intervalo gravava a foto generica de bolo no lugar da verdadeira.
+   */
+  const [fotoFichaCarregada, setFotoFichaCarregada] = useState(true);
+  /** Ficha cuja foto esta sendo buscada; descarta a resposta se outra ficha
+   * for aberta no meio. */
+  const fotoDaFichaRef = useRef<string | null>(null);
 
   // Form State
   const [name, setName] = useState('');
@@ -443,6 +429,8 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     setName('');
     setCategory(selectedCategory);
     setImageUrl('');
+    setFotoFichaCarregada(true);
+    fotoDaFichaRef.current = null;
     setYieldInfo('1');
     // Volta ao padrao: o seletor nao era reiniciado, entao a unidade escolhida
     // numa ficha continuava valendo na proxima aberta na mesma sessao — e
@@ -527,8 +515,16 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     setInvalidFieldId(null);
 
     if (!ficha.imageUrl) {
+      setFotoFichaCarregada(false);
+      fotoDaFichaRef.current = ficha.id;
       const imageUrl = await fetchFichaPhoto(ficha.id);
+      // Outra ficha foi aberta enquanto esta foto vinha: descarta.
+      if (fotoDaFichaRef.current !== ficha.id) return;
       if (imageUrl) setImageUrl(imageUrl);
+      setFotoFichaCarregada(true);
+    } else {
+      setFotoFichaCarregada(true);
+      fotoDaFichaRef.current = null;
     }
   };
 
@@ -889,7 +885,13 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     const fichaData: Omit<FichaTecnica, 'id' | 'createdAt'> = {
       name: name.trim(),
       category,
-      imageUrl: imageUrl.trim() || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&auto=format&fit=crop&q=80',
+      // Foto ainda nao carregada (e a pessoa nao escolheu outra): `undefined`
+      // = mantem a foto gravada. Sem foto de verdade: a foto generica, como antes.
+      imageUrl: imageUrl.trim()
+        ? imageUrl.trim()
+        : fotoFichaCarregada
+          ? 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&auto=format&fit=crop&q=80'
+          : undefined,
       // Numero digitado + unidade do seletor, sempre — nao so quando alguem
       // abre o seletor e clica. A unidade nao tem coluna propria, entao ou ela
       // entra aqui no texto ou se perde. Ver [[comporRendimentoParaGravar]].
@@ -960,7 +962,9 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
       const fichaData: Omit<FichaTecnica, 'id' | 'createdAt'> = {
         name: `${fichaToDup.name} (Cópia)`,
         category: fichaToDup.category,
-        imageUrl: fichaToDup.imageUrl,
+        // A lista so tem a miniatura: busca a foto inteira para a copia nao
+        // nascer sem foto.
+        imageUrl: fichaToDup.imageUrl ?? (await fetchFichaPhoto(fichaToDup.id)) ?? undefined,
         tamanhos: fichaToDup.tamanhos,
         ingredients: (fichaToDup.ingredients || []).map((ing, idx) => ({ ...ing, id: `${Date.now()}_${idx}` })),
         maoDeObraCost: fichaToDup.maoDeObraCost,
@@ -2428,7 +2432,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 
                   {/* DIREITA: IMAGEM */}
                   <img
-                    src={ficha.imageUrl || fichaPhotos[ficha.id]}
+                    src={ficha.fotoMini || ficha.imageUrl}
                     alt={ficha.name}
                     style={{
                       width: '72px',

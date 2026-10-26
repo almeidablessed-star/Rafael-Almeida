@@ -146,33 +146,33 @@ const LADO_MINIATURA = 96;
  * Devolve null se a imagem nao puder ser desenhada — a lista volta a mostrar a
  * inicial do nome, como antes.
  */
-export const gerarMiniatura = (dataUrl: string): Promise<string | null> =>
+export const gerarMiniatura = (dataUrl: string, lado: number = LADO_MINIATURA): Promise<string | null> =>
   new Promise((resolve) => {
     const img = new Image();
     img.onerror = () => resolve(null);
     img.onload = () => {
       try {
-        const lado = Math.min(img.width, img.height);
+        const recorte = Math.min(img.width, img.height);
         const canvas = document.createElement('canvas');
-        canvas.width = LADO_MINIATURA;
-        canvas.height = LADO_MINIATURA;
+        canvas.width = lado;
+        canvas.height = lado;
         const ctx = canvas.getContext('2d');
-        if (!ctx || lado === 0) {
+        if (!ctx || recorte === 0) {
           resolve(null);
           return;
         }
         ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, LADO_MINIATURA, LADO_MINIATURA);
+        ctx.fillRect(0, 0, lado, lado);
         ctx.drawImage(
           img,
-          (img.width - lado) / 2,
-          (img.height - lado) / 2,
-          lado,
-          lado,
+          (img.width - recorte) / 2,
+          (img.height - recorte) / 2,
+          recorte,
+          recorte,
           0,
           0,
-          LADO_MINIATURA,
-          LADO_MINIATURA
+          lado,
+          lado
         );
         resolve(canvas.toDataURL('image/jpeg', 0.75));
       } catch {
