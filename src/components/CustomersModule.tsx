@@ -264,6 +264,22 @@ export const CustomersModule: React.FC = () => {
   // Expanded customers state in the Dates view
   const [expandedCustomerId, setExpandedCustomerId] = useState<string | null>(null);
 
+  /**
+   * Trava a rolagem da pagina enquanto o formulario esta aberto — mesmo
+   * cuidado do ProfileModal. Sem isto, no iPhone o gesto de rolar o
+   * formulario "vazava" para a lista de clientes por tras (scroll chaining do
+   * Safari): a lista rolava escondida atras do formulario, que parecia
+   * travado por alguns segundos ate esse embalo parar.
+   */
+  useEffect(() => {
+    if (!isFormOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isFormOpen]);
+
   const handleOpenAdd = () => {
     setEditingId(null);
     setName('');
@@ -781,7 +797,7 @@ export const CustomersModule: React.FC = () => {
             </div>
 
             {/* Corpo com rolagem */}
-            <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
+            <div className="flex-1 overflow-y-auto overscroll-contain p-4 flex flex-col gap-3">
               {formError && (
                 <div className="p-3 rounded-lg bg-red-50 border border-red-200">
                   <p className="text-sm text-red-600">{formError}</p>
