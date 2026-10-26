@@ -62,7 +62,23 @@ function AppContent() {
   const { formatCurrency } = useCurrency();
   const { fichas, isLoading: fichasCarregando } = useFichasTecnicas();
   const { administrativeCosts, marcarTourVisto } = useCosts();
-  const { consumirParaPedido, devolverPedido } = useProdutos();
+  const { consumirParaPedido, devolverPedido, pedidoTemRastroDeEstoque } = useProdutos();
+
+  /**
+   * Pedido lancado ha mais de 3 meses e cuja baixa de estoque ja saiu do
+   * historico (limpeza automatica de 3 meses no banco). Para ele, editar ou
+   * excluir NAO mexe no estoque: nao ha como saber quanto devolver, e
+   * reconsumir sem devolver derrubaria o estoque duas vezes pelo mesmo pedido.
+   */
+  const TRES_MESES_MS = 90 * 24 * 60 * 60 * 1000;
+  const pedidoSemRastroAntigo = async (tx: Transaction) =>
+    !!tx.createdAt &&
+    Date.now() - tx.createdAt > TRES_MESES_MS &&
+    !(await pedidoTemRastroDeEstoque(tx.id));
+  const AVISO_PEDIDO_ANTIGO =
+    'Este pedido foi lançado há mais de 3 meses, e o registro de quanto ele baixou do ' +
+    'estoque já foi apagado pela limpeza automática do histórico. Por isso o estoque ' +
+    'não foi alterado. Se precisar, ajuste as quantidades na aba Produtos.';
   const {
     transacoes: transactions,
     addTransacao,
@@ -122,6 +138,9 @@ function AppContent() {
       // acharia mais nada para devolver. Os insumos ficariam baixados para
       // sempre, em silencio.
       if (tx.type === 'venda') {
+        if (await pedidoSemRastroAntigo(tx)) {
+          alert(`ℹ️ ${AVISO_PEDIDO_ANTIGO}`);
+        }
         try {
           await devolverPedido(tx.id);
         } catch (err: any) {
@@ -366,6 +385,10 @@ function AppContent() {
       // consome de novo pela composicao nova. Nao calculamos
       // delta de proposito — delta so funciona quando muda apenas a quantidade,
       // e quebra quando a confeiteira troca o produto ou mistura itens.
+      if (updated.type === 'venda' && (await pedidoSemRastroAntigo(existing))) {
+        alert(`ℹ️ O pedido foi salvo.\n\n${AVISO_PEDIDO_ANTIGO}`);
+        return true;
+      }
       if (updated.type === 'venda') {
         try {
           // Fichas que o pedido usava e que sumiram do catalogo desde entao.

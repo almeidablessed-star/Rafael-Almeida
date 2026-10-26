@@ -78,6 +78,8 @@ interface ProdutosContextType {
    * O nome sobrevive porque fica escrito na `descricao` do proprio movimento.
    */
   devolverPedido: (transacaoId: string, fichasQueNaoVoltam?: string[]) => Promise<void>;
+  /** O pedido ainda tem baixa de estoque registrada? Ver a definicao. */
+  pedidoTemRastroDeEstoque: (transacaoId: string) => Promise<boolean>;
 }
 
 const ProdutosContext = createContext<ProdutosContextType | undefined>(undefined);
@@ -398,6 +400,29 @@ export const ProdutosProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   /**
+   * O pedido ainda tem baixa de estoque registrada no historico?
+   *
+   * Desde 26/10/2026 uma tarefa do banco apaga o historico com mais de 3
+   * meses (pg_cron, migration 20261026140000). Pedido mais velho que isso pode
+   * nao ter mais o rastro de quanto baixou — e sem rastro a devolucao nao
+   * devolve nada. Quem edita ou exclui um pedido antigo pergunta isto antes,
+   * para nao reconsumir (o estoque cairia duas vezes pelo mesmo pedido) e para
+   * avisar a confeiteira.
+   */
+  const pedidoTemRastroDeEstoque = async (transacaoId: string): Promise<boolean> => {
+    if (!user) return false;
+    const { count, error: erro } = await supabase
+      .from('estoque_movimentos')
+      .select('id', { count: 'exact', head: true })
+      .eq('usuaria_id', user.id)
+      .eq('transacao_id', transacaoId)
+      .eq('tipo', 'consumo');
+    // Na duvida (erro de rede), segue o caminho normal de sempre.
+    if (erro) return true;
+    return (count || 0) > 0;
+  };
+
+  /**
    * Devolve ao catalogo tudo o que um pedido consumiu.
    *
    * Le os movimentos do tipo 'consumo' pelo transacao_id e trata os DOIS
@@ -596,6 +621,7 @@ export const ProdutosProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         custoPorUnidade,
         consumirParaPedido,
         devolverPedido,
+        pedidoTemRastroDeEstoque,
       }}
     >
       {children}
