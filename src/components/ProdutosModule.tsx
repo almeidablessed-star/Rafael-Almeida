@@ -54,31 +54,51 @@ const getColorBasedOnThreshold = (
       ? { stroke: '#4CAF7D', text: '#4CAF7D', background: '#E8F5E9' }
       : { stroke: '#C4626F', text: '#C4626F', background: '#FFEBEE' };
   }
+  // Tres cores, uma por situacao: vermelho so ABAIXO do aviso ("Comprar ja"),
+  // laranja ate 50% acima dele ("Perto de acabar"), verde dali para cima
+  // ("Tranquilo"). Antes "Perto de acabar" (ate 25% acima) saia vermelho, a
+  // mesma cor de "Comprar ja", e o laranja so aparecia numa faixa do meio.
   const slack = ((quantity - minThreshold) / minThreshold) * 100;
-  if (slack >= 75) return { stroke: '#4CAF7D', text: '#4CAF7D', background: '#E8F5E9' };
-  if (slack >= 50) return { stroke: '#81C784', text: '#81C784', background: '#F1F8E9' };
-  if (slack >= 25) return { stroke: '#F5A623', text: '#F5A623', background: '#FFF3E0' };
-  return { stroke: '#C4626F', text: '#C4626F', background: '#FFEBEE' };
+  if (slack >= 50) return { stroke: '#4CAF7D', text: '#4CAF7D', background: '#E8F5E9' };
+  return { stroke: '#F5A623', text: '#D9861A', background: '#FFF3E0' };
 };
 
 /**
- * Percentual do anel de estoque — mesma base de calculo (quantity vs
- * minThreshold) e os MESMOS cortes de `getColorBasedOnThreshold` (slack de
- * 25/50/75%), para o numero e a cor sempre contarem a mesma historia. Antes
- * comparava quantidadeAtual com quantidadeReferencia (o ultimo "estoque
- * cheio" de reabastecimento) — uma base sem nenhuma relacao com o alerta
- * minimo, entao o anel podia ficar laranja/vermelho com o numero preso em
- * 100%.
+ * O anel do Estoque como marcador de gasolina: quanto ainda resta do estoque
+ * CHEIO (a quantidade depois da ultima compra, `quantidadeReferencia`, que o
+ * ProdutosContext atualiza sempre que a quantidade sobe), e um risquinho onde
+ * fica o aviso de compra. A cor continua vindo do aviso
+ * (`getColorBasedOnThreshold`).
  *
- * Reta unica: 0 -> 0%, minThreshold -> 25%, 1.25x -> 50% (cor vira laranja),
- * 1.5x -> 75% (cor vira verde claro), 1.75x -> 100%, capado (cor vira verde
- * forte).
+ * Antes o anel media a distancia ate o aviso (aviso = 25%, 1,75x o aviso =
+ * 100%). O "100%" era um numero inventado, sem relacao com quanto a
+ * confeiteira costuma guardar, e 4,7 kg de um pote de 5 kg aparecia como 43%.
+ * Bem antes disso o anel ja tinha usado o estoque cheio, mas sem o risquinho:
+ * a cor (do aviso) e o numero (do cheio) pareciam se contradizer. O risquinho
+ * mostra no proprio anel o quanto falta ate o aviso.
+ *
+ * Tudo na unidade da embalagem. Sem estoque cheio registrado (produto
+ * antigo), o cheio vira o dobro do aviso, para o risquinho cair no meio.
  */
-const getPercentageBasedOnThreshold = (quantity: number, minThreshold: number): number => {
-  if (minThreshold <= 0) return quantity > 0 ? 100 : 0;
-  if (quantity < minThreshold) return Math.max(0, (quantity / minThreshold) * 25);
-  const slack = ((quantity - minThreshold) / minThreshold) * 100;
-  return Math.min(100, 25 + slack);
+const anelDoEstoque = (
+  quantidade: number,
+  referencia: number | null,
+  avisoNaUnidadeDaEmbalagem: number
+): { cheio: number; preenchido: number; aviso: number | null } => {
+  const base = referencia && referencia > 0 ? referencia : avisoNaUnidadeDaEmbalagem * 2;
+  const cheio = Math.max(base, quantidade, 0);
+  if (cheio <= 0) return { cheio: 0, preenchido: 0, aviso: null };
+  return {
+    cheio,
+    preenchido: Math.min(1, Math.max(0, quantidade / cheio)),
+    aviso: avisoNaUnidadeDaEmbalagem > 0 ? Math.min(1, avisoNaUnidadeDaEmbalagem / cheio) : null,
+  };
+};
+
+/** Ponto do arco do anel (semicirculo de raio `r`, centro 38,60) na fracao `f`. */
+const pontoDoArco = (f: number, r: number) => {
+  const angulo = Math.PI * (1 - f);
+  return { x: 38 + r * Math.cos(angulo), y: 60 - r * Math.sin(angulo) };
 };
 
 /**
@@ -91,8 +111,7 @@ const getStatusLabel = (quantity: number, minThreshold: number): string => {
   if (quantity < minThreshold) return 'Comprar já';
   if (minThreshold <= 0) return quantity > 0 ? 'Tranquilo' : 'Comprar já';
   const slack = ((quantity - minThreshold) / minThreshold) * 100;
-  if (slack < 25) return 'Perto de acabar';
-  if (slack < 50) return 'De olho';
+  if (slack < 50) return 'Perto de acabar';
   return 'Tranquilo';
 };
 
@@ -923,7 +942,11 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                 // antes de decidir critico/alto (ver normalizeToCommonUnit).
                 const qtdNormalizada = normalizeToCommonUnit(qtd, p.unidadeEmbalagem, p.nivelMinimoUnidade || p.unidadeEmbalagem);
                 const colors = getColorBasedOnThreshold(qtdNormalizada, min);
-                const displayPercentage = getPercentageBasedOnThreshold(qtdNormalizada, min);
+                const anel = anelDoEstoque(
+                  qtd,
+                  p.quantidadeReferencia,
+                  normalizeToCommonUnit(min, p.nivelMinimoUnidade || p.unidadeEmbalagem, p.unidadeEmbalagem)
+                );
                 const isCritical = qtdNormalizada < min || (min <= 0 && qtdNormalizada <= 0);
                 // Quantidade e aviso na MESMA unidade (a do aviso): "4.725 g"
                 // ao lado de "4 kg" obrigava a fazer a conta de cabeca.
@@ -938,7 +961,13 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                     <svg width="76" height="64" viewBox="0 0 76 64" className="flex-shrink-0">
                       <path d="M8 60a30 30 0 0 1 60 0" fill="none" stroke="#F1ECF2" strokeWidth="10" strokeLinecap="round" />
                       <path d="M8 60a30 30 0 0 1 60 0" fill="none" stroke={colors.stroke} strokeWidth="10" strokeLinecap="round"
-                        strokeDasharray={`${displayPercentage * (Math.PI * 30 / 100)} ${Math.PI * 30}`} />
+                        strokeDasharray={`${anel.preenchido * Math.PI * 30} ${Math.PI * 30}`} />
+                      {/* Risquinho do aviso de compra, atravessando o arco. */}
+                      {anel.aviso !== null && (() => {
+                        const de = pontoDoArco(anel.aviso, 23);
+                        const ate = pontoDoArco(anel.aviso, 37);
+                        return <line x1={de.x} y1={de.y} x2={ate.x} y2={ate.y} stroke="#3A2350" strokeWidth="2.5" strokeLinecap="round" />;
+                      })()}
                       <text x="38" y="58" textAnchor="middle" fontSize="11" fontWeight="900" fill={colors.stroke} fontFamily="'Manrope', sans-serif">
                         {formatQuantity(arredonda2(qtdNormalizada))} {unidadeDoAviso}
                       </text>
@@ -968,7 +997,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                             style={{ width: '22px', height: '22px', borderRadius: '8px', background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 800, color: '#5B4A6B', border: 'none', cursor: 'pointer', boxShadow: '0 2px 5px rgba(58,35,80,.1)' }}
                           >−</button>
                           <span style={{ padding: '0 7px', fontSize: '11px', fontWeight: 800, color: '#241B2B', whiteSpace: 'nowrap' }}>
-                            {min} <span style={{ fontSize: '9px', fontWeight: 600, color: '#8A7E90' }}>{p.nivelMinimoUnidade}</span>
+                            {formatQuantity(min)} <span style={{ fontSize: '9px', fontWeight: 600, color: '#8A7E90' }}>{p.nivelMinimoUnidade}</span>
                           </span>
                           <button
                             onClick={() => handleQuickAdjustThreshold(p, getThresholdDelta(p.nivelMinimoUnidade || 'g'))}
