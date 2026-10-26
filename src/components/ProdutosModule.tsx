@@ -274,6 +274,26 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
    * prontos pra salvar, pra "Criar mesmo assim" nao precisar remontar tudo. */
   const [duplicateWarning, setDuplicateWarning] = useState<{ data: Omit<Produto, 'id'>; existing: Produto } | null>(null);
 
+  /**
+   * Trava a tela de tras enquanto o formulario esta aberto — mesmo cuidado do
+   * cadastro de Clientes. No iPad o form fica no meio com a lista aparecendo
+   * em volta (desfocada), e o gesto de rolar mexia a lista por tras. O `html`
+   * entra junto porque no iPad e ele que rola a pagina.
+   */
+  const formAberto = isAdding && aba !== 'compras';
+  useEffect(() => {
+    if (!formAberto) return;
+    const html = document.documentElement;
+    const anteriorHtml = html.style.overflow;
+    const anteriorBody = document.body.style.overflow;
+    html.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    return () => {
+      html.style.overflow = anteriorHtml;
+      document.body.style.overflow = anteriorBody;
+    };
+  }, [formAberto]);
+
   useEffect(() => {
     if (!isAdding) {
       setNome('');
@@ -508,7 +528,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
               abria no topo da lista: quem clicava no lapis de um produto la
               embaixo nao via nada acontecer, porque o form surgia fora da tela. */}
           {isAdding && aba !== 'compras' && createPortal(
-            <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-neutral-900/80 backdrop-blur-xs p-0 sm:p-4" role="dialog" aria-modal="true">
+            <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-neutral-900/80 backdrop-blur-xs p-0 sm:p-4 overscroll-none" role="dialog" aria-modal="true">
             <div className="w-full h-full sm:h-auto sm:max-w-[430px] sm:max-h-[90vh] bg-[#F6F2F5] sm:rounded-[24px] overflow-hidden flex flex-col" style={{ boxShadow: '0 30px 70px rgba(58,35,80,0.26)' }}>
               {/* Visual do design "Editar Produto" (Claude Design, artefato
                   "Pedido Carula Cake"): cabecalho roxo, cards brancos com
@@ -539,7 +559,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
               </div>
 
               <form ref={produtoFormRef} onSubmit={handleSave} noValidate className="flex-1 min-h-0 flex flex-col" style={{ marginTop: '-18px', borderRadius: '24px 24px 0 0', background: '#F6F2F5', fontFamily: "'Manrope', sans-serif", color: '#241B2B' }}>
-              <div className="flex-1 overflow-y-auto flex flex-col gap-2.5" style={{ padding: '16px 16px 14px' }}>
+              <div className="flex-1 overflow-y-auto overscroll-contain flex flex-col gap-2.5" style={{ padding: '16px 16px 14px' }}>
                 {formError && (
                   <div className="p-2.5 rounded-xl bg-[#FDF4F5] border border-[rgba(196,98,111,.35)] text-[12px] text-[#C4626F]">
                     {formError}
