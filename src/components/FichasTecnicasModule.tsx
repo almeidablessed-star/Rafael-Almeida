@@ -203,6 +203,17 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     fichaLastStepChangeRef.current = performance.now();
   }, [formStep]);
   const fichaStepChangeIsFresh = () => performance.now() - fichaLastStepChangeRef.current < 400;
+
+  /**
+   * Trava de gravacao. Sem ela, cada toque a mais em "Salvar ficha tecnica"
+   * (ou "Ir"/Enter no teclado, que tambem envia o formulario) enquanto a
+   * gravacao ainda estava em andamento criava OUTRA ficha. Com foto a gravacao
+   * leva segundos, e em 25/10/2026 um brigadeiro virou 6 fichas iguais
+   * (ids 181-186, apagadas a mao depois). O ref barra na hora, antes do React
+   * re-renderizar; o state so muda o botao para "Salvando...".
+   */
+  const salvandoFichaRef = useRef(false);
+  const [salvandoFicha, setSalvandoFicha] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [confirmandoAvancarSemInsumos, setConfirmandoAvancarSemInsumos] = useState(false);
   const [deletingFicha, setDeletingFicha] = useState<FichaTecnica | null>(null);
@@ -845,6 +856,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 
   const handleSaveFicha = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (salvandoFichaRef.current) return;
     if (!name.trim()) return;
 
     // Converter tamanhos do formulário para TamanhoOpcao
@@ -912,6 +924,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   };
 
   const performSaveFicha = async (fichaData: Omit<FichaTecnica, 'id' | 'createdAt'>) => {
+    // Ja tem uma gravacao em andamento: este envio e o segundo toque.
+    if (salvandoFichaRef.current) return;
+    salvandoFichaRef.current = true;
+    setSalvandoFicha(true);
     try {
       if (editingId) {
         await updateFicha(editingId, fichaData);
@@ -923,6 +939,9 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
       setDuplicateWarning(null);
     } catch (err) {
       alert('Erro ao salvar ficha técnica: ' + (err as any).message);
+    } finally {
+      salvandoFichaRef.current = false;
+      setSalvandoFicha(false);
     }
   };
 
@@ -2108,10 +2127,11 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                 key="ficha-confirmar"
                 type="submit"
                 form="form-ficha-stepped"
+                disabled={salvandoFicha}
                 className="flex-1 flex items-center justify-center gap-2 transition-transform hover:-translate-y-0.5"
-                style={{ height: '50px', borderRadius: '16px', border: 'none', background: '#3A2350', boxShadow: '0 10px 20px rgba(58,35,80,.3)', fontSize: '15px', fontWeight: 800, color: '#F5B9C6' }}
+                style={{ height: '50px', borderRadius: '16px', border: 'none', background: '#3A2350', boxShadow: '0 10px 20px rgba(58,35,80,.3)', fontSize: '15px', fontWeight: 800, color: '#F5B9C6', opacity: salvandoFicha ? 0.7 : 1, cursor: salvandoFicha ? 'wait' : 'pointer' }}
                 onClick={(e) => {
-                  if (fichaStepChangeIsFresh()) {
+                  if (salvandoFichaRef.current || fichaStepChangeIsFresh()) {
                     e.preventDefault();
                     return;
                   }
@@ -2130,7 +2150,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                 }}
               >
                 <Check className="w-4 h-4" strokeWidth={2.6} />
-                Salvar ficha técnica
+                {salvandoFicha ? 'Salvando...' : 'Salvar ficha técnica'}
               </button>
             )}
           </div>
