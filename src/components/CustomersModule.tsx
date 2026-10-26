@@ -615,7 +615,7 @@ export const CustomersModule: React.FC = () => {
         >
           {/* Title */}
           <span
-            className="text-white leading-tight flex-1"
+            className="text-white leading-tight flex-1 text-center"
             style={{
               fontFamily: "'Instrument Serif', serif",
               fontSize: '31px',

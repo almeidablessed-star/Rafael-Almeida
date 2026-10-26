@@ -1108,7 +1108,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         >
           {/* Title */}
           <span
-            className="text-white leading-tight flex-1"
+            className="text-white leading-tight flex-1 text-center"
             style={{
               fontFamily: "'Instrument Serif', serif",
               fontSize: '31px',
@@ -1117,20 +1117,6 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
           >
             Fichas Técnicas
           </span>
-
-          {/* Button */}
-          <button
-            onClick={handleOpenAdd}
-            className="px-3 py-2 rounded-xl text-[10px] font-black cursor-pointer transition-all active:scale-95 shrink-0"
-            style={{
-              background: '#F5B9C6',
-              color: '#3A2350',
-              fontFamily: "'Manrope', sans-serif",
-            }}
-            title="Adicionar nova ficha"
-          >
-            Nova Ficha
-          </button>
         </div>
 
         {/* Content Section */}
@@ -1197,6 +1183,37 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
           );
         })}
       </div>
+
+      {/* "Nova ficha" saiu do cabecalho (o titulo agora fica no centro, como
+          nas outras abas) e virou o mesmo botao largo de "Cadastrar Nova(o)
+          Cliente" e "Adicionar Produto": as tres abas criam do mesmo jeito. */}
+      <button
+        type="button"
+        onClick={handleOpenAdd}
+        title="Adicionar nova ficha"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '7px',
+          background: '#FFFFFF',
+          color: '#3A2350',
+          fontFamily: "'Manrope', sans-serif",
+          fontWeight: 800,
+          fontSize: '11.5px',
+          padding: '12px',
+          borderRadius: '14px',
+          cursor: 'pointer',
+          border: '1px solid rgba(110,63,114,.14)',
+          boxShadow: '0 4px 12px rgba(58,35,80,.08)',
+          transition: 'transform .22s ease',
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-2px)')}
+        onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
+      >
+        <Plus className="w-4 h-4 stroke-[3]" />
+        <span>Nova ficha</span>
+      </button>
 
       {/* Formulario de criar/editar ficha, reestruturado em 3 passos — ver
           "Ficha Tecnica - Opcoes.dc.html" e o plano aprovado. Os 3 passos

@@ -391,22 +391,8 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
           className="px-5 flex items-center justify-between gap-3"
           style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)', paddingTop: 'calc(40px + env(safe-area-inset-top, 0px) + var(--topo-ios27, 0px))', paddingBottom: '120px' }}
         >
-          <span className="text-white leading-tight flex-1" style={{ fontFamily: "'Instrument Serif', serif", fontSize: '31px', lineHeight: '1.1' }}>
+          <span className="text-white leading-tight flex-1 text-center" style={{ fontFamily: "'Instrument Serif', serif", fontSize: '31px', lineHeight: '1.1' }}>
             Produtos
-          </span>
-          {/* Selo de estoque baixo na MESMA linha do titulo, a direita. Continua
-              com `visibility: hidden` (nao `&&`) para nao mexer em nada ao
-              trocar de aba interna. */}
-          <span
-            className="inline-flex items-center gap-1 text-[9px] font-extrabold uppercase px-2.5 py-1 rounded-full whitespace-nowrap shrink-0"
-            style={{
-              background: '#C4626F',
-              color: '#FFF8F6',
-              visibility: aba === 'estoque' && lowStockCount > 0 ? 'visible' : 'hidden',
-            }}
-          >
-            <AlertTriangle className="w-2.5 h-2.5" style={{ strokeWidth: 2.5 }} />
-            {lowStockCount || 0} {lowStockCount === 1 ? 'Estoque Baixo' : 'Estoques Baixos'}
           </span>
         </div>
 
@@ -892,6 +878,18 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
             )
           ) : aba === 'estoque' ? (
             <>
+            {/* Selo de estoque baixo: estava no cabecalho, ao lado do titulo, e
+                saiu de la quando os titulos foram centralizados. Fica no topo
+                da lista do Estoque, que e onde ele importa. */}
+            {lowStockCount > 0 && (
+              <span
+                className="self-start inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-3 py-1.5 rounded-full whitespace-nowrap"
+                style={{ background: '#C4626F', color: '#FFF8F6' }}
+              >
+                <AlertTriangle className="w-3 h-3" style={{ strokeWidth: 2.5 }} />
+                {lowStockCount} {lowStockCount === 1 ? 'Estoque Baixo' : 'Estoques Baixos'}
+              </span>
+            )}
             <div className="grid grid-cols-1 gap-4">
               {sortedEstoque.map((p) => {
                 const qtd = p.quantidadeAtual || 0;
