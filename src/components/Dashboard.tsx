@@ -690,7 +690,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               Saúde Financeira dos Produtos
             </h3>
             <p className="text-[11px]" style={{ color: '#7A6E80', marginTop: '2px' }}>
-              Seus preços cobrem a estrutura que você definiu em Minha Empresa?
+              Algum produto está sendo vendido por menos do que custa?
             </p>
           </div>
 
@@ -714,10 +714,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
               const cores = {
                 verde: { texto: '#2E7D51', fundo: '#EEF8F1', borda: '#C9E9D4', label: 'Tudo em dia' },
                 amarelo: { texto: '#8A6D1F', fundo: '#FFF8E7', borda: '#E8D9A8', label: 'Atenção' },
-                vermelho: { texto: '#C4626F', fundo: '#FDF4F5', borda: '#F0C8CD', label: 'Preços baixos' },
+                vermelho: { texto: '#C4626F', fundo: '#FDF4F5', borda: '#F0C8CD', label: 'Prejuízo' },
               } as const;
               const c = cores[saudeFinanceira.nivel as 'verde' | 'amarelo' | 'vermelho'];
-              const temItens = saudeFinanceira.abaixoDaMeta.length > 0;
+              const temItens = saudeFinanceira.comPrejuizo.length > 0;
 
               return (
                 <div
@@ -741,8 +741,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       </p>
                       <p className="text-[11px]" style={{ color: '#7A6E80' }}>
                         {temItens
-                          ? `${saudeFinanceira.abaixoDaMeta.length} de ${saudeFinanceira.totalAvaliados} produtos vendendo abaixo do necessário`
-                          : `${saudeFinanceira.totalAvaliados} produto${saudeFinanceira.totalAvaliados === 1 ? '' : 's'} avaliado${saudeFinanceira.totalAvaliados === 1 ? '' : 's'}, todos cobrindo a meta`}
+                          ? `${saudeFinanceira.comPrejuizo.length} de ${saudeFinanceira.totalAvaliados} produtos vendidos por menos do que custam`
+                          : `${saudeFinanceira.totalAvaliados} produto${saudeFinanceira.totalAvaliados === 1 ? '' : 's'} avaliado${saudeFinanceira.totalAvaliados === 1 ? '' : 's'}, nenhum com prejuízo`}
                       </p>
                     </div>
                     {temItens && (
@@ -755,7 +755,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   {temItens && saudeExpandida && (
                     <div className="border-t" style={{ borderColor: '#EDE6EF' }}>
                       <div className="divide-y" style={{ borderColor: '#F1EBF2' }}>
-                        {saudeFinanceira.abaixoDaMeta.map((item) => (
+                        {saudeFinanceira.comPrejuizo.map((item) => (
                           <div key={`${item.fichaId}-${item.tamanhoId}`} className="px-4 py-2.5 flex items-center justify-between gap-2">
                             <div className="min-w-0">
                               <p className="text-[12px] font-bold truncate" style={{ color: '#241B2B' }}>
@@ -763,7 +763,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                               </p>
                             </div>
                             <span className="text-[11px] font-bold flex-shrink-0" style={{ color: '#C4626F' }}>
-                              −{formatMoney(item.diferenca)}
+                              −{formatMoney(item.prejuizo)}
                             </span>
                           </div>
                         ))}

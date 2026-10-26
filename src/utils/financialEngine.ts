@@ -1149,52 +1149,53 @@ export const calcularPrecoSugeridoProduto = (
 // Selo de saude financeira dos produtos (Fase 4, item 1 do spec original)
 // ============================================================================
 
-/** Um tamanho vendido abaixo do preco que a estrutura financeira da conta exige. */
-export interface ProdutoAbaixoDaMeta {
+/** Um tamanho vendido por MENOS do que custa fazer (prejuizo de verdade). */
+export interface ProdutoComPrejuizo {
   fichaId: string;
   fichaName: string;
   tamanhoId: string;
   tamanhoDescricao: string;
   preco: number;
-  precoSugerido: number;
-  /** precoSugerido - preco. Sempre positivo (e o motivo de estar nesta lista). */
-  diferenca: number;
+  /** Reposicao + mao de obra + custos op., a mesma soma do card da ficha. */
+  custoTotal: number;
+  /** custoTotal - preco. Sempre positivo (e o motivo de estar nesta lista). */
+  prejuizo: number;
 }
 
 export interface SaudeFinanceiraProdutos {
   /**
    * false quando a estrutura financeira ainda nao foi configurada (Minha
-   * Empresa) ou nenhum tamanho tem preco E cmv cadastrados o suficiente para
-   * comparar. Selo deve ficar neutro nesse caso, nunca vermelho — falta de
-   * dado nao e a mesma coisa que preco baixo.
+   * Empresa) ou nenhum tamanho tem preco E insumos cadastrados para comparar.
+   * Selo fica neutro nesse caso, nunca vermelho — falta de dado nao e a mesma
+   * coisa que prejuizo.
    */
   avaliavel: boolean;
-  /** Quantos tamanhos entraram na conta (preco > 0 e CMV > 0). */
+  /** Quantos tamanhos entraram na conta (preco > 0 e insumos > 0). */
   totalAvaliados: number;
-  abaixoDaMeta: ProdutoAbaixoDaMeta[];
-  percentAbaixo: number;
+  comPrejuizo: ProdutoComPrejuizo[];
+  percentComPrejuizo: number;
   nivel: 'neutro' | 'verde' | 'amarelo' | 'vermelho';
 }
 
 /**
- * Avalia se os precos hoje praticados nos produtos cadastrados cobrem a
- * estrutura financeira definida em Minha Empresa. Mesmo motor usado dentro de
- * cada Ficha Tecnica (`calcularPrecoSugeridoProduto`) — aqui so agrega o
- * resultado por conta inteira, sem recalcular nada com formula propria.
+ * Diz quais produtos estao sendo vendidos com PREJUIZO: preco menor que o
+ * custo total do tamanho (reposicao + mao de obra + custos operacionais, a
+ * mesma soma que o card da ficha mostra).
  *
- * Cada TAMANHO e avaliado separadamente, nao a ficha inteira: e o tamanho que
- * tem preco proprio, e um bolo pode ter um tamanho saudavel e outro no
- * prejuizo ao mesmo tempo.
+ * Ate 26/10/2026 o selo comparava o preco com o preco SUGERIDO pela meta de
+ * Minha Empresa e listava a distancia ate a meta: um brigadeiro a R$ 140 com
+ * custo de R$ 152,14 aparecia com "-R$ 122,75" (distancia ate a sugestao), e
+ * nao com o prejuizo real de R$ 12,14. A pedido do Rafael, o selo passou a
+ * falar so de prejuizo; a comparacao com a meta continua dentro da ficha.
  *
- * Um tamanho sem CMV cadastrado (nenhum insumo vinculado) e IGNORADO, nao
- * contado como problema — ele so nao entra na conta, porque sem CMV o motor
- * nao tem o que comparar. Penalizar pela ausencia de cadastro confundiria
- * "preco baixo" com "ficha incompleta", dois problemas diferentes.
+ * Cada TAMANHO e avaliado separadamente: e o tamanho que tem preco proprio.
+ * Tamanho sem insumos cadastrados e IGNORADO — sem eles a conta de custo fica
+ * incompleta, e "ficha incompleta" nao e prejuizo.
  *
- * Faixas (duas linhas de corte, sem faixa intermediaria orfa):
- *   verde   = 0% dos avaliados abaixo da meta
- *   amarelo = ate 50% abaixo da meta
- *   vermelho = mais da metade abaixo da meta
+ * Faixas:
+ *   verde    = nenhum tamanho com prejuizo
+ *   amarelo  = ate metade dos avaliados com prejuizo
+ *   vermelho = mais da metade com prejuizo
  */
 export const avaliarSaudeFinanceiraProdutos = (
   fichas: FichaTecnica[],
@@ -1203,8 +1204,8 @@ export const avaliarSaudeFinanceiraProdutos = (
   const neutro: SaudeFinanceiraProdutos = {
     avaliavel: false,
     totalAvaliados: 0,
-    abaixoDaMeta: [],
-    percentAbaixo: 0,
+    comPrejuizo: [],
+    percentComPrejuizo: 0,
     nivel: 'neutro',
   };
 
@@ -1220,7 +1221,7 @@ export const avaliarSaudeFinanceiraProdutos = (
 
   if (!estrutura.valido) return neutro;
 
-  const abaixoDaMeta: ProdutoAbaixoDaMeta[] = [];
+  const comPrejuizo: ProdutoComPrejuizo[] = [];
   let totalAvaliados = 0;
 
   fichas.forEach((ficha) => {
@@ -1228,28 +1229,31 @@ export const avaliarSaudeFinanceiraProdutos = (
       const preco = Number(tamanho.preco) || 0;
       if (preco <= 0) return;
 
-      const cmv = custoInsumosDoTamanho(ficha, tamanho.id);
-      if (cmv <= 0) return;
+      const reposicao = custoInsumosDoTamanho(ficha, tamanho.id);
+      if (reposicao <= 0) return;
 
       totalAvaliados += 1;
 
-      const { precoSugerido } = calcularPrecoSugeridoProduto(
-        cmv,
-        Number(tamanho.horasTrabalho) || 0,
-        Number(tamanho.valorHora) || 0,
-        administrativeCosts.cmvTargetPercent,
-        estrutura
-      );
+      // Mesma regra do card da ficha: valor do tamanho, e o da ficha so
+      // quando o tamanho nao tem o seu.
+      const maoDeObra = tamanho.maoDeObraCost !== undefined ? tamanho.maoDeObraCost : ficha.maoDeObraCost || 0;
+      const custo = tamanho.custoCost !== undefined ? tamanho.custoCost : ficha.custoCost || 0;
+      const investimento =
+        tamanho.investimentoCost !== undefined ? tamanho.investimentoCost : ficha.investimentoCost || 0;
+      const custoTotal = reposicao + (Number(maoDeObra) || 0) + (Number(custo) || 0) + (Number(investimento) || 0);
 
-      if (preco < precoSugerido) {
-        abaixoDaMeta.push({
+      // Arredonda em centavos antes de comparar: preco igual ao custo, com
+      // fracao de centavo de diferenca, nao e prejuizo.
+      const prejuizo = Math.round((custoTotal - preco) * 100) / 100;
+      if (prejuizo > 0) {
+        comPrejuizo.push({
           fichaId: ficha.id,
           fichaName: ficha.name,
           tamanhoId: tamanho.id,
           tamanhoDescricao: tamanho.descricao,
           preco,
-          precoSugerido,
-          diferenca: precoSugerido - preco,
+          custoTotal,
+          prejuizo,
         });
       }
     });
@@ -1257,15 +1261,15 @@ export const avaliarSaudeFinanceiraProdutos = (
 
   if (totalAvaliados === 0) return neutro;
 
-  const percentAbaixo = (abaixoDaMeta.length / totalAvaliados) * 100;
+  const percentComPrejuizo = (comPrejuizo.length / totalAvaliados) * 100;
   const nivel: SaudeFinanceiraProdutos['nivel'] =
-    percentAbaixo === 0 ? 'verde' : percentAbaixo <= 50 ? 'amarelo' : 'vermelho';
+    percentComPrejuizo === 0 ? 'verde' : percentComPrejuizo <= 50 ? 'amarelo' : 'vermelho';
 
   return {
     avaliavel: true,
     totalAvaliados,
-    abaixoDaMeta,
-    percentAbaixo,
+    comPrejuizo,
+    percentComPrejuizo,
     nivel,
   };
 };
