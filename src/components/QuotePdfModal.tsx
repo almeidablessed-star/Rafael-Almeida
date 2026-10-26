@@ -147,27 +147,38 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
   // reduzida para caber, entao a tela mostra exatamente o que sai no PDF. Na
   // captura, `handleDownloadPdf` alarga o documento para 668px; a area
   // disponivel passa de LARGURA_FOLHA e a reducao some sozinha.
+  //
+  // A reducao tambem respeita a ALTURA livre da janela: a folha inteira cabe
+  // na tela sem rolar (quando a altura manda, ela fica centralizada).
   const miniaturaRef = useRef<HTMLDivElement>(null);
   const folhaRef = useRef<HTMLDivElement>(null);
-  const [miniatura, setMiniatura] = useState<{ escala: number; altura: number } | null>(null);
+  const corpoRef = useRef<HTMLDivElement>(null);
+  const [miniatura, setMiniatura] = useState<{ escala: number; altura: number; recuo: number } | null>(null);
   useLayoutEffect(() => {
     const area = miniaturaRef.current;
     const folha = folhaRef.current;
-    if (!area || !folha) return;
+    const corpo = corpoRef.current;
+    if (!area || !folha || !corpo) return;
     const medir = () => {
       const disponivel = area.clientWidth;
       if (disponivel >= LARGURA_FOLHA) {
         setMiniatura(null);
         return;
       }
-      const escala = disponivel / LARGURA_FOLHA;
       // offsetHeight ignora o transform: e a altura real da folha montada.
-      setMiniatura({ escala, altura: folha.offsetHeight * escala });
+      const alturaFolha = folha.offsetHeight;
+      let escala = disponivel / LARGURA_FOLHA;
+      // Altura que sobra no corpo abaixo da barra "Previa do PDF" (4px = p-1).
+      const topoDaArea = area.getBoundingClientRect().top - corpo.getBoundingClientRect().top + corpo.scrollTop;
+      const alturaLivre = corpo.clientHeight - topoDaArea - 4;
+      if (alturaLivre > 0 && alturaFolha > 0) escala = Math.min(escala, alturaLivre / alturaFolha);
+      setMiniatura({ escala, altura: alturaFolha * escala, recuo: (disponivel - LARGURA_FOLHA * escala) / 2 });
     };
     medir();
     const observador = new ResizeObserver(medir);
     observador.observe(area);
     observador.observe(folha);
+    observador.observe(corpo);
     return () => observador.disconnect();
   }, []);
   const { updateTransacao, fetchTransacaoFotos } = useTransacoes();
@@ -879,7 +890,10 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
 
   return (
     <>
-      <div className="fixed inset-0 z-[99999] bg-neutral-950/85 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 overflow-y-auto print:p-0 print:bg-white print:fixed print:inset-0" role="dialog" aria-modal="true">
+      {/* O topo desce o safe-area + `--topo-ios27` (mesma regra dos cabecalhos
+          do app): sem isso a barra de botoes ficava embaixo do relogio e do
+          brilho do iOS 27 no app instalado. */}
+      <div className="fixed inset-0 z-[99999] bg-neutral-950/85 backdrop-blur-xs flex items-center justify-center p-2 pt-[calc(8px+env(safe-area-inset-top,0px)+var(--topo-ios27,0px))] pb-[calc(8px+env(safe-area-inset-bottom,0px))] sm:p-4 overflow-y-auto print:p-0 print:bg-white print:fixed print:inset-0" role="dialog" aria-modal="true">
       {/* Strict Print CSS for Single Page output */}
       <style>{`
         @media print {
@@ -927,7 +941,7 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
         }
       `}</style>
 
-      <div className="bg-white rounded-xl max-w-2xl w-full shadow-highlight overflow-hidden flex flex-col max-h-[92vh] print:shadow-none print:rounded-none print:max-h-none border-2 border-pink-200 relative" aria-label="Orçamento PDF">
+      <div className={`bg-white rounded-xl max-w-2xl w-full shadow-highlight overflow-hidden flex flex-col max-h-full sm:max-h-[92vh] ${miniatura ? 'h-full' : ''} print:shadow-none print:rounded-none print:max-h-none print:h-auto border-2 border-pink-200 relative`} aria-label="Orçamento PDF">
 
         {/* STICKY TOP CONTROL BAR - ALWAYS VISIBLE & CLEAR ON ALL DEVICES */}
         <div className="p-2.5 sm:p-3 bg-gradient-to-r from-[#3A2350] to-[#A85E86] text-white flex items-center justify-between gap-2 no-print shrink-0 sticky top-0 z-50 border-b border-white/10 shadow-sm">
@@ -981,6 +995,7 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
         {/* PRINTABLE DOCUMENT BODY */}
         <div
           id="quote-pdf-document"
+          ref={corpoRef}
           className="@container p-1 sm:p-1.5 flex-1 min-h-0 overflow-y-auto space-y-1 sm:space-y-2 bg-[#F6F2F5] text-[#241B2B] print:p-1 print:bg-white print:overflow-visible print:flex-none"
         >
           {/* Barra so da miniatura (celular): os botoes de foto da folha ficam
@@ -1014,7 +1029,7 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
           <div
             ref={folhaRef}
             className={miniatura ? '@container [&_.no-print]:hidden' : '@container'}
-            style={miniatura ? { width: `${LARGURA_FOLHA}px`, transform: `scale(${miniatura.escala})`, transformOrigin: 'top left' } : undefined}
+            style={miniatura ? { width: `${LARGURA_FOLHA}px`, marginLeft: `${miniatura.recuo}px`, transform: `scale(${miniatura.escala})`, transformOrigin: 'top left' } : undefined}
           >
           {activeTab === 'cliente' ? (
             /* ======================================================== */
