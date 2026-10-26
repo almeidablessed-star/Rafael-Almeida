@@ -418,12 +418,16 @@ export const CustomersModule: React.FC = () => {
   };
 
   // Filter customers by search term
-  const filteredCustomers = customers.filter(
-    (c) =>
-      c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (c.city && c.city.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  // Sempre em ordem alfabetica (A a Z), ignorando acento e maiuscula: a lista
+  // vinha na ordem de cadastro, da mais nova para a mais antiga.
+  const filteredCustomers = customers
+    .filter(
+      (c) =>
+        c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        c.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (c.city && c.city.toLowerCase().includes(searchTerm.toLowerCase()))
+    )
+    .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' }));
 
   // Saved WhatsApp preference: 'business' | 'standard' | 'ask'
   const [waPreference, setWaPreference] = useState<'business' | 'standard' | 'ask'>(() => {
@@ -713,16 +717,17 @@ export const CustomersModule: React.FC = () => {
             alignItems: 'center',
             justifyContent: 'center',
             gap: '7px',
-            background: '#3A2350',
-            color: '#F5B9C6',
+            // Mesmo botao branco do "Nova ficha" (antes roxo cheio).
+            background: '#FFFFFF',
+            color: '#3A2350',
             fontFamily: "'Manrope', sans-serif",
             fontWeight: 800,
             fontSize: '11.5px',
             padding: '12px',
             borderRadius: '14px',
             cursor: 'pointer',
-            border: 'none',
-            boxShadow: '0 10px 20px rgba(58,35,80,.3)',
+            border: '1px solid rgba(110,63,114,.14)',
+            boxShadow: '0 4px 12px rgba(58,35,80,.08)',
             transition: 'transform .22s ease',
           }}
           onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}

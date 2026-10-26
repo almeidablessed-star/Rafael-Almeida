@@ -134,14 +134,16 @@ const fraseDoAviso = (quantity: number, minThreshold: number, unidade: string): 
   return `${formatQuantity(-diferenca)} ${unidade} abaixo`;
 };
 
+/**
+ * Ordem do Estoque por urgencia, com as mesmas faixas das 3 cores de
+ * `getColorBasedOnThreshold`: 0 = vermelho (Comprar ja), 1 = laranja (Perto
+ * de acabar), 2 = verde (Tranquilo).
+ */
 const getCriticalityRank = (quantity: number, minThreshold: number): number => {
   if (quantity < minThreshold) return 0;
-  if (minThreshold <= 0) return quantity > 0 ? 4 : 0;
+  if (minThreshold <= 0) return quantity > 0 ? 2 : 0;
   const slack = ((quantity - minThreshold) / minThreshold) * 100;
-  if (slack < 25) return 1;
-  if (slack < 50) return 2;
-  if (slack < 75) return 3;
-  return 4;
+  return slack < 50 ? 1 : 2;
 };
 
 /**
@@ -395,13 +397,15 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
   const listaBase = aba === 'estoque' ? produtosDoEstoque : produtos;
   const filtrados = listaBase.filter((p) => p.nome.toLowerCase().includes(searchTerm.toLowerCase()));
 
+  // Estoque por urgencia: vermelho, depois laranja, depois verde. Dentro da
+  // mesma cor, ordem alfabetica.
   const sortedEstoque = aba === 'estoque'
     ? [...filtrados].sort((a, b) => {
         const normA = normalizeToCommonUnit(a.quantidadeAtual || 0, a.unidadeEmbalagem, a.nivelMinimoUnidade || a.unidadeEmbalagem);
         const normB = normalizeToCommonUnit(b.quantidadeAtual || 0, b.unidadeEmbalagem, b.nivelMinimoUnidade || b.unidadeEmbalagem);
         const rankA = getCriticalityRank(normA, a.nivelMinimo || 0);
         const rankB = getCriticalityRank(normB, b.nivelMinimo || 0);
-        return rankA - rankB;
+        return rankA - rankB || a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' });
       })
     : filtrados;
 
