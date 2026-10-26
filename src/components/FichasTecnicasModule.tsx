@@ -4,7 +4,7 @@ import { FichaTecnica, IngredientUsage, Transaction, TamanhoOpcao, StockItem, Pr
 import { formatCurrency, parseNumeroDigitado } from '../utils/formatters';
 import { insumosDeTamanhoOpcao } from '../utils/fichaInsumos';
 import { useCurrency } from '../context/CurrencyContext';
-import { useFichasTecnicas } from '../context/FichasTecnicasContext';
+import { useFichasComCustoAtual } from '../hooks/useFichasComCustoAtual';
 import { useProdutos } from '../context/ProdutosContext';
 import { useCosts } from '../context/CostsContext';
 import { calcularEstruturaFinanceira, calcularPrecoSugeridoProduto, somarDespesasEmpresa, fichaDesatualizada } from '../utils/financialEngine';
@@ -138,7 +138,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   onNavigateToTab,
 }) => {
   const { formatCurrency: formatMoney, symbol } = useCurrency();
-  const { fichas, isLoading: isLoadingFichas, error: fichasError, addFicha, updateFicha, deleteFicha, fetchFichaPhoto } = useFichasTecnicas();
+  const { fichas, isLoading: isLoadingFichas, error: fichasError, addFicha, updateFicha, deleteFicha, fetchFichaPhoto } = useFichasComCustoAtual();
   const { produtos, addProduto, custoPorUnidade } = useProdutos();
 
   const produtosParaAutocomplete = useMemo<StockItem[]>(() => produtos.map((p) => ({

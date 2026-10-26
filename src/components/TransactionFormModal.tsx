@@ -741,6 +741,62 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   const totalItemsCusto = itemsBreakdownList.reduce((sum, b) => sum + b.totalCusto, 0);
   const totalItemsInvestimento = itemsBreakdownList.reduce((sum, b) => sum + b.totalInvestimento, 0);
 
+  /** A lista do pedido como vai para `breakdown.itens` (ver o salvamento). */
+  const montarItensDoBreakdown = () =>
+    orderItems
+      .filter((item) => item.productName)
+      .map((item) => {
+        const bd = getItemBreakdown(item);
+        const ficha =
+          item.productName === 'Outro / Personalizado'
+            ? undefined
+            : fichas.find((f) => normalizeName(f.name) === normalizeName(item.productName));
+        return {
+          fichaId: ficha?.id,
+          nome: bd.name,
+          tamanhoId: item.selectedTamanhoId || null,
+          quantidade: item.quantity,
+          valorUnitario: bd.unitVenda,
+          valorTotal: bd.totalVenda,
+          personalizado: item.productName === 'Outro / Personalizado',
+        };
+      });
+
+  /**
+   * Editar um pedido SEM mexer nos itens mantem o custo gravado no dia em que
+   * ele foi lancado. As fichas agora calculam o custo pelo preco ATUAL dos
+   * produtos (ver useFichasComCustoAtual); sem isto, corrigir o endereco de um
+   * pedido do mes passado trocaria o lucro dele pelo preco de hoje da farinha.
+   * Trocou ficha, tamanho ou quantidade: virou outro pedido, e o custo e
+   * refeito com os precos atuais.
+   */
+  const custosGravadosDoPedido = (() => {
+    if (type !== 'venda' || !editingTransaction?.breakdown) return null;
+    const gravado = editingTransaction.breakdown as any;
+    if (!Array.isArray(gravado.itens) || gravado.itens.length === 0) return null;
+    const assinatura = (itens: any[]) =>
+      JSON.stringify(
+        itens.map((i) => [
+          i.personalizado ? '' : String(i.fichaId ?? ''),
+          i.tamanhoId || null,
+          Number(i.quantidade) || 0,
+          !!i.personalizado,
+          i.personalizado ? Math.round((Number(i.valorUnitario) || 0) * 100) : null,
+        ])
+      );
+    if (assinatura(gravado.itens) !== assinatura(montarItensDoBreakdown())) return null;
+    return {
+      reposicao: Number(gravado.reposicao) || 0,
+      maoDeObra: Number(gravado.maoDeObra) || 0,
+      custos: Number(gravado.custos) || 0,
+      investimento: Number(gravado.investimento) || 0,
+    };
+  })();
+  const custoReposicaoDoPedido = custosGravadosDoPedido ? custosGravadosDoPedido.reposicao : totalItemsReposicao;
+  const custoMaoDeObraDoPedido = custosGravadosDoPedido ? custosGravadosDoPedido.maoDeObra : totalItemsMaodeobra;
+  const custoOperacionalDoPedido = custosGravadosDoPedido ? custosGravadosDoPedido.custos : totalItemsCusto;
+  const custoInvestimentoDoPedido = custosGravadosDoPedido ? custosGravadosDoPedido.investimento : totalItemsInvestimento;
+
   // Delivery Calculations
   const deliveryFee = hasDelivery ? parseNumeroDigitado(deliveryFeeInput) || 0 : 0;
 
@@ -1052,10 +1108,10 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
           // reconstruiam por regex em cima do texto de `notes`, ou recalculando
           // pelo custo atual da ficha. Ver [[SaleBreakdown]].
           breakdown: {
-            reposicao: totalItemsReposicao,
-            maoDeObra: totalItemsMaodeobra,
-            custos: totalItemsCusto,
-            investimento: totalItemsInvestimento,
+            reposicao: custoReposicaoDoPedido,
+            maoDeObra: custoMaoDeObraDoPedido,
+            custos: custoOperacionalDoPedido,
+            investimento: custoInvestimentoDoPedido,
             delivery: hasDelivery ? deliveryFee : 0,
             adicionais: totalAddonsValue,
             // A lista do pedido, item por item, COM O VALOR DE CADA UM.
@@ -1072,24 +1128,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
             // alimenta a baixa de estoque e mexer no formato dele arriscaria o
             // estoque sem necessidade. A coluna `breakdown` e livre e aceita
             // campos novos sem mudanca de banco.
-            itens: orderItems
-              .filter((item) => item.productName)
-              .map((item) => {
-                const bd = getItemBreakdown(item);
-                const ficha =
-                  item.productName === 'Outro / Personalizado'
-                    ? undefined
-                    : fichas.find((f) => normalizeName(f.name) === normalizeName(item.productName));
-                return {
-                  fichaId: ficha?.id,
-                  nome: bd.name,
-                  tamanhoId: item.selectedTamanhoId || null,
-                  quantidade: item.quantity,
-                  valorUnitario: bd.unitVenda,
-                  valorTotal: bd.totalVenda,
-                  personalizado: item.productName === 'Outro / Personalizado',
-                };
-              }),
+            itens: montarItensDoBreakdown(),
             // Os adicionais, um por linha, pelo mesmo motivo dos itens: ate
             // aqui eles so existiam dentro do texto das anotacoes ("Adicionais:
             // Vela: $20,00"), e a edicao nao sabia remonta-los — sumiam ao
@@ -1905,21 +1944,26 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: '8px' }}>
                     <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '10px', padding: '9px 11px' }}>
                       <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', display: 'block' }}>Reposição</span>
-                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>{formatMoney(totalItemsReposicao)}</span>
+                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>{formatMoney(custoReposicaoDoPedido)}</span>
                     </div>
                     <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '10px', padding: '9px 11px' }}>
                       <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', display: 'block' }}>Mão de obra</span>
-                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>{formatMoney(totalItemsMaodeobra)}</span>
+                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>{formatMoney(custoMaoDeObraDoPedido)}</span>
                     </div>
                     <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '10px', padding: '9px 11px' }}>
                       <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', display: 'block' }}>Despesas</span>
-                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>{formatMoney(totalItemsCusto)}</span>
+                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>{formatMoney(custoOperacionalDoPedido)}</span>
                     </div>
                     <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '10px', padding: '9px 11px' }}>
                       <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', display: 'block' }}>Investimento</span>
-                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>{formatMoney(totalItemsInvestimento)}</span>
+                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>{formatMoney(custoInvestimentoDoPedido)}</span>
                     </div>
                   </div>
+                  {custosGravadosDoPedido && (
+                    <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', marginTop: '8px', lineHeight: 1.4 }}>
+                      Custos do dia em que o pedido foi lançado. Os valores por item acima usam os preços de hoje.
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

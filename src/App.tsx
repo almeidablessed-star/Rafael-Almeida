@@ -12,7 +12,7 @@ import { filterTransactionsByPeriod, calculateSummary } from './utils/financialE
 import { getTodayIso, formatDateBr } from './utils/formatters';
 import { useDelayedDelete } from './hooks/useDelayedDelete';
 import { useCorDaBarraDoSistema } from './hooks/useCorDaBarraDoSistema';
-import { useFichasTecnicas } from './context/FichasTecnicasContext';
+import { useFichasComCustoAtual } from './hooks/useFichasComCustoAtual';
 import { useProdutos } from './context/ProdutosContext';
 import { useTransacoes } from './context/TransacoesContext';
 import { TransacoesProvider } from './context/TransacoesContext';
@@ -60,7 +60,7 @@ const TOUR_PRIMEIROS_PASSOS_HABILITADO = true;
 function AppContent() {
   const { isResetPasswordRequired, isOtpVerificationRequired, user, userProfile, logout } = useAuth();
   const { formatCurrency } = useCurrency();
-  const { fichas, isLoading: fichasCarregando } = useFichasTecnicas();
+  const { fichas, isLoading: fichasCarregando } = useFichasComCustoAtual();
   const { administrativeCosts, marcarTourVisto } = useCosts();
   const { consumirParaPedido, devolverPedido, pedidoTemRastroDeEstoque } = useProdutos();
 

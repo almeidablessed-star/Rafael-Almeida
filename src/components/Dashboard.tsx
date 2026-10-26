@@ -7,7 +7,7 @@ import { rotulos } from '../utils/periodoReset';
 import { ResumoDistribuicaoCard } from './ResumoDistribuicaoCard';
 import { ANIMATION_DURATIONS, ANIMATION_EASING } from '../lib/animation-tokens';
 import { useCurrency } from '../context/CurrencyContext';
-import { useFichasTecnicas } from '../context/FichasTecnicasContext';
+import { useFichasComCustoAtual } from '../hooks/useFichasComCustoAtual';
 import { useCustomers } from '../context/CustomersContext';
 import { useProdutos } from '../context/ProdutosContext';
 import { useTransacoes } from '../context/TransacoesContext';
@@ -102,7 +102,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onOpenGlossaryModal,
 }) => {
   const { formatCurrency: formatMoney } = useCurrency();
-  const { fichas, isLoading: fichasLoading } = useFichasTecnicas();
+  const { fichas, isLoading: fichasLoading } = useFichasComCustoAtual();
   const { customers } = useCustomers();
   const { produtos, isLoading: produtosLoading } = useProdutos();
   const { isLoading: transacoesLoading } = useTransacoes();
