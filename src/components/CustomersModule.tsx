@@ -986,9 +986,9 @@ export const CustomersModule: React.FC = () => {
         document.body
       )}
 
-      {/* CUSTOMERS LIST */}
+      {/* CUSTOMERS LIST (grade no iPad: ver .lista-tablet em index.css) */}
       <div
-        className="space-y-3"
+        className="space-y-3 lista-tablet"
         style={{
           paddingLeft: '18px',
           paddingRight: '18px',
@@ -997,7 +997,7 @@ export const CustomersModule: React.FC = () => {
       >
         {filteredCustomers.length === 0 ? (
           <div
-            className="flex flex-col items-center gap-2.5 text-center"
+            className="flex flex-col items-center gap-2.5 text-center lista-vazia"
             style={{
               background: '#fff',
               border: '1px solid rgba(58,35,80,0.1)',

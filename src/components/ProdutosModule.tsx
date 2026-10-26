@@ -890,7 +890,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                 {lowStockCount} {lowStockCount === 1 ? 'Estoque Baixo' : 'Estoques Baixos'}
               </span>
             )}
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 gap-4 lista-tablet lista-altura-igual">
               {sortedEstoque.map((p) => {
                 const qtd = p.quantidadeAtual || 0;
                 const min = p.nivelMinimo || 0;
@@ -918,7 +918,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                     </svg>
 
                     <div className="flex-1 min-w-0 flex flex-col gap-1.5">
-                      <div className="flex items-center gap-2 flex-wrap">
+                      <div className="flex items-center gap-2 flex-wrap estoque-titulo">
                         <h4 className="font-brand text-[13px]" style={{ color: '#241B2B', fontWeight: 800 }}>
                           {p.nome.charAt(0).toUpperCase() + p.nome.slice(1)}
                         </h4>
@@ -986,7 +986,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
             </div>
             </>
           ) : (
-            <div className="grid grid-cols-1 gap-3">
+            <div className="grid grid-cols-1 gap-3 lista-tablet">
               {sortedEstoque.map((p) => (
                 <div key={p.id} className="rounded-[18px] p-3.5 flex items-center justify-between gap-3" style={{ background: '#FFFFFF', border: '1px solid rgba(36,27,43,.06)', boxShadow: '0 8px 20px rgba(58,35,80,.09)' }}>
                   <div className="flex-1 min-w-0">

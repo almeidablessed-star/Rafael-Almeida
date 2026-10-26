@@ -2245,11 +2245,11 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         document.body
       )}
 
-      {/* FICHAS CARDS LIST - SEGUINDO FIELMENTE O DESIGN DE REFERÊNCIA */}
-      <div className="space-y-3">
+      {/* FICHAS CARDS LIST - SEGUINDO FIELMENTE O DESIGN DE REFERÊNCIA (grade no iPad: ver .lista-tablet em index.css) */}
+      <div className="space-y-3 lista-tablet">
         {filteredFichas.length === 0 ? (
           <div
-            className="flex flex-col items-center gap-3 text-center"
+            className="flex flex-col items-center gap-3 text-center lista-vazia"
             style={{
               background: '#fff',
               border: '1px solid rgba(58,35,80,0.1)',

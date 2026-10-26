@@ -233,3 +233,66 @@ a:hover {
     transform: translateX(-50%);
   }
 }
+
+/* ================================================================
+   TELA CHEIA NO iPAD / TABLET (a partir de 640px, so com toque)
+   ================================================================
+
+   `html.tela-de-toque` vem de utils/telaDeToque.ts. No iPad a coluna de
+   celular acima deixava ~40% da tela em bege; aqui o app ocupa tudo, do
+   mesmo jeito que no celular. O computador (sem toque) continua na coluna.
+
+   Pedidos e Fichas viram grade (`.lista-tablet`): um card so ocupando 820px
+   ficava com o valor num canto e os botoes no outro. Em pe cabem 2 cards de
+   largura de celular; deitado (1100px+), 3. */
+
+@media (min-width: 640px) {
+  html.tela-de-toque {
+    --app-col: 100vw;
+  }
+
+  html.tela-de-toque,
+  html.tela-de-toque body {
+    background: var(--color-surface, #F6F2F5);
+  }
+
+  html.tela-de-toque #root {
+    box-shadow: none;
+  }
+
+  html.tela-de-toque .lista-tablet {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    align-items: start;
+  }
+
+  /* `space-y-*` poe margem entre os cards; na grade quem espaca e o `gap`. */
+  html.tela-de-toque .lista-tablet > * {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* Estoque: cards da mesma linha com a mesma altura, e as etiquetas
+     (categoria, critico) sempre na linha de baixo do nome. Antes um nome
+     comprido ("Cakeboard 20 cm") empurrava as etiquetas para baixo so naquele
+     card, e ele ficava mais alto que o vizinho. */
+  html.tela-de-toque .lista-tablet.lista-altura-igual {
+    align-items: stretch;
+  }
+
+  html.tela-de-toque .estoque-titulo > h4 {
+    flex-basis: 100%;
+  }
+
+  /* O aviso de lista vazia ocupa a linha inteira; um card sozinho nao. */
+  html.tela-de-toque .lista-tablet > .lista-vazia {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 1100px) {
+  html.tela-de-toque .lista-tablet {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

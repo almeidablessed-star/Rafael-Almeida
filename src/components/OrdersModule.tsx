@@ -359,13 +359,13 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
         </div>
       </div>
 
-      {/* Orders List */}
-      <div className="space-y-2.5">
+      {/* Orders List (grade no iPad: ver .lista-tablet em index.css) */}
+      <div className="space-y-2.5 lista-tablet">
         {filteredSales.length === 0 && sales.length > 0 ? (
           // Ha pedidos, so nao nesta vista (ou na busca/filtro): o convite
           // "Lance seu primeiro pedido" abaixo seria falso aqui.
           <div
-            className="text-center"
+            className="text-center lista-vazia"
             style={{
               background: '#fff',
               border: '1px solid rgba(58,35,80,0.1)',
@@ -384,7 +384,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
           </div>
         ) : filteredSales.length === 0 ? (
           <div
-            className="flex flex-col items-center gap-2.5 text-center"
+            className="flex flex-col items-center gap-2.5 text-center lista-vazia"
             style={{
               background: '#fff',
               border: '1px solid rgba(58,35,80,0.1)',
