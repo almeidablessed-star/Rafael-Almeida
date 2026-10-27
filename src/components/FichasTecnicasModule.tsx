@@ -20,6 +20,8 @@ import { CampoComAjuda } from './onboarding/CampoComAjuda';
 import { FieldValidationError } from './FieldValidationError';
 import { CustomSelect } from './CustomSelect';
 import { CARD_COMANDA, ROTULO_COMANDA, CAMPO_TINTA, CAIXA_NUMERO, NUMERO, CHIP_UNIDADE, ETIQUETA_VALOR, FuroEtiqueta, Picote } from './estiloComanda';
+import { TituloDaPagina } from './TituloDaPagina';
+import { useTelaDeComputador } from '../hooks/useTelaDeComputador';
 import {
   RENDIMENTO_UNIDADES,
   comporRendimentoParaGravar,
@@ -175,6 +177,11 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
       )
     : null;
   const [selectedCategory, setSelectedCategory] = useState<'bolos' | 'doces' | 'salgados' | 'saudaveis' | 'kids'>('bolos');
+  // Versao computador (docs/design/desktop-redesign, Fichas.dc.html). Um JSX
+  // so para as duas versoes: no computador (`pc`) muda a moldura da pagina
+  // (titulo + "Nova ficha" no topo, cartoes em grade) e as medidas do cartao;
+  // formulario, modais e calculos sao os mesmos.
+  const pc = useTelaDeComputador();
   const [isCreating, setIsCreating] = useState(false);
   // PREVIEW do formulario em 3 passos (Identificacao/Insumos/Preco) — ver
   // "Ficha Tecnica - Opcoes.dc.html". Reseta pra 1 sempre que o formulario
@@ -1076,12 +1083,48 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     </div>
   );
 
+  // Botao "Nova ficha". No celular e o botao largo abaixo dos chips; no
+  // computador fica no topo, a direita do titulo.
+  const botaoNovaFicha = (
+    <button
+      type="button"
+      onClick={handleOpenAdd}
+      title="Adicionar nova ficha"
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: pc ? '8px' : '7px',
+        background: '#FFFFFF',
+        color: '#3A2350',
+        fontFamily: "'Manrope', sans-serif",
+        fontWeight: 800,
+        fontSize: pc ? '13px' : '11.5px',
+        padding: pc ? '0 22px' : '12px',
+        ...(pc ? { height: '48px' } : {}),
+        borderRadius: '14px',
+        cursor: 'pointer',
+        border: '1px solid rgba(110,63,114,.14)',
+        boxShadow: '0 4px 12px rgba(58,35,80,.08)',
+        transition: 'transform .22s ease',
+      }}
+      onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-2px)')}
+      onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
+    >
+      <Plus className="w-4 h-4 stroke-[3]" />
+      <span>Nova ficha</span>
+    </button>
+  );
+
   return (
-    <div className="space-y-0 pb-12 animate-fadeIn" style={{ background: '#F6F2F5', minHeight: '100vh' }}>
+    <div
+      className="space-y-0 pb-12 animate-fadeIn"
+      style={pc ? { fontFamily: "'Manrope', system-ui, sans-serif", color: '#241B2B' } : { background: '#F6F2F5', minHeight: '100vh' }}
+    >
       {/* Header - Roxo Gradiente */}
       <div
-        className="overflow-hidden"
-        style={{
+        className={pc ? undefined : 'overflow-hidden'}
+        style={pc ? undefined : {
           // Sem sombra: este envolucro e a pagina inteira, nao um cartao — a sombra
           // roxa caia abaixo da borda de baixo dele e aparecia como faixa no fim da
           // tela no iPhone. Mesma correcao da aba Pedidos.
@@ -1096,7 +1139,9 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
           marginTop: 'calc(0px - env(safe-area-inset-top, 0px))',
         }}
       >
-        {/* Header with Title only */}
+        {/* Header with Title only (no computador a faixa roxa sai: o titulo
+            vai para o topo do conteudo, ver abaixo) */}
+        {!pc && (
         <div
           className="px-5 flex items-center justify-between gap-4"
           style={{
@@ -1118,10 +1163,11 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
             Fichas Técnicas
           </span>
         </div>
+        )}
 
         {/* Content Section */}
         <div className="flex flex-col gap-4"
-          style={{
+          style={pc ? { gap: '26px' } : {
             marginTop: '-70px',
             background: '#F6F2F5',
             borderRadius: '28px 28px 0 0',
@@ -1138,6 +1184,13 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
           }}
         >
 
+      {pc && (
+        <header style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '16px 24px' }}>
+          <TituloDaPagina>Fichas Técnicas</TituloDaPagina>
+          {botaoNovaFicha}
+        </header>
+      )}
+
       {launchSuccessMsg && (
         <div className="bg-[var(--color-primary)]/10 border border-[var(--color-primary)] text-[var(--color-primary)] text-xs p-3.5 rounded-lg flex items-center gap-2.5 animate-fadeIn shadow-card">
           <Check className="w-5 h-5 text-[var(--color-primary)] shrink-0" />
@@ -1153,7 +1206,13 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
           borda: a sombra do chip escolhido (desce ~24px) era cortada reta,
           num retangulo. A folga interna abriga a sombra inteira; a margem
           negativa devolve os chips ao mesmo lugar de antes. */}
-      <div className="flex gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none', padding: '6px 18px 26px', margin: '-6px -18px -22px' }}>
+      {/* No computador a fileira quebra linha em vez de rolar (cabe tudo),
+          os chips crescem para 44px e os emojis saem. */}
+      <div
+        className={pc ? 'flex flex-wrap' : 'flex gap-2 overflow-x-auto'}
+        style={pc ? { gap: '10px' } : { scrollbarWidth: 'none', padding: '6px 18px 26px', margin: '-6px -18px -22px' }}
+        {...(pc ? { role: 'group', 'aria-label': 'Categorias' } : {})}
+      >
         {(Object.keys(CATEGORY_LABELS) as Array<keyof typeof CATEGORY_LABELS>).map((key) => {
           const cat = CATEGORY_LABELS[key];
           const isActive = selectedCategory === key;
@@ -1163,22 +1222,24 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
               key={key}
               type="button"
               onClick={() => setSelectedCategory(key as typeof selectedCategory)}
-              className="flex-shrink-0 whitespace-nowrap flex items-center gap-1.5 cursor-pointer transition-all"
+              className={pc ? 'flex-shrink-0 whitespace-nowrap flex items-center gap-2 cursor-pointer transition-all' : 'flex-shrink-0 whitespace-nowrap flex items-center gap-1.5 cursor-pointer transition-all'}
               style={{
                 fontSize: '13px',
                 fontWeight: 600,
-                padding: '9px 14px',
+                padding: pc ? '0 18px' : '9px 14px',
+                ...(pc ? { height: '44px', fontFamily: 'inherit' } : {}),
                 borderRadius: '999px',
                 color: isActive ? '#FFFFFF' : '#3A2350',
                 background: isActive ? '#3A2350' : '#FFFFFF',
                 border: `1px solid ${isActive ? '#3A2350' : 'rgba(58,35,80,0.12)'}`,
                 boxShadow: isActive ? '0 8px 16px rgba(58,35,80,0.3)' : '0 2px 4px rgba(58,35,80,0.08)',
               }}
+              {...(pc ? { 'aria-pressed': isActive } : {})}
               onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.borderColor = '#A85E86'; }}
               onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.borderColor = 'rgba(58,35,80,0.12)'; }}
             >
-              <span>{cat.icon} {cat.label}</span>
-              <span style={{ fontSize: '11px', fontWeight: 700, opacity: 0.65 }}>{count}</span>
+              <span>{pc ? cat.label : `${cat.icon} ${cat.label}`}</span>
+              <span style={{ fontSize: pc ? '12px' : '11px', fontWeight: 700, opacity: pc ? 0.7 : 0.65 }}>{count}</span>
             </button>
           );
         })}
@@ -1186,34 +1247,9 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 
       {/* "Nova ficha" saiu do cabecalho (o titulo agora fica no centro, como
           nas outras abas) e virou o mesmo botao largo de "Cadastrar Nova(o)
-          Cliente" e "Adicionar Produto": as tres abas criam do mesmo jeito. */}
-      <button
-        type="button"
-        onClick={handleOpenAdd}
-        title="Adicionar nova ficha"
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '7px',
-          background: '#FFFFFF',
-          color: '#3A2350',
-          fontFamily: "'Manrope', sans-serif",
-          fontWeight: 800,
-          fontSize: '11.5px',
-          padding: '12px',
-          borderRadius: '14px',
-          cursor: 'pointer',
-          border: '1px solid rgba(110,63,114,.14)',
-          boxShadow: '0 4px 12px rgba(58,35,80,.08)',
-          transition: 'transform .22s ease',
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-2px)')}
-        onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
-      >
-        <Plus className="w-4 h-4 stroke-[3]" />
-        <span>Nova ficha</span>
-      </button>
+          Cliente" e "Adicionar Produto": as tres abas criam do mesmo jeito.
+          No computador ele fica no topo, ao lado do titulo. */}
+      {!pc && botaoNovaFicha}
 
       {/* Formulario de criar/editar ficha, reestruturado em 3 passos — ver
           "Ficha Tecnica - Opcoes.dc.html" e o plano aprovado. Os 3 passos
@@ -2246,7 +2282,12 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
       )}
 
       {/* FICHAS CARDS LIST - SEGUINDO FIELMENTE O DESIGN DE REFERÊNCIA (grade no iPad: ver .lista-tablet em index.css) */}
-      <div className="space-y-3 lista-tablet">
+      {/* No computador: grade de cartoes com a mesma altura por linha (a
+          fileira Editar / Duplicar / Excluir desce para o fim do cartao). */}
+      <div
+        className={pc ? undefined : 'space-y-3 lista-tablet'}
+        style={pc ? { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', alignItems: 'stretch', gap: '22px' } : undefined}
+      >
         {filteredFichas.length === 0 ? (
           <div
             className="flex flex-col items-center gap-3 text-center lista-vazia"
@@ -2256,6 +2297,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
               borderRadius: '20px',
               boxShadow: '0 8px 20px rgba(58,35,80,.09)',
               padding: '40px 20px',
+              ...(pc ? { gridColumn: '1 / -1', borderRadius: '22px', padding: '48px 24px' } : {}),
             }}
           >
             <div
@@ -2342,16 +2384,22 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
             const custosLength = baseAnel > 0 ? (custosTotal / baseAnel) * circumference : 0;
             const lucroLength = baseAnel > 0 && lucroTotal > 0 ? (lucroTotal / baseAnel) * circumference : 0;
 
+            // Botao de tamanho aceso. No celular so acende depois de tocar; no
+            // computador acende o tamanho que o cartao esta mostrando (o
+            // primeiro, ate escolher outro), como no desenho.
+            const tamanhoAceso = (tamanhoId: string) =>
+              pc ? tamanhoId === tamanhoSelecionado?.id : selectedTamanhoIdByFicha[ficha.id] === tamanhoId;
+
             return (
               <div
                 key={ficha.id}
                 style={{
                   background: '#FFFFFF',
                   borderRadius: '26px',
-                  padding: '16px',
+                  padding: pc ? '20px' : '16px',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '12px',
+                  gap: pc ? '14px' : '12px',
                   boxShadow: '0 8px 20px rgba(58,35,80,.09)',
                   cursor: 'pointer',
                   transition: 'transform .28s ease, box-shadow .28s ease',
@@ -2366,15 +2414,15 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                 }}
               >
                 {/* HEADER: TÍTULO + IMAGEM */}
-                <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                <div style={{ display: 'flex', gap: pc ? '14px' : '12px', alignItems: 'flex-start' }}>
                   {/* ESQUERDA: TÍTULO E FATIAS */}
-                  <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '7px' }}>
+                  <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: pc ? '10px' : '7px' }}>
                     {/* TÍTULO */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: pc ? '8px' : '6px', flexWrap: 'wrap' }}>
                       <span
                         style={{
                           fontFamily: "'Instrument Serif', serif",
-                          fontSize: '21px',
+                          fontSize: pc ? '24px' : '21px',
                           color: '#241B2B',
                           lineHeight: 1.15,
                         }}
@@ -2387,12 +2435,12 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                           style={{
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '3px',
-                            fontSize: '9px',
+                            gap: pc ? '4px' : '3px',
+                            fontSize: pc ? '11px' : '9px',
                             fontWeight: 800,
-                            color: '#B27A16',
+                            color: pc ? '#8A5A0E' : '#B27A16',
                             background: '#FBF0DD',
-                            padding: '3px 7px',
+                            padding: pc ? '3px 9px' : '3px 7px',
                             borderRadius: '999px',
                             fontFamily: "'Manrope', sans-serif",
                             whiteSpace: 'nowrap',
@@ -2410,30 +2458,32 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                           <button
                             key={tamanho.id}
                             onClick={() => setSelectedTamanhoIdByFicha(prev => ({ ...prev, [ficha.id]: tamanho.id }))}
+                            {...(pc ? { type: 'button' as const, 'aria-pressed': tamanhoAceso(tamanho.id) } : {})}
                             style={{
-                              fontSize: '8px',
-                              fontWeight: selectedTamanhoIdByFicha[ficha.id] === tamanho.id ? 700 : 600,
-                              color: selectedTamanhoIdByFicha[ficha.id] === tamanho.id ? '#FFFFFF' : '#5B4A6B',
-                              background: selectedTamanhoIdByFicha[ficha.id] === tamanho.id
+                              fontSize: pc ? '12px' : '8px',
+                              fontWeight: tamanhoAceso(tamanho.id) ? (pc ? 800 : 700) : 600,
+                              color: tamanhoAceso(tamanho.id) ? '#FFFFFF' : '#5B4A6B',
+                              background: tamanhoAceso(tamanho.id)
                                 ? 'linear-gradient(140deg,#6E3F72,#A85E86)'
                                 : '#F3E9F3',
-                              padding: '4px 8px',
-                              borderRadius: '6px',
+                              padding: pc ? '0 12px' : '4px 8px',
+                              ...(pc ? { height: '36px', fontFamily: 'inherit' } : {}),
+                              borderRadius: pc ? '9px' : '6px',
                               border: 'none',
                               cursor: 'pointer',
                               transition: 'all .15s ease',
-                              boxShadow: selectedTamanhoIdByFicha[ficha.id] === tamanho.id
+                              boxShadow: tamanhoAceso(tamanho.id)
                                 ? '0 4px 12px rgba(110,63,114,.25)'
                                 : 'none',
                               whiteSpace: 'nowrap',
                             }}
                             onMouseEnter={(e) => {
-                              if (selectedTamanhoIdByFicha[ficha.id] !== tamanho.id) {
+                              if (!tamanhoAceso(tamanho.id)) {
                                 e.currentTarget.style.background = '#EFE6F0';
                               }
                             }}
                             onMouseLeave={(e) => {
-                              if (selectedTamanhoIdByFicha[ficha.id] !== tamanho.id) {
+                              if (!tamanhoAceso(tamanho.id)) {
                                 e.currentTarget.style.background = '#F3E9F3';
                               }
                             }}
@@ -2442,7 +2492,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                           </button>
                         ))
                       ) : (
-                        <span style={{ fontSize: '9px', color: '#999' }}>Sem tamanhos</span>
+                        <span style={{ fontSize: pc ? '12px' : '9px', color: pc ? '#7A6E80' : '#999' }}>Sem tamanhos</span>
                       )}
                     </div>
                   </div>
@@ -2452,10 +2502,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                     src={ficha.fotoMini || ficha.imageUrl}
                     alt={ficha.name}
                     style={{
-                      width: '72px',
-                      height: '72px',
+                      width: pc ? '84px' : '72px',
+                      height: pc ? '84px' : '72px',
                       objectFit: 'cover',
-                      borderRadius: '18px',
+                      borderRadius: pc ? '20px' : '18px',
                       border: '2px solid #FFFFFF',
                       boxShadow: '0 8px 18px rgba(58,35,80,.18)',
                       flexShrink: 0,
@@ -2473,10 +2523,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '10px',
+                    gap: pc ? '12px' : '10px',
                     background: '#FAF7FA',
                     borderRadius: '18px',
-                    padding: '12px 14px 14px',
+                    padding: pc ? '14px 16px 16px' : '12px 14px 14px',
                   }}
                 >
                   <div
@@ -2485,12 +2535,12 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                       alignItems: 'baseline',
                       justifyContent: 'space-between',
                       gap: '8px',
-                      paddingBottom: '8px',
+                      paddingBottom: pc ? '10px' : '8px',
                       borderBottom: '1px solid rgba(36,27,43,.08)',
                       fontFamily: "'Manrope', sans-serif",
                     }}
                   >
-                    <span style={{ fontSize: '10px', fontWeight: 800, color: '#7A6E80', letterSpacing: '.04em', textTransform: 'uppercase' }}>
+                    <span style={{ fontSize: pc ? '11px' : '10px', fontWeight: 800, color: '#7A6E80', letterSpacing: '.04em', textTransform: 'uppercase' }}>
                       {tamanhoSelecionado.preco ? 'Preço de venda' : 'Sugestão de preço'}
                     </span>
                     {/* Inter com algarismos de largura igual: a fonte de numero
@@ -2499,7 +2549,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                     <span
                       style={{
                         fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-                        fontSize: '16px',
+                        fontSize: pc ? '20px' : '16px',
                         fontWeight: 500,
                         color: '#241B2B',
                         letterSpacing: '-0.02em',
@@ -2509,17 +2559,17 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                       {formatMoney(tamanhoSelecionado.preco || 0)}
                     </span>
                   </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                  {/* SVG GAUGE */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: pc ? '16px' : '14px' }}>
+                  {/* SVG GAUGE (no computador 92px; o desenho interno e o mesmo) */}
                   <div
                     style={{
                       position: 'relative',
-                      width: '82px',
-                      height: '82px',
+                      width: pc ? '92px' : '82px',
+                      height: pc ? '92px' : '82px',
                       flexShrink: 0,
                     }}
                   >
-                    <svg width="82" height="82" viewBox="0 0 82 82" style={{ transform: 'rotate(-90deg)' }}>
+                    <svg width={pc ? 92 : 82} height={pc ? 92 : 82} viewBox="0 0 82 82" style={{ transform: 'rotate(-90deg)' }}>
                       {/* Background circle */}
                       <circle cx="41" cy="41" r="35" fill="none" stroke="#F1ECF2" strokeWidth="10"></circle>
                       {/* Reposição - roxo */}
@@ -2570,31 +2620,33 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   </div>
 
                   {/* LEGENDA */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: pc ? '7px' : '6px', flex: 1, minWidth: 0 }}>
                     {/* Reposição */}
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '10px', color: '#5B4A6B' }}>
-                      <span style={{ width: '9px', height: '9px', borderRadius: '3px', background: '#6E3F72', flexShrink: 0 }}></span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: pc ? '8px' : '7px', fontSize: pc ? '13px' : '10px', color: '#5B4A6B' }}>
+                      <span style={{ width: pc ? '10px' : '9px', height: pc ? '10px' : '9px', borderRadius: '3px', background: '#6E3F72', flexShrink: 0 }}></span>
                       Reposição
                       <span style={{ color: '#241B2B', marginLeft: 'auto', fontWeight: 400 }}>{formatMoney(repoTotal)}</span>
                     </span>
                     {/* Mão de Obra */}
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '10px', color: '#5B4A6B' }}>
-                      <span style={{ width: '9px', height: '9px', borderRadius: '3px', background: '#C4626F', flexShrink: 0 }}></span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: pc ? '8px' : '7px', fontSize: pc ? '13px' : '10px', color: '#5B4A6B' }}>
+                      <span style={{ width: pc ? '10px' : '9px', height: pc ? '10px' : '9px', borderRadius: '3px', background: '#C4626F', flexShrink: 0 }}></span>
                       Mão de Obra
                       <span style={{ color: '#241B2B', marginLeft: 'auto', fontWeight: 400 }}>{formatMoney(maoDeObraTotal)}</span>
                     </span>
                     {/* Custos */}
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '10px', color: '#5B4A6B' }}>
-                      <span style={{ width: '9px', height: '9px', borderRadius: '3px', background: '#B08D57', flexShrink: 0 }}></span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: pc ? '8px' : '7px', fontSize: pc ? '13px' : '10px', color: '#5B4A6B' }}>
+                      <span style={{ width: pc ? '10px' : '9px', height: pc ? '10px' : '9px', borderRadius: '3px', background: '#B08D57', flexShrink: 0 }}></span>
                       Custos Op.
                       <span style={{ color: '#241B2B', marginLeft: 'auto', fontWeight: 400 }}>{formatMoney(custosTotal)}</span>
                     </span>
-                    {/* Lucro: so quando ha preco — sem preco nao ha o que sobrar. */}
+                    {/* Lucro: so quando ha preco — sem preco nao ha o que sobrar.
+                        No computador em negrito, e o prejuizo num vermelho que da
+                        leitura em letra pequena (#B04E5C), como no desenho. */}
                     {precoTamanho > 0 && (
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '10px', color: lucroTotal < 0 ? '#C4626F' : '#2E7A4A' }}>
-                        <span style={{ width: '9px', height: '9px', borderRadius: '3px', background: lucroTotal < 0 ? '#C4626F' : '#3E9B5F', flexShrink: 0 }}></span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: pc ? '8px' : '7px', fontSize: pc ? '13px' : '10px', color: lucroTotal < 0 ? (pc ? '#B04E5C' : '#C4626F') : '#2E7A4A', ...(pc ? { fontWeight: 700 } : {}) }}>
+                        <span style={{ width: pc ? '10px' : '9px', height: pc ? '10px' : '9px', borderRadius: '3px', background: lucroTotal < 0 ? '#C4626F' : '#3E9B5F', flexShrink: 0 }}></span>
                         {lucroTotal < 0 ? 'Prejuízo' : 'Lucro'}
-                        <span style={{ marginLeft: 'auto', fontWeight: 400 }}>{formatMoney(lucroTotal)}</span>
+                        <span style={{ marginLeft: 'auto', fontWeight: pc ? 700 : 400 }}>{formatMoney(lucroTotal)}</span>
                       </span>
                     )}
                   </div>
@@ -2605,17 +2657,19 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                 <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px' }}>
                 <button
                   onClick={() => setExpandedFichaId(isExpanded ? null : ficha.id)}
+                  {...(pc ? { type: 'button' as const, 'aria-expanded': isExpanded } : {})}
                   style={{
                     background: '#F6F2F5',
                     border: 'none',
-                    fontSize: '10.5px',
+                    fontSize: pc ? '12px' : '10.5px',
                     fontWeight: 700,
                     color: '#3A2350',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '6px',
-                    padding: '7px 13px',
+                    padding: pc ? '0 14px' : '7px 13px',
+                    ...(pc ? { height: '36px', fontFamily: 'inherit' } : {}),
                     borderRadius: '999px',
                     transition: 'transform .2s ease, background .2s ease',
                   }}
@@ -2641,13 +2695,14 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   <span
                     style={{
                       background: '#F6F2F5',
-                      fontSize: '10.5px',
+                      fontSize: pc ? '12px' : '10.5px',
                       fontWeight: 700,
                       color: '#3A2350',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '6px',
-                      padding: '7px 13px',
+                      padding: pc ? '0 14px' : '7px 13px',
+                      ...(pc ? { height: '36px' } : {}),
                       borderRadius: '999px',
                     }}
                   >
@@ -2662,13 +2717,18 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   <div
                     style={{
                       background: '#FAF7FA',
-                      padding: '10px 12px',
-                      borderRadius: '12px',
-                      fontSize: '9px',
+                      padding: pc ? '10px 14px' : '10px 12px',
+                      borderRadius: pc ? '14px' : '12px',
+                      fontSize: pc ? '13px' : '9px',
                     }}
                   >
                     {ingList.map((ing) => (
-                      <div key={ing.id} style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '5px', marginBottom: '5px', borderBottom: '1px solid #E3D8E5' }}>
+                      <div
+                        key={ing.id}
+                        style={pc
+                          ? { display: 'flex', justifyContent: 'space-between', gap: '10px', padding: '7px 0', borderBottom: '1px solid #ECE3EE' }
+                          : { display: 'flex', justifyContent: 'space-between', paddingBottom: '5px', marginBottom: '5px', borderBottom: '1px solid #E3D8E5' }}
+                      >
                         <span style={{ color: '#5B4A6B' }}>
                           {ing.quantity} {ing.unit} de {ing.name}
                         </span>
@@ -2678,25 +2738,27 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   </div>
                 )}
 
-                {/* BOTÕES */}
-                <div style={{ display: 'flex', gap: '7px', paddingTop: '4px' }}>
+                {/* BOTÕES (no computador descem para o fim do cartao: os cartoes
+                    de uma linha da grade ficam da mesma altura) */}
+                <div style={pc ? { display: 'flex', gap: '8px', marginTop: 'auto', paddingTop: '2px' } : { display: 'flex', gap: '7px', paddingTop: '4px' }}>
                   <button
                     onClick={() => handleOpenEdit(ficha)}
+                    {...(pc ? { type: 'button' as const, 'aria-label': `Editar ${ficha.name}` } : {})}
                     style={{
                       flex: 1,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       gap: '6px',
-                      height: '36px',
-                      fontSize: '11px',
+                      height: pc ? '44px' : '36px',
+                      fontSize: pc ? '13px' : '11px',
                       fontWeight: 700,
                       background: '#3A2350',
                       border: 'none',
                       borderRadius: '18px 18px 6px 18px',
                       color: '#F5B9C6',
                       cursor: 'pointer',
-                      boxShadow: '0 8px 16px rgba(58,35,80,.28)',
+                      boxShadow: pc ? 'none' : '0 8px 16px rgba(58,35,80,.28)',
                       transition: 'transform .22s ease',
                     }}
                     onMouseEnter={(e) => {
@@ -2713,14 +2775,15 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   </button>
                   <button
                     onClick={() => handleDuplicate(ficha)}
+                    {...(pc ? { type: 'button' as const, 'aria-label': `Duplicar ${ficha.name}` } : {})}
                     style={{
                       flex: 1,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       gap: '6px',
-                      height: '36px',
-                      fontSize: '11px',
+                      height: pc ? '44px' : '36px',
+                      fontSize: pc ? '13px' : '11px',
                       fontWeight: 700,
                       background: '#F3E9F3',
                       border: 'none',
@@ -2746,19 +2809,20 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   </button>
                   <button
                     onClick={() => handleDelete(ficha)}
+                    {...(pc ? { type: 'button' as const, 'aria-label': `Excluir ${ficha.name}` } : {})}
                     style={{
                       flex: 1,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       gap: '6px',
-                      height: '36px',
-                      fontSize: '11px',
+                      height: pc ? '44px' : '36px',
+                      fontSize: pc ? '13px' : '11px',
                       fontWeight: 700,
                       background: '#FBECEE',
                       border: 'none',
                       borderRadius: '18px 18px 6px 18px',
-                      color: '#C4626F',
+                      color: pc ? '#B04E5C' : '#C4626F',
                       cursor: 'pointer',
                       transition: 'transform .22s ease, background .22s ease',
                     }}
@@ -2808,8 +2872,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
       {pendingDeleteFichas.map((ficha, index) => (
         <div
           key={ficha.id}
-          className="fixed left-1/2 -translate-x-1/2 z-50"
-          style={{ bottom: `${96 + index * 56}px` }}
+          // No computador nao ha menu embaixo: o aviso desce e centraliza no
+          // conteudo (ver .aviso-flutuante em index.css).
+          className={pc ? 'fixed left-1/2 -translate-x-1/2 z-50 aviso-flutuante' : 'fixed left-1/2 -translate-x-1/2 z-50'}
+          style={{ bottom: `${(pc ? 32 : 96) + index * 56}px` }}
         >
           <div
             className="flex items-center gap-3.5 animate-fadeIn"
