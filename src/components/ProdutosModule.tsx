@@ -1104,7 +1104,26 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
           <>
           {/* Lista */}
           {sortedEstoque.length === 0 ? (
-            aba === 'estoque' ? (
+            // Ha produtos nesta aba, so a busca nao achou nenhum. Antes caia
+            // em "Nenhum produto cadastrado" com o convite "Adicionar primeiro
+            // produto", como se a conta estivesse vazia (mesma correcao ja
+            // feita em Pedidos).
+            listaBase.length > 0 ? (
+              <div
+                className="text-center"
+                style={{
+                  background: '#fff',
+                  border: '1px solid rgba(58,35,80,0.1)',
+                  borderRadius: '20px',
+                  padding: pc ? '40px 20px' : '28px 20px',
+                  fontSize: pc ? '14px' : '13px',
+                  color: '#7A6E80',
+                  fontFamily: "'Manrope', sans-serif",
+                }}
+              >
+                Nenhum produto encontrado com essa busca.
+              </div>
+            ) : aba === 'estoque' ? (
               <div
                 className="flex flex-col items-center gap-2.5 text-center"
                 style={{
