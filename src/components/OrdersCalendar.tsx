@@ -25,10 +25,14 @@ interface OrdersCalendarProps {
   onDeleteTransaction?: (tx: Transaction) => void;
   onTogglePaymentStatus?: (tx: Transaction) => void;
   /**
-   * Versao computador do Inicio (docs/design/desktop-redesign, Main.dc.html).
-   * O conteudo dos dois modais — "Pedidos de dd/mm" e "Gostaria de lancar um
-   * pedido para...?" — aparece num painel logo abaixo do calendario, trocado
-   * ao clicar num dia; comeca no dia de hoje. O dia escolhido ganha um anel.
+   * Versao computador do Inicio (docs/design/desktop-redesign, Main.dc.html):
+   * so muda a disposicao e as medidas. Clicar num dia abre os MESMOS modais do
+   * celular ("Pedidos de dd/mm" e "Gostaria de lancar um pedido para...?").
+   *
+   * O desenho punha esse conteudo num painel abaixo do calendario, mas o
+   * Rafael testou (26/10/2026) e o clique parecia nao fazer nada: num dia
+   * livre so mudava a data dentro da frase, e em janela menor o painel ficava
+   * fora da tela. Ele pediu a mesma reacao do celular.
    */
   computador?: boolean;
 }
@@ -39,9 +43,6 @@ const ITENS_LEGENDA = [
   { id: 'com-pedido', rotulo: 'Com Pedido', amostra: { background: 'linear-gradient(150deg, #8F5A9C, #C4626F)' } },
   { id: 'livre', rotulo: 'Livre', amostra: { background: '#B4E7B4' } },
 ] as const;
-
-const dataIso = (d: Date) =>
-  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
 export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
   transactions,
@@ -58,8 +59,6 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
   const [selectedDateStr, setSelectedDateStr] = useState<string | null>(null);
   const [detailsDayStr, setDetailsDayStr] = useState<string | null>(null);
   const [confirmEmptyDayStr, setConfirmEmptyDayStr] = useState<string | null>(null);
-  // So no computador: o dia mostrado no painel abaixo do calendario.
-  const [diaEscolhido, setDiaEscolhido] = useState<string | null>(() => dataIso(new Date()));
 
   /**
    * Filtro da legenda. `null` = sem filtro, que e o estado normal.
@@ -91,26 +90,16 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
 
   // Trocar de mes limpa o filtro: "Hoje" noutro mes apagaria a grade inteira,
   // e um mes todo cinza parece tela quebrada, nao filtro ligado.
-  // No computador, o painel volta para o dia de hoje quando o mes exibido e o
-  // de hoje; noutro mes ele so aparece depois de clicar num dia.
-  const escolherDiaDoMes = (mes: Date) => {
-    const hoje = new Date();
-    const mesDeHoje = mes.getFullYear() === hoje.getFullYear() && mes.getMonth() === hoje.getMonth();
-    setDiaEscolhido(mesDeHoje ? dataIso(hoje) : null);
-  };
-
   const handlePrevMonth = () => {
     setCurrentDate(new Date(year, month - 1, 1));
     setSelectedDateStr(null);
     setFiltro(null);
-    escolherDiaDoMes(new Date(year, month - 1, 1));
   };
 
   const handleNextMonth = () => {
     setCurrentDate(new Date(year, month + 1, 1));
     setSelectedDateStr(null);
     setFiltro(null);
-    escolherDiaDoMes(new Date(year, month + 1, 1));
   };
 
   const handleToday = () => {
@@ -179,8 +168,97 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
   });
   monthEvents.sort((a, b) => a.day - b.day);
 
+  // Os dois modais do dia, iguais no celular e no computador.
+  const modaisDoDia = (
+    <>
+      {/* Modal: Detalhes dos Pedidos do Dia */}
+      {detailsDayStr && (
+        <div
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-[99999] animate-fadeIn"
+          onClick={() => setDetailsDayStr(null)}
+        >
+          <div
+            className="w-full bg-white rounded-[24px] p-6 space-y-4 max-h-[80vh] max-w-md overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-4 border-b">
+              <h3 className="font-serif-display text-lg" style={{ color: '#241B2B' }}>
+                Pedidos de {formatDateBr(detailsDayStr)}
+              </h3>
+              <button
+                onClick={() => setDetailsDayStr(null)}
+                className="p-1 rounded-full hover:bg-neutral-100"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3 pt-2">
+              {(salesByDate[detailsDayStr] || []).map((tx) => (
+                <div key={tx.id} className="pb-3 border-b last:border-b-0">
+                  <p className="font-bold text-sm" style={{ color: '#241B2B' }}>
+                    {tx.customerName || 'Cliente não informado'}
+                  </p>
+                  <p className="text-xs" style={{ color: '#7A6E80' }}>
+                    {tx.description}
+                  </p>
+                  <div className="flex items-center justify-between mt-1">
+                    <p className="text-xs font-semibold" style={{ color: '#241B2B' }}>
+                      {formatMoney(tx.totalValue)}
+                    </p>
+                    <p className="text-xs" style={{ color: tx.paymentStatus === 'pago' ? '#4CAF7D' : '#F5A623' }}>
+                      {tx.paymentStatus === 'pago' ? 'Pago' : 'Pendente'}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Dialog: Confirmar Lançamento de Pedido em Dia Vazio */}
+      {confirmEmptyDayStr && (
+        <div
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-[99999] animate-fadeIn"
+          onClick={() => setConfirmEmptyDayStr(null)}
+        >
+          <div
+            className="bg-white rounded-[24px] p-6 space-y-4 w-[90%] max-w-sm"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="font-serif-display text-lg" style={{ color: '#241B2B' }}>
+              Lançar Pedido
+            </h3>
+            <p style={{ color: '#7A6E80', fontSize: '14px' }}>
+              Gostaria de lançar um pedido para {formatDateBr(confirmEmptyDayStr)}?
+            </p>
+            <div className="flex gap-2 pt-4">
+              <button
+                onClick={() => setConfirmEmptyDayStr(null)}
+                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold"
+                style={{ background: '#F6F2F5', color: '#241B2B' }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  setConfirmEmptyDayStr(null);
+                  onOpenAddModalWithDate?.(confirmEmptyDayStr);
+                }}
+                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white"
+                style={{ background: 'linear-gradient(135deg, #6E3F72 0%, #3A2350 100%)' }}
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+
   if (computador) {
-    const pedidosDoDia = diaEscolhido ? salesByDate[diaEscolhido] || [] : [];
     const botaoMes: React.CSSProperties = {
       display: 'flex',
       alignItems: 'center',
@@ -256,16 +334,16 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
               const isToday = dayStr === todayStr;
               const combina =
                 !filtro || (filtro === 'hoje' ? isToday : filtro === 'com-pedido' ? hasOrders : !hasOrders);
-              const escolhido = combina && dayStr === diaEscolhido;
-              const sombraBase = hasOrders ? '0 6px 14px rgba(143,90,156,0.34)' : '0 6px 14px rgba(76,175,80,0.24)';
+              const sombra = hasOrders ? '0 6px 14px rgba(143,90,156,0.34)' : '0 6px 14px rgba(76,175,80,0.24)';
 
               return (
                 <button
                   key={dayStr}
                   type="button"
-                  onClick={combina ? () => setDiaEscolhido(dayStr) : undefined}
+                  // Mesma reacao do celular: dia com pedido abre os pedidos do
+                  // dia; dia livre pergunta se quer lancar um pedido nele.
+                  onClick={combina ? () => (hasOrders ? setDetailsDayStr(dayStr) : setConfirmEmptyDayStr(dayStr)) : undefined}
                   disabled={!combina}
-                  aria-pressed={escolhido}
                   aria-label={
                     `${dayNum} de ${monthNames[month].toLowerCase()}${isToday ? ', hoje' : ''}, ` +
                     (hasOrders ? `${dayOrders.length} ${dayOrders.length > 1 ? 'pedidos' : 'pedido'}` : 'livre')
@@ -282,7 +360,7 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
                     border: isToday && combina ? '2px solid #3A2350' : 0,
                     background: !combina ? 'transparent' : hasOrders ? 'linear-gradient(150deg, #8F5A9C, #C4626F)' : '#B4E7B4',
                     color: !combina ? '#D3C9D6' : hasOrders ? '#FFFFFF' : '#1B5E1B',
-                    boxShadow: !combina ? 'none' : escolhido ? '0 0 0 3px #FFFFFF, 0 0 0 5px #3A2350' : sombraBase,
+                    boxShadow: !combina ? 'none' : sombra,
                     fontFamily: 'inherit',
                     fontSize: '13px',
                     fontWeight: 800,
@@ -337,69 +415,6 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
           ))}
         </div>
 
-        {/* O que no celular abre em modal ao tocar num dia. */}
-        {diaEscolhido && (
-          <div
-            style={{
-              boxSizing: 'border-box',
-              padding: '18px',
-              borderRadius: '18px',
-              background: '#F6F2F5',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '10px',
-            }}
-          >
-            <h3 className="font-serif-display" style={{ margin: 0, fontSize: '22px', fontWeight: 400, lineHeight: 1.15 }}>
-              {pedidosDoDia.length > 0 ? `Pedidos de ${formatDateBr(diaEscolhido)}` : 'Lançar Pedido'}
-            </h3>
-
-            {pedidosDoDia.map((tx) => (
-              <div
-                key={tx.id}
-                style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', borderRadius: '14px', background: '#FFFFFF' }}
-              >
-                <span style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '14px', fontWeight: 800 }}>{tx.customerName || 'Cliente não informado'}</span>
-                  <span style={{ fontSize: '13px', color: '#7A6E80' }}>{tx.description}</span>
-                </span>
-                <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                  <span style={{ fontSize: '13px', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{formatMoney(tx.totalValue)}</span>
-                  <span style={{ fontSize: '12px', fontWeight: 800, color: tx.paymentStatus === 'pago' ? '#2E7D51' : '#8A6D1F' }}>
-                    {tx.paymentStatus === 'pago' ? 'Pago' : 'Pendente'}
-                  </span>
-                </span>
-              </div>
-            ))}
-
-            {pedidosDoDia.length === 0 && (
-              <>
-                <p style={{ margin: 0, fontSize: '14px', color: '#7A6E80' }}>
-                  Gostaria de lançar um pedido para {formatDateBr(diaEscolhido)}?
-                </p>
-                <button
-                  type="button"
-                  onClick={() => onOpenAddModalWithDate?.(diaEscolhido)}
-                  style={{
-                    height: '44px',
-                    border: 0,
-                    borderRadius: '11px',
-                    background: '#3A2350',
-                    color: '#FFFFFF',
-                    fontFamily: 'inherit',
-                    fontSize: '14px',
-                    fontWeight: 600,
-                    boxShadow: '0 10px 20px rgba(58,35,80,0.3)',
-                    cursor: 'pointer',
-                  }}
-                >
-                  Lançar Pedido
-                </button>
-              </>
-            )}
-          </div>
-        )}
-
         {monthEvents.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '14px', borderTop: '1px solid #EDE6EF' }}>
             <h3 style={{ margin: 0, fontSize: '12px', fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7A6E80' }}>
@@ -416,6 +431,8 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
             ))}
           </div>
         )}
+
+        {modaisDoDia}
       </section>
     );
   }
@@ -614,90 +631,7 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
         </div>
       )}
 
-      {/* Modal: Detalhes dos Pedidos do Dia */}
-      {detailsDayStr && (
-        <div
-          className="fixed inset-0 bg-black/40 flex items-center justify-center z-[99999] animate-fadeIn"
-          onClick={() => setDetailsDayStr(null)}
-        >
-          <div
-            className="w-full bg-white rounded-[24px] p-6 space-y-4 max-h-[80vh] max-w-md overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between pb-4 border-b">
-              <h3 className="font-serif-display text-lg" style={{ color: '#241B2B' }}>
-                Pedidos de {formatDateBr(detailsDayStr)}
-              </h3>
-              <button
-                onClick={() => setDetailsDayStr(null)}
-                className="p-1 rounded-full hover:bg-neutral-100"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="space-y-3 pt-2">
-              {(salesByDate[detailsDayStr] || []).map((tx) => (
-                <div key={tx.id} className="pb-3 border-b last:border-b-0">
-                  <p className="font-bold text-sm" style={{ color: '#241B2B' }}>
-                    {tx.customerName || 'Cliente não informado'}
-                  </p>
-                  <p className="text-xs" style={{ color: '#7A6E80' }}>
-                    {tx.description}
-                  </p>
-                  <div className="flex items-center justify-between mt-1">
-                    <p className="text-xs font-semibold" style={{ color: '#241B2B' }}>
-                      {formatMoney(tx.totalValue)}
-                    </p>
-                    <p className="text-xs" style={{ color: tx.paymentStatus === 'pago' ? '#4CAF7D' : '#F5A623' }}>
-                      {tx.paymentStatus === 'pago' ? 'Pago' : 'Pendente'}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Dialog: Confirmar Lançamento de Pedido em Dia Vazio */}
-      {confirmEmptyDayStr && (
-        <div
-          className="fixed inset-0 bg-black/40 flex items-center justify-center z-[99999] animate-fadeIn"
-          onClick={() => setConfirmEmptyDayStr(null)}
-        >
-          <div
-            className="bg-white rounded-[24px] p-6 space-y-4 w-[90%] max-w-sm"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 className="font-serif-display text-lg" style={{ color: '#241B2B' }}>
-              Lançar Pedido
-            </h3>
-            <p style={{ color: '#7A6E80', fontSize: '14px' }}>
-              Gostaria de lançar um pedido para {formatDateBr(confirmEmptyDayStr)}?
-            </p>
-            <div className="flex gap-2 pt-4">
-              <button
-                onClick={() => setConfirmEmptyDayStr(null)}
-                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold"
-                style={{ background: '#F6F2F5', color: '#241B2B' }}
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={() => {
-                  setConfirmEmptyDayStr(null);
-                  onOpenAddModalWithDate?.(confirmEmptyDayStr);
-                }}
-                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white"
-                style={{ background: 'linear-gradient(135deg, #6E3F72 0%, #3A2350 100%)' }}
-              >
-                Confirmar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {modaisDoDia}
     </div>
   );
 };
