@@ -414,7 +414,18 @@ export const MinhaEmpresaCard: React.FC<{ computador?: boolean; colunaDireita?: 
                     </button>
                   </div>
                 </div>
-                {!pc && (
+                {pc ? (
+                  // Computador: o aviso ja aparece uma vez no topo; aqui fica so o
+                  // "?" com o exemplo calculado com os numeros desta despesa.
+                  exemploRateio && (
+                    <CampoComAjuda
+                      variant="computador"
+                      microcopy="Quer ver um exemplo com os números desta despesa?"
+                      exemploDinamico={exemploRateio}
+                      ariaLabelAjuda={`Ver exemplo com os números de ${d.nome.trim()}`}
+                    />
+                  )
+                ) : (
                   <CampoComAjuda
                     variant="card"
                     microcopy="Se essa despesa também é usada na sua vida pessoal, informe aqui só a parte que é do negócio. Deixe 100 se ela é toda da confeitaria."
