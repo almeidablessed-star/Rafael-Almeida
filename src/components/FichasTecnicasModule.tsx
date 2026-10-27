@@ -1191,13 +1191,6 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         </header>
       )}
 
-      {launchSuccessMsg && (
-        <div className="bg-[var(--color-primary)]/10 border border-[var(--color-primary)] text-[var(--color-primary)] text-xs p-3.5 rounded-lg flex items-center gap-2.5 animate-fadeIn shadow-card">
-          <Check className="w-5 h-5 text-[var(--color-primary)] shrink-0" />
-          <span className="font-bold">{launchSuccessMsg}</span>
-        </div>
-      )}
-
       {/* Category chips — ver "Fichas - Aba.dc.html". Layout novo (pilula
           com contador), mesmas categorias/labels/contagens reais de sempre —
           antes eram 5 blocos quase identicos repetidos a mao, um por
@@ -2902,6 +2895,26 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
           </div>
         </div>
       ))}
+
+      {/* Aviso de sucesso (ex.: "Ficha ... duplicada com sucesso!"). Fica preso
+          embaixo da tela, como o "Desfazer" — antes ficava no topo da lista e,
+          com a lista rolada, sumia de vista. Sobe acima dos avisos de exclusao
+          que estiverem abertos. */}
+      {launchSuccessMsg && (
+        <div
+          role="status"
+          className={pc ? 'fixed left-1/2 -translate-x-1/2 z-50 aviso-flutuante' : 'fixed left-1/2 -translate-x-1/2 z-50'}
+          style={{ bottom: `${(pc ? 32 : 96) + pendingDeleteFichas.length * 56}px`, width: 'max-content', maxWidth: pc ? '720px' : 'calc(100vw - 32px)' }}
+        >
+          <div
+            className="flex items-center gap-2 text-sm font-bold text-white animate-fadeIn"
+            style={{ padding: '12px 18px', borderRadius: '22px', background: '#3A2350', boxShadow: '0 20px 36px rgba(58,35,80,0.26)' }}
+          >
+            <Check size={17} strokeWidth={2.4} color="#A9D8B8" aria-hidden="true" className="shrink-0" />
+            <span>{launchSuccessMsg}</span>
+          </div>
+        </div>
+      )}
       </div>
     </div>
   );
