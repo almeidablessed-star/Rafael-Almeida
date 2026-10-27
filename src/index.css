@@ -353,6 +353,20 @@ a:hover {
     background: #F3E9F3 !important;
   }
 
+  /* Editar / excluir das comandas de Pedidos: mesmos tons de hover do celular. */
+  .icone-acao-pedido:hover {
+    background: #EFE6F0 !important;
+  }
+
+  .icone-acao-pedido-excluir:hover {
+    background: #FBE9EC !important;
+  }
+
+  /* Buscas do computador: o texto de exemplo no cinza do texto secundario. */
+  .busca-computador::placeholder {
+    color: #7A6E80;
+  }
+
   /* Brilho da comanda do Inicio: no computador ela e bem mais larga, entao a
      faixa de luz precisa ir mais longe para atravessar o botao inteiro. */
   .car-sweep-largo {

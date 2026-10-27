@@ -3,6 +3,8 @@ import { Transaction, TransactionType } from '../types';
 import { formatCurrency, formatDateBr, getTodayIso } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
 import { QuotePdfModal } from './QuotePdfModal';
+import { TituloDaPagina } from './TituloDaPagina';
+import { useTelaDeComputador } from '../hooks/useTelaDeComputador';
 import {
   ShoppingBag,
   Search,
@@ -14,6 +16,10 @@ import {
   Filter,
   Calendar,
   Users,
+  Check,
+  Hourglass,
+  User,
+  Coins,
 } from 'lucide-react';
 
 interface OrdersModuleProps {
@@ -37,6 +43,8 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
   const [quoteTx, setQuoteTx] = useState<Transaction | null>(null);
 
   const [vista, setVista] = useState<'proximos' | 'historico'>('proximos');
+  // Versao computador (docs/design/desktop-redesign, Pedidos.dc.html). Ver o `if (pc)`.
+  const pc = useTelaDeComputador();
 
   // Filter sales/orders only
   const sales = transactions.filter((t) => t.type === 'venda');
@@ -96,6 +104,401 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
   // com os cards que aparecem embaixo.
   const pendingCount = salesDaVista.filter((s) => s.paymentStatus === 'pendente').length;
   const paidCount = salesDaVista.filter((s) => (s.paymentStatus || 'pago') === 'pago').length;
+
+  // Ha pedidos, so nao nesta vista (ou na busca/filtro). Mesmo texto no
+  // celular e no computador.
+  const mensagemListaVazia =
+    searchTerm || statusFilter !== 'todos'
+      ? 'Nenhum pedido encontrado com esse filtro.'
+      : vista === 'historico'
+      ? 'Nenhum pedido no histórico ainda. Os pedidos entregues e pagos vêm para cá no dia seguinte à entrega.'
+      : 'Nenhum pedido para os próximos dias.';
+
+  // Conta sem nenhum pedido: o convite para lancar o primeiro.
+  const vazioSemPedidos = (
+    <div
+      className="flex flex-col items-center gap-2.5 text-center lista-vazia"
+      style={{
+        background: '#fff',
+        border: '1px solid rgba(58,35,80,0.1)',
+        borderRadius: '20px',
+        boxShadow: '0 8px 20px rgba(58,35,80,.09)',
+        padding: '40px 20px',
+      }}
+    >
+      <div
+        className="flex items-center justify-center"
+        style={{ width: '64px', height: '64px', borderRadius: '20px', background: '#F3E9F3' }}
+      >
+        <ShoppingBag className="w-[30px] h-[30px]" style={{ color: '#6E3F72' }} strokeWidth={2} />
+      </div>
+      <div className="font-serif-display" style={{ fontSize: '22px', color: '#3A2350' }}>
+        Nenhum pedido encontrado
+      </div>
+      <div className="text-sm" style={{ color: '#7A6E80', maxWidth: '280px' }}>
+        Lance seu primeiro pedido para começar a vender.
+      </div>
+      <button
+        type="button"
+        onClick={() => onOpenAddModal('venda')}
+        className="transition-colors"
+        style={{
+          marginTop: '8px',
+          background: '#3A2350',
+          color: '#fff',
+          fontSize: '14px',
+          fontWeight: 600,
+          padding: '13px 22px',
+          borderRadius: '11px',
+          cursor: 'pointer',
+          boxShadow: '0 10px 20px rgba(58,35,80,.3)',
+        }}
+        onMouseEnter={(e) => { e.currentTarget.style.background = '#6E3F72'; }}
+        onMouseLeave={(e) => { e.currentTarget.style.background = '#3A2350'; }}
+      >
+        Lançar Novo Pedido
+      </button>
+    </div>
+  );
+
+  const modalPdf = quoteTx && (
+    <QuotePdfModal
+      transaction={quoteTx}
+      onClose={() => setQuoteTx(null)}
+    />
+  );
+
+  // ------------------------------------------------------------------
+  // COMPUTADOR (docs/design/desktop-redesign, Pedidos.dc.html): titulo com
+  // o selo, resumo num cartao branco, os controles numa linha so e as
+  // comandas em grade. Mesmos numeros, filtros, busca e modais do celular.
+  // ------------------------------------------------------------------
+  if (pc) {
+    const caixaResumo = (
+      tipo: 'pagas' | 'receber',
+      rotulo: string,
+      valor: number,
+      contagem: string,
+    ) => {
+      const pagas = tipo === 'pagas';
+      return (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '6px',
+            padding: '18px 20px',
+            borderRadius: '18px',
+            background: pagas ? '#EEF7F0' : '#FBF5EA',
+            border: `1px solid ${pagas ? '#CBE6D3' : '#F0E2C8'}`,
+          }}
+        >
+          <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 800, letterSpacing: '0.06em', color: pagas ? '#2E6B45' : '#7A5A1E' }}>
+            {pagas ? <Check size={13} strokeWidth={2.6} aria-hidden="true" /> : <Hourglass size={13} strokeWidth={2.2} aria-hidden="true" />}
+            {rotulo}
+          </span>
+          <span style={{ fontSize: '26px', fontWeight: 800, lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>{formatMoney(valor)}</span>
+          <span style={{ fontSize: '12px', color: pagas ? '#3F6B4C' : '#7A5A1E' }}>{contagem}</span>
+        </div>
+      );
+    };
+
+    const filtrosStatus = [
+      { id: 'todos', rotulo: 'Todos', total: salesDaVista.length },
+      { id: 'pago', rotulo: 'Pagos', total: paidCount },
+      { id: 'pendente', rotulo: 'Pendentes', total: pendingCount },
+    ] as const;
+
+    return (
+      <div
+        className="animate-fadeIn"
+        style={{ display: 'flex', flexDirection: 'column', gap: '28px', fontFamily: "'Manrope', system-ui, sans-serif", fontSize: '14px', lineHeight: 1.5, color: '#241B2B' }}
+      >
+        <header style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '12px 16px' }}>
+          <TituloDaPagina>Pedidos &amp; Encomendas</TituloDaPagina>
+          <span style={{ padding: '6px 14px', borderRadius: '999px', background: '#F3E9F3', color: '#3A2350', fontSize: '11px', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+            {sales.length} {sales.length === 1 ? 'Pedido' : 'Pedidos'}
+          </span>
+        </header>
+
+        <section
+          aria-label="Resumo das vendas"
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            gap: '22px 36px',
+            padding: '30px',
+            borderRadius: '24px',
+            background: '#FFFFFF',
+            boxShadow: '0 8px 20px rgba(58,35,80,0.08)',
+          }}
+        >
+          <div style={{ flex: '1 1 280px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.14em', color: '#7A6E80' }}>TOTAL EM VENDAS</span>
+            <span style={{ fontSize: '56px', fontWeight: 800, letterSpacing: '-0.035em', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
+              {formatMoney(totalVendas)}
+            </span>
+            <span style={{ fontSize: '13px', color: '#7A6E80' }}>
+              {sales.length} {sales.length === 1 ? 'encomenda registrada' : 'encomendas registradas'}
+            </span>
+          </div>
+          <div style={{ flex: '2 1 460px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+            {caixaResumo('pagas', 'VENDAS PAGAS', totalPagas, `${paidCount} ${paidCount === 1 ? 'pedido pago' : 'pedidos pagos'}`)}
+            {caixaResumo('receber', 'A RECEBER (PENDENTES)', totalPendentes + totalAReceber, `${pendingCount} ${pendingCount === 1 ? 'pedido pendente' : 'pedidos pendentes'}`)}
+          </div>
+        </section>
+
+        {/* Controles numa linha: Proximos/Historico, status e busca. */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '14px 24px' }}>
+          <div
+            role="group"
+            aria-label="Próximos ou histórico"
+            style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '4px', width: '320px', maxWidth: '100%', padding: '4px', boxSizing: 'border-box', borderRadius: '999px', background: '#EDE5EC' }}
+          >
+            {([
+              { id: 'proximos', label: 'Próximos', total: proximos.length },
+              { id: 'historico', label: 'Histórico', total: historico.length },
+            ] as const).map((op) => {
+              const ligada = vista === op.id;
+              return (
+                <button
+                  key={op.id}
+                  type="button"
+                  onClick={() => setVista(op.id)}
+                  aria-pressed={ligada}
+                  style={{
+                    height: '40px',
+                    border: 0,
+                    borderRadius: '999px',
+                    background: ligada ? '#FFFFFF' : 'transparent',
+                    color: ligada ? '#3A2350' : '#6A5F70',
+                    boxShadow: ligada ? '0 4px 10px rgba(58,35,80,0.1)' : 'none',
+                    fontFamily: 'inherit',
+                    fontSize: '13px',
+                    fontWeight: ligada ? 800 : 600,
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+                  }}
+                >
+                  {op.label} ({op.total})
+                </button>
+              );
+            })}
+          </div>
+
+          <div role="group" aria-label="Filtrar por pagamento" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+            <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.06em', color: '#7A6E80' }}>STATUS:</span>
+            {filtrosStatus.map((f) => {
+              const ligado = statusFilter === f.id;
+              return (
+                <button
+                  key={f.id}
+                  type="button"
+                  onClick={() => setStatusFilter(f.id)}
+                  aria-pressed={ligado}
+                  style={{
+                    minHeight: '44px',
+                    padding: '0 2px',
+                    border: 0,
+                    borderBottom: `2px solid ${ligado ? '#3A2350' : 'transparent'}`,
+                    background: 'none',
+                    color: ligado ? '#3A2350' : '#6A5F70',
+                    fontFamily: 'inherit',
+                    fontSize: '13px',
+                    fontWeight: ligado ? 800 : 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {f.rotulo} ({f.total})
+                </button>
+              );
+            })}
+          </div>
+
+          <label
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              flex: '0 1 380px',
+              height: '46px',
+              boxSizing: 'border-box',
+              padding: '0 18px',
+              borderRadius: '999px',
+              background: '#FFFFFF',
+              boxShadow: '0 6px 14px rgba(58,35,80,0.07)',
+              color: '#7A6E80',
+            }}
+          >
+            <Search size={17} strokeWidth={1.9} aria-hidden="true" />
+            <input
+              type="search"
+              aria-label="Buscar pedido"
+              placeholder="Buscar por nome da cliente ou descrição do produto..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="busca-computador"
+              style={{ flex: 1, minWidth: 0, border: 0, outline: 0, background: 'transparent', fontFamily: 'inherit', fontSize: '13px', color: '#241B2B' }}
+            />
+          </label>
+        </div>
+
+        {filteredSales.length === 0 && sales.length > 0 ? (
+          <p style={{ margin: 0, padding: '40px 20px', borderRadius: '20px', background: '#FFFFFF', textAlign: 'center', fontSize: '14px', color: '#7A6E80' }}>
+            {mensagemListaVazia}
+          </p>
+        ) : filteredSales.length === 0 ? (
+          vazioSemPedidos
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(420px, 1fr))', gap: '20px' }}>
+            {filteredSales.map((tx) => {
+              const isPending = tx.paymentStatus === 'pendente';
+              const nome = tx.customerName || 'cliente';
+              return (
+                <article
+                  key={tx.id}
+                  onClick={() => onEditTransaction(tx)}
+                  style={{
+                    position: 'relative',
+                    overflow: 'hidden',
+                    borderRadius: '20px',
+                    background: isPending ? '#FFFCF6' : '#FFFFFF',
+                    boxShadow: '0 8px 20px rgba(58,35,80,0.09)',
+                    cursor: 'pointer',
+                    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-6px)';
+                    e.currentTarget.style.boxShadow = '0 18px 34px rgba(58,35,80,.18)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 8px 20px rgba(58,35,80,0.09)';
+                  }}
+                >
+                  <span aria-hidden="true" style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '6px', background: isPending ? 'linear-gradient(180deg, #E4D9C3, #B08D57)' : 'linear-gradient(180deg, #8F5A9C, #C4626F)' }} />
+                  <span aria-hidden="true" style={{ position: 'absolute', left: '-9px', top: '50%', transform: 'translateY(-50%)', width: '18px', height: '18px', borderRadius: '50%', background: '#F6F2F5' }} />
+                  <span aria-hidden="true" style={{ position: 'absolute', right: '-9px', top: '50%', transform: 'translateY(-50%)', width: '18px', height: '18px', borderRadius: '50%', background: '#F6F2F5' }} />
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '20px 24px 16px 30px' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 11px', borderRadius: '999px', background: '#F3E9F3', color: '#3A2350', fontSize: '11px', fontWeight: 800, letterSpacing: '0.04em' }}>
+                        <User size={12} strokeWidth={2.4} aria-hidden="true" />
+                        CLIENTE: {tx.customerName ? tx.customerName.toUpperCase() : 'CLIENTE'}
+                      </span>
+                      <span
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          padding: '5px 11px',
+                          borderRadius: '999px',
+                          background: isPending ? '#E4D9C3' : '#A9D8B8',
+                          color: isPending ? '#5B4A2E' : '#26402F',
+                          fontSize: '11px',
+                          fontWeight: 800,
+                        }}
+                      >
+                        {isPending ? 'Pendente' : 'Pago'}
+                      </span>
+                      {/* So acontece em Proximos: a entrega ja passou e o
+                          pedido so continua aqui porque falta receber. */}
+                      {!!tx.date && tx.date < hoje && faltaReceber(tx) && (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', padding: '5px 11px', borderRadius: '999px', background: '#F6D5DA', color: '#7A2E3A', fontSize: '11px', fontWeight: 800 }}>
+                          Atrasado · falta receber
+                        </span>
+                      )}
+                    </div>
+
+                    <p style={{ margin: 0, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#7A6E80' }}>
+                      <Calendar size={14} strokeWidth={2} aria-hidden="true" />
+                      Data: <strong style={{ color: '#241B2B' }}>{formatDateBr(tx.date)}</strong>
+                      <span aria-hidden="true">•</span>
+                      Pgto: <strong style={{ color: '#241B2B' }}>{tx.paymentMethod || 'N/A'}</strong>
+                    </p>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '14px', borderTop: '1px dashed rgba(36,27,43,0.14)' }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+                        <span style={{ fontSize: '21px', fontWeight: 800, letterSpacing: '-0.01em', fontVariantNumeric: 'tabular-nums' }}>
+                          {formatMoney(tx.totalValue)}
+                        </span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); setQuoteTx(tx); }}
+                            aria-label={`Gerar orçamento em PDF do pedido de ${nome}`}
+                            title="Gerar e Visualizar Orçamento em PDF"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', height: '44px', padding: '0 16px', border: 0, borderRadius: '999px', background: '#3A2350', color: '#F5B9C6', fontFamily: 'inherit', fontSize: '12px', fontWeight: 800, cursor: 'pointer' }}
+                          >
+                            <Printer size={14} strokeWidth={2} aria-hidden="true" />
+                            PDF
+                          </button>
+                          {onTogglePaymentStatus && (
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); onTogglePaymentStatus(tx); }}
+                              aria-label={isPending ? `Marcar o pedido de ${nome} como pago` : `Mudar o pedido de ${nome} para pendente`}
+                              title={isPending ? 'Clique para marcar este pedido como PAGO' : 'Clique para alterar este pedido para PENDENTE'}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                height: '44px',
+                                minWidth: '96px',
+                                padding: '0 14px',
+                                border: 0,
+                                borderRadius: '999px',
+                                background: isPending ? '#A9D8B8' : '#F0E2C8',
+                                color: isPending ? '#26402F' : '#5B4A2E',
+                                fontFamily: 'inherit',
+                                fontSize: '12px',
+                                fontWeight: 800,
+                                cursor: 'pointer',
+                              }}
+                            >
+                              {isPending ? 'Pago' : 'Pendente'}
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            className="icone-acao-pedido"
+                            onClick={(e) => { e.stopPropagation(); onEditTransaction(tx); }}
+                            aria-label={`Editar o pedido de ${nome}`}
+                            title="Editar"
+                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '44px', height: '44px', border: 0, borderRadius: '50%', background: '#F6F2F5', cursor: 'pointer' }}
+                          >
+                            <Edit3 size={16} strokeWidth={2} color="#7A6E80" aria-hidden="true" />
+                          </button>
+                          <button
+                            type="button"
+                            className="icone-acao-pedido icone-acao-pedido-excluir"
+                            onClick={(e) => { e.stopPropagation(); onDeleteTransaction(tx); }}
+                            aria-label={`Excluir o pedido de ${nome}`}
+                            title="Excluir"
+                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '44px', height: '44px', border: 0, borderRadius: '50%', background: '#F6F2F5', cursor: 'pointer' }}
+                          >
+                            <Trash2 size={16} strokeWidth={2} color="#C4626F" aria-hidden="true" />
+                          </button>
+                        </span>
+                      </div>
+                      {!!tx.signalValue && (
+                        <p style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#7A6E80' }}>
+                          <Coins size={14} strokeWidth={2} aria-hidden="true" />
+                          Sinal: {formatMoney(tx.signalValue)} | Restante: {formatMoney((tx.totalValue || 0) - (tx.signalValue || 0))}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
+
+        {modalPdf}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 animate-fadeIn pb-8">
@@ -376,56 +779,10 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
               fontFamily: "'Manrope', sans-serif",
             }}
           >
-            {searchTerm || statusFilter !== 'todos'
-              ? 'Nenhum pedido encontrado com esse filtro.'
-              : vista === 'historico'
-              ? 'Nenhum pedido no histórico ainda. Os pedidos entregues e pagos vêm para cá no dia seguinte à entrega.'
-              : 'Nenhum pedido para os próximos dias.'}
+            {mensagemListaVazia}
           </div>
         ) : filteredSales.length === 0 ? (
-          <div
-            className="flex flex-col items-center gap-2.5 text-center lista-vazia"
-            style={{
-              background: '#fff',
-              border: '1px solid rgba(58,35,80,0.1)',
-              borderRadius: '20px',
-              boxShadow: '0 8px 20px rgba(58,35,80,.09)',
-              padding: '40px 20px',
-            }}
-          >
-            <div
-              className="flex items-center justify-center"
-              style={{ width: '64px', height: '64px', borderRadius: '20px', background: '#F3E9F3' }}
-            >
-              <ShoppingBag className="w-[30px] h-[30px]" style={{ color: '#6E3F72' }} strokeWidth={2} />
-            </div>
-            <div className="font-serif-display" style={{ fontSize: '22px', color: '#3A2350' }}>
-              Nenhum pedido encontrado
-            </div>
-            <div className="text-sm" style={{ color: '#7A6E80', maxWidth: '280px' }}>
-              Lance seu primeiro pedido para começar a vender.
-            </div>
-            <button
-              type="button"
-              onClick={() => onOpenAddModal('venda')}
-              className="transition-colors"
-              style={{
-                marginTop: '8px',
-                background: '#3A2350',
-                color: '#fff',
-                fontSize: '14px',
-                fontWeight: 600,
-                padding: '13px 22px',
-                borderRadius: '11px',
-                cursor: 'pointer',
-                boxShadow: '0 10px 20px rgba(58,35,80,.3)',
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = '#6E3F72'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = '#3A2350'; }}
-            >
-              Lançar Novo Pedido
-            </button>
-          </div>
+          vazioSemPedidos
         ) : (
           filteredSales.map((tx) => {
             const isPending = tx.paymentStatus === 'pendente';
@@ -598,12 +955,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
       </div>
 
       {/* PDF QUOTE PREVIEW MODAL */}
-      {quoteTx && (
-        <QuotePdfModal
-          transaction={quoteTx}
-          onClose={() => setQuoteTx(null)}
-        />
-      )}
+      {modalPdf}
         </div>
       </div>
     </div>
