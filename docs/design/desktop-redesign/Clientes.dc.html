@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Carula — Clientes</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#3A2350}a:hover{color:#6E3F72}
+.nav-link:hover{background:#F6F2F5}
+.icone-acao:hover{background:#EFE6F0}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid #A85E86;outline-offset:2px}
+input::placeholder{color:#7A6E80}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F6F2F5; color: #241B2B; font-family: 'Manrope', system-ui, sans-serif; font-size: 14px; line-height: 1.5">
+
+<aside style="flex: 1 1 248px; box-sizing: border-box; background: #FFFFFF; box-shadow: 1px 0 0 rgba(58,35,80,0.06); padding: 30px 18px 24px; display: flex; flex-direction: column; gap: 28px">
+<span role="img" aria-label="Carula App" style="display: inline-flex; align-items: flex-start; padding: 0 8px">
+<span aria-hidden="true" style="font-size: 40px; font-weight: 800; letter-spacing: -0.055em; line-height: 1; color: #3A2350">carula</span>
+<span aria-hidden="true" style="position: relative; margin-left: 3px; transform: rotate(-8deg); display: inline-flex; align-items: center; background: #F5B9C6; border-radius: 3px 6px 6px 3px; padding: 3px 6px 3px 10px; box-shadow: 0 4px 8px rgba(196,98,111,0.25)"><span style="position: absolute; left: 4px; top: 50%; transform: translateY(-50%); width: 3px; height: 3px; border-radius: 50%; background: #FFFFFF"></span><span style="border-left: 1px dashed rgba(58,35,80,0.35); padding-left: 4px; font-size: 10px; font-weight: 800; letter-spacing: 0.14em; line-height: 1; color: #3A2350">APP</span></span>
+</span>
+<button type="button" style="position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 58px; padding: 0 10px 0 20px; border: 0; border-radius: 18px; background: linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86); box-shadow: 0 10px 22px rgba(58,35,80,0.3); color: #FFFFFF; font-family: 'Instrument Serif', serif; font-size: 23px; line-height: 1; cursor: pointer; text-align: left">Lançar Pedido<span style="display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 12px; background: #F5B9C6; color: #3A2350"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></span></button>
+<nav aria-label="Menu principal" style="display: flex; flex-direction: column; gap: 4px">
+<a class="nav-link" href="Main.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 46px; padding: 0 14px; border-radius: 14px; text-decoration: none; color: #6A5F70; font-size: 12px; font-weight: 700; letter-spacing: 0.1em"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#8E8496" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg>INÍCIO</a>
+<a class="nav-link" href="Pedidos.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 46px; padding: 0 14px; border-radius: 14px; text-decoration: none; color: #6A5F70; font-size: 12px; font-weight: 700; letter-spacing: 0.1em"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#8E8496" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16l-1.2 13H5.2z"></path><path d="M9 7a3 3 0 0 1 6 0"></path></svg>PEDIDOS</a>
+<a class="nav-link" href="Fichas.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 46px; padding: 0 14px; border-radius: 14px; text-decoration: none; color: #6A5F70; font-size: 12px; font-weight: 700; letter-spacing: 0.1em"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#8E8496" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h9a3 3 0 0 1 3 3v13H6a2 2 0 0 1-2-2z"></path><path d="M20 5v15"></path></svg>FICHAS</a>
+<a class="nav-link" href="Clientes.dc.html" aria-current="page" style="display: flex; align-items: center; gap: 12px; min-height: 46px; padding: 0 14px; border-radius: 14px; text-decoration: none; background: #3A2350; color: #F5B9C6; font-size: 12px; font-weight: 800; letter-spacing: 0.1em; box-shadow: 0 8px 18px rgba(58,35,80,0.3)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8.5" r="3.2"></circle><path d="M3.5 20a5.5 5.5 0 0 1 11 0"></path><circle cx="17.5" cy="10" r="2.2"></circle></svg>CLIENTES</a>
+<a class="nav-link" href="Produtos.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 46px; padding: 0 14px; border-radius: 14px; text-decoration: none; color: #6A5F70; font-size: 12px; font-weight: 700; letter-spacing: 0.1em"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#8E8496" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 3 7v10l9 5 9-5V7z"></path><path d="M3 7l9 5 9-5"></path><path d="M12 12v10"></path></svg>PRODUTOS</a>
+<a class="nav-link" href="Empresa.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 46px; padding: 0 14px; border-radius: 14px; text-decoration: none; color: #6A5F70; font-size: 12px; font-weight: 700; letter-spacing: 0.1em"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#8E8496" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"></path><path d="M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path><path d="M3 13h18"></path></svg>EMPRESA</a>
+</nav>
+</aside>
+
+<main style="flex: 999 1 560px; min-width: 0; box-sizing: border-box; padding: 30px 40px 56px">
+<div style="max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 26px">
+
+<header style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px 24px">
+<h1 style="margin: 0; font-family: 'Instrument Serif', serif; font-size: 42px; font-weight: 400; line-height: 1">Clientes</h1>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px">
+<label style="display: flex; align-items: center; gap: 10px; width: 360px; max-width: 100%; height: 48px; box-sizing: border-box; padding: 0 16px; border-radius: 14px; background: #FFFFFF; box-shadow: 0 6px 14px rgba(58,35,80,0.07); color: #7A6E80">
+<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+<input type="search" aria-label="Buscar cliente" placeholder="Buscar cliente por nome, telefone ou cidade..." value="{{busca}}" onChange="{{aoBuscar}}" style="flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font-family: inherit; font-size: 13px; color: #241B2B">
+</label>
+<button type="button" style="display: inline-flex; align-items: center; gap: 8px; height: 48px; padding: 0 20px; border: 1px solid rgba(110,63,114,0.14); border-radius: 14px; background: #FFFFFF; color: #3A2350; box-shadow: 0 4px 12px rgba(58,35,80,0.08); font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Cadastrar Nova(o) Cliente</button>
+</div>
+</header>
+
+<section aria-labelledby="whats-titulo" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; padding: 16px 20px; border-radius: 22px; background: #FFFFFF; box-shadow: 0 8px 20px rgba(58,35,80,0.08)">
+<div style="display: flex; align-items: center; gap: 14px">
+<span style="flex: 0 0 auto; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: #25D366; color: #FFFFFF"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2Z"></path></svg></span>
+<div style="display: flex; flex-direction: column; gap: 1px">
+<h2 id="whats-titulo" style="margin: 0; font-family: 'Instrument Serif', serif; font-size: 21px; font-weight: 400; line-height: 1.15">Envio via WhatsApp</h2>
+<p style="margin: 0; font-size: 13px; color: #7A6E80">Modo atual: <strong style="font-weight: 600; color: #3F6A4C">WhatsApp Business</strong></p>
+</div>
+</div>
+<button type="button" style="display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 18px; border: 0; border-radius: 14px; background: #4C7358; color: #FFFFFF; font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"></path></svg>Configurar WhatsApp</button>
+</section>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); align-items: stretch; gap: 22px">
+<sc-for list="{{cartoes}}" as="c" hint-placeholder-count="9">
+<article style="display: flex; flex-direction: column; overflow: hidden; border-radius: 24px; background: #FFFFFF; box-shadow: 0 8px 20px rgba(58,35,80,0.09)">
+<div style="display: flex; align-items: center; gap: 14px; padding: 18px; background: linear-gradient(140deg, #3A2350, #6E3F72 60%, #A85E86)">
+<span aria-hidden="true" style="flex: 0 0 auto; display: flex; align-items: center; justify-content: center; width: 52px; height: 52px; box-sizing: border-box; border-radius: 50%; background: rgba(255,255,255,0.16); border: 1px solid rgba(255,255,255,0.3); color: #FFFFFF; font-family: 'Instrument Serif', serif; font-size: 24px">{{c.inicial}}</span>
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 6px">
+<h2 style="margin: 0; font-family: 'Instrument Serif', serif; font-size: 24px; font-weight: 400; line-height: 1.1; color: #FFFFFF">{{c.nome}}</h2>
+<span style="display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px; background: #F0E2C8; color: #3A2350; font-size: 11px; font-weight: 800"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>{{c.cidade}}</span>
+</div>
+<button type="button" aria-label="{{c.rotuloWhats}}" style="flex: 0 0 auto; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 0; border-radius: 13px; background: #F5B9C6; box-shadow: 0 6px 14px rgba(0,0,0,0.2); cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3A2350" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.3 7.4L3 21l2.2-5.5A8.4 8.4 0 1 1 21 11.5z"></path></svg></button>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 12px; padding: 16px 18px 14px">
+<div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 10px">
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<span style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 999px; background: #F6F2F5; font-size: 12px; font-weight: 700"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6E3F72" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2Z"></path></svg>{{c.fone}}</span>
+<span style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 999px; background: #F6F2F5; color: #5B4A6B; font-size: 12px; font-weight: 600"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6E3F72" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"></path></svg>{{c.endereco}}</span>
+</div>
+<div style="flex: 0 0 auto; display: flex; gap: 6px">
+<button class="icone-acao" type="button" aria-label="{{c.rotuloEditar}}" style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: 0; border-radius: 50%; background: #F6F2F5; cursor: pointer"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7A6E80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg></button>
+<button class="icone-acao" type="button" aria-label="{{c.rotuloExcluir}}" style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: 0; border-radius: 50%; background: #F6F2F5; cursor: pointer"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#C4626F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path></svg></button>
+</div>
+</div>
+<sc-if value="{{c.temNotas}}" hint-placeholder-val="{{false}}">
+<p style="margin: 0; padding: 9px 12px; border-radius: 12px; background: #FBF7EF; border: 1px solid rgba(176,141,87,0.3); font-size: 13px; font-style: italic; color: #5A4E62">“{{c.notas}}”</p>
+</sc-if>
+</div>
+
+<div style="margin: auto 14px 14px; border-radius: 16px; background: #FAF7FA">
+<button type="button" onClick="{{c.alternar}}" aria-expanded="{{c.aberta}}" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; min-height: 50px; padding: 0 14px; border: 0; background: transparent; font-family: inherit; text-align: left; cursor: pointer">
+<span style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: #241B2B"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6E3F72" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>Todas as Datas Comemorativas</span>
+<span style="display: flex; align-items: center; gap: 8px"><span style="padding: 3px 10px; border-radius: 999px; background: #3A2350; color: #F5B9C6; font-size: 11px; font-weight: 800; white-space: nowrap">{{c.contaDatas}}</span><span style="display: flex; color: #3A2350; transform: {{c.setaGiro}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span></span>
+</button>
+<sc-if value="{{c.aberta}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 8px; max-height: 330px; overflow-y: auto; padding: 0 12px 12px">
+<p style="margin: 2px 2px 0; font-size: 11px; font-weight: 800; letter-spacing: 0.04em; color: #7A6E80">DATAS E LEMBRETES DE {{c.nomeCaixaAlta}}</p>
+<sc-for list="{{c.eventos}}" as="e" hint-placeholder-count="6">
+<div style="display: flex; align-items: center; gap: 10px; padding: 9px 10px 9px 12px; border-radius: 13px; background: #FFFFFF">
+<span aria-hidden="true" style="flex: 0 0 auto; display: flex; color: #241B2B">
+<sc-if value="{{e.pessoal}}" hint-placeholder-val="{{false}}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8"></path><path d="M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2.5 2 4 2 2-1 2-1"></path><path d="M2 21h20"></path><path d="M7 8v3M12 8v3M17 8v3"></path></svg></sc-if>
+<sc-if value="{{e.feriado}}" hint-placeholder-val="{{true}}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"></rect><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"></path><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"></path></svg></sc-if>
+</span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 2px">
+<span style="padding: 0 4px; margin-left: -4px; border-radius: 4px; background: {{e.marca}}; font-size: 13px; font-weight: 700; line-height: 1.35">{{e.titulo}}</span>
+<span style="font-size: 12px; color: #7A6E80">Data: <span style="padding: 1px 6px; border-radius: 5px; background: #F0E2C8; color: #241B2B">{{e.data}}</span></span>
+</span>
+<button type="button" aria-label="{{e.rotuloAvisar}}" style="flex: 0 0 auto; display: inline-flex; align-items: center; gap: 5px; height: 38px; padding: 0 12px; border: 0; border-radius: 12px; background: #3A2350; color: #FFFFFF; font-family: inherit; font-size: 12px; font-weight: 800; cursor: pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F5B9C6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"></path></svg>Avisar</button>
+</div>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</article>
+</sc-for>
+</div>
+
+<sc-if value="{{vazio}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 48px 24px; border-radius: 22px; background: #FFFFFF; border: 1px solid rgba(58,35,80,0.1); box-shadow: 0 8px 20px rgba(58,35,80,0.09); text-align: center">
+<span style="display: flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 20px; background: #F3E9F3; color: #6E3F72"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8.5" r="3.2"></circle><path d="M3.5 20a5.5 5.5 0 0 1 11 0"></path><circle cx="17.5" cy="10" r="2.2"></circle></svg></span>
+<h2 style="margin: 0; font-family: 'Instrument Serif', serif; font-size: 24px; font-weight: 400; color: #3A2350">Nenhum resultado encontrado</h2>
+<p style="margin: 0; max-width: 300px; font-size: 14px; color: #7A6E80">Tente buscar por outro nome, telefone ou cidade.</p>
+</div>
+</sc-if>
+
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1460}}'>
+class Component extends DCLogic {
+  state = { busca: '', aberta: 'camila' };
+
+  feriados() {
+    return [
+      ['Ano Novo / Réveillon', '01-01'], ["Valentine's Day (Dia dos Namorados EUA)", '02-14'], ['Páscoa', '04-05'],
+      ['Dia das Mães (BR/EUA)', '05-10'], ['Dia dos Namorados (Brasil)', '06-12'], ["Father's Day (Dia dos Pais EUA)", '06-21'],
+      ['Festa Junina / São João', '06-24'], ['Dia dos Avós (Brasil)', '07-26'], ['Dia dos Pais (Brasil)', '08-09'],
+      ['Dia das Crianças (Brasil)', '10-12'], ['Dia dos Professores', '10-15'], ['Halloween', '10-31'],
+      ['Thanksgiving (Ação de Graças EUA)', '11-26'], ['Natal', '12-25']
+    ];
+  }
+
+  clientes() {
+    return [
+      { id: 'aline', nome: 'Aline Souza', cidade: 'Salem', fone: '(978) 555-0118', endereco: 'Lafayette St, 52', datas: [['Aniversário', '03-03']] },
+      { id: 'beatriz', nome: 'Beatriz Rocha', cidade: 'Peabody', fone: '(978) 555-0126', endereco: 'Main St, 210', datas: [['Aniversário', '07-08']] },
+      { id: 'camila', nome: 'Camila', cidade: 'Beverly', fone: '(781) 555-0150', endereco: 'Cabot St, 103', notas: 'Prefere entrega à tarde. Alérgica a amendoim.', datas: [['Aniversário', '11-02'], ['Aniversário do Lucas (Filho 1)', '10-15'], ['Aniversário da Sophia (Filha 2)', '11-04']] },
+      { id: 'fernanda', nome: 'Fernanda Lima', cidade: 'Peabody', fone: '(978) 555-0149', endereco: 'Lynn St, 9', datas: [['Aniversário', '01-22']] },
+      { id: 'juliana', nome: 'Juliana Ribeiro', cidade: 'Somerville', fone: '(617) 555-0152', endereco: 'Elm St, 28', datas: [['Aniversário', '10-19']] },
+      { id: 'mariana', nome: 'Mariana Costa', cidade: 'Salem', fone: '(617) 555-0155', endereco: 'Highland Ave, 18', datas: [['Aniversário', '05-27'], ['Aniversário da Helena (Filha)', '09-03']] },
+      { id: 'patricia', nome: 'Patrícia Gomes', cidade: 'Salem', fone: '(617) 555-0153', endereco: 'Derby St, 7', notas: 'Sempre pede embalagem para presente.', datas: [['Aniversário', '12-11']] },
+      { id: 'rafael', nome: 'Rafael', cidade: 'Beverly', fone: '(781) 555-0151', endereco: 'Elm St, 45', datas: [['Aniversário', '08-30'], ['Aniversário de Casamento', '11-20']] },
+      { id: 'renata', nome: 'Renata Alves', cidade: 'Beverly', fone: '(781) 555-0154', endereco: 'Lothrop St, 7', datas: [['Aniversário', '04-16']] }
+    ];
+  }
+
+  renderVals() {
+    const st = this.state;
+    const feriados = this.feriados();
+    const q = st.busca.trim().toLowerCase();
+    const lista = this.clientes()
+      .filter((c) => !q || c.nome.toLowerCase().includes(q) || c.fone.includes(q) || c.cidade.toLowerCase().includes(q))
+      .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+    const curto = (md) => md.slice(3) + '/' + md.slice(0, 2);
+
+    const cartoes = lista.map((c) => {
+      const eventos = [
+        ...c.datas.map(([t, md]) => ({ t, md, pessoal: true })),
+        ...feriados.map(([t, md]) => ({ t, md, pessoal: false }))
+      ].sort((a, b) => (a.md > b.md ? 1 : -1));
+      const aberta = st.aberta === c.id;
+      return {
+        nome: c.nome,
+        nomeCaixaAlta: c.nome.toUpperCase(),
+        inicial: c.nome.charAt(0).toUpperCase(),
+        cidade: c.cidade,
+        fone: c.fone,
+        endereco: c.endereco,
+        temNotas: !!c.notas,
+        notas: c.notas || '',
+        contaDatas: eventos.length + ' datas',
+        aberta,
+        setaGiro: aberta ? 'rotate(180deg)' : 'none',
+        alternar: () => this.setState({ aberta: aberta ? null : c.id }),
+        rotuloWhats: 'Mandar mensagem para ' + c.nome + ' no WhatsApp',
+        rotuloEditar: 'Editar ' + c.nome,
+        rotuloExcluir: 'Excluir ' + c.nome,
+        eventos: eventos.map((e) => ({
+          titulo: e.t,
+          data: curto(e.md),
+          pessoal: e.pessoal,
+          feriado: !e.pessoal,
+          marca: e.pessoal ? '#F5B9C6' : 'transparent',
+          rotuloAvisar: 'Avisar ' + c.nome + ' sobre ' + e.t
+        }))
+      };
+    });
+
+    return {
+      cartoes,
+      vazio: cartoes.length === 0,
+      busca: st.busca,
+      aoBuscar: (e) => this.setState({ busca: e.target.value })
+    };
+  }
+}
+</script>
+</body>
+</html>

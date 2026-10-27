@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Carula — Minha Empresa</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#3A2350}a:hover{color:#6E3F72}
+.nav-link:hover{background:#F6F2F5}
+.icone-acao:hover{background:#EFE6F0}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid #A85E86;outline-offset:2px}
+input::placeholder{color:#7A6E80}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F6F2F5; color: #241B2B; font-family: 'Manrope', system-ui, sans-serif; font-size: 14px; line-height: 1.5">
+
+<aside style="flex: 1 1 248px; box-sizing: border-box; background: #FFFFFF; box-shadow: 1px 0 0 rgba(58,35,80,0.06); padding: 30px 18px 24px; display: flex; flex-direction: column; gap: 28px">
+<span role="img" aria-label="Carula App" style="display: inline-flex; align-items: flex-start; padding: 0 8px">
+<span aria-hidden="true" style="font-size: 40px; font-weight: 800; letter-spacing: -0.055em; line-height: 1; color: #3A2350">carula</span>
+<span aria-hidden="true" style="position: relative; margin-left: 3px; transform: rotate(-8deg); display: inline-flex; align-items: center; background: #F5B9C6; border-radius: 3px 6px 6px 3px; padding: 3px 6px 3px 10px; box-shadow: 0 4px 8px rgba(196,98,111,0.25)"><span style="position: absolute; left: 4px; top: 50%; transform: translateY(-50%); width: 3px; height: 3px; border-radius: 50%; background: #FFFFFF"></span><span style="border-left: 1px dashed rgba(58,35,80,0.35); padding-left: 4px; font-size: 10px; font-weight: 800; letter-spacing: 0.14em; line-height: 1; color: #3A2350">APP</span></span>
+</span>
+<button type="button" style="position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 58px; padding: 0 10px 0 20px; border: 0; border-radius: 18px; background: linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86); box-shadow: 0 10px 22px rgba(58,35,80,0.3); color: #FFFFFF; font-family: 'Instrument Serif', serif; font-size: 23px; line-height: 1; cursor: pointer; text-align: left">Lançar Pedido<span style="display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 12px; background: #F5B9C6; color: #3A2350"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></span></button>
+<nav aria-label="Menu principal" style="display: flex; flex-direction: column; gap: 4px">
+<a class="nav-link" href="Main.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 46px; padding: 0 14px; border-radius: 14px; text-decoration: none; color: #6A5F70; font-size: 12px; font-weight: 700; letter-spacing: 0.1em"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#8E8496" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg>INÍCIO</a>
+<a class="nav-link" href="Pedidos.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 46px; padding: 0 14px; border-radius: 14px; text-decoration: none; color: #6A5F70; font-size: 12px; font-weight: 700; letter-spacing: 0.1em"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#8E8496" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16l-1.2 13H5.2z"></path><path d="M9 7a3 3 0 0 1 6 0"></path></svg>PEDIDOS</a>
+<a class="nav-link" href="Fichas.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 46px; padding: 0 14px; border-radius: 14px; text-decoration: none; color: #6A5F70; font-size: 12px; font-weight: 700; letter-spacing: 0.1em"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#8E8496" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h9a3 3 0 0 1 3 3v13H6a2 2 0 0 1-2-2z"></path><path d="M20 5v15"></path></svg>FICHAS</a>
+<a class="nav-link" href="Clientes.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 46px; padding: 0 14px; border-radius: 14px; text-decoration: none; color: #6A5F70; font-size: 12px; font-weight: 700; letter-spacing: 0.1em"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#8E8496" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8.5" r="3.2"></circle><path d="M3.5 20a5.5 5.5 0 0 1 11 0"></path><circle cx="17.5" cy="10" r="2.2"></circle></svg>CLIENTES</a>
+<a class="nav-link" href="Produtos.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 46px; padding: 0 14px; border-radius: 14px; text-decoration: none; color: #6A5F70; font-size: 12px; font-weight: 700; letter-spacing: 0.1em"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#8E8496" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 3 7v10l9 5 9-5V7z"></path><path d="M3 7l9 5 9-5"></path><path d="M12 12v10"></path></svg>PRODUTOS</a>
+<a class="nav-link" href="Empresa.dc.html" aria-current="page" style="display: flex; align-items: center; gap: 12px; min-height: 46px; padding: 0 14px; border-radius: 14px; text-decoration: none; background: #3A2350; color: #F5B9C6; font-size: 12px; font-weight: 800; letter-spacing: 0.1em; box-shadow: 0 8px 18px rgba(58,35,80,0.3)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"></path><path d="M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path><path d="M3 13h18"></path></svg>EMPRESA</a>
+</nav>
+</aside>
+
+<main style="flex: 999 1 560px; min-width: 0; box-sizing: border-box; padding: 30px 40px 56px">
+<div style="max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 26px">
+
+<h1 style="margin: 0; font-family: 'Instrument Serif', serif; font-size: 42px; font-weight: 400; line-height: 1">Minha Empresa</h1>
+
+<div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 24px">
+
+<div style="flex: 3 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 24px">
+
+<section aria-labelledby="remun-titulo" style="display: flex; flex-direction: column; gap: 14px; padding: 22px; border-radius: 22px; background: #FFFFFF; box-shadow: 0 8px 20px rgba(58,35,80,0.08)">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+<h2 id="remun-titulo" style="margin: 0; font-family: 'Instrument Serif', serif; font-size: 26px; font-weight: 400; line-height: 1.15">Sua Remuneração</h2>
+<button class="icone-acao" type="button" aria-label="Editar sua remuneração" style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: 0; border-radius: 50%; background: transparent; color: #6E3F72; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg></button>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; border-radius: 14px; background: #FAF7FA; border: 1px solid #EDE6EF"><span style="font-size: 11px; font-weight: 800; letter-spacing: 0.05em; color: #7A6E80">RECEBIMENTO DESEJADO</span><span style="font-size: 18px; font-weight: 800; font-variant-numeric: tabular-nums">R$ 3.000,00/mês</span></div>
+<div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; border-radius: 14px; background: #FAF7FA; border: 1px solid #EDE6EF"><span style="font-size: 11px; font-weight: 800; letter-spacing: 0.05em; color: #7A6E80">VALOR DA HORA</span><span style="font-size: 18px; font-weight: 800; font-variant-numeric: tabular-nums">R$ 20,00/hora</span></div>
+<div style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; border-radius: 14px; background: #FAF7FA; border: 1px solid #EDE6EF"><span style="font-size: 11px; font-weight: 800; letter-spacing: 0.05em; color: #7A6E80">META DE HORAS (REFERÊNCIA, NÃO OBRIGAÇÃO)</span><span style="font-size: 15px; font-weight: 700">5 dias/semana · 150,0h/mês → 34,6h/semana → 6,9h/dia</span></div>
+</div>
+</section>
+
+<div style="display: flex; flex-wrap: wrap; align-items: stretch; gap: 24px">
+<section aria-labelledby="periodo-titulo" style="flex: 1 1 260px; display: flex; flex-direction: column; gap: 14px; padding: 22px; border-radius: 22px; background: #FFFFFF; box-shadow: 0 8px 20px rgba(58,35,80,0.08)">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+<h2 id="periodo-titulo" style="margin: 0; font-family: 'Instrument Serif', serif; font-size: 26px; font-weight: 400; line-height: 1.15">Período das Metas</h2>
+<button class="icone-acao" type="button" aria-label="Editar período das metas" style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: 0; border-radius: 50%; background: transparent; color: #6E3F72; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg></button>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; border-radius: 14px; background: #FAF7FA; border: 1px solid #EDE6EF"><span style="font-size: 11px; font-weight: 800; letter-spacing: 0.05em; color: #7A6E80">SUAS METAS ZERAM</span><span style="font-size: 15px; font-weight: 700">Toda semana — de segunda a domingo</span></div>
+</section>
+
+<section aria-labelledby="metas-titulo" style="flex: 1 1 260px; display: flex; flex-direction: column; gap: 14px; padding: 22px; border-radius: 22px; background: #FFFFFF; box-shadow: 0 8px 20px rgba(58,35,80,0.08)">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+<h2 id="metas-titulo" style="margin: 0; font-family: 'Instrument Serif', serif; font-size: 26px; font-weight: 400; line-height: 1.15">Metas da Empresa</h2>
+<button class="icone-acao" type="button" aria-label="Editar metas da empresa" style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: 0; border-radius: 50%; background: transparent; color: #6E3F72; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg></button>
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 12px 6px; border-radius: 14px; background: #FAF7FA; border: 1px solid #EDE6EF"><span style="font-size: 11px; font-weight: 800; letter-spacing: 0.05em; color: #7A6E80">CMV</span><span style="font-size: 18px; font-weight: 800">30%</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 12px 6px; border-radius: 14px; background: #FAF7FA; border: 1px solid #EDE6EF"><span style="font-size: 11px; font-weight: 800; letter-spacing: 0.05em; color: #7A6E80">INVESTIMENTO</span><span style="font-size: 18px; font-weight: 800">6%</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 12px 6px; border-radius: 14px; background: #FAF7FA; border: 1px solid #EDE6EF"><span style="font-size: 11px; font-weight: 800; letter-spacing: 0.05em; color: #7A6E80">LUCRO</span><span style="font-size: 18px; font-weight: 800">20%</span></div>
+</div>
+</section>
+</div>
+
+<section aria-labelledby="despesas-titulo" style="display: flex; flex-direction: column; gap: 14px; padding: 22px; border-radius: 22px; background: #FFFFFF; box-shadow: 0 8px 20px rgba(58,35,80,0.08)">
+<div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px">
+<h2 id="despesas-titulo" style="margin: 0; font-family: 'Instrument Serif', serif; font-size: 26px; font-weight: 400; line-height: 1.15">Despesas do Negócio</h2>
+<span style="font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums">{{totalDespesas}}</span>
+</div>
+<p style="margin: 0; font-size: 13px; color: #7A6E80">Aluguel, luz, internet... custos fixos, independente de quanto você vende. O que já está no custo do produto não entra aqui de novo.</p>
+<div style="display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: 14px; background: #F3E9F3">
+<span aria-hidden="true" style="flex: 0 0 auto; display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: #3A2350; color: #FFFFFF; font-size: 12px; font-weight: 800">?</span>
+<p style="margin: 0; font-size: 13px; color: #4A3F52">Se essa despesa também é usada na sua vida pessoal, informe em “% do negócio” só a parte que é da confeitaria. Deixe 100 se ela é toda do negócio.</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px">
+<sc-for list="{{despesas}}" as="d" hint-placeholder-count="4">
+<div style="overflow: hidden; border-radius: 16px; background: #FFFFFF; border: 1px solid rgba(58,35,80,0.1); box-shadow: 0 6px 14px rgba(58,35,80,0.06)">
+<div style="height: 4px; background: {{d.cor}}"></div>
+<div style="display: flex; flex-direction: column; gap: 10px; padding: 14px">
+<input type="text" aria-label="Nome da despesa" placeholder="Nome da despesa" value="{{d.nome}}" onChange="{{d.aoNome}}" style="height: 46px; box-sizing: border-box; padding: 0 14px; border-radius: 10px; border: 1px solid rgba(58,35,80,0.14); background: #FFFFFF; font-family: inherit; font-size: 17px; font-weight: 600; color: #241B2B">
+<div style="display: flex; align-items: flex-end; gap: 8px">
+<label style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 600; color: #7A6E80">Valor (R$)
+<input type="text" inputmode="decimal" placeholder="0" value="{{d.valor}}" onChange="{{d.aoValor}}" style="width: 100%; height: 44px; box-sizing: border-box; padding: 0 12px; border-radius: 10px; border: 1px solid rgba(58,35,80,0.14); background: #FAF7FA; font-family: inherit; font-size: 16px; font-weight: 600; color: #241B2B; font-variant-numeric: tabular-nums">
+</label>
+<label style="flex: 0 0 96px; display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 600; color: #7A6E80">% do negócio
+<input type="text" inputmode="decimal" placeholder="100" value="{{d.pct}}" onChange="{{d.aoPct}}" style="width: 100%; height: 44px; box-sizing: border-box; padding: 0 12px; border-radius: 10px; border: 1px solid rgba(58,35,80,0.14); background: #FAF7FA; font-family: inherit; font-size: 16px; font-weight: 600; color: #241B2B; font-variant-numeric: tabular-nums">
+</label>
+<span style="flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 4px">
+<span aria-hidden="true" style="font-size: 11px; font-weight: 600; color: #94505E">Excluir</span>
+<button type="button" onClick="{{d.excluir}}" aria-label="{{d.rotuloExcluir}}" style="display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(196,98,111,0.28); background: #FDEFF2; color: #B04E5C; box-shadow: 0 2px 6px rgba(196,98,111,0.12); font-family: inherit; font-size: 18px; font-weight: 700; cursor: pointer">×</button>
+</span>
+</div>
+</div>
+</div>
+</sc-for>
+</div>
+<button type="button" onClick="{{adicionarDespesa}}" style="height: 46px; border: 1px dashed #D9CCDB; border-radius: 12px; background: transparent; color: #6E3F72; font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer">+ Adicionar despesa</button>
+<button type="button" style="display: flex; align-items: center; justify-content: center; gap: 8px; height: 48px; border: 0; border-radius: 12px; background: linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86); color: #FFFFFF; font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><path d="M17 21v-8H7v8M7 3v5h8"></path></svg>Salvar despesas</button>
+</section>
+</div>
+
+<div style="flex: 2 1 360px; min-width: 0; display: flex; flex-direction: column; gap: 24px">
+
+<section aria-labelledby="resumo-titulo" style="overflow: hidden; border-radius: 22px; background: #FFFFFF; border: 1px solid rgba(58,35,80,0.08); box-shadow: 0 8px 20px rgba(58,35,80,0.09)">
+<div style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; padding: 20px 22px; background: #ECDFEE">
+<h2 id="resumo-titulo" style="margin: 0; font-family: 'Instrument Serif', serif; font-size: 26px; font-weight: 400; line-height: 1.15; color: #3A2350">Resumo &amp; Distribuição</h2>
+<span style="font-size: 11px; font-weight: 700; letter-spacing: 0.12em; color: #87476C">MENSAL</span>
+</div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 22px 22px 18px; background: #FAF7FA; border-bottom: 1px solid rgba(58,35,80,0.08)">
+<span style="font-size: 11px; font-weight: 700; letter-spacing: 0.16em; color: #7A6E80">FATURAMENTO NECESSÁRIO</span>
+<span style="font-family: 'Instrument Serif', serif; font-size: 46px; line-height: 1.05; color: #3A2350">{{faturamento}}</span>
+</div>
+<div style="display: flex; flex-direction: column; padding: 6px 12px 12px">
+<sc-for list="{{distribuicao}}" as="r" hint-placeholder-count="5">
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px 12px; padding: 12px 10px; border-bottom: {{r.linha}}">
+<span style="font-size: 14px; font-weight: 600">{{r.nome}}</span>
+<span style="font-size: 15px; font-weight: 700; color: #3A2350; text-align: right; font-variant-numeric: tabular-nums">{{r.valor}}</span>
+<span style="height: 6px; border-radius: 999px; background: #F1ECF2; overflow: hidden"><span style="display: block; width: {{r.largura}}; height: 100%; border-radius: 999px; background: {{r.cor}}"></span></span>
+<span style="font-size: 12px; font-weight: 600; color: #7A6E80; text-align: right; font-variant-numeric: tabular-nums">{{r.pct}}</span>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section aria-labelledby="avulsos-titulo" style="display: flex; flex-direction: column; gap: 14px; padding: 22px; border-radius: 22px; background: #FFFFFF; box-shadow: 0 8px 20px rgba(58,35,80,0.08)">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<h2 id="avulsos-titulo" style="margin: 0; font-family: 'Instrument Serif', serif; font-size: 26px; font-weight: 400; line-height: 1.15">Gastos avulsos</h2>
+<p style="margin: 0; font-size: 13px; line-height: 1.45; color: #7A6E80">O resumo acima é sua meta planejada. Aqui você registra o que realmente gastou fora de uma venda — comprou um equipamento (investimento), pagou alguém avulso (mão de obra) ou teve um custo extra. Esse valor é descontado do seu saldo real lá no Início.</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 14px; background: #FAF7FA; border: 1px solid #EDE6EF"><span style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; color: #7A6E80"><span aria-hidden="true" style="display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 6px; background: #F3E9F3; color: #6E3F72; font-family: 'Instrument Serif', serif; font-size: 13px">C</span>CUSTOS</span><span style="font-family: 'Instrument Serif', serif; font-size: 22px; line-height: 1.1; color: #3A2350">R$ 200,00</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 14px; background: #FAF7FA; border: 1px solid #EDE6EF"><span style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; color: #7A6E80"><span aria-hidden="true" style="display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 6px; background: #F3E9F3; color: #6E3F72; font-family: 'Instrument Serif', serif; font-size: 13px">I</span>INVESTIM.</span><span style="font-family: 'Instrument Serif', serif; font-size: 22px; line-height: 1.1; color: #3A2350">R$ 26,00</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 14px; background: #FAF7FA; border: 1px solid #EDE6EF"><span style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; color: #7A6E80"><span aria-hidden="true" style="display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 6px; background: #F3E9F3; color: #6E3F72; font-family: 'Instrument Serif', serif; font-size: 13px">M</span>MÃO DE OBRA</span><span style="font-family: 'Instrument Serif', serif; font-size: 22px; line-height: 1.1; color: #3A2350">R$ 0,00</span></div>
+</div>
+<p style="margin: 0; font-size: 12px; color: #7A6E80">Gasto essa semana, contando pelo dia em que foi lançado — o mesmo valor descontado no Início.</p>
+<button type="button" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; height: 52px; padding: 0 16px; border: 1px solid #E6E1DB; border-radius: 12px; background: #FFFFFF; box-shadow: 0 8px 20px rgba(58,35,80,0.09); font-family: inherit; cursor: pointer"><span style="display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: #3A2350"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v8M8 12h8"></path></svg>{{rotuloNovo}}</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7A6E80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg></button>
+<div role="group" aria-label="Filtrar gastos avulsos" style="display: flex; gap: 3px; padding: 4px; border-radius: 12px; background: #F6F2F5">
+<sc-for list="{{filtros}}" as="f" hint-placeholder-count="4">
+<button type="button" onClick="{{f.escolher}}" aria-pressed="{{f.ligado}}" style="flex: 1; height: 38px; padding: 0 6px; border: 0; border-radius: 8px; background: {{f.fundo}}; color: {{f.tinta}}; box-shadow: {{f.sombra}}; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap">{{f.nome}}</button>
+</sc-for>
+</div>
+<label style="display: flex; align-items: center; gap: 10px; height: 44px; box-sizing: border-box; padding: 0 14px; border-radius: 12px; border: 1px solid #E6E1DB; background: #FFFFFF; box-shadow: 0 6px 14px rgba(58,35,80,0.07); color: #7A6E80">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+<input type="search" aria-label="Buscar lançamento" placeholder="Buscar lançamento" value="{{busca}}" onChange="{{aoBuscar}}" style="flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font-family: inherit; font-size: 13px; color: #241B2B">
+</label>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{lancamentos}}" as="l" hint-placeholder-count="3">
+<div style="display: flex; align-items: center; gap: 10px; padding: 12px 10px 12px 14px; border-radius: 14px; background: #FAF7FA; border: 1px solid #EDE6EF">
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 13px; font-weight: 800; color: #3A2350">{{l.descricao}}</span>
+<span style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 12px; color: #6E3F72"><span style="padding: 1px 7px; border-radius: 5px; background: #F3E9F3">{{l.categoria}}</span>{{l.data}}</span>
+</div>
+<span style="font-size: 14px; font-weight: 800; color: #3A2350; white-space: nowrap; font-variant-numeric: tabular-nums">{{l.valor}}</span>
+<button type="button" aria-label="{{l.rotuloEditar}}" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border: 0; border-radius: 50%; background: #FFFFFF; color: #6E3F72; cursor: pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg></button>
+<button type="button" aria-label="{{l.rotuloExcluir}}" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border: 0; border-radius: 50%; background: #FFFFFF; color: #B04E5C; cursor: pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path></svg></button>
+</div>
+</sc-for>
+<sc-if value="{{semLancamentos}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 28px 20px; border-radius: 16px; border: 1.5px dashed #E6E1DB; text-align: center">
+<span style="display: flex; align-items: center; justify-content: center; width: 52px; height: 52px; border-radius: 16px; background: #F3E9F3; color: #6E3F72"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"></path><path d="M16 8H8M16 12H8M13 16H8"></path></svg></span>
+<span style="font-family: 'Instrument Serif', serif; font-size: 18px; color: #3A2350">Nenhum registro ainda</span>
+<span style="max-width: 280px; font-size: 13px; color: #7A6E80">Toque em “{{rotuloNovo}}” acima para registrar seu primeiro gasto avulso.</span>
+</div>
+</sc-if>
+</div>
+</section>
+
+</div>
+</div>
+
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1360}}'>
+class Component extends DCLogic {
+  state = { despesas: null, filtro: 'todos', busca: '' };
+
+  despesasIniciais() {
+    return [
+      { id: 1, nome: 'Aluguel', valor: '200', pct: '100' },
+      { id: 2, nome: 'Energia', valor: '80', pct: '50' },
+      { id: 3, nome: 'Internet', valor: '60', pct: '50' },
+      { id: 4, nome: 'Gás de cozinha', valor: '49', pct: '100' }
+    ];
+  }
+
+  renderVals() {
+    const dinheiro = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    const numero = (s) => {
+      const n = parseFloat(String(s || '').replace(/\./g, '').replace(',', '.'));
+      return isFinite(n) ? n : 0;
+    };
+    const st = this.state;
+    const lista = st.despesas || this.despesasIniciais();
+    const atualizar = (id, campo, valor) => this.setState({ despesas: lista.map((d) => (d.id === id ? { ...d, [campo]: valor } : d)) });
+    const cores = ['#A85E86', '#7E4F9E', '#B08D57', '#A9D8B8', '#6E3F72'];
+
+    const despesas = lista.map((d, i) => ({
+      nome: d.nome,
+      valor: d.valor,
+      pct: d.pct,
+      cor: cores[i % cores.length],
+      aoNome: (e) => atualizar(d.id, 'nome', e.target.value),
+      aoValor: (e) => atualizar(d.id, 'valor', e.target.value),
+      aoPct: (e) => atualizar(d.id, 'pct', e.target.value),
+      excluir: () => this.setState({ despesas: lista.filter((x) => x.id !== d.id) }),
+      rotuloExcluir: 'Remover despesa ' + (d.nome || 'sem nome')
+    }));
+
+    const D = lista.reduce((s, d) => s + numero(d.valor) * (numero(d.pct) / 100), 0);
+    const R = 3000;
+    const cmv = 30, inv = 6, lucro = 20;
+    const F = (D + R) / (1 - (cmv + inv + lucro) / 100);
+    const linhas = [
+      ['CMV / Reposição', cmv, F * cmv / 100, '#A85E86'],
+      ['Despesas da empresa', F ? (D / F) * 100 : 0, D, '#6E3F72'],
+      ['Investimento', inv, F * inv / 100, '#B08D57'],
+      ['Mão de obra', F ? (R / F) * 100 : 0, R, '#7E4F9E'],
+      ['Lucro da empresa', lucro, F * lucro / 100, '#A9D8B8']
+    ];
+    const distribuicao = linhas.map(([nome, pct, valor, cor], i) => ({
+      nome,
+      valor: dinheiro(valor),
+      pct: pct.toFixed(2).replace('.', ',') + '%',
+      largura: Math.min(100, Math.max(0, pct)) + '%',
+      cor,
+      linha: i < linhas.length - 1 ? '1px solid rgba(58,35,80,0.06)' : '0'
+    }));
+
+    const todos = [
+      { tipo: 'custos', descricao: 'Botijão de gás', categoria: 'Custo fixo', data: '26/10/2026', valor: 120 },
+      { tipo: 'custos', descricao: 'Conta de luz de outubro', categoria: 'Custo fixo', data: '26/10/2026', valor: 80 },
+      { tipo: 'investimentos', descricao: 'Bicos de confeitar (kit)', categoria: 'Investimento', data: '27/10/2026', valor: 26 }
+    ];
+    const q = st.busca.trim().toLowerCase();
+    const lancamentos = todos
+      .filter((l) => (st.filtro === 'todos' || l.tipo === st.filtro) && (!q || l.descricao.toLowerCase().includes(q)))
+      .map((l) => ({ ...l, valor: '-' + dinheiro(l.valor), rotuloEditar: 'Editar ' + l.descricao, rotuloExcluir: 'Excluir ' + l.descricao }));
+    const filtros = [['todos', 'Todos'], ['custos', 'Custos'], ['investimentos', 'Investimentos'], ['maodeobra', 'Mão de Obra']].map(([id, nome]) => {
+      const ligado = st.filtro === id;
+      return { nome, ligado, fundo: ligado ? '#3A2350' : 'transparent', tinta: ligado ? '#FFFFFF' : '#6E3F72', sombra: ligado ? '0 8px 16px rgba(58,35,80,0.3)' : 'none', escolher: () => this.setState({ filtro: id }) };
+    });
+
+    return {
+      despesas,
+      totalDespesas: dinheiro(D),
+      adicionarDespesa: () => this.setState({ despesas: [...lista, { id: Date.now(), nome: '', valor: '', pct: '100' }] }),
+      faturamento: dinheiro(F),
+      distribuicao,
+      filtros,
+      lancamentos,
+      semLancamentos: lancamentos.length === 0,
+      rotuloNovo: st.filtro === 'maodeobra' ? 'Nova Mão de Obra' : 'Novo Custo / Investimento',
+      busca: st.busca,
+      aoBuscar: (e) => this.setState({ busca: e.target.value })
+    };
+  }
+}
+</script>
+</body>
+</html>

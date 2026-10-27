@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Carula — Início</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#3A2350}a:hover{color:#6E3F72}
+.nav-link:hover{background:#F6F2F5}
+.atalho:hover .atalho-icone{background:#F3E9F3}
+button:focus-visible,a:focus-visible{outline:2px solid #A85E86;outline-offset:2px}
+@keyframes carSweep{0%{transform:translateX(-120%)}100%{transform:translateX(620%)}}
+@keyframes carFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.car-sweep{animation:carSweep 2.8s ease-in-out infinite alternate}
+.car-float{animation:carFloat 4.5s ease-in-out infinite}
+@media (prefers-reduced-motion: reduce){.car-sweep,.car-float{animation:none}}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F6F2F5; color: #241B2B; font-family: 'Manrope', system-ui, sans-serif; font-size: 14px; line-height: 1.5">
+
+<aside style="flex: 1 1 248px; box-sizing: border-box; background: #FFFFFF; box-shadow: 1px 0 0 rgba(58,35,80,0.06); padding: 30px 18px 24px; display: flex; flex-direction: column; gap: 28px">
+<span role="img" aria-label="Carula App" style="display: inline-flex; align-items: flex-start; padding: 0 8px">
+<span aria-hidden="true" style="font-size: 40px; font-weight: 800; letter-spacing: -0.055em; line-height: 1; color: #3A2350">carula</span>
+<span aria-hidden="true" style="position: relative; margin-left: 3px; transform: rotate(-8deg); display: inline-flex; align-items: center; background: #F5B9C6; border-radius: 3px 6px 6px 3px; padding: 3px 6px 3px 10px; box-shadow: 0 4px 8px rgba(196,98,111,0.25)"><span style="position: absolute; left: 4px; top: 50%; transform: translateY(-50%); width: 3px; height: 3px; border-radius: 50%; background: #FFFFFF"></span><span style="border-left: 1px dashed rgba(58,35,80,0.35); padding-left: 4px; font-size: 10px; font-weight: 800; letter-spacing: 0.14em; line-height: 1; color: #3A2350">APP</span></span>
+</span>
+<button type="button" style="position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 58px; padding: 0 10px 0 20px; border: 0; border-radius: 18px; background: linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86); box-shadow: 0 10px 22px rgba(58,35,80,0.3); color: #FFFFFF; font-family: 'Instrument Serif', serif; font-size: 23px; line-height: 1; cursor: pointer; text-align: left">Lançar Pedido<span style="display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 12px; background: #F5B9C6; color: #3A2350"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></span></button>
+<nav aria-label="Menu principal" style="display: flex; flex-direction: column; gap: 4px">
+<a class="nav-link" href="Main.dc.html" aria-current="page" style="display: flex; align-items: center; gap: 12px; min-height: 46px; padding: 0 14px; border-radius: 14px; text-decoration: none; background: #3A2350; color: #F5B9C6; font-size: 12px; font-weight: 800; letter-spacing: 0.1em; box-shadow: 0 8px 18px rgba(58,35,80,0.3)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg>INÍCIO</a>
+<a class="nav-link" href="Pedidos.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 46px; padding: 0 14px; border-radius: 14px; text-decoration: none; color: #6A5F70; font-size: 12px; font-weight: 700; letter-spacing: 0.1em"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#8E8496" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16l-1.2 13H5.2z"></path><path d="M9 7a3 3 0 0 1 6 0"></path></svg>PEDIDOS</a>
+<a class="nav-link" href="Fichas.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 46px; padding: 0 14px; border-radius: 14px; text-decoration: none; color: #6A5F70; font-size: 12px; font-weight: 700; letter-spacing: 0.1em"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#8E8496" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h9a3 3 0 0 1 3 3v13H6a2 2 0 0 1-2-2z"></path><path d="M20 5v15"></path></svg>FICHAS</a>
+<a class="nav-link" href="Clientes.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 46px; padding: 0 14px; border-radius: 14px; text-decoration: none; color: #6A5F70; font-size: 12px; font-weight: 700; letter-spacing: 0.1em"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#8E8496" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8.5" r="3.2"></circle><path d="M3.5 20a5.5 5.5 0 0 1 11 0"></path><circle cx="17.5" cy="10" r="2.2"></circle></svg>CLIENTES</a>
+<a class="nav-link" href="Produtos.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 46px; padding: 0 14px; border-radius: 14px; text-decoration: none; color: #6A5F70; font-size: 12px; font-weight: 700; letter-spacing: 0.1em"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#8E8496" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 3 7v10l9 5 9-5V7z"></path><path d="M3 7l9 5 9-5"></path><path d="M12 12v10"></path></svg>PRODUTOS</a>
+<a class="nav-link" href="Empresa.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 46px; padding: 0 14px; border-radius: 14px; text-decoration: none; color: #6A5F70; font-size: 12px; font-weight: 700; letter-spacing: 0.1em"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#8E8496" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"></path><path d="M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path><path d="M3 13h18"></path></svg>EMPRESA</a>
+</nav>
+</aside>
+
+<main style="flex: 999 1 560px; min-width: 0; box-sizing: border-box; padding: 30px 40px 56px">
+<div style="max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 30px">
+
+<header style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px 24px">
+<h1 style="margin: 0; font-family: 'Instrument Serif', serif; font-size: 42px; font-weight: 400; line-height: 1">Início</h1>
+<div style="display: flex; align-items: flex-start; gap: 6px">
+<button class="atalho" type="button" style="display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 56px; padding: 0; border: 0; background: transparent; color: #7A6E80; font-family: inherit; font-size: 11px; font-weight: 700; cursor: pointer"><span class="atalho-icone" style="display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; border-radius: 13px; background: #FFFFFF; color: #3A2350; box-shadow: 0 6px 14px rgba(58,35,80,0.08)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2"></rect><path d="M11 18h2"></path></svg></span>Mobile</button>
+<button class="atalho" type="button" style="display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 56px; padding: 0; border: 0; background: transparent; color: #7A6E80; font-family: inherit; font-size: 11px; font-weight: 700; cursor: pointer"><span class="atalho-icone" style="display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; border-radius: 13px; background: #FFFFFF; color: #3A2350; box-shadow: 0 6px 14px rgba(58,35,80,0.08)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg></span>Dados</button>
+<button class="atalho" type="button" style="display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 56px; padding: 0; border: 0; background: transparent; color: #7A6E80; font-family: inherit; font-size: 11px; font-weight: 700; cursor: pointer"><span class="atalho-icone" style="display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; border-radius: 13px; background: #FFFFFF; color: #3A2350; box-shadow: 0 6px 14px rgba(58,35,80,0.08)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg></span>Ajuda</button>
+<span aria-hidden="true" style="width: 1px; height: 42px; margin: 0 6px; background: rgba(58,35,80,0.1)"></span>
+<button class="atalho" type="button" style="display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 56px; padding: 0; border: 0; background: transparent; color: #7A6E80; font-family: inherit; font-size: 11px; font-weight: 700; cursor: pointer"><span style="display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(150deg, #3A2350, #A85E86); color: #FFFFFF; font-size: 14px; font-weight: 800; box-shadow: 0 6px 14px rgba(58,35,80,0.18)">CC</span>Perfil</button>
+</div>
+</header>
+
+<div style="display: flex; flex-wrap: wrap; align-items: stretch; gap: 24px">
+<section aria-label="Total em vendas" style="flex: 3 1 560px; box-sizing: border-box; padding: 30px 30px 24px; border-radius: 24px; background: #FFFFFF; box-shadow: 0 8px 20px rgba(58,35,80,0.08); color: #241B2B; display: flex; flex-direction: column; gap: 22px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 11px; font-weight: 800; letter-spacing: 0.14em; color: #7A6E80">TOTAL EM VENDAS</span>
+<span style="font-size: 56px; font-weight: 800; letter-spacing: -0.035em; line-height: 1; font-variant-numeric: tabular-nums">R$ 1.284,00</span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 16px 12px; border-radius: 18px; background: #FAF7FA; border: 1px solid #EDE6EF; text-align: center"><span style="font-size: 11px; font-weight: 800; letter-spacing: 0.06em; color: #7A6E80">VENDAS PAGAS</span><span style="font-size: 22px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums">R$ 1.060,00</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 16px 12px; border-radius: 18px; background: #FAF7FA; border: 1px solid #EDE6EF; text-align: center"><span style="font-size: 11px; font-weight: 800; letter-spacing: 0.06em; color: #7A6E80">SAÍDAS</span><span style="font-size: 22px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums">R$ 412,30</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 16px 12px; border-radius: 18px; background: #FBF5EA; border: 1px solid #F0E2C8; text-align: center"><span style="display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 800; letter-spacing: 0.06em; color: #7A5A1E"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2h12M6 22h12"></path><path d="M7 2v4l5 6-5 6v4M17 2v4l-5 6 5 6v4"></path></svg>A RECEBER</span><span style="font-size: 22px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums">R$ 224,00</span></div>
+</div>
+<p style="margin: 0; font-size: 12px; line-height: 1.5; text-align: center; color: #7A6E80">Números da semana atual (seg–dom) · reinicia toda segunda · “A receber” mostra tudo pendente, de qualquer época</p>
+</section>
+
+<button type="button" style="flex: 2 1 340px; position: relative; overflow: hidden; display: flex; align-items: center; gap: 16px; box-sizing: border-box; padding: 26px 22px 26px 30px; border: 0; border-radius: 28px; background: linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86); box-shadow: 0 14px 30px rgba(58,35,80,0.36); font-family: inherit; text-align: left; cursor: pointer">
+<span aria-hidden="true" style="position: absolute; left: -12px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; border-radius: 50%; background: #F6F2F5"></span>
+<span aria-hidden="true" style="position: absolute; right: -12px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; border-radius: 50%; background: #F6F2F5"></span>
+<span style="flex: 1; display: flex; flex-direction: column; gap: 8px; padding-left: 14px; border-left: 2px dashed rgba(245,185,198,0.5)">
+<span style="font-size: 11px; font-weight: 800; letter-spacing: 0.24em; color: rgba(255,255,255,0.8)">NOVA COMANDA</span>
+<span style="font-family: 'Instrument Serif', serif; font-size: 40px; line-height: 1; color: #FFFFFF">Lançar Pedido</span>
+</span>
+<span class="car-float" style="flex: 0 0 auto; display: flex; align-items: center; justify-content: center; width: 56px; height: 56px; border-radius: 17px; background: #F5B9C6; color: #3A2350; box-shadow: 0 8px 16px rgba(0,0,0,0.18)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></span>
+<span class="car-sweep" aria-hidden="true" style="position: absolute; top: 0; left: 0; width: 70px; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent); pointer-events: none"></span>
+</button>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 24px">
+
+<div style="flex: 3 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 32px">
+<section aria-labelledby="saldos-titulo" style="display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 8px">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<h2 id="saldos-titulo" style="margin: 0; font-family: 'Instrument Serif', serif; font-size: 28px; font-weight: 400; line-height: 1.1">Saldos &amp; Divisão dos Pedidos</h2>
+<p style="margin: 0; font-size: 13px; color: #7A6E80">O que já chegou das vendas − o que você já gastou essa semana.</p>
+</div>
+<button type="button" aria-label="Como funciona a divisão dos pedidos" style="flex: 0 0 auto; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 0; border-radius: 50%; background: transparent; cursor: pointer"><span style="display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: #3A2350; color: #FFFFFF; font-size: 13px; font-weight: 800">?</span></button>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 18px 10px; border-radius: 20px; background: #FFFFFF; box-shadow: 0 8px 20px rgba(58,35,80,0.08); text-align: center"><span style="font-size: 11px; font-weight: 800; letter-spacing: 0.05em; color: #7A6E80">REPOSIÇÃO</span><span style="font-size: 21px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; font-variant-numeric: tabular-nums">R$ 131,70</span><span style="font-size: 12px; line-height: 1.35; color: #7A6E80">de R$ 318,00 que entraram</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 18px 10px; border-radius: 20px; background: #FFFFFF; box-shadow: 0 8px 20px rgba(58,35,80,0.08); text-align: center"><span style="font-size: 11px; font-weight: 800; letter-spacing: 0.05em; color: #7A6E80">MÃO DE OBRA</span><span style="font-size: 21px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; font-variant-numeric: tabular-nums">R$ 360,00</span><span style="font-size: 12px; line-height: 1.35; color: #7A6E80">de R$ 360,00 que entraram</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 18px 10px; border-radius: 20px; background: #FFFFFF; box-shadow: 0 8px 20px rgba(58,35,80,0.08); text-align: center"><span style="font-size: 11px; font-weight: 800; letter-spacing: 0.05em; color: #7A6E80">DESPESAS</span><span style="font-size: 21px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; color: #C4626F; font-variant-numeric: tabular-nums">-R$ 94,00</span><span style="font-size: 12px; line-height: 1.35; color: #7A6E80">de R$ 106,00 que entraram</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 18px 10px; border-radius: 20px; background: #FFFFFF; box-shadow: 0 8px 20px rgba(58,35,80,0.08); text-align: center"><span style="font-size: 11px; font-weight: 800; letter-spacing: 0.05em; color: #7A6E80">INVESTIMENTO</span><span style="font-size: 21px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; font-variant-numeric: tabular-nums">R$ 37,60</span><span style="font-size: 12px; line-height: 1.35; color: #7A6E80">de R$ 63,60 que entraram</span></div>
+<div style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 16px 10px; border-radius: 20px; background: #EEF7F0; box-shadow: 0 8px 20px rgba(58,35,80,0.08); text-align: center"><span style="font-size: 11px; font-weight: 800; letter-spacing: 0.05em; color: #3F6B4C">LUCRO</span><span style="font-size: 24px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; color: #26402F; font-variant-numeric: tabular-nums">R$ 212,40</span><span style="font-size: 12px; color: #3F6B4C">de R$ 212,40 que entraram</span></div>
+</div>
+</section>
+
+<section aria-labelledby="meta-titulo" style="display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<h2 id="meta-titulo" style="margin: 0; font-family: 'Instrument Serif', serif; font-size: 28px; font-weight: 400; line-height: 1.1">Meta da Semana</h2>
+<p style="margin: 0; font-size: 13px; color: #7A6E80">Quanto precisa entrar pra cobrir tudo — negócio e você</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px; padding: 20px; border-radius: 20px; background: #FFFFFF; border: 1px solid #EDE6EF; box-shadow: 0 6px 18px rgba(58,35,80,0.08)">
+<div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; font-weight: 800; letter-spacing: 0.05em; color: #7A6E80">PRECISA FATURAR</span><span style="font-size: 24px; font-weight: 800; line-height: 1.2; font-variant-numeric: tabular-nums">R$ 1.740,73<span style="margin-left: 6px; font-size: 12px; font-weight: 500; color: #7A6E80">por semana</span></span><span style="font-size: 12px; color: #7A6E80">R$ 7.543,18/mês pra bater sua meta completa</span></div>
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; font-weight: 800; letter-spacing: 0.05em; color: #7A6E80">JÁ ENTROU</span><span style="font-size: 19px; font-weight: 800; line-height: 1.2; font-variant-numeric: tabular-nums">R$ 1.060,00</span></div>
+</div>
+<div role="img" aria-label="61% da meta da semana" style="height: 8px; border-radius: 999px; background: #F1EBF2; overflow: hidden"><div style="width: 61%; height: 100%; border-radius: 999px; background: #A85E86"></div></div>
+<p style="margin: 0; font-size: 13px; color: #7A6E80">Faltam R$ 680,73 para cobrir tudo essa semana.</p>
+<div style="display: flex; flex-direction: column; gap: 8px; padding-top: 14px; border-top: 1px dashed #EDE6EF">
+<span style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; letter-spacing: 0.05em; color: #7E4F9E"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.3C.9 8.1 3.1 4 7 4c2.1 0 3.6 1.1 5 3 1.4-1.9 2.9-3 5-3 3.9 0 6.1 4.1 4.6 7.7C19.5 16.4 12 21 12 21z"></path></svg>SUA FATIA PESSOAL</span>
+<p style="margin: 0; font-size: 13px; line-height: 1.45; color: #7A6E80">Disso, <strong style="color: #241B2B">R$ 692,31</strong> por semana é seu — o que você decidiu receber pelo seu trabalho. Até agora já garantiu <strong style="color: #241B2B">R$ 360,00</strong>.</p>
+<div role="img" aria-label="52% da meta pessoal" style="height: 6px; border-radius: 999px; background: #F1EBF2; overflow: hidden"><div style="width: 52%; height: 100%; border-radius: 999px; background: #7E4F9E"></div></div>
+<p style="margin: 0; font-size: 12px; color: #7A6E80">Faltam R$ 332,31 para bater sua meta pessoal essa semana.</p>
+</div>
+</div>
+</section>
+</div>
+
+<section aria-labelledby="agenda-titulo" style="flex: 4 1 380px; min-width: 0; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px; padding: 24px; border-radius: 22px; background: #FFFFFF; box-shadow: 0 8px 20px rgba(58,35,80,0.08)">
+<h2 id="agenda-titulo" style="margin: 0; font-family: 'Instrument Serif', serif; font-size: 28px; font-weight: 400; line-height: 1.1">Agenda de Pedidos</h2>
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 4px">
+<button type="button" aria-label="Mês anterior" style="display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 0; border-radius: 50%; background: transparent; color: #241B2B; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></button>
+<span style="font-size: 14px; font-weight: 800; letter-spacing: 0.2em">OUTUBRO</span>
+<button type="button" aria-label="Próximo mês" style="display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 0; border-radius: 50%; background: transparent; color: #241B2B; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div aria-hidden="true" style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 7px; text-align: center; font-size: 12px; font-weight: 800; letter-spacing: 0.1em; color: #7A6E80"><span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span></div>
+<div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 7px">
+<sc-for list="{{dias}}" as="c" hint-placeholder-count="35">
+<button type="button" onClick="{{c.abrir}}" disabled="{{c.desligado}}" aria-label="{{c.rotulo}}" aria-pressed="{{c.escolhido}}" style="aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; padding: 0; border-radius: 13px; border: {{c.borda}}; background: {{c.fundo}}; color: {{c.tinta}}; box-shadow: {{c.sombra}}; visibility: {{c.visivel}}; font-family: inherit; font-size: 13px; font-weight: 800; cursor: {{c.cursor}}">{{c.numero}}</button>
+</sc-for>
+</div>
+</div>
+<div role="group" aria-label="Filtrar dias" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 20px">
+<sc-for list="{{legenda}}" as="l" hint-placeholder-count="3">
+<button type="button" onClick="{{l.alternar}}" aria-pressed="{{l.ligado}}" style="display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 4px; border: 0; background: none; opacity: {{l.opacidade}}; font-family: inherit; cursor: pointer"><span style="width: 12px; height: 12px; border-radius: 4px; box-sizing: border-box; background: {{l.amostra}}; border: {{l.amostraBorda}}"></span><span style="font-size: 11px; font-weight: 800; letter-spacing: 0.12em; color: #7A6E80">{{l.rotulo}}</span></button>
+</sc-for>
+</div>
+<div style="box-sizing: border-box; padding: 18px; border-radius: 18px; background: #F6F2F5; display: flex; flex-direction: column; gap: 10px">
+<h3 style="margin: 0; font-family: 'Instrument Serif', serif; font-size: 22px; font-weight: 400; line-height: 1.15">{{painelTitulo}}</h3>
+<sc-for list="{{pedidosDoDia}}" as="p" hint-placeholder-count="2">
+<div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; background: #FFFFFF">
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 14px; font-weight: 800">{{p.cliente}}</span><span style="font-size: 13px; color: #7A6E80">{{p.descricao}}</span></span>
+<span style="display: flex; flex-direction: column; align-items: flex-end"><span style="font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums">{{p.valor}}</span><span style="font-size: 12px; font-weight: 800; color: {{p.corStatus}}">{{p.status}}</span></span>
+</div>
+</sc-for>
+<sc-if value="{{diaLivre}}" hint-placeholder-val="{{false}}">
+<p style="margin: 0; font-size: 14px; color: #7A6E80">Gostaria de lançar um pedido para {{diaCurto}}?</p>
+<button type="button" style="height: 44px; border: 0; border-radius: 11px; background: #3A2350; color: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 600; box-shadow: 0 10px 20px rgba(58,35,80,0.3); cursor: pointer">Lançar Pedido</button>
+</sc-if>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px; padding-top: 14px; border-top: 1px solid #EDE6EF">
+<h3 style="margin: 0; font-size: 12px; font-weight: 800; letter-spacing: 0.12em; color: #7A6E80">DATAS COMEMORATIVAS DO MÊS</h3>
+<p style="margin: 0; display: flex; align-items: baseline; gap: 8px; font-size: 13px"><span style="font-weight: 800; color: #6E3F72">12/10</span><span aria-hidden="true" style="color: #B9AEBD">—</span><span>Dia das Crianças</span></p>
+<p style="margin: 0; display: flex; align-items: baseline; gap: 8px; font-size: 13px"><span style="font-weight: 800; color: #6E3F72">19/10</span><span aria-hidden="true" style="color: #B9AEBD">—</span><span>Aniversário Juliana Ribeiro</span></p>
+<p style="margin: 0; display: flex; align-items: baseline; gap: 8px; font-size: 13px"><span style="font-weight: 800; color: #6E3F72">31/10</span><span aria-hidden="true" style="color: #B9AEBD">—</span><span>Halloween</span></p>
+</div>
+</section>
+
+<div style="flex: 3 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 32px">
+<section aria-labelledby="saude-titulo" style="display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<h2 id="saude-titulo" style="margin: 0; font-family: 'Instrument Serif', serif; font-size: 28px; font-weight: 400; line-height: 1.1">Saúde Financeira dos Produtos</h2>
+<p style="margin: 0; font-size: 13px; color: #7A6E80">Algum produto está sendo vendido por menos do que custa?</p>
+</div>
+<div style="overflow: hidden; border-radius: 20px; background: #FFFFFF; border: 1px solid #EDE6EF; box-shadow: 0 6px 18px rgba(58,35,80,0.08)">
+<button type="button" onClick="{{alternarSaude}}" aria-expanded="{{saudeAberta}}" style="display: flex; align-items: center; gap: 12px; width: 100%; padding: 16px; border: 0; background: transparent; font-family: inherit; text-align: left; cursor: pointer">
+<span style="flex: 0 0 auto; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 14px; background: #FFF8E7; color: #8A6D1F"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg></span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px"><span style="font-size: 14px; font-weight: 800; color: #8A6D1F">Atenção</span><span style="font-size: 13px; color: #7A6E80">2 de 6 produtos vendidos por menos do que custam</span></span>
+<span style="flex: 0 0 auto; display: flex; color: #7A6E80; transform: {{setaGiro}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span>
+</button>
+<sc-if value="{{saudeAberta}}" hint-placeholder-val="{{true}}">
+<div style="border-top: 1px solid #EDE6EF">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 16px; border-bottom: 1px solid #F1EBF2"><span style="font-size: 13px; font-weight: 700">Bolo de cenoura com brigadeiro <span style="font-weight: 400; color: #7A6E80">(P · 15 cm)</span></span><span style="font-size: 13px; font-weight: 800; color: #C4626F; white-space: nowrap">−R$ 4,80</span></div>
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 16px"><span style="font-size: 13px; font-weight: 700">Brigadeiro gourmet <span style="font-weight: 400; color: #7A6E80">(Cento)</span></span><span style="font-size: 13px; font-weight: 800; color: #C4626F; white-space: nowrap">−R$ 2,10</span></div>
+<button type="button" style="display: block; width: 100%; min-height: 46px; border: 0; border-top: 1px solid #EDE6EF; background: transparent; color: #5A3F7F; font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer">Ver em Fichas Técnicas</button>
+</div>
+</sc-if>
+</div>
+</section>
+
+<section aria-labelledby="resumo-titulo" style="overflow: hidden; border-radius: 20px; background: #FFFFFF; border: 1px solid rgba(58,35,80,0.08); box-shadow: 0 8px 20px rgba(58,35,80,0.09)">
+<div style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; padding: 18px 20px; background: #ECDFEE">
+<h2 id="resumo-titulo" style="margin: 0; font-family: 'Instrument Serif', serif; font-size: 24px; font-weight: 400; line-height: 1.15; color: #3A2350">Resumo &amp; Distribuição</h2>
+<span style="font-size: 11px; font-weight: 700; letter-spacing: 0.12em; color: #87476C">MENSAL</span>
+</div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 20px 20px 16px; background: #FAF7FA; border-bottom: 1px solid rgba(58,35,80,0.08)">
+<span style="font-size: 11px; font-weight: 700; letter-spacing: 0.16em; color: #7A6E80">FATURAMENTO NECESSÁRIO</span>
+<span style="font-family: 'Instrument Serif', serif; font-size: 42px; line-height: 1.05; color: #3A2350">R$ 7.543,18</span>
+</div>
+<div style="display: flex; flex-direction: column; padding: 6px 10px 12px">
+<sc-for list="{{distribuicao}}" as="d" hint-placeholder-count="5">
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px 12px; padding: 11px 10px; border-bottom: {{d.linha}}">
+<span style="font-size: 13px; font-weight: 600">{{d.nome}}</span>
+<span style="font-size: 14px; font-weight: 700; color: #3A2350; text-align: right; font-variant-numeric: tabular-nums">{{d.valor}}</span>
+<span style="height: 6px; border-radius: 999px; background: #F1ECF2; overflow: hidden"><span style="display: block; width: {{d.largura}}; height: 100%; border-radius: 999px; background: {{d.cor}}"></span></span>
+<span style="font-size: 12px; font-weight: 600; color: #7A6E80; text-align: right; font-variant-numeric: tabular-nums">{{d.pct}}</span>
+</div>
+</sc-for>
+</div>
+</section>
+</div>
+
+</div>
+
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1460}}'>
+class Component extends DCLogic {
+  state = { dia: 27, filtro: null, saudeAberta: true };
+
+  pedidosDoMes() {
+    return {
+      3: [{ c: 'Patrícia Gomes', d: 'Bolo no pote (10 un)', v: 120, pago: true }],
+      6: [{ c: 'Renata Alves', d: 'Torta salgada de frango', v: 85, pago: true }],
+      10: [{ c: 'Mariana Costa', d: 'Kit festa (bolo + 50 doces)', v: 320, pago: true }, { c: 'Aline Souza', d: 'Cento de brigadeiros gourmet', v: 120, pago: true }],
+      15: [{ c: 'Beatriz Rocha', d: 'Bolo de aniversário 2 kg', v: 280, pago: true }],
+      17: [{ c: 'Camila', d: 'Caixa de cupcakes (6 un)', v: 72, pago: true }],
+      21: [{ c: 'Daniela Pires', d: 'Pão de mel recheado (20 un)', v: 160, pago: true }],
+      22: [{ c: 'Camila', d: 'Bolo no pote (6 un)', v: 72, pago: true }],
+      23: [{ c: 'Larissa Teixeira', d: 'Kit festa (bolo + 50 doces)', v: 320, pago: true }],
+      24: [{ c: 'Rafael', d: 'Bolo de cenoura com brigadeiro', v: 95, pago: true }],
+      26: [{ c: 'Fernanda Lima', d: 'Caixa de cupcakes (6 un)', v: 72, pago: true }],
+      27: [{ c: 'Camila', d: 'Bolo de aniversário 2 kg', v: 280, pago: true }, { c: 'Rafael', d: 'Cento de brigadeiros gourmet', v: 120, pago: false }],
+      29: [{ c: 'Juliana Ribeiro', d: 'Bolo no pote Ninho com Nutella (12 un)', v: 144, pago: true }],
+      30: [{ c: 'Patrícia Gomes', d: 'Torta de limão grande', v: 180, pago: true }, { c: 'Renata Alves', d: 'Brigadeiros gourmet (80 un)', v: 104, pago: false }],
+      31: [{ c: 'Mariana Costa', d: 'Cupcakes de Halloween (24 un)', v: 240, pago: true }, { c: 'Bianca Ferreira', d: 'Caixa de brownies (8 un)', v: 64, pago: true }, { c: 'Aline Souza', d: 'Pão de mel recheado (10 un)', v: 80, pago: true }]
+    };
+  }
+
+  renderVals() {
+    const dinheiro = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    const { dia, filtro, saudeAberta } = this.state;
+    const pedidos = this.pedidosDoMes();
+    const HOJE = 27;
+    const curto = (n) => String(n).padStart(2, '0') + '/10';
+
+    const dias = [];
+    for (let i = 0; i < 4; i++) {
+      dias.push({ numero: '', visivel: 'hidden', desligado: true, escolhido: false, rotulo: '', fundo: 'transparent', tinta: 'transparent', borda: '0', sombra: 'none', cursor: 'default', abrir: null });
+    }
+    for (let n = 1; n <= 31; n++) {
+      const lista = pedidos[n] || [];
+      const tem = lista.length > 0;
+      const hoje = n === HOJE;
+      const combina = !filtro || (filtro === 'hoje' ? hoje : filtro === 'com-pedido' ? tem : !tem);
+      const escolhido = n === dia && combina;
+      const sombraBase = tem ? '0 6px 14px rgba(143,90,156,0.34)' : '0 6px 14px rgba(76,175,80,0.24)';
+      dias.push({
+        numero: String(n),
+        visivel: 'visible',
+        desligado: !combina,
+        escolhido,
+        rotulo: n + ' de outubro' + (hoje ? ', hoje' : '') + ', ' + (tem ? lista.length + (lista.length > 1 ? ' pedidos' : ' pedido') : 'livre'),
+        fundo: !combina ? 'transparent' : tem ? 'linear-gradient(150deg, #8F5A9C, #C4626F)' : '#B4E7B4',
+        tinta: !combina ? '#D3C9D6' : tem ? '#FFFFFF' : '#1B5E1B',
+        borda: hoje && combina ? '2px solid #3A2350' : '0',
+        sombra: !combina ? 'none' : escolhido ? '0 0 0 3px #FFFFFF, 0 0 0 5px #3A2350' : sombraBase,
+        cursor: combina ? 'pointer' : 'default',
+        abrir: combina ? () => this.setState({ dia: n }) : null
+      });
+    }
+
+    const doDia = pedidos[dia] || [];
+    const pedidosDoDia = doDia.map((p) => ({ cliente: p.c, descricao: p.d, valor: dinheiro(p.v), status: p.pago ? 'Pago' : 'Pendente', corStatus: p.pago ? '#2E7D51' : '#8A6D1F' }));
+
+    const legenda = [
+      { id: 'hoje', rotulo: 'HOJE', amostra: '#F6F2F5', amostraBorda: '1.5px solid #6E3F72' },
+      { id: 'com-pedido', rotulo: 'COM PEDIDO', amostra: 'linear-gradient(150deg, #8F5A9C, #C4626F)', amostraBorda: '0' },
+      { id: 'livre', rotulo: 'LIVRE', amostra: '#B4E7B4', amostraBorda: '0' }
+    ].map((l) => ({ ...l, ligado: filtro === l.id, opacidade: !filtro || filtro === l.id ? 1 : 0.4, alternar: () => this.setState({ filtro: filtro === l.id ? null : l.id }) }));
+
+    const linhas = [
+      ['CMV / Reposição', 30, 2262.95, '#A85E86'],
+      ['Despesas da empresa', 4.23, 319, '#6E3F72'],
+      ['Investimento', 6, 452.59, '#B08D57'],
+      ['Mão de obra', 39.77, 3000, '#7E4F9E'],
+      ['Lucro da empresa', 20, 1508.64, '#A9D8B8']
+    ];
+    const distribuicao = linhas.map(([nome, pct, valor, cor], i) => ({ nome, valor: dinheiro(valor), pct: pct.toFixed(2).replace('.', ',') + '%', largura: pct + '%', cor, linha: i < linhas.length - 1 ? '1px solid rgba(58,35,80,0.06)' : '0' }));
+
+    return {
+      dias,
+      pedidosDoDia,
+      diaLivre: doDia.length === 0,
+      diaCurto: curto(dia),
+      painelTitulo: doDia.length ? 'Pedidos de ' + curto(dia) : 'Lançar Pedido',
+      legenda,
+      distribuicao,
+      saudeAberta,
+      setaGiro: saudeAberta ? 'rotate(180deg)' : 'none',
+      alternarSaude: () => this.setState({ saudeAberta: !saudeAberta })
+    };
+  }
+}
+</script>
+</body>
+</html>
