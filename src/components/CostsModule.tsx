@@ -343,11 +343,12 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
               >
                 <Receipt className="w-[26px] h-[26px]" style={{ color: '#6E3F72' }} strokeWidth={2} />
               </div>
+              {/* Com busca digitada, a lista vazia e "nada encontrado", nao "nenhum registro". */}
               <div className="font-serif-display" style={{ fontSize: pc ? '18px' : '16px', color: '#3A2350' }}>
-                Nenhum registro ainda
+                {searchTerm ? 'Nada encontrado' : 'Nenhum registro ainda'}
               </div>
               <div className="text-sm" style={{ color: '#7A6E80', maxWidth: '280px', ...(pc ? { fontSize: '13px' } : {}) }}>
-                Toque em "{rotuloNovo}" acima para registrar seu primeiro gasto avulso.
+                {searchTerm ? 'Nenhum lançamento encontrado com essa busca.' : <>Toque em "{rotuloNovo}" acima para registrar seu primeiro gasto avulso.</>}
               </div>
             </div>
           ) : (
