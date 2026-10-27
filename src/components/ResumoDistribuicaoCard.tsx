@@ -23,8 +23,31 @@ const LINHAS_COR = {
   'Lucro da empresa': '#A9D8B8',
 } as const;
 
-export const ResumoDistribuicaoCard: React.FC<{ estrutura: EstruturaFinanceira }> = ({ estrutura }) => {
+/**
+ * Medidas do card em cada versao. `computador` segue o desenho aprovado
+ * (docs/design/desktop-redesign: Main.dc.html e Empresa.dc.html), feito para
+ * uma coluna mais estreita que a do celular; o "MENSAL" escurece para dar
+ * leitura sobre o lilas do cabecalho.
+ */
+const MEDIDAS = {
+  celular: {
+    cabecalho: '20px 22px', cabecalhoGap: '12px', mensal: '#A85E86',
+    total: '22px 22px 18px', totalFonte: '44px',
+    lista: '8px 12px 14px', linha: '12px 10px', linhaGap: '4px 12px', nome: '14px', valor: '15px',
+  },
+  computador: {
+    cabecalho: '18px 20px', cabecalhoGap: '4px 12px', mensal: '#87476C',
+    total: '20px 20px 16px', totalFonte: '42px',
+    lista: '6px 10px 12px', linha: '11px 10px', linhaGap: '6px 12px', nome: '13px', valor: '14px',
+  },
+} as const;
+
+export const ResumoDistribuicaoCard: React.FC<{ estrutura: EstruturaFinanceira; computador?: boolean }> = ({
+  estrutura,
+  computador = false,
+}) => {
   const { formatCurrency } = useCurrency();
+  const m = MEDIDAS[computador ? 'computador' : 'celular'];
 
   const linhas = [
     ['CMV / Reposição', estrutura.cmvTargetPercent, estrutura.cmvAmount],
@@ -74,11 +97,21 @@ export const ResumoDistribuicaoCard: React.FC<{ estrutura: EstruturaFinanceira }
         boxShadow: '0 8px 20px rgba(58,35,80,.09)',
       }}
     >
-      <div style={{ background: '#ECDFEE', padding: '20px 22px', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '12px' }}>
+      <div
+        style={{
+          background: '#ECDFEE',
+          padding: m.cabecalho,
+          display: 'flex',
+          alignItems: 'baseline',
+          justifyContent: 'space-between',
+          gap: m.cabecalhoGap,
+          ...(computador ? { flexWrap: 'wrap' as const } : {}),
+        }}
+      >
         <h3 className="font-serif-display" style={{ margin: 0, fontSize: '24px', lineHeight: 1.15, color: '#3A2350' }}>
           Resumo & Distribuição
         </h3>
-        <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#A85E86', fontFamily: "'Manrope', sans-serif" }}>
+        <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: m.mensal, fontFamily: "'Manrope', sans-serif" }}>
           Mensal
         </span>
       </div>
@@ -87,29 +120,30 @@ export const ResumoDistribuicaoCard: React.FC<{ estrutura: EstruturaFinanceira }
         <p className="text-[12px] p-4" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>{estrutura.mensagemErro}</p>
       ) : (
         <>
-          <div style={{ padding: '22px 22px 18px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', background: '#FAF7FA', borderBottom: '1px solid rgba(58,35,80,0.08)' }}>
+          <div style={{ padding: m.total, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', background: '#FAF7FA', borderBottom: '1px solid rgba(58,35,80,0.08)' }}>
             <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
               Faturamento necessário
             </span>
-            <span className="font-serif-display" style={{ fontSize: '44px', lineHeight: 1.05, color: '#3A2350' }}>
+            <span className="font-serif-display" style={{ fontSize: m.totalFonte, lineHeight: 1.05, color: '#3A2350' }}>
               {formatCurrency(estrutura.faturamentoNecessario)}
             </span>
           </div>
 
-          <div style={{ padding: '8px 12px 14px', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ padding: m.lista, display: 'flex', flexDirection: 'column' }}>
             {linhas.map(([nome, pct, valor], i) => (
               <div
                 key={nome}
                 style={{
                   display: 'grid',
                   gridTemplateColumns: 'minmax(0,1fr) auto',
-                  gap: '4px 12px',
-                  padding: '12px 10px',
+                  gap: m.linhaGap,
+                  padding: m.linha,
+                  ...(computador ? { alignItems: 'center' } : {}),
                   borderBottom: i < linhas.length - 1 ? '1px solid rgba(58,35,80,0.06)' : 'none',
                 }}
               >
-                <span style={{ fontSize: '14px', fontWeight: 600, color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>{nome}</span>
-                <span style={{ fontSize: '15px', fontWeight: 700, color: '#3A2350', textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontFamily: "'Manrope', sans-serif" }}>
+                <span style={{ fontSize: m.nome, fontWeight: 600, color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>{nome}</span>
+                <span style={{ fontSize: m.valor, fontWeight: 700, color: '#3A2350', textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontFamily: "'Manrope', sans-serif" }}>
                   {formatCurrency(valor)}
                 </span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>

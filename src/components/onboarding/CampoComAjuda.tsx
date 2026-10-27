@@ -13,8 +13,13 @@ export const CampoComAjuda: React.FC<{
   /** 'card': bloco unico (fundo lilas + icone lado a lado), usado no card de
    * despesa individual de Minha Empresa. 'inline' (padrao) mantem o layout
    * antigo — texto solto com o "?" flutuando, usado em todo o resto do app
-   * (onboarding incluso) para nao alterar nada fora do escopo pedido. */
-  variant?: 'inline' | 'card';
+   * (onboarding incluso) para nao alterar nada fora do escopo pedido.
+   * 'computador': cabecalho de secao da versao computador — `titulo` e o texto
+   * empilhados a esquerda e o "?" (alvo de 44px) a direita, como no desenho
+   * de docs/design/desktop-redesign. */
+  variant?: 'inline' | 'card' | 'computador';
+  /** So na variante 'computador': o titulo da secao, mostrado acima do texto. */
+  titulo?: React.ReactNode;
   /** O que o leitor de tela anuncia ao focar o botao "?". O padrao e generico
    * de proposito: o painel que abre nem sempre e um exemplo numerico — em
    * varios usos (estoque de hoje, cofrinhos do Inicio) e so uma explicacao, e
@@ -22,8 +27,74 @@ export const CampoComAjuda: React.FC<{
    * prometia a quem nao enxerga a tela um numero que nunca vinha. Passe o
    * texto especifico so onde o painel mostra mesmo valores da conta. */
   ariaLabelAjuda?: string;
-}> = ({ microcopy, exemploDinamico, variant = 'inline', ariaLabelAjuda = 'Ver explicação' }) => {
+}> = ({ microcopy, exemploDinamico, variant = 'inline', ariaLabelAjuda = 'Ver explicação', titulo }) => {
   const [aberto, setAberto] = useState(false);
+
+  if (variant === 'computador') {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontFamily: "'Manrope', sans-serif" }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0 }}>
+            {titulo}
+            <p style={{ margin: 0, fontSize: '13px', color: '#7A6E80' }}>{microcopy}</p>
+          </div>
+          {exemploDinamico && (
+            <button
+              type="button"
+              onClick={() => setAberto((v) => !v)}
+              aria-label={ariaLabelAjuda}
+              aria-expanded={aberto}
+              style={{
+                flex: '0 0 auto',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '44px',
+                height: '44px',
+                border: 0,
+                borderRadius: '50%',
+                background: 'transparent',
+                cursor: 'pointer',
+              }}
+            >
+              <span
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '24px',
+                  height: '24px',
+                  borderRadius: '50%',
+                  background: '#3A2350',
+                  color: '#FFFFFF',
+                  fontSize: '13px',
+                  fontWeight: 800,
+                }}
+              >
+                ?
+              </span>
+            </button>
+          )}
+        </div>
+        {aberto && exemploDinamico && (
+          <div
+            style={{
+              padding: '12px 14px',
+              borderRadius: '14px',
+              border: '1px solid #E6E1DB',
+              background: '#FFFFFF',
+              fontSize: '13px',
+              lineHeight: 1.5,
+              color: '#5A4E46',
+              boxShadow: '0 8px 20px rgba(58,35,80,0.09)',
+            }}
+          >
+            {exemploDinamico}
+          </div>
+        )}
+      </div>
+    );
+  }
 
   const botaoAjuda = (
     <button

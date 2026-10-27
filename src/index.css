@@ -343,8 +343,30 @@ a:hover {
     background: #F6F2F5;
   }
 
-  .menu-lateral button:focus-visible {
+  .layout-computador button:focus-visible {
     outline: 2px solid #A85E86;
     outline-offset: 2px;
+  }
+
+  /* Atalhos do topo do Inicio (Mobile, Dados, Ajuda). */
+  .atalho-topo:hover .atalho-topo-icone {
+    background: #F3E9F3 !important;
+  }
+
+  /* Brilho da comanda do Inicio: no computador ela e bem mais larga, entao a
+     faixa de luz precisa ir mais longe para atravessar o botao inteiro. */
+  .car-sweep-largo {
+    animation: carSweepLargo 2.8s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes carSweepLargo {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(620%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .car-sweep-largo {
+    animation: none;
   }
 }
