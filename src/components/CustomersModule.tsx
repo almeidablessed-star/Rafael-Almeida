@@ -529,7 +529,12 @@ export const CustomersModule: React.FC = () => {
     // Pure message strictly WITHOUT menu Canva link attached (as explicitly requested!)
     const fullMessage = nomeNegocio ? `${bodyMsg}\n\n— ${nomeNegocio}` : bodyMsg;
 
-    if (!forceModal && waPreference !== 'ask') {
+    // No computador, sempre a tela de envio (pedido do Rafael, 26/10/2026): o
+    // "Business"/"Comum" abre o app pelo link whatsapp://, que no computador so
+    // funciona com o WhatsApp Desktop instalado — sem ele o clique nao fazia
+    // nada. Na tela de envio da para ver a mensagem e escolher "Abrir pelo
+    // navegador". No celular continua indo direto para o app escolhido.
+    if (!forceModal && waPreference !== 'ask' && !pc) {
       executeSendWhatsApp(customer.phone, fullMessage, waPreference);
     } else {
       setWaModalData({
@@ -1788,6 +1793,9 @@ export const CustomersModule: React.FC = () => {
               </button>
             </div>
 
+            {/* "Sempre abrir direto" nao vale no computador: la esta tela aparece
+                sempre (ver handleSendReminder), entao a caixinha some. */}
+            {!pc && (
             <div className="flex-shrink-0 bg-white px-4 py-3.5" style={{ borderTop: '1px solid rgba(58,35,80,0.08)' }}>
               <label className="flex items-center gap-2.5 text-xs font-semibold cursor-pointer select-none" style={{ color: '#3A2350' }}>
                 <input
@@ -1804,6 +1812,7 @@ export const CustomersModule: React.FC = () => {
                 <span>Sempre abrir direto no WhatsApp Business</span>
               </label>
             </div>
+            )}
           </div>
         </div>,
         document.body
