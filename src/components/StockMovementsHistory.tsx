@@ -105,6 +105,51 @@ const MovementRow: React.FC<{ mov: MovimentoEstoque }> = ({ mov }) => (
   </div>
 );
 
+/**
+ * Versao computador (docs/design/desktop-redesign, Produtos.dc.html): cada
+ * movimento numa caixinha colorida pelo tipo, dentro do cartao "Historico de
+ * Movimentacoes" da coluna da direita do Estoque. Mesmos dados e textos.
+ */
+const TONS_COMPUTADOR: Record<string, { fundo: string; borda: string; cor: string }> = {
+  consumo: { fundo: '#FEF2F2', borda: '#FECACA', cor: '#DC2626' },
+  entrada: { fundo: '#EFF6FF', borda: '#BFDBFE', cor: '#0284C7' },
+  devolucao: { fundo: '#F0FDF4', borda: '#BBF7D0', cor: '#15803D' },
+};
+const TOM_PADRAO = { fundo: '#F9FAFB', borda: '#E5E7EB', cor: '#7A6E80' };
+
+const MovementRowComputador: React.FC<{ mov: MovimentoEstoque }> = ({ mov }) => {
+  const tom = TONS_COMPUTADOR[mov.tipo] || TOM_PADRAO;
+  const Icone = mov.tipo === 'consumo' ? ArrowDown : mov.tipo === 'devolucao' ? RotateCcw : mov.tipo === 'entrada' ? ArrowUp : TrendingUp;
+  return (
+    <div style={{ display: 'flex', gap: '12px', padding: '12px', borderRadius: '14px', background: tom.fundo, border: `1px solid ${tom.borda}` }}>
+      <span
+        aria-hidden="true"
+        style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', borderRadius: '8px', background: '#FFFFFF', border: '1px solid #EDE6EF', color: tom.cor }}
+      >
+        <Icone size={16} />
+      </span>
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0 }}>
+            <span style={{ fontSize: '13px', fontWeight: 700, color: '#241B2B' }}>{mov.itemNome}</span>
+            <span style={{ fontSize: '12px', color: '#6A5F70' }}>{mov.descricao}</span>
+          </div>
+          <span style={{ fontSize: '11px', fontWeight: 700, color: '#6A5F70', whiteSpace: 'nowrap' }}>{formatarData(mov.createdAt)}</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '6px', borderTop: '1px solid rgba(36,27,43,0.08)' }}>
+          <span style={{ padding: '2px 8px', borderRadius: '5px', background: 'rgba(255,255,255,0.7)', fontSize: '11px', fontWeight: 700, color: '#241B2B' }}>
+            {rotulo(mov.tipo)}
+          </span>
+          <span style={{ fontSize: '13px', fontWeight: 700, color: '#241B2B', fontVariantNumeric: 'tabular-nums' }}>
+            {mov.tipo === 'consumo' ? '−' : '+'}
+            {formatarQuantidade(mov.quantidade)} {mov.unidade}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const FullHistoryModal: React.FC<{ movimentos: MovimentoEstoque[]; onClose: () => void }> = ({
   movimentos,
   onClose,
@@ -136,11 +181,40 @@ const FullHistoryModal: React.FC<{ movimentos: MovimentoEstoque[]; onClose: () =
   );
 };
 
-export const StockMovementsHistory: React.FC = () => {
+export const StockMovementsHistory: React.FC<{ computador?: boolean }> = ({ computador = false }) => {
   const { movimentos } = useProdutos();
   const [modalAberto, setModalAberto] = useState(false);
 
   const visiveis = movimentos.slice(0, INLINE_LIMIT);
+
+  if (computador) {
+    if (visiveis.length === 0) {
+      return (
+        <p style={{ margin: 0, padding: '24px 12px', textAlign: 'center', fontSize: '13px', color: '#7A6E80' }}>
+          Nenhum movimento de estoque registrado ainda.
+        </p>
+      );
+    }
+    return (
+      <>
+        {visiveis.map((mov) => (
+          <MovementRowComputador key={mov.id} mov={mov} />
+        ))}
+        {movimentos.length > INLINE_LIMIT && (
+          <button
+            type="button"
+            onClick={() => setModalAberto(true)}
+            style={{ height: '44px', border: 0, borderRadius: '12px', background: '#F6F2F5', color: '#3A2350', fontFamily: 'inherit', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}
+          >
+            Ver histórico completo ({movimentos.length})
+          </button>
+        )}
+        {modalAberto && (
+          <FullHistoryModal movimentos={movimentos} onClose={() => setModalAberto(false)} />
+        )}
+      </>
+    );
+  }
 
   if (visiveis.length === 0) {
     return (

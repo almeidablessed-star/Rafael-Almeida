@@ -5,6 +5,8 @@ import { getWeeklySummariesByYearMonth, getHistoryYears, getHistoryMonthsByYear 
 import { useCosts } from '../context/CostsContext';
 import { rotulos } from '../utils/periodoReset';
 import { CustomSelect } from './CustomSelect';
+import { BarChart3 } from 'lucide-react';
+import { useTelaDeComputador } from '../hooks/useTelaDeComputador';
 
 interface WeeklyHistoryCardProps {
   transactions: Transaction[];
@@ -16,6 +18,8 @@ const monthNames = [
 ];
 
 export const WeeklyHistoryCard: React.FC<WeeklyHistoryCardProps> = ({ transactions }) => {
+  // No computador os emojis da interface viram icones (docs/design/desktop-redesign/README.md).
+  const pc = useTelaDeComputador();
   // O periodo escolhida pela usuaria e o que decide como as transacoes se
   // agrupam aqui. Trocar o periodo reagrupa o historico inteiro na hora, sem
   // migrar dado nenhum: este card sempre derivou tudo das transacoes.
@@ -101,9 +105,10 @@ export const WeeklyHistoryCard: React.FC<WeeklyHistoryCardProps> = ({ transactio
             color: '#241B2B',
             margin: 0,
             marginBottom: '4px',
+            ...(pc ? { display: 'flex', alignItems: 'center', gap: '8px' } : {}),
           }}
         >
-          📊 Histórico
+          {pc ? <><BarChart3 size={18} strokeWidth={2} color="#6E3F72" aria-hidden="true" />Histórico</> : '📊 Histórico'}
         </h3>
         <p
           style={{

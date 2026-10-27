@@ -16,6 +16,8 @@ import { areUnitsCompatible, convertQuantity } from '../utils/units';
 import { CARD_COMANDA, ROTULO_COMANDA, CAMPO_TINTA, CAIXA_NUMERO, NUMERO, CHIP_UNIDADE, Picote } from './estiloComanda';
 import { CustomSelect } from './CustomSelect';
 import { CampoComAjuda } from './onboarding/CampoComAjuda';
+import { TituloDaPagina } from './TituloDaPagina';
+import { useTelaDeComputador } from '../hooks/useTelaDeComputador';
 import {
   Package,
   Plus,
@@ -40,6 +42,16 @@ import {
  */
 
 const CATEGORIAS_SUGERIDAS = ['Massa', 'Recheio', 'Cobertura', 'Decoração', 'Embalagem'];
+
+/** As tres abas da tela, iguais no celular e no computador. */
+const ABAS_PRODUTOS = [{ id: 'todos', label: 'Todos os Produtos' }, { id: 'estoque', label: 'Estoque' }, { id: 'compras', label: 'Compras' }];
+
+/**
+ * Texto das situacoes do Estoque no computador: o mesmo tom de cada cor, mais
+ * escuro, para dar leitura em letra pequena (docs/design/desktop-redesign,
+ * Produtos.dc.html). O traco do anel continua na cor de sempre.
+ */
+const TINTA_COMPUTADOR: Record<string, string> = { '#C4626F': '#B04E5C', '#F5A623': '#A0620C', '#4CAF7D': '#2E7D51' };
 const UNIDADES: Produto['unidadeEmbalagem'][] = ['g', 'kg', 'ml', 'L', 'un', 'pacote'];
 
 const getColorBasedOnThreshold = (
@@ -195,6 +207,12 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
   const { produtos: produtosDoContexto, addProduto, updateProduto, deleteProduto, custoPorUnidade } = useProdutos();
   const { formatCurrency, symbol } = useCurrency();
   const [aba, setAba] = useState<'todos' | 'estoque' | 'compras'>('todos');
+  // Versao computador (docs/design/desktop-redesign, Produtos.dc.html). Um JSX
+  // so para as duas versoes: no computador (`pc`) as abas, a busca e o botao
+  // ficam numa linha, Todos vira grade e o Estoque ganha duas colunas, com o
+  // Historico de Movimentacoes num cartao a direita. Formulario, modais e
+  // calculos nao mudam.
+  const pc = useTelaDeComputador();
 
   const [deletingProduto, setDeletingProduto] = useState<Produto | null>(null);
   const {
@@ -434,11 +452,184 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
     return norm <= (p.nivelMinimo || 0);
   }).length;
 
+  // Os tres pedacos da aba Estoque. O celular empilha os tres; o computador
+  // poe o selo e os cartoes a esquerda e o historico a direita (ver o ramo
+  // `aba === 'estoque'` no JSX).
+  const seloEstoqueBaixo = (
+    <>
+    {/* Selo de estoque baixo: estava no cabecalho, ao lado do titulo, e
+        saiu de la quando os titulos foram centralizados. Fica no topo
+        da lista do Estoque, que e onde ele importa. */}
+    {lowStockCount > 0 && (
+      <span
+        className="self-start inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-3 py-1.5 rounded-full whitespace-nowrap"
+        style={{ background: pc ? '#B04E5C' : '#C4626F', color: '#FFF8F6', ...(pc ? { gap: '6px', padding: '6px 12px', fontSize: '11px', letterSpacing: '0.06em' } : {}) }}
+      >
+        <AlertTriangle className="w-3 h-3" style={{ strokeWidth: 2.5, ...(pc ? { width: '13px', height: '13px' } : {}) }} />
+        {lowStockCount} {lowStockCount === 1 ? 'Estoque Baixo' : 'Estoques Baixos'}
+      </span>
+    )}
+    </>
+  );
+
+  const gradeEstoque = (
+    <div
+      className={pc ? undefined : 'grid grid-cols-1 gap-4 lista-tablet lista-altura-igual'}
+      style={pc ? { alignSelf: 'stretch', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(330px, 1fr))', alignItems: 'stretch', gap: '14px' } : undefined}
+    >
+      {sortedEstoque.map((p) => {
+        const qtd = p.quantidadeAtual || 0;
+        const min = p.nivelMinimo || 0;
+        // Comparacao sempre na unidade do ALERTA, nunca nos numeros crus:
+        // quantidade em kg e alerta em g precisam estar na mesma escala
+        // antes de decidir critico/alto (ver normalizeToCommonUnit).
+        const qtdNormalizada = normalizeToCommonUnit(qtd, p.unidadeEmbalagem, p.nivelMinimoUnidade || p.unidadeEmbalagem);
+        const colors = getColorBasedOnThreshold(qtdNormalizada, min);
+        const anel = anelDoEstoque(
+          qtd,
+          p.quantidadeReferencia,
+          normalizeToCommonUnit(min, p.nivelMinimoUnidade || p.unidadeEmbalagem, p.unidadeEmbalagem)
+        );
+        const isCritical = qtdNormalizada < min || (min <= 0 && qtdNormalizada <= 0);
+        // Quantidade e aviso na MESMA unidade (a do aviso): "4.725 g"
+        // ao lado de "4 kg" obrigava a fazer a conta de cabeca.
+        const unidadeDoAviso = p.nivelMinimoUnidade || p.unidadeEmbalagem;
+        // Texto da situacao: no computador, o mesmo tom mais escuro.
+        const tinta = pc ? TINTA_COMPUTADOR[colors.stroke] || colors.text : colors.text;
+
+        return (
+          <div
+            key={p.id}
+            className="rounded-[22px] p-3.5 flex items-center gap-3 transition-all"
+            style={{ background: isCritical ? '#FDF4F5' : '#FFFFFF', border: isCritical ? '1px solid rgba(196,98,111,.35)' : '1px solid rgba(36,27,43,.06)', boxShadow: '0 8px 20px rgba(58,35,80,.09)', ...(pc ? { padding: '16px', gap: '14px' } : {}) }}
+          >
+            <svg width={pc ? 84 : 76} height={pc ? 71 : 64} viewBox="0 0 76 64" className="flex-shrink-0">
+              <path d="M8 60a30 30 0 0 1 60 0" fill="none" stroke="#F1ECF2" strokeWidth="10" strokeLinecap="round" />
+              <path d="M8 60a30 30 0 0 1 60 0" fill="none" stroke={colors.stroke} strokeWidth="10" strokeLinecap="round"
+                strokeDasharray={`${anel.preenchido * Math.PI * 30} ${Math.PI * 30}`} />
+              {/* Risquinho do aviso de compra, atravessando o arco. */}
+              {anel.aviso !== null && (() => {
+                const de = pontoDoArco(anel.aviso, 23);
+                const ate = pontoDoArco(anel.aviso, 37);
+                return <line x1={de.x} y1={de.y} x2={ate.x} y2={ate.y} stroke="#3A2350" strokeWidth="2.5" strokeLinecap="round" />;
+              })()}
+              <text x="38" y="58" textAnchor="middle" fontSize={pc ? '10.5' : '11'} fontWeight={pc ? '800' : '900'} fill={pc ? tinta : colors.stroke} fontFamily="'Manrope', sans-serif">
+                {formatQuantity(arredonda2(qtdNormalizada))} {unidadeDoAviso}
+              </text>
+            </svg>
+
+            <div className="flex-1 min-w-0 flex flex-col gap-1.5" style={pc ? { gap: '8px' } : undefined}>
+              <div className="flex items-center gap-2 flex-wrap estoque-titulo" style={pc ? { gap: '6px' } : undefined}>
+                <h4 className="font-brand text-[13px]" style={{ color: '#241B2B', fontWeight: 800, ...(pc ? { fontSize: '14px', lineHeight: 1.3, flexBasis: '100%' } : {}) }}>
+                  {p.nome.charAt(0).toUpperCase() + p.nome.slice(1)}
+                </h4>
+                {p.categoria && (
+                  <span
+                    style={{ background: '#F6F2F5', color: pc ? '#6A5F70' : '#7A6E80', ...(pc ? { fontSize: '10px', fontWeight: 800, letterSpacing: '0.04em', padding: '2px 7px' } : {}) }}
+                    className="text-[8.5px] font-bold px-[7px] py-[3px] rounded-md uppercase whitespace-nowrap"
+                  >
+                    {p.categoria}
+                  </span>
+                )}
+                <span
+                  style={{ background: colors.background, color: tinta, ...(pc ? { fontSize: '10px', fontWeight: 800, letterSpacing: '0.04em', padding: '2px 7px' } : {}) }}
+                  className="text-[8.5px] font-bold px-[7px] py-[3px] rounded-md uppercase whitespace-nowrap"
+                >
+                  {getStatusLabel(qtdNormalizada, min)}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2 mt-0.5" style={pc ? { marginTop: 0 } : undefined}>
+                <span className="text-[10.5px]" style={{ color: '#7A6E80', ...(pc ? { fontSize: '12px' } : {}) }}>Avisar abaixo de:</span>
+                <div className="flex items-center" style={{ background: '#F6F2F5', border: '1px solid rgba(36,27,43,.08)', borderRadius: '10px', padding: '2px' }}>
+                  <button
+                    onClick={() => handleQuickAdjustThreshold(p, -getThresholdDelta(p.nivelMinimoUnidade || 'g'))}
+                    {...(pc ? { type: 'button' as const, 'aria-label': `Avisar mais cedo: diminuir o aviso de ${p.nome}` } : {})}
+                    className="active:scale-95 transition-transform"
+                    style={{ width: pc ? '32px' : '22px', height: pc ? '32px' : '22px', borderRadius: '8px', background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: pc ? '15px' : '12px', fontWeight: 800, color: '#5B4A6B', border: 'none', cursor: 'pointer', boxShadow: pc ? 'none' : '0 2px 5px rgba(58,35,80,.1)' }}
+                  >−</button>
+                  <span style={{ padding: pc ? '0 8px' : '0 7px', fontSize: pc ? '13px' : '11px', fontWeight: 800, color: '#241B2B', whiteSpace: 'nowrap' }}>
+                    {formatQuantity(min)} <span style={{ fontSize: pc ? '11px' : '9px', fontWeight: 600, color: pc ? '#7A6E80' : '#8A7E90' }}>{p.nivelMinimoUnidade}</span>
+                  </span>
+                  <button
+                    onClick={() => handleQuickAdjustThreshold(p, getThresholdDelta(p.nivelMinimoUnidade || 'g'))}
+                    {...(pc ? { type: 'button' as const, 'aria-label': `Aumentar o aviso de ${p.nome}` } : {})}
+                    className="active:scale-95 transition-transform"
+                    style={{ width: pc ? '32px' : '22px', height: pc ? '32px' : '22px', borderRadius: '8px', background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: pc ? '15px' : '12px', fontWeight: 800, color: '#5B4A6B', border: 'none', cursor: 'pointer', boxShadow: pc ? 'none' : '0 2px 5px rgba(58,35,80,.1)' }}
+                  >+</button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between gap-2 mt-0.5" style={pc ? { marginTop: 0 } : undefined}>
+                <div style={{ fontSize: pc ? '12px' : '11px', fontWeight: 800, color: tinta, background: '#F6F2F5', border: '1px solid rgba(36,27,43,.08)', borderRadius: '12px', padding: pc ? '6px 10px' : '7px 9px', whiteSpace: 'nowrap', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {fraseDoAviso(qtdNormalizada, min, unidadeDoAviso)}
+                </div>
+                <div className="flex items-center gap-1" style={pc ? { gap: '2px' } : undefined}>
+                  <button
+                    onClick={() => handleOpenEdit(p)}
+                    {...(pc ? { type: 'button' as const, 'aria-label': `Editar ${p.nome}` } : {})}
+                    className="hover:bg-[#EFE6F0] transition-colors"
+                    style={{ width: pc ? '36px' : '28px', height: pc ? '36px' : '28px', borderRadius: pc ? '10px' : '9px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    <Edit3 className="w-3.5 h-3.5" style={{ color: '#7A6E80', strokeWidth: 2, ...(pc ? { width: '15px', height: '15px' } : {}) }} />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(p)}
+                    {...(pc ? { type: 'button' as const, 'aria-label': `Excluir ${p.nome}` } : {})}
+                    className="hover:bg-[#FBE9EC] transition-colors"
+                    style={{ width: pc ? '36px' : '28px', height: pc ? '36px' : '28px', borderRadius: pc ? '10px' : '9px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" style={{ color: '#C4626F', strokeWidth: 2, ...(pc ? { width: '15px', height: '15px' } : {}) }} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+
+  const tituloHistorico = 'Histórico de Movimentações';
+  const fraseHistorico = 'Rastreie todas as consumições, devoluções e reposições automáticas de estoque';
+  const historicoMovimentacoes = pc ? (
+    // Computador: cartao proprio, na coluna da direita do Estoque.
+    <section
+      aria-labelledby="mov-titulo"
+      style={{ flex: '1 1 320px', minWidth: 0, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: '12px', padding: '20px', borderRadius: '22px', background: '#FFFFFF', boxShadow: '0 8px 20px rgba(58,35,80,0.08)' }}
+    >
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+        <h2 id="mov-titulo" style={{ margin: 0, fontSize: '12px', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#241B2B' }}>
+          {tituloHistorico}
+        </h2>
+        <p style={{ margin: 0, fontSize: '12px', color: '#7A6E80' }}>{fraseHistorico}</p>
+      </div>
+      <StockMovementsHistory computador />
+    </section>
+  ) : (
+    <>
+    {/* Historico de movimentacoes: migrado de EstoqueModule.tsx para
+        aqui, junto do estoque REAL (o antigo mostrava um historico
+        correto ao lado de quantidades que ninguem mais atualiza). */}
+    <div className="mt-2">
+      <div className="mb-3">
+        <h2 className="text-xs font-extrabold uppercase text-[var(--color-pastry-chocolate)]">
+          {tituloHistorico}
+        </h2>
+        <p className="text-[10.5px] mt-1" style={{ color: '#7A6E80' }}>
+          {fraseHistorico}
+        </p>
+      </div>
+      <StockMovementsHistory />
+    </div>
+    </>
+  );
+
   return (
-    <div className="pb-12 animate-fadeIn" style={{ background: '#F6F2F5' }}>
+    <div className="pb-12 animate-fadeIn" style={pc ? { color: '#241B2B' } : { background: '#F6F2F5' }}>
       <div
-        className="overflow-hidden"
-        style={{
+        className={pc ? undefined : 'overflow-hidden'}
+        style={pc ? { fontFamily: "'Manrope', system-ui, sans-serif" } : {
           // Sem sombra: este envolucro e a pagina inteira, nao um cartao — a sombra
           // roxa caia abaixo da borda de baixo dele e aparecia como faixa no fim da
           // tela no iPhone. Mesma correcao da aba Pedidos.
@@ -453,7 +644,9 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
             70 px. Antes este tinha 24 px, titulo em 29 px, uma linha so para o
             selo de estoque baixo acima do titulo e um texto de apoio embaixo —
             a folha comecava ~40 px mais abaixo que nas outras abas (pedido do
-            Rafael, 26/10/2026). */}
+            Rafael, 26/10/2026). No computador a faixa roxa sai: o titulo vai
+            para o topo do conteudo. */}
+        {!pc && (
         <div
           className="px-5 flex items-center justify-between gap-3"
           style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 60%, #A85E86 100%)', paddingTop: 'calc(40px + env(safe-area-inset-top, 0px) + var(--topo-ios27, 0px))', paddingBottom: '120px' }}
@@ -462,22 +655,77 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
             Produtos
           </span>
         </div>
+        )}
 
         <div
           className="flex flex-col gap-4"
-          style={{
+          style={pc ? { gap: '24px' } : {
             marginTop: '-70px', background: '#F6F2F5', borderRadius: '28px 28px 0 0', position: 'relative', padding: '20px',
             marginLeft: 'calc(-0.5 * var(--app-bleed) + 50%)', marginRight: 'calc(-0.5 * var(--app-bleed) + 50%)',
             paddingLeft: 'calc(20px + max(0px, env(safe-area-inset-left)))', paddingRight: 'calc(20px + max(0px, env(safe-area-inset-right)))',
           }}
         >
+          {pc && (
+            <>
+              <TituloDaPagina>Produtos</TituloDaPagina>
+              {/* Computador: as abas a esquerda e, a direita, a busca e o
+                  "Adicionar Produto" (que somem na aba Compras, como hoje). */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '14px 20px' }}>
+                <div role="group" aria-label="Abas de produtos" style={{ display: 'flex', gap: '4px', padding: '4px', borderRadius: '14px', background: '#FFFFFF', boxShadow: '0 6px 14px rgba(58,35,80,0.07)' }}>
+                  {ABAS_PRODUTOS.map((tab) => (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => { setAba(tab.id as any); setIsAdding(false); }}
+                      aria-pressed={aba === tab.id}
+                      style={{
+                        height: '42px', padding: '0 22px', border: 0, borderRadius: '11px', cursor: 'pointer', whiteSpace: 'nowrap',
+                        background: aba === tab.id ? '#3A2350' : 'transparent',
+                        color: aba === tab.id ? '#F5B9C6' : '#6A5F70',
+                        fontFamily: 'inherit', fontSize: '13px', fontWeight: 800,
+                      }}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+                {aba !== 'compras' && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '320px', maxWidth: '100%', height: '46px', boxSizing: 'border-box', padding: '0 14px', borderRadius: '14px', background: '#FFFFFF', boxShadow: '0 6px 14px rgba(58,35,80,0.07)', color: '#7A6E80' }}>
+                      <Search size={16} strokeWidth={1.9} aria-hidden="true" />
+                      <input
+                        type="search"
+                        aria-label="Buscar produto"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder="Buscar produto..."
+                        className="busca-computador"
+                        style={{ flex: 1, minWidth: 0, border: 0, outline: 0, background: 'transparent', fontFamily: 'inherit', fontSize: '13px', color: '#241B2B' }}
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      onClick={handleOpenAdd}
+                      title="Adicionar novo produto"
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', height: '46px', padding: '0 18px', border: 0, borderRadius: '14px', background: '#3A2350', color: '#F5B9C6', fontFamily: 'inherit', fontSize: '13px', fontWeight: 800, cursor: 'pointer', whiteSpace: 'nowrap' }}
+                    >
+                      <Plus size={15} strokeWidth={3} aria-hidden="true" />
+                      Adicionar Produto
+                    </button>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+
           {/* Abas Todos / Estoque / Compras. Fecha o formulario de Novo/Editar
               Produto ao trocar de aba: ele so era escondido ao ir pra Compras
               (aba !== 'compras'), entao trocar entre Todos/Estoque com o
               formulario aberto deixava a lista de baixo (ja correta) escondida
               atras dele — parecia que o filtro nao tinha funcionado. */}
+          {!pc && (
           <div style={{ display: 'flex', gap: '3px', background: 'white', borderRadius: '14px', padding: '3px', boxShadow: '0 6px 14px rgba(58,35,80,.07)' }}>
-            {[{ id: 'todos', label: 'Todos os Produtos' }, { id: 'estoque', label: 'Estoque' }, { id: 'compras', label: 'Compras' }].map((tab) => (
+            {ABAS_PRODUTOS.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => { setAba(tab.id as any); setIsAdding(false); }}
@@ -492,9 +740,11 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
               </button>
             ))}
           </div>
+          )}
 
-          {/* Search + Adicionar — nao fazem sentido na aba Compras */}
-          {aba !== 'compras' && (
+          {/* Search + Adicionar — nao fazem sentido na aba Compras (no
+              computador ficam na linha das abas, acima) */}
+          {!pc && aba !== 'compras' && (
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             <div style={{ flex: 1, position: 'relative' }}>
               <Search className="w-3.75 h-3.75 absolute" style={{ color: '#A096A6', left: '13px', top: '50%', transform: 'translateY(-50%)' }} />
@@ -944,155 +1194,74 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
               </div>
             )
           ) : aba === 'estoque' ? (
-            <>
-            {/* Selo de estoque baixo: estava no cabecalho, ao lado do titulo, e
-                saiu de la quando os titulos foram centralizados. Fica no topo
-                da lista do Estoque, que e onde ele importa. */}
-            {lowStockCount > 0 && (
-              <span
-                className="self-start inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-3 py-1.5 rounded-full whitespace-nowrap"
-                style={{ background: '#C4626F', color: '#FFF8F6' }}
-              >
-                <AlertTriangle className="w-3 h-3" style={{ strokeWidth: 2.5 }} />
-                {lowStockCount} {lowStockCount === 1 ? 'Estoque Baixo' : 'Estoques Baixos'}
-              </span>
-            )}
-            <div className="grid grid-cols-1 gap-4 lista-tablet lista-altura-igual">
-              {sortedEstoque.map((p) => {
-                const qtd = p.quantidadeAtual || 0;
-                const min = p.nivelMinimo || 0;
-                // Comparacao sempre na unidade do ALERTA, nunca nos numeros crus:
-                // quantidade em kg e alerta em g precisam estar na mesma escala
-                // antes de decidir critico/alto (ver normalizeToCommonUnit).
-                const qtdNormalizada = normalizeToCommonUnit(qtd, p.unidadeEmbalagem, p.nivelMinimoUnidade || p.unidadeEmbalagem);
-                const colors = getColorBasedOnThreshold(qtdNormalizada, min);
-                const anel = anelDoEstoque(
-                  qtd,
-                  p.quantidadeReferencia,
-                  normalizeToCommonUnit(min, p.nivelMinimoUnidade || p.unidadeEmbalagem, p.unidadeEmbalagem)
-                );
-                const isCritical = qtdNormalizada < min || (min <= 0 && qtdNormalizada <= 0);
-                // Quantidade e aviso na MESMA unidade (a do aviso): "4.725 g"
-                // ao lado de "4 kg" obrigava a fazer a conta de cabeca.
-                const unidadeDoAviso = p.nivelMinimoUnidade || p.unidadeEmbalagem;
-
-                return (
-                  <div
-                    key={p.id}
-                    className="rounded-[22px] p-3.5 flex items-center gap-3 transition-all"
-                    style={{ background: isCritical ? '#FDF4F5' : '#FFFFFF', border: isCritical ? '1px solid rgba(196,98,111,.35)' : '1px solid rgba(36,27,43,.06)', boxShadow: '0 8px 20px rgba(58,35,80,.09)' }}
-                  >
-                    <svg width="76" height="64" viewBox="0 0 76 64" className="flex-shrink-0">
-                      <path d="M8 60a30 30 0 0 1 60 0" fill="none" stroke="#F1ECF2" strokeWidth="10" strokeLinecap="round" />
-                      <path d="M8 60a30 30 0 0 1 60 0" fill="none" stroke={colors.stroke} strokeWidth="10" strokeLinecap="round"
-                        strokeDasharray={`${anel.preenchido * Math.PI * 30} ${Math.PI * 30}`} />
-                      {/* Risquinho do aviso de compra, atravessando o arco. */}
-                      {anel.aviso !== null && (() => {
-                        const de = pontoDoArco(anel.aviso, 23);
-                        const ate = pontoDoArco(anel.aviso, 37);
-                        return <line x1={de.x} y1={de.y} x2={ate.x} y2={ate.y} stroke="#3A2350" strokeWidth="2.5" strokeLinecap="round" />;
-                      })()}
-                      <text x="38" y="58" textAnchor="middle" fontSize="11" fontWeight="900" fill={colors.stroke} fontFamily="'Manrope', sans-serif">
-                        {formatQuantity(arredonda2(qtdNormalizada))} {unidadeDoAviso}
-                      </text>
-                    </svg>
-
-                    <div className="flex-1 min-w-0 flex flex-col gap-1.5">
-                      <div className="flex items-center gap-2 flex-wrap estoque-titulo">
-                        <h4 className="font-brand text-[13px]" style={{ color: '#241B2B', fontWeight: 800 }}>
-                          {p.nome.charAt(0).toUpperCase() + p.nome.slice(1)}
-                        </h4>
-                        {p.categoria && (
-                          <span style={{ background: '#F6F2F5', color: '#7A6E80' }} className="text-[8.5px] font-bold px-[7px] py-[3px] rounded-md uppercase whitespace-nowrap">
-                            {p.categoria}
-                          </span>
-                        )}
-                        <span style={{ background: colors.background, color: colors.text }} className="text-[8.5px] font-bold px-[7px] py-[3px] rounded-md uppercase whitespace-nowrap">
-                          {getStatusLabel(qtdNormalizada, min)}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-[10.5px]" style={{ color: '#7A6E80' }}>Avisar abaixo de:</span>
-                        <div className="flex items-center" style={{ background: '#F6F2F5', border: '1px solid rgba(36,27,43,.08)', borderRadius: '10px', padding: '2px' }}>
-                          <button
-                            onClick={() => handleQuickAdjustThreshold(p, -getThresholdDelta(p.nivelMinimoUnidade || 'g'))}
-                            className="active:scale-95 transition-transform"
-                            style={{ width: '22px', height: '22px', borderRadius: '8px', background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 800, color: '#5B4A6B', border: 'none', cursor: 'pointer', boxShadow: '0 2px 5px rgba(58,35,80,.1)' }}
-                          >−</button>
-                          <span style={{ padding: '0 7px', fontSize: '11px', fontWeight: 800, color: '#241B2B', whiteSpace: 'nowrap' }}>
-                            {formatQuantity(min)} <span style={{ fontSize: '9px', fontWeight: 600, color: '#8A7E90' }}>{p.nivelMinimoUnidade}</span>
-                          </span>
-                          <button
-                            onClick={() => handleQuickAdjustThreshold(p, getThresholdDelta(p.nivelMinimoUnidade || 'g'))}
-                            className="active:scale-95 transition-transform"
-                            style={{ width: '22px', height: '22px', borderRadius: '8px', background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 800, color: '#5B4A6B', border: 'none', cursor: 'pointer', boxShadow: '0 2px 5px rgba(58,35,80,.1)' }}
-                          >+</button>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between gap-2 mt-0.5">
-                        <div style={{ fontSize: '11px', fontWeight: 800, color: colors.text, background: '#F6F2F5', border: '1px solid rgba(36,27,43,.08)', borderRadius: '12px', padding: '7px 9px', whiteSpace: 'nowrap', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {fraseDoAviso(qtdNormalizada, min, unidadeDoAviso)}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <button onClick={() => handleOpenEdit(p)} className="hover:bg-[#EFE6F0] transition-colors" style={{ width: '28px', height: '28px', borderRadius: '9px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <Edit3 className="w-3.5 h-3.5" style={{ color: '#7A6E80', strokeWidth: 2 }} />
-                          </button>
-                          <button onClick={() => handleDelete(p)} className="hover:bg-[#FBE9EC] transition-colors" style={{ width: '28px', height: '28px', borderRadius: '9px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <Trash2 className="w-3.5 h-3.5" style={{ color: '#C4626F', strokeWidth: 2 }} />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Historico de movimentacoes: migrado de EstoqueModule.tsx para
-                aqui, junto do estoque REAL (o antigo mostrava um historico
-                correto ao lado de quantidades que ninguem mais atualiza). */}
-            <div className="mt-2">
-              <div className="mb-3">
-                <h2 className="text-xs font-extrabold uppercase text-[var(--color-pastry-chocolate)]">
-                  Histórico de Movimentações
-                </h2>
-                <p className="text-[10.5px] mt-1" style={{ color: '#7A6E80' }}>
-                  Rastreie todas as consumições, devoluções e reposições automáticas de estoque
-                </p>
+            pc ? (
+              // Computador: duas colunas — selo e cartoes a esquerda, o
+              // Historico de Movimentacoes num cartao proprio a direita.
+              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', gap: '24px' }}>
+                <div style={{ flex: '2 1 640px', minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '14px' }}>
+                  {seloEstoqueBaixo}
+                  {gradeEstoque}
+                </div>
+                {historicoMovimentacoes}
               </div>
-              <StockMovementsHistory />
-            </div>
+            ) : (
+            <>
+            {seloEstoqueBaixo}
+            {gradeEstoque}
+            {historicoMovimentacoes}
             </>
+            )
           ) : (
-            <div className="grid grid-cols-1 gap-3 lista-tablet">
+            <div
+              className={pc ? undefined : 'grid grid-cols-1 gap-3 lista-tablet'}
+              style={pc ? { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '14px' } : undefined}
+            >
               {sortedEstoque.map((p) => (
-                <div key={p.id} className="rounded-[18px] p-3.5 flex items-center justify-between gap-3" style={{ background: '#FFFFFF', border: '1px solid rgba(36,27,43,.06)', boxShadow: '0 8px 20px rgba(58,35,80,.09)' }}>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h4 className="font-brand text-[13px]" style={{ color: '#241B2B', fontWeight: 800 }}>{p.nome}</h4>
+                <div
+                  key={p.id}
+                  className="rounded-[18px] p-3.5 flex items-center justify-between gap-3"
+                  style={{ background: '#FFFFFF', border: '1px solid rgba(36,27,43,.06)', boxShadow: '0 8px 20px rgba(58,35,80,.09)', ...(pc ? { padding: '16px 14px 16px 18px' } : {}) }}
+                >
+                  <div className="flex-1 min-w-0" style={pc ? { display: 'flex', flexDirection: 'column', gap: '5px' } : undefined}>
+                    <div className="flex items-center gap-2 flex-wrap" style={pc ? { gap: '6px' } : undefined}>
+                      <h4 className="font-brand text-[13px]" style={{ color: '#241B2B', fontWeight: 800, ...(pc ? { fontSize: '14px', lineHeight: 1.3 } : {}) }}>{p.nome}</h4>
                       {p.categoria && (
-                        <span style={{ background: '#F6F2F5', color: '#7A6E80' }} className="text-[8.5px] font-bold px-[7px] py-[3px] rounded-md uppercase whitespace-nowrap">
+                        <span
+                          style={{ background: '#F6F2F5', color: pc ? '#6A5F70' : '#7A6E80', ...(pc ? { fontSize: '10px', fontWeight: 800, letterSpacing: '0.04em', padding: '2px 7px' } : {}) }}
+                          className="text-[8.5px] font-bold px-[7px] py-[3px] rounded-md uppercase whitespace-nowrap"
+                        >
                           {p.categoria}
                         </span>
                       )}
                       {!p.controlaEstoque && (
-                        <span style={{ background: '#FFF3E0', color: '#B27A16' }} className="text-[8.5px] font-bold px-[7px] py-[3px] rounded-md uppercase whitespace-nowrap">
+                        <span
+                          style={{ background: '#FFF3E0', color: pc ? '#8A5A0E' : '#B27A16', ...(pc ? { fontSize: '10px', fontWeight: 800, letterSpacing: '0.04em', padding: '2px 7px' } : {}) }}
+                          className="text-[8.5px] font-bold px-[7px] py-[3px] rounded-md uppercase whitespace-nowrap"
+                        >
                           Sem estoque
                         </span>
                       )}
                     </div>
-                    <p className="text-[11px] mt-1" style={{ color: '#7A6E80' }}>
+                    <p className="text-[11px] mt-1" style={{ color: '#7A6E80', ...(pc ? { fontSize: '12px', marginTop: 0 } : {}) }}>
                       {formatCurrency(p.precoPago)} / {p.quantidadeEmbalagem} {p.unidadeEmbalagem} · custo unitário {symbol} {custoPorUnidade(p).toFixed(4)}/{p.unidadeEmbalagem}
                     </p>
                   </div>
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    <button onClick={() => handleOpenEdit(p)} className="hover:bg-[#EFE6F0] transition-colors" style={{ width: '28px', height: '28px', borderRadius: '9px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <Edit3 className="w-3.5 h-3.5" style={{ color: '#7A6E80', strokeWidth: 2 }} />
+                  <div className="flex items-center gap-1 flex-shrink-0" style={pc ? { gap: '2px' } : undefined}>
+                    <button
+                      onClick={() => handleOpenEdit(p)}
+                      {...(pc ? { type: 'button' as const, 'aria-label': `Editar ${p.nome}` } : {})}
+                      className="hover:bg-[#EFE6F0] transition-colors"
+                      style={{ width: pc ? '40px' : '28px', height: pc ? '40px' : '28px', borderRadius: pc ? '10px' : '9px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    >
+                      <Edit3 className="w-3.5 h-3.5" style={{ color: '#7A6E80', strokeWidth: 2, ...(pc ? { width: '15px', height: '15px' } : {}) }} />
                     </button>
-                    <button onClick={() => handleDelete(p)} className="hover:bg-[#FBE9EC] transition-colors" style={{ width: '28px', height: '28px', borderRadius: '9px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <Trash2 className="w-3.5 h-3.5" style={{ color: '#C4626F', strokeWidth: 2 }} />
+                    <button
+                      onClick={() => handleDelete(p)}
+                      {...(pc ? { type: 'button' as const, 'aria-label': `Excluir ${p.nome}` } : {})}
+                      className="hover:bg-[#FBE9EC] transition-colors"
+                      style={{ width: pc ? '40px' : '28px', height: pc ? '40px' : '28px', borderRadius: pc ? '10px' : '9px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" style={{ color: '#C4626F', strokeWidth: 2, ...(pc ? { width: '15px', height: '15px' } : {}) }} />
                     </button>
                   </div>
                 </div>
@@ -1127,8 +1296,10 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
       {pendingDeleteProdutos.map((produto, index) => (
         <div
           key={produto.id}
-          className="fixed left-1/2 -translate-x-1/2 z-50"
-          style={{ bottom: `${96 + index * 56}px` }}
+          // No computador nao ha menu embaixo: o aviso desce e centraliza no
+          // conteudo (ver .aviso-flutuante em index.css).
+          className={pc ? 'fixed left-1/2 -translate-x-1/2 z-50 aviso-flutuante' : 'fixed left-1/2 -translate-x-1/2 z-50'}
+          style={{ bottom: `${(pc ? 32 : 96) + index * 56}px` }}
         >
           <div
             className="flex items-center gap-3.5 animate-fadeIn"
