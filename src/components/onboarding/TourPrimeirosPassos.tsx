@@ -25,6 +25,8 @@ interface Retangulo {
   left: number;
   width: number;
   height: number;
+  /** O alvo esta no menu lateral do computador (MenuLateral), e nao no menu de baixo. */
+  lateral: boolean;
 }
 
 interface TourPrimeirosPassosProps {
@@ -65,7 +67,7 @@ export const TourPrimeirosPassos: React.FC<TourPrimeirosPassosProps> = ({ onNavi
       const alvo = document.querySelector(`[data-tour-id="${passo.tab}"]`);
       if (!alvo) return;
       const r = alvo.getBoundingClientRect();
-      setRect({ top: r.top, left: r.left, width: r.width, height: r.height });
+      setRect({ top: r.top, left: r.left, width: r.width, height: r.height, lateral: !!alvo.closest('.menu-lateral') });
     };
 
     // Um frame de folga para o navegador aplicar o novo activeTab (cor/negrito
@@ -83,10 +85,20 @@ export const TourPrimeirosPassos: React.FC<TourPrimeirosPassosProps> = ({ onNavi
   const centroX = rect.left + rect.width / 2;
   const larguraBalao = 300;
   const margem = 16;
-  const balaoLeft = Math.min(
-    Math.max(centroX - larguraBalao / 2, margem),
-    window.innerWidth - larguraBalao - margem
-  );
+  // No celular o balao fica acima do menu de baixo, centrado no icone. No
+  // computador o menu e lateral: o balao vai a direita do item, na altura dele.
+  const posicaoBalao: React.CSSProperties = rect.lateral
+    ? {
+        left: rect.left + rect.width + 18,
+        top: Math.min(Math.max(rect.top - 8, margem), window.innerHeight - 200),
+      }
+    : {
+        left: Math.min(
+          Math.max(centroX - larguraBalao / 2, margem),
+          window.innerWidth - larguraBalao - margem
+        ),
+        bottom: 110,
+      };
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 10000 }}>
@@ -122,8 +134,7 @@ export const TourPrimeirosPassos: React.FC<TourPrimeirosPassosProps> = ({ onNavi
           transition={{ duration: 0.25 }}
           style={{
             position: 'fixed',
-            left: balaoLeft,
-            bottom: 110,
+            ...posicaoBalao,
             width: larguraBalao,
             maxWidth: `calc(var(--app-bleed) - ${margem * 2}px)`,
             background: '#FFFFFF',

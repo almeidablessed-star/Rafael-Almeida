@@ -46,20 +46,23 @@ const IconCustos = (props: { stroke: string; strokeWidth: number }) => (
   </svg>
 );
 
+/** As abas do app, na ordem do menu. O menu lateral do computador (MenuLateral) usa a mesma lista. */
+export const ABAS_DO_MENU = [
+  { id: 'dashboard' as TabType, label: 'Início', icon: IconInicio },
+  { id: 'pedidos' as TabType, label: 'Pedidos', icon: IconPedidos },
+  { id: 'fichas' as TabType, label: 'Fichas', icon: IconFichas },
+  { id: 'clientes' as TabType, label: 'Clientes', icon: IconClientes },
+  { id: 'produtos' as TabType, label: 'Produtos', icon: IconProdutos },
+  { id: 'custos' as TabType, label: 'Empresa', icon: IconCustos },
+];
+
 interface BottomNavProps {
   activeTab: TabType;
   onTabChange: (tab: TabType) => void;
 }
 
 export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
-  const tabs = [
-    { id: 'dashboard' as TabType, label: 'Início', icon: IconInicio },
-    { id: 'pedidos' as TabType, label: 'Pedidos', icon: IconPedidos },
-    { id: 'fichas' as TabType, label: 'Fichas', icon: IconFichas },
-    { id: 'clientes' as TabType, label: 'Clientes', icon: IconClientes },
-    { id: 'produtos' as TabType, label: 'Produtos', icon: IconProdutos },
-    { id: 'custos' as TabType, label: 'Empresa', icon: IconCustos },
-  ];
+  const tabs = ABAS_DO_MENU;
 
   return (
     <nav

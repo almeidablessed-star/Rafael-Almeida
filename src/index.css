@@ -296,3 +296,55 @@ a:hover {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* ================================================================
+   VERSAO COMPUTADOR (a partir de 1024px, so SEM toque)
+   ================================================================
+
+   Desenho aprovado em docs/design/desktop-redesign/README.md. Quem liga e o
+   hook useTelaDeComputador, que rende `.layout-computador` (menu lateral +
+   conteudo) no lugar do menu de baixo. Tudo aqui depende dessa classe na
+   tela: o login, a verificacao de codigo e o onboarding nao tem menu e
+   continuam na coluna de celular; o iPad (tela-de-toque) nunca recebe a
+   classe e continua como esta. */
+
+@media (min-width: 1024px) {
+  html:has(.layout-computador) {
+    --menu-lateral: 248px;
+    /* Area do conteudo: a janela menos o menu. As pecas fixas (.app-col-fixed)
+       se medem por ela. */
+    --app-col: calc(100vw - var(--menu-lateral));
+    /* Os blocos "de ponta a ponta" do celular (faixa roxa do topo) nao escapam
+       mais: com 100% o truque `calc(-0.5 * X + 50%)` da margem zero. */
+    --app-bleed: 100%;
+  }
+
+  html:has(.layout-computador),
+  html:has(.layout-computador) body {
+    background: #F6F2F5;
+  }
+
+  html:has(.layout-computador) #root {
+    max-width: none;
+    margin: 0;
+    box-shadow: none;
+  }
+
+  html:has(.layout-computador) .app-col-fixed {
+    left: calc(var(--menu-lateral) + var(--app-col) / 2) !important;
+  }
+
+  /* Aviso "Pedido deletado / Desfazer": no meio do conteudo, nao da janela. */
+  html:has(.layout-computador) .aviso-flutuante {
+    left: calc(var(--menu-lateral) + var(--app-col) / 2);
+  }
+
+  .menu-lateral-item:not([aria-current]):hover {
+    background: #F6F2F5;
+  }
+
+  .menu-lateral button:focus-visible {
+    outline: 2px solid #A85E86;
+    outline-offset: 2px;
+  }
+}

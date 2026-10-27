@@ -13,6 +13,7 @@ import { getTodayIso, formatDateBr } from './utils/formatters';
 import { useDelayedDelete } from './hooks/useDelayedDelete';
 import { useCorDaBarraDoSistema } from './hooks/useCorDaBarraDoSistema';
 import { useFichasComCustoAtual } from './hooks/useFichasComCustoAtual';
+import { useTelaDeComputador } from './hooks/useTelaDeComputador';
 import { useProdutos } from './context/ProdutosContext';
 import { useTransacoes } from './context/TransacoesContext';
 import { TransacoesProvider } from './context/TransacoesContext';
@@ -32,6 +33,7 @@ import { useAuth } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { PainelParceiroPage } from './pages/PainelParceiroPage';
 import { BottomNav } from './components/BottomNav';
+import { MenuLateral } from './components/MenuLateral';
 import { PeriodSelector } from './components/PeriodSelector';
 import { Dashboard } from './components/Dashboard';
 import { VerifyOtpPage } from './pages/VerifyOtpPage';
@@ -92,6 +94,9 @@ function AppContent() {
   // reabria nela; essa chave deixou de ser usada e e apagada uma vez abaixo.
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
   useCorDaBarraDoSistema(activeTab);
+  // Versao computador (1024px+, sem toque): menu lateral no lugar do menu de
+  // baixo. Ver docs/design/desktop-redesign/README.md.
+  const telaDeComputador = useTelaDeComputador();
 
   // Period filter state
   const [period, setPeriod] = useState<TimePeriod>('mes'); // Default to 'Este Mês'
@@ -531,16 +536,8 @@ function AppContent() {
   // FinancialOnboardingGate. Aqui dentro ela ficava atras do portao de
   // onboarding e nunca chegava a aparecer no primeiro acesso.
 
-  return (
-      <div className="min-h-screen text-[var(--color-ink)] flex flex-col font-sans" style={{ overflow: 'hidden' }}>
-
-        {/* Main Screen Container */}
-        <main className="flex-1 max-w-full w-full mx-auto px-0 pb-20 bottom-nav-safe" style={{
-          paddingTop: 'max(0px, env(safe-area-inset-top))',
-          paddingLeft: 'max(0px, env(safe-area-inset-left))',
-          paddingRight: 'max(0px, env(safe-area-inset-right))',
-        }}>
-
+  const conteudoDaAba = (
+      <>
         {/* Tab Content Router */}
         {activeTab === 'dashboard' && (
           <Dashboard
@@ -618,11 +615,47 @@ function AppContent() {
             onLogout={handleLogout}
           />
         )}
+      </>
+  );
 
-        </main>
+  return (
+      <div className="min-h-screen text-[var(--color-ink)] flex flex-col font-sans" style={{ overflow: 'hidden' }}>
 
-      {/* Fixed Bottom Navigation Bar */}
-      <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+      {telaDeComputador ? (
+        // Computador: menu lateral fixo a esquerda e o conteudo num container
+        // de ate 1200px a direita (medidas do README do redesign desktop).
+        <div className="layout-computador">
+          <MenuLateral
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            onLancarPedido={() => handleOpenAddModal('venda')}
+          />
+          <main
+            style={{
+              marginLeft: 'var(--menu-lateral, 248px)',
+              minHeight: '100vh',
+              boxSizing: 'border-box',
+              padding: '30px 40px 56px',
+            }}
+          >
+            <div style={{ maxWidth: '1200px', margin: '0 auto' }}>{conteudoDaAba}</div>
+          </main>
+        </div>
+      ) : (
+        <>
+          {/* Main Screen Container */}
+          <main className="flex-1 max-w-full w-full mx-auto px-0 pb-20 bottom-nav-safe" style={{
+            paddingTop: 'max(0px, env(safe-area-inset-top))',
+            paddingLeft: 'max(0px, env(safe-area-inset-left))',
+            paddingRight: 'max(0px, env(safe-area-inset-right))',
+          }}>
+            {conteudoDaAba}
+          </main>
+
+          {/* Fixed Bottom Navigation Bar */}
+          <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+        </>
+      )}
 
       {/* Transaction Form Modal */}
       <TransactionFormModal
@@ -713,8 +746,9 @@ function AppContent() {
       {pendingDeleteTransacoes.map((tx, index) => (
         <div
           key={tx.id}
-          className="fixed left-1/2 -translate-x-1/2 z-50"
-          style={{ bottom: `${96 + index * 56}px` }}
+          className="fixed left-1/2 -translate-x-1/2 z-50 aviso-flutuante"
+          // 96px livra o menu de baixo; no computador nao ha menu embaixo.
+          style={{ bottom: `${(telaDeComputador ? 32 : 96) + index * 56}px` }}
         >
           <div
             className="flex items-center gap-3.5 animate-fadeIn"
