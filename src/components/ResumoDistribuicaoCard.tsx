@@ -24,30 +24,35 @@ const LINHAS_COR = {
 } as const;
 
 /**
- * Medidas do card em cada versao. `computador` segue o desenho aprovado
- * (docs/design/desktop-redesign: Main.dc.html e Empresa.dc.html), feito para
- * uma coluna mais estreita que a do celular; o "MENSAL" escurece para dar
- * leitura sobre o lilas do cabecalho.
+ * Medidas do card em cada versao (docs/design/desktop-redesign). No
+ * computador o "MENSAL" escurece para dar leitura sobre o lilas do cabecalho.
+ * - `computador`: coluna estreita do Inicio (Main.dc.html).
+ * - `computadorLargo`: coluna mais larga da Minha Empresa (Empresa.dc.html).
  */
 const MEDIDAS = {
   celular: {
-    cabecalho: '20px 22px', cabecalhoGap: '12px', mensal: '#A85E86',
+    raio: '20px', cabecalho: '20px 22px', cabecalhoGap: '12px', titulo: '24px', mensal: '#A85E86',
     total: '22px 22px 18px', totalFonte: '44px',
     lista: '8px 12px 14px', linha: '12px 10px', linhaGap: '4px 12px', nome: '14px', valor: '15px',
   },
   computador: {
-    cabecalho: '18px 20px', cabecalhoGap: '4px 12px', mensal: '#87476C',
+    raio: '20px', cabecalho: '18px 20px', cabecalhoGap: '4px 12px', titulo: '24px', mensal: '#87476C',
     total: '20px 20px 16px', totalFonte: '42px',
     lista: '6px 10px 12px', linha: '11px 10px', linhaGap: '6px 12px', nome: '13px', valor: '14px',
   },
+  computadorLargo: {
+    raio: '22px', cabecalho: '20px 22px', cabecalhoGap: '4px 12px', titulo: '26px', mensal: '#87476C',
+    total: '22px 22px 18px', totalFonte: '46px',
+    lista: '6px 12px 12px', linha: '12px 10px', linhaGap: '6px 12px', nome: '14px', valor: '15px',
+  },
 } as const;
 
-export const ResumoDistribuicaoCard: React.FC<{ estrutura: EstruturaFinanceira; computador?: boolean }> = ({
+export const ResumoDistribuicaoCard: React.FC<{ estrutura: EstruturaFinanceira; computador?: boolean | 'largo' }> = ({
   estrutura,
   computador = false,
 }) => {
   const { formatCurrency } = useCurrency();
-  const m = MEDIDAS[computador ? 'computador' : 'celular'];
+  const m = MEDIDAS[computador === 'largo' ? 'computadorLargo' : computador ? 'computador' : 'celular'];
 
   const linhas = [
     ['CMV / Reposição', estrutura.cmvTargetPercent, estrutura.cmvAmount],
@@ -90,7 +95,7 @@ export const ResumoDistribuicaoCard: React.FC<{ estrutura: EstruturaFinanceira; 
   return (
     <div
       style={{
-        borderRadius: '20px',
+        borderRadius: m.raio,
         overflow: 'hidden',
         background: '#FFFFFF',
         border: '1px solid rgba(58,35,80,0.08)',
@@ -108,7 +113,7 @@ export const ResumoDistribuicaoCard: React.FC<{ estrutura: EstruturaFinanceira; 
           ...(computador ? { flexWrap: 'wrap' as const } : {}),
         }}
       >
-        <h3 className="font-serif-display" style={{ margin: 0, fontSize: '24px', lineHeight: 1.15, color: '#3A2350' }}>
+        <h3 className="font-serif-display" style={{ margin: 0, fontSize: m.titulo, lineHeight: 1.15, color: '#3A2350' }}>
           Resumo & Distribuição
         </h3>
         <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: m.mensal, fontFamily: "'Manrope', sans-serif" }}>

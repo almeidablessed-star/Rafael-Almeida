@@ -50,7 +50,15 @@ const PERIODO_DESCRICAO: Record<PeriodoReset, string> = {
   mensal: 'Todo mês — do dia 1 ao fim do mês',
 };
 
-export const MinhaEmpresaCard: React.FC = () => {
+/**
+ * `computador`: versao computador em duas colunas (docs/design/desktop-redesign,
+ * Empresa.dc.html). `colunaDireita` entra abaixo do Resumo, na coluna da direita
+ * (o CostsModule passa os gastos avulsos). No celular nada disso e usado.
+ */
+export const MinhaEmpresaCard: React.FC<{ computador?: boolean; colunaDireita?: React.ReactNode }> = ({
+  computador = false,
+  colunaDireita,
+}) => {
   const { administrativeCosts, salvarConfiguracaoEmpresa, salvarDespesas, error } = useCosts();
   const { formatCurrency, symbol } = useCurrency();
 
@@ -182,38 +190,74 @@ export const MinhaEmpresaCard: React.FC = () => {
     ? `Com seu faturamento necessário de ${formatCurrency(estrutura.faturamentoNecessario)}, isso significa aproximadamente ${formatCurrency(estrutura.lucroAmount)} por mês de lucro para a empresa, além do que você recebe pelo seu trabalho.`
     : undefined;
 
-  return (
-    <div className="space-y-4">
-      {(error || erroLocal) && (
-        <div className="p-2.5 rounded-xl bg-[#FDF4F5] border border-[rgba(196,98,111,.35)] text-[12px] text-[#C4626F]" style={{ fontFamily: "'Manrope', sans-serif" }}>
-          {error || erroLocal}
-        </div>
-      )}
+  // ------------------------------------------------------------------
+  // As secoes, cada uma num bloco. O celular empilha na ordem de sempre; o
+  // computador (`pc`) arruma em duas colunas, como em
+  // docs/design/desktop-redesign/Empresa.dc.html: Remuneracao, Periodo + Metas
+  // lado a lado e Despesas a esquerda; Resumo e a `colunaDireita` (os gastos
+  // avulsos, que vem do CostsModule) a direita.
+  // ------------------------------------------------------------------
+  const pc = computador;
 
-      {/* Secao 1 — Sua Remuneracao */}
-      <div className={secaoCard}>
+  // Cartao de secao e caixinhas de valor do computador: brancos, com as
+  // caixinhas em lilas claro. No celular continuam as classes de sempre.
+  const secaoPc = (extra?: React.CSSProperties): React.CSSProperties => ({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '14px',
+    padding: '22px',
+    borderRadius: '22px',
+    background: '#FFFFFF',
+    boxShadow: '0 8px 20px rgba(58,35,80,0.08)',
+    ...extra,
+  });
+  const caixaPc: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: '4px', padding: '14px 16px', borderRadius: '14px', background: '#FAF7FA', border: '1px solid #EDE6EF' };
+  const rotuloCaixa: React.CSSProperties = { color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800, ...(pc ? { fontSize: '11px' } : {}) };
+  const valorCaixa = (tamanho: 'grande' | 'medio'): React.CSSProperties => ({
+    color: '#241B2B',
+    fontFamily: "'Manrope', sans-serif",
+    ...(pc ? (tamanho === 'grande' ? { fontSize: '18px', fontWeight: 800, marginTop: 0, fontVariantNumeric: 'tabular-nums' } : { fontSize: '15px', fontWeight: 700, marginTop: 0 }) : {}),
+  });
+  const tituloSecao: React.CSSProperties = { color: '#241B2B', ...(pc ? { margin: 0, fontSize: '26px', lineHeight: 1.15 } : {}) };
+  const botaoEditar = (rotulo: string, aoClicar: () => void) => (
+    <button
+      onClick={aoClicar}
+      className={pc ? 'rounded-full flex items-center justify-center text-[#6E3F72] hover:bg-[#F3E9F3] transition-colors' : 'w-7 h-7 rounded-full flex items-center justify-center text-[#6E3F72] hover:bg-white transition-colors'}
+      title="Editar"
+      {...(pc ? { type: 'button' as const, 'aria-label': rotulo, style: { width: '40px', height: '40px' } } : {})}
+    >
+      <Edit3 size={pc ? 16 : 14} />
+    </button>
+  );
+
+  const textoDespesas = 'Aluguel, luz, internet... custos fixos, independente de quanto você vende. O que já está no custo do produto não entra aqui de novo.';
+
+  const avisoErro = (error || erroLocal) && (
+    <div className="p-2.5 rounded-xl bg-[#FDF4F5] border border-[rgba(196,98,111,.35)] text-[12px] text-[#C4626F]" style={{ fontFamily: "'Manrope', sans-serif" }}>
+      {error || erroLocal}
+    </div>
+  );
+
+  const secaoRemuneracao = (
+      <div className={pc ? undefined : secaoCard} style={pc ? secaoPc() : undefined}>
         <div className="flex items-center justify-between">
-          <h3 className={secaoTitulo} style={{ color: '#241B2B' }}>Sua Remuneração</h3>
-          {!editandoRemuneracao && (
-            <button onClick={() => setEditandoRemuneracao(true)} className="w-7 h-7 rounded-full flex items-center justify-center text-[#6E3F72] hover:bg-white transition-colors" title="Editar">
-              <Edit3 size={14} />
-            </button>
-          )}
+          <h3 className={secaoTitulo} style={tituloSecao}>Sua Remuneração</h3>
+          {!editandoRemuneracao && botaoEditar('Editar sua remuneração', () => setEditandoRemuneracao(true))}
         </div>
 
         {!editandoRemuneracao ? (
-          <div className="grid grid-cols-2 gap-2">
-            <div className="bg-white rounded-xl p-3 border border-[#E6E1DB]">
-              <p className="text-[9px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>Recebimento desejado</p>
-              <p className="text-[13px] font-bold mt-1" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>{formatCurrency(monthlyIncomeTarget)}/mês</p>
+          <div className="grid grid-cols-2 gap-2" style={pc ? { gap: '10px' } : undefined}>
+            <div className="bg-white rounded-xl p-3 border border-[#E6E1DB]" style={pc ? caixaPc : undefined}>
+              <p className="text-[9px] uppercase tracking-[0.05em]" style={rotuloCaixa}>Recebimento desejado</p>
+              <p className="text-[13px] font-bold mt-1" style={valorCaixa('grande')}>{formatCurrency(monthlyIncomeTarget)}/mês</p>
             </div>
-            <div className="bg-white rounded-xl p-3 border border-[#E6E1DB]">
-              <p className="text-[9px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>Valor da hora</p>
-              <p className="text-[13px] font-bold mt-1" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>{formatCurrency(horaTrabalho)}/hora</p>
+            <div className="bg-white rounded-xl p-3 border border-[#E6E1DB]" style={pc ? caixaPc : undefined}>
+              <p className="text-[9px] uppercase tracking-[0.05em]" style={rotuloCaixa}>Valor da hora</p>
+              <p className="text-[13px] font-bold mt-1" style={valorCaixa('grande')}>{formatCurrency(horaTrabalho)}/hora</p>
             </div>
-            <div className="col-span-2 bg-white rounded-xl p-3 border border-[#E6E1DB]">
-              <p className="text-[9px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>Meta de horas (referência, não obrigação)</p>
-              <p className="text-[12px] font-bold mt-1" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>
+            <div className="col-span-2 bg-white rounded-xl p-3 border border-[#E6E1DB]" style={pc ? caixaPc : undefined}>
+              <p className="text-[9px] uppercase tracking-[0.05em]" style={rotuloCaixa}>Meta de horas (referência, não obrigação)</p>
+              <p className="text-[12px] font-bold mt-1" style={valorCaixa('medio')}>
                 {workingDaysPerWeek} dias/semana · {metaHoras.horasPorMes.toFixed(1)}h/mês → {metaHoras.horasPorSemana.toFixed(1)}h/semana → {metaHoras.horasPorDia.toFixed(1)}h/dia
               </p>
             </div>
@@ -249,29 +293,27 @@ export const MinhaEmpresaCard: React.FC = () => {
           </div>
         )}
       </div>
+  );
 
-      {/*
-        Secao propria, e nao um campo dentro de "Sua Remuneracao", de proposito.
-        La dentro ele ficaria colado em "Dias de trabalho por semana", e as duas
-        coisas nao tem relacao nenhuma: dias por semana e rotina de trabalho e
-        alimenta a meta de HORAS, que continua sempre semanal. Lado a lado, o
-        arranjo sugeriria que escolher "quinzenal" converteria as horas junto —
-        que e exatamente a duvida que a microcopy abaixo existe para matar.
-      */}
-      <div className={secaoCard}>
+  /*
+    Secao propria, e nao um campo dentro de "Sua Remuneracao", de proposito.
+    La dentro ele ficaria colado em "Dias de trabalho por semana", e as duas
+    coisas nao tem relacao nenhuma: dias por semana e rotina de trabalho e
+    alimenta a meta de HORAS, que continua sempre semanal. Lado a lado, o
+    arranjo sugeriria que escolher "quinzenal" converteria as horas junto —
+    que e exatamente a duvida que a microcopy abaixo existe para matar.
+  */
+  const secaoPeriodo = (
+      <div className={pc ? undefined : secaoCard} style={pc ? secaoPc({ flex: '1 1 260px', minWidth: 0 }) : undefined}>
         <div className="flex items-center justify-between">
-          <h3 className={secaoTitulo} style={{ color: '#241B2B' }}>Período das Metas</h3>
-          {!editandoPeriodo && (
-            <button onClick={() => setEditandoPeriodo(true)} className="w-7 h-7 rounded-full flex items-center justify-center text-[#6E3F72] hover:bg-white transition-colors" title="Editar">
-              <Edit3 size={14} />
-            </button>
-          )}
+          <h3 className={secaoTitulo} style={tituloSecao}>Período das Metas</h3>
+          {!editandoPeriodo && botaoEditar('Editar período das metas', () => setEditandoPeriodo(true))}
         </div>
 
         {!editandoPeriodo ? (
-          <div className="bg-white rounded-xl p-3 border border-[#E6E1DB]">
-            <p className="text-[9px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>Suas metas zeram</p>
-            <p className="text-[13px] font-bold mt-1" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>
+          <div className="bg-white rounded-xl p-3 border border-[#E6E1DB]" style={pc ? caixaPc : undefined}>
+            <p className="text-[9px] uppercase tracking-[0.05em]" style={rotuloCaixa}>Suas metas zeram</p>
+            <p className="text-[13px] font-bold mt-1" style={valorCaixa('medio')}>
               {PERIODO_DESCRICAO[periodoReset]}
             </p>
           </div>
@@ -301,15 +343,34 @@ export const MinhaEmpresaCard: React.FC = () => {
           </div>
         )}
       </div>
+  );
 
-      {/* Secao 3 — Despesas do Negocio */}
-      <div className={secaoCard}>
-        <div className="flex items-center justify-between">
-          <h3 className={secaoTitulo} style={{ color: '#241B2B' }}>Despesas do Negócio</h3>
-          <span className="text-[12px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>{formatCurrency(despesasMensais)}</span>
+  // Secao 3 — Despesas do Negocio
+  const secaoDespesas = (
+      <div className={pc ? undefined : secaoCard} style={pc ? secaoPc() : undefined}>
+        <div className="flex items-center justify-between" style={pc ? { alignItems: 'baseline', gap: '12px' } : undefined}>
+          <h3 className={secaoTitulo} style={tituloSecao}>Despesas do Negócio</h3>
+          <span className="text-[12px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", ...(pc ? { fontSize: '16px', fontWeight: 800, fontVariantNumeric: 'tabular-nums' } : {}) }}>{formatCurrency(despesasMensais)}</span>
         </div>
-        <CampoComAjuda microcopy="Aluguel, luz, internet... custos fixos, independente de quanto você vende. O que já está no custo do produto não entra aqui de novo." />
-        <div className="space-y-2">
+        {pc ? (
+          <>
+            <p style={{ margin: 0, fontSize: '13px', color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>{textoDespesas}</p>
+            {/* No computador o aviso do "% do negocio" aparece uma vez so, aqui
+                no topo (no celular ele se repete em cada despesa). */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '12px 14px', borderRadius: '14px', background: '#F3E9F3' }}>
+              <span aria-hidden="true" style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '50%', background: '#3A2350', color: '#FFFFFF', fontSize: '12px', fontWeight: 800 }}>?</span>
+              <p style={{ margin: 0, fontSize: '13px', color: '#4A3F52', fontFamily: "'Manrope', sans-serif" }}>
+                Se essa despesa também é usada na sua vida pessoal, informe em “% do negócio” só a parte que é da confeitaria. Deixe 100 se ela é toda do negócio.
+              </p>
+            </div>
+          </>
+        ) : (
+          <CampoComAjuda microcopy={textoDespesas} />
+        )}
+        <div
+          className={pc ? undefined : 'space-y-2'}
+          style={pc ? { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px' } : undefined}
+        >
           {despesas.map((d, i) => {
             const exemploRateio = d.nome && d.valor
               ? `Você informou ${formatCurrency(d.valor)} de ${d.nome.trim()}. Se só uma parte é do negócio, ajuste esse número — por exemplo, 50 significa que ${formatCurrency(d.valor * 0.5)} entram como custo real da confeitaria.`
@@ -318,83 +379,95 @@ export const MinhaEmpresaCard: React.FC = () => {
             <div
               key={d.id ?? `novo-${i}`}
               className="overflow-hidden shadow-[0_8px_20px_rgba(58,35,80,.09)] hover:shadow-[0_20px_36px_rgba(58,35,80,.18)] hover:-translate-y-[3px] focus-within:shadow-[0_20px_36px_rgba(58,35,80,.18)] focus-within:-translate-y-[3px] transition-all duration-200"
-              style={{ borderRadius: '16px', background: '#FFFFFF', border: '1px solid rgba(58,35,80,0.08)' }}
+              style={{ borderRadius: '16px', background: '#FFFFFF', border: pc ? '1px solid rgba(58,35,80,0.1)' : '1px solid rgba(58,35,80,0.08)' }}
             >
               <div style={{ height: '4px', background: DESPESA_ACCENTS[i % DESPESA_ACCENTS.length] }} />
-              <div className="p-3 space-y-2">
+              <div className={pc ? undefined : 'p-3 space-y-2'} style={pc ? { display: 'flex', flexDirection: 'column', gap: '10px', padding: '14px' } : undefined}>
                 <input type="text" placeholder="Nome da despesa" value={d.nome} onChange={(e) => atualizarDespesa(i, 'nome', e.target.value)}
-                  style={{ fontFamily: "'Manrope', sans-serif", fontSize: '17px', fontWeight: 600, padding: '12px 14px', borderRadius: '10px', border: '1px solid rgba(58,35,80,0.14)' }}
+                  {...(pc ? { 'aria-label': 'Nome da despesa' } : {})}
+                  style={{ fontFamily: "'Manrope', sans-serif", fontSize: '17px', fontWeight: 600, padding: pc ? '0 14px' : '12px 14px', ...(pc ? { height: '46px', boxSizing: 'border-box' as const } : {}), borderRadius: '10px', border: '1px solid rgba(58,35,80,0.14)' }}
                   className="w-full bg-white focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe" />
                 <div className="flex gap-2 items-end">
                   <div className="flex-1">
                     <label className="text-xs font-semibold block mb-1" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>Valor ({symbol})</label>
                     <CampoNumerico placeholder="0" ariaLabel="Valor da despesa" value={d.valor} onChange={(valor) => atualizarDespesa(i, 'valor', valor)}
-                      style={{ fontFamily: "'Manrope', sans-serif", fontSize: '16px', fontWeight: 600, padding: '11px 13px', borderRadius: '10px', border: '1px solid rgba(58,35,80,0.14)', background: '#FAF7FA', fontVariantNumeric: 'tabular-nums' }}
+                      style={{ fontFamily: "'Manrope', sans-serif", fontSize: '16px', fontWeight: 600, padding: pc ? '0 12px' : '11px 13px', ...(pc ? { height: '44px', boxSizing: 'border-box' as const } : {}), borderRadius: '10px', border: '1px solid rgba(58,35,80,0.14)', background: '#FAF7FA', fontVariantNumeric: 'tabular-nums' }}
                       className="w-full focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe" />
                   </div>
                   <div className="w-24">
                     <label className="text-xs font-semibold block mb-1" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>% do negócio</label>
                     <CampoNumerico placeholder="100" ariaLabel="Percentual do negócio" value={d.percentualRateio} onChange={(valor) => atualizarDespesa(i, 'percentualRateio', valor)}
-                      style={{ fontFamily: "'Manrope', sans-serif", fontSize: '16px', fontWeight: 600, padding: '11px 13px', borderRadius: '10px', border: '1px solid rgba(58,35,80,0.14)', background: '#FAF7FA', fontVariantNumeric: 'tabular-nums' }}
+                      style={{ fontFamily: "'Manrope', sans-serif", fontSize: '16px', fontWeight: 600, padding: pc ? '0 12px' : '11px 13px', ...(pc ? { height: '44px', boxSizing: 'border-box' as const } : {}), borderRadius: '10px', border: '1px solid rgba(58,35,80,0.14)', background: '#FAF7FA', fontVariantNumeric: 'tabular-nums' }}
                       className="w-full focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe" />
                   </div>
-                  <div className="flex-shrink-0">
-                    <span className="text-[10px] font-semibold block mb-1 text-right" style={{ color: '#A96A78', letterSpacing: '0.02em', fontFamily: "'Manrope', sans-serif" }}>Excluir</span>
+                  <div className="flex-shrink-0" style={pc ? { display: 'flex', flexDirection: 'column', alignItems: 'center' } : undefined}>
+                    <span className="text-[10px] font-semibold block mb-1 text-right" style={{ color: pc ? '#94505E' : '#A96A78', letterSpacing: '0.02em', fontFamily: "'Manrope', sans-serif", ...(pc ? { fontSize: '11px', textAlign: 'center' as const } : {}) }}>Excluir</span>
                     <button
                       onClick={() => removerDespesa(i)}
-                      aria-label="Remover despesa"
+                      aria-label={pc ? `Excluir a despesa ${d.nome.trim() || 'sem nome'}` : 'Remover despesa'}
                       className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all active:scale-95"
-                      style={{ border: '1px solid rgba(196,98,111,0.28)', background: '#FDEFF2', color: '#C4626F', boxShadow: '0 2px 6px rgba(196,98,111,0.12)' }}
+                      style={{ border: '1px solid rgba(196,98,111,0.28)', background: '#FDEFF2', color: pc ? '#B04E5C' : '#C4626F', boxShadow: '0 2px 6px rgba(196,98,111,0.12)', ...(pc ? { width: '44px', height: '44px', fontSize: '18px' } : {}) }}
                       onMouseEnter={(e) => { e.currentTarget.style.background = '#F5B9C6'; e.currentTarget.style.color = '#6E2231'; e.currentTarget.style.boxShadow = '0 10px 20px rgba(196,98,111,0.26)'; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.background = '#FDEFF2'; e.currentTarget.style.color = '#C4626F'; e.currentTarget.style.boxShadow = '0 2px 6px rgba(196,98,111,0.12)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = '#FDEFF2'; e.currentTarget.style.color = pc ? '#B04E5C' : '#C4626F'; e.currentTarget.style.boxShadow = '0 2px 6px rgba(196,98,111,0.12)'; }}
                     >
                       ×
                     </button>
                   </div>
                 </div>
-                <CampoComAjuda
-                  variant="card"
-                  microcopy="Se essa despesa também é usada na sua vida pessoal, informe aqui só a parte que é do negócio. Deixe 100 se ela é toda da confeitaria."
-                  exemploDinamico={exemploRateio}
-                  ariaLabelAjuda="Ver exemplo com os números da sua conta"
-                />
+                {!pc && (
+                  <CampoComAjuda
+                    variant="card"
+                    microcopy="Se essa despesa também é usada na sua vida pessoal, informe aqui só a parte que é do negócio. Deixe 100 se ela é toda da confeitaria."
+                    exemploDinamico={exemploRateio}
+                    ariaLabelAjuda="Ver exemplo com os números da sua conta"
+                  />
+                )}
               </div>
             </div>
             );
           })}
         </div>
-        <button onClick={adicionarDespesa} className="w-full py-2.5 rounded-xl border border-dashed border-[#E6E1DB] text-[12px] font-bold text-[#6E3F72] hover:bg-white transition-all">
+        <button
+          onClick={adicionarDespesa}
+          className="w-full py-2.5 rounded-xl border border-dashed border-[#E6E1DB] text-[12px] font-bold text-[#6E3F72] hover:bg-white transition-all"
+          {...(pc ? { type: 'button' as const, style: { height: '46px', padding: 0, borderColor: '#D9CCDB', borderRadius: '12px', fontSize: '13px', fontWeight: 800 } } : {})}
+        >
           + Adicionar despesa
         </button>
-        <button className={botaoPrimario + ' w-full'} style={{ background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)' }} onClick={salvarDespesasHandler} disabled={salvando}>
-          <Save size={13} />{salvando ? 'Salvando' : 'Salvar despesas'}
+        <button
+          className={botaoPrimario + ' w-full'}
+          style={{ background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)', ...(pc ? { height: '48px', padding: 0, borderRadius: '12px', fontSize: '13px', fontWeight: 800, gap: '8px' } : {}) }}
+          onClick={salvarDespesasHandler}
+          disabled={salvando}
+        >
+          <Save size={pc ? 15 : 13} />{salvando ? 'Salvando' : 'Salvar despesas'}
         </button>
       </div>
+  );
 
-      {/* Secao 3 — Metas da Empresa */}
-      <div className={secaoCard}>
+  // Secao 3 — Metas da Empresa
+  const caixaMetaPc: React.CSSProperties = { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', padding: '12px 6px', borderRadius: '14px', background: '#FAF7FA', border: '1px solid #EDE6EF' };
+  const valorMeta: React.CSSProperties = { color: '#241B2B', fontFamily: "'Manrope', sans-serif", ...(pc ? { fontSize: '18px', fontWeight: 800, marginTop: 0 } : {}) };
+  const secaoMetas = (
+      <div className={pc ? undefined : secaoCard} style={pc ? secaoPc({ flex: '1 1 260px', minWidth: 0 }) : undefined}>
         <div className="flex items-center justify-between">
-          <h3 className={secaoTitulo} style={{ color: '#241B2B' }}>Metas da Empresa</h3>
-          {!editandoMetas && (
-            <button onClick={() => setEditandoMetas(true)} className="w-7 h-7 rounded-full flex items-center justify-center text-[#6E3F72] hover:bg-white transition-colors" title="Editar">
-              <Edit3 size={14} />
-            </button>
-          )}
+          <h3 className={secaoTitulo} style={tituloSecao}>Metas da Empresa</h3>
+          {!editandoMetas && botaoEditar('Editar metas da empresa', () => setEditandoMetas(true))}
         </div>
 
         {!editandoMetas ? (
           <div className="grid grid-cols-3 gap-2">
-            <div className="bg-white rounded-xl p-3 border border-[#E6E1DB] text-center">
-              <p className="text-[9px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>CMV</p>
-              <p className="text-[14px] font-bold mt-1" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>{cmvTargetPercent}%</p>
+            <div className="bg-white rounded-xl p-3 border border-[#E6E1DB] text-center" style={pc ? caixaMetaPc : undefined}>
+              <p className="text-[9px] uppercase tracking-[0.05em]" style={rotuloCaixa}>CMV</p>
+              <p className="text-[14px] font-bold mt-1" style={valorMeta}>{cmvTargetPercent}%</p>
             </div>
-            <div className="bg-white rounded-xl p-3 border border-[#E6E1DB] text-center">
-              <p className="text-[9px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>Investimento</p>
-              <p className="text-[14px] font-bold mt-1" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>{investmentTargetPercent}%</p>
+            <div className="bg-white rounded-xl p-3 border border-[#E6E1DB] text-center" style={pc ? caixaMetaPc : undefined}>
+              <p className="text-[9px] uppercase tracking-[0.05em]" style={rotuloCaixa}>Investimento</p>
+              <p className="text-[14px] font-bold mt-1" style={valorMeta}>{investmentTargetPercent}%</p>
             </div>
-            <div className="bg-white rounded-xl p-3 border border-[#E6E1DB] text-center">
-              <p className="text-[9px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>Lucro</p>
-              <p className="text-[14px] font-bold mt-1" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>{profitTargetPercent}%</p>
+            <div className="bg-white rounded-xl p-3 border border-[#E6E1DB] text-center" style={pc ? caixaMetaPc : undefined}>
+              <p className="text-[9px] uppercase tracking-[0.05em]" style={rotuloCaixa}>Lucro</p>
+              <p className="text-[14px] font-bold mt-1" style={valorMeta}>{profitTargetPercent}%</p>
             </div>
           </div>
         ) : (
@@ -423,11 +496,47 @@ export const MinhaEmpresaCard: React.FC = () => {
           </div>
         )}
       </div>
+  );
 
-      {/* Secao 4 — Resumo / Distribuicao. SEMPRE visivel, nunca em accordion.
-          Recalcula a cada tecla digitada nas secoes acima, salvo ou nao.
-          Mesmo componente usado no Dashboard — ver [[ResumoDistribuicaoCard]]. */}
-      <ResumoDistribuicaoCard estrutura={estrutura} />
+  // Secao 4 — Resumo / Distribuicao. SEMPRE visivel, nunca em accordion.
+  // Recalcula a cada tecla digitada nas secoes acima, salvo ou nao.
+  // Mesmo componente usado no Dashboard — ver [[ResumoDistribuicaoCard]].
+  const secaoResumo = <ResumoDistribuicaoCard estrutura={estrutura} computador={pc ? 'largo' : false} />;
+
+  if (pc) {
+    return (
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', gap: '24px', fontFamily: "'Manrope', sans-serif" }}>
+        <div style={{ flex: '3 1 560px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          {avisoErro}
+          {secaoRemuneracao}
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'stretch', gap: '24px' }}>
+            {secaoPeriodo}
+            {secaoMetas}
+          </div>
+          {secaoDespesas}
+        </div>
+        <div style={{ flex: '2 1 360px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          {secaoResumo}
+          {colunaDireita}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {avisoErro}
+
+      {/* Secao 1 — Sua Remuneracao */}
+      {secaoRemuneracao}
+
+      {secaoPeriodo}
+
+      {secaoDespesas}
+
+      {secaoMetas}
+
+      {secaoResumo}
     </div>
   );
 };
