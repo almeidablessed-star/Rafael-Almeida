@@ -1,4 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { avisar } from './AvisoApp';
 import { createPortal } from 'react-dom';
 import { Transaction } from '../types';
 import { formatCurrency, formatDateBr } from '../utils/formatters';
@@ -225,7 +226,7 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
     try {
       await updateTransacao(transaction.id, { ...transaction, inspirationImage: imagem });
     } catch (err: any) {
-      alert(`⚠️ A foto não pôde ser salva no pedido:\n\n${err?.message || err}`);
+      avisar(`A foto não pôde ser salva no pedido:\n\n${err?.message || err}`, { titulo: 'Não deu para salvar a foto' });
     }
   };
 
@@ -234,7 +235,7 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
     if (!file) return;
 
     if (file.size > 8 * 1024 * 1024) {
-      alert('A imagem é muito grande. Escolha uma foto de até 8MB.');
+      avisar('A imagem é muito grande. Escolha uma foto de até 8MB.', { titulo: 'Foto grande demais' });
       return;
     }
 
@@ -245,7 +246,7 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
         await persistirImagem(result);
       }
     } catch (err: any) {
-      alert(err?.message || 'Nao foi possivel usar esta imagem.');
+      avisar(err?.message || 'Não foi possível usar esta imagem.', { titulo: 'Não deu para usar a foto' });
     }
   };
 
@@ -818,7 +819,7 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
 
     } catch (err) {
       console.error('Error generating PDF:', err);
-      alert('Erro ao gerar PDF. Tente novamente.');
+      avisar('Erro ao gerar PDF. Tente novamente.', { titulo: 'Não deu para gerar o PDF' });
       restaurarEstilos();
     } finally {
       setIsGeneratingPdf(false);
