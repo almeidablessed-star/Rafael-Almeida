@@ -984,19 +984,21 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       return;
     }
 
-    // Trava do centavo: o pedido remontado tem que valer o mesmo que o gravado.
-    // Se divergir, alguma coisa se perdeu entre abrir e salvar — e gravar assim
-    // trocaria o valor do pedido sem ninguem pedir. Melhor nao salvar nada.
+    // Trava do centavo: o valor de um pedido nunca muda em silencio. Se o total
+    // remontado divergir do gravado, a pessoa ve os dois valores e decide.
+    // Antes isto BLOQUEAVA o salvamento sempre, e com isso nenhuma edicao que
+    // mudasse o total (outro tamanho, outra quantidade, ficha que mudou de
+    // preco) podia ser salva — o formulario so voltava para Produtos.
+    // Cancelar sai antes de `setIsSaving`, entao nada e gravado.
     if (type === 'venda' && editingTransaction && totalGravadoDoPedido != null) {
       const remontado = Math.round(grandTotalSalePrice * 100) / 100;
       const gravado = Math.round(totalGravadoDoPedido * 100) / 100;
       if (Math.abs(remontado - gravado) >= 0.005) {
-        alert(
-          `O total deste pedido era ${formatMoney(gravado)} e ficou ${formatMoney(remontado)} ao reabrir. ` +
-            'Isso não deveria acontecer — nada foi salvo. Confira os itens antes de continuar.'
+        const continuar = window.confirm(
+          `O total deste pedido vai mudar de ${formatMoney(gravado)} para ${formatMoney(remontado)}.\n\n` +
+            'Salvar assim?'
         );
-        setPedidoFormStep(2);
-        return;
+        if (!continuar) return;
       }
     }
 

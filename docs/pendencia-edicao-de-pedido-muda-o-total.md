@@ -32,10 +32,12 @@
 > 2. **Os valores dos itens de ficha são recalculados pelo preço ATUAL da
 >    ficha** ao reabrir, não pelo `valorUnitario` congelado (só item
 >    personalizado e ficha apagada usam o valor gravado). Quem segura o
->    estrago é a "trava do centavo", que recusa salvar se o total remontado
->    divergir do gravado. Resultado prático: se a ficha mudou de preço, aquele
->    pedido fica travado para edição. O histórico não é reescrito, mas também
->    não é restaurado.
+>    estrago é a "trava do centavo". **Desde 27/10/2026** ela não bloqueia
+>    mais: se o total remontado divergir do gravado, o app pergunta "O total
+>    deste pedido vai mudar de X para Y. Salvar assim?" e só grava com OK.
+>    Antes ela recusava sempre, e com isso nenhuma edição que mudasse o total
+>    (outro tamanho, outra quantidade, ficha que mudou de preço) podia ser
+>    salva. O histórico não é reescrito sem a pessoa ver os dois valores.
 > 3. O ledger `estoque_movimentos` **cresce a cada edição** (devolução +
 >    consumo), o que é o projeto do reequilíbrio e mantém o saldo correto —
 >    mas as linhas de um produto apagado permanecem na tabela.
