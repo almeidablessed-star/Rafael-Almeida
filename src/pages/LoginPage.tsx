@@ -234,7 +234,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onVerifyOtpClick, onForgot
                 href={HOTMART_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full py-3 rounded-xl font-semibold bg-gray-100 text-[#6E3F72] hover:bg-gray-200 transition-all text-sm flex items-center justify-center"
+                className="w-full py-3 rounded-xl font-semibold bg-[#F3E9F3] hover:bg-[#EADCEB] transition-all text-sm flex items-center justify-center"
+                // Cor no style, como na versao computador: a regra solta
+                // `a { color: #E82C1B }` do index.css vencia a classe e deixava
+                // o texto vermelho.
+                style={{ color: '#6E3F72' }}
               >
                 Quero comprar
               </a>
