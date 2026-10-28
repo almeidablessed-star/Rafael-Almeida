@@ -1,4 +1,5 @@
 ﻿import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { avisar, perguntar } from './AvisoApp';
 import { createPortal } from 'react-dom';
 import { FichaTecnica, IngredientUsage, Transaction, TamanhoOpcao, StockItem, Produto } from '../types';
 import { formatCurrency, parseNumeroDigitado } from '../utils/formatters';
@@ -247,7 +248,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         await deleteFicha(ficha.id);
       } catch (err: any) {
         console.error('Erro ao deletar ficha técnica:', err);
-        alert('Erro ao deletar ficha técnica: ' + (err.message || JSON.stringify(err)));
+        avisar('Erro ao deletar ficha técnica: ' + (err.message || JSON.stringify(err)), { titulo: 'Não deu para excluir a ficha' });
       }
     },
   });
@@ -700,10 +701,11 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     // receita usa"). Nao bloqueia: zero e uma resposta legitima para quem
     // ainda nao comprou o item.
     if (novoProdutoControlaEstoque && !novoProdutoQtdAtual.trim()) {
-      const seguir = window.confirm(
+      const seguir = await perguntar(
         'Você não informou quanto já tem guardado deste item, então ele vai entrar com estoque zero.\n\n' +
           'Esse campo é o seu estoque de hoje — não o quanto a receita usa, que é o de cima.\n\n' +
-          'Quer salvar assim mesmo?'
+          'Quer salvar assim mesmo?',
+        { titulo: 'Estoque vai entrar zerado', confirmar: 'Salvar assim', cancelar: 'Voltar e preencher' }
       );
       if (!seguir) return;
     }
@@ -771,7 +773,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 
       setCriandoProdutoInsumo(null);
     } catch (err) {
-      alert((err as any).message || 'Erro ao criar produto');
+      avisar((err as any).message || 'Erro ao criar produto', { titulo: 'Não deu para criar o produto' });
     } finally {
       setSalvandoNovoProduto(false);
     }
@@ -946,7 +948,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
       setEditingId(null);
       setDuplicateWarning(null);
     } catch (err) {
-      alert('Erro ao salvar ficha técnica: ' + (err as any).message);
+      avisar('Erro ao salvar ficha técnica: ' + (err as any).message, { titulo: 'Não deu para salvar a ficha' });
     } finally {
       salvandoFichaRef.current = false;
       setSalvandoFicha(false);
@@ -985,7 +987,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
       setLaunchSuccessMsg(`Ficha "${fichaToDup.name}" duplicada com sucesso!`);
       setTimeout(() => setLaunchSuccessMsg(null), 3500);
     } catch (err) {
-      alert('Erro ao duplicar ficha: ' + (err as any).message);
+      avisar('Erro ao duplicar ficha: ' + (err as any).message, { titulo: 'Não deu para duplicar a ficha' });
     } finally {
       duplicandoRef.current.delete(fichaToDup.id);
       setDuplicandoIds((ids) => ids.filter((id) => id !== fichaToDup.id));
@@ -1390,7 +1392,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                             try {
                               setImageUrl(await compressImageFile(file));
                             } catch (err: any) {
-                              alert(err?.message || 'Nao foi possivel usar esta imagem.');
+                              avisar(err?.message || 'Não foi possível usar esta imagem.', { titulo: 'Não deu para usar a foto' });
                             }
                           }}
                           className="hidden"
