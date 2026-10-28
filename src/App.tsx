@@ -146,7 +146,7 @@ function AppContent() {
           alert(`ℹ️ ${AVISO_PEDIDO_ANTIGO}`);
         }
         try {
-          await devolverPedido(tx.id);
+          await devolverPedido(tx.id, [], 'excluido');
         } catch (err: any) {
           alert(
             `⚠️ Os insumos não voltaram ao estoque:\n\n${err?.message || err}\n\n` +
@@ -412,7 +412,8 @@ function AppContent() {
           // reconhecido e segue o caminho de sempre.
           await devolverPedido(
             editingId,
-            fichasApagadas.map((item) => item.fichaName || '').filter(Boolean)
+            fichasApagadas.map((item) => item.fichaName || '').filter(Boolean),
+            'alterado'
           );
           const itens = resolverItensDoPedido(updated.fichaItems);
           if (itens.length > 0) {

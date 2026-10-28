@@ -45,6 +45,11 @@ interface SupabaseProduto {
   created_at: string;
 }
 
+/** Por que o pedido devolveu o estoque — vai escrito na linha de devolucao do
+ * historico. Na edicao o app devolve tudo e consome de novo pela versao nova,
+ * entao "cancelado" ali fazia parecer que o pedido tinha sido cancelado. */
+export type MotivoDaDevolucao = 'alterado' | 'excluido';
+
 interface ProdutosContextType {
   produtos: Produto[];
   movimentos: MovimentoEstoque[];
@@ -78,7 +83,11 @@ interface ProdutosContextType {
    * viva tinha `ficha_id` preenchido; o da ficha apagada depois estava nulo.
    * O nome sobrevive porque fica escrito na `descricao` do proprio movimento.
    */
-  devolverPedido: (transacaoId: string, fichasQueNaoVoltam?: string[]) => Promise<void>;
+  devolverPedido: (
+    transacaoId: string,
+    fichasQueNaoVoltam?: string[],
+    motivo?: MotivoDaDevolucao
+  ) => Promise<void>;
   /** O pedido ainda tem baixa de estoque registrada? Ver a definicao. */
   pedidoTemRastroDeEstoque: (transacaoId: string) => Promise<boolean>;
 }
@@ -442,8 +451,16 @@ export const ProdutosProvider: React.FC<{ children: React.ReactNode }> = ({ chil
    * devolucao no historico, para a tela continuar mostrando o par
    * consumo/devolucao corretamente.
    */
-  const devolverPedido = async (transacaoId: string, fichasQueNaoVoltam: string[] = []) => {
+  const devolverPedido = async (
+    transacaoId: string,
+    fichasQueNaoVoltam: string[] = [],
+    motivo: MotivoDaDevolucao = 'excluido'
+  ) => {
     if (!user) throw new Error('User not authenticated');
+
+    // So o final da frase muda ("Pedido #251 alterado"). O comeco, ate
+    // "(Pedido #", fica igual: `fichasDaDescricao` abaixo le exatamente ele.
+    const fimDaDescricao = motivo === 'alterado' ? 'alterado' : 'excluído';
 
     // Consumos E devolucoes, porque o que interessa e o SALDO LIQUIDO que este
     // pedido ainda tem preso no estoque.
@@ -552,7 +569,7 @@ export const ProdutosProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             quantidade: m.quantidade,
             unidade: m.unidade,
             transacao_id: transacaoId,
-            descricao: `Devolução: ${m.item_nome} (Pedido #${numeroCurto(transacaoId)} cancelado)`,
+            descricao: `Devolução: ${m.item_nome} (Pedido #${numeroCurto(transacaoId)} ${fimDaDescricao})`,
           })
           .select('id')
           .single();
@@ -595,7 +612,7 @@ export const ProdutosProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           quantidade: m.quantidade,
           unidade: m.unidade,
           transacao_id: transacaoId,
-          descricao: `Devolução: ${m.item_nome} (Pedido #${numeroCurto(transacaoId)} cancelado)`,
+          descricao: `Devolução: ${m.item_nome} (Pedido #${numeroCurto(transacaoId)} ${fimDaDescricao})`,
         });
         if (errMovLegado) throw errMovLegado;
       }
