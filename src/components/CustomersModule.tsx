@@ -810,8 +810,8 @@ export const CustomersModule: React.FC = () => {
 
       {/* Success Toast */}
       {showToast && (
-        <div className="bg-[var(--color-semantic-success)] text-[var(--color-neutral-charcoal)] p-3.5 rounded-lg shadow-sm text-xs font-bold flex items-center gap-2 border border-[var(--color-text-muted)] animate-slideUp">
-          <CheckCircle2 className="w-4 h-4 text-[var(--color-neutral-charcoal)] shrink-0" />
+        <div className="bg-[#A9D8B8] text-[#241B2B] p-3.5 rounded-lg shadow-sm text-xs font-bold flex items-center gap-2 border border-[rgba(36,27,43,0.6)] animate-slideUp">
+          <CheckCircle2 className="w-4 h-4 text-[#241B2B] shrink-0" />
           <span>Cliente salva com sucesso!</span>
         </div>
       )}
@@ -1488,7 +1488,7 @@ export const CustomersModule: React.FC = () => {
                       "{c.notes}"
                     </p>
                   ) : (
-                    <p className="text-[11px] text-[var(--color-neutral-charcoal)]/70 italic bg-[var(--color-neutral-hero)] p-2 rounded-xl border border-[var(--color-accent-gold)]/30">
+                    <p className="text-[11px] text-[#241B2B]/70 italic bg-[#F6F2F5] p-2 rounded-xl border border-[#F5B9C6]/30">
                       📝 "{c.notes}"
                     </p>
                   ))}
@@ -1644,7 +1644,7 @@ export const CustomersModule: React.FC = () => {
                             )}
                             <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: pc ? '2px' : '3px', ...(pc ? { alignItems: 'flex-start' } : {}) }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                {!pc && (ev.isHoliday ? <Gift className="w-3.5 h-3.5 text-[var(--color-neutral-charcoal)] shrink-0" /> : <Cake className="w-3.5 h-3.5 text-[var(--color-neutral-charcoal)] shrink-0" />)}
+                                {!pc && (ev.isHoliday ? <Gift className="w-3.5 h-3.5 text-[#241B2B] shrink-0" /> : <Cake className="w-3.5 h-3.5 text-[#241B2B] shrink-0" />)}
                                 <span
                                   style={{
                                     fontSize: pc ? '13px' : '11px',

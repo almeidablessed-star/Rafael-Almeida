@@ -68,7 +68,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) 
     <nav
       className="fixed bottom-0 left-0 right-0 bg-white shadow-nav-bottom pb-safe app-col-fixed"
       style={{
-        borderTop: '1px solid var(--color-border-nav)',
+        borderTop: '1px solid rgba(58,35,80,0.08)',
         zIndex: 9999,
       }}
     >

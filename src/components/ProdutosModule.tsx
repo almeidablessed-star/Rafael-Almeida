@@ -613,7 +613,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
         correto ao lado de quantidades que ninguem mais atualiza). */}
     <div className="mt-2">
       <div className="mb-3">
-        <h2 className="text-xs font-extrabold uppercase text-[var(--color-pastry-chocolate)]">
+        <h2 className="text-xs font-extrabold uppercase text-[#241B2B]">
           {tituloHistorico}
         </h2>
         <p className="text-[10.5px] mt-1" style={{ color: '#7A6E80' }}>

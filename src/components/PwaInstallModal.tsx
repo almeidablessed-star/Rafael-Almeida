@@ -37,7 +37,7 @@ export const PwaInstallModal: React.FC<PwaInstallModalProps> = ({ isOpen, onClos
         {/* Modal Header */}
         <div className="flex items-center justify-between pb-2 border-b border-neutral-100">
           <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-[var(--color-semantic-coral)]/10 text-[var(--color-semantic-coral)] flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-[#F3E9F3] text-[#6E3F72] flex items-center justify-center">
               <Smartphone className="w-5 h-5" />
             </div>
             <div>
@@ -91,7 +91,7 @@ export const PwaInstallModal: React.FC<PwaInstallModalProps> = ({ isOpen, onClos
         {/* Close button */}
         <button
           onClick={onClose}
-          className="w-full py-3 bg-[var(--color-semantic-coral)] hover:bg-[var(--color-semantic-coral-hover)] text-white font-brand font-bold text-sm rounded-lg shadow-sm active:scale-98 transition-all"
+          className="w-full py-3 bg-[#3A2350] hover:bg-[#241B2B] text-white font-brand font-bold text-sm rounded-lg shadow-sm active:scale-98 transition-all"
         >
           Entendi!
         </button>
