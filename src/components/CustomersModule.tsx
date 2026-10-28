@@ -515,7 +515,10 @@ export const CustomersModule: React.FC = () => {
         .replace('{nome}', customer.name)
         .replace('{data_sem_ano}', dateFormatted);
     } else if (isCustomerOwnBirthday) {
-      bodyMsg = `Olá, ${customer.name}! 🎉🎂 Parabéns pelo seu aniversário! Que o seu novo ano venha recheado de paz, saúde e muitas alegrias! 💖✨ Para comemorar essa data tão especial, que tal garantir um bolo bem delicioso e personalizado?`;
+      // No futuro, como as outras datas: a mensagem sai ANTES do aniversario,
+      // para dar tempo da encomenda. "Parabens" no dia chegava tarde demais
+      // para vender o bolo (pedido do Rafael, 28/10/2026).
+      bodyMsg = `Olá, ${customer.name}! ✨ Tudo bem? Vi que o seu aniversário está chegando (${dateFormatted})! 🎉🎂 Que tal comemorar essa data tão especial com um bolo bem delicioso e personalizado? Se quiser, já posso reservar a sua encomenda! 💖`;
     } else {
       bodyMsg = `Olá, ${customer.name}! ✨ Tudo bem? Vi que a data especial (${eventTitle}) está se aproximando (${dateFormatted})! 🎂 Gostaria de garantir sua encomenda de bolo ou doces para comemorar essa data?`;
     }
