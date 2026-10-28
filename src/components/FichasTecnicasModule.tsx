@@ -260,6 +260,12 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   });
   const [expandedFichaId, setExpandedFichaId] = useState<string | null>(null);
   const [launchSuccessMsg, setLaunchSuccessMsg] = useState<string | null>(null);
+  // Fichas sendo duplicadas agora. A copia leva alguns segundos (busca a foto
+  // inteira e grava) e, sem esta trava, um segundo clique nesse intervalo
+  // criava outra copia. O ref barra o clique repetido antes mesmo do re-render;
+  // o state troca o botao para "Duplicando…".
+  const [duplicandoIds, setDuplicandoIds] = useState<string[]>([]);
+  const duplicandoRef = useRef<Set<string>>(new Set());
   const [expandedTamanhosId, setExpandedTamanhosId] = useState<string | null>(null);
   const [selectedTamanhoIdByFicha, setSelectedTamanhoIdByFicha] = useState<Record<string, string>>({}); // Rastreia tamanho selecionado por ficha
 
@@ -965,6 +971,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   };
 
   const handleDuplicate = async (fichaToDup: FichaTecnica) => {
+    // Clique repetido enquanto a copia desta ficha ainda esta sendo gravada.
+    if (duplicandoRef.current.has(fichaToDup.id)) return;
+    duplicandoRef.current.add(fichaToDup.id);
+    setDuplicandoIds((ids) => [...ids, fichaToDup.id]);
     try {
       const fichaData: Omit<FichaTecnica, 'id' | 'createdAt'> = {
         name: `${fichaToDup.name} (Cópia)`,
@@ -983,6 +993,9 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
       setTimeout(() => setLaunchSuccessMsg(null), 3500);
     } catch (err) {
       alert('Erro ao duplicar ficha: ' + (err as any).message);
+    } finally {
+      duplicandoRef.current.delete(fichaToDup.id);
+      setDuplicandoIds((ids) => ids.filter((id) => id !== fichaToDup.id));
     }
   };
 
@@ -2769,6 +2782,9 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   <button
                     onClick={() => handleDuplicate(ficha)}
                     {...(pc ? { type: 'button' as const, 'aria-label': `Duplicar ${ficha.name}` } : {})}
+                    // Enquanto a copia e gravada: botao travado e "Duplicando…".
+                    disabled={duplicandoIds.includes(ficha.id)}
+                    {...(duplicandoIds.includes(ficha.id) ? { 'aria-busy': true } : {})}
                     style={{
                       flex: 1,
                       display: 'flex',
@@ -2782,7 +2798,8 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                       border: 'none',
                       borderRadius: '18px 18px 18px 6px',
                       color: '#6E3F72',
-                      cursor: 'pointer',
+                      cursor: duplicandoIds.includes(ficha.id) ? 'progress' : 'pointer',
+                      ...(duplicandoIds.includes(ficha.id) ? { opacity: 0.7 } : {}),
                       transition: 'transform .22s ease, background .22s ease',
                     }}
                     onMouseEnter={(e) => {
@@ -2798,7 +2815,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                       <rect x="9" y="9" width="11" height="11" rx="2.5"></rect>
                       <path d="M5 15V6a2 2 0 0 1 2-2h9"></path>
                     </svg>
-                    Duplicar
+                    {duplicandoIds.includes(ficha.id) ? 'Duplicando…' : 'Duplicar'}
                   </button>
                   <button
                     onClick={() => handleDelete(ficha)}
