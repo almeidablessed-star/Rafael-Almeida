@@ -199,6 +199,11 @@ export const MinhaEmpresaCard: React.FC<{ computador?: boolean; colunaDireita?: 
   // ------------------------------------------------------------------
   const pc = computador;
 
+  // Formularios de edicao (Remuneracao, Periodo, Metas) no computador: campos
+  // de 46px e botoes de 44px, como o resto da tela. No celular, sem mudanca.
+  const campoEdicaoPc: React.CSSProperties = { height: '46px', boxSizing: 'border-box', padding: '0 14px', fontSize: '15px', borderRadius: '12px', marginTop: '6px' };
+  const botaoEdicaoPc: React.CSSProperties = { flex: 1, height: '44px', padding: '0 16px', fontSize: '13px', borderRadius: '12px' };
+
   // Cartao de secao e caixinhas de valor do computador: brancos, com as
   // caixinhas em lilas claro. No celular continuam as classes de sempre.
   const secaoPc = (extra?: React.CSSProperties): React.CSSProperties => ({
@@ -265,17 +270,17 @@ export const MinhaEmpresaCard: React.FC<{ computador?: boolean; colunaDireita?: 
         ) : (
           <div className="space-y-3">
             <div>
-              <label className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>Quanto você quer receber por mês</label>
+              <label className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", ...(pc ? { fontSize: '13px' } : {}) }}>Quanto você quer receber por mês</label>
               <CampoComAjuda microcopy="É quanto você quer receber pelo seu trabalho — nunca o lucro da empresa. São coisas diferentes." />
-              <CampoNumerico className={inputClass} value={monthlyIncomeTarget} onChange={setMonthlyIncomeTarget} ariaLabel="Quanto você quer receber por mês" />
+              <CampoNumerico className={inputClass} style={pc ? campoEdicaoPc : undefined} value={monthlyIncomeTarget} onChange={setMonthlyIncomeTarget} ariaLabel="Quanto você quer receber por mês" />
             </div>
             <div>
-              <label className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>Valor da sua hora</label>
+              <label className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", ...(pc ? { fontSize: '13px' } : {}) }}>Valor da sua hora</label>
               <CampoComAjuda microcopy="Multiplicado pelas horas de cada receita, vira a mão de obra daquele produto." />
-              <CampoNumerico className={inputClass} value={horaTrabalho} onChange={setHoraTrabalho} ariaLabel="Valor da sua hora" />
+              <CampoNumerico className={inputClass} style={pc ? campoEdicaoPc : undefined} value={horaTrabalho} onChange={setHoraTrabalho} ariaLabel="Valor da sua hora" />
             </div>
             <div>
-              <label className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>Dias de trabalho por semana</label>
+              <label className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", ...(pc ? { fontSize: '13px' } : {}) }}>Dias de trabalho por semana</label>
               <CustomSelect
                 value={String(workingDaysPerWeek)}
                 onChange={(v) => setWorkingDaysPerWeek(Number(v))}
@@ -285,8 +290,8 @@ export const MinhaEmpresaCard: React.FC<{ computador?: boolean; colunaDireita?: 
               />
             </div>
             <div className="flex gap-2">
-              <button className={botaoSecundario} onClick={cancelarRemuneracao} disabled={salvando}><X size={13} className="inline mr-1" />Cancelar</button>
-              <button className={botaoPrimario} style={{ background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)' }} onClick={salvarRemuneracao} disabled={salvando}>
+              <button className={botaoSecundario} style={pc ? botaoEdicaoPc : undefined} onClick={cancelarRemuneracao} disabled={salvando}><X size={13} className="inline mr-1" />Cancelar</button>
+              <button className={botaoPrimario} style={{ background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)', ...(pc ? botaoEdicaoPc : {}) }} onClick={salvarRemuneracao} disabled={salvando}>
                 <Save size={13} />{salvando ? 'Salvando' : 'Salvar'}
               </button>
             </div>
@@ -320,7 +325,7 @@ export const MinhaEmpresaCard: React.FC<{ computador?: boolean; colunaDireita?: 
         ) : (
           <div className="space-y-3">
             <div>
-              <label className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>De quanto em quanto tempo suas metas recomeçam</label>
+              <label className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", ...(pc ? { fontSize: '13px' } : {}) }}>De quanto em quanto tempo suas metas recomeçam</label>
               <CampoComAjuda microcopy="Trocar aqui reagrupa todo o seu histórico no novo período — nenhum valor de venda muda, só o recorte com que você vê. Sua meta de horas continua semanal de qualquer jeito." />
               <CustomSelect
                 value={periodoReset}
@@ -335,8 +340,8 @@ export const MinhaEmpresaCard: React.FC<{ computador?: boolean; colunaDireita?: 
               />
             </div>
             <div className="flex gap-2">
-              <button className={botaoSecundario} onClick={cancelarPeriodo} disabled={salvando}><X size={13} className="inline mr-1" />Cancelar</button>
-              <button className={botaoPrimario} style={{ background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)' }} onClick={salvarPeriodo} disabled={salvando}>
+              <button className={botaoSecundario} style={pc ? botaoEdicaoPc : undefined} onClick={cancelarPeriodo} disabled={salvando}><X size={13} className="inline mr-1" />Cancelar</button>
+              <button className={botaoPrimario} style={{ background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)', ...(pc ? botaoEdicaoPc : {}) }} onClick={salvarPeriodo} disabled={salvando}>
                 <Save size={13} />{salvando ? 'Salvando' : 'Salvar'}
               </button>
             </div>
@@ -484,23 +489,23 @@ export const MinhaEmpresaCard: React.FC<{ computador?: boolean; colunaDireita?: 
         ) : (
           <div className="space-y-3">
             <div>
-              <label className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>Meta de CMV (%)</label>
+              <label className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", ...(pc ? { fontSize: '13px' } : {}) }}>Meta de CMV (%)</label>
               <CampoComAjuda microcopy="Quanto do preço do bolo vai embora só com ingredientes e embalagem. Quanto menor, mais sobra pra você." exemploDinamico={exemploCmv} ariaLabelAjuda="Ver exemplo com os números da sua conta" />
-              <CampoNumerico className={inputClass} value={cmvTargetPercent} onChange={setCmvTargetPercent} ariaLabel="Meta de CMV em porcentagem" />
+              <CampoNumerico className={inputClass} style={pc ? campoEdicaoPc : undefined} value={cmvTargetPercent} onChange={setCmvTargetPercent} ariaLabel="Meta de CMV em porcentagem" />
             </div>
             <div>
-              <label className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>Meta de investimento (%)</label>
+              <label className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", ...(pc ? { fontSize: '13px' } : {}) }}>Meta de investimento (%)</label>
               <CampoComAjuda microcopy="Uma reserva pra comprar equipamento, fazer curso, crescer o negócio — sem tirar do seu bolso." exemploDinamico={exemploInvestimento} ariaLabelAjuda="Ver exemplo com os números da sua conta" />
-              <CampoNumerico className={inputClass} value={investmentTargetPercent} onChange={setInvestmentTargetPercent} ariaLabel="Meta de investimento em porcentagem" />
+              <CampoNumerico className={inputClass} style={pc ? campoEdicaoPc : undefined} value={investmentTargetPercent} onChange={setInvestmentTargetPercent} ariaLabel="Meta de investimento em porcentagem" />
             </div>
             <div>
-              <label className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>Meta de lucro (%)</label>
+              <label className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", ...(pc ? { fontSize: '13px' } : {}) }}>Meta de lucro (%)</label>
               <CampoComAjuda microcopy="O que sobra pra empresa, além do que você já recebe pelo seu trabalho." exemploDinamico={exemploLucro} ariaLabelAjuda="Ver exemplo com os números da sua conta" />
-              <CampoNumerico className={inputClass} value={profitTargetPercent} onChange={setProfitTargetPercent} ariaLabel="Meta de lucro em porcentagem" />
+              <CampoNumerico className={inputClass} style={pc ? campoEdicaoPc : undefined} value={profitTargetPercent} onChange={setProfitTargetPercent} ariaLabel="Meta de lucro em porcentagem" />
             </div>
             <div className="flex gap-2">
-              <button className={botaoSecundario} onClick={cancelarMetas} disabled={salvando}><X size={13} className="inline mr-1" />Cancelar</button>
-              <button className={botaoPrimario} style={{ background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)' }} onClick={salvarMetas} disabled={salvando}>
+              <button className={botaoSecundario} style={pc ? botaoEdicaoPc : undefined} onClick={cancelarMetas} disabled={salvando}><X size={13} className="inline mr-1" />Cancelar</button>
+              <button className={botaoPrimario} style={{ background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)', ...(pc ? botaoEdicaoPc : {}) }} onClick={salvarMetas} disabled={salvando}>
                 <Save size={13} />{salvando ? 'Salvando' : 'Salvar'}
               </button>
             </div>
