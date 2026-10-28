@@ -603,8 +603,8 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
           paddingLeft: 'calc(20px + max(0px, env(safe-area-inset-left)))',
           paddingRight: 'calc(20px + max(0px, env(safe-area-inset-right)))',
           // Sem isso, todo texto aqui dentro que nao define fontFamily no
-          // proprio elemento cai no sans-serif padrao do Tailwind (o v4 nao
-          // le tailwind.config.ts), em vez da fonte da marca. Definido uma
+          // proprio elemento cai no sans-serif padrao do Tailwind (o app nao
+          // tem tailwind.config; ver o topo do index.css), em vez da fonte da marca. Definido uma
           // vez aqui — herdado por tudo abaixo — em vez de repetir em cada
           // <span>/<p> do historico de lancamentos avulsos.
           fontFamily: "'Manrope', sans-serif",

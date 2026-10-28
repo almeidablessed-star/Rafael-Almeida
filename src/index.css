@@ -2,7 +2,15 @@
 
 /* ================================================================
    Carula Confeitaria — camada visual do redesign
-   ================================================================ */
+   ================================================================
+
+   O VISUAL ATUAL E O OFICIAL (decisao do Rafael, 28/10/2026). Este arquivo
+   e o unico CSS do app. Nao existe tailwind.config: o Tailwind v4 roda com o
+   padrao de fabrica, e cores/fontes da marca vao escritas direto nos
+   componentes. O tailwind.config.ts e a folha index.css.css, que nunca
+   eram lidos, foram apagados nesta data sem mudar nada na tela (o CSS do
+   build saiu identico). Nao recriar nenhum dos dois nem ligar @config/@theme:
+   isso repintaria o app inteiro. */
 
 /* === GOOGLE FONTS ===
    Manrope e Instrument Serif vem do <link> no index.html. Os dois @import
