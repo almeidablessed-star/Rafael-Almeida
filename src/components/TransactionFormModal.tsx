@@ -1901,7 +1901,11 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       <span style={{ fontSize: '11px', fontWeight: 500, color: '#A096A6' }}>{totalValue ? `Máx: ${currencySymbol}${totalValue}` : '-'}</span>
                     </label>
                     <div className="relative">
-                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-bold text-emerald-600 text-lg">{currencySymbol}</span>
+                      {/* Mesmo prefixo da "Taxa de entrega": cinza, 13px, com folga
+                          antes do numero. Antes era verde e em 18px, e o "R$"
+                          ficava por baixo do valor digitado. A folga da direita
+                          e menor para o texto de exemplo caber a 360px. */}
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[13px] text-[#7A6E80] font-bold">{currencySymbol}</span>
                       <input
                         type="text"
                         inputMode="decimal"
@@ -1919,7 +1923,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                             setSignalValue(val);
                           }
                         }}
-                        style={{ width: '100%', border: '1px solid rgba(58,35,80,0.14)', borderRadius: '10px', padding: '12px 12px 12px 30px', fontSize: '15px', background: '#FAF7FA' }}
+                        style={{ width: '100%', border: '1px solid rgba(58,35,80,0.14)', borderRadius: '10px', padding: '12px 8px 12px 34px', fontSize: '15px', background: '#FAF7FA' }}
                       />
                     </div>
                   </div>
