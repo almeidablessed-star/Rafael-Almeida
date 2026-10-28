@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { VerifyOtpStandalonePage } from './VerifyOtpStandalonePage';
+import { EntradaComputador, MENSAGEM_PARCEIRO } from '../components/EntradaComputador';
+import { useTelaDeComputador } from '../hooks/useTelaDeComputador';
 
 interface Numeros {
   total: number;
@@ -25,6 +27,8 @@ interface Numeros {
  */
 export const PainelParceiroPage: React.FC = () => {
   const { user, isLoading, logout } = useAuth();
+  // Computador: moldura do login, com a frase do parceiro no painel roxo.
+  const pc = useTelaDeComputador();
   // Mesmo botao e mesmo caminho de saida das outras telas: `logout` do
   // contexto, com queda para encerrar a sessao local se ele falhar.
   const sair = async () => {
@@ -94,6 +98,18 @@ export const PainelParceiroPage: React.FC = () => {
   }
 
   if (negado || !numeros) {
+    if (pc) {
+      return (
+        <EntradaComputador {...MENSAGEM_PARCEIRO}>
+          <div className="text-center">
+            <h1 className="font-serif-display" style={{ fontSize: '36px', lineHeight: 1.1, fontWeight: 400, color: '#241B2B', margin: '0 0 8px' }}>
+              Acesso negado
+            </h1>
+            <p style={{ color: '#7A6E80', fontSize: '15px' }}>Esta área é só para parceiros.</p>
+          </div>
+        </EntradaComputador>
+      );
+    }
     return (
       <div className="min-h-screen flex items-center justify-center px-5" style={{ background: '#F6F2F5' }}>
         <div
@@ -140,6 +156,51 @@ export const PainelParceiroPage: React.FC = () => {
     </div>
   );
 
+  // Nota e Sair: iguais no celular e no computador.
+  const nota = (
+    <p
+      className="text-center mt-5 text-[12px]"
+      style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}
+    >
+      "Ativas" conta quem está com a assinatura em dia. A comissão é paga
+      pela Hotmart — confira os valores por lá.
+    </p>
+  );
+
+  if (pc) {
+    // No cartao branco, os numeros ganham o fundo lilas claro do app (branco no
+    // branco sumiria).
+    const numero = (rotulo: string, valor: number) => (
+      <div key={rotulo} className="flex-1" style={{ background: '#F6F2F5', borderRadius: '18px', padding: '18px 12px', textAlign: 'center' }}>
+        <div style={{ fontSize: '34px', fontWeight: 800, color: '#241B2B' }}>{valor}</div>
+        <div style={{ fontSize: '11px', fontWeight: 800, color: '#7A6E80', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '4px' }}>
+          {rotulo}
+        </div>
+      </div>
+    );
+    return (
+      <EntradaComputador {...MENSAGEM_PARCEIRO}>
+        <h1 className="font-serif-display" style={{ fontSize: '44px', lineHeight: 1, fontWeight: 400, marginBottom: '24px' }}>
+          Suas indicações
+        </h1>
+        <div className="flex gap-3">
+          {numero('Total', numeros.total)}
+          {numero('Ativas', numeros.ativas)}
+          {numero('Pausadas', numeros.pausadas)}
+        </div>
+        {nota}
+        <button
+          type="button"
+          onClick={sair}
+          className="w-full rounded-2xl text-sm font-bold transition-colors hover:bg-[#F6F2F5]"
+          style={{ marginTop: '20px', height: '44px', border: '1px solid rgba(58,35,80,0.16)', color: '#3A2350', background: '#FFFFFF' }}
+        >
+          Sair
+        </button>
+      </EntradaComputador>
+    );
+  }
+
   return (
     <div className="min-h-screen" style={{ background: '#F6F2F5' }}>
       <div
@@ -165,13 +226,7 @@ export const PainelParceiroPage: React.FC = () => {
           {cartao('Pausadas', numeros.pausadas)}
         </div>
 
-        <p
-          className="text-center mt-5 text-[12px]"
-          style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}
-        >
-          "Ativas" conta quem está com a assinatura em dia. A comissão é paga
-          pela Hotmart — confira os valores por lá.
-        </p>
+        {nota}
 
         <button
           type="button"

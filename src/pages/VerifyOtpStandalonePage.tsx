@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { Lock, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
-import { EntradaComputador } from '../components/EntradaComputador';
+import { EntradaComputador, MENSAGEM_PARCEIRO } from '../components/EntradaComputador';
 import { useTelaDeComputador } from '../hooks/useTelaDeComputador';
 
 interface VerifyOtpStandalonePageProps {
@@ -13,9 +13,10 @@ interface VerifyOtpStandalonePageProps {
 
 export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = ({ onBackClick, modo = 'primeiro-acesso' }) => {
   const { beginAuthTransition, endAuthTransition } = useAuth();
-  // Computador: mesma moldura do login (painel roxo + cartao). O parceiro fica
-  // de fora: a frase do painel fala com a confeitaria, nao com ele.
-  const pc = useTelaDeComputador() && modo !== 'parceiro';
+  // Computador: mesma moldura do login (painel roxo + cartao). No modo parceiro
+  // o painel troca a frase da confeitaria por uma que fala com o parceiro.
+  const pc = useTelaDeComputador();
+  const mensagem = modo === 'parceiro' ? MENSAGEM_PARCEIRO : {};
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -189,7 +190,7 @@ export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = (
     );
     if (pc) {
       return (
-        <EntradaComputador>
+        <EntradaComputador {...mensagem}>
           <div style={{ textAlign: 'center' }}>{sucesso}</div>
         </EntradaComputador>
       );
@@ -509,7 +510,7 @@ export const VerifyOtpStandalonePage: React.FC<VerifyOtpStandalonePageProps> = (
   );
 
   if (pc) {
-    return <EntradaComputador>{formulario}</EntradaComputador>;
+    return <EntradaComputador {...mensagem}>{formulario}</EntradaComputador>;
   }
 
   return (

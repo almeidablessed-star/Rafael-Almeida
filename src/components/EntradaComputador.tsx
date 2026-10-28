@@ -9,8 +9,15 @@ import { LogoCarulaApp } from './LogoCarulaApp';
  * A classe `.entrada-computador` solta o #root da coluna de celular (ver
  * index.css), do mesmo jeito que `.layout-computador` faz no app logado.
  * Desenho aprovado pelo Rafael em 28/10/2026.
+ *
+ * `frase`/`texto` trocam a mensagem do painel (a Area do Parceiro fala com o
+ * parceiro, nao com a confeitaria). Sem eles, vale a frase da confeitaria.
  */
-export const EntradaComputador: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+export const EntradaComputador: React.FC<{
+  children: React.ReactNode;
+  frase?: React.ReactNode;
+  texto?: string;
+}> = ({ children, frase, texto }) => (
   <div
     className="entrada-computador"
     style={{
@@ -44,10 +51,10 @@ export const EntradaComputador: React.FC<{ children: React.ReactNode }> = ({ chi
 
       <div>
         <h2 className="font-serif-display" style={{ fontSize: '66px', lineHeight: 1.02, fontWeight: 400, maxWidth: '520px' }}>
-          Sua confeitaria, <i style={{ color: '#F5B9C6' }}>organizada</i>.
+          {frase ?? <>Sua confeitaria, <i style={{ color: '#F5B9C6' }}>organizada</i>.</>}
         </h2>
         <p style={{ marginTop: '18px', fontSize: '17px', lineHeight: 1.55, color: '#E6D8E8', maxWidth: '440px' }}>
-          Pedidos, fichas técnicas, estoque e clientes num lugar só — no celular e no computador.
+          {texto ?? 'Pedidos, fichas técnicas, estoque e clientes num lugar só — no celular e no computador.'}
         </p>
       </div>
 
@@ -71,3 +78,13 @@ export const EntradaComputador: React.FC<{ children: React.ReactNode }> = ({ chi
     </section>
   </div>
 );
+
+/** Mensagem do painel na Area do Parceiro (codigo de entrada, acesso negado e painel). */
+export const MENSAGEM_PARCEIRO = {
+  frase: (
+    <>
+      Suas indicações, <i style={{ color: '#F5B9C6' }}>na palma da mão</i>.
+    </>
+  ),
+  texto: 'Acompanhe quantas pessoas você indicou e quantas estão com a assinatura em dia.',
+};
