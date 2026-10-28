@@ -793,13 +793,16 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
           }
           pdf.addImage(imagemFinal, formato, 0, 0, img.width, img.height, undefined, 'FAST');
 
-          // "Carula App - Orçamento - Camila - 27-10-2026.pdf". Antes era
-          // "Folha_Cliente_Camila_1792986719865.pdf", com a hora em milissegundos.
+          // "Carula App - Orçamento Bliss - 27-10-2026.pdf": o nome da
+          // CONFEITARIA, nao o da cliente. Antes era
+          // "Folha_Cliente_Camila_1792986719865.pdf". A data vai com traco porque
+          // barra nao pode em nome de arquivo.
           const isCozinha = activeTab === 'cozinha';
-          const nomeCliente = (transaction.customerName || 'Cliente').trim().replace(/[\\/:*?"<>|]+/g, '');
+          const nomeNegocio = (sellerName || '').trim().replace(/[\\/:*?"<>|]+/g, '');
           const hoje = new Date();
           const dataArquivo = `${String(hoje.getDate()).padStart(2, '0')}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${hoje.getFullYear()}`;
-          const titulo = `Carula App - ${isCozinha ? 'Ficha da Cozinha' : 'Orçamento'} - ${nomeCliente} - ${dataArquivo}`;
+          const tipoFolha = isCozinha ? 'Ficha da Cozinha' : 'Orçamento';
+          const titulo = `Carula App - ${nomeNegocio ? `${tipoFolha} ${nomeNegocio}` : tipoFolha} - ${dataArquivo}`;
           const filename = `${titulo}.pdf`;
           pdf.setProperties({ title: titulo, creator: 'Carula App' });
 
