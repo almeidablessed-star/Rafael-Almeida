@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { avisar } from './AvisoApp';
 import { Transaction, TransactionType, StockItem } from '../types';
 import { calculateWeeklyBalances } from '../utils/financialEngine';
 import { WeeklyHistoryCard } from './WeeklyHistoryCard';
@@ -177,7 +178,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
     const hasItemQty = itemQtyNum > 0;
 
     if (hasItemQty && itemQtyNum <= 0) {
-      alert('Quantidade deve ser maior que zero');
+      avisar('Quantidade deve ser maior que zero', { titulo: 'Falta a quantidade' });
       return;
     }
 
@@ -210,10 +211,11 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
             if (saldoConvertido === null) {
               // Comprar 2 L de um item cadastrado em gramas nao tem conversao
               // possivel. Somar assim mesmo corromperia o saldo em silencio.
-              alert(
-                `⚠️ "${existing.nome}" está cadastrado em "${existing.unidadeEmbalagem}" e você informou "${itemUnit}".\n\n` +
+              avisar(
+                `"${existing.nome}" está cadastrado em "${existing.unidadeEmbalagem}" e você informou "${itemUnit}".\n\n` +
                   `Essas unidades não se convertem. A despesa foi registrada, mas o estoque não foi alterado.\n\n` +
-                  `Ajuste a unidade na aba Produtos ou informe a compra na mesma unidade do cadastro.`
+                  `Ajuste a unidade na aba Produtos ou informe a compra na mesma unidade do cadastro.`,
+                { titulo: 'Unidades diferentes' }
               );
             } else {
               desfazerProduto = () => updateProduto(existing.id, existing);
@@ -254,7 +256,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
         }
       } catch (err) {
         console.error('Erro ao atualizar produto:', err);
-        alert('Erro ao registrar item no catálogo de Produtos. Despesa registrada, mas verifique em Produtos.');
+        avisar('Erro ao registrar item no catálogo de Produtos. Despesa registrada, mas verifique em Produtos.', { titulo: 'Confira em Produtos' });
       }
     }
 
@@ -279,7 +281,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
           await desfazerProduto();
         } catch (err) {
           console.error('Erro ao desfazer o produto da compra que falhou:', err);
-          alert('A compra não foi salva, e o estoque deste item pode ter mudado. Confira na aba Produtos.');
+          avisar('A compra não foi salva, e o estoque deste item pode ter mudado. Confira na aba Produtos.', { titulo: 'Confira em Produtos' });
         }
       }
       return;
