@@ -810,8 +810,13 @@ export const CustomersModule: React.FC = () => {
 
       {/* Success Toast */}
       {showToast && (
-        <div className="bg-[#A9D8B8] text-[#241B2B] p-3.5 rounded-lg shadow-sm text-xs font-bold flex items-center gap-2 border border-[rgba(36,27,43,0.6)] animate-slideUp">
-          <CheckCircle2 className="w-4 h-4 text-[#241B2B] shrink-0" />
+        // Mesmo estilo dos outros avisos do app ("Ficha deletada / Desfazer"):
+        // pilula roxa, check verde, texto centralizado em Manrope.
+        <div
+          className="flex items-center justify-center gap-2 text-sm font-bold text-white animate-slideUp"
+          style={{ padding: '12px 18px', borderRadius: '999px', background: '#3A2350', boxShadow: '0 12px 24px rgba(58,35,80,0.22)', fontFamily: "'Manrope', sans-serif", textAlign: 'center' }}
+        >
+          <CheckCircle2 className="w-4 h-4 shrink-0" style={{ color: '#A9D8B8' }} />
           <span>Cliente salva com sucesso!</span>
         </div>
       )}
