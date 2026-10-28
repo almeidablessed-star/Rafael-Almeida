@@ -773,7 +773,25 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
             format: [img.width, img.height],
           });
 
-          pdf.addImage(imgData, 'PNG', 0, 0, img.width, img.height);
+          // A folha entra como JPEG, na mesma resolucao da captura. Em PNG o PDF
+          // saia com ~9,6 MB (pesado para mandar no WhatsApp); o PNG continua
+          // sendo a captura (o truque das duas tentativas do iOS e com ele) e so
+          // e convertido aqui. Fundo branco antes, porque JPEG nao tem
+          // transparencia.
+          const tela = document.createElement('canvas');
+          tela.width = img.width;
+          tela.height = img.height;
+          const ctx = tela.getContext('2d');
+          let imagemFinal = imgData;
+          let formato: 'PNG' | 'JPEG' = 'PNG';
+          if (ctx) {
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, tela.width, tela.height);
+            ctx.drawImage(img, 0, 0);
+            imagemFinal = tela.toDataURL('image/jpeg', 0.85);
+            formato = 'JPEG';
+          }
+          pdf.addImage(imagemFinal, formato, 0, 0, img.width, img.height, undefined, 'FAST');
 
           // "Carula App - Orçamento - Camila - 27-10-2026.pdf". Antes era
           // "Folha_Cliente_Camila_1792986719865.pdf", com a hora em milissegundos.
