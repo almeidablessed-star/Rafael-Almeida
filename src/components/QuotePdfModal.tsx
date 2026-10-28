@@ -141,6 +141,9 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
   const [activeTab, setActiveTab] = useState<'cliente' | 'cozinha'>('cliente');
   const [copied, setCopied] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  /** PDF ja gerado esperando um toque para abrir o "Compartilhar" do celular
+   * (ver `entregarPdf`). */
+  const [pdfPronto, setPdfPronto] = useState<File | null>(null);
   const [inspirationImage, setInspirationImage] = useState<string>(transaction.inspirationImage || '');
 
   // Miniatura da folha no celular: a folha e montada com LARGURA_FOLHA e
@@ -394,6 +397,51 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
   };
 
   // Download PDF document directly using html-to-image
+  // No celular o PDF vai pelo "Compartilhar" do sistema, so o arquivo. O
+  // `pdf.save` abria o PDF num endereco temporario do navegador
+  // ("blob:https://rafael-almeida-nine.vercel.app/...") e, ao compartilhar dali
+  // para o WhatsApp, esse endereco ia junto como texto, com o nome da conta da
+  // hospedagem. No computador continua o download de sempre.
+  //
+  // O "Compartilhar" so abre logo depois de um toque; gerar o PDF demora, e o
+  // navegador pode recusar (NotAllowedError). Nesse caso aparece o botao
+  // "Enviar PDF", e o toque nele abre o compartilhar.
+  const entregarPdf = async (pdf: { output: (tipo: 'blob') => Blob; save: (nome: string) => void }, filename: string) => {
+    const arquivo = new File([pdf.output('blob')], filename, { type: 'application/pdf' });
+    const celular = document.documentElement.classList.contains('tela-de-toque');
+    if (celular && navigator.canShare?.({ files: [arquivo] })) {
+      try {
+        await navigator.share({ files: [arquivo] });
+        return;
+      } catch (err: any) {
+        if (err?.name === 'AbortError') return; // fechou o menu sem escolher
+        if (err?.name === 'NotAllowedError') {
+          setPdfPronto(arquivo);
+          return;
+        }
+      }
+    }
+    pdf.save(filename);
+  };
+
+  const compartilharPdfPronto = async () => {
+    if (!pdfPronto) return;
+    try {
+      await navigator.share({ files: [pdfPronto] });
+      setPdfPronto(null);
+    } catch (err: any) {
+      if (err?.name === 'AbortError') return;
+      // Sem compartilhar: baixa do jeito antigo para nao perder o PDF.
+      const url = URL.createObjectURL(pdfPronto);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = pdfPronto.name;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+      setPdfPronto(null);
+    }
+  };
+
   const handleDownloadPdf = async () => {
     const docElem = document.getElementById('quote-pdf-document');
     if (!docElem) {
@@ -727,15 +775,18 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
 
           pdf.addImage(imgData, 'PNG', 0, 0, img.width, img.height);
 
+          // "Carula App - Orçamento - Camila - 27-10-2026.pdf". Antes era
+          // "Folha_Cliente_Camila_1792986719865.pdf", com a hora em milissegundos.
           const isCozinha = activeTab === 'cozinha';
-          const clientName = (transaction.customerName || 'Cliente').replace(/\s+/g, '_');
-          const timestamp = new Date().getTime();
-          const filename = isCozinha
-            ? `Ficha_Cozinha_${clientName}_${timestamp}.pdf`
-            : `Folha_Cliente_${clientName}_${timestamp}.pdf`;
+          const nomeCliente = (transaction.customerName || 'Cliente').trim().replace(/[\\/:*?"<>|]+/g, '');
+          const hoje = new Date();
+          const dataArquivo = `${String(hoje.getDate()).padStart(2, '0')}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${hoje.getFullYear()}`;
+          const titulo = `Carula App - ${isCozinha ? 'Ficha da Cozinha' : 'Orçamento'} - ${nomeCliente} - ${dataArquivo}`;
+          const filename = `${titulo}.pdf`;
+          pdf.setProperties({ title: titulo, creator: 'Carula App' });
 
-          pdf.save(filename);
           restaurarEstilos();
+          void entregarPdf(pdf, filename);
         };
         img.src = imgData;
 
@@ -971,6 +1022,17 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
 
           <div className="flex items-center gap-1.5 shrink-0">
             {/* Direct PDF Download Button */}
+            {/* PDF pronto esperando o toque para o "Compartilhar" (ver entregarPdf). */}
+            {pdfPronto ? (
+            <button
+              onClick={compartilharPdfPronto}
+              className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-[#F5B9C6] hover:bg-[#E8A0B0] text-[#3A2350] text-[11px] sm:text-xs font-black flex items-center gap-1 shadow-sm active:scale-95 transition-all cursor-pointer animate-fadeIn"
+              title="Enviar o PDF pronto"
+            >
+              <FileText className="w-3 h-3" />
+              <span>Enviar PDF</span>
+            </button>
+            ) : (
             <button
               onClick={handleDownloadPdf}
               disabled={isGeneratingPdf}
@@ -980,6 +1042,7 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
               <FileText className="w-3 h-3" />
               <span>{isGeneratingPdf ? 'Gerando PDF...' : 'Baixar PDF'}</span>
             </button>
+            )}
 
             {/* Close Button - Icon Only */}
             <button
