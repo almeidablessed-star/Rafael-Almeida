@@ -120,20 +120,13 @@ interface FichasTecnicasModuleProps {
   onNavigateToTab?: (tab: any) => void;
 }
 
-const CATEGORY_LABELS: Record<string, { label: string; icon: string; tagBg: string }> = {
-  bolos: { label: 'Bolos & Massas', icon: '🎂', tagBg: 'bg-[var(--color-pastry-pink)] text-[var(--color-pastry-chocolate)]' },
-  doces: { label: 'Doces & Sobremesas', icon: '🧁', tagBg: 'bg-[var(--color-pastry-lavender)] text-[var(--color-pastry-chocolate)]' },
-  salgados: { label: 'Salgados & Lanches', icon: '🥟', tagBg: 'bg-[var(--color-pastry-sage)] text-[var(--color-pastry-chocolate)]' },
-  saudaveis: { label: 'Saudáveis & Fit', icon: '🥗', tagBg: 'bg-[var(--color-pastry-sage)] text-[var(--color-pastry-chocolate)]' },
-  kids: { label: 'Kids Friendly', icon: '🧸', tagBg: 'bg-[var(--color-pastry-yellow)] text-[var(--color-pastry-chocolate)]' },
+const CATEGORY_LABELS: Record<string, { label: string; icon: string }> = {
+  bolos: { label: 'Bolos & Massas', icon: '🎂' },
+  doces: { label: 'Doces & Sobremesas', icon: '🧁' },
+  salgados: { label: 'Salgados & Lanches', icon: '🥟' },
+  saudaveis: { label: 'Saudáveis & Fit', icon: '🥗' },
+  kids: { label: 'Kids Friendly', icon: '🧸' },
 };
-
-const PALETTE_BG_CLASSES = [
-  'bg-[var(--color-pastry-sage)] border-[var(--color-text-muted)]', // Verde Sálvia
-  'bg-[var(--color-pastry-lavender)] border-[var(--color-pastry-light-pink)]/40', // Lavanda
-  'bg-[var(--color-pastry-pink)] border-[var(--color-pastry-light-pink)]',    // Rosa Soft
-  'bg-[var(--color-pastry-yellow)] border-[var(--color-pastry-light-pink)]/40', // Amarelo Manteiga
-];
 
 export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   onAddTransaction,
