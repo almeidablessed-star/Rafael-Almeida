@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { EntradaComputador } from '../components/EntradaComputador';
+import { useTelaDeComputador } from '../hooks/useTelaDeComputador';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { Lock, CheckCircle, AlertCircle } from 'lucide-react';
@@ -55,6 +57,9 @@ async function trocarSenhaComUmaRetentativa(
 
 export const ResetPasswordPage: React.FC = () => {
   const { logout, beginAuthTransition, endAuthTransition } = useAuth();
+  // Computador: mesma moldura do login (painel roxo + cartao). O celular segue
+  // no layout de sempre, sem mudanca.
+  const pc = useTelaDeComputador();
 
   // Mesmo botao e mesmo caminho de saida da tela de pausa: `logout` do
   // contexto, com queda para encerrar a sessao local se ele falhar.
@@ -142,6 +147,37 @@ export const ResetPasswordPage: React.FC = () => {
   };
 
   if (success) {
+    const sucesso = (
+      <>
+        <CheckCircle style={{
+          width: '64px',
+          height: '64px',
+          color: '#10b981',
+          margin: '0 auto 20px',
+        }} />
+        <h1 style={{
+          fontSize: '28px',
+          fontWeight: 'bold',
+          color: '#241B2B',
+          marginBottom: '16px',
+        }}>
+          Senha Atualizada!
+        </h1>
+        <p style={{
+          color: '#666',
+          marginBottom: '20px',
+        }}>
+          Sua senha foi definida com sucesso. Você será redirecionado para fazer login...
+        </p>
+      </>
+    );
+    if (pc) {
+      return (
+        <EntradaComputador>
+          <div style={{ textAlign: 'center' }}>{sucesso}</div>
+        </EntradaComputador>
+      );
+    }
     return (
       <div style={{
         minHeight: '100vh',
@@ -159,29 +195,176 @@ export const ResetPasswordPage: React.FC = () => {
           textAlign: 'center',
           boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
         }}>
-          <CheckCircle style={{
-            width: '64px',
-            height: '64px',
-            color: '#10b981',
-            margin: '0 auto 20px',
-          }} />
-          <h1 style={{
-            fontSize: '28px',
-            fontWeight: 'bold',
-            color: '#241B2B',
-            marginBottom: '16px',
-          }}>
-            Senha Atualizada!
-          </h1>
-          <p style={{
-            color: '#666',
-            marginBottom: '20px',
-          }}>
-            Sua senha foi definida com sucesso. Você será redirecionado para fazer login...
-          </p>
+          {sucesso}
         </div>
       </div>
     );
+  }
+
+  const formulario = (
+    <>
+      {/* Header */}
+      <div style={{ marginBottom: '30px', textAlign: 'center' }}>
+        <Lock style={{
+          width: '48px',
+          height: '48px',
+          color: '#6E3F72',
+          margin: '0 auto 16px',
+        }} />
+        <h1 style={{
+          fontSize: '28px',
+          fontWeight: 'bold',
+          color: '#241B2B',
+          marginBottom: '8px',
+        }}>
+          Defina Sua Senha
+        </h1>
+        <p style={{
+          color: '#666',
+          fontSize: '14px',
+        }}>
+          Crie uma senha segura para acessar o Carula
+        </p>
+      </div>
+
+      {/* Error Message */}
+      {error && (
+        <div style={{
+          background: '#fee2e2',
+          border: '1px solid #fca5a5',
+          borderRadius: '12px',
+          padding: '12px 16px',
+          marginBottom: '20px',
+          display: 'flex',
+          gap: '12px',
+          alignItems: 'flex-start',
+        }}>
+          <AlertCircle style={{
+            width: '20px',
+            height: '20px',
+            color: '#dc2626',
+            flexShrink: 0,
+            marginTop: '2px',
+          }} />
+          <p style={{
+            color: '#dc2626',
+            fontSize: '14px',
+            margin: 0,
+          }}>
+            {error}
+          </p>
+        </div>
+      )}
+
+      {/* Form */}
+      <form onSubmit={handleResetPassword} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        {/* Password Input */}
+        <div>
+          <label style={{
+            display: 'block',
+            fontSize: '13px',
+            fontWeight: '600',
+            color: '#241B2B',
+            marginBottom: '8px',
+          }}>
+            Nova Senha
+          </label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Digite sua senha"
+            style={{
+              width: '100%',
+              padding: '12px 16px',
+              border: '1px solid #e5e7eb',
+              borderRadius: '12px',
+              fontSize: '14px',
+              fontFamily: "'Manrope', sans-serif",
+              transition: 'border-color 0.2s',
+              boxSizing: 'border-box',
+            }}
+            onFocus={(e) => e.currentTarget.style.borderColor = '#6E3F72'}
+            onBlur={(e) => e.currentTarget.style.borderColor = '#e5e7eb'}
+          />
+        </div>
+
+        {/* Confirm Password Input */}
+        <div>
+          <label style={{
+            display: 'block',
+            fontSize: '13px',
+            fontWeight: '600',
+            color: '#241B2B',
+            marginBottom: '8px',
+          }}>
+            Confirme a Senha
+          </label>
+          <input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Confirme sua senha"
+            style={{
+              width: '100%',
+              padding: '12px 16px',
+              border: '1px solid #e5e7eb',
+              borderRadius: '12px',
+              fontSize: '14px',
+              fontFamily: "'Manrope', sans-serif",
+              transition: 'border-color 0.2s',
+              boxSizing: 'border-box',
+            }}
+            onFocus={(e) => e.currentTarget.style.borderColor = '#6E3F72'}
+            onBlur={(e) => e.currentTarget.style.borderColor = '#e5e7eb'}
+          />
+        </div>
+
+        {/* Submit Button */}
+        <button
+          type="submit"
+          disabled={isLoading}
+          style={{
+            background: 'linear-gradient(140deg, #6E3F72, #A85E86)',
+            color: 'white',
+            border: 'none',
+            padding: '12px 16px',
+            borderRadius: '12px',
+            fontSize: '14px',
+            fontWeight: '600',
+            cursor: isLoading ? 'not-allowed' : 'pointer',
+            transition: 'opacity 0.2s',
+            opacity: isLoading ? 0.7 : 1,
+            marginTop: '8px',
+          }}
+        >
+          {isLoading ? 'Atualizando...' : 'Definir Senha'}
+        </button>
+      </form>
+
+      {/* Info */}
+      <p style={{
+        fontSize: '12px',
+        color: '#999',
+        textAlign: 'center',
+        marginTop: '20px',
+      }}>
+        A senha deve ter no mínimo 8 caracteres
+      </p>
+
+      <button
+        type="button"
+        onClick={sair}
+        className="w-full py-3 rounded-2xl text-sm font-bold transition-colors"
+        style={{ border: '1px solid rgba(58,35,80,0.16)', color: '#3A2350', background: '#FFFFFF' }}
+      >
+        Sair
+      </button>
+    </>
+  );
+
+  if (pc) {
+    return <EntradaComputador>{formulario}</EntradaComputador>;
   }
 
   return (
@@ -202,163 +385,7 @@ export const ResetPasswordPage: React.FC = () => {
         width: '100%',
         boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
       }}>
-        {/* Header */}
-        <div style={{ marginBottom: '30px', textAlign: 'center' }}>
-          <Lock style={{
-            width: '48px',
-            height: '48px',
-            color: '#6E3F72',
-            margin: '0 auto 16px',
-          }} />
-          <h1 style={{
-            fontSize: '28px',
-            fontWeight: 'bold',
-            color: '#241B2B',
-            marginBottom: '8px',
-          }}>
-            Defina Sua Senha
-          </h1>
-          <p style={{
-            color: '#666',
-            fontSize: '14px',
-          }}>
-            Crie uma senha segura para acessar o Carula
-          </p>
-        </div>
-
-        {/* Error Message */}
-        {error && (
-          <div style={{
-            background: '#fee2e2',
-            border: '1px solid #fca5a5',
-            borderRadius: '12px',
-            padding: '12px 16px',
-            marginBottom: '20px',
-            display: 'flex',
-            gap: '12px',
-            alignItems: 'flex-start',
-          }}>
-            <AlertCircle style={{
-              width: '20px',
-              height: '20px',
-              color: '#dc2626',
-              flexShrink: 0,
-              marginTop: '2px',
-            }} />
-            <p style={{
-              color: '#dc2626',
-              fontSize: '14px',
-              margin: 0,
-            }}>
-              {error}
-            </p>
-          </div>
-        )}
-
-        {/* Form */}
-        <form onSubmit={handleResetPassword} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {/* Password Input */}
-          <div>
-            <label style={{
-              display: 'block',
-              fontSize: '13px',
-              fontWeight: '600',
-              color: '#241B2B',
-              marginBottom: '8px',
-            }}>
-              Nova Senha
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Digite sua senha"
-              style={{
-                width: '100%',
-                padding: '12px 16px',
-                border: '1px solid #e5e7eb',
-                borderRadius: '12px',
-                fontSize: '14px',
-                fontFamily: "'Manrope', sans-serif",
-                transition: 'border-color 0.2s',
-                boxSizing: 'border-box',
-              }}
-              onFocus={(e) => e.currentTarget.style.borderColor = '#6E3F72'}
-              onBlur={(e) => e.currentTarget.style.borderColor = '#e5e7eb'}
-            />
-          </div>
-
-          {/* Confirm Password Input */}
-          <div>
-            <label style={{
-              display: 'block',
-              fontSize: '13px',
-              fontWeight: '600',
-              color: '#241B2B',
-              marginBottom: '8px',
-            }}>
-              Confirme a Senha
-            </label>
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirme sua senha"
-              style={{
-                width: '100%',
-                padding: '12px 16px',
-                border: '1px solid #e5e7eb',
-                borderRadius: '12px',
-                fontSize: '14px',
-                fontFamily: "'Manrope', sans-serif",
-                transition: 'border-color 0.2s',
-                boxSizing: 'border-box',
-              }}
-              onFocus={(e) => e.currentTarget.style.borderColor = '#6E3F72'}
-              onBlur={(e) => e.currentTarget.style.borderColor = '#e5e7eb'}
-            />
-          </div>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={isLoading}
-            style={{
-              background: 'linear-gradient(140deg, #6E3F72, #A85E86)',
-              color: 'white',
-              border: 'none',
-              padding: '12px 16px',
-              borderRadius: '12px',
-              fontSize: '14px',
-              fontWeight: '600',
-              cursor: isLoading ? 'not-allowed' : 'pointer',
-              transition: 'opacity 0.2s',
-              opacity: isLoading ? 0.7 : 1,
-              marginTop: '8px',
-            }}
-          >
-            {isLoading ? 'Atualizando...' : 'Definir Senha'}
-          </button>
-        </form>
-
-        {/* Info */}
-        <p style={{
-          fontSize: '12px',
-          color: '#999',
-          textAlign: 'center',
-          marginTop: '20px',
-        }}>
-          A senha deve ter no mínimo 8 caracteres
-        </p>
-
-        <button
-          type="button"
-          onClick={sair}
-          className="w-full py-3 rounded-2xl text-sm font-bold transition-colors"
-          style={{ border: '1px solid rgba(58,35,80,0.16)', color: '#3A2350', background: '#FFFFFF' }}
-        >
-          Sair
-        </button>
+        {formulario}
       </div>
     </div>
   );
