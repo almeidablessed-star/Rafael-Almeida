@@ -1337,12 +1337,6 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
                         </div>
                       );
                     })}
-                    {transaction.observations && (
-                      <div className="mt-auto flex items-start gap-[7px]" style={{ background: '#FBF6EC', color: '#5B4A2E', borderRadius: '14px', padding: '9px 12px', fontSize: '11px', fontWeight: 600, lineHeight: 1.45 }}>
-                        <Pencil className="w-3 h-3 shrink-0 mt-0.5" strokeWidth={2.2} />
-                        <span><b style={{ fontWeight: 800 }}>Observações:</b> "{transaction.observations}"</span>
-                      </div>
-                    )}
                   </section>
 
                   {/* Pagamento em pe (versao clara do design), ao lado dos itens:
@@ -1363,7 +1357,7 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
                       </span>
                     </div>
                     {transaction.signalValue ? (
-                      <div className="flex flex-col gap-1.5 mt-auto">
+                      <div className="flex flex-col gap-1.5">
                         <div className="flex items-center justify-between gap-2" style={{ background: 'rgba(169,216,184,.25)', borderRadius: '12px', padding: '8px 12px' }}>
                           <span style={{ fontSize: '11px', fontWeight: 700, color: '#4C7358' }}>Sinal pago</span>
                           <span className="tabular-nums" style={{ fontSize: '14px', fontWeight: 800, color: '#4C7358' }}>{formatCurrency(transaction.signalValue)}</span>
@@ -1374,6 +1368,24 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
                         </div>
                       </div>
                     ) : null}
+                    {/* Observacoes no espaco que sobrava embaixo do pagamento, no
+                        mesmo formato da Ficha da Cozinha, mas so "Observacoes":
+                        sao as anotacoes da confeiteira no pedido. Antes ficavam
+                        no fim do card de itens. */}
+                    <div className="flex-1 flex items-start gap-2" style={{ background: '#FBF6EC', color: '#5B4A2E', borderRadius: '16px', padding: '12px 14px', fontSize: '11px', fontWeight: 600, lineHeight: 1.5, minHeight: '64px' }}>
+                      <Pencil className="w-3 h-3 shrink-0 mt-0.5" strokeWidth={2.2} />
+                      <span>
+                        <b style={{ fontWeight: 800, display: 'block', fontSize: '9px', letterSpacing: '.12em', marginBottom: '3px' }}>OBSERVAÇÕES</b>
+                        {/* Os dois campos de anotacao do pedido: "Observacoes do
+                            pedido" (passo Cliente) e "Observacoes / anotacoes do
+                            cliente" (passo Pagamento). */}
+                        {[transaction.observations, transaction.notes].filter((t) => t && t.trim()).length > 0
+                          ? [transaction.observations, transaction.notes]
+                              .filter((t): t is string => !!t && !!t.trim())
+                              .map((t, i) => <span key={i} style={{ display: 'block' }}>"{t.trim()}"</span>)
+                          : 'Nenhuma observação.'}
+                      </span>
+                    </div>
                   </section>
                 </div>
               </div>
