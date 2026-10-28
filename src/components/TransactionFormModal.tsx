@@ -379,6 +379,20 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   const [pedidoSemItensDetalhados, setPedidoSemItensDetalhados] = useState(false);
   /** Total que estava gravado no pedido sendo editado, para a trava do centavo. */
   const [totalGravadoDoPedido, setTotalGravadoDoPedido] = useState<number | null>(null);
+  /** Pergunta "o total vai mudar" aberta (no layout do app, nao a caixinha do
+   * navegador). `handleSubmit` espera a resposta pela promessa guardada no ref. */
+  const [mudancaDeTotal, setMudancaDeTotal] = useState<{ de: number; para: number } | null>(null);
+  const respostaMudancaDeTotal = useRef<((salvar: boolean) => void) | null>(null);
+  const perguntarMudancaDeTotal = (de: number, para: number) =>
+    new Promise<boolean>((resolve) => {
+      respostaMudancaDeTotal.current = resolve;
+      setMudancaDeTotal({ de, para });
+    });
+  const responderMudancaDeTotal = (salvar: boolean) => {
+    respostaMudancaDeTotal.current?.(salvar);
+    respostaMudancaDeTotal.current = null;
+    setMudancaDeTotal(null);
+  };
 
   // Delivery State
   const [hasDelivery, setHasDelivery] = useState<boolean>(false);
@@ -994,10 +1008,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       const remontado = Math.round(grandTotalSalePrice * 100) / 100;
       const gravado = Math.round(totalGravadoDoPedido * 100) / 100;
       if (Math.abs(remontado - gravado) >= 0.005) {
-        const continuar = window.confirm(
-          `O total deste pedido vai mudar de ${formatMoney(gravado)} para ${formatMoney(remontado)}.\n\n` +
-            'Salvar assim?'
-        );
+        const continuar = await perguntarMudancaDeTotal(gravado, remontado);
         if (!continuar) return;
       }
     }
@@ -1900,7 +1911,10 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                   <div>
                     <label style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
                       <span>Valor do sinal / entrada</span>
-                      <span style={{ fontSize: '11px', fontWeight: 500, color: '#A096A6' }}>{totalValue ? `Máx: ${currencySymbol}${totalValue}` : '-'}</span>
+                      {/* O limite e o total do pedido. Antes lia `totalValue`, que so os
+                          lancamentos que nao sao venda preenchem: no pedido aparecia
+                          sempre "-" e a entrada nao tinha limite nenhum. */}
+                      <span style={{ fontSize: '11px', fontWeight: 500, color: '#A096A6' }}>{grandTotalSalePrice > 0 ? `Máx: ${formatMoney(grandTotalSalePrice)}` : '-'}</span>
                     </label>
                     <div className="relative">
                       {/* Mesmo prefixo da "Taxa de entrega": cinza, 13px, com folga
@@ -1917,9 +1931,9 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                           const val = e.target.value;
                           if (val === '') {
                             setSignalValue(val);
-                          } else if (totalValue) {
+                          } else if (grandTotalSalePrice > 0) {
                             const numVal = parseNumeroDigitado(val);
-                            const totalNum = parseNumeroDigitado(totalValue) || 0;
+                            const totalNum = Math.round(grandTotalSalePrice * 100) / 100;
                             if (numVal <= totalNum) setSignalValue(val);
                           } else {
                             setSignalValue(val);
@@ -2562,6 +2576,53 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
           }}
           onClose={() => setShowPdfQuoteModal(false)}
         />
+      )}
+
+      {/* Pergunta "o total vai mudar", no layout das confirmacoes do app (a mesma
+          da agenda: "Gostaria de lancar um pedido para...?"). Clicar fora =
+          Cancelar. */}
+      {mudancaDeTotal && (
+        <div
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-[100000] animate-fadeIn"
+          onClick={(e) => { e.stopPropagation(); responderMudancaDeTotal(false); }}
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="mudanca-total-titulo"
+        >
+          <div
+            className="bg-white rounded-[24px] p-6 space-y-4 w-[90%] max-w-sm"
+            onClick={(e) => e.stopPropagation()}
+            style={{ fontFamily: "'Manrope', sans-serif" }}
+          >
+            <h3 id="mudanca-total-titulo" className="font-serif-display text-lg" style={{ color: '#241B2B' }}>
+              O total vai mudar
+            </h3>
+            <p style={{ color: '#7A6E80', fontSize: '14px', lineHeight: 1.5 }}>
+              O total deste pedido vai mudar de{' '}
+              <strong style={{ color: '#241B2B' }}>{formatMoney(mudancaDeTotal.de)}</strong> para{' '}
+              <strong style={{ color: '#241B2B' }}>{formatMoney(mudancaDeTotal.para)}</strong>. Quer salvar assim?
+            </p>
+            <div className="flex gap-2 pt-4">
+              <button
+                type="button"
+                onClick={() => responderMudancaDeTotal(false)}
+                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold"
+                style={{ background: '#F6F2F5', color: '#241B2B', minHeight: '44px' }}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                autoFocus
+                onClick={() => responderMudancaDeTotal(true)}
+                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white"
+                style={{ background: 'linear-gradient(135deg, #6E3F72 0%, #3A2350 100%)', minHeight: '44px' }}
+              >
+                Salvar assim
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>,
     document.body
