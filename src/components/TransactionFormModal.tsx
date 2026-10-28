@@ -1,5 +1,6 @@
 ﻿import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { avisar } from './AvisoApp';
 import {
   Transaction,
   TransactionType,
@@ -1004,9 +1005,10 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
     // o pedido com o que estiver na tela — provavelmente um item so — e mudaria
     // o valor em silencio, que e exatamente o defeito que esta correcao fecha.
     if (type === 'venda' && editingTransaction && pedidoSemItensDetalhados) {
-      alert(
+      avisar(
         'Este pedido foi criado antes de o app guardar a lista de itens, então não dá para reabrir os itens com segurança.\n\n' +
-          'Refaça os itens antes de salvar, ou cancele e lance o pedido de novo. Nada foi salvo.'
+          'Refaça os itens antes de salvar, ou cancele e lance o pedido de novo. Nada foi salvo.',
+        { titulo: 'Refaça os itens antes de salvar' }
       );
       setPedidoFormStep(2);
       return;
@@ -1049,12 +1051,12 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       // Era assim que o pedido saia com subtotal zero: o <select> exibia o
       // primeiro bolo da lista e ninguem percebia que nada fora escolhido.
       if (orderItems.some((item) => !item.productName)) {
-        alert('⚠️ Escolha o produto de cada item do pedido antes de gravar.');
+        avisar('Escolha o produto de cada item do pedido antes de gravar.', { titulo: 'Falta escolher o produto' });
         return;
       }
 
       if (grandTotalSalePrice <= 0) {
-        alert('Por favor, selecione ao menos um produto válido com valor maior que zero.');
+        avisar('Por favor, selecione ao menos um produto válido com valor maior que zero.', { titulo: 'Pedido sem valor' });
         return;
       }
 
@@ -1206,7 +1208,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
 
     // Standard submission for non-sale types
     if (!description.trim()) {
-      alert('Por favor, informe uma descrição ou nome do lançamento.');
+      avisar('Por favor, informe uma descrição ou nome do lançamento.', { titulo: 'Falta a descrição' });
       return;
     }
 
@@ -1215,7 +1217,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       parseNumeroDigitado(totalValue) || quantity * parsedUnit;
 
     if (parsedTotal <= 0) {
-      alert('Por favor, digite um valor válido maior que zero.');
+      avisar('Por favor, digite um valor válido maior que zero.', { titulo: 'Falta o valor' });
       return;
     }
 
@@ -1508,7 +1510,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                         try {
                           setInspirationImage(await compressImageFile(file));
                         } catch (err: any) {
-                          alert(err?.message || 'Nao foi possivel usar esta imagem.');
+                          avisar(err?.message || 'Não foi possível usar esta imagem.', { titulo: 'Não deu para usar a foto' });
                         }
                       }}
                       className="hidden"
