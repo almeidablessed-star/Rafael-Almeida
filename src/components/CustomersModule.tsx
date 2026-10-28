@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { avisar } from './AvisoApp';
 import { createPortal } from 'react-dom';
 import { Customer, CustomerEvent } from '../types';
 import { formatDateBr, formatDayMonthOnly } from '../utils/formatters';
@@ -341,7 +342,7 @@ export const CustomersModule: React.FC = () => {
     } catch (err: any) {
       // `compressImageFile` recusa um arquivo cru grande demais quando a
       // compressao falha. A mensagem dele ja explica o que fazer.
-      alert(err?.message || 'Nao foi possivel usar esta imagem.');
+      avisar(err?.message || 'Não foi possível usar esta imagem.', { titulo: 'Não deu para usar a foto' });
     }
   };
 

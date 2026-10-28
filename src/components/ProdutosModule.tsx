@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { avisar } from './AvisoApp';
 import { createPortal } from 'react-dom';
 import { Produto, Transaction } from '../types';
 import { useProdutos } from '../context/ProdutosContext';
@@ -224,7 +225,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
       try {
         await deleteProduto(produto.id);
       } catch (err: any) {
-        alert(`⚠️ Não foi possível excluir o produto:\n\n${err?.message || err}`);
+        avisar(`Não foi possível excluir o produto:\n\n${err?.message || err}`, { titulo: 'Não deu para excluir o produto' });
       }
     },
   });

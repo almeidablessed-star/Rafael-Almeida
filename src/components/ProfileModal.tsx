@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { avisar } from './AvisoApp';
 import { X, Camera, Edit2, Clock } from 'lucide-react';
 import { useCurrency } from '../context/CurrencyContext';
 import { useAuth } from '../context/AuthContext';
@@ -154,7 +155,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
         photo,
       }));
     } catch (err: any) {
-      alert(err?.message || 'Nao foi possivel usar esta imagem.');
+      avisar(err?.message || 'Não foi possível usar esta imagem.', { titulo: 'Não deu para usar a foto' });
     }
   };
 
