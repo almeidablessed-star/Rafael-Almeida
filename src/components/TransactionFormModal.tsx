@@ -1534,7 +1534,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                         <button
                           type="button"
                           onClick={() => setInspirationImage('')}
-                          className="absolute top-0 right-0 bg-semantic-error-600 text-white p-0.5"
+                          className="absolute top-0 right-0 bg-[#C4626F] text-white p-0.5"
                           title="Remover foto"
                         >
                           <X className="w-3 h-3" />

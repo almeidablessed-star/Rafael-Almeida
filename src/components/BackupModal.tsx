@@ -312,7 +312,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between pb-2 border-b border-neutral-100">
           <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-semantic-info-100 text-semantic-info-600 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-[#F3E9F3] text-[#6E3F72] flex items-center justify-center">
               <Database className="w-5 h-5" />
             </div>
             <div>
@@ -341,13 +341,13 @@ export const BackupModal: React.FC<BackupModalProps> = ({
         </div>
 
         {/* Security badge note */}
-        <div className="bg-semantic-success-50 border border-semantic-success-200 rounded-lg p-3 flex items-center gap-2.5 text-xs text-semantic-success-800 font-medium">
+        <div className="bg-[#F3E9F3] border border-[rgba(110,63,114,0.22)] rounded-lg p-3 flex items-center gap-2.5 text-xs text-[#3A2350] font-medium">
           {/* Este texto dizia "nada sai do seu dispositivo, tudo e salvo
               localmente no navegador". Era verdade enquanto os lancamentos
               viviam no localStorage; deixou de ser quando passaram para o
               Supabase. Promessa de privacidade desatualizada e pior do que
               nenhuma — a confeiteira decide o que registrar com base nela. */}
-          <ShieldCheck className="w-5 h-5 text-semantic-success-600 shrink-0" />
+          <ShieldCheck className="w-5 h-5 text-[#6E3F72] shrink-0" />
           <span>
             Seus lançamentos ficam guardados na sua conta, protegidos por senha, e
             aparecem em todos os aparelhos onde você entrar. Só você tem acesso.
@@ -379,7 +379,8 @@ export const BackupModal: React.FC<BackupModalProps> = ({
 
         {/* Confirmacao da restauracao: aparece no lugar da lista de acoes
             depois que o arquivo passou na conferencia. Cores com escalas reais
-            do Tailwind (amber/rose) — as `semantic-*-N` nao existem. */}
+            do Tailwind (amber/rose) — as `semantic-*-N` nao existem; o resto do modal
+            usa as cores literais da paleta do app pelo mesmo motivo. */}
         {restauracaoPendente && (
           <div className="space-y-3 pt-1">
             <h4 className="font-bold text-sm text-neutral-900">Substituir seus lançamentos?</h4>
@@ -519,7 +520,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
             className="w-full p-3.5 bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 rounded-lg flex items-center justify-between text-left transition-all active:scale-98"
           >
             <div className="flex items-center gap-3">
-              <Upload className="w-5 h-5 text-semantic-info-500" />
+              <Upload className="w-5 h-5 text-[#6E3F72]" />
               <div>
                 <span className="block font-bold text-xs text-neutral-800">
                   Restaurar Backup de Arquivo
@@ -547,15 +548,15 @@ export const BackupModal: React.FC<BackupModalProps> = ({
               await onClearAll();
               onClose();
             }}
-            className="w-full p-3 bg-semantic-error-50 hover:bg-rose-100 border border-semantic-error-200 rounded-lg flex items-center justify-between text-left transition-all active:scale-98"
+            className="w-full p-3 bg-[#FDF4F5] hover:bg-[#FBE9EC] border border-[#F0D9DD] rounded-lg flex items-center justify-between text-left transition-all active:scale-98"
           >
             <div className="flex items-center gap-3">
-              <Trash2 className="w-5 h-5 text-semantic-error-600" />
+              <Trash2 className="w-5 h-5 text-[#C4626F]" />
               <div>
-                <span className="block font-bold text-xs text-semantic-error-800">
+                <span className="block font-bold text-xs text-[#B04E5C]">
                   Zerar Todos os Dados (Começar do Zero)
                 </span>
-                <span className="text-[11px] text-semantic-error-600 font-normal">
+                <span className="text-[11px] text-[#C4626F] font-normal">
                   Limpa todas as vendas, compras e lançamentos
                 </span>
               </div>
