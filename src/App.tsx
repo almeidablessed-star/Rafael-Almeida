@@ -1,5 +1,6 @@
 // v2.1 - Fresh rebuild with latest redesign - force Vercel deployment
 import React, { useState, useEffect } from 'react';
+import { avisar, perguntar } from './components/AvisoApp';
 import { AuthProvider } from './context/AuthContext';
 import {
   Transaction,
@@ -143,15 +144,16 @@ function AppContent() {
       // sempre, em silencio.
       if (tx.type === 'venda') {
         if (await pedidoSemRastroAntigo(tx)) {
-          alert(`ℹ️ ${AVISO_PEDIDO_ANTIGO}`);
+          await avisar(AVISO_PEDIDO_ANTIGO, { titulo: 'Pedido antigo' });
         }
         try {
           await devolverPedido(tx.id, [], 'excluido');
         } catch (err: any) {
-          alert(
-            `⚠️ Os insumos não voltaram ao estoque:\n\n${err?.message || err}\n\n` +
+          await avisar(
+            `Os insumos não voltaram ao estoque:\n\n${err?.message || err}\n\n` +
               `O pedido NÃO foi excluído, para o estorno poder ser refeito. ` +
-              `Confira a aba Produtos e tente de novo.`
+              `Confira a aba Produtos e tente de novo.`,
+            { titulo: 'O pedido não foi excluído' }
           );
           return;
         }
@@ -160,7 +162,7 @@ function AppContent() {
       try {
         await deleteTransacao(tx.id);
       } catch (err: any) {
-        alert(`⚠️ Não foi possível excluir o pedido:\n\n${err?.message || err}`);
+        avisar(`Não foi possível excluir o pedido:\n\n${err?.message || err}`, { titulo: 'Não deu para excluir o pedido' });
       }
     },
   });
@@ -267,19 +269,21 @@ function AppContent() {
     if (type === 'venda') {
       // Carregando DE VERDADE: unico caso em que pedir para esperar e honesto.
       if (fichasCarregando) {
-        alert('⏳ As fichas técnicas ainda estão carregando. Tente novamente em alguns segundos.');
+        avisar('As fichas técnicas ainda estão carregando. Tente novamente em alguns segundos.', { titulo: 'Só um instante' });
         return;
       }
 
       // Carregou e nao ha nenhuma: nao e demora, e ausencia — e tem solucao.
       if (fichas.length === 0) {
-        const criarAgora = window.confirm(
+        perguntar(
           'Você ainda não tem nenhuma Ficha Técnica cadastrada.\n\n' +
             'A ficha é a receita do seu produto: é dela que saem o preço e o custo ' +
             'de cada pedido. Cadastre pelo menos uma para poder lançar um pedido.\n\n' +
-            'Quer criar a sua primeira agora?'
-        );
-        if (criarAgora) setActiveTab('fichas');
+            'Quer criar a sua primeira agora?',
+          { titulo: 'Falta uma Ficha Técnica', confirmar: 'Criar agora', cancelar: 'Agora não' }
+        ).then((criarAgora) => {
+          if (criarAgora) setActiveTab('fichas');
+        });
         return;
       }
     }
@@ -305,7 +309,7 @@ function AppContent() {
       await addTransacao(txData);
       return true;
     } catch (err: any) {
-      alert(`⚠️ Não foi possível gravar o lançamento:\n\n${err?.message || err}\n\nNada foi salvo.`);
+      avisar(`Não foi possível gravar o lançamento:\n\n${err?.message || err}\n\nNada foi salvo.`, { titulo: 'Não deu para gravar' });
       return false;
     }
   };
@@ -344,17 +348,18 @@ function AppContent() {
    * deixava negativo, entao a confeiteira nunca ficava sabendo que o cadastro
    * estava incompleto — o estoque so ia ficando errado.
    */
-  const avisarProblemasDeBaixa = (problemas: ProblemaBaixa[]) => {
+  const avisarProblemasDeBaixa = async (problemas: ProblemaBaixa[]) => {
     if (problemas.length === 0) return;
     const linhas = problemas.map((p) =>
       p.motivo === 'sem-item-no-estoque'
         ? `• ${p.insumo} — não está cadastrado no catálogo de Produtos`
         : `• ${p.insumo} — a ficha usa "${p.unidadeFicha}" e o produto usa "${p.unidadeEstoque}"`
     );
-    alert(
-      `⚠️ O pedido foi salvo, mas estes insumos NÃO baixaram do estoque:\n\n` +
+    await avisar(
+      `O pedido foi salvo, mas estes insumos NÃO baixaram do estoque:\n\n` +
         `${linhas.join('\n')}\n\n` +
-        `Ajuste na aba Produtos para a baixa funcionar nos próximos pedidos.`
+        `Ajuste na aba Produtos para a baixa funcionar nos próximos pedidos.`,
+      { titulo: 'Estoque não baixou' }
     );
   };
 
@@ -380,7 +385,7 @@ function AppContent() {
       try {
         await updateTransacao(editingId, updated);
       } catch (err: any) {
-        alert(`⚠️ Não foi possível salvar o lançamento:\n\n${err?.message || err}\n\nNada foi alterado.`);
+        avisar(`Não foi possível salvar o lançamento:\n\n${err?.message || err}\n\nNada foi alterado.`, { titulo: 'Não deu para salvar' });
         return false;
       }
 
@@ -390,7 +395,7 @@ function AppContent() {
       // delta de proposito — delta so funciona quando muda apenas a quantidade,
       // e quebra quando a confeiteira troca o produto ou mistura itens.
       if (updated.type === 'venda' && (await pedidoSemRastroAntigo(existing))) {
-        alert(`ℹ️ O pedido foi salvo.\n\n${AVISO_PEDIDO_ANTIGO}`);
+        avisar(`O pedido foi salvo.\n\n${AVISO_PEDIDO_ANTIGO}`, { titulo: 'Pedido antigo' });
         return true;
       }
       if (updated.type === 'venda') {
@@ -418,24 +423,26 @@ function AppContent() {
           const itens = resolverItensDoPedido(updated.fichaItems);
           if (itens.length > 0) {
             const resultado = await consumirParaPedido(itens, editingId);
-            avisarProblemasDeBaixa(resultado.problemas);
+            await avisarProblemasDeBaixa(resultado.problemas);
           }
 
           if (fichasApagadas.length > 0) {
-            alert(
-              `⚠️ O pedido foi salvo, mas estes itens não mexem mais no estoque:\n\n` +
+            await avisar(
+              `O pedido foi salvo, mas estes itens não mexem mais no estoque:\n\n` +
                 fichasApagadas
                   .map((item) => `• ${item.fichaName || 'Item'} — a ficha técnica foi apagada`)
                   .join('\n') +
                 `\n\nO que eles já tinham baixado continua baixado, porque o pedido ` +
                 `segue de pé. Para o estoque voltar a acompanhar este item, ` +
-                `cadastre a ficha de novo e refaça o pedido.`
+                `cadastre a ficha de novo e refaça o pedido.`,
+              { titulo: 'Ficha técnica apagada' }
             );
           }
         } catch (err: any) {
-          alert(
-            `⚠️ O pedido foi atualizado, mas o estoque não pôde ser reajustado:\n\n` +
-              `${err?.message || err}\n\nConfira as quantidades na aba Produtos.`
+          avisar(
+            `O pedido foi atualizado, mas o estoque não pôde ser reajustado:\n\n` +
+              `${err?.message || err}\n\nConfira as quantidades na aba Produtos.`,
+            { titulo: 'Confira o estoque' }
           );
         }
       }
@@ -445,7 +452,7 @@ function AppContent() {
     // Validação defensiva: se é venda mas fichaItems chegou vazio, bloqueia
     // submit e avisa. Impede que a venda seja registrada sem dar baixa no estoque.
     if (txData.type === 'venda' && (!txData.fichaItems || txData.fichaItems.length === 0)) {
-      alert('⚠️ Erro: nenhum produto foi vinculado à ficha técnica. Verifique se os produtos estão cadastrados e tente novamente.');
+      avisar('Nenhum produto foi vinculado à ficha técnica. Verifique se os produtos estão cadastrados e tente novamente.', { titulo: 'Pedido sem produto' });
       return false;
     }
 
@@ -454,7 +461,7 @@ function AppContent() {
         await addTransacao(txData);
         return true;
       } catch (err: any) {
-        alert(`⚠️ Não foi possível gravar o lançamento:\n\n${err?.message || err}\n\nNada foi salvo.`);
+        avisar(`Não foi possível gravar o lançamento:\n\n${err?.message || err}\n\nNada foi salvo.`, { titulo: 'Não deu para gravar' });
         return false;
       }
     }
@@ -466,7 +473,7 @@ function AppContent() {
     try {
       criada = await addTransacao(txData);
     } catch (err: any) {
-      alert(`⚠️ Não foi possível gravar o pedido:\n\n${err?.message || err}\n\nNada foi salvo.`);
+      avisar(`Não foi possível gravar o pedido:\n\n${err?.message || err}\n\nNada foi salvo.`, { titulo: 'Não deu para gravar o pedido' });
       return false;
     }
 
@@ -474,12 +481,13 @@ function AppContent() {
       const itens = resolverItensDoPedido(criada.fichaItems);
       if (itens.length > 0) {
         const resultado = await consumirParaPedido(itens, criada.id);
-        avisarProblemasDeBaixa(resultado.problemas);
+        await avisarProblemasDeBaixa(resultado.problemas);
       }
     } catch (err: any) {
-      alert(
-        `⚠️ O pedido foi salvo, mas a baixa de estoque falhou:\n\n${err?.message || err}\n\n` +
-          `Nenhum insumo foi debitado. Confira a aba Produtos.`
+      avisar(
+        `O pedido foi salvo, mas a baixa de estoque falhou:\n\n${err?.message || err}\n\n` +
+          `Nenhum insumo foi debitado. Confira a aba Produtos.`,
+        { titulo: 'Estoque não baixou' }
       );
     }
     return true;
@@ -494,7 +502,7 @@ function AppContent() {
     try {
       await updateTransacao(tx.id, { ...tx, paymentStatus: newStatus });
     } catch (err: any) {
-      alert(`⚠️ Não foi possível mudar o status do pagamento:\n\n${err?.message || err}`);
+      avisar(`Não foi possível mudar o status do pagamento:\n\n${err?.message || err}`, { titulo: 'Não deu para mudar o pagamento' });
     }
   };
 
@@ -516,7 +524,7 @@ function AppContent() {
     try {
       await limparTudo();
     } catch (err: any) {
-      alert(`⚠️ Não foi possível limpar os lançamentos:\n\n${err?.message || err}`);
+      avisar(`Não foi possível limpar os lançamentos:\n\n${err?.message || err}`, { titulo: 'Não deu para limpar' });
     }
   };
 
@@ -596,7 +604,7 @@ function AppContent() {
               try {
                 await addTransacao(txData);
               } catch (err: any) {
-                alert(`⚠️ Não foi possível gravar o lançamento:\n\n${err?.message || err}`);
+                avisar(`Não foi possível gravar o lançamento:\n\n${err?.message || err}`, { titulo: 'Não deu para gravar' });
               }
             }}
             onNavigateToTab={(tab) => setActiveTab(tab)}
