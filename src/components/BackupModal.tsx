@@ -142,6 +142,11 @@ export const BackupModal: React.FC<BackupModalProps> = ({
    */
   const [arquivoPronto, setArquivoPronto] = useState<File | null>(null);
 
+  /** Pergunta do "Zerar todos os dados" aberta, no layout do app (era a
+   * caixinha do navegador). `zerando` trava os botoes enquanto apaga. */
+  const [confirmarZerar, setConfirmarZerar] = useState(false);
+  const [zerando, setZerando] = useState(false);
+
   if (!isOpen) return null;
 
   /** Toque na tela, e nao mouse: celular ou tablet. */
@@ -541,13 +546,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
 
           {/* Clear All Data */}
           <button
-            onClick={async () => {
-              if (!confirm('ATENÇÃO: Certeza que deseja apagar TODOS os lançamentos e começar do zero? Esta ação é irreversível e vale para todos os seus aparelhos.')) {
-                return;
-              }
-              await onClearAll();
-              onClose();
-            }}
+            onClick={() => setConfirmarZerar(true)}
             className="w-full p-3 bg-[#FDF4F5] hover:bg-[#FBE9EC] border border-[#F0D9DD] rounded-lg flex items-center justify-between text-left transition-all active:scale-98"
           >
             <div className="flex items-center gap-3">
@@ -565,6 +564,64 @@ export const BackupModal: React.FC<BackupModalProps> = ({
         </div>
 
       </div>
+
+      {/* Confirmacao do "Zerar todos os dados", no layout das perguntas do app
+          (mesmo molde de "O total vai mudar"). O foco comeca no Cancelar e
+          clicar fora tambem cancela: e a acao mais perigosa do app, apaga tudo
+          e nao tem volta. */}
+      {confirmarZerar && (
+        <div
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-[100000] animate-fadeIn"
+          onClick={() => { if (!zerando) setConfirmarZerar(false); }}
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="zerar-titulo"
+        >
+          <div
+            className="bg-white rounded-[24px] p-6 space-y-4 w-[90%] max-w-sm"
+            onClick={(e) => e.stopPropagation()}
+            style={{ fontFamily: "'Manrope', sans-serif" }}
+          >
+            <h3 id="zerar-titulo" className="font-serif-display text-lg" style={{ color: '#241B2B' }}>
+              Apagar todos os lançamentos?
+            </h3>
+            <p style={{ color: '#7A6E80', fontSize: '14px', lineHeight: 1.5 }}>
+              Isso apaga <strong style={{ color: '#B04E5C' }}>todos os lançamentos</strong> e começa do zero.
+              A ação é irreversível e vale para todos os seus aparelhos.
+            </p>
+            <div className="flex gap-2 pt-4">
+              <button
+                type="button"
+                autoFocus
+                disabled={zerando}
+                onClick={() => setConfirmarZerar(false)}
+                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold disabled:opacity-50"
+                style={{ background: '#F6F2F5', color: '#241B2B', minHeight: '44px' }}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={zerando}
+                onClick={async () => {
+                  setZerando(true);
+                  try {
+                    await onClearAll();
+                    setConfirmarZerar(false);
+                    onClose();
+                  } finally {
+                    setZerando(false);
+                  }
+                }}
+                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white disabled:opacity-60"
+                style={{ background: '#C4626F', minHeight: '44px' }}
+              >
+                {zerando ? 'Apagando...' : 'Apagar tudo'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>,
     document.body
   );
