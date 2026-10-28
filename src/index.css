@@ -330,6 +330,19 @@ a:hover {
     box-shadow: none;
   }
 
+  /* Telas de entrada (login, codigo): sem menu, mas tambem largas. Ver
+     components/EntradaComputador.tsx. */
+  html:has(.entrada-computador),
+  html:has(.entrada-computador) body {
+    background: #F6F2F5;
+  }
+
+  html:has(.entrada-computador) #root {
+    max-width: none;
+    margin: 0;
+    box-shadow: none;
+  }
+
   html:has(.layout-computador) .app-col-fixed {
     left: calc(var(--menu-lateral) + var(--app-col) / 2) !important;
   }
