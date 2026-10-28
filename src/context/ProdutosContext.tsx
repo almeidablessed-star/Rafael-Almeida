@@ -4,6 +4,7 @@ import { useAuth } from './AuthContext';
 import { Produto, FichaTecnica, StockItem } from '../types';
 import { planejarBaixa, ResultadoBaixa } from '../utils/stockConsumption';
 import { normalizeName } from '../utils/fichaMatcher';
+import { referenciaDoCheio } from '../utils/referenciaDoEstoque';
 
 /**
  * Fonte unica do catalogo de Produtos, compartilhada por todas as telas.
@@ -246,12 +247,10 @@ export const ProdutosProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setError(null);
 
       // Mesma regra do EstoqueContext: so aumento de quantidade reseta o
-      // baseline "cheio" do arco de percentual.
+      // baseline "cheio" do arco de percentual — comparando na mesma unidade,
+      // porque a compra pode trocar g por kg (ver referenciaDoCheio).
       const atual = produtos.find((p) => p.id === id);
-      const novaReferencia =
-        atual && produtoData.controlaEstoque && (produtoData.quantidadeAtual ?? 0) > (atual.quantidadeAtual ?? 0)
-          ? produtoData.quantidadeAtual
-          : atual?.quantidadeReferencia;
+      const novaReferencia = referenciaDoCheio(atual, produtoData);
 
       const { data, error: updateError } = await supabase
         .from('produtos')
