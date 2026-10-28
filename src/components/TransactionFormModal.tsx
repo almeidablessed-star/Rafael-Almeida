@@ -393,6 +393,20 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
     respostaMudancaDeTotal.current = null;
     setMudancaDeTotal(null);
   };
+  /** Mesma ideia para o sinal apagado: a pergunta abre no layout do app (era
+   * a caixinha do navegador) e `handleSubmit` espera a resposta. */
+  const [sinalApagado, setSinalApagado] = useState<number | null>(null);
+  const respostaSinalApagado = useRef<((salvar: boolean) => void) | null>(null);
+  const perguntarSinalApagado = (valor: number) =>
+    new Promise<boolean>((resolve) => {
+      respostaSinalApagado.current = resolve;
+      setSinalApagado(valor);
+    });
+  const responderSinalApagado = (salvar: boolean) => {
+    respostaSinalApagado.current?.(salvar);
+    respostaSinalApagado.current = null;
+    setSinalApagado(null);
+  };
 
   // Delivery State
   const [hasDelivery, setHasDelivery] = useState<boolean>(false);
@@ -1023,11 +1037,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
     // simbolo fixo. Cancelar sai antes de `setIsSaving`, entao nada e gravado.
     const sinalGravado = editingTransaction?.signalValue;
     if (type === 'venda' && sinalGravado != null && !signalValue.trim()) {
-      const continuar = window.confirm(
-        `Este pedido tinha um sinal de ${formatMoney(Number(sinalGravado))} e o campo está vazio. ` +
-          'Salvar assim marca o pedido como pago por inteiro e apaga o valor que a cliente ainda deve.\n\n' +
-          'Quer continuar?'
-      );
+      const continuar = await perguntarSinalApagado(Number(sinalGravado));
       if (!continuar) return;
     }
 
@@ -2615,6 +2625,54 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                 type="button"
                 autoFocus
                 onClick={() => responderMudancaDeTotal(true)}
+                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white"
+                style={{ background: 'linear-gradient(135deg, #6E3F72 0%, #3A2350 100%)', minHeight: '44px' }}
+              >
+                Salvar assim
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Pergunta do sinal apagado, no mesmo layout de "O total vai mudar".
+          Clicar fora = Cancelar. O foco comeca no Cancelar: aqui o "Salvar
+          assim" apaga o que a cliente ainda deve. */}
+      {sinalApagado != null && (
+        <div
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-[100000] animate-fadeIn"
+          onClick={(e) => { e.stopPropagation(); responderSinalApagado(false); }}
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="sinal-apagado-titulo"
+        >
+          <div
+            className="bg-white rounded-[24px] p-6 space-y-4 w-[90%] max-w-sm"
+            onClick={(e) => e.stopPropagation()}
+            style={{ fontFamily: "'Manrope', sans-serif" }}
+          >
+            <h3 id="sinal-apagado-titulo" className="font-serif-display text-lg" style={{ color: '#241B2B' }}>
+              O campo do sinal está vazio
+            </h3>
+            <p style={{ color: '#7A6E80', fontSize: '14px', lineHeight: 1.5 }}>
+              Este pedido tinha um sinal de{' '}
+              <strong style={{ color: '#241B2B' }}>{formatMoney(sinalApagado)}</strong> e o campo está vazio.
+              Salvar assim marca o pedido como pago por inteiro e apaga o valor que a cliente ainda deve.
+              Quer continuar?
+            </p>
+            <div className="flex gap-2 pt-4">
+              <button
+                type="button"
+                autoFocus
+                onClick={() => responderSinalApagado(false)}
+                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold"
+                style={{ background: '#F6F2F5', color: '#241B2B', minHeight: '44px' }}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => responderSinalApagado(true)}
                 className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white"
                 style={{ background: 'linear-gradient(135deg, #6E3F72 0%, #3A2350 100%)', minHeight: '44px' }}
               >
