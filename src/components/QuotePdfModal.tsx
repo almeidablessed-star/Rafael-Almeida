@@ -1015,6 +1015,27 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
 
       <div className={`bg-white rounded-xl max-w-2xl w-full shadow-highlight overflow-hidden flex flex-col max-h-full sm:max-h-[92vh] ${miniatura ? 'h-full' : ''} print:shadow-none print:rounded-none print:max-h-none print:h-auto border-2 border-pink-200 relative`} aria-label="Orçamento PDF">
 
+        {/* Enquanto o PDF e gerado, a folha e esticada ao tamanho natural para a
+            captura (ver handleDownloadPdf) e, na tela, parecia um zoom cortado
+            por 3-4 s. Este aviso cobre o cartao nesse tempo. A captura e da
+            folha (#quote-pdf-document), nao da tela: o aviso nao entra no PDF. */}
+        {isGeneratingPdf && (
+          <div
+            className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-3 animate-fadeIn print:hidden"
+            style={{ background: '#F6F2F5', fontFamily: "'Manrope', sans-serif" }}
+            role="status"
+            aria-live="polite"
+          >
+            <div
+              className="animate-spin"
+              style={{ width: '40px', height: '40px', borderRadius: '50%', border: '4px solid #E6DCEA', borderTopColor: '#6E3F72' }}
+              aria-hidden="true"
+            />
+            <p style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#3A2350' }}>Gerando o PDF…</p>
+            <p style={{ margin: 0, fontSize: '13px', color: '#7A6E80' }}>Leva alguns segundinhos.</p>
+          </div>
+        )}
+
         {/* STICKY TOP CONTROL BAR - ALWAYS VISIBLE & CLEAR ON ALL DEVICES */}
         <div className="p-2.5 sm:p-3 bg-gradient-to-r from-[#3A2350] to-[#A85E86] text-white flex items-center justify-between gap-2 no-print shrink-0 sticky top-0 z-50 border-b border-white/10 shadow-sm">
           {/* Mode Switcher */}
