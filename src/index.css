@@ -343,6 +343,23 @@ a:hover {
     box-shadow: none;
   }
 
+  /* Onboarding no computador: a pergunta de cada passo cresce no cartao
+     largo (no celular fica nos 22px da classe). */
+  .onboarding-computador main h2.font-serif-display {
+    font-size: 30px;
+    line-height: 1.2;
+  }
+
+  /* Explicacoes e rotulos pequenos do celular (9-11px) ficam miudos na tela
+     grande; o redesign desktop pede no minimo 12px para texto secundario. */
+  .onboarding-computador main .text-\[11px\] {
+    font-size: 13px;
+  }
+
+  .onboarding-computador main .text-\[9px\] {
+    font-size: 12px;
+  }
+
   html:has(.layout-computador) .app-col-fixed {
     left: calc(var(--menu-lateral) + var(--app-col) / 2) !important;
   }

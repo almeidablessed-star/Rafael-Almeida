@@ -13,6 +13,9 @@ import {
 import { CampoNumerico } from '../CampoNumerico';
 import { CampoComAjuda } from './CampoComAjuda';
 import { CustomSelect } from '../CustomSelect';
+import { LogoCarulaApp } from '../LogoCarulaApp';
+import { useTelaDeComputador } from '../../hooks/useTelaDeComputador';
+import { Check } from 'lucide-react';
 
 /**
  * Onboarding financeiro obrigatorio (spec "Minha Empresa", Parte 3), com o
@@ -30,6 +33,19 @@ import { CustomSelect } from '../CustomSelect';
  */
 
 const TOTAL_PASSOS = 9;
+
+/** Nomes curtos dos passos, para a lista do painel na versao computador. */
+const NOMES_PASSOS = [
+  'Seu pró-labore',
+  'Valor da sua hora',
+  'Dias de trabalho',
+  'Reset das metas',
+  'Despesas do negócio',
+  'Meta de CMV',
+  'Meta de investimento',
+  'Meta de lucro',
+  'Resumo',
+];
 
 const DESPESAS_REDESIGN_HABILITADO = true;
 
@@ -81,6 +97,7 @@ export const EmpresaOnboardingFlow: React.FC = () => {
   const { logout } = useAuth();
   const { fichas } = useFichasTecnicas();
   const { formatCurrency, symbol } = useCurrency();
+  const pc = useTelaDeComputador();
 
   const [passo, setPasso] = useState(1);
   const [carregouInicial, setCarregouInicial] = useState(false);
@@ -227,6 +244,588 @@ export const EmpresaOnboardingFlow: React.FC = () => {
     ? `Com seu faturamento necessário de ${formatCurrency(estrutura.faturamentoNecessario)}, isso significa aproximadamente ${formatCurrency(estrutura.lucroAmount)} por mês de lucro para a empresa, além do que você recebe pelo seu trabalho.`
     : undefined;
 
+  // Conteudo de cada passo, igual no celular e no computador: so a moldura
+  // em volta muda (ver `pc` mais abaixo).
+  const conteudoPasso = (
+    <>
+      {erro && (
+        <div className="mb-3 p-2.5 rounded-xl bg-[#FDF4F5] border border-[rgba(196,98,111,.35)] text-[12px] text-[#C4626F]" style={{ fontFamily: "'Manrope', sans-serif" }}>
+          {erro}
+        </div>
+      )}
+
+      {passo === 1 && (
+        <div className="space-y-3">
+          <h2 className={labelClass} style={{ color: '#241B2B' }}>Quanto você quer receber por mês pelo seu trabalho?</h2>
+          <CampoComAjuda microcopy="É quanto você quer receber pelo seu trabalho — nunca o lucro da empresa. São coisas diferentes." />
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
+              Pró-labore mensal
+            </label>
+            <div className="flex items-stretch overflow-hidden" style={{ borderRadius: '8px', border: '1px solid rgba(58,35,80,0.14)', background: '#FFFFFF' }}>
+              <span
+                className="flex items-center px-3 flex-shrink-0"
+                style={{ background: '#F3E9F3', fontSize: '14px', fontWeight: 600, color: '#3A2350', fontFamily: "'Manrope', sans-serif" }}
+              >
+                {symbol}
+              </span>
+              <CampoNumerico
+                value={monthlyIncomeTarget}
+                onChange={setMonthlyIncomeTarget}
+                placeholder="0"
+                ariaLabel="Quanto você quer receber por mês"
+                className="flex-1 min-w-0 focus:outline-none"
+                style={{ padding: '10px 12px', border: 'none', background: 'transparent', fontSize: '14px', color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}
+              />
+            </div>
+          </div>
+          <div className="pt-2">
+            <button className={botaoPrimario} style={{ background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)', boxShadow: '0 10px 24px rgba(58,35,80,.35)' }} onClick={() => avancar({ monthlyIncomeTarget })} disabled={salvando}>
+              Avançar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {passo === 2 && (
+        <div className="space-y-3">
+          <h2 className={labelClass} style={{ color: '#241B2B' }}>Quanto vale sua hora de trabalho?</h2>
+          <CampoComAjuda microcopy="Multiplicado pelas horas de cada receita, vira a mão de obra daquele produto — automaticamente, sem você fazer a conta." />
+          <CampoNumerico
+            className={inputClass}
+            value={horaTrabalho}
+            onChange={setHoraTrabalho}
+            placeholder="0"
+            ariaLabel="Quanto vale sua hora de trabalho"
+          />
+          <div className="flex gap-2 pt-2">
+            <button className={botaoSecundario} onClick={voltar} disabled={salvando}>Voltar</button>
+            <div className="flex-1">
+              <button className={botaoPrimario} style={{ background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)', boxShadow: '0 10px 24px rgba(58,35,80,.35)' }} onClick={() => avancar({ horaTrabalho })} disabled={salvando}>
+                Avançar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {passo === 3 && (
+        <div className="space-y-3">
+          <h2 className={labelClass} style={{ color: '#241B2B' }}>Quantos dias por semana você quer trabalhar?</h2>
+          <CustomSelect
+            value={String(workingDaysPerWeek)}
+            onChange={(v) => setWorkingDaysPerWeek(Number(v))}
+            ariaLabel="Dias de trabalho por semana"
+            options={[1, 2, 3, 4, 5, 6, 7].map((n) => ({ value: String(n), label: String(n) }))}
+          />
+          <div className="p-3 rounded-xl border border-[#E6E1DB] bg-white">
+            <p className="text-[10px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
+              Meta de referência — não é uma obrigação
+            </p>
+            <p className="text-[13px] font-bold mt-1" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>
+              {metaHoras.horasPorMes.toFixed(1)}h/mês → {metaHoras.horasPorSemana.toFixed(1)}h/semana → {metaHoras.horasPorDia.toFixed(1)}h/dia
+            </p>
+          </div>
+          <div className="flex gap-2 pt-2">
+            <button className={botaoSecundario} onClick={voltar} disabled={salvando}>Voltar</button>
+            <div className="flex-1">
+              <button className={botaoPrimario} style={{ background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)', boxShadow: '0 10px 24px rgba(58,35,80,.35)' }} onClick={() => avancar({ workingDaysPerWeek })} disabled={salvando}>
+                Avançar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {passo === 4 && (
+        <div className="space-y-3">
+          <h2 className={labelClass} style={{ color: '#241B2B' }}>Com que frequência você quer resetar suas metas?</h2>
+          <CampoComAjuda microcopy="É de quanto em quanto tempo suas metas zeram e recomeçam. Não muda nenhum valor de venda, só o recorte com que você acompanha. Dá pra trocar depois em Minha Empresa." />
+          <CustomSelect
+            value={periodoReset}
+            onChange={(v) => setPeriodoReset(v as PeriodoReset)}
+            ariaLabel="Período de reset das metas"
+            options={[
+              { value: 'semanal', label: 'Toda semana (segunda a domingo)' },
+              { value: 'quinzenal', label: 'A cada quinzena (dias 1–15 e 16 ao fim do mês)' },
+              { value: 'mensal', label: 'Todo mês (mês cheio)' },
+            ]}
+          />
+          <div className="p-3 rounded-xl border border-[#E6E1DB] bg-white">
+            <p className="text-[10px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
+              Sua meta de horas continua semanal
+            </p>
+            <p className="text-[13px] font-bold mt-1" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>
+              {metaHoras.horasPorSemana.toFixed(1)}h/semana → {metaHoras.horasPorDia.toFixed(1)}h/dia
+            </p>
+          </div>
+          <div className="flex gap-2 pt-2">
+            <button className={botaoSecundario} onClick={voltar} disabled={salvando}>Voltar</button>
+            <div className="flex-1">
+              <button className={botaoPrimario} style={{ background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)', boxShadow: '0 10px 24px rgba(58,35,80,.35)' }} onClick={() => avancar({ periodoReset })} disabled={salvando}>
+                Avançar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {passo === 5 && (
+        <div className="space-y-3">
+          <h2 className={labelClass} style={{ color: '#241B2B' }}>Despesas mensais do negócio</h2>
+          <CampoComAjuda microcopy="Aluguel, luz, internet... custos fixos, independente de quanto você vende. O que já está no custo do produto (embalagem, insumos) não entra aqui de novo." />
+          <div className="space-y-2">
+            {despesas.map((d, i) => {
+              if (!DESPESAS_REDESIGN_HABILITADO) {
+                return (
+                  <div key={d.id ?? `novo-${i}`} className="p-3 rounded-xl border border-[#E6E1DB] bg-white space-y-2">
+                    <input
+                      type="text"
+                      placeholder="Nome da despesa"
+                      value={d.nome}
+                      onChange={(e) => atualizarDespesa(i, 'nome', e.target.value)}
+                      className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
+                    />
+                    <div className="flex gap-2 items-center">
+                      <CampoNumerico
+                        placeholder="Valor"
+                        ariaLabel="Valor da despesa"
+                        value={d.valor}
+                        onChange={(valor) => atualizarDespesa(i, 'valor', valor)}
+                        className="flex-1 px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
+                      />
+                      <CampoNumerico
+                        placeholder="% negócio"
+                        ariaLabel="Percentual do negócio"
+                        value={d.percentualRateio}
+                        onChange={(valor) => atualizarDespesa(i, 'percentualRateio', valor)}
+                        className="w-24 px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
+                      />
+                      <button
+                        onClick={() => removerDespesa(i)}
+                        className="w-8 h-8 flex-shrink-0 rounded-full bg-[#FDF4F5] text-[#C4626F] flex items-center justify-center text-xs font-bold"
+                        aria-label="Remover despesa"
+                      >
+                        ×
+                      </button>
+                    </div>
+                    {d.percentualRateio < 100 && (
+                      <p className="text-[10px]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
+                        Se essa despesa também é usada na sua vida pessoal, aqui vale só a parte da confeitaria.
+                      </p>
+                    )}
+                  </div>
+                );
+              }
+
+              // Mesmo layout de MinhaEmpresaCard.tsx (secao "Despesas do
+              // Negocio" pos-onboarding): labels "Valor (R$)"/"% do
+              // negocio" + CampoComAjuda com exemplo dinamico por item.
+              // O wrapper <div className="flex-1"> em vez do <input> reto
+              // como filho do flex tambem e o que evita o vazamento do
+              // campo pra fora do card (bug so visivel aqui, onde o
+              // container e mais estreito que em Minha Empresa).
+              const exemploRateio = d.nome && d.valor
+                ? `Você informou ${formatCurrency(d.valor)} de ${d.nome.trim()}. Se só uma parte é do negócio, ajuste esse número — por exemplo, 50 significa que ${formatCurrency(d.valor * 0.5)} entram como custo real da confeitaria.`
+                : undefined;
+
+              return (
+                <div key={d.id ?? `novo-${i}`} className="p-3 rounded-xl border border-[#E6E1DB] bg-white space-y-2">
+                  <input
+                    type="text"
+                    placeholder="Nome da despesa"
+                    value={d.nome}
+                    onChange={(e) => atualizarDespesa(i, 'nome', e.target.value)}
+                    className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
+                  />
+                  <div className="flex gap-2 items-end">
+                    <div className="flex-1 min-w-0">
+                      <label className="text-[9px] font-bold block mb-1" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
+                        Valor ({symbol})
+                      </label>
+                      <CampoNumerico
+                        placeholder="0"
+                        ariaLabel="Valor da despesa"
+                        value={d.valor}
+                        onChange={(valor) => atualizarDespesa(i, 'valor', valor)}
+                        className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
+                      />
+                    </div>
+                    <div className="w-24 flex-shrink-0">
+                      <label className="text-[9px] font-bold block mb-1" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
+                        % do negócio
+                      </label>
+                      <CampoNumerico
+                        placeholder="100"
+                        ariaLabel="Percentual do negócio"
+                        value={d.percentualRateio}
+                        onChange={(valor) => atualizarDespesa(i, 'percentualRateio', valor)}
+                        className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
+                      />
+                    </div>
+                    <button
+                      onClick={() => removerDespesa(i)}
+                      className="w-8 h-8 flex-shrink-0 rounded-full bg-[#FDF4F5] text-[#C4626F] flex items-center justify-center text-xs font-bold"
+                      aria-label="Remover despesa"
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <CampoComAjuda
+                    microcopy="Se essa despesa também é usada na sua vida pessoal, informe aqui só a parte que é do negócio. Deixe 100 se ela é toda da confeitaria."
+                    exemploDinamico={exemploRateio}
+                    ariaLabelAjuda="Ver exemplo com os números da sua conta"
+                  />
+                </div>
+              );
+            })}
+          </div>
+          <button
+            onClick={adicionarDespesa}
+            className="w-full py-2.5 rounded-xl border border-dashed border-[#E6E1DB] text-[12px] font-bold text-[#6E3F72] hover:bg-white transition-all"
+          >
+            + Adicionar despesa
+          </button>
+          <div className="p-3 rounded-xl bg-white border border-[#E6E1DB] flex items-center justify-between">
+            <span className="text-[11px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>Total considerado</span>
+            <span className="text-[15px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>{formatCurrency(despesasMensais)}</span>
+          </div>
+          <div className="flex gap-2 pt-2">
+            <button className={botaoSecundario} onClick={voltar} disabled={salvando}>Voltar</button>
+            <div className="flex-1">
+              <button className={botaoPrimario} style={{ background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)', boxShadow: '0 10px 24px rgba(58,35,80,.35)' }} onClick={avancarComDespesas} disabled={salvando}>
+                Avançar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {passo === 6 && (
+        <div className="space-y-3">
+          <h2 className={labelClass} style={{ color: '#241B2B' }}>Meta de CMV (%)</h2>
+          <CampoComAjuda
+            microcopy="Quanto do preço do bolo vai embora só com ingredientes e embalagem. Quanto menor, mais sobra pra você."
+            exemploDinamico={exemploCmv}
+            ariaLabelAjuda="Ver exemplo com os números da sua conta"
+          />
+          <NotaSobreOPadrao>
+            34% é uma referência comum para confeitaria e doceria — a maioria fica entre 25% e 40% do preço de venda. Pode ajustar para a realidade do seu negócio.
+          </NotaSobreOPadrao>
+          <CampoNumerico
+            className={inputClass}
+            value={cmvTargetPercent}
+            onChange={setCmvTargetPercent}
+            ariaLabel="Meta de CMV em porcentagem"
+          />
+          <div className="flex gap-2 pt-2">
+            <button className={botaoSecundario} onClick={voltar} disabled={salvando}>Voltar</button>
+            <div className="flex-1">
+              <button className={botaoPrimario} style={{ background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)', boxShadow: '0 10px 24px rgba(58,35,80,.35)' }} onClick={() => avancar({ cmvTargetPercent })} disabled={salvando}>
+                Avançar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {passo === 7 && (
+        <div className="space-y-3">
+          <h2 className={labelClass} style={{ color: '#241B2B' }}>Meta de investimento (%)</h2>
+          <CampoComAjuda
+            microcopy="Uma reserva pra comprar equipamento, fazer curso, crescer o negócio — sem tirar do seu bolso."
+            exemploDinamico={exemploInvestimento}
+            ariaLabelAjuda="Ver exemplo com os números da sua conta"
+          />
+          <NotaSobreOPadrao>
+            5% é uma reserva para reinvestir no negócio — equipamento, melhorias, capital de giro. Não é um padrão fixo do setor, é um ponto de partida: ajuste como fizer sentido pra você.
+          </NotaSobreOPadrao>
+          <CampoNumerico
+            className={inputClass}
+            value={investmentTargetPercent}
+            onChange={setInvestmentTargetPercent}
+            ariaLabel="Meta de investimento em porcentagem"
+          />
+          <div className="flex gap-2 pt-2">
+            <button className={botaoSecundario} onClick={voltar} disabled={salvando}>Voltar</button>
+            <div className="flex-1">
+              <button className={botaoPrimario} style={{ background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)', boxShadow: '0 10px 24px rgba(58,35,80,.35)' }} onClick={() => avancar({ investmentTargetPercent })} disabled={salvando}>
+                Avançar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {passo === 8 && (
+        <div className="space-y-3">
+          <h2 className={labelClass} style={{ color: '#241B2B' }}>Meta de lucro (%)</h2>
+          <CampoComAjuda
+            microcopy="O que sobra pra empresa, além do que você já recebe pelo seu trabalho."
+            exemploDinamico={exemploLucro}
+            ariaLabelAjuda="Ver exemplo com os números da sua conta"
+          />
+          <NotaSobreOPadrao>
+            Pode parecer baixo perto das margens de 30% a 50% que você vê por aí — mas aquelas normalmente misturam o lucro com o seu próprio trabalho. Aqui no Carula a mão de obra já é paga à parte, como se fosse o seu salário. Este número é só o que sobra pra empresa depois disso. Ajuste como quiser.
+          </NotaSobreOPadrao>
+          <CampoNumerico
+            className={inputClass}
+            value={profitTargetPercent}
+            onChange={setProfitTargetPercent}
+            ariaLabel="Meta de lucro em porcentagem"
+          />
+          <div className="flex gap-2 pt-2">
+            <button className={botaoSecundario} onClick={voltar} disabled={salvando}>Voltar</button>
+            <div className="flex-1">
+              <button className={botaoPrimario} style={{ background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)', boxShadow: '0 10px 24px rgba(58,35,80,.35)' }} onClick={() => avancar({ profitTargetPercent })} disabled={salvando}>
+                Avançar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {passo === 9 && (
+        <div className="space-y-3">
+          <h2 className={labelClass} style={{ color: '#241B2B' }}>Resumo</h2>
+          <CampoComAjuda microcopy="Quanto você precisa vender no total pra cobrir tudo — seu trabalho, os custos fixos e o lucro da empresa." />
+
+          {!estrutura.valido ? (
+            <div className="p-3 rounded-xl bg-[#FDF4F5] border border-[rgba(196,98,111,.35)] text-[12px] text-[#C4626F]" style={{ fontFamily: "'Manrope', sans-serif" }}>
+              {estrutura.mensagemErro}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="p-4 rounded-xl bg-white border border-[#E6E1DB] text-center">
+                <p className="text-[10px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>Faturamento necessário</p>
+                <p className="font-serif-display text-[28px]" style={{ color: '#241B2B' }}>{formatCurrency(estrutura.faturamentoNecessario)}</p>
+              </div>
+
+              <div className="rounded-xl border border-[#E6E1DB] bg-white overflow-hidden">
+                {[
+                  ['CMV / Reposição', estrutura.cmvTargetPercent, estrutura.cmvAmount],
+                  ['Despesas da empresa', estrutura.custosPercent, estrutura.custosAmount],
+                  ['Investimento', estrutura.investmentTargetPercent, estrutura.investimentoAmount],
+                  ['Mão de obra', estrutura.maoDeObraPercent, estrutura.maoDeObraAmount],
+                  ['Lucro da empresa', estrutura.profitTargetPercent, estrutura.lucroAmount],
+                ].map(([nome, pct, valor], i) => (
+                  <div key={nome as string} className={`flex items-center justify-between px-3 py-2.5 ${i > 0 ? 'border-t border-[#E6E1DB]' : ''}`}>
+                    <span className="text-[12px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>{nome}</span>
+                    <span className="text-[12px]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>{(pct as number).toFixed(2)}%</span>
+                    <span className="text-[12px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>{formatCurrency(valor as number)}</span>
+                  </div>
+                ))}
+              </div>
+
+              {precoMedioAtual != null && (
+                <p className="text-[11px] p-2.5 rounded-xl bg-white border border-[#E6E1DB]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
+                  Hoje seus produtos custam em média {formatCurrency(precoMedioAtual)}. A comparação detalhada com o preço sugerido por produto chega quando as fichas técnicas forem religadas a este mesmo motor de cálculo.
+                </p>
+              )}
+            </div>
+          )}
+
+          {avisoRemuneracao && (
+            <div className="p-3.5 rounded-xl" style={{ background: '#FDF4F5', border: '1px solid #F0D9DD' }} role="alert">
+              <p className="text-[12.5px] leading-relaxed m-0 font-bold" style={{ color: '#C4626F', fontFamily: "'Manrope', sans-serif" }}>
+                Falta dizer quanto você quer receber por mês.
+              </p>
+              <p className="text-[12px] leading-relaxed mt-1 mb-2.5" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
+                É desse valor que sai o cálculo de todas as suas metas. Sem ele, elas nascem zeradas.
+              </p>
+              <button
+                className="px-4 py-2.5 rounded-xl text-white text-[12px] font-bold active:scale-95 transition-all"
+                style={{ background: '#C4626F' }}
+                onClick={() => { setAvisoRemuneracao(false); irParaPasso(PASSO_REMUNERACAO); }}
+                disabled={salvando}
+              >
+                Preencher agora
+              </button>
+            </div>
+          )}
+
+          <div className="flex gap-2 pt-2">
+            <button className={botaoSecundario} onClick={voltar} disabled={salvando}>Voltar</button>
+            <div className="flex-1">
+              <button
+                className={botaoPrimario}
+                style={{ background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)', boxShadow: '0 10px 24px rgba(58,35,80,.35)' }}
+                onClick={confirmarConclusao}
+                disabled={salvando || !estrutura.valido}
+              >
+                Confirmar e concluir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+
+  const dicaPasso1 = passo === 1 && (
+    <div className="p-3.5 rounded-xl flex items-start gap-2.5" style={{ background: '#F3E9F3' }}>
+      <span
+        className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
+        style={{ background: '#3A2350', color: '#FFFFFF', fontSize: '12px', fontWeight: 700 }}
+      >
+        ?
+      </span>
+      <p className="text-[12.5px] leading-relaxed m-0" style={{ color: '#6E3F72', fontFamily: "'Manrope', sans-serif" }}>
+        Sem ideia do valor? Pense no que você precisa receber para viver tranquila — dá pra ajustar depois.
+      </p>
+    </div>
+  );
+
+  const botaoSair = (
+    <button
+      type="button"
+      onClick={sair}
+      className="w-full py-3 rounded-2xl text-sm font-bold transition-colors"
+      style={{ border: '1px solid rgba(58,35,80,0.16)', color: '#3A2350', background: '#FFFFFF' }}
+    >
+      Sair
+    </button>
+  );
+
+  // Computador: painel roxo com a lista dos passos a esquerda e o passo atual
+  // num cartao a direita, na linha do login (EntradaComputador). A lista so
+  // mostra o caminho; navegar continua sendo pelo Voltar/Avancar. O celular
+  // segue no retorno de baixo, sem mudanca.
+  if (pc) {
+    return (
+      <div
+        className="entrada-computador onboarding-computador"
+        style={{
+          minHeight: '100vh',
+          display: 'grid',
+          gridTemplateColumns: '480px minmax(0, 1fr)',
+          background: '#F6F2F5',
+          color: '#241B2B',
+          fontFamily: "'Manrope', sans-serif",
+        }}
+      >
+        <aside
+          style={{
+            background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)',
+            color: '#FFFFFF',
+            padding: '44px 52px',
+            display: 'flex',
+            flexDirection: 'column',
+            position: 'sticky',
+            top: 0,
+            height: '100vh',
+            overflowY: 'auto',
+          }}
+        >
+          <div>
+            <LogoCarulaApp fundo="roxo" tamanho={34} />
+          </div>
+          <h1 className="font-serif-display" style={{ fontSize: '44px', lineHeight: 1.05, fontWeight: 400, marginTop: '40px' }}>
+            Vamos montar sua estrutura financeira
+          </h1>
+          <p style={{ marginTop: '12px', fontSize: '15px', lineHeight: 1.5, color: '#E6D8E8' }}>
+            Isso ajuda a saber quanto você precisa faturar — não só o que cobrar por bolo.
+          </p>
+
+          <ol style={{ marginTop: '30px', display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '14px', listStyle: 'none', padding: 0 }}>
+            {NOMES_PASSOS.map((nome, i) => {
+              const numero = i + 1;
+              const feito = numero < passo;
+              const atual = numero === passo;
+              return (
+                <li
+                  key={nome}
+                  aria-current={atual ? 'step' : undefined}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '7px 12px',
+                    margin: '0 -12px',
+                    borderRadius: '12px',
+                    background: atual ? 'rgba(255,255,255,.12)' : 'transparent',
+                    fontWeight: atual ? 800 : 600,
+                    color: feito ? '#CBB6CF' : atual ? '#FFFFFF' : '#E6D8E8',
+                  }}
+                >
+                  <span
+                    style={{
+                      width: '24px',
+                      height: '24px',
+                      borderRadius: '50%',
+                      flexShrink: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '12px',
+                      fontWeight: 800,
+                      background: atual ? '#F5B9C6' : feito ? 'rgba(255,255,255,.18)' : 'transparent',
+                      color: atual ? '#3A2350' : '#FFFFFF',
+                      border: !atual && !feito ? '1.5px solid rgba(255,255,255,.4)' : 'none',
+                    }}
+                  >
+                    {feito ? <Check style={{ width: '13px', height: '13px' }} strokeWidth={3} /> : numero}
+                  </span>
+                  {nome}
+                </li>
+              );
+            })}
+          </ol>
+
+          <button
+            type="button"
+            onClick={sair}
+            className="transition-colors hover:bg-white/10"
+            style={{
+              marginTop: 'auto',
+              alignSelf: 'flex-start',
+              height: '44px',
+              padding: '0 28px',
+              borderRadius: '14px',
+              border: '1px solid rgba(255,255,255,.35)',
+              color: '#FFFFFF',
+              fontSize: '14px',
+              fontWeight: 700,
+            }}
+          >
+            Sair
+          </button>
+        </aside>
+
+        {/* Cartao preso no alto (alinhado ao titulo do painel), e nao centralizado
+            na altura: assim a barra de progresso nao pula de lugar a cada passo. */}
+        <main style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '120px 48px 64px' }}>
+          <div style={{ width: '100%', maxWidth: '560px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div>
+              <div
+                className="flex items-center justify-between"
+                style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '.1em', textTransform: 'uppercase', color: '#7A6E80', marginBottom: '8px' }}
+              >
+                <span>Passo {passo} de {TOTAL_PASSOS}</span>
+                <span style={{ fontVariantNumeric: 'tabular-nums' }}>{Math.round((passo / TOTAL_PASSOS) * 100)}%</span>
+              </div>
+              <div style={{ height: '6px', borderRadius: '99px', background: '#EADCEB', overflow: 'hidden' }}>
+                <div
+                  className="transition-all duration-300"
+                  style={{ height: '100%', borderRadius: '99px', width: `${(passo / TOTAL_PASSOS) * 100}%`, background: 'linear-gradient(90deg, #A85E86, #6E3F72)' }}
+                />
+              </div>
+            </div>
+
+            <div style={{ background: '#FFFFFF', borderRadius: '24px', boxShadow: '0 8px 20px rgba(58,35,80,.08)', overflow: 'hidden' }}>
+              <div style={{ height: '4px', background: '#A85E86' }} />
+              <div style={{ padding: '32px 36px' }}>
+                {conteudoPasso}
+              </div>
+            </div>
+
+            {dicaPasso1}
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div
       className="overflow-hidden shadow-card"
@@ -316,442 +915,13 @@ export const EmpresaOnboardingFlow: React.FC = () => {
         >
           <div style={{ height: '4px', background: '#A85E86' }} />
           <div className="p-5">
-          {erro && (
-            <div className="mb-3 p-2.5 rounded-xl bg-[#FDF4F5] border border-[rgba(196,98,111,.35)] text-[12px] text-[#C4626F]" style={{ fontFamily: "'Manrope', sans-serif" }}>
-              {erro}
-            </div>
-          )}
-
-          {passo === 1 && (
-            <div className="space-y-3">
-              <h2 className={labelClass} style={{ color: '#241B2B' }}>Quanto você quer receber por mês pelo seu trabalho?</h2>
-              <CampoComAjuda microcopy="É quanto você quer receber pelo seu trabalho — nunca o lucro da empresa. São coisas diferentes." />
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
-                  Pró-labore mensal
-                </label>
-                <div className="flex items-stretch overflow-hidden" style={{ borderRadius: '8px', border: '1px solid rgba(58,35,80,0.14)', background: '#FFFFFF' }}>
-                  <span
-                    className="flex items-center px-3 flex-shrink-0"
-                    style={{ background: '#F3E9F3', fontSize: '14px', fontWeight: 600, color: '#3A2350', fontFamily: "'Manrope', sans-serif" }}
-                  >
-                    {symbol}
-                  </span>
-                  <CampoNumerico
-                    value={monthlyIncomeTarget}
-                    onChange={setMonthlyIncomeTarget}
-                    placeholder="0"
-                    ariaLabel="Quanto você quer receber por mês"
-                    className="flex-1 min-w-0 focus:outline-none"
-                    style={{ padding: '10px 12px', border: 'none', background: 'transparent', fontSize: '14px', color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}
-                  />
-                </div>
-              </div>
-              <div className="pt-2">
-                <button className={botaoPrimario} style={{ background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)', boxShadow: '0 10px 24px rgba(58,35,80,.35)' }} onClick={() => avancar({ monthlyIncomeTarget })} disabled={salvando}>
-                  Avançar
-                </button>
-              </div>
-            </div>
-          )}
-
-          {passo === 2 && (
-            <div className="space-y-3">
-              <h2 className={labelClass} style={{ color: '#241B2B' }}>Quanto vale sua hora de trabalho?</h2>
-              <CampoComAjuda microcopy="Multiplicado pelas horas de cada receita, vira a mão de obra daquele produto — automaticamente, sem você fazer a conta." />
-              <CampoNumerico
-                className={inputClass}
-                value={horaTrabalho}
-                onChange={setHoraTrabalho}
-                placeholder="0"
-                ariaLabel="Quanto vale sua hora de trabalho"
-              />
-              <div className="flex gap-2 pt-2">
-                <button className={botaoSecundario} onClick={voltar} disabled={salvando}>Voltar</button>
-                <div className="flex-1">
-                  <button className={botaoPrimario} style={{ background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)', boxShadow: '0 10px 24px rgba(58,35,80,.35)' }} onClick={() => avancar({ horaTrabalho })} disabled={salvando}>
-                    Avançar
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {passo === 3 && (
-            <div className="space-y-3">
-              <h2 className={labelClass} style={{ color: '#241B2B' }}>Quantos dias por semana você quer trabalhar?</h2>
-              <CustomSelect
-                value={String(workingDaysPerWeek)}
-                onChange={(v) => setWorkingDaysPerWeek(Number(v))}
-                ariaLabel="Dias de trabalho por semana"
-                options={[1, 2, 3, 4, 5, 6, 7].map((n) => ({ value: String(n), label: String(n) }))}
-              />
-              <div className="p-3 rounded-xl border border-[#E6E1DB] bg-white">
-                <p className="text-[10px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
-                  Meta de referência — não é uma obrigação
-                </p>
-                <p className="text-[13px] font-bold mt-1" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>
-                  {metaHoras.horasPorMes.toFixed(1)}h/mês → {metaHoras.horasPorSemana.toFixed(1)}h/semana → {metaHoras.horasPorDia.toFixed(1)}h/dia
-                </p>
-              </div>
-              <div className="flex gap-2 pt-2">
-                <button className={botaoSecundario} onClick={voltar} disabled={salvando}>Voltar</button>
-                <div className="flex-1">
-                  <button className={botaoPrimario} style={{ background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)', boxShadow: '0 10px 24px rgba(58,35,80,.35)' }} onClick={() => avancar({ workingDaysPerWeek })} disabled={salvando}>
-                    Avançar
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {passo === 4 && (
-            <div className="space-y-3">
-              <h2 className={labelClass} style={{ color: '#241B2B' }}>Com que frequência você quer resetar suas metas?</h2>
-              <CampoComAjuda microcopy="É de quanto em quanto tempo suas metas zeram e recomeçam. Não muda nenhum valor de venda, só o recorte com que você acompanha. Dá pra trocar depois em Minha Empresa." />
-              <CustomSelect
-                value={periodoReset}
-                onChange={(v) => setPeriodoReset(v as PeriodoReset)}
-                ariaLabel="Período de reset das metas"
-                options={[
-                  { value: 'semanal', label: 'Toda semana (segunda a domingo)' },
-                  { value: 'quinzenal', label: 'A cada quinzena (dias 1–15 e 16 ao fim do mês)' },
-                  { value: 'mensal', label: 'Todo mês (mês cheio)' },
-                ]}
-              />
-              <div className="p-3 rounded-xl border border-[#E6E1DB] bg-white">
-                <p className="text-[10px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
-                  Sua meta de horas continua semanal
-                </p>
-                <p className="text-[13px] font-bold mt-1" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>
-                  {metaHoras.horasPorSemana.toFixed(1)}h/semana → {metaHoras.horasPorDia.toFixed(1)}h/dia
-                </p>
-              </div>
-              <div className="flex gap-2 pt-2">
-                <button className={botaoSecundario} onClick={voltar} disabled={salvando}>Voltar</button>
-                <div className="flex-1">
-                  <button className={botaoPrimario} style={{ background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)', boxShadow: '0 10px 24px rgba(58,35,80,.35)' }} onClick={() => avancar({ periodoReset })} disabled={salvando}>
-                    Avançar
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {passo === 5 && (
-            <div className="space-y-3">
-              <h2 className={labelClass} style={{ color: '#241B2B' }}>Despesas mensais do negócio</h2>
-              <CampoComAjuda microcopy="Aluguel, luz, internet... custos fixos, independente de quanto você vende. O que já está no custo do produto (embalagem, insumos) não entra aqui de novo." />
-              <div className="space-y-2">
-                {despesas.map((d, i) => {
-                  if (!DESPESAS_REDESIGN_HABILITADO) {
-                    return (
-                      <div key={d.id ?? `novo-${i}`} className="p-3 rounded-xl border border-[#E6E1DB] bg-white space-y-2">
-                        <input
-                          type="text"
-                          placeholder="Nome da despesa"
-                          value={d.nome}
-                          onChange={(e) => atualizarDespesa(i, 'nome', e.target.value)}
-                          className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
-                        />
-                        <div className="flex gap-2 items-center">
-                          <CampoNumerico
-                            placeholder="Valor"
-                            ariaLabel="Valor da despesa"
-                            value={d.valor}
-                            onChange={(valor) => atualizarDespesa(i, 'valor', valor)}
-                            className="flex-1 px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
-                          />
-                          <CampoNumerico
-                            placeholder="% negócio"
-                            ariaLabel="Percentual do negócio"
-                            value={d.percentualRateio}
-                            onChange={(valor) => atualizarDespesa(i, 'percentualRateio', valor)}
-                            className="w-24 px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
-                          />
-                          <button
-                            onClick={() => removerDespesa(i)}
-                            className="w-8 h-8 flex-shrink-0 rounded-full bg-[#FDF4F5] text-[#C4626F] flex items-center justify-center text-xs font-bold"
-                            aria-label="Remover despesa"
-                          >
-                            ×
-                          </button>
-                        </div>
-                        {d.percentualRateio < 100 && (
-                          <p className="text-[10px]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
-                            Se essa despesa também é usada na sua vida pessoal, aqui vale só a parte da confeitaria.
-                          </p>
-                        )}
-                      </div>
-                    );
-                  }
-
-                  // Mesmo layout de MinhaEmpresaCard.tsx (secao "Despesas do
-                  // Negocio" pos-onboarding): labels "Valor (R$)"/"% do
-                  // negocio" + CampoComAjuda com exemplo dinamico por item.
-                  // O wrapper <div className="flex-1"> em vez do <input> reto
-                  // como filho do flex tambem e o que evita o vazamento do
-                  // campo pra fora do card (bug so visivel aqui, onde o
-                  // container e mais estreito que em Minha Empresa).
-                  const exemploRateio = d.nome && d.valor
-                    ? `Você informou ${formatCurrency(d.valor)} de ${d.nome.trim()}. Se só uma parte é do negócio, ajuste esse número — por exemplo, 50 significa que ${formatCurrency(d.valor * 0.5)} entram como custo real da confeitaria.`
-                    : undefined;
-
-                  return (
-                    <div key={d.id ?? `novo-${i}`} className="p-3 rounded-xl border border-[#E6E1DB] bg-white space-y-2">
-                      <input
-                        type="text"
-                        placeholder="Nome da despesa"
-                        value={d.nome}
-                        onChange={(e) => atualizarDespesa(i, 'nome', e.target.value)}
-                        className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
-                      />
-                      <div className="flex gap-2 items-end">
-                        <div className="flex-1 min-w-0">
-                          <label className="text-[9px] font-bold block mb-1" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
-                            Valor ({symbol})
-                          </label>
-                          <CampoNumerico
-                            placeholder="0"
-                            ariaLabel="Valor da despesa"
-                            value={d.valor}
-                            onChange={(valor) => atualizarDespesa(i, 'valor', valor)}
-                            className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
-                          />
-                        </div>
-                        <div className="w-24 flex-shrink-0">
-                          <label className="text-[9px] font-bold block mb-1" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
-                            % do negócio
-                          </label>
-                          <CampoNumerico
-                            placeholder="100"
-                            ariaLabel="Percentual do negócio"
-                            value={d.percentualRateio}
-                            onChange={(valor) => atualizarDespesa(i, 'percentualRateio', valor)}
-                            className="w-full px-3 py-2 bg-white border border-[#E6E1DB] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe"
-                          />
-                        </div>
-                        <button
-                          onClick={() => removerDespesa(i)}
-                          className="w-8 h-8 flex-shrink-0 rounded-full bg-[#FDF4F5] text-[#C4626F] flex items-center justify-center text-xs font-bold"
-                          aria-label="Remover despesa"
-                        >
-                          ×
-                        </button>
-                      </div>
-                      <CampoComAjuda
-                        microcopy="Se essa despesa também é usada na sua vida pessoal, informe aqui só a parte que é do negócio. Deixe 100 se ela é toda da confeitaria."
-                        exemploDinamico={exemploRateio}
-                        ariaLabelAjuda="Ver exemplo com os números da sua conta"
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-              <button
-                onClick={adicionarDespesa}
-                className="w-full py-2.5 rounded-xl border border-dashed border-[#E6E1DB] text-[12px] font-bold text-[#6E3F72] hover:bg-white transition-all"
-              >
-                + Adicionar despesa
-              </button>
-              <div className="p-3 rounded-xl bg-white border border-[#E6E1DB] flex items-center justify-between">
-                <span className="text-[11px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>Total considerado</span>
-                <span className="text-[15px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>{formatCurrency(despesasMensais)}</span>
-              </div>
-              <div className="flex gap-2 pt-2">
-                <button className={botaoSecundario} onClick={voltar} disabled={salvando}>Voltar</button>
-                <div className="flex-1">
-                  <button className={botaoPrimario} style={{ background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)', boxShadow: '0 10px 24px rgba(58,35,80,.35)' }} onClick={avancarComDespesas} disabled={salvando}>
-                    Avançar
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {passo === 6 && (
-            <div className="space-y-3">
-              <h2 className={labelClass} style={{ color: '#241B2B' }}>Meta de CMV (%)</h2>
-              <CampoComAjuda
-                microcopy="Quanto do preço do bolo vai embora só com ingredientes e embalagem. Quanto menor, mais sobra pra você."
-                exemploDinamico={exemploCmv}
-                ariaLabelAjuda="Ver exemplo com os números da sua conta"
-              />
-              <NotaSobreOPadrao>
-                34% é uma referência comum para confeitaria e doceria — a maioria fica entre 25% e 40% do preço de venda. Pode ajustar para a realidade do seu negócio.
-              </NotaSobreOPadrao>
-              <CampoNumerico
-                className={inputClass}
-                value={cmvTargetPercent}
-                onChange={setCmvTargetPercent}
-                ariaLabel="Meta de CMV em porcentagem"
-              />
-              <div className="flex gap-2 pt-2">
-                <button className={botaoSecundario} onClick={voltar} disabled={salvando}>Voltar</button>
-                <div className="flex-1">
-                  <button className={botaoPrimario} style={{ background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)', boxShadow: '0 10px 24px rgba(58,35,80,.35)' }} onClick={() => avancar({ cmvTargetPercent })} disabled={salvando}>
-                    Avançar
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {passo === 7 && (
-            <div className="space-y-3">
-              <h2 className={labelClass} style={{ color: '#241B2B' }}>Meta de investimento (%)</h2>
-              <CampoComAjuda
-                microcopy="Uma reserva pra comprar equipamento, fazer curso, crescer o negócio — sem tirar do seu bolso."
-                exemploDinamico={exemploInvestimento}
-                ariaLabelAjuda="Ver exemplo com os números da sua conta"
-              />
-              <NotaSobreOPadrao>
-                5% é uma reserva para reinvestir no negócio — equipamento, melhorias, capital de giro. Não é um padrão fixo do setor, é um ponto de partida: ajuste como fizer sentido pra você.
-              </NotaSobreOPadrao>
-              <CampoNumerico
-                className={inputClass}
-                value={investmentTargetPercent}
-                onChange={setInvestmentTargetPercent}
-                ariaLabel="Meta de investimento em porcentagem"
-              />
-              <div className="flex gap-2 pt-2">
-                <button className={botaoSecundario} onClick={voltar} disabled={salvando}>Voltar</button>
-                <div className="flex-1">
-                  <button className={botaoPrimario} style={{ background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)', boxShadow: '0 10px 24px rgba(58,35,80,.35)' }} onClick={() => avancar({ investmentTargetPercent })} disabled={salvando}>
-                    Avançar
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {passo === 8 && (
-            <div className="space-y-3">
-              <h2 className={labelClass} style={{ color: '#241B2B' }}>Meta de lucro (%)</h2>
-              <CampoComAjuda
-                microcopy="O que sobra pra empresa, além do que você já recebe pelo seu trabalho."
-                exemploDinamico={exemploLucro}
-                ariaLabelAjuda="Ver exemplo com os números da sua conta"
-              />
-              <NotaSobreOPadrao>
-                Pode parecer baixo perto das margens de 30% a 50% que você vê por aí — mas aquelas normalmente misturam o lucro com o seu próprio trabalho. Aqui no Carula a mão de obra já é paga à parte, como se fosse o seu salário. Este número é só o que sobra pra empresa depois disso. Ajuste como quiser.
-              </NotaSobreOPadrao>
-              <CampoNumerico
-                className={inputClass}
-                value={profitTargetPercent}
-                onChange={setProfitTargetPercent}
-                ariaLabel="Meta de lucro em porcentagem"
-              />
-              <div className="flex gap-2 pt-2">
-                <button className={botaoSecundario} onClick={voltar} disabled={salvando}>Voltar</button>
-                <div className="flex-1">
-                  <button className={botaoPrimario} style={{ background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)', boxShadow: '0 10px 24px rgba(58,35,80,.35)' }} onClick={() => avancar({ profitTargetPercent })} disabled={salvando}>
-                    Avançar
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {passo === 9 && (
-            <div className="space-y-3">
-              <h2 className={labelClass} style={{ color: '#241B2B' }}>Resumo</h2>
-              <CampoComAjuda microcopy="Quanto você precisa vender no total pra cobrir tudo — seu trabalho, os custos fixos e o lucro da empresa." />
-
-              {!estrutura.valido ? (
-                <div className="p-3 rounded-xl bg-[#FDF4F5] border border-[rgba(196,98,111,.35)] text-[12px] text-[#C4626F]" style={{ fontFamily: "'Manrope', sans-serif" }}>
-                  {estrutura.mensagemErro}
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <div className="p-4 rounded-xl bg-white border border-[#E6E1DB] text-center">
-                    <p className="text-[10px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>Faturamento necessário</p>
-                    <p className="font-serif-display text-[28px]" style={{ color: '#241B2B' }}>{formatCurrency(estrutura.faturamentoNecessario)}</p>
-                  </div>
-
-                  <div className="rounded-xl border border-[#E6E1DB] bg-white overflow-hidden">
-                    {[
-                      ['CMV / Reposição', estrutura.cmvTargetPercent, estrutura.cmvAmount],
-                      ['Despesas da empresa', estrutura.custosPercent, estrutura.custosAmount],
-                      ['Investimento', estrutura.investmentTargetPercent, estrutura.investimentoAmount],
-                      ['Mão de obra', estrutura.maoDeObraPercent, estrutura.maoDeObraAmount],
-                      ['Lucro da empresa', estrutura.profitTargetPercent, estrutura.lucroAmount],
-                    ].map(([nome, pct, valor], i) => (
-                      <div key={nome as string} className={`flex items-center justify-between px-3 py-2.5 ${i > 0 ? 'border-t border-[#E6E1DB]' : ''}`}>
-                        <span className="text-[12px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>{nome}</span>
-                        <span className="text-[12px]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>{(pct as number).toFixed(2)}%</span>
-                        <span className="text-[12px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>{formatCurrency(valor as number)}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {precoMedioAtual != null && (
-                    <p className="text-[11px] p-2.5 rounded-xl bg-white border border-[#E6E1DB]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
-                      Hoje seus produtos custam em média {formatCurrency(precoMedioAtual)}. A comparação detalhada com o preço sugerido por produto chega quando as fichas técnicas forem religadas a este mesmo motor de cálculo.
-                    </p>
-                  )}
-                </div>
-              )}
-
-              {avisoRemuneracao && (
-                <div className="p-3.5 rounded-xl" style={{ background: '#FDF4F5', border: '1px solid #F0D9DD' }} role="alert">
-                  <p className="text-[12.5px] leading-relaxed m-0 font-bold" style={{ color: '#C4626F', fontFamily: "'Manrope', sans-serif" }}>
-                    Falta dizer quanto você quer receber por mês.
-                  </p>
-                  <p className="text-[12px] leading-relaxed mt-1 mb-2.5" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
-                    É desse valor que sai o cálculo de todas as suas metas. Sem ele, elas nascem zeradas.
-                  </p>
-                  <button
-                    className="px-4 py-2.5 rounded-xl text-white text-[12px] font-bold active:scale-95 transition-all"
-                    style={{ background: '#C4626F' }}
-                    onClick={() => { setAvisoRemuneracao(false); irParaPasso(PASSO_REMUNERACAO); }}
-                    disabled={salvando}
-                  >
-                    Preencher agora
-                  </button>
-                </div>
-              )}
-
-              <div className="flex gap-2 pt-2">
-                <button className={botaoSecundario} onClick={voltar} disabled={salvando}>Voltar</button>
-                <div className="flex-1">
-                  <button
-                    className={botaoPrimario}
-                    style={{ background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)', boxShadow: '0 10px 24px rgba(58,35,80,.35)' }}
-                    onClick={confirmarConclusao}
-                    disabled={salvando || !estrutura.valido}
-                  >
-                    Confirmar e concluir
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+          {conteudoPasso}
           </div>
         </div>
 
-        {passo === 1 && (
-          <div className="p-3.5 rounded-xl flex items-start gap-2.5" style={{ background: '#F3E9F3' }}>
-            <span
-              className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
-              style={{ background: '#3A2350', color: '#FFFFFF', fontSize: '12px', fontWeight: 700 }}
-            >
-              ?
-            </span>
-            <p className="text-[12.5px] leading-relaxed m-0" style={{ color: '#6E3F72', fontFamily: "'Manrope', sans-serif" }}>
-              Sem ideia do valor? Pense no que você precisa receber para viver tranquila — dá pra ajustar depois.
-            </p>
-          </div>
-        )}
+        {dicaPasso1}
 
-        <button
-          type="button"
-          onClick={sair}
-          className="w-full py-3 rounded-2xl text-sm font-bold transition-colors"
-          style={{ border: '1px solid rgba(58,35,80,0.16)', color: '#3A2350', background: '#FFFFFF' }}
-        >
-          Sair
-        </button>
+        {botaoSair}
         </div>
       </div>
     </div>
