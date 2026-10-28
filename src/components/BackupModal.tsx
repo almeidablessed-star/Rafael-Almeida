@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { avisar } from './AvisoApp';
 import { createPortal } from 'react-dom';
 import { Transaction } from '../types';
 import { X, Download, Upload, Trash2, Database, ShieldCheck } from 'lucide-react';
@@ -199,7 +200,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
     } catch (err: any) {
       // Melhor nao gerar arquivo nenhum do que gerar um backup incompleto: a
       // restauracao regrava a partir dele e o que faltar sera perdido.
-      alert(`Erro ao preparar o backup: ${err?.message || err}\n\nNenhum arquivo foi gerado.`);
+      avisar(`Erro ao preparar o backup: ${err?.message || err}\n\nNenhum arquivo foi gerado.`, { titulo: 'Não deu para gerar o backup' });
       return;
     } finally {
       setIsExporting(false);
@@ -231,7 +232,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
       try {
         parsed = JSON.parse(event.target?.result as string);
       } catch {
-        alert('Arquivo inválido: não é um backup JSON do Carula App. Nada foi alterado.');
+        avisar('Arquivo inválido: não é um backup JSON do Carula App. Nada foi alterado.', { titulo: 'Arquivo inválido' });
         return;
       }
       // Nada e apagado aqui: o arquivo so e conferido. A troca so acontece
@@ -239,7 +240,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
       if (ehBackupCompleto(parsed)) {
         const erro = validarBackupCompleto(parsed);
         if (erro) {
-          alert(erro);
+          avisar(erro, { titulo: 'Este arquivo não serve' });
           return;
         }
         setTamanhoArquivo(file.size);
@@ -249,7 +250,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
       // Arquivo antigo (versao 1): so lancamentos, pelo caminho de sempre.
       const resultado = validarBackup(parsed);
       if (!resultado.ok || !resultado.itens) {
-        alert(resultado.erro);
+        avisar(resultado.erro || 'Arquivo inválido.', { titulo: 'Este arquivo não serve' });
         return;
       }
       setTamanhoArquivo(file.size);
@@ -264,17 +265,17 @@ export const BackupModal: React.FC<BackupModalProps> = ({
     try {
       // `await` antes do aviso: a restauracao grava no banco e pode falhar.
       await onRestoreTransactions(restauracaoPendente);
-      alert(`Backup restaurado com sucesso! ${restauracaoPendente.length} lançamento(s) carregado(s).`);
+      avisar(`Backup restaurado com sucesso! ${restauracaoPendente.length} lançamento(s) carregado(s).`, { titulo: 'Backup restaurado' });
       setRestauracaoPendente(null);
       onClose();
     } catch (err: any) {
       if (ehFalhaSemResposta(err)) {
         // Sem resposta nao da para afirmar que nada mudou.
-        alert('Não foi possível confirmar a restauração. Confira seus lançamentos antes de tentar de novo.');
+        avisar('Não foi possível confirmar a restauração. Confira seus lançamentos antes de tentar de novo.', { titulo: 'Confira seus lançamentos' });
       } else {
         // O banco respondeu com erro, e a troca e uma transacao so: nada foi
         // apagado.
-        alert(`Não foi possível restaurar o backup. Seus lançamentos continuam como estavam.\n\n${err?.message || err}`);
+        avisar(`Não foi possível restaurar o backup. Seus lançamentos continuam como estavam.\n\n${err?.message || err}`, { titulo: 'Não deu para restaurar' });
       }
     } finally {
       setIsRestoring(false);
@@ -286,20 +287,24 @@ export const BackupModal: React.FC<BackupModalProps> = ({
     setIsRestoring(true);
     try {
       const r = await restaurarBackupCompleto(completoPendente);
-      alert(
+      // `await`: o app recarrega logo abaixo. A caixinha antiga segurava o
+      // recarregamento ate o OK; a janela do app precisa da espera explicita,
+      // senao a mensagem some na hora.
+      await avisar(
         `Backup restaurado com sucesso!\n\n${r.fichas} ficha(s), ${r.produtos} produto(s), ` +
-          `${r.clientes} cliente(s) e ${r.transacoes} lançamento(s).`
+          `${r.clientes} cliente(s) e ${r.transacoes} lançamento(s).`,
+        { titulo: 'Backup restaurado' }
       );
       // Clientes, fichas, produtos, empresa e lancamentos vivem em contextos
       // diferentes: recarregar o app busca tudo de novo de uma vez.
       window.location.reload();
     } catch (err: any) {
       if (ehFalhaSemResposta(err)) {
-        alert('Não foi possível confirmar a restauração. Confira seus dados antes de tentar de novo.');
+        avisar('Não foi possível confirmar a restauração. Confira seus dados antes de tentar de novo.', { titulo: 'Confira seus dados' });
       } else {
         // O banco respondeu com erro, e a troca e uma transacao so: nada foi
         // apagado.
-        alert(`Não foi possível restaurar o backup. Seus dados continuam como estavam.\n\n${err?.message || err}`);
+        avisar(`Não foi possível restaurar o backup. Seus dados continuam como estavam.\n\n${err?.message || err}`, { titulo: 'Não deu para restaurar' });
       }
       setIsRestoring(false);
     }
