@@ -26,15 +26,19 @@ export const EntradaComputador: React.FC<{ children: React.ReactNode }> = ({ chi
       style={{
         background: 'linear-gradient(150deg, #3A2350, #6E3F72 55%, #A85E86)',
         color: '#FFFFFF',
-        padding: '48px 64px',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
+        // Sem margem em cima: o logo se centraliza entre a borda do topo e a
+        // frase, e uma margem ali o empurraria para baixo.
+        padding: '0 64px 48px',
+        // Tres faixas: a do meio (a frase) fica no centro, e as de cima e de
+        // baixo dividem o resto por igual.
+        display: 'grid',
+        gridTemplateRows: '1fr auto 1fr',
       }}
     >
-      {/* Logo grande, com a largura de "Sua confeitaria," (que comeca na
-          mesma margem), a pedido do Rafael. */}
-      <div>
+      {/* Logo grande, com a largura de "Sua confeitaria,", no meio do espaco
+          entre o topo e a frase e centralizado na largura do painel, a pedido
+          do Rafael. */}
+      <div style={{ alignSelf: 'center', justifySelf: 'center' }}>
         <LogoCarulaApp fundo="roxo" tamanho={89} />
       </div>
 
@@ -47,7 +51,7 @@ export const EntradaComputador: React.FC<{ children: React.ReactNode }> = ({ chi
         </p>
       </div>
 
-      <p style={{ fontSize: '13px', color: '#CBB6CF' }}>app.carulaconfeitaria.com.br</p>
+      <p style={{ alignSelf: 'end', fontSize: '13px', color: '#CBB6CF' }}>app.carulaconfeitaria.com.br</p>
     </section>
 
     <section style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px' }}>
