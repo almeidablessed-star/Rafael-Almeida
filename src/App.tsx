@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { avisar, perguntar } from './components/AvisoApp';
 import { migrarFotosAntigas } from './utils/migrarFotosAntigas';
+import { limparFotosSemUso } from './utils/limparFotosSemUso';
 import { AuthProvider } from './context/AuthContext';
 import {
   Transaction,
@@ -69,10 +70,13 @@ function AppContent() {
   const { consumirParaPedido, devolverPedido, pedidoTemRastroDeEstoque } = useProdutos();
 
   // Fotos antigas (base64 nas linhas) vao para o deposito em segundo plano,
-  // uma por vez, depois que o app terminou de abrir. Ver utils/migrarFotosAntigas.ts.
+  // uma por vez, depois que o app terminou de abrir; em seguida, a limpeza das
+  // fotos sem uso ha mais de 30 dias. Ver utils/migrarFotosAntigas.ts e
+  // utils/limparFotosSemUso.ts.
   useEffect(() => {
     if (!user?.id) return;
-    const t = setTimeout(() => void migrarFotosAntigas(user.id), 8000);
+    const id = user.id;
+    const t = setTimeout(() => void migrarFotosAntigas(id).then(() => limparFotosSemUso(id)), 8000);
     return () => clearTimeout(t);
   }, [user?.id]);
 
