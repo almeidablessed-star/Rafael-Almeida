@@ -1,6 +1,7 @@
 // v2.1 - Fresh rebuild with latest redesign - force Vercel deployment
 import React, { useState, useEffect } from 'react';
 import { avisar, perguntar } from './components/AvisoApp';
+import { migrarFotosAntigas } from './utils/migrarFotosAntigas';
 import { AuthProvider } from './context/AuthContext';
 import {
   Transaction,
@@ -66,6 +67,14 @@ function AppContent() {
   const { fichas, isLoading: fichasCarregando } = useFichasComCustoAtual();
   const { administrativeCosts, marcarTourVisto } = useCosts();
   const { consumirParaPedido, devolverPedido, pedidoTemRastroDeEstoque } = useProdutos();
+
+  // Fotos antigas (base64 nas linhas) vao para o deposito em segundo plano,
+  // uma por vez, depois que o app terminou de abrir. Ver utils/migrarFotosAntigas.ts.
+  useEffect(() => {
+    if (!user?.id) return;
+    const t = setTimeout(() => void migrarFotosAntigas(user.id), 8000);
+    return () => clearTimeout(t);
+  }, [user?.id]);
 
   /**
    * Pedido lancado ha mais de 3 meses e cuja baixa de estoque ja saiu do
