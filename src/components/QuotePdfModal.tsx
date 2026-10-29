@@ -1,5 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { avisar } from './AvisoApp';
+import { situacaoPagamento } from '../utils/situacaoPagamento';
 import { createPortal } from 'react-dom';
 import { Transaction } from '../types';
 import { formatCurrency, formatDateBr } from '../utils/formatters';
@@ -860,7 +861,7 @@ ${transaction.description}
 ${transaction.observations ? `📝 *Observações:* ${transaction.observations}` : ''}
 
 💰 *VALOR TOTAL DO PEDIDO:* ${formatCurrency(transaction.totalValue)}
-${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transaction.signalValue)}\n📋 *Restante a Pagar na Entrega:* ${formatCurrency(transaction.totalValue - transaction.signalValue)}` : ''}
+${situacaoPagamento(transaction) === 'sinal' ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transaction.signalValue)}\n📋 *Restante a Pagar na Entrega:* ${formatCurrency(transaction.totalValue - transaction.signalValue)}` : ''}
 💳 *Pagamento:* ${
   transaction.paymentMethod === 'cash' ? '💵 Cash (Dinheiro)'
   : transaction.paymentMethod === 'pix' ? '💸 Pix'
@@ -1357,7 +1358,8 @@ ${transaction.signalValue ? `✅ *Sinal/Entrada Pago:* ${formatCurrency(transact
                         {formatCurrency(transaction.totalValue)}
                       </span>
                     </div>
-                    {transaction.signalValue ? (
+                    {/* Sinal so quando ele de fato entrou (mesma regra da lista: utils/situacaoPagamento.ts). */}
+                    {situacaoPagamento(transaction) === 'sinal' ? (
                       <div className="flex flex-col gap-1.5">
                         <div className="flex items-center justify-between gap-2" style={{ background: 'rgba(169,216,184,.25)', borderRadius: '12px', padding: '8px 12px' }}>
                           <span style={{ fontSize: '11px', fontWeight: 700, color: '#4C7358' }}>Sinal pago</span>
