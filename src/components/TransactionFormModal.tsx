@@ -1,4 +1,5 @@
 ﻿import React, { useState, useEffect, useRef } from 'react';
+import { situacaoPagamento } from '../utils/situacaoPagamento';
 import { createPortal } from 'react-dom';
 import { avisar } from './AvisoApp';
 import {
@@ -394,20 +395,6 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
     respostaMudancaDeTotal.current = null;
     setMudancaDeTotal(null);
   };
-  /** Mesma ideia para o sinal apagado: a pergunta abre no layout do app (era
-   * a caixinha do navegador) e `handleSubmit` espera a resposta. */
-  const [sinalApagado, setSinalApagado] = useState<number | null>(null);
-  const respostaSinalApagado = useRef<((salvar: boolean) => void) | null>(null);
-  const perguntarSinalApagado = (valor: number) =>
-    new Promise<boolean>((resolve) => {
-      respostaSinalApagado.current = resolve;
-      setSinalApagado(valor);
-    });
-  const responderSinalApagado = (salvar: boolean) => {
-    respostaSinalApagado.current?.(salvar);
-    respostaSinalApagado.current = null;
-    setSinalApagado(null);
-  };
 
   // Delivery State
   const [hasDelivery, setHasDelivery] = useState<boolean>(false);
@@ -429,7 +416,14 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   // Common fields
   const [date, setDate] = useState<string>(getTodayIso());
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('zelle');
-  const [paymentStatus, setPaymentStatus] = useState<'pago' | 'pendente'>('pago');
+  /**
+   * Escolha da tela: Pendente (nada entrou), Sinal pago (entrou so o sinal) ou
+   * Pago (entrou tudo). No banco vira `status_pagamento` + `valor_sinal`, como
+   * sempre: 'sinal' grava 'pago' com o sinal; as outras duas gravam sem sinal.
+   * Ver utils/situacaoPagamento.ts.
+   */
+  const [paymentStatus, setPaymentStatus] = useState<'pago' | 'sinal' | 'pendente'>('pago');
+  const statusParaGravar: 'pago' | 'pendente' = paymentStatus === 'pendente' ? 'pendente' : 'pago';
   const [supplier, setSupplier] = useState('');
   const [laborPeriod, setLaborPeriod] = useState<LaborPeriod>('diaria');
   const [costCategory, setCostCategory] = useState<CostCategory>('fixo');
@@ -441,7 +435,11 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       setType(editingTransaction.type);
       setDate(editingTransaction.date || getTodayIso());
       setPaymentMethod(editingTransaction.paymentMethod || 'zelle');
-      setPaymentStatus(editingTransaction.paymentStatus || 'pago');
+      setPaymentStatus(
+        editingTransaction.type === 'venda'
+          ? situacaoPagamento(editingTransaction)
+          : (editingTransaction.paymentStatus || 'pago')
+      );
       setSupplier(editingTransaction.supplier || '');
       setLaborPeriod(editingTransaction.laborPeriod || 'diaria');
       setCostCategory(editingTransaction.category || 'fixo');
@@ -1029,18 +1027,14 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       }
     }
 
-    // Rede de seguranca para o mesmo estrago descrito la em cima: o campo do
-    // sinal ficar vazio num pedido que TINHA sinal significa apagar do banco o
-    // que a cliente ainda deve, sem aviso nenhum. O preenchimento acima ja
-    // resolve o caso comum; isto cobre quem apagou o campo sem querer, e
-    // qualquer outro caminho que leve ao mesmo lugar.
-    //
-    // A frase diz o valor pela moeda escolhida (`formatMoney`), nunca um
-    // simbolo fixo. Cancelar sai antes de `setIsSaving`, entao nada e gravado.
-    const sinalGravado = editingTransaction?.signalValue;
-    if (type === 'venda' && sinalGravado != null && !signalValue.trim()) {
-      const continuar = await perguntarSinalApagado(Number(sinalGravado));
-      if (!continuar) return;
+    // "Sinal pago" sem o valor do sinal nao diz quanto ainda falta receber.
+    // Antes a escolha era so Pago/Pendente e um campo vazio virava "pago por
+    // inteiro" em silencio (por isso existia a pergunta "o campo do sinal esta
+    // vazio"); agora Pago e Pendente sao escolhas explicitas e limpam o sinal,
+    // e so o "Sinal pago" exige o valor.
+    if (type === 'venda' && paymentStatus === 'sinal' && !(parseNumeroDigitado(signalValue) > 0)) {
+      avisar('Digite quanto a cliente já pagou de sinal, ou escolha "Pago" ou "Pendente".', { titulo: 'Falta o valor do sinal' });
+      return;
     }
 
     setIsSaving(true);
@@ -1121,10 +1115,11 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
           quantity: orderItems.reduce((acc, i) => acc + i.quantity, 0),
           unitValue: grandTotalSalePrice,
           totalValue: grandTotalSalePrice,
-          signalValue: signalValue ? parseNumeroDigitado(signalValue) : undefined,
+          // So "Sinal pago" leva o sinal; Pago e Pendente gravam sem ele.
+          signalValue: paymentStatus === 'sinal' && signalValue ? parseNumeroDigitado(signalValue) : undefined,
           date: eventDate || getTodayIso(),
           paymentMethod,
-          paymentStatus,
+          paymentStatus: statusParaGravar,
           notes: notesStr,
           // A ficha nao e escolhida na tela: o sistema casa cada item do pedido
           // com sua ficha pelo nome do produto. Ver utils/fichaMatcher.ts.
@@ -1856,7 +1851,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                 <div style={{ background: '#fff', borderRadius: '16px', boxShadow: '0 8px 20px rgba(58,35,80,0.09)', padding: '18px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div>
                     <label style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '8px' }}>Status do pagamento *</label>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: '8px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: '8px' }}>
                       <button
                         type="button"
                         onClick={() => setPaymentStatus('pendente')}
@@ -1866,8 +1861,20 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                             : 'bg-amber-50 text-amber-900 border-amber-200 hover:bg-amber-100'
                         }`}
                       >
-                        <span>⏳ Pendente (a receber)</span>
+                        <span>⏳ Pendente</span>
                         {paymentStatus === 'pendente' && <Check className="w-3.5 h-3.5" />}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPaymentStatus('sinal')}
+                        className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition-all text-left flex items-center justify-between ${
+                          paymentStatus === 'sinal'
+                            ? 'bg-[#A85E86] text-white border-[#A85E86] shadow-card'
+                            : 'bg-[#FBEFF2] text-[#6E3F72] border-[#F5B9C6] hover:bg-[#F8E1E7]'
+                        }`}
+                      >
+                        <span>💰 Sinal pago</span>
+                        {paymentStatus === 'sinal' && <Check className="w-3.5 h-3.5" />}
                       </button>
                       <button
                         type="button"
@@ -1878,7 +1885,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                             : 'bg-emerald-50 text-emerald-900 border-emerald-200 hover:bg-emerald-100'
                         }`}
                       >
-                        <span>✅ Pago (recebido)</span>
+                        <span>✅ Pago</span>
                         {paymentStatus === 'pago' && <Check className="w-3.5 h-3.5" />}
                       </button>
                     </div>
@@ -1920,41 +1927,44 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                     />
                   </div>
 
-                  <div>
-                    <label style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                      <span>Valor do sinal / entrada</span>
-                      {/* O limite e o total do pedido. Antes lia `totalValue`, que so os
-                          lancamentos que nao sao venda preenchem: no pedido aparecia
-                          sempre "-" e a entrada nao tinha limite nenhum. */}
-                      <span style={{ fontSize: '11px', fontWeight: 500, color: '#A096A6' }}>{grandTotalSalePrice > 0 ? `Máx: ${formatMoney(grandTotalSalePrice)}` : '-'}</span>
-                    </label>
-                    <div className="relative">
-                      {/* Mesmo prefixo da "Taxa de entrega": cinza, 13px, com folga
-                          antes do numero. Antes era verde e em 18px, e o "R$"
-                          ficava por baixo do valor digitado. A folga da direita
-                          e menor para o texto de exemplo caber a 360px. */}
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[13px] text-[#7A6E80] font-bold">{currencySymbol}</span>
-                      <input
-                        type="text"
-                        inputMode="decimal"
-                        placeholder="Deixe em branco = valor total pago"
-                        value={signalValue}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          if (val === '') {
-                            setSignalValue(val);
-                          } else if (grandTotalSalePrice > 0) {
-                            const numVal = parseNumeroDigitado(val);
-                            const totalNum = Math.round(grandTotalSalePrice * 100) / 100;
-                            if (numVal <= totalNum) setSignalValue(val);
-                          } else {
-                            setSignalValue(val);
-                          }
-                        }}
-                        style={{ width: '100%', border: '1px solid rgba(58,35,80,0.14)', borderRadius: '10px', padding: '12px 8px 12px 34px', fontSize: '15px', background: '#FAF7FA' }}
-                      />
+                  {/* So em "Sinal pago": e o quanto ja entrou; o resto fica para a entrega. */}
+                  {paymentStatus === 'sinal' && (
+                    <div>
+                      <label style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                        <span>Valor do sinal / entrada *</span>
+                        {/* O limite e o total do pedido. Antes lia `totalValue`, que so os
+                            lancamentos que nao sao venda preenchem: no pedido aparecia
+                            sempre "-" e a entrada nao tinha limite nenhum. */}
+                        <span style={{ fontSize: '11px', fontWeight: 500, color: '#A096A6' }}>{grandTotalSalePrice > 0 ? `Máx: ${formatMoney(grandTotalSalePrice)}` : '-'}</span>
+                      </label>
+                      <div className="relative">
+                        {/* Mesmo prefixo da "Taxa de entrega": cinza, 13px, com folga
+                            antes do numero. Antes era verde e em 18px, e o "R$"
+                            ficava por baixo do valor digitado. A folga da direita
+                            e menor para o texto de exemplo caber a 360px. */}
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[13px] text-[#7A6E80] font-bold">{currencySymbol}</span>
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          placeholder="Quanto a cliente já pagou"
+                          value={signalValue}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (val === '') {
+                              setSignalValue(val);
+                            } else if (grandTotalSalePrice > 0) {
+                              const numVal = parseNumeroDigitado(val);
+                              const totalNum = Math.round(grandTotalSalePrice * 100) / 100;
+                              if (numVal <= totalNum) setSignalValue(val);
+                            } else {
+                              setSignalValue(val);
+                            }
+                          }}
+                          style={{ width: '100%', border: '1px solid rgba(58,35,80,0.14)', borderRadius: '10px', padding: '12px 8px 12px 34px', fontSize: '15px', background: '#FAF7FA' }}
+                        />
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 <div style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 55%, #A85E86 100%)', borderRadius: '16px', padding: '18px', display: 'flex', flexDirection: 'column', gap: '14px', boxShadow: '0 20px 36px rgba(58,35,80,0.18)' }}>
@@ -2583,7 +2593,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
             totalValue: grandTotalSalePrice,
             date,
             paymentMethod,
-            paymentStatus,
+            paymentStatus: statusParaGravar,
             notes,
           }}
           onClose={() => setShowPdfQuoteModal(false)}
@@ -2627,54 +2637,6 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                 type="button"
                 autoFocus
                 onClick={() => responderMudancaDeTotal(true)}
-                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white"
-                style={{ background: 'linear-gradient(135deg, #6E3F72 0%, #3A2350 100%)', minHeight: '44px' }}
-              >
-                Salvar assim
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Pergunta do sinal apagado, no mesmo layout de "O total vai mudar".
-          Clicar fora = Cancelar. O foco comeca no Cancelar: aqui o "Salvar
-          assim" apaga o que a cliente ainda deve. */}
-      {sinalApagado != null && (
-        <div
-          className="fixed inset-0 bg-black/40 flex items-center justify-center z-[100000] animate-fadeIn"
-          onClick={(e) => { e.stopPropagation(); responderSinalApagado(false); }}
-          role="alertdialog"
-          aria-modal="true"
-          aria-labelledby="sinal-apagado-titulo"
-        >
-          <div
-            className="bg-white rounded-[24px] p-6 space-y-4 w-[90%] max-w-sm"
-            onClick={(e) => e.stopPropagation()}
-            style={{ fontFamily: "'Manrope', sans-serif" }}
-          >
-            <h3 id="sinal-apagado-titulo" className="font-serif-display text-lg" style={{ color: '#241B2B' }}>
-              O campo do sinal está vazio
-            </h3>
-            <p style={{ color: '#7A6E80', fontSize: '14px', lineHeight: 1.5 }}>
-              Este pedido tinha um sinal de{' '}
-              <strong style={{ color: '#241B2B' }}>{formatMoney(sinalApagado)}</strong> e o campo está vazio.
-              Salvar assim marca o pedido como pago por inteiro e apaga o valor que a cliente ainda deve.
-              Quer continuar?
-            </p>
-            <div className="flex gap-2 pt-4">
-              <button
-                type="button"
-                autoFocus
-                onClick={() => responderSinalApagado(false)}
-                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold"
-                style={{ background: '#F6F2F5', color: '#241B2B', minHeight: '44px' }}
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={() => responderSinalApagado(true)}
                 className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white"
                 style={{ background: 'linear-gradient(135deg, #6E3F72 0%, #3A2350 100%)', minHeight: '44px' }}
               >

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { situacaoPagamento, faltaReceberDoPedido } from '../utils/situacaoPagamento';
 import { Transaction, TransactionType } from '../types';
 import { formatCurrency, formatDateBr, getTodayIso } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
@@ -22,6 +23,36 @@ import {
   Coins,
 } from 'lucide-react';
 
+/**
+ * Etiqueta e botao de pagamento de cada estado (utils/situacaoPagamento.ts).
+ * "Sinal pago": entrou so o sinal, o restante fica para a entrega — rose da
+ * marca, para nao confundir com o bege do Pendente nem com o verde do Pago.
+ */
+const ETIQUETA = {
+  pendente: { texto: 'Pendente', emoji: '⏳', fundo: '#E4D9C3', cor: '#5B4A2E' },
+  sinal: { texto: 'Sinal pago', emoji: '💰', fundo: '#F5B9C6', cor: '#3A2350' },
+  pago: { texto: 'Pago', emoji: '✅', fundo: '#A9D8B8', cor: '#26402F' },
+} as const;
+
+/** O botao leva ao proximo estado: pendente/sinal -> pago, pago -> pendente. */
+const BOTAO = {
+  pendente: {
+    texto: 'Pago', textoCurto: '✅ Pago', fundo: '#A9D8B8', cor: '#26402F',
+    title: 'Clique para marcar este pedido como PAGO',
+    ariaLabel: (nome: string) => `Marcar o pedido de ${nome} como pago`,
+  },
+  sinal: {
+    texto: 'Recebi o restante', textoCurto: '✅ Recebi', fundo: '#A9D8B8', cor: '#26402F',
+    title: 'Recebi o restante: marca este pedido como PAGO por inteiro',
+    ariaLabel: (nome: string) => `Recebi o restante do pedido de ${nome}: marcar como pago`,
+  },
+  pago: {
+    texto: 'Pendente', textoCurto: 'Pendente', fundo: '#F0E2C8', cor: '#5B4A2E',
+    title: 'Clique para alterar este pedido para PENDENTE',
+    ariaLabel: (nome: string) => `Mudar o pedido de ${nome} para pendente`,
+  },
+} as const;
+
 interface OrdersModuleProps {
   transactions: Transaction[];
   onOpenAddModal: (type?: TransactionType) => void;
@@ -39,7 +70,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
 }) => {
   const { formatCurrency: formatMoney } = useCurrency();
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'todos' | 'pago' | 'pendente'>('todos');
+  const [statusFilter, setStatusFilter] = useState<'todos' | 'pago' | 'sinal' | 'pendente'>('todos');
   const [quoteTx, setQuoteTx] = useState<Transaction | null>(null);
 
   const [vista, setVista] = useState<'proximos' | 'historico'>('proximos');
@@ -75,9 +106,9 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
       s.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (s.customerName && s.customerName.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    const currentStatus = s.paymentStatus || 'pago';
+    // Pendente, Sinal pago ou Pago: a mesma regra da etiqueta (utils/situacaoPagamento.ts).
     const matchesStatus =
-      statusFilter === 'todos' ? true : currentStatus === statusFilter;
+      statusFilter === 'todos' ? true : situacaoPagamento(s) === statusFilter;
 
     return matchesSearch && matchesStatus;
   });
@@ -102,8 +133,12 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
 
   // Contagens dos filtros de status: so da vista aberta, para o numero bater
   // com os cards que aparecem embaixo.
-  const pendingCount = salesDaVista.filter((s) => s.paymentStatus === 'pendente').length;
-  const paidCount = salesDaVista.filter((s) => (s.paymentStatus || 'pago') === 'pago').length;
+  const pendingCount = salesDaVista.filter((s) => situacaoPagamento(s) === 'pendente').length;
+  const paidCount = salesDaVista.filter((s) => situacaoPagamento(s) === 'pago').length;
+  const sinalCount = salesDaVista.filter((s) => situacaoPagamento(s) === 'sinal').length;
+  // Legenda das caixas de resumo: quem tem so o sinal pago aparece nas duas
+  // (o sinal entrou em "pagas", o restante esta em "a receber").
+  const comSinal = sinalCount ? ` + ${sinalCount} com sinal` : '';
 
   // Ha pedidos, so nao nesta vista (ou na busca/filtro). Mesmo texto no
   // celular e no computador.
@@ -206,6 +241,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
     const filtrosStatus = [
       { id: 'todos', rotulo: 'Todos', total: salesDaVista.length },
       { id: 'pago', rotulo: 'Pagos', total: paidCount },
+      { id: 'sinal', rotulo: 'Sinal pago', total: sinalCount },
       { id: 'pendente', rotulo: 'Pendentes', total: pendingCount },
     ] as const;
 
@@ -244,8 +280,8 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
             </span>
           </div>
           <div style={{ flex: '2 1 460px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
-            {caixaResumo('pagas', 'VENDAS PAGAS', totalPagas, `${paidCount} ${paidCount === 1 ? 'pedido pago' : 'pedidos pagos'}`)}
-            {caixaResumo('receber', 'A RECEBER (PENDENTES)', totalPendentes + totalAReceber, `${pendingCount} ${pendingCount === 1 ? 'pedido pendente' : 'pedidos pendentes'}`)}
+            {caixaResumo('pagas', 'VENDAS PAGAS', totalPagas, `${paidCount} ${paidCount === 1 ? 'pedido pago' : 'pedidos pagos'}${comSinal}`)}
+            {caixaResumo('receber', 'A RECEBER (PENDENTES)', totalPendentes + totalAReceber, `${pendingCount} ${pendingCount === 1 ? 'pedido pendente' : 'pedidos pendentes'}${comSinal}`)}
           </div>
         </section>
 
@@ -354,6 +390,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(420px, 1fr))', gap: '20px' }}>
             {filteredSales.map((tx) => {
               const isPending = tx.paymentStatus === 'pendente';
+              const situacao = situacaoPagamento(tx);
               const nome = tx.customerName || 'cliente';
               return (
                 <article
@@ -393,13 +430,15 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                           alignItems: 'center',
                           padding: '5px 11px',
                           borderRadius: '999px',
-                          background: isPending ? '#E4D9C3' : '#A9D8B8',
-                          color: isPending ? '#5B4A2E' : '#26402F',
+                          background: ETIQUETA[situacao].fundo,
+                          color: ETIQUETA[situacao].cor,
                           fontSize: '11px',
                           fontWeight: 800,
                         }}
                       >
-                        {isPending ? 'Pendente' : 'Pago'}
+                        {situacao === 'sinal'
+                          ? `Sinal pago · falta ${formatMoney(faltaReceberDoPedido(tx))}`
+                          : ETIQUETA[situacao].texto}
                       </span>
                       {/* So acontece em Proximos: a entrega ja passou e o
                           pedido so continua aqui porque falta receber. */}
@@ -437,8 +476,8 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                             <button
                               type="button"
                               onClick={(e) => { e.stopPropagation(); onTogglePaymentStatus(tx); }}
-                              aria-label={isPending ? `Marcar o pedido de ${nome} como pago` : `Mudar o pedido de ${nome} para pendente`}
-                              title={isPending ? 'Clique para marcar este pedido como PAGO' : 'Clique para alterar este pedido para PENDENTE'}
+                              aria-label={BOTAO[situacao].ariaLabel(nome)}
+                              title={BOTAO[situacao].title}
                               style={{
                                 display: 'inline-flex',
                                 alignItems: 'center',
@@ -448,15 +487,15 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                                 padding: '0 14px',
                                 border: 0,
                                 borderRadius: '999px',
-                                background: isPending ? '#A9D8B8' : '#F0E2C8',
-                                color: isPending ? '#26402F' : '#5B4A2E',
+                                background: BOTAO[situacao].fundo,
+                                color: BOTAO[situacao].cor,
                                 fontFamily: 'inherit',
                                 fontSize: '12px',
                                 fontWeight: 800,
                                 cursor: 'pointer',
                               }}
                             >
-                              {isPending ? 'Pago' : 'Pendente'}
+                              {BOTAO[situacao].texto}
                             </button>
                           )}
                           <button
@@ -610,7 +649,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                 {formatMoney(totalPagas)}
               </div>
               <div style={{ fontSize: '9px', color: 'rgba(247,220,225,.7)', marginTop: '2px', fontFamily: "'Manrope', sans-serif" }}>
-                {paidCount} {paidCount === 1 ? 'pedido pago' : 'pedidos pagos'}
+                {paidCount} {paidCount === 1 ? 'pedido pago' : 'pedidos pagos'}{comSinal}
               </div>
             </div>
 
@@ -623,7 +662,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                 {formatMoney(totalPendentes + totalAReceber)}
               </div>
               <div style={{ fontSize: '9px', color: 'rgba(247,220,225,.7)', marginTop: '2px', fontFamily: "'Manrope', sans-serif" }}>
-                {pendingCount} {pendingCount === 1 ? 'pedido pendente' : 'pedidos pendentes'}
+                {pendingCount} {pendingCount === 1 ? 'pedido pendente' : 'pedidos pendentes'}{comSinal}
               </div>
             </div>
           </div>
@@ -694,7 +733,8 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
           />
         </div>
 
-        <div className="flex items-center gap-[14px] overflow-x-auto no-scrollbar" style={{ paddingBottom: '0.25rem', borderBottom: '1px solid rgba(36,27,43,.1)' }}>
+        {/* Cada filtro numa linha so; se os quatro nao couberem, a faixa rola para o lado. */}
+        <div className="flex items-center gap-[10px] overflow-x-auto no-scrollbar [&>*]:shrink-0 [&>*]:whitespace-nowrap" style={{ paddingBottom: '0.25rem', borderBottom: '1px solid rgba(36,27,43,.1)' }}>
           <span className="text-[10px] font-bold text-[#9A8FA0] uppercase flex items-center gap-1" style={{ fontFamily: "'Manrope', sans-serif", letterSpacing: '.06em' }}>
             STATUS:
           </span>
@@ -737,6 +777,26 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
             }}
           >
             Pagos ({paidCount})
+          </button>
+
+          <button
+            onClick={() => setStatusFilter('sinal')}
+            className={`text-xs font-bold transition-all cursor-pointer flex items-center gap-1 whitespace-nowrap ${
+              statusFilter === 'sinal'
+                ? 'text-[#3A2350] border-b-2 border-[#3A2350]'
+                : 'text-[#7A6E80] hover:text-[#3A2350]'
+            }`}
+            style={{
+              fontSize: '12px',
+              fontFamily: "'Manrope', sans-serif",
+              fontWeight: statusFilter === 'sinal' ? 800 : 600,
+              background: 'none',
+              border: 'none',
+              padding: '8px 0',
+              marginBottom: statusFilter === 'sinal' ? '-1px' : '0',
+            }}
+          >
+            Sinal ({sinalCount})
           </button>
 
           <button
@@ -786,6 +846,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
         ) : (
           filteredSales.map((tx) => {
             const isPending = tx.paymentStatus === 'pendente';
+            const situacao = situacaoPagamento(tx);
             // Com sinal o card ganha uma linha a mais; os respiros encolhem o
             // mesmo tanto para ele ficar da altura de um card sem sinal.
             const temSinal = !!tx.signalValue;
@@ -847,15 +908,9 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                         👤 CLIENTE: {tx.customerName ? tx.customerName.toUpperCase() : 'CLIENTE'}
                       </span>
 
-                      {isPending ? (
-                        <span className="rounded-full flex items-center gap-1" style={{ fontSize: '9px', fontWeight: 800, color: '#5B4A2E', background: '#E4D9C3', padding: '5px 10px', fontFamily: "'Manrope', sans-serif" }}>
-                          ⏳ Pendente
-                        </span>
-                      ) : (
-                        <span className="rounded-full flex items-center gap-1" style={{ fontSize: '9px', fontWeight: 800, color: '#26402F', background: '#A9D8B8', padding: '5px 10px', fontFamily: "'Manrope', sans-serif" }}>
-                          ✅ Pago
-                        </span>
-                      )}
+                      <span className="rounded-full flex items-center gap-1" style={{ fontSize: '9px', fontWeight: 800, color: ETIQUETA[situacao].cor, background: ETIQUETA[situacao].fundo, padding: '5px 10px', fontFamily: "'Manrope', sans-serif" }}>
+                        {ETIQUETA[situacao].emoji} {ETIQUETA[situacao].texto}
+                      </span>
 
                       {/* So acontece em Proximos: a entrega ja passou e o
                           pedido so continua aqui porque falta receber. */}
@@ -894,25 +949,15 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                     </button>
 
                     {onTogglePaymentStatus && (
-                      isPending ? (
-                        <button
-                          onClick={(e) => { e.stopPropagation(); onTogglePaymentStatus(tx); }}
-                          className="rounded-full transition-all flex items-center gap-1 cursor-pointer active:scale-95 hover:translate-y-[-2px]"
-                          style={{ fontSize: '9px', fontWeight: 800, color: '#26402F', background: '#A9D8B8', width: '53px', padding: '5px 0', justifyContent: 'center', whiteSpace: 'nowrap', fontFamily: "'Manrope', sans-serif" }}
-                          title="Clique para marcar este pedido como PAGO"
-                        >
-                          <span>✅ Pago</span>
-                        </button>
-                      ) : (
-                        <button
-                          onClick={(e) => { e.stopPropagation(); onTogglePaymentStatus(tx); }}
-                          className="rounded-full transition-all flex items-center gap-1 cursor-pointer active:scale-95 hover:translate-y-[-2px]"
-                          style={{ fontSize: '9px', fontWeight: 700, color: '#5B4A2E', background: '#F0E2C8', width: '53px', padding: '5px 0', justifyContent: 'center', whiteSpace: 'nowrap', fontFamily: "'Manrope', sans-serif" }}
-                          title="Clique para alterar este pedido para PENDENTE"
-                        >
-                          <span>Pendente</span>
-                        </button>
-                      )
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onTogglePaymentStatus(tx); }}
+                        className="rounded-full transition-all flex items-center gap-1 cursor-pointer active:scale-95 hover:translate-y-[-2px]"
+                        style={{ fontSize: '9px', fontWeight: situacao === 'pago' ? 700 : 800, color: BOTAO[situacao].cor, background: BOTAO[situacao].fundo, minWidth: '53px', padding: '5px 8px', justifyContent: 'center', whiteSpace: 'nowrap', fontFamily: "'Manrope', sans-serif" }}
+                        title={BOTAO[situacao].title}
+                        aria-label={BOTAO[situacao].ariaLabel(tx.customerName || 'cliente')}
+                      >
+                        <span>{BOTAO[situacao].textoCurto}</span>
+                      </button>
                     )}
 
                     {onEditTransaction && (

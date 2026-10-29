@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { avisar, perguntar } from './components/AvisoApp';
 import { migrarFotosAntigas } from './utils/migrarFotosAntigas';
 import { limparFotosSemUso } from './utils/limparFotosSemUso';
+import { proximoPagamento } from './utils/situacaoPagamento';
 import { AuthProvider } from './context/AuthContext';
 import {
   Transaction,
@@ -510,10 +511,11 @@ function AppContent() {
     setDeletingTransaction(tx);
   };
 
+  // Botao de pagamento do card: pendente -> pago, sinal -> pago ("Recebi o
+  // restante"), pago -> pendente. O sinal sai nos tres. Ver utils/situacaoPagamento.ts.
   const handleTogglePaymentStatus = async (tx: Transaction) => {
-    const newStatus = tx.paymentStatus === 'pendente' ? 'pago' : 'pendente';
     try {
-      await updateTransacao(tx.id, { ...tx, paymentStatus: newStatus });
+      await updateTransacao(tx.id, proximoPagamento(tx));
     } catch (err: any) {
       avisar(`Não foi possível mudar o status do pagamento:\n\n${err?.message || err}`, { titulo: 'Não deu para mudar o pagamento' });
     }

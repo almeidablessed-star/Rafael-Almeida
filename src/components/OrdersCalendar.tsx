@@ -1,4 +1,5 @@
 ﻿import React, { useState } from 'react';
+import { situacaoPagamento, faltaReceberDoPedido } from '../utils/situacaoPagamento';
 import { Transaction, Customer } from '../types';
 import { formatCurrency, formatDateBr } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
@@ -206,8 +207,13 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
                     <p className="text-xs font-semibold" style={{ color: '#241B2B' }}>
                       {formatMoney(tx.totalValue)}
                     </p>
-                    <p className="text-xs" style={{ color: tx.paymentStatus === 'pago' ? '#4CAF7D' : '#F5A623' }}>
-                      {tx.paymentStatus === 'pago' ? 'Pago' : 'Pendente'}
+                    {/* Tres estados, mesma regra da lista de Pedidos (utils/situacaoPagamento.ts). */}
+                    <p className="text-xs" style={{ color: situacaoPagamento(tx) === 'pago' ? '#4CAF7D' : situacaoPagamento(tx) === 'sinal' ? '#A85E86' : '#F5A623' }}>
+                      {situacaoPagamento(tx) === 'pago'
+                        ? 'Pago'
+                        : situacaoPagamento(tx) === 'sinal'
+                        ? `Sinal pago · falta ${formatMoney(faltaReceberDoPedido(tx))}`
+                        : 'Pendente'}
                     </p>
                   </div>
                 </div>

@@ -1,4 +1,5 @@
 import { Transaction, WeeklySummary } from '../types';
+import { faltaReceberDoPedido } from './situacaoPagamento';
 import { getIndiceNoMes, getJanela, getJanelaAtual, type PeriodoReset } from './periodoReset';
 
 /**
@@ -93,12 +94,15 @@ export function calculateWeeklyTotals(transactions: Transaction[]) {
 
   transactions.forEach((tx) => {
     if (tx.type === 'venda') {
-      if (tx.paymentStatus === 'pago') {
-        vendidas += tx.totalValue;
-        lucroLiquido += tx.totalValue;
-      } else {
-        aReceber += tx.totalValue;
-      }
+      // So o que entrou conta como vendido; o resto e "a receber". Com sinal,
+      // entrou so o sinal — mesma regra das contas do Inicio
+      // (financialEngine.calculateWeeklyBalances). Antes o pedido com sinal
+      // entrava inteiro como vendido e o restante sumia do "a receber".
+      const falta = faltaReceberDoPedido(tx);
+      const entrou = tx.totalValue - falta;
+      vendidas += entrou;
+      lucroLiquido += entrou;
+      aReceber += falta;
     } else if (tx.type === 'reposicao' || tx.type === 'maodeobra' || tx.type === 'custo' || tx.type === 'investimento' || tx.type === 'lucro') {
       saldos += tx.totalValue;
       lucroLiquido -= tx.totalValue;
