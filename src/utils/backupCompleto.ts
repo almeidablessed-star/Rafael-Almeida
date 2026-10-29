@@ -4,9 +4,12 @@ import { supabase } from '../lib/supabase';
  * Backup completo (versao 2): clientes, fichas tecnicas, produtos, Minha
  * Empresa e lancamentos, num arquivo so.
  *
- * SEM FOTOS, de proposito: elas eram ~99% do arquivo (medido em 26/10/2026:
- * 2,2 MB com fotos, 7 KB sem), e uma conta real com fotos passaria do limite
- * de restauracao (~20 MB). Quem restaura fica sem as fotos; a tela avisa.
+ * Fotos: vai so o ENDERECO das que estao no deposito (storage:<uid>/..., uns
+ * 80 caracteres) e as miniaturas. Foto inteira em base64 (de quem ainda nao
+ * migrou) fica de fora: eram ~99% do arquivo (medido em 26/10/2026: 2,2 MB com
+ * fotos, 7 KB sem) e passariam do limite de restauracao (~20 MB). Ao restaurar,
+ * as fotos do deposito voltam, porque excluir ou zerar nao apaga os arquivos.
+ * Ver supabase/migrations/20261029130000_backup_leva_fotos.sql.
  *
  * As linhas vao com os nomes das colunas do banco: quem le o arquivo de volta
  * e a funcao `restaurar_backup_completo`
@@ -24,16 +27,38 @@ const COLUNAS = {
   produtos:
     'id,nome,categoria,preco_pago,quantidade_embalagem,unidade_embalagem,controla_estoque,quantidade_atual,quantidade_referencia,nivel_minimo,nivel_minimo_unidade,created_at,updated_at',
   fichas_tecnicas:
-    'id,nome_produto,categoria,custo,mao_de_obra,reposicao,investimento,tamanhos,insumos,rendimento,created_at',
+    'id,nome_produto,categoria,custo,mao_de_obra,reposicao,investimento,tamanhos,insumos,rendimento,created_at,foto_url,foto_mini',
   clientes:
-    'id,nome,telefone,endereco,city,notes,eventDate,recurringEventTitle,additionalEvents,created_at',
+    'id,nome,telefone,endereco,city,notes,eventDate,recurringEventTitle,additionalEvents,created_at,photoUrl,foto_mini',
   transacoes:
-    'id,tipo,descricao,data,quantidade,valor_unitario,valor_total,valor_sinal,status_pagamento,forma_pagamento,cliente_nome,cliente_telefone,data_evento,horario_entrega,endereco_entrega,observacoes,notas,fornecedor,periodo_mao_de_obra,categoria,breakdown,ficha_itens,insumos_consumidos,produto_id,created_at',
+    'id,tipo,descricao,data,quantidade,valor_unitario,valor_total,valor_sinal,status_pagamento,forma_pagamento,cliente_nome,cliente_telefone,data_evento,horario_entrega,endereco_entrega,observacoes,notas,fornecedor,periodo_mao_de_obra,categoria,breakdown,ficha_itens,insumos_consumidos,produto_id,created_at,cliente_foto_url,imagem_inspiracao',
   despesas_empresa: 'nome,valor,percentual_rateio,ordem,created_at,updated_at',
   configuracao_empresa_historico: 'campo,valor_antigo,valor_novo,changed_at',
   administrative_costs:
     'agua,aluguel,energia,gas,internet,limpeza,gasolina,hora_trabalho,monthly_income_target,working_days_per_week,cmv_target_percent,investment_target_percent,profit_target_percent,migrado_de_colunas_fixas,periodo_reset',
-  usuarias: 'nome_confeitaria,moeda,telefone,endereco,instagram',
+  usuarias: 'nome_confeitaria,moeda,telefone,endereco,instagram,foto_url',
+};
+
+/**
+ * Colunas de foto de cada parte do arquivo, e a miniatura que anda com cada uma.
+ * Fica so endereco do deposito; foto inteira (base64) sai do arquivo, e a
+ * miniatura sai junto (sem a foto, ela so confundiria a lista).
+ */
+const FOTOS: Record<string, { foto: string; mini?: string }[]> = {
+  fichas_tecnicas: [{ foto: 'foto_url', mini: 'foto_mini' }],
+  clientes: [{ foto: 'photoUrl', mini: 'foto_mini' }],
+  transacoes: [{ foto: 'cliente_foto_url' }, { foto: 'imagem_inspiracao' }],
+  usuarias: [{ foto: 'foto_url' }],
+};
+
+const soEnderecosDoDeposito = (tabela: string, linha: any) => {
+  if (!linha) return linha;
+  for (const { foto, mini } of FOTOS[tabela] || []) {
+    if (typeof linha[foto] === 'string' && linha[foto].startsWith('storage:')) continue;
+    delete linha[foto];
+    if (mini) delete linha[mini];
+  }
+  return linha;
 };
 
 export interface BackupCompleto {
@@ -62,7 +87,7 @@ const buscarTodas = async (tabela: keyof typeof COLUNAS, uid: string, ordem: str
       .order(ordem, { ascending: true })
       .range(inicio, inicio + PAGINA - 1);
     if (error) throw error;
-    todas.push(...(data || []));
+    todas.push(...(data || []).map((linha: any) => soEnderecosDoDeposito(tabela, linha)));
     if (!data || data.length < PAGINA) return todas;
   }
 };
@@ -107,7 +132,7 @@ export const montarBackupCompleto = async (): Promise<BackupCompleto> => {
     despesas,
     historico,
     custos: (custos as unknown as Record<string, unknown>) || null,
-    perfil: (perfil as unknown as Record<string, unknown>) || null,
+    perfil: soEnderecosDoDeposito('usuarias', perfil as unknown as Record<string, unknown>) || null,
   };
 };
 

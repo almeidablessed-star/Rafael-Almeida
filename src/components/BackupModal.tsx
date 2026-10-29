@@ -116,6 +116,14 @@ const LIMITE_AVISO_BYTES = 20 * 1024 * 1024;
 const ehFalhaSemResposta = (err: any) =>
   !err?.code && /failed to fetch|load failed|networkerror/i.test(String(err?.message || err));
 
+/** Quantas fotos do deposito o backup completo leva (endereco `storage:`). */
+const fotosNoArquivo = (b: BackupCompleto | null) => {
+  if (!b) return 0;
+  const conta = (lista: any[] | undefined, colunas: string[]) =>
+    (lista || []).reduce((n, l) => n + colunas.filter((c) => typeof l?.[c] === 'string' && l[c].startsWith('storage:')).length, 0);
+  return conta(b.fichas, ['foto_url']) + conta(b.clientes, ['photoUrl']) + conta(b.transacoes, ['cliente_foto_url', 'imagem_inspiracao']);
+};
+
 export const BackupModal: React.FC<BackupModalProps> = ({
   isOpen,
   onClose,
@@ -457,10 +465,19 @@ export const BackupModal: React.FC<BackupModalProps> = ({
             <p className="text-xs text-neutral-700 leading-relaxed">
               Tudo o que você tem agora será apagado e trocado pelo que está no arquivo.
             </p>
-            <p className="text-xs text-amber-900 bg-amber-50 border border-amber-200 rounded-lg p-3 leading-relaxed">
-              <strong>As fotos não voltam:</strong> o backup não guarda fotos. Fichas, clientes e pedidos
-              voltam completos, mas sem as imagens.
-            </p>
+            {/* Arquivo novo leva o endereco das fotos do deposito, e elas voltam.
+                Arquivo antigo (de antes de 29/10/2026) nao tem foto nenhuma. */}
+            {fotosNoArquivo(completoPendente) > 0 ? (
+              <p className="text-xs bg-[#F3E9F3] border border-[rgba(110,63,114,0.22)] rounded-lg p-3 leading-relaxed" style={{ color: '#3A2350' }}>
+                <strong>As fotos voltam junto:</strong> o arquivo guarda {fotosNoArquivo(completoPendente)} foto(s) de fichas,
+                clientes e pedidos.
+              </p>
+            ) : (
+              <p className="text-xs text-amber-900 bg-amber-50 border border-amber-200 rounded-lg p-3 leading-relaxed">
+                <strong>As fotos não voltam:</strong> este backup não guarda fotos. Fichas, clientes e pedidos
+                voltam completos, mas sem as imagens.
+              </p>
+            )}
             {tamanhoArquivo > LIMITE_AVISO_BYTES && (
               <p className="text-xs text-amber-900 bg-amber-50 border border-amber-200 rounded-lg p-3 leading-relaxed">
                 Este backup é grande e pode não restaurar de uma vez. Se falhar, nada será apagado.
@@ -518,7 +535,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
                 <span className="text-[11px] text-neutral-500">
                   {isExporting
                     ? 'Juntando seus dados — pode levar alguns segundos'
-                    : 'Salva um arquivo .json com fichas, produtos, clientes, Minha Empresa e lançamentos (as fotos não entram)'}
+                    : 'Salva um arquivo .json com fichas, produtos, clientes, Minha Empresa, lançamentos e fotos'}
                 </span>
               </div>
             </div>
