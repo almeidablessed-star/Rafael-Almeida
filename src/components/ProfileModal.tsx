@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { apagarFotoTrocada, guardarFoto } from '../utils/fotoDeposito';
 import { avisar } from './AvisoApp';
 import { X, Camera, Edit2, Clock } from 'lucide-react';
 import { useCurrency } from '../context/CurrencyContext';
@@ -200,6 +201,13 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
       // como vazio" na leitura.
       const orNull = (v: string) => (v.trim() ? v.trim() : null);
 
+      // Foto nova sobe ao deposito e a coluna guarda so o endereco; a mesma foto
+      // de antes volta como o endereco que ja era (ver utils/fotoDeposito.ts).
+      const fotoAntes = profileData.photo
+        ? (await supabase.from('usuarias').select('foto_url').eq('id', user.id).single()).data?.foto_url
+        : undefined;
+      const foto = profileData.photo ? await guardarFoto(profileData.photo, user.id, 'perfil') : undefined;
+
       const { error } = await supabase
         .from('usuarias')
         .update({
@@ -214,7 +222,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
           // foto perfeitamente boa — bastava salvar uma edicao de telefone numa
           // sessao recem-aberta para perde-la. Omitir a chave deixa o valor
           // gravado intacto.
-          ...(profileData.photo ? { foto_url: profileData.photo } : {}),
+          ...(foto ? { foto_url: foto } : {}),
           telefone: orNull(profileData.phone),
           endereco: orNull(profileData.address),
           instagram: orNull(profileData.instagram),
@@ -225,6 +233,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
         setMessage({ type: 'error', text: 'Erro ao salvar perfil' });
         return;
       }
+      await apagarFotoTrocada(fotoAntes, foto);
 
       // Reler o perfil para que a folha de orcamento use os dados novos sem
       // depender de um reload da pagina.

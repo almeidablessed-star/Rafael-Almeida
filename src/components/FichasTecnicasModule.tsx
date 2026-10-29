@@ -977,6 +977,8 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         // A lista so tem a miniatura: busca a foto inteira para a copia nao
         // nascer sem foto.
         imageUrl: fichaToDup.imageUrl ?? (await fetchFichaPhoto(fichaToDup.id)) ?? undefined,
+        // Foto ja no deposito nao gera miniatura nova: a copia usa a da original.
+        fotoMini: fichaToDup.fotoMini,
         tamanhos: fichaToDup.tamanhos,
         ingredients: (fichaToDup.ingredients || []).map((ing, idx) => ({ ...ing, id: `${Date.now()}_${idx}` })),
         maoDeObraCost: fichaToDup.maoDeObraCost,

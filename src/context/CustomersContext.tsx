@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { abrirFoto, apagarFotoTrocada, ehEnderecoDeposito, guardarFoto } from '../utils/fotoDeposito';
 import { supabase } from '../lib/supabase';
 import { gerarMiniatura } from '../utils/imageCompression';
 import { useAuth } from './AuthContext';
@@ -60,7 +61,9 @@ const mapSupabaseToCustomer = (data: SupabaseCustomer): Customer => ({
   id: String(data.id),
   name: data.nome,
   phone: data.telefone,
-  photoUrl: data.photoUrl,
+  // Endereco do deposito nao vai para a tela: quem mostra a foto pede o link
+  // por `fetchCustomerPhoto` (ver utils/fotoDeposito.ts).
+  photoUrl: ehEnderecoDeposito(data.photoUrl) ? undefined : data.photoUrl,
   fotoMini: data.foto_mini || undefined,
   eventDate: data.eventDate,
   recurringEventTitle: data.recurringEventTitle,
@@ -78,10 +81,15 @@ const mapSupabaseToCustomer = (data: SupabaseCustomer): Customer => ({
  * antes de a foto terminar de carregar (~2 s) apagava a foto da cliente.
  * Mesmo cuidado de `fotoOuOmitida` em TransacoesContext.
  */
-const fotoEMiniatura = async (photoUrl: string | undefined) => {
+const fotoEMiniatura = async (photoUrl: string | undefined, usuariaId: string, novoRegistro = false) => {
   if (photoUrl === undefined) return {};
   if (!photoUrl) return { photoUrl: null, foto_mini: null };
-  return { photoUrl, foto_mini: await gerarMiniatura(photoUrl) };
+  // Foto nova (data URI) ou ja do deposito: o arquivo vai/fica no deposito e o
+  // banco guarda so o endereco. Ver utils/fotoDeposito.ts.
+  const guardada = await guardarFoto(photoUrl, usuariaId, 'clientes', { novoRegistro });
+  // A mesma foto de antes, ja no deposito: a miniatura gravada continua valendo.
+  if (!photoUrl.startsWith('data:') && ehEnderecoDeposito(guardada)) return { photoUrl: guardada };
+  return { photoUrl: guardada, foto_mini: await gerarMiniatura(photoUrl) };
 };
 
 const mapCustomerToSupabase = (customer: Omit<Customer, 'id' | 'createdAt'>) => ({
@@ -165,7 +173,8 @@ export const CustomersProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           .eq('id', id)
           .eq('usuaria_id', user.id)
           .single();
-        if (!linha?.photoUrl) continue;
+        // So fotos antigas (data URI): as do deposito ja nascem com miniatura.
+        if (!linha?.photoUrl || !linha.photoUrl.startsWith('data:')) continue;
         const mini = await gerarMiniatura(linha.photoUrl);
         if (!mini) continue;
         const { error: erroGravar } = await supabase
@@ -185,7 +194,7 @@ export const CustomersProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const fetchCustomerPhoto = async (customerId: string): Promise<string | null> => {
     const existing = customers.find(c => c.id === customerId);
-    if (existing?.photoUrl) return existing.photoUrl;
+    if (existing?.photoUrl) return abrirFoto(existing.photoUrl);
 
     try {
       const { data, error } = await supabase
@@ -196,7 +205,7 @@ export const CustomersProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         .single();
 
       if (error) throw error;
-      return data?.photoUrl || null;
+      return abrirFoto(data?.photoUrl);
     } catch (err: any) {
       console.error('Error fetching customer photo:', err);
       return null;
@@ -210,7 +219,7 @@ export const CustomersProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       setError(null);
       const { data, error: insertError } = await supabase
         .from('clientes')
-        .insert([{ usuaria_id: user.id, ...mapCustomerToSupabase(customerData), ...(await fotoEMiniatura(customerData.photoUrl)) }])
+        .insert([{ usuaria_id: user.id, ...mapCustomerToSupabase(customerData), ...(await fotoEMiniatura(customerData.photoUrl, user.id, true)) }])
         .select()
         .single();
 
@@ -232,15 +241,22 @@ export const CustomersProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     try {
       setError(null);
+      // Foto que estava gravada, para apagar do deposito se for trocada.
+      const fotoAntes =
+        customerData.photoUrl === undefined
+          ? undefined
+          : (await supabase.from('clientes').select('photoUrl').eq('id', parseInt(id)).eq('usuaria_id', user.id).single()).data?.photoUrl;
+      const foto = await fotoEMiniatura(customerData.photoUrl, user.id);
       const { data, error: updateError } = await supabase
         .from('clientes')
-        .update({ ...mapCustomerToSupabase(customerData), ...(await fotoEMiniatura(customerData.photoUrl)) })
+        .update({ ...mapCustomerToSupabase(customerData), ...foto })
         .eq('id', parseInt(id))
         .eq('usuaria_id', user.id)
         .select()
         .single();
 
       if (updateError) throw updateError;
+      await apagarFotoTrocada(fotoAntes, (foto as { photoUrl?: string | null }).photoUrl);
 
       const updated = mapSupabaseToCustomer(data);
       setCustomers((prev) => prev.map((c) => (c.id === id ? updated : c)));

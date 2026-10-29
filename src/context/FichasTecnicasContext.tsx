@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { abrirFoto, apagarFotoTrocada, ehEnderecoDeposito, guardarFoto } from '../utils/fotoDeposito';
 import { supabase } from '../lib/supabase';
 import { gerarMiniatura } from '../utils/imageCompression';
 import { useAuth } from './AuthContext';
@@ -91,7 +92,9 @@ const mapSupabaseToFicha = (data: SupabaseFichaTecnica): FichaTecnica => {
     id: String(data.id),
     name: data.nome_produto,
     category: normalizedCategory as any,
-    imageUrl: data.foto_url,
+    // Endereco do deposito nao vai para a tela: quem mostra a foto pede o link
+    // por `fetchFichaPhoto` (ver utils/fotoDeposito.ts).
+    imageUrl: ehEnderecoDeposito(data.foto_url) ? undefined : data.foto_url,
     fotoMini: data.foto_mini || undefined,
     yieldInfo: data.rendimento || undefined,
     tamanhos: tamanhos,
@@ -120,11 +123,27 @@ const LADO_MINI_FICHA = 144;
  * Foto que nao e data URI (o link da foto generica) ja e leve: vira a propria
  * miniatura.
  */
-const fotoEMiniaturaDaFicha = async (imageUrl: string | undefined) => {
+/**
+ * Ficha nova (criar ou duplicar). Duplicando uma ficha cuja foto ja esta no
+ * deposito, a miniatura nao tem de onde ser gerada (nao ha data URI): vale a
+ * miniatura da ficha original, que o Duplicar manda junto em `fotoMini`.
+ */
+const fotoDaFichaNova = async (fichaData: Omit<FichaTecnica, 'id' | 'createdAt'>, usuariaId: string) => {
+  const foto = (await fotoEMiniaturaDaFicha(fichaData.imageUrl, usuariaId, true)) as { foto_url?: string | null; foto_mini?: string | null };
+  if (foto.foto_url && foto.foto_mini === undefined && fichaData.fotoMini) return { ...foto, foto_mini: fichaData.fotoMini };
+  return foto;
+};
+
+const fotoEMiniaturaDaFicha = async (imageUrl: string | undefined, usuariaId: string, novoRegistro = false) => {
   if (imageUrl === undefined) return {};
   if (!imageUrl) return { foto_url: null, foto_mini: null };
-  const foto_mini = imageUrl.startsWith('data:') ? await gerarMiniatura(imageUrl, LADO_MINI_FICHA) : imageUrl;
-  return { foto_url: imageUrl, foto_mini };
+  // Foto nova (data URI) ou ja do deposito: o arquivo vai/fica no deposito e o
+  // banco guarda so o endereco. Ver utils/fotoDeposito.ts.
+  const foto_url = await guardarFoto(imageUrl, usuariaId, 'fichas', { novoRegistro });
+  if (imageUrl.startsWith('data:')) return { foto_url, foto_mini: await gerarMiniatura(imageUrl, LADO_MINI_FICHA) };
+  // A mesma foto de antes: a miniatura gravada continua valendo.
+  if (ehEnderecoDeposito(foto_url)) return { foto_url };
+  return { foto_url, foto_mini: imageUrl };
 };
 
 const mapFichaToSupabase = (ficha: Omit<FichaTecnica, 'id' | 'createdAt'>) => ({
@@ -225,7 +244,7 @@ export const FichasTecnicasProvider: React.FC<{ children: React.ReactNode }> = (
       setError(null);
       const { data, error: insertError } = await supabase
         .from('fichas_tecnicas')
-        .insert([{ usuaria_id: user.id, ...mapFichaToSupabase(fichaData), ...(await fotoEMiniaturaDaFicha(fichaData.imageUrl)) }])
+        .insert([{ usuaria_id: user.id, ...mapFichaToSupabase(fichaData), ...(await fotoDaFichaNova(fichaData, user.id)) }])
         .select()
         .single();
 
@@ -247,15 +266,22 @@ export const FichasTecnicasProvider: React.FC<{ children: React.ReactNode }> = (
 
     try {
       setError(null);
+      // Foto que estava gravada, para apagar do deposito se for trocada.
+      const fotoAntes =
+        fichaData.imageUrl === undefined
+          ? undefined
+          : (await supabase.from('fichas_tecnicas').select('foto_url').eq('id', parseInt(id)).eq('usuaria_id', user.id).single()).data?.foto_url;
+      const foto = await fotoEMiniaturaDaFicha(fichaData.imageUrl, user.id);
       const { data, error: updateError } = await supabase
         .from('fichas_tecnicas')
-        .update({ ...mapFichaToSupabase(fichaData), ...(await fotoEMiniaturaDaFicha(fichaData.imageUrl)) })
+        .update({ ...mapFichaToSupabase(fichaData), ...foto })
         .eq('id', parseInt(id))
         .eq('usuaria_id', user.id)
         .select()
         .single();
 
       if (updateError) throw updateError;
+      await apagarFotoTrocada(fotoAntes, (foto as { foto_url?: string | null }).foto_url);
 
       const updated = mapSupabaseToFicha(data);
       setFichas((prev) => prev.map((f) => (f.id === id ? updated : f)));
@@ -300,7 +326,7 @@ export const FichasTecnicasProvider: React.FC<{ children: React.ReactNode }> = (
             usuaria_id: user.id,
             nome_produto: ficha.name,
             categoria: ficha.category,
-            foto_url: ficha.imageUrl || null,
+            foto_url: (await guardarFoto(ficha.imageUrl, user.id, 'fichas')) ?? null,
             tamanhos: ficha.tamanhos,
             insumos: ficha.ingredients,
             mao_de_obra: ficha.maoDeObraCost,
@@ -347,8 +373,9 @@ export const FichasTecnicasProvider: React.FC<{ children: React.ReactNode }> = (
           .eq('id', id)
           .eq('usuaria_id', user.id)
           .single();
-        if (!linha?.foto_url) continue;
-        const { foto_mini } = (await fotoEMiniaturaDaFicha(linha.foto_url)) as { foto_mini?: string | null };
+        // So fotos antigas (data URI): as do deposito ja nascem com miniatura.
+        if (!linha?.foto_url || !linha.foto_url.startsWith('data:')) continue;
+        const foto_mini = await gerarMiniatura(linha.foto_url, LADO_MINI_FICHA);
         if (!foto_mini) continue;
         const { error: erroGravar } = await supabase
           .from('fichas_tecnicas')
@@ -367,7 +394,7 @@ export const FichasTecnicasProvider: React.FC<{ children: React.ReactNode }> = (
 
   const fetchFichaPhoto = async (fichaId: string): Promise<string | null> => {
     const existing = fichas.find(f => f.id === fichaId);
-    if (existing?.imageUrl) return existing.imageUrl;
+    if (existing?.imageUrl) return abrirFoto(existing.imageUrl);
 
     try {
       const { data, error } = await supabase
@@ -378,7 +405,7 @@ export const FichasTecnicasProvider: React.FC<{ children: React.ReactNode }> = (
         .single();
 
       if (error) throw error;
-      return data?.foto_url || null;
+      return abrirFoto(data?.foto_url);
     } catch (err: any) {
       console.error('Error fetching ficha photo:', err);
       return null;

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { abrirFoto, apagarFotoTrocada, guardarFoto } from '../utils/fotoDeposito';
 import { supabase } from '../lib/supabase';
 import { useAuth } from './AuthContext';
 import { Transaction, FichaOrderItem } from '../types';
@@ -84,6 +85,20 @@ const textoOuNulo = (valor?: string) => (valor && valor.trim() ? valor : null);
  */
 const fotoOuOmitida = (coluna: string, valor?: string | null) =>
   valor === undefined ? {} : { [coluna]: valor || null };
+
+/**
+ * As duas fotos do pedido prontas para gravar: foto nova sobe ao deposito e a
+ * coluna guarda so o endereco (ver utils/fotoDeposito.ts). `undefined` continua
+ * `undefined` — a coluna fica de fora, como em `fotoOuOmitida`.
+ */
+const fotosDoPedido = async (
+  tx: Omit<Transaction, 'id' | 'createdAt'>,
+  usuariaId: string,
+  novoRegistro: boolean
+) => ({
+  customerPhotoUrl: await guardarFoto(tx.customerPhotoUrl, usuariaId, 'pedidos', { novoRegistro }),
+  inspirationImage: await guardarFoto(tx.inspirationImage, usuariaId, 'pedidos', { novoRegistro }),
+});
 
 /**
  * Colunas lidas nas consultas de lista.
@@ -261,9 +276,10 @@ export const TransacoesProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         .single();
 
       if (error) throw error;
+      // Endereco do deposito vira link para a tela; foto antiga volta como esta.
       return {
-        customerPhotoUrl: data?.cliente_foto_url || null,
-        inspirationImage: data?.imagem_inspiracao || null,
+        customerPhotoUrl: await abrirFoto(data?.cliente_foto_url),
+        inspirationImage: await abrirFoto(data?.imagem_inspiracao),
       };
     } catch (err: any) {
       console.error('Error fetching transacao photos:', err);
@@ -298,9 +314,10 @@ export const TransacoesProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
     try {
       setError(null);
+      const fotos = await fotosDoPedido(txData, user.id, true);
       const { data, error: insertError } = await supabase
         .from('transacoes')
-        .insert([{ usuaria_id: user.id, ...mapTransactionToSupabase(txData) }])
+        .insert([{ usuaria_id: user.id, ...mapTransactionToSupabase({ ...txData, ...fotos }) }])
         // Sem as colunas de foto tambem na volta: a linha acabou de ser
         // gravada com a foto que ja esta na tela, e devolve-la so faria o
         // mesmo base64 subir e descer na mesma operacao.
@@ -323,15 +340,25 @@ export const TransacoesProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
     try {
       setError(null);
+      // Fotos que estavam gravadas, para apagar do deposito as que forem trocadas.
+      const mexeuNasFotos = txData.customerPhotoUrl !== undefined || txData.inspirationImage !== undefined;
+      const antes = mexeuNasFotos
+        ? (await supabase.from('transacoes').select('cliente_foto_url,imagem_inspiracao').eq('id', parseInt(id)).eq('usuaria_id', user.id).single()).data
+        : null;
+      const fotos = await fotosDoPedido(txData, user.id, false);
       const { data, error: updateError } = await supabase
         .from('transacoes')
-        .update(mapTransactionToSupabase(txData))
+        .update(mapTransactionToSupabase({ ...txData, ...fotos }))
         .eq('id', parseInt(id))
         .eq('usuaria_id', user.id)
         .select(COLUNAS_SEM_FOTO)
         .single();
 
       if (updateError) throw updateError;
+      if (antes) {
+        await apagarFotoTrocada(antes.cliente_foto_url, fotos.customerPhotoUrl);
+        await apagarFotoTrocada(antes.imagem_inspiracao, fotos.inspirationImage);
+      }
 
       const atualizada = mapSupabaseToTransaction(comoLinha(data));
       setTransacoes((prev) => prev.map((t) => (t.id === id ? atualizada : t)));

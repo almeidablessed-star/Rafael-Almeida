@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { abrirFoto } from '../utils/fotoDeposito';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 
@@ -239,7 +240,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .single();
 
       if (!error && data) {
-        setUserProfile(data);
+        // Endereco do deposito vira link: as telas usam `foto_url` direto no <img>.
+        setUserProfile({ ...data, foto_url: (await abrirFoto(data.foto_url)) || undefined });
       }
     } catch (error) {
       console.error('Error refreshing user profile:', error);
@@ -417,7 +419,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .single();
 
       if (error) throw error;
-      return data?.foto_url || null;
+      return abrirFoto(data?.foto_url);
     } catch (err: any) {
       console.error('Error fetching user photo:', err);
       return null;
