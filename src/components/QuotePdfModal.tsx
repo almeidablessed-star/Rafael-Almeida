@@ -1,4 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useZoomDaPrevia } from '../hooks/useZoomDaPrevia';
 import { avisar } from './AvisoApp';
 import { situacaoPagamento } from '../utils/situacaoPagamento';
 import { createPortal } from 'react-dom';
@@ -186,6 +187,13 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
     observador.observe(corpo);
     return () => observador.disconnect();
   }, []);
+  // Pinca na folha do celular. O PDF nao e afetado: o zoom volta ao normal antes
+  // da captura, e a captura desliga a miniatura.
+  const { ampliada: previaAmpliada, resetar: resetarZoomDaPrevia } = useZoomDaPrevia(
+    miniaturaRef,
+    folhaRef,
+    miniatura ? { ...miniatura, largura: LARGURA_FOLHA } : null
+  );
   const { updateTransacao, fetchTransacaoFotos } = useTransacoes();
 
   /**
@@ -445,6 +453,7 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
   };
 
   const handleDownloadPdf = async () => {
+    resetarZoomDaPrevia();
     const docElem = document.getElementById('quote-pdf-document');
     if (!docElem) {
       console.error('PDF document element not found');
@@ -1110,7 +1119,18 @@ ${situacaoPagamento(transaction) === 'sinal' ? `✅ *Sinal/Entrada Pago:* ${form
               no-print, e some na captura (a miniatura e desligada nela). */}
           {miniatura && (
             <div className="no-print flex items-center justify-between gap-2" style={{ padding: '6px 4px 4px', fontFamily: "'Manrope', sans-serif" }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, color: '#7A6E80' }}>Prévia do PDF</span>
+              {previaAmpliada ? (
+                <button
+                  type="button"
+                  onClick={resetarZoomDaPrevia}
+                  className="px-3 py-1.5 rounded-xl font-bold text-[11px] cursor-pointer"
+                  style={{ background: '#F3E9F3', color: '#3A2350' }}
+                >
+                  Tamanho normal
+                </button>
+              ) : (
+                <span style={{ fontSize: '11px', fontWeight: 700, color: '#7A6E80' }}>Prévia do PDF</span>
+              )}
               <div className="flex items-center gap-1.5">
                 <label className="px-3 py-1.5 rounded-xl bg-[#F5B9C6] text-[#3A2350] font-bold text-[11px] flex items-center gap-1 cursor-pointer shadow-sm">
                   <Camera className="w-3.5 h-3.5" />
@@ -1132,11 +1152,12 @@ ${situacaoPagamento(transaction) === 'sinal' ? `✅ *Sinal/Entrada Pago:* ${form
             </div>
           )}
 
-          <div ref={miniaturaRef} style={miniatura ? { height: `${miniatura.altura}px`, overflow: 'hidden' } : undefined}>
+          <div ref={miniaturaRef} style={miniatura ? { height: `${miniatura.altura}px`, overflow: 'hidden', touchAction: 'pan-y' } : undefined}>
           <div
             ref={folhaRef}
             className={miniatura ? '@container [&_.no-print]:hidden' : '@container'}
-            style={miniatura ? { width: `${LARGURA_FOLHA}px`, marginLeft: `${miniatura.recuo}px`, transform: `scale(${miniatura.escala})`, transformOrigin: 'top left' } : undefined}
+            // O transform (reducao + zoom) e escrito por useZoomDaPrevia.
+            style={miniatura ? { width: `${LARGURA_FOLHA}px`, marginLeft: `${miniatura.recuo}px`, transformOrigin: 'top left' } : undefined}
           >
           {activeTab === 'cliente' ? (
             /* ======================================================== */
