@@ -260,6 +260,9 @@ export const CustomersModule: React.FC = () => {
   /** Cliente cuja foto esta sendo buscada; evita que a foto de uma caia no
    * formulario de outra quando se abre duas em seguida. */
   const fotoDaClienteRef = useRef<string | null>(null);
+  /** Miniatura na tela enquanto a foto inteira nao chega. So para ver: quem vai
+   * para o banco e sempre `photoUrl`, para nunca gravar a foto reduzida. */
+  const [miniaturaEmEspera, setMiniaturaEmEspera] = useState('');
   const [eventDate, setEventDate] = useState('');
   const [recurringEventTitle, setRecurringEventTitle] = useState('Aniversário');
   const [additionalEvents, setAdditionalEvents] = useState<CustomerEvent[]>([]);
@@ -294,6 +297,7 @@ export const CustomersModule: React.FC = () => {
     setName('');
     setPhone('');
     setPhotoUrl('');
+    setMiniaturaEmEspera('');
     setFotoCarregada(true);
     fotoDaClienteRef.current = null;
     setEventDate('');
@@ -322,13 +326,20 @@ export const CustomersModule: React.FC = () => {
 
     if (!c.photoUrl) {
       setFotoCarregada(false);
+      setMiniaturaEmEspera(c.fotoMini || '');
       fotoDaClienteRef.current = c.id;
       const photo = await fetchCustomerPhoto(c.id);
       // Outra cliente foi aberta enquanto esta foto vinha: descarta.
       if (fotoDaClienteRef.current !== c.id) return;
       if (photo) setPhotoUrl(photo);
-      setFotoCarregada(true);
+      // Tem miniatura, logo tem foto: se a busca falhou, continua "nao carregada"
+      // e salvar mantem a foto gravada.
+      if (photo || !c.fotoMini) {
+        setMiniaturaEmEspera('');
+        setFotoCarregada(true);
+      }
     } else {
+      setMiniaturaEmEspera('');
       setFotoCarregada(true);
       fotoDaClienteRef.current = null;
     }
@@ -337,8 +348,12 @@ export const CustomersModule: React.FC = () => {
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    // Foto escolhida vale mais que a gravada: a resposta da busca, se ainda
+    // vier, nao toma o lugar dela.
+    fotoDaClienteRef.current = null;
     try {
       setPhotoUrl(await compressImageFile(file));
+      setMiniaturaEmEspera('');
     } catch (err: any) {
       // `compressImageFile` recusa um arquivo cru grande demais quando a
       // compressao falha. A mensagem dele ja explica o que fazer.
@@ -1003,8 +1018,8 @@ export const CustomersModule: React.FC = () => {
                   className="w-16 h-16 rounded-[20px] flex items-center justify-center flex-shrink-0 overflow-hidden"
                   style={{ background: 'rgba(245,185,198,0.25)', border: '2px solid rgba(255,255,255,0.35)' }}
                 >
-                  {photoUrl ? (
-                    <img src={photoUrl} alt="Preview" className="w-full h-full object-cover" />
+                  {photoUrl || miniaturaEmEspera ? (
+                    <img src={photoUrl || miniaturaEmEspera} alt="Preview" className="w-full h-full object-cover" />
                   ) : (
                     <User className="w-[26px] h-[26px]" style={{ color: '#F5B9C6' }} />
                   )}
@@ -1016,7 +1031,7 @@ export const CustomersModule: React.FC = () => {
                     className="inline-flex items-center gap-1.5 self-start bg-white/15 hover:bg-white/30 text-white text-xs font-semibold px-3 py-2 rounded-[9px] cursor-pointer transition-colors"
                   >
                     <Camera className="w-3.5 h-3.5" />
-                    <span>{photoUrl ? 'Alterar foto' : 'Escolher foto'}</span>
+                    <span>{photoUrl || miniaturaEmEspera ? 'Alterar foto' : 'Escolher foto'}</span>
                   </label>
                   <input
                     id="photo-upload"

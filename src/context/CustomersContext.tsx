@@ -119,7 +119,21 @@ export const CustomersProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     fetchCustomers();
   }, [user]);
 
+  /**
+   * `photoUrl` das clientes ja abertas no Editar, para nao pedir de novo ao banco
+   * a cada abertura. Esquecida ao salvar, ao apagar e ao recarregar a lista.
+   */
+  const fotoPorClienteRef = useRef(new Map<string, string>());
+  /** Muda ao esquecer: resposta que saiu antes disso nao volta a ser guardada. */
+  const versaoDasFotosRef = useRef(0);
+  const esquecerFoto = (clienteId?: string) => {
+    versaoDasFotosRef.current += 1;
+    if (clienteId) fotoPorClienteRef.current.delete(clienteId);
+    else fotoPorClienteRef.current.clear();
+  };
+
   const fetchCustomers = async () => {
+    esquecerFoto();
     if (!user) return;
 
     try {
@@ -195,6 +209,9 @@ export const CustomersProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const fetchCustomerPhoto = async (customerId: string): Promise<string | null> => {
     const existing = customers.find(c => c.id === customerId);
     if (existing?.photoUrl) return abrirFoto(existing.photoUrl);
+    const guardada = fotoPorClienteRef.current.get(customerId);
+    if (guardada) return abrirFoto(guardada);
+    const versao = versaoDasFotosRef.current;
 
     try {
       const { data, error } = await supabase
@@ -205,6 +222,7 @@ export const CustomersProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         .single();
 
       if (error) throw error;
+      if (data?.photoUrl && versao === versaoDasFotosRef.current) fotoPorClienteRef.current.set(customerId, data.photoUrl);
       return abrirFoto(data?.photoUrl);
     } catch (err: any) {
       console.error('Error fetching customer photo:', err);
@@ -256,6 +274,7 @@ export const CustomersProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         .single();
 
       if (updateError) throw updateError;
+      esquecerFoto(id);
       await apagarFotoTrocada(fotoAntes, (foto as { photoUrl?: string | null }).photoUrl);
 
       const updated = mapSupabaseToCustomer(data);
@@ -280,6 +299,7 @@ export const CustomersProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
       if (deleteError) throw deleteError;
 
+      esquecerFoto(id);
       setCustomers((prev) => prev.filter((c) => c.id !== id));
     } catch (err: any) {
       setError(err.message || 'Erro ao deletar cliente');
