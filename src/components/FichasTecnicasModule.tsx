@@ -13,6 +13,7 @@ import { normalizeName } from '../utils/fichaMatcher';
 import { capitalizeFirstLetter } from '../utils/textCase';
 import { areUnitsCompatible, convertCostPerUnit } from '../utils/units';
 import { StockItemAutocomplete } from './StockItemAutocomplete';
+import { AvisoInsumoSemCadastro } from './AvisoInsumoSemCadastro';
 import { compressImageFile } from '../utils/imageCompression';
 import { GenericDeleteConfirmModal } from './GenericDeleteConfirmModal';
 import { DuplicateNameWarningModal } from './DuplicateNameWarningModal';
@@ -43,7 +44,6 @@ import {
   Check,
   X,
   Sparkles,
-  PlusCircle,
   TrendingUp,
   ChevronDown,
   ChevronUp,
@@ -1613,6 +1613,14 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                           </button>
                         </div>
 
+                        {/* Colado no nome: com o teclado aberto, a linha da quantidade pode sair da tela. */}
+                        <AvisoInsumoSemCadastro
+                          nome={ing.name}
+                          ativo={!ing.produtoId && criandoProdutoInsumo?.insumoId !== ing.id}
+                          avisoDeCusto={ing.unitCost > 0 ? undefined : `Sem cadastrar, o custo dele fica em ${formatMoney(0)} na ficha.`}
+                          onCadastrar={() => handleAbrirCriarProduto(tamanho.id, ing.id, ing.name)}
+                        />
+
                         <Picote />
 
                         {/* Quantidade + custo */}
@@ -1669,20 +1677,6 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                             </div>
                           </div>
                         </div>
-
-                        {ing.name.trim() !== '' && !ing.produtoId && criandoProdutoInsumo?.insumoId !== ing.id && (
-                          <div style={{ padding: '0 16px 14px' }}>
-                            <button
-                              type="button"
-                              onClick={() => handleAbrirCriarProduto(tamanho.id, ing.id, ing.name)}
-                              className="flex items-center gap-1.5 text-left hover:underline cursor-pointer"
-                              style={{ fontSize: '11px', fontWeight: 700, color: '#6E3F72' }}
-                            >
-                              <PlusCircle className="w-3.5 h-3.5 shrink-0" />
-                              "{ing.name}" não está cadastrado ainda — adicionar agora?
-                            </button>
-                          </div>
-                        )}
 
                         {criandoProdutoInsumo?.tamanhoId === tamanho.id && criandoProdutoInsumo?.insumoId === ing.id && (
                           <>
