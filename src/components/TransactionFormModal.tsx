@@ -1967,42 +1967,42 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                   )}
                 </div>
 
-                <div style={{ background: 'linear-gradient(155deg, #3A2350 0%, #6E3F72 55%, #A85E86 100%)', borderRadius: '16px', padding: '18px', display: 'flex', flexDirection: 'column', gap: '14px', boxShadow: '0 20px 36px rgba(58,35,80,0.18)' }}>
+                <div style={{ background: '#fff', borderRadius: '16px', padding: '18px', display: 'flex', flexDirection: 'column', gap: '14px', boxShadow: '0 8px 20px rgba(58,35,80,0.09)' }}>
                   <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '10px' }}>
                     <div>
-                      <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.65)', display: 'block' }}>
+                      <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#7A6E80', display: 'block' }}>
                         Total do pedido
                       </span>
-                      <span style={{ fontFamily: "'Instrument Serif', serif", fontSize: '32px', lineHeight: 1, color: '#fff' }}>
+                      <span style={{ fontFamily: "'Instrument Serif', serif", fontSize: '32px', lineHeight: 1, color: '#3A2350' }}>
                         {formatMoney(grandTotalSalePrice)}
                       </span>
                     </div>
-                    <div style={{ textAlign: 'right', fontSize: '12px', color: 'rgba(255,255,255,0.7)' }}>
+                    <div style={{ textAlign: 'right', fontSize: '12px', color: '#7A6E80' }}>
                       <div>{orderItems.length} {orderItems.length === 1 ? 'item' : 'itens'} no pedido</div>
                       {hasDelivery && deliveryFee > 0 && <div>+ Entrega: {formatMoney(deliveryFee)}</div>}
                       {totalAddonsValue > 0 && <div>+ Adic.: {formatMoney(totalAddonsValue)}</div>}
                     </div>
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: '8px' }}>
-                    <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '10px', padding: '9px 11px' }}>
-                      <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', display: 'block' }}>Reposição</span>
-                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>{formatMoney(custoReposicaoDoPedido)}</span>
+                    <div style={{ background: '#F6F2F5', borderRadius: '10px', padding: '9px 11px' }}>
+                      <span style={{ fontSize: '11px', color: '#7A6E80', display: 'block' }}>Reposição</span>
+                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#3A2350' }}>{formatMoney(custoReposicaoDoPedido)}</span>
                     </div>
-                    <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '10px', padding: '9px 11px' }}>
-                      <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', display: 'block' }}>Mão de obra</span>
-                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>{formatMoney(custoMaoDeObraDoPedido)}</span>
+                    <div style={{ background: '#F6F2F5', borderRadius: '10px', padding: '9px 11px' }}>
+                      <span style={{ fontSize: '11px', color: '#7A6E80', display: 'block' }}>Mão de obra</span>
+                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#3A2350' }}>{formatMoney(custoMaoDeObraDoPedido)}</span>
                     </div>
-                    <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '10px', padding: '9px 11px' }}>
-                      <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', display: 'block' }}>Despesas</span>
-                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>{formatMoney(custoOperacionalDoPedido)}</span>
+                    <div style={{ background: '#F6F2F5', borderRadius: '10px', padding: '9px 11px' }}>
+                      <span style={{ fontSize: '11px', color: '#7A6E80', display: 'block' }}>Despesas</span>
+                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#3A2350' }}>{formatMoney(custoOperacionalDoPedido)}</span>
                     </div>
-                    <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '10px', padding: '9px 11px' }}>
-                      <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', display: 'block' }}>Investimento</span>
-                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>{formatMoney(custoInvestimentoDoPedido)}</span>
+                    <div style={{ background: '#F6F2F5', borderRadius: '10px', padding: '9px 11px' }}>
+                      <span style={{ fontSize: '11px', color: '#7A6E80', display: 'block' }}>Investimento</span>
+                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#3A2350' }}>{formatMoney(custoInvestimentoDoPedido)}</span>
                     </div>
                   </div>
                   {custosGravadosDoPedido && (
-                    <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', marginTop: '8px', lineHeight: 1.4 }}>
+                    <div style={{ fontSize: '11px', color: '#7A6E80', marginTop: '8px', lineHeight: 1.4 }}>
                       Custos do dia em que o pedido foi lançado. Os valores por item acima usam os preços de hoje.
                     </div>
                   )}
