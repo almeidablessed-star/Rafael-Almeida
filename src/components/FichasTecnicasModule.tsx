@@ -1996,7 +1996,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                     administrativeCosts && estruturaFinanceira?.valido && insumos > 0
                       ? calcularPrecoSugeridoProduto(insumos, horasNum, tarifaNum, administrativeCosts.cmvTargetPercent, estruturaFinanceira)
                       : null;
-                  const abaixoDaMeta = precoCalculado != null && preco > 0 && preco < precoCalculado.precoSugerido;
+                  // Em centavos: a sugestao tem mais casas que o preco digitado, e uma
+                  // fracao de centavo aparecia como "Abaixo da meta em R$ 0,00".
+                  const abaixoDaMeta =
+                    precoCalculado != null && preco > 0 && Math.round(preco * 100) < Math.round(precoCalculado.precoSugerido * 100);
 
                   return (
                     <section key={tamanho.id} className="relative" style={{ ...CARD_COMANDA, padding: 0 }}>
