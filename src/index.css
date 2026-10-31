@@ -339,13 +339,17 @@ a:hover {
   }
 
   /* Telas de entrada (login, codigo): sem menu, mas tambem largas. Ver
-     components/EntradaComputador.tsx. */
+     components/EntradaComputador.tsx. `#root:empty` e o instante antes do React
+     desenhar a primeira tela: sem ele a coluna vazia aparece primeiro. */
   html:has(.entrada-computador),
-  html:has(.entrada-computador) body {
+  html:has(.entrada-computador) body,
+  html:has(#root:empty),
+  html:has(#root:empty) body {
     background: #F6F2F5;
   }
 
-  html:has(.entrada-computador) #root {
+  html:has(.entrada-computador) #root,
+  html:has(#root:empty) #root {
     max-width: none;
     margin: 0;
     box-shadow: none;

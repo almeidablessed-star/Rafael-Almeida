@@ -5,6 +5,7 @@ import { SetupProfilePage } from '../pages/SetupProfilePage';
 import { VerifyOtpStandalonePage } from '../pages/VerifyOtpStandalonePage';
 import { ResetPasswordPage } from '../pages/ResetPasswordPage';
 import { AssinaturaInativaPage } from '../pages/AssinaturaInativaPage';
+import { TelaCarregando } from './TelaCarregando';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -18,14 +19,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const [authMode, setAuthMode] = React.useState<'login' | 'verify-otp' | 'esqueci-senha'>('login');
 
   if (isLoading || isValidatingProfile) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#F5F5F5] to-white">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-full border-4 border-gray-200 border-t-[#6E3F72] animate-spin" />
-          <p className="text-gray-600">Carregando...</p>
-        </div>
-      </div>
-    );
+    return <TelaCarregando />;
   }
 
   if (!user) {
