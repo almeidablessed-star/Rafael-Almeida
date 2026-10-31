@@ -457,6 +457,8 @@ export const CustomersModule: React.FC = () => {
 
   const [expandedDatesCustomerId, setExpandedDatesCustomerId] = useState<string | null>(null);
 
+  const aparelhoDeToque = document.documentElement.classList.contains('tela-de-toque');
+
   // Execute WhatsApp send
   const executeSendWhatsApp = (phone: string, msg: string, targetType: 'business' | 'standard' | 'web') => {
     let cleanPhone = phone.replace(/\D/g, '');
@@ -538,7 +540,9 @@ export const CustomersModule: React.FC = () => {
     // funciona com o WhatsApp Desktop instalado — sem ele o clique nao fazia
     // nada. Na tela de envio da para ver a mensagem e escolher "Abrir pelo
     // navegador". No celular continua indo direto para o app escolhido.
-    if (!forceModal && waPreference !== 'ask' && !pc) {
+    // Vale pelo aparelho, nao pela largura: computador com a janela estreita
+    // (menos de 1024px, `pc` falso) tambem nao abre o link whatsapp://.
+    if (!forceModal && waPreference !== 'ask' && aparelhoDeToque) {
       executeSendWhatsApp(customer.phone, fullMessage, waPreference);
     } else {
       setWaModalData({
@@ -1765,6 +1769,45 @@ export const CustomersModule: React.FC = () => {
               </div>
 
               <span className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Abrir com</span>
+              {/* No computador o navegador vem primeiro: os outros dois usam o link
+                  whatsapp://, que sem o programa instalado nao faz nada e o site nao
+                  tem como detectar isso. */}
+              {!aparelhoDeToque ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      executeSendWhatsApp(waModalData.phone, waModalData.message, 'web');
+                      setWaModalData(null);
+                    }}
+                    className="w-full flex items-center justify-center gap-2 py-3.5 rounded-[11px] text-white text-sm font-semibold transition-transform active:scale-95 cursor-pointer"
+                    style={{ background: '#4C7358', boxShadow: '0 10px 20px rgba(76,115,88,.3)' }}
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    Abrir pelo navegador
+                  </button>
+                  <span className="text-xs font-semibold text-center" style={{ color: '#7A6E80' }}>
+                    Precisa do programa instalado no computador:
+                  </span>
+                  <div className="grid grid-cols-2 gap-2">
+                    {([['business', 'WhatsApp Business'], ['standard', 'WhatsApp comum']] as const).map(([alvo, rotulo]) => (
+                      <button
+                        key={alvo}
+                        type="button"
+                        onClick={() => {
+                          executeSendWhatsApp(waModalData.phone, waModalData.message, alvo);
+                          setWaModalData(null);
+                        }}
+                        className="py-2.5 rounded-[11px] bg-white text-xs font-semibold transition-transform active:scale-95 cursor-pointer"
+                        style={{ border: '1px solid rgba(58,35,80,0.16)', color: '#3A2350' }}
+                      >
+                        {rotulo}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              ) : (
+              <>
               <button
                 type="button"
                 onClick={() => {
@@ -1800,11 +1843,13 @@ export const CustomersModule: React.FC = () => {
               >
                 Abrir pelo navegador
               </button>
+              </>
+              )}
             </div>
 
             {/* "Sempre abrir direto" nao vale no computador: la esta tela aparece
                 sempre (ver handleSendReminder), entao a caixinha some. */}
-            {!pc && (
+            {aparelhoDeToque && (
             <div className="flex-shrink-0 bg-white px-4 py-3.5" style={{ borderTop: '1px solid rgba(58,35,80,0.08)' }}>
               <label className="flex items-center gap-2.5 text-xs font-semibold cursor-pointer select-none" style={{ color: '#3A2350' }}>
                 <input
