@@ -198,7 +198,21 @@ export const FichasTecnicasProvider: React.FC<{ children: React.ReactNode }> = (
     fetchFichas();
   }, [user]);
 
+  /**
+   * `foto_url` das fichas ja abertas no Editar, para nao pedir de novo ao banco
+   * a cada abertura. Esquecida ao salvar, ao apagar e ao recarregar a lista.
+   */
+  const fotoPorFichaRef = useRef(new Map<string, string>());
+  /** Muda ao esquecer: resposta que saiu antes disso nao volta a ser guardada. */
+  const versaoDasFotosRef = useRef(0);
+  const esquecerFoto = (fichaId?: string) => {
+    versaoDasFotosRef.current += 1;
+    if (fichaId) fotoPorFichaRef.current.delete(fichaId);
+    else fotoPorFichaRef.current.clear();
+  };
+
   const fetchFichas = async () => {
+    esquecerFoto();
     if (!user) return;
 
     try {
@@ -281,6 +295,7 @@ export const FichasTecnicasProvider: React.FC<{ children: React.ReactNode }> = (
         .single();
 
       if (updateError) throw updateError;
+      esquecerFoto(id);
       await apagarFotoTrocada(fotoAntes, (foto as { foto_url?: string | null }).foto_url);
 
       const updated = mapSupabaseToFicha(data);
@@ -306,6 +321,7 @@ export const FichasTecnicasProvider: React.FC<{ children: React.ReactNode }> = (
 
       if (deleteError) throw deleteError;
 
+      esquecerFoto(id);
       setFichas((prev) => prev.filter((f) => f.id !== id));
     } catch (err: any) {
       setError(err.message || 'Erro ao deletar ficha técnica');
@@ -395,6 +411,9 @@ export const FichasTecnicasProvider: React.FC<{ children: React.ReactNode }> = (
   const fetchFichaPhoto = async (fichaId: string): Promise<string | null> => {
     const existing = fichas.find(f => f.id === fichaId);
     if (existing?.imageUrl) return abrirFoto(existing.imageUrl);
+    const guardada = fotoPorFichaRef.current.get(fichaId);
+    if (guardada) return abrirFoto(guardada);
+    const versao = versaoDasFotosRef.current;
 
     try {
       const { data, error } = await supabase
@@ -405,6 +424,7 @@ export const FichasTecnicasProvider: React.FC<{ children: React.ReactNode }> = (
         .single();
 
       if (error) throw error;
+      if (data?.foto_url && versao === versaoDasFotosRef.current) fotoPorFichaRef.current.set(fichaId, data.foto_url);
       return abrirFoto(data?.foto_url);
     } catch (err: any) {
       console.error('Error fetching ficha photo:', err);

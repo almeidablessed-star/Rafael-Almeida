@@ -277,6 +277,9 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   /** Ficha cuja foto esta sendo buscada; descarta a resposta se outra ficha
    * for aberta no meio. */
   const fotoDaFichaRef = useRef<string | null>(null);
+  /** Miniatura na tela enquanto a foto inteira nao chega. So para ver: quem vai
+   * para o banco e sempre `imageUrl`, para a ficha nunca gravar a foto reduzida. */
+  const [miniaturaEmEspera, setMiniaturaEmEspera] = useState('');
 
   // Form State
   const [name, setName] = useState('');
@@ -436,6 +439,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     setName('');
     setCategory(selectedCategory);
     setImageUrl('');
+    setMiniaturaEmEspera('');
     setFotoFichaCarregada(true);
     fotoDaFichaRef.current = null;
     setYieldInfo('1');
@@ -523,13 +527,20 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 
     if (!ficha.imageUrl) {
       setFotoFichaCarregada(false);
+      setMiniaturaEmEspera(ficha.fotoMini || '');
       fotoDaFichaRef.current = ficha.id;
       const imageUrl = await fetchFichaPhoto(ficha.id);
       // Outra ficha foi aberta enquanto esta foto vinha: descarta.
       if (fotoDaFichaRef.current !== ficha.id) return;
       if (imageUrl) setImageUrl(imageUrl);
-      setFotoFichaCarregada(true);
+      // Tem miniatura, logo tem foto: se a busca falhou, continua "nao carregada"
+      // e salvar mantem a foto gravada.
+      if (imageUrl || !ficha.fotoMini) {
+        setMiniaturaEmEspera('');
+        setFotoFichaCarregada(true);
+      }
     } else {
+      setMiniaturaEmEspera('');
       setFotoFichaCarregada(true);
       fotoDaFichaRef.current = null;
     }
@@ -1359,14 +1370,21 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-semibold" style={{ color: '#7A6E80' }}>Foto</label>
-                    {imageUrl ? (
+                    {imageUrl || miniaturaEmEspera ? (
                       <div className="flex items-center gap-3">
                         <div className="relative w-11 h-11 rounded-xl overflow-hidden flex-shrink-0" style={{ border: '2px solid #F3E9F3' }}>
-                          <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                          <img src={imageUrl || miniaturaEmEspera} alt="Preview" className="w-full h-full object-cover" />
                         </div>
                         <button
                           type="button"
-                          onClick={() => setImageUrl('')}
+                          onClick={() => {
+                            setImageUrl('');
+                            setMiniaturaEmEspera('');
+                            // Removeu antes da foto inteira chegar: a resposta nao
+                            // traz a foto de volta, e salvar vale como remocao.
+                            fotoDaFichaRef.current = null;
+                            setFotoFichaCarregada(true);
+                          }}
                           className="text-xs font-bold"
                           style={{ color: '#C4626F' }}
                         >
