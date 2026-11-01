@@ -465,7 +465,9 @@ function AppContent() {
 
     // Validação defensiva: se é venda mas fichaItems chegou vazio, bloqueia
     // submit e avisa. Impede que a venda seja registrada sem dar baixa no estoque.
-    if (txData.type === 'venda' && (!txData.fichaItems || txData.fichaItems.length === 0)) {
+    // Item "Outro / Personalizado" nao tem ficha e nao baixa estoque, entao nao conta.
+    const soItensAvulsos = !!txData.breakdown?.itens?.length && txData.breakdown.itens.every((item) => item.personalizado);
+    if (txData.type === 'venda' && !soItensAvulsos && (!txData.fichaItems || txData.fichaItems.length === 0)) {
       avisar('Nenhum produto foi vinculado à ficha técnica. Verifique se os produtos estão cadastrados e tente novamente.', { titulo: 'Pedido sem produto' });
       return false;
     }
