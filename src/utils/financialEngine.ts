@@ -2,6 +2,8 @@ import { Transaction, TimePeriod, SummaryTotals, FichaTecnica, DespesaEmpresa, A
 import { getTodayIso, formatDateBr } from './formatters';
 import { getCurrentWeekMonday, getCurrentWeekSunday, createdAtToLocalIso } from './weeklyArchiveUtils';
 import { getJanela, getJanelaAtual, janelasPorMes, rotulos, type PeriodoReset } from './periodoReset';
+import { recebidoNoPeriodo } from './recebimentos';
+import { faltaReceberDoPedido } from './situacaoPagamento';
 import { custoInsumosDoTamanho } from './fichaInsumos';
 
 /**
@@ -610,16 +612,14 @@ export function calculateWeeklyBalances(
   // o periodo. `getJanelaAtual` cobre os tres modos com a mesma aritmetica que
   // o resto do app usa — nao ha um segundo calculo de borda aqui.
   const { inicioIso: startDate, fimIso: endDate } = getJanelaAtual(periodo);
-  // Filtra por data de LANCAMENTO (createdAt), nao pela data de entrega
-  // (tx.date) escolhida no pedido — o Dashboard mostra "como estou indo essa
-  // semana" em vendas fechadas, nao um calendario de entregas futuras. O
-  // histórico semanal da aba Compras (weeklyArchiveUtils.filterTransactionsByWeek)
-  // usa o mesmo criterio, pelo mesmo motivo.
-  const weeklyTransactions = transactions.filter((tx) => {
+  // Saidas e o "a receber" do periodo seguem a data de LANCAMENTO (createdAt),
+  // nao a de entrega (tx.date). O dinheiro das vendas segue o dia em que ENTROU
+  // (utils/recebimentos.ts), logo olha todos os pedidos, de qualquer periodo.
+  const lancadaNoPeriodo = (tx: Transaction) => {
     if (!tx.createdAt) return false;
     const lancadoEm = createdAtToLocalIso(tx.createdAt);
     return lancadoEm >= startDate && lancadoEm <= endDate;
-  });
+  };
 
   // Inline balances calculation for current week
   let reposicaoInflow = 0;
@@ -638,20 +638,16 @@ export function calculateWeeklyBalances(
   let totalExpensesCount = 0;
   let totalExpensesAmount = 0;
 
-  for (const tx of weeklyTransactions) {
+  for (const tx of transactions) {
     const val = Number(tx.totalValue) || 0;
 
     if (tx.type === 'venda') {
-      if (tx.paymentStatus !== 'pendente') {
+      if (lancadaNoPeriodo(tx)) totalAReceber += faltaReceberDoPedido(tx);
+
+      const paidAmount = recebidoNoPeriodo(tx, startDate, endDate);
+      if (paidAmount > 0) {
         paidSalesCount += 1;
-        // Usar signalValue se informado, caso contrário assume que foi pago o valor total
-        const paidAmount = tx.signalValue ? Number(tx.signalValue) : val;
         totalPaidSalesAmount += paidAmount;
-        // Se há sinal, o restante fica a receber
-        if (tx.signalValue) {
-          const remainingAmount = val - paidAmount;
-          totalAReceber += remainingAmount;
-        }
 
         // Fonte unica: a composicao gravada na venda (com fallback interno
         // para pedidos antigos). O recalculo pelos custos ATUAIS da ficha que
@@ -680,10 +676,9 @@ export function calculateWeeklyBalances(
           ((detail.maoDeObra || 0) + (detail.adicionais || 0) + (detail.delivery || 0)) * fatorRecebido;
         custoInflow += (detail.custos || 0) * fatorRecebido;
         investimentoInflow += (detail.investimento || 0) * fatorRecebido;
-      } else {
-        // Pendentes completamente a receber
-        totalAReceber += val;
       }
+    } else if (!lancadaNoPeriodo(tx)) {
+      continue;
     } else if (tx.type === 'reposicao') {
       totalExpensesCount += 1;
       totalExpensesAmount += val;
@@ -859,14 +854,8 @@ export const calcularMetaSemanal = (
   // mao da cliente.
   const faturadoNaSemana = transacoes.reduce((soma, tx) => {
     if (tx.type !== 'venda') return soma;
-    if (tx.paymentStatus === 'pendente') return soma;
-    if (!tx.createdAt) return soma;
-    const lancadoEm = createdAtToLocalIso(tx.createdAt);
-    if (lancadoEm < startIso || lancadoEm > endIso) return soma;
-
-    // Com sinal, so o que foi efetivamente pago entra.
-    const pago = tx.signalValue != null ? Number(tx.signalValue) : Number(tx.totalValue);
-    return soma + (Number.isFinite(pago) ? pago : 0);
+    // So o que entrou neste periodo, no dia em que entrou.
+    return soma + recebidoNoPeriodo(tx, startIso, endIso);
   }, 0);
 
   const faltaFaturar = Math.max(0, necessarioPorSemana - faturadoNaSemana);

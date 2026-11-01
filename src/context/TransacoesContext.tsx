@@ -2,7 +2,9 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { abrirFoto, apagarFotoTrocada, guardarFoto } from '../utils/fotoDeposito';
 import { supabase } from '../lib/supabase';
 import { useAuth } from './AuthContext';
-import { Transaction, FichaOrderItem } from '../types';
+import { Transaction, FichaOrderItem, Recebimento } from '../types';
+import { ajustarRecebimentos, recebimentosDoPedido, totalRecebidoDoPedido } from '../utils/recebimentos';
+import { getTodayIso } from '../utils/formatters';
 
 /**
  * Fonte unica das transacoes: pedidos, compras, custos, mao de obra e
@@ -27,6 +29,7 @@ import { Transaction, FichaOrderItem } from '../types';
 /** Formato da tabela `transacoes` no Supabase. */
 interface SupabaseTransacao {
   id: number;
+  recebimentos: Recebimento[] | null;
   usuaria_id: string;
   tipo: string;
   descricao: string;
@@ -116,7 +119,7 @@ const COLUNAS_SEM_FOTO =
   'status_pagamento,forma_pagamento,cliente_nome,cliente_telefone,data_evento,' +
   'horario_entrega,endereco_entrega,observacoes,notas,fornecedor,' +
   'periodo_mao_de_obra,categoria,breakdown,ficha_itens,insumos_consumidos,' +
-  'produto_id,created_at';
+  'produto_id,created_at,recebimentos';
 
 /**
  * O supabase-js deduz o tipo do retorno lendo a string do `select` como
@@ -162,6 +165,7 @@ const mapSupabaseToTransaction = (d: SupabaseTransacao): Transaction => {
     consumedIngredients: Array.isArray(d.insumos_consumidos) ? d.insumos_consumidos : [],
     produtoId: d.produto_id ?? undefined,
     createdAt: new Date(d.created_at).getTime(),
+    recebimentos: Array.isArray(d.recebimentos) ? d.recebimentos : null,
   };
 };
 
@@ -198,6 +202,7 @@ const mapTransactionToSupabase = (tx: Omit<Transaction, 'id' | 'createdAt'>) => 
   ficha_itens: tx.fichaItems || [],
   insumos_consumidos: tx.consumedIngredients || [],
   produto_id: tx.produtoId ?? null,
+  recebimentos: tx.recebimentos ?? null,
 });
 
 interface TransacoesContextType {
@@ -315,9 +320,11 @@ export const TransacoesProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     try {
       setError(null);
       const fotos = await fotosDoPedido(txData, user.id, true);
+      const recebimentos =
+        txData.type === 'venda' ? ajustarRecebimentos([], totalRecebidoDoPedido(txData), getTodayIso()) : null;
       const { data, error: insertError } = await supabase
         .from('transacoes')
-        .insert([{ usuaria_id: user.id, ...mapTransactionToSupabase({ ...txData, ...fotos }) }])
+        .insert([{ usuaria_id: user.id, ...mapTransactionToSupabase({ ...txData, ...fotos, recebimentos }) }])
         // Sem as colunas de foto tambem na volta: a linha acabou de ser
         // gravada com a foto que ja esta na tela, e devolve-la so faria o
         // mesmo base64 subir e descer na mesma operacao.
@@ -346,9 +353,15 @@ export const TransacoesProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         ? (await supabase.from('transacoes').select('cliente_foto_url,imagem_inspiracao').eq('id', parseInt(id)).eq('usuaria_id', user.id).single()).data
         : null;
       const fotos = await fotosDoPedido(txData, user.id, false);
+      // Toda mudanca de pedido passa aqui: formulario, "Recebi" e "Pago".
+      const gravada = transacoes.find((t) => t.id === id);
+      const recebimentos =
+        txData.type === 'venda'
+          ? ajustarRecebimentos(gravada ? recebimentosDoPedido(gravada) : [], totalRecebidoDoPedido(txData), getTodayIso())
+          : null;
       const { data, error: updateError } = await supabase
         .from('transacoes')
-        .update(mapTransactionToSupabase({ ...txData, ...fotos }))
+        .update(mapTransactionToSupabase({ ...txData, ...fotos, recebimentos }))
         .eq('id', parseInt(id))
         .eq('usuaria_id', user.id)
         .select(COLUNAS_SEM_FOTO)

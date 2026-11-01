@@ -31,7 +31,7 @@ const COLUNAS = {
   clientes:
     'id,nome,telefone,endereco,city,notes,eventDate,recurringEventTitle,additionalEvents,created_at,photoUrl,foto_mini',
   transacoes:
-    'id,tipo,descricao,data,quantidade,valor_unitario,valor_total,valor_sinal,status_pagamento,forma_pagamento,cliente_nome,cliente_telefone,data_evento,horario_entrega,endereco_entrega,observacoes,notas,fornecedor,periodo_mao_de_obra,categoria,breakdown,ficha_itens,insumos_consumidos,produto_id,created_at,cliente_foto_url,imagem_inspiracao',
+    'id,tipo,descricao,data,quantidade,valor_unitario,valor_total,valor_sinal,status_pagamento,forma_pagamento,cliente_nome,cliente_telefone,data_evento,horario_entrega,endereco_entrega,observacoes,notas,fornecedor,periodo_mao_de_obra,categoria,breakdown,ficha_itens,insumos_consumidos,produto_id,created_at,cliente_foto_url,imagem_inspiracao,recebimentos',
   despesas_empresa: 'nome,valor,percentual_rateio,ordem,created_at,updated_at',
   configuracao_empresa_historico: 'campo,valor_antigo,valor_novo,changed_at',
   administrative_costs:

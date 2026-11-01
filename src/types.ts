@@ -221,9 +221,16 @@ export interface SaleBreakdown {
   adicionaisDetalhados?: SaleBreakdownAdicional[];
 }
 
+/** Dinheiro que entrou de um pedido, no dia em que foi marcado. Ver utils/recebimentos.ts. */
+export interface Recebimento {
+  valor: number;
+  em: string; // YYYY-MM-DD
+}
+
 export interface Transaction {
   id: string;
   type: TransactionType;
+  recebimentos?: Recebimento[] | null;
   description: string;
   customerName?: string;
   customerPhone?: string;

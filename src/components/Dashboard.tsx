@@ -648,7 +648,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         {/* Linha 1: Total em vendas e a comanda, com a mesma altura. */}
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'stretch', gap: '24px' }}>
           <section
-            aria-label="Total em vendas"
+            aria-label="Recebido na semana"
             style={{
               flex: '3 1 560px',
               boxSizing: 'border-box',
@@ -662,7 +662,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             }}
           >
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.14em', color: '#7A6E80' }}>TOTAL EM VENDAS</span>
+              <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.14em', color: '#7A6E80' }}>RECEBIDO NA SEMANA</span>
               <span style={{ fontSize: '56px', fontWeight: 800, letterSpacing: '-0.035em', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
                 {formatMoney(totalIn)}
               </span>
@@ -927,7 +927,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           {/* Top: Total em Vendas Card */}
           <div>
             <div className="text-[9px] font-black uppercase tracking-[0.14em]" style={{ color: 'rgba(247,220,225,0.8)', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
-              TOTAL EM VENDAS
+              RECEBIDO NA SEMANA
             </div>
             <div className="text-white" style={{ fontSize: '32px', lineHeight: 1, letterSpacing: '-0.03em', marginTop: '0px', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
               {formatMoney(totalIn)}

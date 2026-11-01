@@ -1,5 +1,6 @@
 import { Transaction, WeeklySummary } from '../types';
 import { faltaReceberDoPedido } from './situacaoPagamento';
+import { recebimentosDoPedido, recebidoNoPeriodo } from './recebimentos';
 import { getIndiceNoMes, getJanela, getJanelaAtual, type PeriodoReset } from './periodoReset';
 
 /**
@@ -68,8 +69,8 @@ export function createdAtToLocalIso(createdAt: number): string {
 }
 
 /**
- * Filtra transacoes cujo lancamento (`createdAt`) caiu dentro do intervalo
- * [startDate, endDate] (segunda a domingo, inclusive).
+ * Transacoes do intervalo [startDate, endDate], inclusive: as lancadas nele e os
+ * pedidos que receberam dinheiro nele.
  */
 export function filterTransactionsByWeek(
   transactions: Transaction[],
@@ -77,6 +78,7 @@ export function filterTransactionsByWeek(
   endDate: string
 ): Transaction[] {
   return transactions.filter((tx) => {
+    if (tx.type === 'venda' && recebidoNoPeriodo(tx, startDate, endDate) > 0) return true;
     if (!tx.createdAt) return false;
     const lancadoEm = createdAtToLocalIso(tx.createdAt);
     return lancadoEm >= startDate && lancadoEm <= endDate;
@@ -86,7 +88,7 @@ export function filterTransactionsByWeek(
 /**
  * Calculate totals for a week
  */
-export function calculateWeeklyTotals(transactions: Transaction[]) {
+export function calculateWeeklyTotals(transactions: Transaction[], startDate: string, endDate: string) {
   let lucroLiquido = 0;
   let vendidas = 0;
   let saldos = 0;
@@ -94,15 +96,16 @@ export function calculateWeeklyTotals(transactions: Transaction[]) {
 
   transactions.forEach((tx) => {
     if (tx.type === 'venda') {
-      // So o que entrou conta como vendido; o resto e "a receber". Com sinal,
-      // entrou so o sinal — mesma regra das contas do Inicio
-      // (financialEngine.calculateWeeklyBalances). Antes o pedido com sinal
-      // entrava inteiro como vendido e o restante sumia do "a receber".
-      const falta = faltaReceberDoPedido(tx);
-      const entrou = tx.totalValue - falta;
+      // So o que entrou NESTA semana conta como vendido; o que falta fica na
+      // semana do lancamento. Mesma regra das contas do Inicio
+      // (financialEngine.calculateWeeklyBalances).
+      const entrou = recebidoNoPeriodo(tx, startDate, endDate);
       vendidas += entrou;
       lucroLiquido += entrou;
-      aReceber += falta;
+      if (tx.createdAt) {
+        const lancadoEm = createdAtToLocalIso(tx.createdAt);
+        if (lancadoEm >= startDate && lancadoEm <= endDate) aReceber += faltaReceberDoPedido(tx);
+      }
     } else if (tx.type === 'reposicao' || tx.type === 'maodeobra' || tx.type === 'custo' || tx.type === 'investimento' || tx.type === 'lucro') {
       saldos += tx.totalValue;
       lucroLiquido -= tx.totalValue;
@@ -135,6 +138,9 @@ function getWeeksWithTransactions(transactions: Transaction[], periodo: PeriodoR
   transactions.forEach((tx) => {
     if (!tx.createdAt) return;
     inicios.add(getJanela(createdAtToLocalIso(tx.createdAt), periodo).inicioIso);
+    if (tx.type === 'venda') {
+      recebimentosDoPedido(tx).forEach((r) => inicios.add(getJanela(r.em, periodo).inicioIso));
+    }
   });
   return Array.from(inicios)
     .sort()
@@ -173,7 +179,7 @@ export function getWeeklySummariesByYearMonth(
   return weeks
     .map(({ startDate, endDate }) => {
       const weekTransactions = filterTransactionsByWeek(transactions, startDate, endDate);
-      const totals = calculateWeeklyTotals(weekTransactions);
+      const totals = calculateWeeklyTotals(weekTransactions, startDate, endDate);
       return {
         id: `week-${startDate}`,
         year,
