@@ -683,7 +683,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   // --- Order Items Logic ---
   const getItemBreakdown = (item: OrderItemState) => {
     if (item.productName === 'Outro / Personalizado') {
-      const customVenda = parseNumeroDigitado(item.customUnitValue?.replace(',', '.') || '0') || 0;
+      const customVenda = parseNumeroDigitado(item.customUnitValue || '0') || 0;
       // Item avulso nao tem ficha; estimamos pela media real do catalogo dela.
       const prop = calculateProportionalBreakdown(customVenda, undefined, proporcoesDoCatalogo);
       return {
@@ -1012,6 +1012,31 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       return;
     }
 
+    // "Sinal pago" sem o valor do sinal nao diz quanto ainda falta receber.
+    // Antes a escolha era so Pago/Pendente e um campo vazio virava "pago por
+    // inteiro" em silencio (por isso existia a pergunta "o campo do sinal esta
+    // vazio"); agora Pago e Pendente sao escolhas explicitas e limpam o sinal,
+    // e so o "Sinal pago" exige o valor.
+    if (type === 'venda' && paymentStatus === 'sinal' && !(parseNumeroDigitado(signalValue) > 0)) {
+      avisar('Digite quanto a cliente já pagou de sinal, ou escolha "Pago" ou "Pendente".', { titulo: 'Falta o valor do sinal' });
+      return;
+    }
+
+    // O limite do campo so vale ao digitar: diminuir os itens depois deixava o
+    // sinal maior que o total, e o restante negativo descontava do "A receber".
+    // Vem antes da pergunta sobre o total, para nao confirmar algo que nao grava.
+    if (
+      type === 'venda' &&
+      paymentStatus === 'sinal' &&
+      Math.round(parseNumeroDigitado(signalValue) * 100) > Math.round(grandTotalSalePrice * 100)
+    ) {
+      avisar(
+        `O sinal de ${formatMoney(parseNumeroDigitado(signalValue))} é maior que o total do pedido, de ${formatMoney(grandTotalSalePrice)}. Corrija o valor do sinal para salvar.`,
+        { titulo: 'Sinal maior que o total' }
+      );
+      return;
+    }
+
     // Trava do centavo: o valor de um pedido nunca muda em silencio. Se o total
     // remontado divergir do gravado, a pessoa ve os dois valores e decide.
     // Antes isto BLOQUEAVA o salvamento sempre, e com isso nenhuma edicao que
@@ -1025,16 +1050,6 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
         const continuar = await perguntarMudancaDeTotal(gravado, remontado);
         if (!continuar) return;
       }
-    }
-
-    // "Sinal pago" sem o valor do sinal nao diz quanto ainda falta receber.
-    // Antes a escolha era so Pago/Pendente e um campo vazio virava "pago por
-    // inteiro" em silencio (por isso existia a pergunta "o campo do sinal esta
-    // vazio"); agora Pago e Pendente sao escolhas explicitas e limpam o sinal,
-    // e so o "Sinal pago" exige o valor.
-    if (type === 'venda' && paymentStatus === 'sinal' && !(parseNumeroDigitado(signalValue) > 0)) {
-      avisar('Digite quanto a cliente já pagou de sinal, ou escolha "Pago" ou "Pendente".', { titulo: 'Falta o valor do sinal' });
-      return;
     }
 
     setIsSaving(true);
