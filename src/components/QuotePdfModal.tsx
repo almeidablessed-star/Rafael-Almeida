@@ -4,7 +4,8 @@ import { avisar } from './AvisoApp';
 import { situacaoPagamento } from '../utils/situacaoPagamento';
 import { createPortal } from 'react-dom';
 import { Transaction } from '../types';
-import { formatCurrency, formatDateBr } from '../utils/formatters';
+import { formatCurrency, formatDateBr, quantidadeDoInsumo } from '../utils/formatters';
+import { insumosDoTamanho } from '../utils/fichaInsumos';
 import { useAuth } from '../context/AuthContext';
 import { useFichasTecnicas } from '../context/FichasTecnicasContext';
 import { useTransacoes } from '../context/TransacoesContext';
@@ -964,6 +965,47 @@ ${situacaoPagamento(transaction) === 'sinal' ? `✅ *Sinal/Entrada Pago:* ${form
     );
   });
 
+  /**
+   * Cada item da Ficha da Cozinha, com a receita do tamanho pedido. Vem de
+   * `breakdown.itens`: separar o texto da descricao transformava "Bolo, morango"
+   * em dois itens, e ler `ficha.ingredients` mostrava sempre o primeiro tamanho.
+   * Pedido anterior a essa lista continua pelo texto.
+   */
+  const itensDaCozinha = transaction.breakdown?.itens?.length
+    ? transaction.breakdown.itens.map((item) => {
+        const ficha = item.personalizado
+          ? fichas.find((f) => normalizeName(f.name) === normalizeName(item.nome))
+          : fichas.find((f) => f.id === item.fichaId) || getRecipeDetailsForItem(item.nome);
+        const tamanho = ficha?.tamanhos?.find((t) => t.id === item.tamanhoId);
+        const quantidade = Number(item.quantidade) || 1;
+        return {
+          titulo: `${quantidade > 1 ? `${quantidade}x ` : ''}${item.nome}${tamanho?.descricao ? ` (${tamanho.descricao})` : ''}`,
+          ficha,
+          // O rendimento da ficha espelha o primeiro tamanho: nos outros, seria mentira.
+          rendimento:
+            tamanho?.rendimento?.trim() ||
+            (ficha && (!tamanho || tamanho.id === ficha.tamanhos[0]?.id) ? formatRendimentoParaExibir(ficha) : ''),
+          insumos: ficha ? insumosDoTamanho(ficha, item.tamanhoId || undefined) : [],
+          quantidade,
+        };
+      })
+    : recipeItems.map((linha) => {
+        const ficha = getRecipeDetailsForItem(linha);
+        // O tamanho so existe no texto: "2x Bolo (20cm)".
+        const tamanho = ficha?.tamanhos?.find((t) => t.descricao && linha.includes(`(${t.descricao})`));
+        return {
+          titulo: linha,
+          ficha,
+          rendimento:
+            tamanho?.rendimento?.trim() ||
+            (ficha && (!tamanho || tamanho.id === ficha.tamanhos[0]?.id) ? formatRendimentoParaExibir(ficha) : ''),
+          insumos: ficha ? insumosDoTamanho(ficha, tamanho?.id) : [],
+          quantidade: Number(/^(\d+)\s*x\s/i.exec(linha)?.[1]) || 1,
+        };
+      });
+
+  const numeroDaCozinha = (n: number) => String(Math.round(n * 1000) / 1000).replace('.', ',');
+
   const toggleAccordion = (idx: number) => {
     setExpandedItems((prev) => ({
       ...prev,
@@ -1574,20 +1616,19 @@ ${situacaoPagamento(transaction) === 'sinal' ? `✅ *Sinal/Entrada Pago:* ${form
                     INSUMOS DA PRODUÇÃO
                   </span>
                   <span className="whitespace-nowrap" style={{ background: '#F3E9F3', color: '#3A2350', fontSize: '9px', fontWeight: 800, padding: '5px 10px', borderRadius: '999px' }}>
-                    {recipeItems.length} {recipeItems.length === 1 ? 'item de receita' : 'itens de receita'}
+                    {itensDaCozinha.length} {itensDaCozinha.length === 1 ? 'item de receita' : 'itens de receita'}
                   </span>
                 </div>
                 <span className="no-print" style={{ fontSize: '10px', fontWeight: 600, color: '#7A6E80' }}>
                   Toque no item para abrir ou fechar os ingredientes.
                 </span>
 
-                {recipeItems.length === 0 ? (
+                {itensDaCozinha.length === 0 ? (
                   <div className="text-center" style={{ background: '#F6F2F5', borderRadius: '14px', padding: '14px', fontSize: '12px', fontWeight: 600, color: '#7A6E80' }}>
                     Nenhum item de receita cadastrado neste pedido.
                   </div>
                 ) : (
-                  recipeItems.map((itemStr, idx) => {
-                    const ficha = getRecipeDetailsForItem(itemStr);
+                  itensDaCozinha.map(({ titulo: itemStr, ficha, rendimento, insumos, quantidade }, idx) => {
                     const isOpen = expandedItems[idx] !== false; // aberto por padrao
 
                     return (
@@ -1602,9 +1643,9 @@ ${situacaoPagamento(transaction) === 'sinal' ? `✅ *Sinal/Entrada Pago:* ${form
                             <Cake className="w-[15px] h-[15px]" style={{ color: '#F5B9C6' }} strokeWidth={2} />
                           </div>
                           <span className="flex-1 min-w-0 leading-tight" style={{ fontSize: '13px', fontWeight: 700 }}>{itemStr}</span>
-                          {ficha && (
+                          {ficha && rendimento && (
                             <span className="shrink-0 whitespace-nowrap" style={{ background: '#FCEFF2', color: '#3A2350', fontSize: '10px', fontWeight: 800, padding: '4px 10px', borderRadius: '999px' }}>
-                              Rende {formatRendimentoParaExibir(ficha)}
+                              Rende {rendimento}
                             </span>
                           )}
                           <span className="no-print shrink-0" style={{ color: '#7A6E80' }}>
@@ -1614,13 +1655,14 @@ ${situacaoPagamento(transaction) === 'sinal' ? `✅ *Sinal/Entrada Pago:* ${form
 
                         {isOpen && (
                           <div style={{ padding: '4px 10px 10px', background: '#FFFFFF' }}>
-                            {ficha && ficha.ingredients.length > 0 ? (
+                            {insumos.length > 0 ? (
                               <div className="grid grid-cols-1 @min-[600px]:grid-cols-2 gap-1.5">
-                                {ficha.ingredients.map((ing) => (
+                                {insumos.map((ing) => (
                                   <div key={ing.id} className="flex items-center justify-between gap-2" style={{ background: '#F6F2F5', borderRadius: '12px', padding: '7px 10px' }}>
                                     <span className="min-w-0 truncate" style={{ fontSize: '12px', fontWeight: 700 }}>{ing.name}</span>
                                     <span className="shrink-0 tabular-nums" style={{ background: '#E7F2EA', color: '#3A2350', fontSize: '11px', fontWeight: 800, padding: '3px 8px', borderRadius: '8px' }}>
-                                      {ing.quantity} {ing.unit}
+                                      {numeroDaCozinha(quantidadeDoInsumo(ing.quantity) * quantidade)} {ing.unit}
+                                      {quantidade > 1 && ` (${quantidade} × ${numeroDaCozinha(quantidadeDoInsumo(ing.quantity))} ${ing.unit})`}
                                     </span>
                                   </div>
                                 ))}
