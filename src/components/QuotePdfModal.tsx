@@ -5,7 +5,8 @@ import { avisar, perguntar } from './AvisoApp';
 import { situacaoPagamento } from '../utils/situacaoPagamento';
 import { createPortal } from 'react-dom';
 import { Transaction } from '../types';
-import { formatCurrency, formatDateBr, quantidadeDoInsumo } from '../utils/formatters';
+import { formatDateBr, quantidadeDoInsumo } from '../utils/formatters';
+import { useCurrency } from '../context/CurrencyContext';
 import { insumosDoTamanho } from '../utils/fichaInsumos';
 import { useVoltarFecha } from '../hooks/useVoltarFecha';
 import { useAuth } from '../context/AuthContext';
@@ -145,6 +146,9 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
   onClose,
 }) => {
   const [activeTab, setActiveTab] = useState<'cliente' | 'cozinha'>('cliente');
+  // Na moeda da conta: o PDF e o texto do WhatsApp saiam sempre em real,
+  // tambem para quem vende em dolar.
+  const { formatCurrency } = useCurrency();
   useVoltarFecha(true, onClose);
   const [copied, setCopied] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
@@ -181,7 +185,11 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
       // Altura que sobra no corpo abaixo da barra "Previa do PDF" (4px = p-1).
       const topoDaArea = area.getBoundingClientRect().top - corpo.getBoundingClientRect().top + corpo.scrollTop;
       const alturaLivre = corpo.clientHeight - topoDaArea - 4;
-      if (alturaLivre > 0 && alturaFolha > 0) escala = Math.min(escala, alturaLivre / alturaFolha);
+      // So no celular: no computador a janela tem quase a largura da folha, e
+      // caber pela altura a encolhia pela metade, com faixas vazias dos lados.
+      // La a folha ocupa a largura e rola, como sai no PDF.
+      const celular = window.innerWidth < 1024;
+      if (celular && alturaLivre > 0 && alturaFolha > 0) escala = Math.min(escala, alturaLivre / alturaFolha);
       setMiniatura({ escala, altura: alturaFolha * escala, recuo: (disponivel - LARGURA_FOLHA * escala) / 2 });
     };
     medir();

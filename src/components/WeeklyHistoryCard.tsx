@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Transaction } from '../types';
-import { formatCurrency, formatDateBr } from '../utils/formatters';
+import { formatDateBr } from '../utils/formatters';
+import { useCurrency } from '../context/CurrencyContext';
 import { getWeeklySummariesByYearMonth, getHistoryYears, getHistoryMonthsByYear } from '../utils/weeklyArchiveUtils';
 import { useCosts } from '../context/CostsContext';
 import { rotulos } from '../utils/periodoReset';
@@ -18,6 +19,8 @@ const monthNames = [
 ];
 
 export const WeeklyHistoryCard: React.FC<WeeklyHistoryCardProps> = ({ transactions }) => {
+  // Na moeda da conta (saia sempre em real).
+  const { formatCurrency } = useCurrency();
   // No computador os emojis da interface viram icones (docs/design/desktop-redesign/README.md).
   const pc = useTelaDeComputador();
   // O periodo escolhida pela usuaria e o que decide como as transacoes se
