@@ -68,7 +68,7 @@ function AppContent() {
   const { formatCurrency } = useCurrency();
   const { fichas, isLoading: fichasCarregando } = useFichasComCustoAtual();
   const { administrativeCosts, marcarTourVisto } = useCosts();
-  const { consumirParaPedido, devolverPedido, pedidoTemRastroDeEstoque } = useProdutos();
+  const { consumirParaPedido, devolverPedido, pedidoTemRastroDeEstoque, pedidoBaixariaEstoque } = useProdutos();
 
   // Fotos antigas (base64 nas linhas) vao para o deposito em segundo plano,
   // uma por vez, depois que o app terminou de abrir; em seguida, a limpeza das
@@ -82,20 +82,20 @@ function AppContent() {
   }, [user?.id]);
 
   /**
-   * Pedido lancado ha mais de 3 meses e cuja baixa de estoque ja saiu do
-   * historico (limpeza automatica de 3 meses no banco). Para ele, editar ou
-   * excluir NAO mexe no estoque: nao ha como saber quanto devolver, e
-   * reconsumir sem devolver derrubaria o estoque duas vezes pelo mesmo pedido.
+   * Pedido que baixaria estoque, mas sem o registro da baixa: a limpeza de 3
+   * meses do historico, ou um backup restaurado de antes de o arquivo levar esse
+   * registro. Para ele, editar ou excluir NAO mexe no estoque: nao ha como saber
+   * quanto devolver, e reconsumir sem devolver derrubaria o estoque duas vezes
+   * pelo mesmo pedido.
    */
-  const TRES_MESES_MS = 90 * 24 * 60 * 60 * 1000;
-  const pedidoSemRastroAntigo = async (tx: Transaction) =>
-    !!tx.createdAt &&
-    Date.now() - tx.createdAt > TRES_MESES_MS &&
-    !(await pedidoTemRastroDeEstoque(tx.id));
-  const AVISO_PEDIDO_ANTIGO =
-    'Este pedido foi lançado há mais de 3 meses, e o registro de quanto ele baixou do ' +
-    'estoque já foi apagado pela limpeza automática do histórico. Por isso o estoque ' +
-    'não foi alterado. Se precisar, ajuste as quantidades na aba Produtos.';
+  const pedidoSemRastro = async (tx: Transaction) => {
+    const itens = resolverItensDoPedido(tx.fichaItems);
+    return itens.length > 0 && pedidoBaixariaEstoque(itens) && !(await pedidoTemRastroDeEstoque(tx.id));
+  };
+  const AVISO_PEDIDO_SEM_RASTRO =
+    'O registro de quanto este pedido baixou do estoque não existe mais: ele foi apagado ' +
+    'pela limpeza do histórico de 3 meses ou o pedido veio de um backup antigo. Por isso o ' +
+    'estoque não foi alterado. Se precisar, ajuste as quantidades na aba Produtos.';
   const {
     transacoes: transactions,
     addTransacao,
@@ -157,8 +157,8 @@ function AppContent() {
       // acharia mais nada para devolver. Os insumos ficariam baixados para
       // sempre, em silencio.
       if (tx.type === 'venda') {
-        if (await pedidoSemRastroAntigo(tx)) {
-          await avisar(AVISO_PEDIDO_ANTIGO, { titulo: 'Pedido antigo' });
+        if (await pedidoSemRastro(tx)) {
+          await avisar(AVISO_PEDIDO_SEM_RASTRO, { titulo: 'Estoque não alterado' });
         }
         try {
           await devolverPedido(tx.id, [], 'excluido');
@@ -408,8 +408,8 @@ function AppContent() {
       // consome de novo pela composicao nova. Nao calculamos
       // delta de proposito — delta so funciona quando muda apenas a quantidade,
       // e quebra quando a confeiteira troca o produto ou mistura itens.
-      if (updated.type === 'venda' && (await pedidoSemRastroAntigo(existing))) {
-        avisar(`O pedido foi salvo.\n\n${AVISO_PEDIDO_ANTIGO}`, { titulo: 'Pedido antigo' });
+      if (updated.type === 'venda' && (await pedidoSemRastro(existing))) {
+        avisar(`O pedido foi salvo.\n\n${AVISO_PEDIDO_SEM_RASTRO}`, { titulo: 'Estoque não alterado' });
         return true;
       }
       if (updated.type === 'venda') {

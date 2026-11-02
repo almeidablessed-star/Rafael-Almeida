@@ -90,6 +90,8 @@ interface ProdutosContextType {
   ) => Promise<void>;
   /** O pedido ainda tem baixa de estoque registrada? Ver a definicao. */
   pedidoTemRastroDeEstoque: (transacaoId: string) => Promise<boolean>;
+  /** Estes itens baixam algum insumo do estoque? Sem isso, nao ter registro de baixa e normal. */
+  pedidoBaixariaEstoque: (items: { ficha: FichaTecnica; quantity: number; tamanhoId?: string }[]) => boolean;
 }
 
 const ProdutosContext = createContext<ProdutosContextType | undefined>(undefined);
@@ -320,15 +322,8 @@ export const ProdutosProvider: React.FC<{ children: React.ReactNode }> = ({ chil
    * Mesma logica de aplicar-uma-por-vez e desfazer tudo se uma falhar do
    * EstoqueContext original — meia baixa aplicada e pior que baixa nenhuma.
    */
-  const consumirParaPedido = async (
-    items: { ficha: FichaTecnica; quantity: number; tamanhoId?: string }[],
-    transacaoId: string
-  ): Promise<ResultadoBaixa> => {
-    if (!user) throw new Error('User not authenticated');
-
-    // Saldo do banco, nao do estado: ver `buscarProdutosFrescos`.
-    const produtosAtuais = await buscarProdutosFrescos();
-    const produtosComoStockItems: StockItem[] = produtosAtuais.map((p) => ({
+  const comoStockItems = (lista: Produto[]): StockItem[] =>
+    lista.map((p) => ({
       id: String(p.id),
       name: p.nome,
       quantity: p.quantidadeAtual || 0,
@@ -339,7 +334,17 @@ export const ProdutosProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       fullQuantity: p.quantidadeReferencia || 0,
     }));
 
-    const plano = planejarBaixa(items, produtosComoStockItems);
+  const pedidoBaixariaEstoque = (items: { ficha: FichaTecnica; quantity: number; tamanhoId?: string }[]) =>
+    planejarBaixa(items, comoStockItems(produtos)).baixas.length > 0;
+
+  const consumirParaPedido = async (
+    items: { ficha: FichaTecnica; quantity: number; tamanhoId?: string }[],
+    transacaoId: string
+  ): Promise<ResultadoBaixa> => {
+    if (!user) throw new Error('User not authenticated');
+
+    // Saldo do banco, nao do estado: ver `buscarProdutosFrescos`.
+    const plano = planejarBaixa(items, comoStockItems(await buscarProdutosFrescos()));
     if (plano.baixas.length === 0) {
       return { baixados: [], problemas: plano.problemas };
     }
@@ -638,6 +643,7 @@ export const ProdutosProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         consumirParaPedido,
         devolverPedido,
         pedidoTemRastroDeEstoque,
+        pedidoBaixariaEstoque,
       }}
     >
       {children}

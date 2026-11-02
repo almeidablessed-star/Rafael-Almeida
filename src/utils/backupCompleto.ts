@@ -34,6 +34,7 @@ const COLUNAS = {
     'id,tipo,descricao,data,quantidade,valor_unitario,valor_total,valor_sinal,status_pagamento,forma_pagamento,cliente_nome,cliente_telefone,data_evento,horario_entrega,endereco_entrega,observacoes,notas,fornecedor,periodo_mao_de_obra,categoria,breakdown,ficha_itens,insumos_consumidos,produto_id,created_at,cliente_foto_url,imagem_inspiracao,recebimentos',
   despesas_empresa: 'nome,valor,percentual_rateio,ordem,created_at,updated_at',
   configuracao_empresa_historico: 'campo,valor_antigo,valor_novo,changed_at',
+  estoque_movimentos: 'produto_id,item_nome,tipo,quantidade,unidade,transacao_id,ficha_id,descricao,created_at',
   administrative_costs:
     'agua,aluguel,energia,gas,internet,limpeza,gasolina,hora_trabalho,monthly_income_target,working_days_per_week,cmv_target_percent,investment_target_percent,profit_target_percent,migrado_de_colunas_fixas,periodo_reset',
   usuarias: 'nome_confeitaria,moeda,telefone,endereco,instagram,foto_url',
@@ -71,6 +72,8 @@ export interface BackupCompleto {
   transacoes: any[];
   despesas: any[];
   historico: any[];
+  /** O que cada pedido baixou do estoque. Backup antigo nao tem. */
+  movimentos?: any[];
   custos: Record<string, unknown> | null;
   perfil: Record<string, unknown> | null;
 }
@@ -97,13 +100,14 @@ export const montarBackupCompleto = async (): Promise<BackupCompleto> => {
   if (!user) throw new Error('Sem sessão: entre de novo e tente outra vez.');
   const uid = user.id;
 
-  const [produtos, fichas, clientes, transacoes, despesas, historico] = await Promise.all([
+  const [produtos, fichas, clientes, transacoes, despesas, historico, movimentos] = await Promise.all([
     buscarTodas('produtos', uid, 'id'),
     buscarTodas('fichas_tecnicas', uid, 'id'),
     buscarTodas('clientes', uid, 'id'),
     buscarTodas('transacoes', uid, 'id'),
     buscarTodas('despesas_empresa', uid, 'ordem'),
     buscarTodas('configuracao_empresa_historico', uid, 'changed_at'),
+    buscarTodas('estoque_movimentos', uid, 'created_at'),
   ]);
 
   const { data: custos, error: erroCustos } = await supabase
@@ -131,6 +135,7 @@ export const montarBackupCompleto = async (): Promise<BackupCompleto> => {
     transacoes,
     despesas,
     historico,
+    movimentos,
     custos: (custos as unknown as Record<string, unknown>) || null,
     perfil: soEnderecosDoDeposito('usuarias', perfil as unknown as Record<string, unknown>) || null,
   };
@@ -148,7 +153,7 @@ const ehData = (v: unknown) => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.te
  * recusa o resto (e desfaz tudo); aqui sai o erro claro dos casos comuns.
  */
 export const validarBackupCompleto = (dado: BackupCompleto): string | null => {
-  for (const lista of ['produtos', 'fichas', 'clientes', 'transacoes', 'despesas', 'historico'] as const) {
+  for (const lista of ['produtos', 'fichas', 'clientes', 'transacoes', 'despesas', 'historico', 'movimentos'] as const) {
     if (dado[lista] !== undefined && !Array.isArray(dado[lista])) return `A parte "${lista}" do arquivo está quebrada.`;
   }
   const total =
