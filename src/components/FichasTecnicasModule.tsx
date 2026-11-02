@@ -2076,7 +2076,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         ] as const).map(([rotulo, valor, cor]) => {
                           // Despesas e investimento sao parte do preco: sem preco, o
                           // R$ 0,00 parecia erro (a pessoa nao via o campo la em cima).
-                          const esperaPreco = preco <= 0 && estruturaFinanceira?.valido && (rotulo === 'Despesas' || rotulo === 'Investimento');
+                          const esperaPreco = preco <= 0 && valor === 0 && estruturaFinanceira?.valido && (rotulo === 'Despesas' || rotulo === 'Investimento');
                           return (
                           <div key={rotulo} className="flex items-baseline gap-2" style={{ fontSize: '13px', fontWeight: 600, color: '#5B4A6B' }}>
                             <span aria-hidden="true" className="flex-shrink-0" style={{ width: '8px', height: '8px', borderRadius: '3px', background: cor }} />
