@@ -2073,14 +2073,23 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                           ['Mão de obra', mdo, '#C4626F'],
                           ['Despesas', cus, '#B08D57'],
                           ['Investimento', inv, '#D6B8E0'],
-                        ] as const).map(([rotulo, valor, cor]) => (
+                        ] as const).map(([rotulo, valor, cor]) => {
+                          // Despesas e investimento sao parte do preco: sem preco, o
+                          // R$ 0,00 parecia erro (a pessoa nao via o campo la em cima).
+                          const esperaPreco = preco <= 0 && estruturaFinanceira?.valido && (rotulo === 'Despesas' || rotulo === 'Investimento');
+                          return (
                           <div key={rotulo} className="flex items-baseline gap-2" style={{ fontSize: '13px', fontWeight: 600, color: '#5B4A6B' }}>
                             <span aria-hidden="true" className="flex-shrink-0" style={{ width: '8px', height: '8px', borderRadius: '3px', background: cor }} />
                             {rotulo}
                             <span aria-hidden="true" className="flex-1" style={{ borderBottom: '1.5px dotted rgba(110,63,114,.25)', transform: 'translateY(-3px)' }} />
-                            <span className="tabular-nums" style={{ fontWeight: 800, color: '#241B2B' }}>{formatMoney(valor)}</span>
+                            {esperaPreco ? (
+                              <span style={{ fontSize: '11px', fontWeight: 700, color: '#9A8FA0' }}>digite o preço acima</span>
+                            ) : (
+                              <span className="tabular-nums" style={{ fontWeight: 800, color: '#241B2B' }}>{formatMoney(valor)}</span>
+                            )}
                           </div>
-                        ))}
+                          );
+                        })}
                         <div className="flex items-center justify-between mt-1" style={{ padding: '10px 14px', borderRadius: '16px', background: '#F6F2F5' }}>
                           <span style={{ fontFamily: "'Instrument Serif', serif", fontSize: '20px', lineHeight: 1 }}>Custo total</span>
                           <span className="tabular-nums" style={{ fontSize: '18px', fontWeight: 800, letterSpacing: '-.02em' }}>{formatMoney(custoTotal)}</span>
@@ -2151,6 +2160,19 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                                 </span>
                               </span>
                             </div>
+                            {/* Com um toque o sugerido vai para o campo do preco: o
+                                destaque e aqui embaixo, e o campo la em cima passava
+                                despercebido. */}
+                            {Math.round(preco * 100) !== Math.round(precoCalculado.precoSugerido * 100) && precoCalculado.precoSugerido > 0 && (
+                              <button
+                                type="button"
+                                onClick={() => handleUpdateTamanho(tamanho.id, 'preco', (Math.round(precoCalculado.precoSugerido * 100) / 100).toFixed(2).replace('.', ','))}
+                                className="self-end rounded-full font-bold"
+                                style={{ padding: '7px 14px', fontSize: '12px', color: '#3A2350', background: '#FFFFFF', border: '1.5px solid #6E3F72' }}
+                              >
+                                Usar este preço
+                              </button>
+                            )}
                             {preco > 0 && (
                               abaixoDaMeta ? (
                                 <span className="inline-flex items-center gap-1.5 self-start" style={{ fontSize: '11px', fontWeight: 800, padding: '5px 11px', borderRadius: '999px', background: '#FDF4F5', color: '#C4626F', border: '1px solid rgba(196,98,111,.25)' }}>

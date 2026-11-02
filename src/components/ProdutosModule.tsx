@@ -347,6 +347,11 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
       setAlertaTocado(false);
       setAcabeiDeComprar(false);
       setEditingId(null);
+    } else {
+      // Produto novo ja vem como "acabei de comprar": quem cadastra quase sempre
+      // acabou de comprar, e o estoque ficava zerado (o pedido seguinte deixava
+      // negativo). Desmarca quem so quer registrar o preco.
+      setAcabeiDeComprar(true);
     }
   }, [isAdding]);
 
