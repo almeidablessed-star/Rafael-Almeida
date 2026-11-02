@@ -96,6 +96,20 @@ const Janela: React.FC<{
   );
 };
 
+// Janelas abertas agora, a de cima por ultimo (ver fecharAvisoAberto).
+const abertas: ((sim: boolean) => void)[] = [];
+
+/**
+ * O voltar do celular com uma pergunta na tela responde "nao" (Cancelar /
+ * Continuar editando), como o Esc. Devolve se havia alguma para fechar.
+ */
+export const fecharAvisoAberto = (): boolean => {
+  const ultima = abertas[abertas.length - 1];
+  if (!ultima) return false;
+  ultima(false);
+  return true;
+};
+
 const abrir = (mensagem: string, opcoes: Opcoes, pergunta: boolean) =>
   new Promise<boolean>((resolve) => {
     const lugar = document.createElement('div');
@@ -105,10 +119,12 @@ const abrir = (mensagem: string, opcoes: Opcoes, pergunta: boolean) =>
     const responder = (sim: boolean) => {
       if (respondido) return;
       respondido = true;
+      abertas.splice(abertas.indexOf(responder), 1);
       raiz.unmount();
       lugar.remove();
       resolve(sim);
     };
+    abertas.push(responder);
     raiz.render(<Janela mensagem={mensagem} opcoes={opcoes} pergunta={pergunta} responder={responder} />);
   });
 

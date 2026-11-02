@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { fecharAvisoAberto } from '../components/AvisoApp';
 
 /**
  * Botao voltar do celular (Android, e o gesto de voltar) fecha a janela aberta
@@ -22,14 +23,19 @@ const entradaAtual = (): number => Number(history.state?.carulaJanela) || 0;
 
 const aoVoltar = () => {
   const topo = pilha[pilha.length - 1];
-  if (topo && topo.id > entradaAtual()) topo.fechar();
+  if (!topo || topo.id <= entradaAtual()) return;
+  // Com o "Sair sem salvar?" na tela, voltar de novo e "Continuar editando".
+  // Antes o segundo voltar ja nao tinha entrada nenhuma e saia do app.
+  if (fecharAvisoAberto()) {
+    history.pushState({ carulaJanela: topo.id }, '');
+    return;
+  }
+  topo.fechar();
 };
 
 export function useVoltarFecha(aberto: boolean, fechar: () => void | Promise<void>) {
   const fecharRef = useRef(fechar);
   fecharRef.current = fechar;
-  const abertoRef = useRef(aberto);
-  abertoRef.current = aberto;
 
   useEffect(() => {
     if (!aberto) return;
@@ -41,10 +47,11 @@ export function useVoltarFecha(aberto: boolean, fechar: () => void | Promise<voi
     const janela: Janela = {
       id,
       fechar: async () => {
+        // Repoe a entrada antes de perguntar: a pergunta fica em cima dela, e um
+        // novo voltar cai em aoVoltar em vez de sair do app. Se a janela fechar,
+        // a limpeza abaixo tira a entrada de novo.
+        history.pushState({ carulaJanela: id }, '');
         await fecharRef.current();
-        // Continuou aberta (escolheu continuar editando): repoe a entrada.
-        await new Promise((r) => setTimeout(r, 0));
-        if (abertoRef.current && pilha.includes(janela)) history.pushState({ carulaJanela: id }, '');
       },
     };
     pilha.push(janela);
