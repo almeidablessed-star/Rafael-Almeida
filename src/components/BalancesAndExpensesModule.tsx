@@ -113,7 +113,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
   // mais chamados aqui — o rastro de entrada por compra fica na propria
   // transacao (`produto_id`), sem duplicar num `estoque_movimentos` que agora
   // pertence a um sistema paralelo em fase de aposentadoria.
-  const { produtos, addProduto, updateProduto, deleteProduto, custoPorUnidade } = useProdutos();
+  const { produtos, addProduto, updateProduto, deleteProduto, custoPorUnidade, buscarProdutoFresco } = useProdutos();
 
   const produtosParaAutocomplete: StockItem[] = produtos.map((p) => ({
     id: String(p.id),
@@ -209,7 +209,9 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
     if (hasItemQty) {
       try {
         const itemNameFromDescription = description.trim();
-        const existing = findExistingProduto(itemNameFromDescription);
+        // Saldo do banco, nao da tela: outro aparelho pode ter baixado estoque.
+        const naTela = findExistingProduto(itemNameFromDescription);
+        const existing = naTela ? (await buscarProdutoFresco(naTela.id)) || naTela : undefined;
 
         if (existing) {
           produtoIdParaTransacao = existing.id;

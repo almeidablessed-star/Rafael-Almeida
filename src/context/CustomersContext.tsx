@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { useAoVoltarParaOApp } from '../hooks/useAoVoltarParaOApp';
 import { abrirFoto, apagarFotoTrocada, ehEnderecoDeposito, guardarFoto } from '../utils/fotoDeposito';
 import { supabase } from '../lib/supabase';
 import { gerarMiniatura } from '../utils/imageCompression';
@@ -132,12 +133,14 @@ export const CustomersProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     else fotoPorClienteRef.current.clear();
   };
 
-  const fetchCustomers = async () => {
-    esquecerFoto();
+  // `silencioso`: busca de fundo (ver useAoVoltarParaOApp), sem tela de
+  // carregando, que fecharia um cadastro aberto, e sem esquecer as fotos.
+  const fetchCustomers = async (silencioso = false) => {
+    if (!silencioso) esquecerFoto();
     if (!user) return;
 
     try {
-      setIsLoading(true);
+      if (!silencioso) setIsLoading(true);
       setError(null);
 
       const { data, error: fetchError } = await supabase
@@ -154,12 +157,13 @@ export const CustomersProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       setCustomers(data?.map(mapSupabaseToCustomer) || []);
       void gerarMiniaturasQueFaltam();
     } catch (err: any) {
-      setError(err.message || 'Erro ao carregar clientes');
+      if (!silencioso) setError(err.message || 'Erro ao carregar clientes');
       console.error('Error fetching customers:', err);
     } finally {
-      setIsLoading(false);
+      if (!silencioso) setIsLoading(false);
     }
   };
+  useAoVoltarParaOApp(() => fetchCustomers(true), !!user);
 
   /**
    * Clientes cadastradas antes da miniatura existir: tem foto, mas `foto_mini`

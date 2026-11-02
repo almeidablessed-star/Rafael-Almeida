@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useAoVoltarParaOApp } from '../hooks/useAoVoltarParaOApp';
 import { abrirFoto, apagarFotoTrocada, guardarFoto } from '../utils/fotoDeposito';
 import { supabase } from '../lib/supabase';
 import { useAuth } from './AuthContext';
@@ -237,11 +238,12 @@ export const TransacoesProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     fetchTransacoes();
   }, [user]);
 
-  const fetchTransacoes = async () => {
+  // `silencioso`: busca de fundo (ver useAoVoltarParaOApp), sem tela de carregando.
+  const fetchTransacoes = async (silencioso = false) => {
     if (!user) return;
 
     try {
-      setIsLoading(true);
+      if (!silencioso) setIsLoading(true);
       setError(null);
 
       const { data, error: fetchError } = await supabase
@@ -255,12 +257,13 @@ export const TransacoesProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
       setTransacoes(comoLinhas(data).map(mapSupabaseToTransaction));
     } catch (err: any) {
-      setError(err.message || 'Erro ao carregar lançamentos');
+      if (!silencioso) setError(err.message || 'Erro ao carregar lançamentos');
       console.error('Error fetching transacoes:', err);
     } finally {
-      setIsLoading(false);
+      if (!silencioso) setIsLoading(false);
     }
   };
+  useAoVoltarParaOApp(() => fetchTransacoes(true), !!user);
 
   /**
    * Busca as duas fotos de um pedido sob demanda.

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { useAoVoltarParaOApp } from '../hooks/useAoVoltarParaOApp';
 import { abrirFoto, apagarFotoTrocada, ehEnderecoDeposito, guardarFoto } from '../utils/fotoDeposito';
 import { supabase } from '../lib/supabase';
 import { gerarMiniatura } from '../utils/imageCompression';
@@ -211,12 +212,14 @@ export const FichasTecnicasProvider: React.FC<{ children: React.ReactNode }> = (
     else fotoPorFichaRef.current.clear();
   };
 
-  const fetchFichas = async () => {
-    esquecerFoto();
+  // `silencioso`: busca de fundo (ver useAoVoltarParaOApp), sem tela de
+  // carregando e sem esquecer as fotos.
+  const fetchFichas = async (silencioso = false) => {
+    if (!silencioso) esquecerFoto();
     if (!user) return;
 
     try {
-      setIsLoading(true);
+      if (!silencioso) setIsLoading(true);
       setError(null);
 
       const { data, error: fetchError } = await supabase
@@ -243,13 +246,17 @@ export const FichasTecnicasProvider: React.FC<{ children: React.ReactNode }> = (
       setFichas((data || []).map(mapSupabaseToFicha));
       void gerarMiniaturasQueFaltam();
     } catch (err: any) {
-      setError(err.message || 'Erro ao carregar fichas técnicas');
       console.error('Error fetching fichas:', err);
-      setFichas([]);
+      // Falha de fundo deixa a lista como estava.
+      if (!silencioso) {
+        setError(err.message || 'Erro ao carregar fichas técnicas');
+        setFichas([]);
+      }
     } finally {
-      setIsLoading(false);
+      if (!silencioso) setIsLoading(false);
     }
   };
+  useAoVoltarParaOApp(() => fetchFichas(true), !!user);
 
   const addFicha = async (fichaData: Omit<FichaTecnica, 'id' | 'createdAt'>) => {
     if (!user) throw new Error('User not authenticated');

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useAoVoltarParaOApp } from '../hooks/useAoVoltarParaOApp';
 import { supabase } from '../lib/supabase';
 import { useAuth } from './AuthContext';
 import { CompraRegistrada, Produto, FichaTecnica, StockItem } from '../types';
@@ -57,6 +58,7 @@ interface ProdutosContextType {
   isLoading: boolean;
   error: string | null;
   fetchProdutos: () => Promise<void>;
+  buscarProdutoFresco: (id: number) => Promise<Produto | undefined>;
   /** Historico de estoque_movimentos — mesma tabela usada pelo consumo/devolucao abaixo. */
   fetchMovimentos: () => Promise<void>;
   addProduto: (data: Omit<Produto, 'id'>) => Promise<Produto>;
@@ -207,10 +209,11 @@ export const ProdutosProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return (data || []).map(mapSupabaseToProduto);
   };
 
-  const fetchProdutos = async () => {
+  // `silencioso`: busca de fundo (ver useAoVoltarParaOApp), sem tela de carregando.
+  const fetchProdutos = async (silencioso = false) => {
     if (!user) return;
     try {
-      setIsLoading(true);
+      if (!silencioso) setIsLoading(true);
       setError(null);
       const { data, error: fetchError } = await supabase
         .from('produtos')
@@ -221,12 +224,19 @@ export const ProdutosProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (fetchError) throw fetchError;
       setProdutos((data || []).map(mapSupabaseToProduto));
     } catch (err: any) {
-      setError(err.message || 'Erro ao carregar produtos');
+      if (!silencioso) setError(err.message || 'Erro ao carregar produtos');
       console.error('Error fetching produtos:', err);
     } finally {
-      setIsLoading(false);
+      if (!silencioso) setIsLoading(false);
     }
   };
+  useAoVoltarParaOApp(() => {
+    fetchProdutos(true);
+    fetchMovimentos();
+  }, !!user);
+
+  /** O produto como esta no banco agora, para quem vai gravar em cima dele. */
+  const buscarProdutoFresco = async (id: number) => (await buscarProdutosFrescos()).find((p) => p.id === id);
 
   const addProduto = async (produtoData: Omit<Produto, 'id'>) => {
     if (!user) throw new Error('User not authenticated');
@@ -675,6 +685,7 @@ export const ProdutosProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         isLoading,
         error,
         fetchProdutos,
+        buscarProdutoFresco,
         fetchMovimentos,
         addProduto,
         updateProduto,

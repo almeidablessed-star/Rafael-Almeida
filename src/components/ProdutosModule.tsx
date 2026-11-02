@@ -209,7 +209,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
   abaInicial,
   onAbaInicialConsumida,
 }) => {
-  const { produtos: produtosDoContexto, addProduto, updateProduto, deleteProduto, custoPorUnidade } = useProdutos();
+  const { produtos: produtosDoContexto, addProduto, updateProduto, deleteProduto, custoPorUnidade, buscarProdutoFresco } = useProdutos();
   const { formatCurrency, symbol } = useCurrency();
   const [aba, setAba] = useState<'todos' | 'estoque' | 'compras'>('todos');
   // Versao computador (docs/design/desktop-redesign, Produtos.dc.html). Um JSX
@@ -370,6 +370,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
     // a sugestao nao pode reescrever nada — nem se ela mudar a embalagem aqui.
     setAlertaTocado(true);
     setEditingId(p.id);
+    produtoAoAbrirRef.current = p;
     setIsAdding(true);
     setInvalidFieldId(null);
   };
@@ -427,6 +428,26 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
     await performSave(data);
   };
 
+  /**
+   * O produto como estava quando o Editar abriu. Na hora de gravar, o que a
+   * pessoa nao mexeu vem do banco: o estoque pode ter mudado em outro aparelho
+   * (ou por um pedido) com o formulario aberto, e gravar a tela antiga voltava
+   * o saldo. Tambem deixa de arredondar o estoque so por salvar (9,725 virava
+   * 9,73: a tela mostra duas casas).
+   */
+  const produtoAoAbrirRef = useRef<Produto | null>(null);
+  const soOQueMudou = (data: Omit<Produto, 'id'>, original: Produto, fresco: Produto): Omit<Produto, 'id'> => {
+    const resultado: any = { ...data };
+    for (const campo of Object.keys(data) as (keyof typeof data)[]) {
+      const naoMexeu =
+        campo === 'quantidadeAtual'
+          ? Math.abs((data.quantidadeAtual || 0) - (original.quantidadeAtual || 0)) < 0.01
+          : JSON.stringify(data[campo]) === JSON.stringify(original[campo]);
+      if (naoMexeu && campo in fresco) resultado[campo] = fresco[campo];
+    }
+    return resultado;
+  };
+
   // O botao continua ativo enquanto grava: sem isto, um toque duplo criava dois produtos.
   const salvandoProdutoRef = useRef(false);
   const performSave = async (data: Omit<Produto, 'id'>) => {
@@ -434,7 +455,9 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
     salvandoProdutoRef.current = true;
     try {
       if (editingId) {
-        await updateProduto(editingId, data);
+        const original = produtoAoAbrirRef.current;
+        const fresco = await buscarProdutoFresco(editingId);
+        await updateProduto(editingId, original && fresco ? soOQueMudou(data, original, fresco) : data);
       } else {
         await addProduto(data);
       }
@@ -453,7 +476,8 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
 
   const handleQuickAdjustThreshold = async (p: Produto, delta: number) => {
     const novo = Math.max(0, (p.nivelMinimo || 0) + delta);
-    await updateProduto(p.id, { ...p, nivelMinimo: novo });
+    const fresco = await buscarProdutoFresco(p.id);
+    await updateProduto(p.id, { ...(fresco || p), nivelMinimo: novo });
   };
 
   const produtosDoEstoque = produtos.filter((p) => p.controlaEstoque);
