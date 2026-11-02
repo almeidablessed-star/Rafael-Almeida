@@ -68,7 +68,7 @@ function AppContent() {
   const { formatCurrency } = useCurrency();
   const { fichas, isLoading: fichasCarregando } = useFichasComCustoAtual();
   const { administrativeCosts, marcarTourVisto } = useCosts();
-  const { consumirParaPedido, devolverPedido, pedidoTemRastroDeEstoque, pedidoBaixariaEstoque } = useProdutos();
+  const { consumirParaPedido, devolverPedido, pedidoTemRastroDeEstoque, pedidoBaixariaEstoque, desfazerCompra } = useProdutos();
 
   // Fotos antigas (base64 nas linhas) vao para o deposito em segundo plano,
   // uma por vez, depois que o app terminou de abrir; em seguida, a limpeza das
@@ -171,6 +171,23 @@ function AppContent() {
             { titulo: 'O pedido não foi excluído' }
           );
           return;
+        }
+      }
+
+      // Compra: o estoque e o preco voltam junto. Compra de antes deste registro
+      // nao tem como saber o que mudou, entao avisa.
+      if (tx.type !== 'venda' && tx.produtoId != null) {
+        try {
+          if (tx.breakdown?.compra) {
+            await desfazerCompra(tx.breakdown.compra);
+          } else {
+            await avisar(
+              'Esta compra é de antes de o app guardar o que ela mudou no produto. O lançamento será excluído, mas o estoque e o preço não mudam. Se precisar, ajuste na aba Produtos.',
+              { titulo: 'Estoque não alterado' }
+            );
+          }
+        } catch (err: any) {
+          await avisar(`O produto não foi ajustado:\n\n${err?.message || err}\n\nConfira na aba Produtos.`, { titulo: 'Confira em Produtos' });
         }
       }
 
@@ -363,6 +380,19 @@ function AppContent() {
    * deixava negativo, entao a confeiteira nunca ficava sabendo que o cadastro
    * estava incompleto — o estoque so ia ficando errado.
    */
+  // Nao bloqueia: a venda aconteceu, e o saldo pode so estar desatualizado.
+  const avisarEstoqueNegativo = async (baixados: { itemNome: string; unidade: string; quantidadeFinal: number }[]) => {
+    const negativos = baixados.filter((b) => b.quantidadeFinal < 0);
+    if (negativos.length === 0) return;
+    await avisar(
+      `O pedido foi salvo, mas o estoque ficou negativo:\n\n` +
+        negativos.map((b) => `• ${b.itemNome}: ${formatarQuantidade(b.quantidadeFinal)} ${b.unidade}`).join('\n') +
+        `\n\nRegistre a compra ou ajuste a quantidade na aba Produtos.`,
+      { titulo: 'Estoque negativo' }
+    );
+  };
+  const formatarQuantidade = (n: number) => String(Math.round(n * 1000) / 1000).replace('.', ',');
+
   const avisarProblemasDeBaixa = async (problemas: ProblemaBaixa[]) => {
     if (problemas.length === 0) return;
     const linhas = problemas.map((p) =>
@@ -439,6 +469,7 @@ function AppContent() {
           if (itens.length > 0) {
             const resultado = await consumirParaPedido(itens, editingId);
             await avisarProblemasDeBaixa(resultado.problemas);
+            await avisarEstoqueNegativo(resultado.baixados);
           }
 
           if (fichasApagadas.length > 0) {
@@ -499,6 +530,7 @@ function AppContent() {
       if (itens.length > 0) {
         const resultado = await consumirParaPedido(itens, criada.id);
         await avisarProblemasDeBaixa(resultado.problemas);
+        await avisarEstoqueNegativo(resultado.baixados);
       }
     } catch (err: any) {
       avisar(

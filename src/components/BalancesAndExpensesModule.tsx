@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { avisar } from './AvisoApp';
-import { Transaction, TransactionType, StockItem } from '../types';
+import { CompraRegistrada, Transaction, TransactionType, StockItem } from '../types';
 import { calculateWeeklyBalances } from '../utils/financialEngine';
 import { WeeklyHistoryCard } from './WeeklyHistoryCard';
 import { FieldValidationError } from './FieldValidationError';
@@ -203,6 +203,8 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
     // uma compra recusada pelo banco deixava o estoque somado sem compra
     // nenhuma registrada.
     let desfazerProduto: (() => Promise<unknown>) | null = null;
+    // Gravado na compra, para a exclusao saber o que desfazer.
+    let compra: CompraRegistrada | undefined;
 
     if (hasItemQty) {
       try {
@@ -238,6 +240,14 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
                 quantidadeEmbalagem: itemQtyNum,
                 unidadeEmbalagem: itemUnit,
               });
+              compra = {
+                produtoId: existing.id,
+                quantidade: itemQtyNum,
+                unidade: itemUnit,
+                valor: valNum,
+                somouNoEstoque: true,
+                antes: { precoPago: existing.precoPago, quantidadeEmbalagem: existing.quantidadeEmbalagem, unidadeEmbalagem: existing.unidadeEmbalagem },
+              };
             }
           } else {
             // Sem controle de estoque: so atualiza o preco de referencia, no
@@ -249,6 +259,14 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
               quantidadeEmbalagem: itemQtyNum,
               unidadeEmbalagem: itemUnit,
             });
+            compra = {
+              produtoId: existing.id,
+              quantidade: itemQtyNum,
+              unidade: itemUnit,
+              valor: valNum,
+              somouNoEstoque: false,
+              antes: { precoPago: existing.precoPago, quantidadeEmbalagem: existing.quantidadeEmbalagem, unidadeEmbalagem: existing.unidadeEmbalagem },
+            };
           }
         } else {
           const novo = await addProduto({
@@ -264,6 +282,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
             nivelMinimoUnidade: itemUnit,
           });
           produtoIdParaTransacao = novo.id;
+          compra = { produtoId: novo.id, quantidade: itemQtyNum, unidade: itemUnit, valor: valNum, somouNoEstoque: true, antes: null };
           desfazerProduto = () => deleteProduto(novo.id);
         }
       } catch (err) {
@@ -282,6 +301,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
       paymentStatus: 'pago',
       notes: `Compra registrada em ${NOTA_POR_COFRINHO[category]}${hasItemQty ? ` - Item: ${description.trim()} (${itemQtyNum}${itemUnit})` : ''}`,
       produtoId: produtoIdParaTransacao,
+      breakdown: compra ? { compra, reposicao: 0, maoDeObra: 0, custos: 0, investimento: 0, delivery: 0, adicionais: 0 } : undefined,
     });
 
     if (!gravou) {

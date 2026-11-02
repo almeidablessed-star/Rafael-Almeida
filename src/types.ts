@@ -203,7 +203,22 @@ export interface SaleBreakdownAdicional {
   custo: number;
 }
 
+/**
+ * O que uma compra mudou no produto, para poder desfazer ao excluir. `antes` e o
+ * preco anterior; nulo quando a compra criou o produto.
+ */
+export interface CompraRegistrada {
+  produtoId: number;
+  quantidade: number;
+  unidade: string;
+  valor: number;
+  somouNoEstoque: boolean;
+  antes: { precoPago: number; quantidadeEmbalagem: number; unidadeEmbalagem: string } | null;
+}
+
 export interface SaleBreakdown {
+  /** So nas compras, que nao usam os valores de venda abaixo. */
+  compra?: CompraRegistrada;
   reposicao: number;
   maoDeObra: number;
   custos: number;

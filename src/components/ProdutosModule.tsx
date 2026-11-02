@@ -11,6 +11,7 @@ import { BalancesAndExpensesModule } from './BalancesAndExpensesModule';
 import { GenericDeleteConfirmModal } from './GenericDeleteConfirmModal';
 import { DuplicateNameWarningModal } from './DuplicateNameWarningModal';
 import { useDelayedDelete } from '../hooks/useDelayedDelete';
+import { useFichasTecnicas } from '../context/FichasTecnicasContext';
 import { FieldValidationError } from './FieldValidationError';
 import { normalizeName } from '../utils/fichaMatcher';
 import { areUnitsCompatible, convertQuantity } from '../utils/units';
@@ -216,6 +217,16 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
   const pc = useTelaDeComputador();
 
   const [deletingProduto, setDeletingProduto] = useState<Produto | null>(null);
+  const { fichas } = useFichasTecnicas();
+  const fichasQueUsamOProduto = deletingProduto
+    ? fichas
+        .filter((f) =>
+          [...(f.ingredients || []), ...(f.tamanhos || []).flatMap((t) => t.ingredients || [])].some(
+            (i) => Number(i.produtoId) === deletingProduto.id
+          )
+        )
+        .map((f) => f.name)
+    : [];
   const {
     pendingItems: pendingDeleteProdutos,
     requestDelete: requestDeleteProduto,
@@ -409,7 +420,11 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
     await performSave(data);
   };
 
+  // O botao continua ativo enquanto grava: sem isto, um toque duplo criava dois produtos.
+  const salvandoProdutoRef = useRef(false);
   const performSave = async (data: Omit<Produto, 'id'>) => {
+    if (salvandoProdutoRef.current) return;
+    salvandoProdutoRef.current = true;
     try {
       if (editingId) {
         await updateProduto(editingId, data);
@@ -420,6 +435,8 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
       setDuplicateWarning(null);
     } catch (err) {
       setFormError((err as any).message || 'Erro ao salvar produto');
+    } finally {
+      salvandoProdutoRef.current = false;
     }
   };
 
@@ -1299,6 +1316,9 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
         itemName={deletingProduto?.nome}
         itemDetails={[
           { label: '💰', value: formatCurrency(deletingProduto?.precoPago || 0) },
+          ...(fichasQueUsamOProduto.length > 0
+            ? [{ label: '⚠️', value: `Usado em: ${fichasQueUsamOProduto.join(', ')}. Sem ele, essas fichas ficam com o custo antigo e não baixam este insumo do estoque.` }]
+            : []),
         ]}
         onClose={() => setDeletingProduto(null)}
         onConfirmDelete={() => {

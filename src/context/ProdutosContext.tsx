@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from './AuthContext';
-import { Produto, FichaTecnica, StockItem } from '../types';
+import { CompraRegistrada, Produto, FichaTecnica, StockItem } from '../types';
+import { convertQuantity } from '../utils/units';
 import { planejarBaixa, ResultadoBaixa } from '../utils/stockConsumption';
 import { normalizeName } from '../utils/fichaMatcher';
 import { referenciaDoCheio } from '../utils/referenciaDoEstoque';
@@ -92,6 +93,8 @@ interface ProdutosContextType {
   pedidoTemRastroDeEstoque: (transacaoId: string) => Promise<boolean>;
   /** Estes itens baixam algum insumo do estoque? Sem isso, nao ter registro de baixa e normal. */
   pedidoBaixariaEstoque: (items: { ficha: FichaTecnica; quantity: number; tamanhoId?: string }[]) => boolean;
+  /** Tira do produto o que uma compra excluida tinha mudado. */
+  desfazerCompra: (compra: CompraRegistrada) => Promise<void>;
 }
 
 const ProdutosContext = createContext<ProdutosContextType | undefined>(undefined);
@@ -334,6 +337,43 @@ export const ProdutosProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       fullQuantity: p.quantidadeReferencia || 0,
     }));
 
+  const desfazerCompra = async (compra: CompraRegistrada) => {
+    const produto = (await buscarProdutosFrescos()).find((p) => p.id === compra.produtoId);
+    if (!produto) return;
+
+    // O preco so volta se esta compra ainda for a ultima: depois de outra compra,
+    // o preco atual e o daquela.
+    const aindaEAUltima =
+      produto.precoPago === compra.valor &&
+      produto.quantidadeEmbalagem === compra.quantidade &&
+      produto.unidadeEmbalagem === compra.unidade;
+    const novaEmbalagem = aindaEAUltima && compra.antes ? compra.antes : null;
+    const unidadeFinal = (novaEmbalagem?.unidadeEmbalagem || produto.unidadeEmbalagem) as Produto['unidadeEmbalagem'];
+
+    let quantidadeAtual = produto.quantidadeAtual;
+    if (produto.controlaEstoque) {
+      const saldo = convertQuantity(produto.quantidadeAtual || 0, produto.unidadeEmbalagem, unidadeFinal);
+      const comprado = compra.somouNoEstoque ? convertQuantity(compra.quantidade, compra.unidade, unidadeFinal) : 0;
+      if (saldo === null || comprado === null) {
+        throw new Error(`A unidade de "${produto.nome}" mudou depois desta compra, então o estoque não foi alterado.`);
+      }
+      // O que ja foi usado nao volta: o saldo para no zero.
+      quantidadeAtual = Math.max(0, saldo - comprado);
+    }
+
+    await updateProduto(produto.id, {
+      ...produto,
+      quantidadeAtual,
+      ...(novaEmbalagem
+        ? {
+            precoPago: novaEmbalagem.precoPago,
+            quantidadeEmbalagem: novaEmbalagem.quantidadeEmbalagem,
+            unidadeEmbalagem: unidadeFinal,
+          }
+        : {}),
+    });
+  };
+
   const pedidoBaixariaEstoque = (items: { ficha: FichaTecnica; quantity: number; tamanhoId?: string }[]) =>
     planejarBaixa(items, comoStockItems(produtos)).baixas.length > 0;
 
@@ -407,7 +447,7 @@ export const ProdutosProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     await fetchMovimentos();
 
     return {
-      baixados: plano.baixas.map((b) => ({ itemNome: b.itemNome, quantidade: b.quantidade, unidade: b.unidade })),
+      baixados: plano.baixas.map((b) => ({ itemNome: b.itemNome, quantidade: b.quantidade, unidade: b.unidade, quantidadeFinal: b.quantidadeFinal })),
       problemas: plano.problemas,
     };
   };
@@ -644,6 +684,7 @@ export const ProdutosProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         devolverPedido,
         pedidoTemRastroDeEstoque,
         pedidoBaixariaEstoque,
+        desfazerCompra,
       }}
     >
       {children}

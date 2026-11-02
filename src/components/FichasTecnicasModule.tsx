@@ -1626,7 +1626,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         {/* Colado no nome: com o teclado aberto, a linha da quantidade pode sair da tela. */}
                         <AvisoInsumoSemCadastro
                           nome={ing.name}
-                          ativo={!ing.produtoId && criandoProdutoInsumo?.insumoId !== ing.id}
+                          ativo={!produtos.some((p) => p.id === Number(ing.produtoId)) && criandoProdutoInsumo?.insumoId !== ing.id}
                           avisoDeCusto={ing.unitCost > 0 ? undefined : `Sem cadastrar, o custo dele fica em ${formatMoney(0)} na ficha.`}
                           onCadastrar={() => handleAbrirCriarProduto(tamanho.id, ing.id, ing.name)}
                         />

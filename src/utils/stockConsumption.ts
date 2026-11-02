@@ -63,7 +63,7 @@ export interface PlanoBaixa {
  * entao pertence ao motor de consumo, nao a um contexto especifico.
  */
 export interface ResultadoBaixa {
-  baixados: { itemNome: string; quantidade: number; unidade: string }[];
+  baixados: { itemNome: string; quantidade: number; unidade: string; quantidadeFinal: number }[];
   problemas: ProblemaBaixa[];
 }
 
