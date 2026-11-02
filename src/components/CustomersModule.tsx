@@ -8,6 +8,8 @@ import { exemplosContato } from '../utils/exemplosContato';
 import { useCustomers } from '../context/CustomersContext';
 import { useAuth } from '../context/AuthContext';
 import { useDelayedDelete } from '../hooks/useDelayedDelete';
+import { useSairSemSalvar } from '../hooks/useSairSemSalvar';
+import { useVoltarFecha } from '../hooks/useVoltarFecha';
 import { compressImageFile } from '../utils/imageCompression';
 import { capitalizeFirstLetter } from '../utils/textCase';
 import { GenericDeleteConfirmModal } from './GenericDeleteConfirmModal';
@@ -210,7 +212,7 @@ const DEFAULT_CUSTOMERS: Customer[] = [
 
 export const CustomersModule: React.FC = () => {
   const { customers: customersDoContexto, isLoading: isLoadingCustomers, error: customersError, addCustomer, updateCustomer, deleteCustomer, fetchCustomerPhoto } = useCustomers();
-  const { userProfile } = useAuth();
+  const { userProfile, user } = useAuth();
   const { currency } = useCurrency();
   const exemplos = exemplosContato(currency);
   const [searchTerm, setSearchTerm] = useState('');
@@ -227,6 +229,7 @@ export const CustomersModule: React.FC = () => {
     requestDelete: requestDeleteCustomer,
     cancelDelete: cancelDeleteCustomer,
   } = useDelayedDelete<Customer>({
+    chaveLocal: user ? `carula_clientes_excluindo_${user.id}` : undefined,
     deleteFn: async (customer) => {
       try {
         await deleteCustomer(customer.id);
@@ -235,6 +238,9 @@ export const CustomersModule: React.FC = () => {
       }
     },
   });
+
+  const sairDoCadastro = useSairSemSalvar(isFormOpen);
+  useVoltarFecha(isFormOpen, () => sairDoCadastro.tentarFechar(() => setIsFormOpen(false)));
 
   // Tira os clientes pendentes da lista na hora (mesmo padrao de
   // `fichasVisiveis`/`produtos`/`transacoesVisiveis`) — o DELETE real so vai
@@ -985,6 +991,7 @@ export const CustomersModule: React.FC = () => {
           <form
             ref={customerFormRef}
             onSubmit={handleSave}
+            {...sairDoCadastro.ouvintes}
             noValidate
             className="w-full h-full sm:h-auto sm:max-w-[430px] sm:max-h-[90vh] bg-[#F6F2F5] sm:rounded-[24px] overflow-hidden flex flex-col"
             style={{ boxShadow: '0 30px 70px rgba(58,35,80,0.26)' }}
@@ -1005,7 +1012,8 @@ export const CustomersModule: React.FC = () => {
                 </div>
                 <button
                   type="button"
-                  onClick={() => setIsFormOpen(false)}
+                  data-fechar
+                  onClick={() => sairDoCadastro.tentarFechar(() => setIsFormOpen(false))}
                   className="flex items-center justify-center text-white flex-shrink-0 transition-colors hover:bg-white/25"
                   style={{ width: '36px', height: '36px', borderRadius: '11px', background: 'rgba(255,255,255,.16)' }}
                   aria-label="Fechar"

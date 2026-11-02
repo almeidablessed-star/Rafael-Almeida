@@ -14,7 +14,11 @@ import {
 } from './types';
 import { filterTransactionsByPeriod, calculateSummary } from './utils/financialEngine';
 import { getTodayIso, formatDateBr } from './utils/formatters';
-import { useDelayedDelete } from './hooks/useDelayedDelete';
+import { useDelayedDelete, finalizarExclusoesGuardadas } from './hooks/useDelayedDelete';
+import { useVoltarFecha } from './hooks/useVoltarFecha';
+import { useCustomers } from './context/CustomersContext';
+import { useFichasTecnicas } from './context/FichasTecnicasContext';
+import { podeSair } from './utils/saidaPendente';
 import { useCorDaBarraDoSistema } from './hooks/useCorDaBarraDoSistema';
 import { useFichasComCustoAtual } from './hooks/useFichasComCustoAtual';
 import { useTelaDeComputador } from './hooks/useTelaDeComputador';
@@ -68,7 +72,22 @@ function AppContent() {
   const { formatCurrency } = useCurrency();
   const { fichas, isLoading: fichasCarregando } = useFichasComCustoAtual();
   const { administrativeCosts, marcarTourVisto } = useCosts();
-  const { consumirParaPedido, devolverPedido, pedidoTemRastroDeEstoque, pedidoBaixariaEstoque, desfazerCompra } = useProdutos();
+  const { consumirParaPedido, devolverPedido, pedidoTemRastroDeEstoque, pedidoBaixariaEstoque, desfazerCompra, deleteProduto } = useProdutos();
+  const { deleteCustomer } = useCustomers();
+  const { deleteFicha } = useFichasTecnicas();
+
+  // Exclusoes de Clientes, Fichas e Produtos guardadas antes de recarregar: se
+  // a pessoa nao abrir aquela aba, terminam aqui (ver finalizarExclusoesGuardadas).
+  useEffect(() => {
+    if (!user) return;
+    const parar = [
+      finalizarExclusoesGuardadas<{ id: string }>(`carula_clientes_excluindo_${user.id}`, (c) => deleteCustomer(c.id)),
+      finalizarExclusoesGuardadas<{ id: string }>(`carula_fichas_excluindo_${user.id}`, (f) => deleteFicha(f.id)),
+      finalizarExclusoesGuardadas<{ id: number }>(`carula_produtos_excluindo_${user.id}`, (p) => deleteProduto(p.id)),
+    ];
+    return () => parar.forEach((p) => p());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   // Fotos antigas (base64 nas linhas) vao para o deposito em segundo plano,
   // uma por vez, depois que o app terminou de abrir; em seguida, a limpeza das
@@ -108,6 +127,10 @@ function AppContent() {
   // ultima aba aberta ficava salva no aparelho (`carula_activeTab`) e o app
   // reabria nela; essa chave deixou de ser usada e e apagada uma vez abaixo.
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
+  // Pelo menu: a tela atual pode ter edicao sem salvar (ver saidaPendente).
+  const trocarAba = async (tab: TabType) => {
+    if (tab !== activeTab && (await podeSair())) setActiveTab(tab);
+  };
   useCorDaBarraDoSistema(activeTab);
   // Versao computador (1024px+, sem toque): menu lateral no lugar do menu de
   // baixo. Ver docs/design/desktop-redesign/README.md.
@@ -179,7 +202,9 @@ function AppContent() {
       if (tx.type !== 'venda' && tx.produtoId != null) {
         try {
           if (tx.breakdown?.compra) {
-            await desfazerCompra(tx.breakdown.compra);
+            // `produto_id` acompanha a restauracao de backup; o id guardado
+            // dentro da compra fica com o numero antigo.
+            await desfazerCompra({ ...tx.breakdown.compra, produtoId: tx.produtoId });
           } else {
             await avisar(
               'Esta compra é de antes de o app guardar o que ela mudou no produto. O lançamento será excluído, mas o estoque e o preço não mudam. Se precisar, ajuste na aba Produtos.',
@@ -707,7 +732,7 @@ function AppContent() {
         <div className="layout-computador">
           <MenuLateral
             activeTab={activeTab}
-            onTabChange={setActiveTab}
+            onTabChange={trocarAba}
             onLancarPedido={() => handleOpenAddModal('venda')}
           />
           <main
@@ -733,7 +758,7 @@ function AppContent() {
           </main>
 
           {/* Fixed Bottom Navigation Bar */}
-          <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+          <BottomNav activeTab={activeTab} onTabChange={trocarAba} />
         </>
       )}
 

@@ -6,6 +6,7 @@ import { createPortal } from 'react-dom';
 import { Transaction } from '../types';
 import { formatCurrency, formatDateBr, quantidadeDoInsumo } from '../utils/formatters';
 import { insumosDoTamanho } from '../utils/fichaInsumos';
+import { useVoltarFecha } from '../hooks/useVoltarFecha';
 import { useAuth } from '../context/AuthContext';
 import { useFichasTecnicas } from '../context/FichasTecnicasContext';
 import { useTransacoes } from '../context/TransacoesContext';
@@ -143,6 +144,7 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
   onClose,
 }) => {
   const [activeTab, setActiveTab] = useState<'cliente' | 'cozinha'>('cliente');
+  useVoltarFecha(true, onClose);
   const [copied, setCopied] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   /** PDF ja gerado esperando um toque para abrir o "Compartilhar" do celular

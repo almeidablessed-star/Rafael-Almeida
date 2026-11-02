@@ -18,6 +18,9 @@ import { compressImageFile } from '../utils/imageCompression';
 import { GenericDeleteConfirmModal } from './GenericDeleteConfirmModal';
 import { DuplicateNameWarningModal } from './DuplicateNameWarningModal';
 import { useDelayedDelete } from '../hooks/useDelayedDelete';
+import { useSairSemSalvar } from '../hooks/useSairSemSalvar';
+import { useVoltarFecha } from '../hooks/useVoltarFecha';
+import { useAuth } from '../context/AuthContext';
 import { CampoComAjuda } from './onboarding/CampoComAjuda';
 import { FieldValidationError } from './FieldValidationError';
 import { CustomSelect } from './CustomSelect';
@@ -245,11 +248,15 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
    * corrigido pra suportar varias pendentes ao mesmo tempo, cada uma com seu
    * proprio timer.
    */
+  const { user } = useAuth();
+  const sairDaFicha = useSairSemSalvar(isCreating);
+  useVoltarFecha(isCreating, () => sairDaFicha.tentarFechar(() => setIsCreating(false)));
   const {
     pendingItems: pendingDeleteFichas,
     requestDelete: requestDeleteFicha,
     cancelDelete: cancelDeleteFicha,
   } = useDelayedDelete<FichaTecnica>({
+    chaveLocal: user ? `carula_fichas_excluindo_${user.id}` : undefined,
     deleteFn: async (ficha) => {
       try {
         await deleteFicha(ficha.id);
@@ -1289,6 +1296,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         <div
           className="w-full h-full sm:h-auto sm:max-w-[430px] sm:max-h-[90vh] sm:rounded-[24px] overflow-hidden flex flex-col"
           style={{ background: '#FFFFFF', boxShadow: '0 30px 70px rgba(58,35,80,0.26)' }}
+          {...sairDaFicha.ouvintes}
         >
           {/* Cabecalho gradiente com navegacao de passos */}
           <div
@@ -1301,8 +1309,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
               </span>
               <button
                 type="button"
-                onClick={() => setIsCreating(false)}
+                data-fechar
+                onClick={() => sairDaFicha.tentarFechar(() => setIsCreating(false))}
                 className="w-8 h-8 rounded-[10px] bg-white/15 hover:bg-white/25 flex items-center justify-center text-white transition-colors flex-shrink-0"
+                aria-label="Fechar"
               >
                 <X className="w-4 h-4" />
               </button>

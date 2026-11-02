@@ -2,6 +2,7 @@
 import { situacaoPagamento } from '../utils/situacaoPagamento';
 import { createPortal } from 'react-dom';
 import { avisar, perguntar } from './AvisoApp';
+import { useVoltarFecha } from '../hooks/useVoltarFecha';
 import {
   Transaction,
   TransactionType,
@@ -181,6 +182,8 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
     }
     onClose();
   };
+
+  useVoltarFecha(isOpen, tentarFechar);
 
   /**
    * Guarda de duplo-clique no botao primario do rodape.

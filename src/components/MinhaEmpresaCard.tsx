@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { marcarSaidaPendente } from '../utils/saidaPendente';
 import { Edit3, Save, X } from 'lucide-react';
 import { useCosts } from '../context/CostsContext';
 import { useCurrency } from '../context/CurrencyContext';
@@ -91,6 +92,14 @@ export const MinhaEmpresaCard: React.FC<{ computador?: boolean; colunaDireita?: 
     setProfitTargetPercent(administrativeCosts.profitTargetPercent);
     setCarregouInicial(true);
   }, [administrativeCosts, carregouInicial]);
+
+  // Despesa digitada e nao salva: trocar de aba pergunta antes (saidaPendente).
+  const despesasSemSalvar =
+    carregouInicial && !!administrativeCosts && JSON.stringify(despesas) !== JSON.stringify(administrativeCosts.despesas);
+  useEffect(() => {
+    marcarSaidaPendente(despesasSemSalvar ? 'Você mudou as despesas e ainda não tocou em "Salvar despesas".' : null);
+  }, [despesasSemSalvar]);
+  useEffect(() => () => marcarSaidaPendente(null), []);
 
   if (!administrativeCosts || !carregouInicial) return null;
 
@@ -458,6 +467,9 @@ export const MinhaEmpresaCard: React.FC<{ computador?: boolean; colunaDireita?: 
         >
           <Save size={pc ? 15 : 13} />{salvando ? 'Salvando' : 'Salvar despesas'}
         </button>
+        {despesasSemSalvar && !salvando && (
+          <p className="text-center text-[12px] font-bold text-[#A8485A]">Alterações ainda não salvas</p>
+        )}
       </div>
   );
 

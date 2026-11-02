@@ -32,6 +32,31 @@ interface UseDelayedDeleteOptions<T> {
  * entrada, entao dois (ou mais) podem estar pendentes ao mesmo tempo sem um
  * atropelar o outro.
  */
+// Chaves cuja tela esta aberta agora e cuida das proprias exclusoes.
+const chavesEmUso = new Set<string>();
+
+/**
+ * Exclusao guardada por uma tela que nao foi aberta depois de recarregar: sem
+ * isto ela so terminava quando a pessoa voltasse aquela aba. Espera o mesmo
+ * tempo do Desfazer e, se a tela continuar fechada, exclui.
+ */
+export function finalizarExclusoesGuardadas<T>(chaveLocal: string, deleteFn: (item: T) => Promise<void>, delayMs = 10000) {
+  const t = setTimeout(async () => {
+    if (chavesEmUso.has(chaveLocal)) return;
+    let itens: T[] = [];
+    try {
+      itens = JSON.parse(localStorage.getItem(chaveLocal) || '[]');
+      localStorage.removeItem(chaveLocal);
+    } catch {
+      return;
+    }
+    for (const item of itens) {
+      await deleteFn(item).catch((err) => console.error('Erro ao finalizar exclusão guardada:', err));
+    }
+  }, delayMs);
+  return () => clearTimeout(t);
+}
+
 export function useDelayedDelete<T extends { id: string | number }>({
   deleteFn,
   delayMs = 10000,
@@ -100,6 +125,14 @@ export function useDelayedDelete<T extends { id: string | number }>({
 
   // O timer zero cai fora na montagem dupla do StrictMode, que senao excluiria
   // tudo na hora pela desmontagem logo abaixo.
+  useEffect(() => {
+    if (!chaveLocal) return;
+    chavesEmUso.add(chaveLocal);
+    return () => {
+      chavesEmUso.delete(chaveLocal);
+    };
+  }, [chaveLocal]);
+
   useEffect(() => {
     if (!chaveLocal) return;
     const t = setTimeout(() => {

@@ -11,6 +11,9 @@ import { BalancesAndExpensesModule } from './BalancesAndExpensesModule';
 import { GenericDeleteConfirmModal } from './GenericDeleteConfirmModal';
 import { DuplicateNameWarningModal } from './DuplicateNameWarningModal';
 import { useDelayedDelete } from '../hooks/useDelayedDelete';
+import { useSairSemSalvar } from '../hooks/useSairSemSalvar';
+import { useVoltarFecha } from '../hooks/useVoltarFecha';
+import { useAuth } from '../context/AuthContext';
 import { useFichasTecnicas } from '../context/FichasTecnicasContext';
 import { FieldValidationError } from './FieldValidationError';
 import { normalizeName } from '../utils/fichaMatcher';
@@ -217,6 +220,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
   const pc = useTelaDeComputador();
 
   const [deletingProduto, setDeletingProduto] = useState<Produto | null>(null);
+  const { user } = useAuth();
   const { fichas } = useFichasTecnicas();
   const fichasQueUsamOProduto = deletingProduto
     ? fichas
@@ -232,6 +236,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
     requestDelete: requestDeleteProduto,
     cancelDelete: cancelDeleteProduto,
   } = useDelayedDelete<Produto>({
+    chaveLocal: user ? `carula_produtos_excluindo_${user.id}` : undefined,
     deleteFn: async (produto) => {
       try {
         await deleteProduto(produto.id);
@@ -259,6 +264,8 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
   }, [abaInicial]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isAdding, setIsAdding] = useState(false);
+  const sairDoProduto = useSairSemSalvar(isAdding);
+  useVoltarFecha(isAdding && aba !== 'compras', () => sairDoProduto.tentarFechar(() => setIsAdding(false)));
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formError, setFormError] = useState('');
   const produtoFormRef = useRef<HTMLFormElement>(null);
@@ -797,7 +804,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
               embaixo nao via nada acontecer, porque o form surgia fora da tela. */}
           {isAdding && aba !== 'compras' && createPortal(
             <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-neutral-900/80 backdrop-blur-xs p-0 sm:p-4 overscroll-none" role="dialog" aria-modal="true">
-            <div className="w-full h-full sm:h-auto sm:max-w-[430px] sm:max-h-[90vh] bg-[#F6F2F5] sm:rounded-[24px] overflow-hidden flex flex-col" style={{ boxShadow: '0 30px 70px rgba(58,35,80,0.26)' }}>
+            <div className="w-full h-full sm:h-auto sm:max-w-[430px] sm:max-h-[90vh] bg-[#F6F2F5] sm:rounded-[24px] overflow-hidden flex flex-col" style={{ boxShadow: '0 30px 70px rgba(58,35,80,0.26)' }} {...sairDoProduto.ouvintes}>
               {/* Visual do design "Editar Produto" (Claude Design, artefato
                   "Pedido Carula Cake"): cabecalho roxo, cards brancos com
                   rotulos em caixa alta, picote de comanda entre as partes e a
@@ -817,7 +824,8 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                 </div>
                 <button
                   type="button"
-                  onClick={() => setIsAdding(false)}
+                  data-fechar
+                  onClick={() => sairDoProduto.tentarFechar(() => setIsAdding(false))}
                   className="flex items-center justify-center text-white flex-shrink-0 transition-colors hover:bg-white/25"
                   style={{ width: '36px', height: '36px', borderRadius: '11px', background: 'rgba(255,255,255,.16)' }}
                   aria-label="Fechar"

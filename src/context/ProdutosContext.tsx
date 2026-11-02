@@ -339,7 +339,7 @@ export const ProdutosProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const desfazerCompra = async (compra: CompraRegistrada) => {
     const produto = (await buscarProdutosFrescos()).find((p) => p.id === compra.produtoId);
-    if (!produto) return;
+    if (!produto) throw new Error('O produto desta compra não foi encontrado, então o estoque e o preço não mudaram.');
 
     // O preco so volta se esta compra ainda for a ultima: depois de outra compra,
     // o preco atual e o daquela.
