@@ -154,9 +154,21 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
   // as unidades para uma base so, entao g -> ml devolvia um numero em vez de
   // recusar. Ver [[units]].
 
+  // O botao continua ativo enquanto grava: sem esta trava, um toque duplo criava
+  // duas compras e dois produtos.
+  const gravandoCompraRef = useRef(false);
   const handleSaveExpense = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (gravandoCompraRef.current) return;
+    gravandoCompraRef.current = true;
+    try {
+      await gravarCompra();
+    } finally {
+      gravandoCompraRef.current = false;
+    }
+  };
 
+  const gravarCompra = async () => {
     // Substitui o balao de validacao nativo do navegador (form ganhou
     // `noValidate`) — mesmo padrao usado em Ficha Tecnica e Pedido.
     const form = expenseFormRef.current;

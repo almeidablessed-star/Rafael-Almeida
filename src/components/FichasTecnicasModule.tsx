@@ -2,7 +2,7 @@
 import { avisar, perguntar } from './AvisoApp';
 import { createPortal } from 'react-dom';
 import { FichaTecnica, IngredientUsage, Transaction, TamanhoOpcao, StockItem, Produto } from '../types';
-import { formatCurrency, parseNumeroDigitado } from '../utils/formatters';
+import { formatCurrency, formatNumeroParaEdicao, parseNumeroDigitado, quantidadeDoInsumo } from '../utils/formatters';
 import { insumosDeTamanhoOpcao } from '../utils/fichaInsumos';
 import { useCurrency } from '../context/CurrencyContext';
 import { useFichasComCustoAtual } from '../hooks/useFichasComCustoAtual';
@@ -120,6 +120,13 @@ interface FichasTecnicasModuleProps {
   onAddTransaction?: (txData: Omit<Transaction, 'id' | 'createdAt'>) => void;
   onNavigateToTab?: (tab: any) => void;
 }
+
+/**
+ * Quantidade gravada para o campo, com virgula: "1.125" no campo seria lido como
+ * mil cento e vinte e cinco ao salvar.
+ */
+const quantidadeParaOCampo = (quantidade: unknown) =>
+  formatNumeroParaEdicao(quantidadeDoInsumo(quantidade)) as unknown as number;
 
 const CATEGORY_LABELS: Record<string, { label: string; icon: string }> = {
   bolos: { label: 'Bolos & Massas', icon: '🎂' },
@@ -503,8 +510,8 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
           // encontraria os tamanhos vazios e acharia que perdeu a receita.
           ingredients:
             t.ingredients && t.ingredients.length > 0
-              ? t.ingredients.map((ing, k) => ({ ...ing, id: ing.id || `${t.id}_${k}` }))
-              : (ficha.ingredients || []).map((ing, k) => ({ ...ing, id: `${t.id}_base_${k}` })),
+              ? t.ingredients.map((ing, k) => ({ ...ing, quantity: quantidadeParaOCampo(ing.quantity), id: ing.id || `${t.id}_${k}` }))
+              : (ficha.ingredients || []).map((ing, k) => ({ ...ing, quantity: quantidadeParaOCampo(ing.quantity), id: `${t.id}_base_${k}` })),
           maoDeObraCost: (t.maoDeObraCost || 0).toString(),
           custoCost: (t.custoCost || 0).toString(),
           investimentoCost: (t.investimentoCost || 0).toString(),
@@ -597,7 +604,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         // o `?? custoBase` e so defensivo, nunca deveria disparar na pratica.
         const convertedCost = convertCostPerUnit(custoBase, produto.unidadeEmbalagem, unidade) ?? custoBase;
         updated.unitCost = convertedCost;
-        updated.totalCost = (Number(ing.quantity) || 0) * convertedCost;
+        updated.totalCost = quantidadeDoInsumo(ing.quantity) * convertedCost;
         updated.produtoId = produto.id;
       } else if (field === 'name') {
         // Nome mudou e nao bate mais com nenhum produto: solta o vinculo
@@ -608,7 +615,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     }
 
     if (field === 'quantity' || field === 'unitCost') {
-      const q = field === 'quantity' ? parseNumeroDigitado(val) || 0 : ing.quantity;
+      const q = quantidadeDoInsumo(field === 'quantity' ? val : ing.quantity);
       const c = field === 'unitCost' ? parseNumeroDigitado(val) || 0 : ing.unitCost;
       updated.totalCost = q * c;
     }
@@ -774,7 +781,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                     produtoId: produto.id,
                     unit: unidade,
                     unitCost: convertedCost,
-                    totalCost: (Number(ing.quantity) || 0) * convertedCost,
+                    totalCost: quantidadeDoInsumo(ing.quantity) * convertedCost,
                   };
                 }),
               }
@@ -889,7 +896,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         horasTrabalho: horas > 0 ? horas : undefined,
         valorHora: tarifa > 0 ? tarifa : undefined,
         // Insumos deste tamanho, sem as linhas em branco que ficaram por engano.
-        ingredients: t.ingredients.filter((ing) => (ing.name || '').trim()),
+        // A quantidade sai daqui como numero: no formulario ela e o texto digitado.
+        ingredients: t.ingredients
+          .filter((ing) => (ing.name || '').trim())
+          .map((ing) => ({ ...ing, quantity: quantidadeDoInsumo(ing.quantity) })),
         // Com horas e tarifa preenchidas, a mao de obra vem da conta. Sem elas,
         // o valor que ja estava gravado e PRESERVADO — do contrario abrir uma
         // ficha antiga e salvar zeraria a mao de obra dela sem aviso.
@@ -1588,7 +1598,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                                               produtoId: produto.id,
                                               unit: unidade,
                                               unitCost: convertedCost,
-                                              totalCost: (Number(i2.quantity) || 0) * convertedCost,
+                                              totalCost: quantidadeDoInsumo(i2.quantity) * convertedCost,
                                             };
                                           }),
                                         }

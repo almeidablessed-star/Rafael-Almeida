@@ -1,3 +1,4 @@
+import { quantidadeDoInsumo } from './formatters';
 import { FichaTecnica, StockItem } from '../types';
 import { normalizeName } from './fichaMatcher';
 import { convertQuantity } from './units';
@@ -123,8 +124,11 @@ export const planejarBaixa = (
         return;
       }
 
+      const quantidadeNaFicha = quantidadeDoInsumo(insumo.quantity);
+      if (!(quantidadeNaFicha > 0)) return;
+
       const necessario = convertQuantity(
-        insumo.quantity * fator,
+        quantidadeNaFicha * fator,
         insumo.unit,
         itemEstoque.unit
       );

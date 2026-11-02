@@ -89,6 +89,16 @@ export const formatNumeroParaEdicao = (value: number): string => {
   return String(value).replace('.', ',');
 };
 
+/**
+ * Quantidade de um insumo como numero. O campo guarda o texto digitado enquanto
+ * a ficha esta aberta, e ha fichas gravadas assim: "0,5" em conta vira NaN, que
+ * zerava o custo e apagava o saldo do produto na baixa do pedido.
+ */
+export const quantidadeDoInsumo = (quantidade: unknown): number => {
+  const n = typeof quantidade === 'number' ? quantidade : parseNumeroDigitado(String(quantidade ?? ''));
+  return Number.isFinite(n) ? n : 0;
+};
+
 export const getTodayIso = (): string => {
   const now = new Date();
   const year = now.getFullYear();

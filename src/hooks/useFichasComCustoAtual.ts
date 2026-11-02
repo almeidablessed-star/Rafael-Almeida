@@ -3,6 +3,7 @@ import { FichaTecnica, IngredientUsage, Produto } from '../types';
 import { useFichasTecnicas } from '../context/FichasTecnicasContext';
 import { useProdutos } from '../context/ProdutosContext';
 import { convertCostPerUnit } from '../utils/units';
+import { quantidadeDoInsumo } from '../utils/formatters';
 
 /**
  * As fichas com o custo de cada insumo calculado pelo preco ATUAL do produto.
@@ -28,7 +29,7 @@ export const insumoComCustoAtual = (ing: IngredientUsage, produtos: Produto[]): 
   const custoBase = produto.precoPago / produto.quantidadeEmbalagem;
   const unitCost = convertCostPerUnit(custoBase, produto.unidadeEmbalagem, ing.unit);
   if (unitCost == null) return ing;
-  const totalCost = (Number(ing.quantity) || 0) * unitCost;
+  const totalCost = quantidadeDoInsumo(ing.quantity) * unitCost;
   if (unitCost === ing.unitCost && totalCost === ing.totalCost) return ing;
   return { ...ing, unitCost, totalCost };
 };
