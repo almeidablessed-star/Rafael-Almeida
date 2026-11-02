@@ -84,6 +84,10 @@ export const parseNumeroDigitado = (input: string): number => {
  * veio do banco: virgula decimal e NENHUM separador de milhar, para que o
  * texto exibido seja exatamente o que o parser le de volta sem ambiguidade.
  */
+/** Numero com casas fixas e virgula, para mostrar ("34,00", "117,7"). */
+export const numeroComVirgula = (value: number, casas: number): string =>
+  (Number.isFinite(value) ? value : 0).toFixed(casas).replace('.', ',');
+
 export const formatNumeroParaEdicao = (value: number): string => {
   if (!Number.isFinite(value) || value === 0) return '';
   return String(value).replace('.', ',');

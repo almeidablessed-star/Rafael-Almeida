@@ -1,3 +1,6 @@
+import { numeroComVirgula } from '../../utils/formatters';
+import { mensagemDeErro } from '../../utils/mensagemDeErro';
+import { erroDaEmpresa } from '../../utils/validarEmpresa';
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -163,13 +166,24 @@ export const EmpresaOnboardingFlow: React.FC = () => {
       await salvarPassoOnboarding(novoPasso, campos);
       setPasso(novoPasso);
     } catch (err: any) {
-      setErro(err.message || 'Erro ao salvar. Tente novamente.');
+      setErro(mensagemDeErro(err, 'Erro ao salvar. Tente novamente.'));
     } finally {
       setSalvando(false);
     }
   };
 
-  const avancar = (campos: Parameters<typeof salvarPassoOnboarding>[1] = {}) => irParaPasso(passo + 1, campos);
+  const avancar = (campos: Parameters<typeof salvarPassoOnboarding>[1] = {}) => {
+    // No passo do lucro as tres metas ja foram escolhidas: confere a soma.
+    const conferir = 'profitTargetPercent' in campos
+      ? { ...campos, cmvTargetPercent, investmentTargetPercent }
+      : campos;
+    const problema = erroDaEmpresa(conferir as Parameters<typeof erroDaEmpresa>[0]);
+    if (problema) {
+      setErro(problema);
+      return;
+    }
+    return irParaPasso(passo + 1, campos);
+  };
   const voltar = () => irParaPasso(passo - 1);
 
   const avancarComDespesas = async () => {
@@ -181,7 +195,7 @@ export const EmpresaOnboardingFlow: React.FC = () => {
       await salvarPassoOnboarding(passo + 1, {});
       setPasso(passo + 1);
     } catch (err: any) {
-      setErro(err.message || 'Erro ao salvar despesas. Tente novamente.');
+      setErro(mensagemDeErro(err, 'Erro ao salvar despesas. Tente novamente.'));
     } finally {
       setSalvando(false);
     }
@@ -208,7 +222,7 @@ export const EmpresaOnboardingFlow: React.FC = () => {
     try {
       await concluirOnboarding();
     } catch (err: any) {
-      setErro(err.message || 'Erro ao concluir onboarding. Tente novamente.');
+      setErro(mensagemDeErro(err, 'Erro ao concluir onboarding. Tente novamente.'));
     } finally {
       setSalvando(false);
     }
@@ -323,7 +337,7 @@ export const EmpresaOnboardingFlow: React.FC = () => {
               Meta de referência — não é uma obrigação
             </p>
             <p className="text-[13px] font-bold mt-1" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>
-              {metaHoras.horasPorMes.toFixed(1)}h/mês → {metaHoras.horasPorSemana.toFixed(1)}h/semana → {metaHoras.horasPorDia.toFixed(1)}h/dia
+              {numeroComVirgula(metaHoras.horasPorMes, 1)}h/mês → {numeroComVirgula(metaHoras.horasPorSemana, 1)}h/semana → {numeroComVirgula(metaHoras.horasPorDia, 1)}h/dia
             </p>
           </div>
           <div className="flex gap-2 pt-2">
@@ -356,7 +370,7 @@ export const EmpresaOnboardingFlow: React.FC = () => {
               Sua meta de horas continua semanal
             </p>
             <p className="text-[13px] font-bold mt-1" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>
-              {metaHoras.horasPorSemana.toFixed(1)}h/semana → {metaHoras.horasPorDia.toFixed(1)}h/dia
+              {numeroComVirgula(metaHoras.horasPorSemana, 1)}h/semana → {numeroComVirgula(metaHoras.horasPorDia, 1)}h/dia
             </p>
           </div>
           <div className="flex gap-2 pt-2">
@@ -611,7 +625,7 @@ export const EmpresaOnboardingFlow: React.FC = () => {
                 ].map(([nome, pct, valor], i) => (
                   <div key={nome as string} className={`flex items-center justify-between px-3 py-2.5 ${i > 0 ? 'border-t border-[#E6E1DB]' : ''}`}>
                     <span className="text-[12px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>{nome}</span>
-                    <span className="text-[12px]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>{(pct as number).toFixed(2)}%</span>
+                    <span className="text-[12px]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>{numeroComVirgula(pct as number, 2)}%</span>
                     <span className="text-[12px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>{formatCurrency(valor as number)}</span>
                   </div>
                 ))}

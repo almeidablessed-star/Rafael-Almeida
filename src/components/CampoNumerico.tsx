@@ -50,8 +50,10 @@ export const CampoNumerico: React.FC<{
       style={style}
       aria-label={ariaLabel}
       onChange={(e) => {
-        setTexto(e.target.value);
-        onChange(parseNumeroDigitado(e.target.value));
+        // So numero: "abc" ficava escrito no campo e virava 0 ao gravar.
+        const limpo = e.target.value.replace(/[^\d.,\s-]/g, '');
+        setTexto(limpo);
+        onChange(parseNumeroDigitado(limpo));
       }}
     />
   );

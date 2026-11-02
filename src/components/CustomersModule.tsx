@@ -1,10 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { avisar } from './AvisoApp';
+import { mensagemDeErro } from '../utils/mensagemDeErro';
+import { avisar, perguntar } from './AvisoApp';
 import { createPortal } from 'react-dom';
 import { Customer, CustomerEvent } from '../types';
 import { formatDateBr, formatDayMonthOnly } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
 import { exemplosContato } from '../utils/exemplosContato';
+import { RegraDaData, proximaData, proximoAniversario } from '../utils/datasComemorativas';
+import { telefoneParaWhatsApp, limparTelefoneDigitado } from '../utils/telefoneWhatsApp';
+import { normalizeName } from '../utils/fichaMatcher';
 import { useCustomers } from '../context/CustomersContext';
 import { useAuth } from '../context/AuthContext';
 import { useDelayedDelete } from '../hooks/useDelayedDelete';
@@ -55,7 +59,8 @@ export const MENU_CANVA_URL =
 export interface UniversalHoliday {
   id: string;
   title: string;
-  date2026: string; // YYYY-MM-DD
+  /** Como achar o dia em cada ano (ver datasComemorativas). */
+  regra: RegraDaData;
   country: 'BR' | 'EUA' | 'Universal';
   messageTemplate: string;
 }
@@ -64,7 +69,7 @@ export const UNIVERSAL_HOLIDAYS: UniversalHoliday[] = [
   {
     id: 'h0',
     title: 'Ano Novo / Réveillon',
-    date2026: '2026-01-01',
+    regra: { fixa: '01-01' },
     country: 'Universal',
     messageTemplate:
       'Olá, {nome}! 🥂✨ Prepare-se para a virada de ano! Encomende o bolo da sua festa para começar o ano adoçado!',
@@ -72,7 +77,7 @@ export const UNIVERSAL_HOLIDAYS: UniversalHoliday[] = [
   {
     id: 'h1',
     title: "Valentine's Day (Dia dos Namorados EUA)",
-    date2026: '2026-02-14',
+    regra: { fixa: '02-14' },
     country: 'EUA',
     messageTemplate:
       "Olá, {nome}! 💖 O Valentine's Day está chegando! 🍫✨ Gostaria de encomendar um bolo especial ou doces artesanais para comemorar?",
@@ -80,7 +85,7 @@ export const UNIVERSAL_HOLIDAYS: UniversalHoliday[] = [
   {
     id: 'h1b',
     title: 'Páscoa',
-    date2026: '2026-04-05',
+    regra: { pascoa: true },
     country: 'Universal',
     messageTemplate:
       'Olá, {nome}! 🐰🍫 A Páscoa vem aí! Nossos ovos de colher, bolos de Páscoa e sobremesas especiais já estão com encomendas abertas!',
@@ -88,7 +93,7 @@ export const UNIVERSAL_HOLIDAYS: UniversalHoliday[] = [
   {
     id: 'h2',
     title: 'Dia das Mães (BR/EUA)',
-    date2026: '2026-05-10',
+    regra: { mes: 4, diaDaSemana: 0, n: 2 },
     country: 'Universal',
     messageTemplate:
       'Olá, {nome}! 🌸 O Dia das Mães está se aproximando! 💕 Surpreenda quem você ama com uma caixa de doces ou bolo especial!',
@@ -96,7 +101,7 @@ export const UNIVERSAL_HOLIDAYS: UniversalHoliday[] = [
   {
     id: 'h3',
     title: 'Dia dos Namorados (Brasil)',
-    date2026: '2026-06-12',
+    regra: { fixa: '06-12' },
     country: 'BR',
     messageTemplate:
       'Olá, {nome}! ❤️ O Dia dos Namorados no Brasil está chegando! 🍰✨ Garanta sua caixa de doces ou bolo de festa!',
@@ -104,7 +109,7 @@ export const UNIVERSAL_HOLIDAYS: UniversalHoliday[] = [
   {
     id: 'h3b',
     title: 'Festa Junina / São João',
-    date2026: '2026-06-24',
+    regra: { fixa: '06-24' },
     country: 'BR',
     messageTemplate:
       'Olá, {nome}! 🌽🔥 A época de Festa Junina chegou! Bolos caseiros de milho, fubá cremoso e paçoca fresquinhos para o seu arraial!',
@@ -112,7 +117,7 @@ export const UNIVERSAL_HOLIDAYS: UniversalHoliday[] = [
   {
     id: 'h4',
     title: "Father's Day (Dia dos Pais EUA)",
-    date2026: '2026-06-21',
+    regra: { mes: 5, diaDaSemana: 0, n: 3 },
     country: 'EUA',
     messageTemplate:
       'Olá, {nome}! 👔 O Dia dos Pais (EUA) vem aí! ✨ Encomende um bolo delicioso para presentear seu pai!',
@@ -120,7 +125,7 @@ export const UNIVERSAL_HOLIDAYS: UniversalHoliday[] = [
   {
     id: 'h5',
     title: 'Dia dos Avós (Brasil)',
-    date2026: '2026-07-26',
+    regra: { fixa: '07-26' },
     country: 'BR',
     messageTemplate:
       'Olá, {nome}! 👵👴 O Dia dos Avós está chegando! 💕 Demonstre todo seu amor com os doces e bolos especiais!',
@@ -128,7 +133,7 @@ export const UNIVERSAL_HOLIDAYS: UniversalHoliday[] = [
   {
     id: 'h6',
     title: 'Dia dos Pais (Brasil)',
-    date2026: '2026-08-09',
+    regra: { mes: 7, diaDaSemana: 0, n: 2 },
     country: 'BR',
     messageTemplate:
       'Olá, {nome}! 👔 O Dia dos Pais no Brasil está chegando! 🎉 Garanta a sobremesa perfeita para o almoço em família!',
@@ -136,7 +141,7 @@ export const UNIVERSAL_HOLIDAYS: UniversalHoliday[] = [
   {
     id: 'h6b',
     title: 'Dia das Crianças (Brasil)',
-    date2026: '2026-10-12',
+    regra: { fixa: '10-12' },
     country: 'BR',
     messageTemplate:
       'Olá, {nome}! 🎈🧸 O Dia das Crianças está se aproximando! Que tal encomendar um bolo divertido e colorido para festejar?',
@@ -144,7 +149,7 @@ export const UNIVERSAL_HOLIDAYS: UniversalHoliday[] = [
   {
     id: 'h6c',
     title: 'Dia dos Professores',
-    date2026: '2026-10-15',
+    regra: { fixa: '10-15' },
     country: 'Universal',
     messageTemplate:
       'Olá, {nome}! 🍎📚 O Dia dos Professores vem aí! Mimos e caixas de doces especiais para presentear com carinho quem ensina nossos filhos!',
@@ -152,7 +157,7 @@ export const UNIVERSAL_HOLIDAYS: UniversalHoliday[] = [
   {
     id: 'h6d',
     title: 'Halloween',
-    date2026: '2026-10-31',
+    regra: { fixa: '10-31' },
     country: 'EUA',
     messageTemplate:
       'Olá, {nome}! 🎃👻 Halloween se aproximando! Encomende cupcakes temáticos e bolos assustadoramente deliciosos!',
@@ -160,7 +165,7 @@ export const UNIVERSAL_HOLIDAYS: UniversalHoliday[] = [
   {
     id: 'h7',
     title: 'Thanksgiving (Ação de Graças EUA)',
-    date2026: '2026-11-26',
+    regra: { mes: 10, diaDaSemana: 4, n: 4 },
     country: 'EUA',
     messageTemplate:
       'Olá, {nome}! 🍂 O Thanksgiving está se aproximando! 🥧✨ Deixe sua ceia ainda mais gostosa com os nossos bolos e sobremesas!',
@@ -168,7 +173,7 @@ export const UNIVERSAL_HOLIDAYS: UniversalHoliday[] = [
   {
     id: 'h8',
     title: 'Natal',
-    date2026: '2026-12-25',
+    regra: { fixa: '12-25' },
     country: 'Universal',
     messageTemplate:
       'Olá, {nome}! 🎄✨ O Natal vem aí! Nossas encomendas para a ceia já estão abertas. Reserve seu bolo especial com antecedência!',
@@ -234,7 +239,7 @@ export const CustomersModule: React.FC = () => {
       try {
         await deleteCustomer(customer.id);
       } catch (err: any) {
-        setFormError(err.message || 'Erro ao deletar cliente');
+        setFormError(mensagemDeErro(err, 'Erro ao deletar cliente'));
       }
     },
   });
@@ -363,7 +368,7 @@ export const CustomersModule: React.FC = () => {
     } catch (err: any) {
       // `compressImageFile` recusa um arquivo cru grande demais quando a
       // compressao falha. A mensagem dele ja explica o que fazer.
-      avisar(err?.message || 'Não foi possível usar esta imagem.', { titulo: 'Não deu para usar a foto' });
+      avisar(mensagemDeErro(err, 'Não foi possível usar esta imagem.'), { titulo: 'Não deu para usar a foto' });
     }
   };
 
@@ -400,6 +405,19 @@ export const CustomersModule: React.FC = () => {
 
     if (!name.trim()) return;
 
+    // Pedido guarda a cliente pelo nome: duas com o mesmo nome se confundem.
+    const mesmoNome = customers.find((c) => c.id !== editingId && normalizeName(c.name) === normalizeName(name));
+    if (
+      mesmoNome &&
+      !(await perguntar(`Já existe uma cliente chamada "${mesmoNome.name}"${mesmoNome.phone ? ` (${mesmoNome.phone})` : ''}. Cadastrar outra com o mesmo nome?`, {
+        titulo: 'Nome repetido',
+        confirmar: 'Cadastrar mesmo assim',
+        cancelar: 'Voltar',
+      }))
+    ) {
+      return;
+    }
+
     setFormError('');
     setIsSaving(true);
 
@@ -430,7 +448,7 @@ export const CustomersModule: React.FC = () => {
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
     } catch (err: any) {
-      setFormError(err.message || 'Erro ao salvar cliente');
+      setFormError(mensagemDeErro(err, 'Erro ao salvar cliente'));
     } finally {
       setIsSaving(false);
     }
@@ -482,12 +500,7 @@ export const CustomersModule: React.FC = () => {
 
   // Execute WhatsApp send
   const executeSendWhatsApp = (phone: string, msg: string, targetType: 'business' | 'standard' | 'web') => {
-    let cleanPhone = phone.replace(/\D/g, '');
-    if (cleanPhone.length === 10) {
-      cleanPhone = '1' + cleanPhone;
-    } else if (cleanPhone.length === 11 && !cleanPhone.startsWith('1') && !cleanPhone.startsWith('55')) {
-      cleanPhone = '55' + cleanPhone;
-    }
+    const cleanPhone = telefoneParaWhatsApp(phone);
 
     const encodedMsg = encodeURIComponent(msg);
     const isAndroid = /android/i.test(navigator.userAgent);
@@ -538,6 +551,9 @@ export const CustomersModule: React.FC = () => {
       bodyMsg = customMsgTemplate
         .replace('{nome}', customer.name)
         .replace('{data_sem_ano}', dateFormatted);
+    } else if (isCustomerOwnBirthday && !eventDateParam && !customer.eventDate) {
+      // Sem aniversario cadastrado nao ha data para citar ("chegando (breve)").
+      bodyMsg = `Olá, ${customer.name}! ✨ Tudo bem? Estou com encomendas abertas! 🎂 Se tiver alguma comemoração chegando, posso preparar um bolo ou doces especiais para você. 💖`;
     } else if (isCustomerOwnBirthday) {
       // No futuro, como as outras datas: a mensagem sai ANTES do aniversario,
       // para dar tempo da encomenda. "Parabens" no dia chegava tarde demais
@@ -588,7 +604,7 @@ export const CustomersModule: React.FC = () => {
     if (c.eventDate) {
       events.push({
         title: c.recurringEventTitle || 'Aniversário',
-        date: c.eventDate,
+        date: proximoAniversario(c.eventDate),
         dateShort: formatDayMonthOnly(c.eventDate),
         isHoliday: false,
       });
@@ -600,7 +616,7 @@ export const CustomersModule: React.FC = () => {
         if (ev.date && ev.title) {
           events.push({
             title: ev.title,
-            date: ev.date,
+            date: proximoAniversario(ev.date),
             dateShort: formatDayMonthOnly(ev.date),
             isHoliday: false,
           });
@@ -610,16 +626,17 @@ export const CustomersModule: React.FC = () => {
 
     // 3. Featured universal holidays for fast access
     UNIVERSAL_HOLIDAYS.forEach((h) => {
+      const data = proximaData(h.regra);
       events.push({
         title: h.title,
-        date: h.date2026,
-        dateShort: formatDayMonthOnly(h.date2026),
+        date: data,
+        dateShort: formatDayMonthOnly(data),
         isHoliday: true,
         customTemplate: h.messageTemplate,
       });
     });
 
-    // Sort customer events chronologically
+    // A mais proxima primeiro: cada data ja esta na proxima vez que acontece.
     events.sort((a, b) => (a.date > b.date ? 1 : -1));
 
     return {
@@ -1087,8 +1104,9 @@ export const CustomersModule: React.FC = () => {
                     required
                     placeholder={`Ex: ${exemplos.telefone}`}
                     value={phone}
+                    inputMode="tel"
                     onChange={(e) => {
-                      setPhone(e.target.value);
+                      setPhone(limparTelefoneDigitado(e.target.value));
                       if (invalidFieldId === 'cliente-telefone') setInvalidFieldId(null);
                     }}
                     className="border rounded-[10px] px-3 py-3 text-[15px]"

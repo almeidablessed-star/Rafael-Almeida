@@ -1,4 +1,5 @@
 ﻿import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { mensagemDeErro } from '../utils/mensagemDeErro';
 import { avisar, perguntar } from './AvisoApp';
 import { createPortal } from 'react-dom';
 import { FichaTecnica, IngredientUsage, Transaction, TamanhoOpcao, StockItem, Produto } from '../types';
@@ -262,7 +263,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         await deleteFicha(ficha.id);
       } catch (err: any) {
         console.error('Erro ao deletar ficha técnica:', err);
-        avisar('Erro ao deletar ficha técnica: ' + (err.message || JSON.stringify(err)), { titulo: 'Não deu para excluir a ficha' });
+        avisar('Erro ao deletar ficha técnica: ' + mensagemDeErro(err), { titulo: 'Não deu para excluir a ficha' });
       }
     },
   });
@@ -798,7 +799,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
 
       setCriandoProdutoInsumo(null);
     } catch (err) {
-      avisar((err as any).message || 'Erro ao criar produto', { titulo: 'Não deu para criar o produto' });
+      avisar(mensagemDeErro(err, 'Erro ao criar produto'), { titulo: 'Não deu para criar o produto' });
     } finally {
       setSalvandoNovoProduto(false);
     }
@@ -887,6 +888,13 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
     e.preventDefault();
     if (salvandoFichaRef.current) return;
     if (!name.trim()) return;
+
+    // Com mais de um tamanho, o nome e o que diferencia um do outro no pedido.
+    if (tamanhos.length > 1 && tamanhos.some((t) => !t.descricao.trim())) {
+      setFormStep(1);
+      avisar('Dê um nome para cada tamanho (ex.: 15 cm, 20 cm). No pedido, é o nome que mostra qual tamanho foi escolhido.', { titulo: 'Tamanho sem nome' });
+      return;
+    }
 
     // Converter tamanhos do formulário para TamanhoOpcao
     const tamanhosData: TamanhoOpcao[] = tamanhos.map((t) => {
@@ -1397,7 +1405,8 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         </div>
                         <button
                           type="button"
-                          onClick={() => {
+                          onClick={async () => {
+                            if (!(await perguntar('A foto sai desta ficha quando você salvar.', { titulo: 'Remover a foto?', confirmar: 'Remover', cancelar: 'Manter', perigo: true }))) return;
                             setImageUrl('');
                             setMiniaturaEmEspera('');
                             // Removeu antes da foto inteira chegar: a resposta nao
@@ -1432,7 +1441,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                             try {
                               setImageUrl(await compressImageFile(file));
                             } catch (err: any) {
-                              avisar(err?.message || 'Não foi possível usar esta imagem.', { titulo: 'Não deu para usar a foto' });
+                              avisar(mensagemDeErro(err, 'Não foi possível usar esta imagem.'), { titulo: 'Não deu para usar a foto' });
                             }
                           }}
                           className="hidden"

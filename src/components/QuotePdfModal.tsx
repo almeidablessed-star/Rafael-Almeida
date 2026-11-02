@@ -1,6 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { mensagemDeErro } from '../utils/mensagemDeErro';
 import { useZoomDaPrevia } from '../hooks/useZoomDaPrevia';
-import { avisar } from './AvisoApp';
+import { avisar, perguntar } from './AvisoApp';
 import { situacaoPagamento } from '../utils/situacaoPagamento';
 import { createPortal } from 'react-dom';
 import { Transaction } from '../types';
@@ -238,7 +239,7 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
     try {
       await updateTransacao(transaction.id, { ...transaction, inspirationImage: imagem });
     } catch (err: any) {
-      avisar(`A foto não pôde ser salva no pedido:\n\n${err?.message || err}`, { titulo: 'Não deu para salvar a foto' });
+      avisar(`A foto não pôde ser salva no pedido:\n\n${mensagemDeErro(err)}`, { titulo: 'Não deu para salvar a foto' });
     }
   };
 
@@ -258,11 +259,13 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
         await persistirImagem(result);
       }
     } catch (err: any) {
-      avisar(err?.message || 'Não foi possível usar esta imagem.', { titulo: 'Não deu para usar a foto' });
+      avisar(mensagemDeErro(err, 'Não foi possível usar esta imagem.'), { titulo: 'Não deu para usar a foto' });
     }
   };
 
   const handleRemoveImage = async () => {
+    // Ja grava na hora: sem perguntar, um toque sem querer apagava a foto do pedido.
+    if (!(await perguntar('A foto de referência sai deste pedido.', { titulo: 'Remover a foto?', confirmar: 'Remover', cancelar: 'Manter', perigo: true }))) return;
     setInspirationImage('');
     await persistirImagem('');
   };
@@ -1286,7 +1289,7 @@ ${situacaoPagamento(transaction) === 'sinal' ? `✅ *Sinal/Entrada Pago:* ${form
                           )}
                         </div>
                         <div className="flex flex-col gap-[3px] min-w-0">
-                          <span className="truncate" style={{ fontFamily: "'Instrument Serif', serif", fontSize: '24px', lineHeight: 1.1 }}>
+                          <span style={{ fontFamily: "'Instrument Serif', serif", fontSize: '24px', lineHeight: 1.1, overflowWrap: 'anywhere' }}>
                             {transaction.customerName || 'Cliente'}
                           </span>
                           <span className="flex items-center gap-[5px]" style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80' }}>
@@ -1517,7 +1520,7 @@ ${situacaoPagamento(transaction) === 'sinal' ? `✅ *Sinal/Entrada Pago:* ${form
                         )}
                       </div>
                       <div className="flex flex-col gap-[3px] min-w-0">
-                        <span className="truncate" style={{ fontFamily: "'Instrument Serif', serif", fontSize: '30px', lineHeight: 1.1 }}>
+                        <span style={{ fontFamily: "'Instrument Serif', serif", fontSize: '30px', lineHeight: 1.1, overflowWrap: 'anywhere' }}>
                           {transaction.customerName || 'Cliente'}
                         </span>
                         {transaction.customerPhone && (

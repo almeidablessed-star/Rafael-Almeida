@@ -182,6 +182,11 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
 
     const valNum = parseNumeroDigitado(amount);
     if (!description.trim() || isNaN(valNum) || valNum <= 0) {
+      // Antes saia sem dizer nada: o toque parecia nao funcionar.
+      avisar(
+        !description.trim() ? 'Escreva o que você comprou.' : 'Digite quanto custou, só com números (ex.: 25,90).',
+        { titulo: 'Falta uma informação' }
+      );
       return;
     }
 

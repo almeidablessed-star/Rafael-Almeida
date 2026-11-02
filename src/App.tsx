@@ -1,5 +1,6 @@
 // v2.1 - Fresh rebuild with latest redesign - force Vercel deployment
 import React, { useState, useEffect, useRef } from 'react';
+import { mensagemDeErro } from './utils/mensagemDeErro';
 import { avisar, perguntar } from './components/AvisoApp';
 import { migrarFotosAntigas } from './utils/migrarFotosAntigas';
 import { limparFotosSemUso } from './utils/limparFotosSemUso';
@@ -188,7 +189,7 @@ function AppContent() {
           await devolverPedido(tx.id, [], 'excluido');
         } catch (err: any) {
           await avisar(
-            `Os insumos não voltaram ao estoque:\n\n${err?.message || err}\n\n` +
+            `Os insumos não voltaram ao estoque:\n\n${mensagemDeErro(err)}\n\n` +
               `O pedido NÃO foi excluído, para o estorno poder ser refeito. ` +
               `Confira a aba Produtos e tente de novo.`,
             { titulo: 'O pedido não foi excluído' }
@@ -212,14 +213,14 @@ function AppContent() {
             );
           }
         } catch (err: any) {
-          await avisar(`O produto não foi ajustado:\n\n${err?.message || err}\n\nConfira na aba Produtos.`, { titulo: 'Confira em Produtos' });
+          await avisar(`O produto não foi ajustado:\n\n${mensagemDeErro(err)}\n\nConfira na aba Produtos.`, { titulo: 'Confira em Produtos' });
         }
       }
 
       try {
         await deleteTransacao(tx.id);
       } catch (err: any) {
-        avisar(`Não foi possível excluir o pedido:\n\n${err?.message || err}`, { titulo: 'Não deu para excluir o pedido' });
+        avisar(`Não foi possível excluir o pedido:\n\n${mensagemDeErro(err)}`, { titulo: 'Não deu para excluir o pedido' });
       }
     },
   });
@@ -366,7 +367,7 @@ function AppContent() {
       await addTransacao(txData);
       return true;
     } catch (err: any) {
-      avisar(`Não foi possível gravar o lançamento:\n\n${err?.message || err}\n\nNada foi salvo.`, { titulo: 'Não deu para gravar' });
+      avisar(`Não foi possível gravar o lançamento:\n\n${mensagemDeErro(err)}\n\nNada foi salvo.`, { titulo: 'Não deu para gravar' });
       return false;
     }
   };
@@ -455,7 +456,7 @@ function AppContent() {
       try {
         await updateTransacao(editingId, updated);
       } catch (err: any) {
-        avisar(`Não foi possível salvar o lançamento:\n\n${err?.message || err}\n\nNada foi alterado.`, { titulo: 'Não deu para salvar' });
+        avisar(`Não foi possível salvar o lançamento:\n\n${mensagemDeErro(err)}\n\nNada foi alterado.`, { titulo: 'Não deu para salvar' });
         return false;
       }
 
@@ -512,7 +513,7 @@ function AppContent() {
         } catch (err: any) {
           avisar(
             `O pedido foi atualizado, mas o estoque não pôde ser reajustado:\n\n` +
-              `${err?.message || err}\n\nConfira as quantidades na aba Produtos.`,
+              `${mensagemDeErro(err)}\n\nConfira as quantidades na aba Produtos.`,
             { titulo: 'Confira o estoque' }
           );
         }
@@ -534,7 +535,7 @@ function AppContent() {
         await addTransacao(txData);
         return true;
       } catch (err: any) {
-        avisar(`Não foi possível gravar o lançamento:\n\n${err?.message || err}\n\nNada foi salvo.`, { titulo: 'Não deu para gravar' });
+        avisar(`Não foi possível gravar o lançamento:\n\n${mensagemDeErro(err)}\n\nNada foi salvo.`, { titulo: 'Não deu para gravar' });
         return false;
       }
     }
@@ -546,7 +547,7 @@ function AppContent() {
     try {
       criada = await addTransacao(txData);
     } catch (err: any) {
-      avisar(`Não foi possível gravar o pedido:\n\n${err?.message || err}\n\nNada foi salvo.`, { titulo: 'Não deu para gravar o pedido' });
+      avisar(`Não foi possível gravar o pedido:\n\n${mensagemDeErro(err)}\n\nNada foi salvo.`, { titulo: 'Não deu para gravar o pedido' });
       return false;
     }
 
@@ -559,7 +560,7 @@ function AppContent() {
       }
     } catch (err: any) {
       avisar(
-        `O pedido foi salvo, mas a baixa de estoque falhou:\n\n${err?.message || err}\n\n` +
+        `O pedido foi salvo, mas a baixa de estoque falhou:\n\n${mensagemDeErro(err)}\n\n` +
           `Nenhum insumo foi debitado. Confira a aba Produtos.`,
         { titulo: 'Estoque não baixou' }
       );
@@ -598,7 +599,7 @@ function AppContent() {
     try {
       await updateTransacao(tx.id, proximoPagamento(tx));
     } catch (err: any) {
-      avisar(`Não foi possível mudar o status do pagamento:\n\n${err?.message || err}`, { titulo: 'Não deu para mudar o pagamento' });
+      avisar(`Não foi possível mudar o status do pagamento:\n\n${mensagemDeErro(err)}`, { titulo: 'Não deu para mudar o pagamento' });
     }
   };
 
@@ -620,7 +621,7 @@ function AppContent() {
     try {
       await limparTudo();
     } catch (err: any) {
-      avisar(`Não foi possível limpar os lançamentos:\n\n${err?.message || err}`, { titulo: 'Não deu para limpar' });
+      avisar(`Não foi possível limpar os lançamentos:\n\n${mensagemDeErro(err)}`, { titulo: 'Não deu para limpar' });
     }
   };
 
@@ -700,7 +701,7 @@ function AppContent() {
               try {
                 await addTransacao(txData);
               } catch (err: any) {
-                avisar(`Não foi possível gravar o lançamento:\n\n${err?.message || err}`, { titulo: 'Não deu para gravar' });
+                avisar(`Não foi possível gravar o lançamento:\n\n${mensagemDeErro(err)}`, { titulo: 'Não deu para gravar' });
               }
             }}
             onNavigateToTab={(tab) => setActiveTab(tab)}

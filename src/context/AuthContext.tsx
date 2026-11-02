@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useRef, useState } from 'r
 import { abrirFoto } from '../utils/fotoDeposito';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { useAoVoltarParaOApp } from '../hooks/useAoVoltarParaOApp';
 
 export interface UserProfile {
   id: string;
@@ -247,6 +248,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Error refreshing user profile:', error);
     }
   };
+  // Acesso pausado (reembolso, prazo vencido) com o app aberto: sem reler o
+  // perfil, a pessoa seguia na tela e o banco recusava gravar em silencio.
+  useAoVoltarParaOApp(refreshUserProfile, !!user);
 
   const login = async (email: string, password: string) => {
     try {

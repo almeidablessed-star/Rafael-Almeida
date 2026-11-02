@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { mensagemDeErro } from '../utils/mensagemDeErro';
 import { X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -31,7 +32,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
         onLoginSuccess(email);
       }, 1000);
     } catch (err: any) {
-      setMessage({ type: 'error', text: err.message || 'Email ou senha incorretos' });
+      setMessage({ type: 'error', text: mensagemDeErro(err, 'Email ou senha incorretos') });
       setLoading(false);
     }
   };

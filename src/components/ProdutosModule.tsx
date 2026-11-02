@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { mensagemDeErro } from '../utils/mensagemDeErro';
 import { avisar } from './AvisoApp';
 import { createPortal } from 'react-dom';
 import { Produto, Transaction } from '../types';
 import { useProdutos } from '../context/ProdutosContext';
-import { formatQuantity, parseNumeroDigitado } from '../utils/formatters';
+import { formatQuantity, parseNumeroDigitado, numeroComVirgula } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
 import { capitalizeFirstLetter } from '../utils/textCase';
 import { StockMovementsHistory } from './StockMovementsHistory';
@@ -241,7 +242,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
       try {
         await deleteProduto(produto.id);
       } catch (err: any) {
-        avisar(`Não foi possível excluir o produto:\n\n${err?.message || err}`, { titulo: 'Não deu para excluir o produto' });
+        avisar(`Não foi possível excluir o produto:\n\n${mensagemDeErro(err)}`, { titulo: 'Não deu para excluir o produto' });
       }
     },
   });
@@ -358,13 +359,13 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
   const handleOpenEdit = (p: Produto) => {
     setNome(p.nome);
     setCategoria(p.categoria || '');
-    setPrecoPago(String(p.precoPago));
-    setQuantidadeEmbalagem(String(p.quantidadeEmbalagem));
+    setPrecoPago(String(p.precoPago).replace('.', ','));
+    setQuantidadeEmbalagem(String(p.quantidadeEmbalagem).replace('.', ','));
     setUnidadeEmbalagem(p.unidadeEmbalagem);
     setControlaEstoque(p.controlaEstoque);
     setQuantidadeAtual(p.quantidadeAtual != null ? String(Math.round(p.quantidadeAtual * 100) / 100).replace('.', ',') : '');
     setQuantidadeAtualUnidade(p.unidadeEmbalagem);
-    setNivelMinimo(p.nivelMinimo != null ? String(p.nivelMinimo) : '');
+    setNivelMinimo(p.nivelMinimo != null ? String(p.nivelMinimo).replace('.', ',') : '');
     setNivelMinimoUnidade(p.nivelMinimoUnidade || 'g');
     // Editando um produto que ja existe: o alerta dele e uma escolha feita, e
     // a sugestao nao pode reescrever nada — nem se ela mudar a embalagem aqui.
@@ -464,7 +465,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
       setIsAdding(false);
       setDuplicateWarning(null);
     } catch (err) {
-      setFormError((err as any).message || 'Erro ao salvar produto');
+      setFormError(mensagemDeErro(err, 'Erro ao salvar produto'));
     } finally {
       salvandoProdutoRef.current = false;
     }
@@ -984,7 +985,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                       {custoPorUnidade({
                         precoPago: parseNumeroDigitado(precoPago) || 0,
                         quantidadeEmbalagem: parseNumeroDigitado(quantidadeEmbalagem) || 1,
-                      }).toFixed(4)}
+                      }).toFixed(4).replace('.', ',')}
                       <span style={{ fontSize: '12px', color: '#7A6E80', fontWeight: 700 }}> /{unidadeEmbalagem}</span>
                     </span>
                   </div>
@@ -1312,7 +1313,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                       )}
                     </div>
                     <p className="text-[11px] mt-1" style={{ color: '#7A6E80', ...(pc ? { fontSize: '12px', marginTop: 0 } : {}) }}>
-                      {formatCurrency(p.precoPago)} / {p.quantidadeEmbalagem} {p.unidadeEmbalagem} · custo unitário {symbol} {custoPorUnidade(p).toFixed(4)}/{p.unidadeEmbalagem}
+                      {formatCurrency(p.precoPago)} / {p.quantidadeEmbalagem} {p.unidadeEmbalagem} · custo unitário {symbol} {numeroComVirgula(custoPorUnidade(p), 4)}/{p.unidadeEmbalagem}
                     </p>
                   </div>
                   <div className="flex items-center gap-1 flex-shrink-0" style={pc ? { gap: '2px' } : undefined}>

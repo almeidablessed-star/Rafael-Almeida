@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { mensagemDeErro } from '../utils/mensagemDeErro';
 import { avisar } from './AvisoApp';
 import { createPortal } from 'react-dom';
 import { Transaction } from '../types';
@@ -208,7 +209,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
     } catch (err: any) {
       // Melhor nao gerar arquivo nenhum do que gerar um backup incompleto: a
       // restauracao regrava a partir dele e o que faltar sera perdido.
-      avisar(`Erro ao preparar o backup: ${err?.message || err}\n\nNenhum arquivo foi gerado.`, { titulo: 'Não deu para gerar o backup' });
+      avisar(`Erro ao preparar o backup: ${mensagemDeErro(err)}\n\nNenhum arquivo foi gerado.`, { titulo: 'Não deu para gerar o backup' });
       return;
     } finally {
       setIsExporting(false);
@@ -283,7 +284,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
       } else {
         // O banco respondeu com erro, e a troca e uma transacao so: nada foi
         // apagado.
-        avisar(`Não foi possível restaurar o backup. Seus lançamentos continuam como estavam.\n\n${err?.message || err}`, { titulo: 'Não deu para restaurar' });
+        avisar(`Não foi possível restaurar o backup. Seus lançamentos continuam como estavam.\n\n${mensagemDeErro(err)}`, { titulo: 'Não deu para restaurar' });
       }
     } finally {
       setIsRestoring(false);
@@ -312,7 +313,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
       } else {
         // O banco respondeu com erro, e a troca e uma transacao so: nada foi
         // apagado.
-        avisar(`Não foi possível restaurar o backup. Seus dados continuam como estavam.\n\n${err?.message || err}`, { titulo: 'Não deu para restaurar' });
+        avisar(`Não foi possível restaurar o backup. Seus dados continuam como estavam.\n\n${mensagemDeErro(err)}`, { titulo: 'Não deu para restaurar' });
       }
       setIsRestoring(false);
     }

@@ -1,3 +1,4 @@
+import { numeroComVirgula } from '../utils/formatters';
 import React from 'react';
 import { useCurrency } from '../context/CurrencyContext';
 import { EstruturaFinanceira } from '../utils/financialEngine';
@@ -81,7 +82,7 @@ export const ResumoDistribuicaoCard: React.FC<{ estrutura: EstruturaFinanceira; 
               {linhas.map(([nome, pct, valor], i) => (
                 <div key={nome} className={`flex items-center justify-between px-3 py-2 ${i > 0 ? 'border-t border-[#E6E1DB]' : ''}`}>
                   <span className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>{nome}</span>
-                  <span className="text-[11px]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>{pct.toFixed(2)}%</span>
+                  <span className="text-[11px]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>{numeroComVirgula(pct, 2)}%</span>
                   <span className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>{formatCurrency(valor)}</span>
                 </div>
               ))}
@@ -157,7 +158,7 @@ export const ResumoDistribuicaoCard: React.FC<{ estrutura: EstruturaFinanceira; 
                   </div>
                 </div>
                 <span style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80', textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontFamily: "'Manrope', sans-serif" }}>
-                  {pct.toFixed(2)}%
+                  {numeroComVirgula(pct, 2)}%
                 </span>
               </div>
             ))}

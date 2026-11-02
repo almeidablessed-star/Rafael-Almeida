@@ -1,4 +1,5 @@
 ﻿import React, { useState, useEffect, useRef } from 'react';
+import { mensagemDeErro } from '../utils/mensagemDeErro';
 import { situacaoPagamento } from '../utils/situacaoPagamento';
 import { createPortal } from 'react-dom';
 import { avisar, perguntar } from './AvisoApp';
@@ -500,7 +501,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
         // legitimo (pedido pago de uma vez so nao tem sinal), e preencher com
         // o total faria o caminho inverso — inventar um sinal onde nao havia.
         setSignalValue(
-          editingTransaction.signalValue != null ? String(editingTransaction.signalValue) : ''
+          editingTransaction.signalValue != null ? String(editingTransaction.signalValue).replace('.', ',') : ''
         );
         // A taxa de entrega nao tem coluna propria — vive dentro de
         // `breakdown`/`notes`. parseSaleDetail ja sabe ler dos dois lugares
@@ -621,7 +622,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
         setQuantity(editingTransaction.quantity || 1);
         setUnitValue(String(editingTransaction.unitValue || 0));
         setTotalValue(String(editingTransaction.totalValue || 0));
-        setSignalValue(String(editingTransaction.signalValue || editingTransaction.totalValue || 0));
+        setSignalValue(String(editingTransaction.signalValue || editingTransaction.totalValue || 0).replace('.', ','));
       }
     } else {
       setType(initialType);
@@ -919,7 +920,8 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
 
   const handleUpdateCustomField = (id: string, field: 'customDescription' | 'customUnitValue', value: string) => {
     setOrderItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, [field]: value } : item))
+      // Valor nao fica negativo: "-50" no personalizado descontava do pedido.
+      prev.map((item) => (item.id === id ? { ...item, [field]: field === 'customUnitValue' ? value.replace(/-/g, '') : value } : item))
     );
   };
 
@@ -943,7 +945,8 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   };
 
   const handleUpdateAddon = (id: string, field: keyof AddonItemState, val: any) => {
-    setAddons((prev) => prev.map((a) => (a.id === id ? { ...a, [field]: val } : a)));
+    const valor = field === 'value' && typeof val === 'string' ? val.replace(/-/g, '') : val;
+    setAddons((prev) => prev.map((a) => (a.id === id ? { ...a, [field]: valor } : a)));
   };
 
   // --- Non-sale Handlers ---
@@ -1561,7 +1564,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                         try {
                           setInspirationImage(await compressImageFile(file));
                         } catch (err: any) {
-                          avisar(err?.message || 'Não foi possível usar esta imagem.', { titulo: 'Não deu para usar a foto' });
+                          avisar(mensagemDeErro(err, 'Não foi possível usar esta imagem.'), { titulo: 'Não deu para usar a foto' });
                         }
                       }}
                       className="hidden"
@@ -1586,7 +1589,9 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                         <img src={inspirationImage} alt="Inspiração" className="w-full h-full object-cover" />
                         <button
                           type="button"
-                          onClick={() => setInspirationImage('')}
+                          onClick={async () => {
+                            if (await perguntar('A foto de referência sai deste pedido quando você gravar.', { titulo: 'Remover a foto?', confirmar: 'Remover', cancelar: 'Manter', perigo: true })) setInspirationImage('');
+                          }}
                           className="absolute top-0 right-0 bg-[#C4626F] text-white p-0.5"
                           title="Remover foto"
                         >
@@ -1696,7 +1701,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                             <input
                               type="text"
                               inputMode="decimal"
-                              placeholder="0.00"
+                              placeholder="0,00"
                               value={item.customUnitValue || ''}
                               onChange={(e) => handleUpdateCustomField(item.id, 'customUnitValue', e.target.value)}
                               style={{ width: '100%', border: '1px solid rgba(58,35,80,0.14)', borderRadius: '10px', padding: '10px', fontSize: '13px', background: '#FAF7FA' }}
@@ -1883,7 +1888,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                                 inputMode="decimal"
                                 value={addon.value}
                                 onChange={(e) => handleUpdateAddon(addon.id, 'value', e.target.value)}
-                                placeholder="0.00"
+                                placeholder="0,00"
                                 style={{ width: '100%', border: '1px solid rgba(58,35,80,0.14)', borderRadius: '9px', padding: '8px', fontSize: '12px', background: '#fff' }}
                               />
                             </div>
@@ -2384,7 +2389,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                   <input
                     type="text"
                     inputMode="decimal"
-                    placeholder="0.00"
+                    placeholder="0,00"
                     value={unitValue}
                     onChange={(e) => handleUnitValueChange(e.target.value)}
                     className="w-full px-3.5 py-2.5 text-sm bg-neutral-50 border border-neutral-300 rounded-lg text-neutral-800 font-semibold focus:outline-none focus:ring-2 focus:ring-pink-400 focus:bg-white"
@@ -2406,7 +2411,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                     type="text"
                     inputMode="decimal"
                     required
-                    placeholder="0.00"
+                    placeholder="0,00"
                     value={totalValue}
                     onChange={(e) => handleTotalValueChange(e.target.value)}
                     className="w-full pl-9 pr-3.5 py-3 text-lg font-extrabold bg-pink-50/50 border-2 border-[#E6E1DB] rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:bg-white"

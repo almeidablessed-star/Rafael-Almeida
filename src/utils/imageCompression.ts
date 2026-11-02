@@ -61,6 +61,12 @@ const erroFallbackPesado = (file: File) =>
  */
 export const compressImageFile = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
+    // PDF, video e afins: antes eram gravados como se fossem foto (imagem
+    // quebrada) ou sumiam sem aviso.
+    if (file.type && !file.type.startsWith('image/')) {
+      reject(new Error('Esse arquivo não é uma foto. Escolha uma imagem (JPG ou PNG).'));
+      return;
+    }
     const reader = new FileReader();
 
     reader.onerror = () => reject(new Error('Nao foi possivel ler o arquivo'));

@@ -1,3 +1,6 @@
+import { numeroComVirgula } from '../utils/formatters';
+import { mensagemDeErro } from '../utils/mensagemDeErro';
+import { erroDaEmpresa } from '../utils/validarEmpresa';
 import React, { useEffect, useState } from 'react';
 import { marcarSaidaPendente } from '../utils/saidaPendente';
 import { Edit3, Save, X } from 'lucide-react';
@@ -114,13 +117,18 @@ export const MinhaEmpresaCard: React.FC<{ computador?: boolean; colunaDireita?: 
   );
 
   const salvarRemuneracao = async () => {
+    const problema = erroDaEmpresa({ monthlyIncomeTarget, horaTrabalho });
+    if (problema) {
+      setErroLocal(problema);
+      return;
+    }
     setErroLocal('');
     setSalvando(true);
     try {
       await salvarConfiguracaoEmpresa({ monthlyIncomeTarget, horaTrabalho, workingDaysPerWeek });
       setEditandoRemuneracao(false);
     } catch (err: any) {
-      setErroLocal(err.message || 'Erro ao salvar.');
+      setErroLocal(mensagemDeErro(err, 'Erro ao salvar.'));
     } finally {
       setSalvando(false);
     }
@@ -134,13 +142,18 @@ export const MinhaEmpresaCard: React.FC<{ computador?: boolean; colunaDireita?: 
   };
 
   const salvarMetas = async () => {
+    const problema = erroDaEmpresa({ cmvTargetPercent, investmentTargetPercent, profitTargetPercent });
+    if (problema) {
+      setErroLocal(problema);
+      return;
+    }
     setErroLocal('');
     setSalvando(true);
     try {
       await salvarConfiguracaoEmpresa({ cmvTargetPercent, investmentTargetPercent, profitTargetPercent });
       setEditandoMetas(false);
     } catch (err: any) {
-      setErroLocal(err.message || 'Erro ao salvar.');
+      setErroLocal(mensagemDeErro(err, 'Erro ao salvar.'));
     } finally {
       setSalvando(false);
     }
@@ -153,7 +166,7 @@ export const MinhaEmpresaCard: React.FC<{ computador?: boolean; colunaDireita?: 
       await salvarConfiguracaoEmpresa({ periodoReset });
       setEditandoPeriodo(false);
     } catch (err: any) {
-      setErroLocal(err.message || 'Erro ao salvar.');
+      setErroLocal(mensagemDeErro(err, 'Erro ao salvar.'));
     } finally {
       setSalvando(false);
     }
@@ -178,7 +191,7 @@ export const MinhaEmpresaCard: React.FC<{ computador?: boolean; colunaDireita?: 
       const salvas = await salvarDespesas(despesas);
       setDespesas(salvas);
     } catch (err: any) {
-      setErroLocal(err.message || 'Erro ao salvar despesas.');
+      setErroLocal(mensagemDeErro(err, 'Erro ao salvar despesas.'));
     } finally {
       setSalvando(false);
     }
@@ -248,7 +261,7 @@ export const MinhaEmpresaCard: React.FC<{ computador?: boolean; colunaDireita?: 
 
   const avisoErro = (error || erroLocal) && (
     <div className="p-2.5 rounded-xl bg-[#FDF4F5] border border-[rgba(196,98,111,.35)] text-[12px] text-[#C4626F]" style={{ fontFamily: "'Manrope', sans-serif" }}>
-      {error || erroLocal}
+      {erroLocal || mensagemDeErro(error)}
     </div>
   );
 
@@ -272,7 +285,7 @@ export const MinhaEmpresaCard: React.FC<{ computador?: boolean; colunaDireita?: 
             <div className="col-span-2 bg-white rounded-xl p-3 border border-[#E6E1DB]" style={pc ? caixaPc : undefined}>
               <p className="text-[9px] uppercase tracking-[0.05em]" style={rotuloCaixa}>Meta de horas (referência, não obrigação)</p>
               <p className="text-[12px] font-bold mt-1" style={valorCaixa('medio')}>
-                {workingDaysPerWeek} dias/semana · {metaHoras.horasPorMes.toFixed(1)}h/mês → {metaHoras.horasPorSemana.toFixed(1)}h/semana → {metaHoras.horasPorDia.toFixed(1)}h/dia
+                {workingDaysPerWeek} dias/semana · {numeroComVirgula(metaHoras.horasPorMes, 1)}h/mês → {numeroComVirgula(metaHoras.horasPorSemana, 1)}h/semana → {numeroComVirgula(metaHoras.horasPorDia, 1)}h/dia
               </p>
             </div>
           </div>

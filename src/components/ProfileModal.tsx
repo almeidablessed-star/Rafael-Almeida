@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { mensagemDeErro } from '../utils/mensagemDeErro';
 import { apagarFotoTrocada, guardarFoto } from '../utils/fotoDeposito';
 import { avisar } from './AvisoApp';
 import { X, Camera, Edit2, Clock } from 'lucide-react';
@@ -156,7 +157,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
         photo,
       }));
     } catch (err: any) {
-      avisar(err?.message || 'Não foi possível usar esta imagem.', { titulo: 'Não deu para usar a foto' });
+      avisar(mensagemDeErro(err, 'Não foi possível usar esta imagem.'), { titulo: 'Não deu para usar a foto' });
     }
   };
 
