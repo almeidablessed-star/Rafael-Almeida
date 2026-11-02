@@ -982,10 +982,10 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                       <span style={{ fontSize: '11px', fontWeight: 600, color: '#7A6E80' }}>calculado automaticamente</span>
                     </div>
                     <span style={{ fontSize: '18px', fontWeight: 800, letterSpacing: '-.02em', color: '#3A2350' }}>
-                      {custoPorUnidade({
+                      {numeroComVirgula(custoPorUnidade({
                         precoPago: parseNumeroDigitado(precoPago) || 0,
                         quantidadeEmbalagem: parseNumeroDigitado(quantidadeEmbalagem) || 1,
-                      }).toFixed(4).replace('.', ',')}
+                      }), 4)}
                       <span style={{ fontSize: '12px', color: '#7A6E80', fontWeight: 700 }}> /{unidadeEmbalagem}</span>
                     </span>
                   </div>

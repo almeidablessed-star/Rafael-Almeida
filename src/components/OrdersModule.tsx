@@ -140,6 +140,14 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
   // (o sinal entrou em "pagas", o restante esta em "a receber").
   const comSinal = sinalCount ? ` + ${sinalCount} com sinal` : '';
 
+  // Legenda das caixas de resumo: os valores delas somam TODOS os pedidos, entao
+  // a contagem tambem. Com a da vista, "$100 em vendas pagas" saia ao lado de
+  // "0 pedidos pagos" quando o pedido estava no Historico.
+  const pagosNoTotal = sales.filter((s) => situacaoPagamento(s) === 'pago').length;
+  const pendentesNoTotal = sales.filter((s) => situacaoPagamento(s) === 'pendente').length;
+  const sinalNoTotal = sales.filter((s) => situacaoPagamento(s) === 'sinal').length;
+  const comSinalNoTotal = sinalNoTotal ? ` + ${sinalNoTotal} com sinal` : '';
+
   // Ha pedidos, so nao nesta vista (ou na busca/filtro). Mesmo texto no
   // celular e no computador.
   const mensagemListaVazia =
@@ -280,8 +288,8 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
             </span>
           </div>
           <div style={{ flex: '2 1 460px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
-            {caixaResumo('pagas', 'VENDAS PAGAS', totalPagas, `${paidCount} ${paidCount === 1 ? 'pedido pago' : 'pedidos pagos'}${comSinal}`)}
-            {caixaResumo('receber', 'A RECEBER (PENDENTES)', totalPendentes + totalAReceber, `${pendingCount} ${pendingCount === 1 ? 'pedido pendente' : 'pedidos pendentes'}${comSinal}`)}
+            {caixaResumo('pagas', 'VENDAS PAGAS', totalPagas, `${pagosNoTotal} ${pagosNoTotal === 1 ? 'pedido pago' : 'pedidos pagos'}${comSinalNoTotal}`)}
+            {caixaResumo('receber', 'A RECEBER (PENDENTES)', totalPendentes + totalAReceber, `${pendentesNoTotal} ${pendentesNoTotal === 1 ? 'pedido pendente' : 'pedidos pendentes'}${comSinalNoTotal}`)}
           </div>
         </section>
 
@@ -649,7 +657,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                 {formatMoney(totalPagas)}
               </div>
               <div style={{ fontSize: '9px', color: 'rgba(247,220,225,.7)', marginTop: '2px', fontFamily: "'Manrope', sans-serif" }}>
-                {paidCount} {paidCount === 1 ? 'pedido pago' : 'pedidos pagos'}{comSinal}
+                {pagosNoTotal} {pagosNoTotal === 1 ? 'pedido pago' : 'pedidos pagos'}{comSinalNoTotal}
               </div>
             </div>
 
@@ -662,7 +670,7 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
                 {formatMoney(totalPendentes + totalAReceber)}
               </div>
               <div style={{ fontSize: '9px', color: 'rgba(247,220,225,.7)', marginTop: '2px', fontFamily: "'Manrope', sans-serif" }}>
-                {pendingCount} {pendingCount === 1 ? 'pedido pendente' : 'pedidos pendentes'}{comSinal}
+                {pendentesNoTotal} {pendentesNoTotal === 1 ? 'pedido pendente' : 'pedidos pendentes'}{comSinalNoTotal}
               </div>
             </div>
           </div>

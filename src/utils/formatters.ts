@@ -84,9 +84,21 @@ export const parseNumeroDigitado = (input: string): number => {
  * veio do banco: virgula decimal e NENHUM separador de milhar, para que o
  * texto exibido seja exatamente o que o parser le de volta sem ambiguidade.
  */
-/** Numero com casas fixas e virgula, para mostrar ("34,00", "117,7"). */
-export const numeroComVirgula = (value: number, casas: number): string =>
-  (Number.isFinite(value) ? value : 0).toFixed(casas).replace('.', ',');
+/**
+ * Numero com casas fixas para mostrar, no padrao da moeda da conta: virgula
+ * em real ("34,00"), ponto em dolar ("34.00"), igual aos valores em dinheiro
+ * da mesma tela. A moeda vem da copia local que o CurrencyContext mantem.
+ */
+export const numeroComVirgula = (value: number, casas: number): string => {
+  const texto = (Number.isFinite(value) ? value : 0).toFixed(casas);
+  let moeda: string | null = null;
+  try {
+    moeda = localStorage.getItem('carula_currency');
+  } catch {
+    // Sem localStorage (testes): fica o padrao brasileiro.
+  }
+  return moeda === 'USD' ? texto : texto.replace('.', ',');
+};
 
 export const formatNumeroParaEdicao = (value: number): string => {
   if (!Number.isFinite(value) || value === 0) return '';
