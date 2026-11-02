@@ -4,6 +4,12 @@ interface UseDelayedDeleteOptions<T> {
   /** Chamado 10s (ou `delayMs`) depois de `requestDelete`, se ninguem cancelar antes. */
   deleteFn: (item: T) => Promise<void>;
   delayMs?: number;
+  /**
+   * Guarda os pendentes neste aparelho. Quem fecha ou recarrega o app nos 10s
+   * nao passa pela desmontagem abaixo: sem isto o item voltava como se a exclusao
+   * nunca tivesse existido. Ao abrir de novo, a contagem e o Desfazer recomecam.
+   */
+  chaveLocal?: string;
 }
 
 /**
@@ -29,9 +35,25 @@ interface UseDelayedDeleteOptions<T> {
 export function useDelayedDelete<T extends { id: string | number }>({
   deleteFn,
   delayMs = 10000,
+  chaveLocal,
 }: UseDelayedDeleteOptions<T>) {
   const [pendingItems, setPendingItems] = useState<T[]>([]);
   const pendingRef = useRef<Map<string | number, { item: T; timeoutId: ReturnType<typeof setTimeout> }>>(new Map());
+
+  // Sempre a versao atual: o timer pode ter nascido antes de os dados carregarem.
+  const deleteFnRef = useRef(deleteFn);
+  deleteFnRef.current = deleteFn;
+
+  const guardarPendentes = () => {
+    if (!chaveLocal) return;
+    try {
+      const itens = [...pendingRef.current.values()].map((p) => p.item);
+      if (itens.length > 0) localStorage.setItem(chaveLocal, JSON.stringify(itens));
+      else localStorage.removeItem(chaveLocal);
+    } catch {
+      // Sem localStorage, a exclusao segue valendo enquanto o app estiver aberto.
+    }
+  };
 
   const removeFromState = (id: string | number) => {
     setPendingItems((prev) => prev.filter((item) => item.id !== id));
@@ -42,14 +64,15 @@ export function useDelayedDelete<T extends { id: string | number }>({
       const current = pendingRef.current.get(id);
       if (!current) return;
       pendingRef.current.delete(id);
+      guardarPendentes();
       try {
-        await deleteFn(current.item);
+        await deleteFnRef.current(current.item);
       } finally {
         removeFromState(id);
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [deleteFn]
+    [chaveLocal]
   );
 
   const requestDelete = useCallback(
@@ -58,8 +81,10 @@ export function useDelayedDelete<T extends { id: string | number }>({
         finalize(item.id);
       }, delayMs);
       pendingRef.current.set(item.id, { item, timeoutId });
+      guardarPendentes();
       setPendingItems((prev) => [...prev, item]);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [delayMs, finalize]
   );
 
@@ -68,8 +93,25 @@ export function useDelayedDelete<T extends { id: string | number }>({
     if (!current) return;
     clearTimeout(current.timeoutId);
     pendingRef.current.delete(id);
+    guardarPendentes();
     removeFromState(id);
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chaveLocal]);
+
+  // O timer zero cai fora na montagem dupla do StrictMode, que senao excluiria
+  // tudo na hora pela desmontagem logo abaixo.
+  useEffect(() => {
+    if (!chaveLocal) return;
+    const t = setTimeout(() => {
+      try {
+        const itens: T[] = JSON.parse(localStorage.getItem(chaveLocal) || '[]');
+        itens.filter((item) => !pendingRef.current.has(item.id)).forEach(requestDelete);
+      } catch {
+        // Conteudo ilegivel: nao ha o que retomar.
+      }
+    }, 0);
+    return () => clearTimeout(t);
+  }, [chaveLocal, requestDelete]);
 
   // Se a tela for desmontada (troca de aba) com exclusoes pendentes, finaliza
   // o delete real de cada uma na hora em vez de deixar os timers morrerem
@@ -77,13 +119,16 @@ export function useDelayedDelete<T extends { id: string | number }>({
   // sido excluidos de verdade do banco.
   useEffect(() => {
     return () => {
+      // Sem pendentes aqui, nao apaga o que ainda vai ser retomado.
+      if (pendingRef.current.size === 0) return;
       pendingRef.current.forEach((current) => {
         clearTimeout(current.timeoutId);
-        deleteFn(current.item).catch((err) => {
+        deleteFnRef.current(current.item).catch((err) => {
           console.error('Erro ao finalizar exclusão pendente ao desmontar:', err);
         });
       });
       pendingRef.current.clear();
+      guardarPendentes();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

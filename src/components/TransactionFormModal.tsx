@@ -1,7 +1,7 @@
 ﻿import React, { useState, useEffect, useRef } from 'react';
 import { situacaoPagamento } from '../utils/situacaoPagamento';
 import { createPortal } from 'react-dom';
-import { avisar } from './AvisoApp';
+import { avisar, perguntar } from './AvisoApp';
 import {
   Transaction,
   TransactionType,
@@ -154,8 +154,33 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
     if (isOpen) {
       setPedidoFormStep(1);
       setInvalidFieldId(null);
+      mexeuNoFormularioRef.current = false;
     }
   }, [isOpen]);
+
+  /**
+   * Tocar fora ou no X perto de um campo e facil sem querer: quem ja preencheu
+   * algo decide antes de perder. Vale qualquer digitacao ou botao dentro do
+   * formulario. "Cancelar" continua saindo direto, porque ali a intencao e clara.
+   */
+  const mexeuNoFormularioRef = useRef(false);
+  const marcarQueMexeu = () => {
+    mexeuNoFormularioRef.current = true;
+  };
+  const tentarFechar = async () => {
+    if (
+      mexeuNoFormularioRef.current &&
+      !(await perguntar('O que você preencheu aqui ainda não foi salvo.', {
+        titulo: 'Sair sem salvar?',
+        confirmar: 'Sair sem salvar',
+        cancelar: 'Continuar editando',
+        perigo: true,
+      }))
+    ) {
+      return;
+    }
+    onClose();
+  };
 
   /**
    * Guarda de duplo-clique no botao primario do rodape.
@@ -422,8 +447,10 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
    * sempre: 'sinal' grava 'pago' com o sinal; as outras duas gravam sem sinal.
    * Ver utils/situacaoPagamento.ts.
    */
-  const [paymentStatus, setPaymentStatus] = useState<'pago' | 'sinal' | 'pendente'>('pago');
-  const statusParaGravar: 'pago' | 'pendente' = paymentStatus === 'pendente' ? 'pendente' : 'pago';
+  // Sem escolha ao abrir um pedido novo: ja vir "Pago" contava como recebido o
+  // pedido de quem so passou direto por este campo.
+  const [paymentStatus, setPaymentStatus] = useState<'pago' | 'sinal' | 'pendente' | null>(null);
+  const statusParaGravar: 'pago' | 'pendente' = paymentStatus === 'pago' || paymentStatus === 'sinal' ? 'pago' : 'pendente';
   const [supplier, setSupplier] = useState('');
   const [laborPeriod, setLaborPeriod] = useState<LaborPeriod>('diaria');
   const [costCategory, setCostCategory] = useState<CostCategory>('fixo');
@@ -597,7 +624,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       setType(initialType);
       setDate(getTodayIso());
       setPaymentMethod('zelle');
-      setPaymentStatus('pago');
+      setPaymentStatus(null);
       setSupplier('');
       setLaborPeriod('diaria');
       setCostCategory(initialType === 'investimento' ? 'investimento' : 'fixo');
@@ -1012,6 +1039,12 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       return;
     }
 
+    if (type === 'venda' && !paymentStatus) {
+      avisar('Escolha se o pedido está Pendente, com Sinal pago ou Pago.', { titulo: 'Falta o status do pagamento' });
+      setPedidoFormStep(3);
+      return;
+    }
+
     // "Sinal pago" sem o valor do sinal nao diz quanto ainda falta receber.
     // Antes a escolha era so Pago/Pendente e um campo vazio virava "pago por
     // inteiro" em silencio (por isso existia a pergunta "o campo do sinal esta
@@ -1270,7 +1303,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       className="fixed inset-0 z-[99999] flex items-end sm:items-center justify-center bg-neutral-900/80 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto"
       role="dialog"
       aria-modal="true"
-      onClick={onClose}
+      onClick={tentarFechar}
     >
       <div
         className="w-full max-w-xl bg-[#F6F2F5] rounded-t-xl sm:rounded-xl shadow-highlight overflow-hidden max-h-[92vh] flex flex-col animate-slideUp"
@@ -1288,7 +1321,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                 : `Novo Registro: ${typeDetails.label}`}
             </span>
             <button
-              onClick={onClose}
+              onClick={tentarFechar}
               className="w-8 h-8 rounded-full bg-white/80 hover:bg-white text-[#3A2350] flex items-center justify-center transition-colors shrink-0"
             >
               <X className="w-5 h-5" />
@@ -1323,6 +1356,11 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
           id="pedido-form"
           ref={pedidoFormRef}
           onSubmit={handleSubmit}
+          onInputCapture={marcarQueMexeu}
+          onChangeCapture={marcarQueMexeu}
+          onClickCapture={(e) => {
+            if ((e.target as HTMLElement).closest('button')) marcarQueMexeu();
+          }}
           noValidate
           style={{ fontFamily: "'Manrope', sans-serif" }}
           className="p-5 overflow-y-auto space-y-4 flex-1 stagger-children"

@@ -1,9 +1,9 @@
 // v2.1 - Fresh rebuild with latest redesign - force Vercel deployment
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { avisar, perguntar } from './components/AvisoApp';
 import { migrarFotosAntigas } from './utils/migrarFotosAntigas';
 import { limparFotosSemUso } from './utils/limparFotosSemUso';
-import { proximoPagamento } from './utils/situacaoPagamento';
+import { faltaReceberDoPedido, proximoPagamento, situacaoPagamento } from './utils/situacaoPagamento';
 import { AuthProvider } from './context/AuthContext';
 import {
   Transaction,
@@ -148,6 +148,7 @@ function AppContent() {
     requestDelete: requestDeleteTransacao,
     cancelDelete: cancelDeleteTransacao,
   } = useDelayedDelete<Transaction>({
+    chaveLocal: user ? `carula_pedidos_excluindo_${user.id}` : undefined,
     deleteFn: async (tx) => {
       // A DEVOLUCAO VEM ANTES DA EXCLUSAO, e a ordem importa.
       //
@@ -515,7 +516,28 @@ function AppContent() {
 
   // Botao de pagamento do card: pendente -> pago, sinal -> pago ("Recebi o
   // restante"), pago -> pendente. O sinal sai nos tres. Ver utils/situacaoPagamento.ts.
+  // Pendente -> pago vai direto. Os outros dois mexem em dinheiro ja anotado, e o
+  // botao fica ao lado de outros no card: um toque sem querer nao pode bastar.
+  const confirmandoPagamentoRef = useRef(false);
   const handleTogglePaymentStatus = async (tx: Transaction) => {
+    if (confirmandoPagamentoRef.current) return;
+    const nome = tx.customerName || 'este cliente';
+    const situacao = situacaoPagamento(tx);
+    if (situacao !== 'pendente') {
+      confirmandoPagamentoRef.current = true;
+      const seguir = await (situacao === 'sinal'
+        ? perguntar(`Confirma que recebeu o restante de ${formatCurrency(faltaReceberDoPedido(tx))} de ${nome}?`, {
+            titulo: 'Recebeu o restante?',
+            confirmar: 'Recebi',
+          })
+        : perguntar(`O pedido de ${nome} volta a ficar pendente, e os ${formatCurrency(tx.totalValue)} saem do que foi recebido.`, {
+            titulo: 'Voltar para pendente?',
+            confirmar: 'Voltar para pendente',
+            perigo: true,
+          }));
+      confirmandoPagamentoRef.current = false;
+      if (!seguir) return;
+    }
     try {
       await updateTransacao(tx.id, proximoPagamento(tx));
     } catch (err: any) {
