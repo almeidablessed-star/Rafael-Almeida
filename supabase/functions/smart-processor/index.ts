@@ -99,6 +99,18 @@ function readHottok(req: Request): string {
 const VALIDADE_MS = 30 * 60 * 1000;
 
 const GRANTING_EVENTS = ['PURCHASE_APPROVED', 'PURCHASE_COMPLETE'];
+
+/**
+ * Produtos da Hotmart que dao acesso ao app. Hoje so o "Carula APP" (assinatura
+ * mensal). O antigo ConfePRO (pagamento unico) chegou a ter webhook apontando
+ * para ca, e sem esta conferencia qualquer compra que chegasse neste endereco
+ * criava conta com acesso — de qualquer produto.
+ *
+ * Evento de outro produto e registrado e respondido com 200 (para a Hotmart
+ * parar de reenviar), sem liberar nem cortar nada. Evento sem produto (os testes
+ * manuais por curl, no formato chato) segue o caminho normal.
+ */
+const PRODUTOS_DO_APP = [8690560];
 const GRANTING_STATUSES = ['APPROVED', 'COMPLETE', 'COMPLETED'];
 
 /**
@@ -337,6 +349,7 @@ interface NormalizedPayload {
   affiliateCode?: string;
   transacao?: string;
   subscriberCode?: string;
+  produtoId?: number;
 }
 
 // Tres formatos convivem aqui: o envelope de COMPRA da Hotmart (tudo sob
@@ -358,7 +371,13 @@ function normalizePayload(body: any): NormalizedPayload {
       // assunto da Hotmart e nao nosso.
       affiliateCode: d.affiliates?.[0]?.affiliate_code,
       transacao: d.purchase?.transaction,
-      subscriberCode: d.subscriber?.code || d.subscription?.subscriber_code,
+      // Na COMPRA (aprovada, renovacao, reembolso) o codigo vem em
+      // `data.subscription.subscriber.code` — conferido no envio real de
+      // 04/11/2026. O cancelamento de assinatura traz `data.subscriber.code`.
+      // Sem o primeiro caminho o codigo era gravado vazio em toda compra.
+      subscriberCode:
+        d.subscription?.subscriber?.code || d.subscriber?.code || d.subscription?.subscriber_code,
+      produtoId: typeof d.product?.id === 'number' ? d.product.id : undefined,
     };
   }
 
@@ -554,7 +573,9 @@ function resumirPayload(p: NormalizedPayload, body: any) {
     transaction: p.transacao ?? null,
     subscriber_code: p.subscriberCode ?? null,
     affiliate_code: p.affiliateCode ?? null,
-    date_next_charge: d?.date_next_charge ?? null,
+    // Compra: `data.purchase.date_next_charge`. Cancelamento: `data.date_next_charge`.
+    date_next_charge: d?.purchase?.date_next_charge ?? d?.date_next_charge ?? null,
+    product_id: p.produtoId ?? null,
     buyer_email: p.email ?? null,
     buyer_name: p.name ?? null,
     campos_recebidos: {
@@ -641,6 +662,12 @@ Deno.serve(async (req) => {
         console.log(`Evento ${p.eventId} ja processado`);
         return json({ message: 'Event already processed', eventId: p.eventId }, 200);
       }
+    }
+
+    if (p.produtoId !== undefined && !PRODUTOS_DO_APP.includes(p.produtoId)) {
+      console.log(`Evento ${event} de outro produto (${p.produtoId}) ignorado`);
+      await registrarEvento(p, body, null, null);
+      return json({ message: 'Other product ignored', event, product: p.produtoId }, 200);
     }
 
     // Cancelamento de assinatura: o acesso vale ate o fim do periodo ja pago.
