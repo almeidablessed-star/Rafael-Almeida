@@ -60,6 +60,14 @@ function generateRandomPassword(): string {
 /** Para onde vao as respostas aos e-mails: o dominio do remetente nao tem caixa de entrada. */
 const RESPONDER_PARA = 'suportecarulaapp@gmail.com';
 
+/**
+ * Formulario de reembolso da Hotmart. Pede so o codigo da transacao e o e-mail
+ * da compra, sem login — e por isso o e-mail ja leva o codigo junto. Achar esse
+ * caminho pela Hotmart exige passar por varios artigos de ajuda, e quem nao acha
+ * tende a contestar no cartao, o que pesa bem mais contra o produto.
+ */
+const LINK_REEMBOLSO = 'https://refund.hotmart.com/';
+
 /** O nome vem do payload da Hotmart e entra no HTML do e-mail: escapar sempre. */
 function escaparHtml(texto: string): string {
   return texto
@@ -942,9 +950,15 @@ Deno.serve(async (req) => {
               Se o código vencer, é só tocar em <strong>"Não recebi o código"</strong> na mesma tela que enviamos outro.
             </p>
             <p style="color: #666; line-height: 1.6;">Dúvidas? Responda este e-mail.</p>
-            <p style="color: #6B6B6B; font-size: 12px; text-align: center; margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
-              Você recebeu esta mensagem porque comprou o Carula App pela Hotmart com este endereço.
-            </p>
+            <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
+              ${p.transacao ? `<p style="color: #6B6B6B; font-size: 12px; margin: 0 0 8px 0;">Código da compra: <strong>${escaparHtml(p.transacao)}</strong></p>` : ''}
+              <p style="color: #6B6B6B; font-size: 12px; line-height: 1.6; margin: 0 0 16px 0;">
+                Arrependeu-se? Você tem 7 dias de garantia para <a href="${LINK_REEMBOLSO}" style="color: #6E3F72;">pedir o reembolso pela Hotmart</a>. Lá pedem o código da compra e o e-mail usado nela.
+              </p>
+              <p style="color: #6B6B6B; font-size: 12px; text-align: center; margin: 0;">
+                Você recebeu esta mensagem porque comprou o Carula App pela Hotmart com este endereço.
+              </p>
+            </div>
           </div>
         </div>
       `,
