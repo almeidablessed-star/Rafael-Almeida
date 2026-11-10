@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useDeferredValue } from 'react';
 import { mensagemDeErro } from '../utils/mensagemDeErro';
 import { avisar, perguntar } from './AvisoApp';
 import { createPortal } from 'react-dom';
@@ -465,17 +465,35 @@ export const CustomersModule: React.FC = () => {
     }
   };
 
-  // Filter customers by search term
-  // Sempre em ordem alfabetica (A a Z), ignorando acento e maiuscula: a lista
-  // vinha na ordem de cadastro, da mais nova para a mais antiga.
-  const filteredCustomers = customers
-    .filter(
-      (c) =>
-        c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        c.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (c.city && c.city.toLowerCase().includes(searchTerm.toLowerCase()))
-    )
-    .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' }));
+  // Busca por nome, telefone ou cidade SEM ligar para acento nem maiuscula:
+  // "iana" acha "Ianã" (antes so achava digitando o acento certinho). O
+  // telefone tambem casa so pelos numeros: "1198765" acha "(11) 98765-...".
+  //
+  // Pensado para centenas de clientes: o texto de busca de cada uma e montado
+  // uma vez por lista (useMemo), nao a cada tecla, e a lista acompanha a
+  // digitacao com `useDeferredValue` — o campo responde na hora mesmo que a
+  // lista leve um instante a mais para redesenhar.
+  const indiceDeBusca = useMemo(
+    () =>
+      [...customers]
+        // Sempre em ordem alfabetica (A a Z), ignorando acento e maiuscula.
+        .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' }))
+        .map((c) => ({
+          cliente: c,
+          texto: normalizeName(`${c.name} ${c.phone} ${c.city || ''}`),
+          digitos: (c.phone || '').replace(/\D/g, ''),
+        })),
+    [customers]
+  );
+  const buscaAdiada = useDeferredValue(searchTerm);
+  const filteredCustomers = useMemo(() => {
+    const termo = normalizeName(buscaAdiada);
+    const termoDigitos = buscaAdiada.replace(/\D/g, '');
+    if (!termo) return indiceDeBusca.map((i) => i.cliente);
+    return indiceDeBusca
+      .filter((i) => i.texto.includes(termo) || (termoDigitos.length >= 3 && i.digitos.includes(termoDigitos)))
+      .map((i) => i.cliente);
+  }, [indiceDeBusca, buscaAdiada]);
 
   // Saved WhatsApp preference: 'business' | 'standard' | 'ask'
   const [waPreference, setWaPreference] = useState<'business' | 'standard' | 'ask'>(() => {
@@ -591,7 +609,10 @@ export const CustomersModule: React.FC = () => {
   };
 
   // Group events by CUSTOMER so customer names don't repeat endlessly in 100 separate tabs
-  const customerGroupedList = customers.map((c) => {
+  // Calculado uma vez por lista de clientes, e nao a cada tecla da busca: cada
+  // cliente soma as datas fixas do ano (Natal, Dia das Maes...), e com cem
+  // clientes isso eram centenas de contas de data por letra digitada.
+  const customerGroupedList = useMemo(() => customers.map((c) => {
     const events: {
       title: string;
       date: string;
@@ -643,7 +664,11 @@ export const CustomersModule: React.FC = () => {
       customer: c,
       events,
     };
-  });
+  }), [customers]);
+  const eventosPorCliente = useMemo(
+    () => new Map(customerGroupedList.map((g) => [g.customer.id, g.events])),
+    [customerGroupedList]
+  );
 
   if (isLoadingCustomers) {
     return (
@@ -1321,8 +1346,7 @@ export const CustomersModule: React.FC = () => {
           </div>
         ) : (
           filteredCustomers.map((c) => {
-            const cGroup = customerGroupedList.find((g) => g.customer.id === c.id);
-            const cEvents = cGroup?.events || [];
+            const cEvents = eventosPorCliente.get(c.id) || [];
 
             return (
               <div
