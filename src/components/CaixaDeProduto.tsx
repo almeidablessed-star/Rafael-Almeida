@@ -157,9 +157,14 @@ export const CaixaDeProduto: React.FC<CaixaDeProdutoProps> = ({
   }, [aberto]);
 
   /**
-   * Posicao da lista na tela, como no CustomSelect, com uma diferenca: aqui o
-   * teclado do celular abre junto. O `innerHeight` nao encolhe com o teclado
-   * no iPhone; o `visualViewport` sim, entao o espaco livre vem dele.
+   * Posicao da lista na tela. Ela abre SEMPRE para baixo, colada no campo:
+   * aberta para cima, no iPhone, ela cobria o proprio campo enquanto se
+   * digitava (relato do Rafael, 10/11/2026). Quando o teclado deixa pouco
+   * espaco embaixo, quem se mexe e o formulario: ele rola ate o campo ficar
+   * perto do topo, e a lista ganha o espaco entre o campo e o teclado.
+   *
+   * O espaco livre vem do `visualViewport`, e nao do `innerHeight`: no iPhone
+   * so o primeiro encolhe quando o teclado abre.
    */
   const [posicao, setPosicao] = useState<React.CSSProperties | null>(null);
   useLayoutEffect(() => {
@@ -167,36 +172,61 @@ export const CaixaDeProduto: React.FC<CaixaDeProdutoProps> = ({
       setPosicao(null);
       return;
     }
+    const margem = 8;
+    const alturaDesejada = Math.min(280, opcoes.length * 46 + 12);
+    const areaVisivel = () => {
+      const vv = window.visualViewport;
+      return {
+        topo: vv ? vv.offsetTop : 0,
+        fundo: vv ? vv.offsetTop + vv.height : window.innerHeight,
+      };
+    };
+    const rolarParaCaber = () => {
+      const caixa = caixaRef.current;
+      if (!caixa) return;
+      const r = caixa.getBoundingClientRect();
+      const { topo, fundo } = areaVisivel();
+      const falta = alturaDesejada - (fundo - r.bottom - margem);
+      if (falta <= 0) return;
+      // A area que rola em volta do campo (o corpo do formulario do pedido).
+      let pai = caixa.parentElement;
+      while (pai && !(pai.scrollHeight > pai.clientHeight && /(auto|scroll)/.test(getComputedStyle(pai).overflowY))) {
+        pai = pai.parentElement;
+      }
+      // Nao sobe o campo para baixo do cabecalho fixo do formulario.
+      const alvo = Math.max(pai ? pai.getBoundingClientRect().top : 0, topo) + 12;
+      const passo = Math.min(r.top - alvo, falta);
+      if (passo > 0) (pai ?? document.scrollingElement)?.scrollBy({ top: passo });
+    };
     const calcular = () => {
       const caixa = caixaRef.current;
       if (!caixa) return;
       const r = caixa.getBoundingClientRect();
-      const vv = window.visualViewport;
-      const topoVisivel = vv ? vv.offsetTop : 0;
-      const fundoVisivel = vv ? vv.offsetTop + vv.height : window.innerHeight;
-      const margem = 8;
-      const alturaDesejada = Math.min(280, opcoes.length * 46 + 12);
-      const espacoAbaixo = fundoVisivel - r.bottom - margem;
-      const espacoAcima = r.top - topoVisivel - margem;
-      const paraCima = espacoAbaixo < alturaDesejada && espacoAcima > espacoAbaixo;
-      const maxHeight = Math.max(120, Math.min(280, (paraCima ? espacoAcima : espacoAbaixo) - 6));
+      const { fundo } = areaVisivel();
+      const espacoAbaixo = fundo - r.bottom - margem;
       setPosicao({
-        ...(paraCima ? { bottom: window.innerHeight - r.top + 6 } : { top: r.bottom + 6 }),
+        top: r.bottom + 6,
         left: r.left,
         width: r.width,
-        maxHeight,
+        maxHeight: Math.max(120, Math.min(280, espacoAbaixo - 6)),
       });
     };
-    calcular();
+    // O teclado abre animado: ao terminar, o visualViewport muda de tamanho,
+    // e so entao da para saber quanto espaco sobrou.
+    const aoMudarArea = () => {
+      rolarParaCaber();
+      calcular();
+    };
+    aoMudarArea();
     const vv = window.visualViewport;
     window.addEventListener('scroll', calcular, true);
-    window.addEventListener('resize', calcular);
-    vv?.addEventListener('resize', calcular);
+    window.addEventListener('resize', aoMudarArea);
+    vv?.addEventListener('resize', aoMudarArea);
     vv?.addEventListener('scroll', calcular);
     return () => {
       window.removeEventListener('scroll', calcular, true);
-      window.removeEventListener('resize', calcular);
-      vv?.removeEventListener('resize', calcular);
+      window.removeEventListener('resize', aoMudarArea);
+      vv?.removeEventListener('resize', aoMudarArea);
       vv?.removeEventListener('scroll', calcular);
     };
   }, [aberto, opcoes.length]);
