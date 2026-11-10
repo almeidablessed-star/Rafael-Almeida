@@ -707,8 +707,12 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
 
   const typeDetails = getTransactionTypeDetails(type);
 
-  // Use fichas técnicas reais cadastradas pela confeiteira
-  const cakeNamesList = fichas.map(f => f.name);
+  // Use fichas técnicas reais cadastradas pela confeiteira, em ordem
+  // alfabetica: com dezenas de bolos, a ordem de cadastro obrigava a procurar
+  // a lista inteira. `numeric` poe "Bolo 2" antes de "Bolo 10".
+  const cakeNamesList = fichas
+    .map(f => f.name)
+    .sort((a, b) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base', numeric: true }));
   const sweetsNamesList: string[] = [];
 
   // --- Order Items Logic ---

@@ -56,6 +56,7 @@ import {
   Scale,
   Clock,
   ArrowRight,
+  Search,
 } from 'lucide-react';
 
 /**
@@ -182,6 +183,9 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
       )
     : null;
   const [selectedCategory, setSelectedCategory] = useState<'bolos' | 'doces' | 'salgados' | 'saudaveis' | 'kids'>('bolos');
+  // Busca pelo nome da ficha. Com texto, procura em TODAS as categorias (a
+  // confeiteira nem sempre lembra se cadastrou em Bolos ou em Doces).
+  const [buscaFicha, setBuscaFicha] = useState('');
   // Versao computador (docs/design/desktop-redesign, Fichas.dc.html). Um JSX
   // so para as duas versoes: no computador (`pc`) muda a moldura da pagina
   // (titulo + "Nova ficha" no topo, cartoes em grade) e as medidas do cartao;
@@ -1058,7 +1062,58 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   const fichasVisiveis = pendingDeleteFichas.length > 0
     ? fichas.filter((f) => !pendingDeleteFichas.some((pend) => pend.id === f.id))
     : fichas;
-  const filteredFichas = fichasVisiveis.filter((f) => f.category === selectedCategory);
+  // Ordem alfabetica, e nao a de cadastro (mais nova primeiro): com dezenas de
+  // fichas, achar "Prestigio" no meio da ordem de chegada era rolar a lista
+  // inteira. Uma ficha recem-criada vai para o lugar dela na ordem, de
+  // proposito (pedido do Rafael, 09/11/2026).
+  const termoBusca = normalizeName(buscaFicha);
+  const filteredFichas = fichasVisiveis
+    .filter((f) => (termoBusca ? normalizeName(f.name).includes(termoBusca) : f.category === selectedCategory))
+    .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base', numeric: true }));
+
+  // Mesmo visual da busca de Clientes, no celular e no computador.
+  const campoBuscaFicha = (
+    <div style={{ position: 'relative', ...(pc ? { width: '360px', maxWidth: '100%' } : {}) }}>
+      <Search
+        className="w-4 h-4 absolute top-1/2 -translate-y-1/2"
+        style={{ color: '#A096A6', left: pc ? '16px' : '13px', pointerEvents: 'none' }}
+        aria-hidden="true"
+      />
+      <input
+        type="text"
+        aria-label="Buscar ficha"
+        placeholder="Buscar ficha pelo nome..."
+        value={buscaFicha}
+        onChange={(e) => setBuscaFicha(e.target.value)}
+        className={pc ? 'busca-computador' : undefined}
+        style={{
+          width: '100%',
+          boxSizing: 'border-box',
+          padding: pc ? '0 40px 0 42px' : '11px 36px 11px 34px',
+          ...(pc ? { height: '48px' } : {}),
+          background: '#FFFFFF',
+          borderRadius: '14px',
+          fontSize: pc ? '13px' : '11px',
+          color: pc ? '#241B2B' : '#A096A6',
+          border: 'none',
+          boxShadow: '0 6px 14px rgba(58,35,80,.07)',
+          fontFamily: "'Manrope', sans-serif",
+          outline: 'none',
+        }}
+      />
+      {buscaFicha && (
+        <button
+          type="button"
+          aria-label="Limpar busca"
+          onClick={() => setBuscaFicha('')}
+          className="absolute top-1/2 -translate-y-1/2 flex items-center justify-center"
+          style={{ right: '6px', width: '32px', height: '32px', borderRadius: '10px', background: 'transparent', border: 'none', color: '#7A6E80', cursor: 'pointer' }}
+        >
+          <X className="w-4 h-4" />
+        </button>
+      )}
+    </div>
+  );
 
   // Tamanho aberto nos passos 2 e 3. Se o escolhido foi removido no passo 1,
   // cai no primeiro.
@@ -1233,9 +1288,14 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
       {pc && (
         <header style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '16px 24px' }}>
           <TituloDaPagina>Fichas Técnicas</TituloDaPagina>
-          {botaoNovaFicha}
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '12px' }}>
+            {campoBuscaFicha}
+            {botaoNovaFicha}
+          </div>
         </header>
       )}
+
+      {!pc && campoBuscaFicha}
 
       {/* Category chips — ver "Fichas - Aba.dc.html". Layout novo (pilula
           com contador), mesmas categorias/labels/contagens reais de sempre —
@@ -1254,13 +1314,16 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
       >
         {(Object.keys(CATEGORY_LABELS) as Array<keyof typeof CATEGORY_LABELS>).map((key) => {
           const cat = CATEGORY_LABELS[key];
-          const isActive = selectedCategory === key;
+          const isActive = !termoBusca && selectedCategory === key;
           const count = fichasVisiveis.filter((f) => f.category === key).length;
           return (
             <button
               key={key}
               type="button"
-              onClick={() => setSelectedCategory(key as typeof selectedCategory)}
+              onClick={() => {
+                setSelectedCategory(key as typeof selectedCategory);
+                setBuscaFicha('');
+              }}
               className={pc ? 'flex-shrink-0 whitespace-nowrap flex items-center gap-2 cursor-pointer transition-all' : 'flex-shrink-0 whitespace-nowrap flex items-center gap-1.5 cursor-pointer transition-all'}
               style={{
                 fontSize: '13px',
@@ -2350,6 +2413,12 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         document.body
       )}
 
+      {termoBusca && filteredFichas.length > 0 && (
+        <div style={{ fontSize: '12px', color: '#7A6E80', marginBottom: pc ? '-12px' : '-4px' }}>
+          {filteredFichas.length === 1 ? '1 ficha encontrada' : `${filteredFichas.length} fichas encontradas`} em todas as categorias
+        </div>
+      )}
+
       {/* FICHAS CARDS LIST - SEGUINDO FIELMENTE O DESIGN DE REFERÊNCIA (grade no iPad: ver .lista-tablet em index.css) */}
       {/* No computador: grade de cartoes com a mesma altura por linha (a
           fileira Editar / Duplicar / Excluir desce para o fim do cartao). */}
@@ -2376,14 +2445,18 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
               <BookOpen className="w-[30px] h-[30px]" style={{ color: '#6E3F72' }} strokeWidth={2} />
             </div>
             <div className="font-serif-display" style={{ fontSize: '22px', color: '#3A2350' }}>
-              Nenhuma ficha em {CATEGORY_LABELS[selectedCategory].label} ainda
+              {termoBusca
+                ? `Nenhuma ficha com “${buscaFicha.trim()}”`
+                : `Nenhuma ficha em ${CATEGORY_LABELS[selectedCategory].label} ainda`}
             </div>
             <div className="text-sm" style={{ color: '#7A6E80', maxWidth: '380px' }}>
-              Cadastre a receita uma vez e o Carula calcula custo, mão de obra e preço sugerido de cada tamanho.
+              {termoBusca
+                ? 'Procuramos em todas as categorias. Confira a escrita ou tente só uma parte do nome.'
+                : 'Cadastre a receita uma vez e o Carula calcula custo, mão de obra e preço sugerido de cada tamanho.'}
             </div>
             <button
               type="button"
-              onClick={handleOpenAdd}
+              onClick={termoBusca ? () => setBuscaFicha('') : handleOpenAdd}
               className="transition-colors"
               style={{
                 marginTop: '8px',
@@ -2399,7 +2472,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
               onMouseEnter={(e) => { e.currentTarget.style.background = '#6E3F72'; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = '#3A2350'; }}
             >
-              Adicionar primeira ficha
+              {termoBusca ? 'Limpar busca' : 'Adicionar primeira ficha'}
             </button>
           </div>
         ) : (
