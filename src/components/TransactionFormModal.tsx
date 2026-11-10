@@ -28,7 +28,7 @@ import { getTodayIso, getTransactionTypeDetails, parseNumeroDigitado } from '../
 import { buildFichaItems, normalizeName } from '../utils/fichaMatcher';
 import { capitalizeFirstLetter } from '../utils/textCase';
 import { calculateProportionalBreakdown, derivarProporcoes, parseSaleDetail } from '../utils/financialEngine';
-import { CustomSelect } from './CustomSelect';
+import { CaixaDeProduto } from './CaixaDeProduto';
 import {
   X,
   Plus,
@@ -1661,18 +1661,24 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                             agrupava um unico item, e o proprio rotulo ja carrega
                             o ✨ que o separava visualmente.
                           */
-                          <CustomSelect
+                          <CaixaDeProduto
                             value={item.productName}
-                            placeholder="Selecione o produto…"
+                            placeholder="Selecione ou digite o produto…"
                             ariaLabel="Produto do item do pedido"
                             onChange={(v) => {
                               handleUpdateItemProduct(item.id, v);
                               if (invalidFieldId === `pedido-produto-${item.id}`) setInvalidFieldId(null);
                             }}
-                            options={[
-                              ...cakeNamesList.map((name) => ({ value: name, label: name })),
-                              { value: 'Outro / Personalizado', label: '✨ Outro / Personalizado' },
-                            ]}
+                            options={cakeNamesList.map((name) => ({ value: name, label: name }))}
+                            valorOutro="Outro / Personalizado"
+                            rotuloOutro="✨ Outro / Personalizado"
+                            onUsarComoOutro={(nome) => {
+                              // As duas atualizacoes sao funcionais: a segunda
+                              // preenche o nome depois que a primeira zerou o item.
+                              handleUpdateItemProduct(item.id, 'Outro / Personalizado');
+                              handleUpdateCustomField(item.id, 'customDescription', capitalizeFirstLetter(nome));
+                              if (invalidFieldId === `pedido-produto-${item.id}`) setInvalidFieldId(null);
+                            }}
                           />
                         )}
                         {invalidFieldId === `pedido-produto-${item.id}` && <FieldValidationError />}
