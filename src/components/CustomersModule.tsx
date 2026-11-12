@@ -777,7 +777,7 @@ export const CustomersModule: React.FC = () => {
             gap: pc ? '8px' : '6px',
             background: '#4C7358',
             color: '#FFFFFF',
-            fontSize: pc ? '13px' : '11px',
+            fontSize: pc ? '13px' : '12.5px',
             fontWeight: 800,
             padding: pc ? '0 18px' : '9px 13px',
             ...(pc ? { height: '44px' } : {}),
@@ -1347,6 +1347,12 @@ export const CustomersModule: React.FC = () => {
         ) : (
           filteredCustomers.map((c) => {
             const cEvents = eventosPorCliente.get(c.id) || [];
+            // Celular: o cartao e uma linha (foto, nome, cidade, WhatsApp) e
+            // abre ao toque para mostrar telefone, endereco, editar, excluir e
+            // as datas. Com a faixa roxa alta cabiam so dois clientes e meio
+            // por tela. No computador o cartao continua aberto, como era.
+            const aberto = pc || expandedCustomerId === c.id;
+            const alternarAberto = () => setExpandedCustomerId(expandedCustomerId === c.id ? null : c.id);
 
             return (
               <div
@@ -1357,17 +1363,29 @@ export const CustomersModule: React.FC = () => {
                   // desce para o fim (cartoes de uma linha com a mesma altura).
                   ? { borderRadius: '24px', display: 'flex', flexDirection: 'column', boxShadow: '0 8px 20px rgba(58,35,80,0.09)' }
                   : {
-                  borderRadius: '24px',
+                  borderRadius: '20px',
                 }}
               >
-                {/* GRADIENT HEADER */}
+                {/* Cabecalho: faixa em degrade no computador; no celular, a
+                    linha clara que abre e fecha o cartao. */}
                 <div
+                  {...(pc ? {} : {
+                    role: 'button',
+                    tabIndex: 0,
+                    'aria-expanded': aberto,
+                    'aria-label': `${c.name}: ${aberto ? 'fechar' : 'abrir'} detalhes`,
+                    onClick: alternarAberto,
+                    onKeyDown: (e: React.KeyboardEvent) => {
+                      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); alternarAberto(); }
+                    },
+                  })}
                   style={{
-                    background: 'linear-gradient(140deg,#3A2350,#6E3F72 60%,#A85E86)',
-                    padding: pc ? '18px' : '14px 15px',
+                    background: pc ? 'linear-gradient(140deg,#3A2350,#6E3F72 60%,#A85E86)' : 'transparent',
+                    padding: pc ? '18px' : '12px 10px 12px 14px',
                     display: 'flex',
                     alignItems: 'center',
                     gap: pc ? '14px' : '12px',
+                    ...(pc ? {} : { cursor: 'pointer' }),
                   }}
                 >
                   {/* Avatar */}
@@ -1375,11 +1393,12 @@ export const CustomersModule: React.FC = () => {
                     style={{
                       width: pc ? '52px' : '46px',
                       height: pc ? '52px' : '46px',
-                      ...(pc ? { boxSizing: 'border-box' as const, overflow: 'hidden' } : {}),
+                      ...(pc ? { boxSizing: 'border-box' as const } : {}),
+                      overflow: 'hidden',
                       borderRadius: '50%',
-                      background: 'rgba(255,255,255,.16)',
-                      border: '1px solid rgba(255,255,255,.3)',
-                      color: '#FFFFFF',
+                      background: pc ? 'rgba(255,255,255,.16)' : '#F3E9F3',
+                      border: pc ? '1px solid rgba(255,255,255,.3)' : 'none',
+                      color: pc ? '#FFFFFF' : '#3A2350',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -1411,17 +1430,23 @@ export const CustomersModule: React.FC = () => {
                       style={{
                         fontFamily: "'Instrument Serif', serif",
                         fontSize: pc ? '24px' : '21px',
-                        color: '#FFFFFF',
+                        color: pc ? '#FFFFFF' : '#241B2B',
                         lineHeight: 1.1,
+                        overflowWrap: 'anywhere',
                       }}
                     >
                       {c.name}
                     </span>
-                    {c.city && (
+                    {!pc && (
+                      <span style={{ fontSize: '13px', color: '#5B5062', fontFamily: "'Manrope', sans-serif" }}>
+                        {[c.city, `${cEvents.length} ${cEvents.length === 1 ? 'data' : 'datas'}`].filter(Boolean).join(' · ')}
+                      </span>
+                    )}
+                    {pc && c.city && (
                       <span
                         style={{
                           alignSelf: 'flex-start',
-                          fontSize: pc ? '11px' : '9.5px',
+                          fontSize: '11px',
                           fontWeight: 800,
                           color: '#3A2350',
                           background: '#F0E2C8',
@@ -1439,12 +1464,13 @@ export const CustomersModule: React.FC = () => {
 
                   {/* WhatsApp Icon */}
                   <button
-                    onClick={() => handleSendReminder(c)}
-                    {...(pc ? { type: 'button' as const, 'aria-label': `Enviar mensagem no WhatsApp para ${c.name}` } : {})}
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); handleSendReminder(c); }}
+                    aria-label={`Enviar mensagem no WhatsApp para ${c.name}`}
                     style={{
-                      width: pc ? '44px' : '34px',
-                      height: pc ? '44px' : '34px',
-                      borderRadius: pc ? '13px' : '12px',
+                      width: '44px',
+                      height: '44px',
+                      borderRadius: '13px',
                       background: '#F5B9C6',
                       display: 'flex',
                       alignItems: 'center',
@@ -1452,26 +1478,34 @@ export const CustomersModule: React.FC = () => {
                       cursor: 'pointer',
                       flexShrink: 0,
                       border: 'none',
-                      boxShadow: '0 6px 14px rgba(0,0,0,.2)',
+                      boxShadow: pc ? '0 6px 14px rgba(0,0,0,.2)' : 'none',
                       transition: 'transform .2s ease',
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
                     onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
                     title="Enviar mensagem no WhatsApp"
                   >
-                    <svg width={pc ? 18 : 15} height={pc ? 18 : 15} viewBox="0 0 24 24" fill="none" stroke="#3A2350" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#3A2350" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M21 11.5a8.4 8.4 0 0 1-12.3 7.4L3 21l2.2-5.5A8.4 8.4 0 1 1 21 11.5z"></path>
                     </svg>
                   </button>
+                  {!pc && (
+                    <ChevronDown
+                      aria-hidden="true"
+                      style={{ flexShrink: 0, width: '18px', height: '18px', color: '#7A6E80', transform: aberto ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }}
+                    />
+                  )}
                 </div>
 
+                {aberto && (<>
                 {/* CARD CONTENT */}
                 <div
                   style={{
-                    padding: pc ? '16px 18px 14px' : '14px 15px',
+                    padding: pc ? '16px 18px 14px' : '12px 14px 14px',
                     display: 'flex',
                     flexDirection: 'column',
                     gap: pc ? '12px' : '11px',
+                    ...(pc ? {} : { borderTop: '1px solid #F0E9F1' }),
                   }}
                 >
                   <div className={pc ? 'flex items-start gap-3 justify-between' : 'flex items-center gap-3 flex-wrap justify-between'}>
@@ -1481,11 +1515,11 @@ export const CustomersModule: React.FC = () => {
                           display: 'flex',
                           alignItems: 'center',
                           gap: pc ? '6px' : '4px',
-                          fontSize: pc ? '12px' : '10.5px',
+                          fontSize: '12px',
                           fontWeight: 700,
                           color: '#241B2B',
                           background: '#F6F2F5',
-                          padding: pc ? '5px 11px' : '4px 9px',
+                          padding: '5px 11px',
                           borderRadius: '999px',
                           fontFamily: "'Manrope', sans-serif",
                         }}
@@ -1498,11 +1532,11 @@ export const CustomersModule: React.FC = () => {
                             display: 'flex',
                             alignItems: 'center',
                             gap: pc ? '6px' : '4px',
-                            fontSize: pc ? '12px' : '10.5px',
+                            fontSize: '12px',
                             fontWeight: 600,
                             color: '#5B4A6B',
                             background: '#F6F2F5',
-                            padding: pc ? '5px 11px' : '4px 9px',
+                            padding: '5px 11px',
                             borderRadius: '999px',
                             fontFamily: "'Manrope', sans-serif",
                           }}
@@ -1513,13 +1547,13 @@ export const CustomersModule: React.FC = () => {
                       )}
                     </div>
 
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center shrink-0" style={{ gap: pc ? '8px' : '14px' }}>
                       <button
                         onClick={() => handleOpenEdit(c)}
                         {...(pc ? { type: 'button' as const, 'aria-label': `Editar ${c.name}` } : {})}
                         style={{
-                          width: pc ? '40px' : '28px',
-                          height: pc ? '40px' : '28px',
+                          width: pc ? '40px' : '44px',
+                          height: pc ? '40px' : '44px',
                           background: '#F6F2F5',
                           display: 'flex',
                           alignItems: 'center',
@@ -1539,8 +1573,8 @@ export const CustomersModule: React.FC = () => {
                         onClick={() => handleDelete(c)}
                         {...(pc ? { type: 'button' as const, 'aria-label': `Excluir ${c.name}` } : {})}
                         style={{
-                          width: pc ? '40px' : '28px',
-                          height: pc ? '40px' : '28px',
+                          width: pc ? '40px' : '44px',
+                          height: pc ? '40px' : '44px',
                           background: '#F6F2F5',
                           display: 'flex',
                           alignItems: 'center',
@@ -1566,7 +1600,7 @@ export const CustomersModule: React.FC = () => {
                       "{c.notes}"
                     </p>
                   ) : (
-                    <p className="text-[11px] text-[#241B2B]/70 italic bg-[#F6F2F5] p-2 rounded-xl border border-[#F5B9C6]/30">
+                    <p className="text-[#241B2B]/70 italic bg-[#F6F2F5] p-2 rounded-xl border border-[#F5B9C6]/30" style={{ fontSize: '12px' }}>
                       📝 "{c.notes}"
                     </p>
                   ))}
@@ -1627,7 +1661,7 @@ export const CustomersModule: React.FC = () => {
                         display: 'flex',
                         alignItems: 'center',
                         gap: '8px',
-                        fontSize: pc ? '13px' : '11.5px',
+                        fontSize: pc ? '13px' : '12.5px',
                         fontWeight: pc ? 700 : 800,
                         color: '#241B2B',
                         fontFamily: "'Manrope', sans-serif",
@@ -1640,7 +1674,7 @@ export const CustomersModule: React.FC = () => {
                     <div className={pc ? 'flex items-center gap-2' : 'flex items-center gap-1.5'}>
                       <span
                         style={{
-                          fontSize: pc ? '11px' : '9.5px',
+                          fontSize: '11px',
                           fontWeight: pc ? 800 : 600,
                           background: '#3A2350',
                           color: '#F5B9C6',
@@ -1685,7 +1719,7 @@ export const CustomersModule: React.FC = () => {
                     >
                       <p
                         style={{
-                          fontSize: pc ? '11px' : '9.5px',
+                          fontSize: '11px',
                           fontWeight: 800,
                           letterSpacing: pc ? '.04em' : '.06em',
                           color: '#7A6E80',
@@ -1725,7 +1759,7 @@ export const CustomersModule: React.FC = () => {
                                 {!pc && (ev.isHoliday ? <Gift className="w-3.5 h-3.5 text-[#241B2B] shrink-0" /> : <Cake className="w-3.5 h-3.5 text-[#241B2B] shrink-0" />)}
                                 <span
                                   style={{
-                                    fontSize: pc ? '13px' : '11px',
+                                    fontSize: pc ? '13px' : '12.5px',
                                     fontWeight: 700,
                                     color: '#241B2B',
                                     overflow: 'hidden',
@@ -1752,7 +1786,7 @@ export const CustomersModule: React.FC = () => {
                               </div>
                               <p
                                 style={{
-                                  fontSize: pc ? '12px' : '10px',
+                                  fontSize: '12px',
                                   color: '#7A6E80',
                                   fontFamily: "'Manrope', sans-serif",
                                   ...(pc ? { margin: 0 } : {}),
@@ -1772,7 +1806,7 @@ export const CustomersModule: React.FC = () => {
                                     'aria-label': `Avisar ${c.name}: ${ev.title}`,
                                     style: { height: '38px', padding: '0 12px', borderRadius: '12px', fontSize: '12px', gap: '5px', fontFamily: 'inherit' },
                                   }
-                                : {})}
+                                : { 'aria-label': `Avisar ${c.name}: ${ev.title}`, style: { height: '40px', padding: '0 12px', fontSize: '12px' } })}
                             >
                               <MessageCircle className="w-3.5 h-3.5 text-[#F5B9C6]" />
                               <span>Avisar</span>
@@ -1783,6 +1817,7 @@ export const CustomersModule: React.FC = () => {
                     </div>
                   )}
                 </div>
+                </>)}
               </div>
             );
           })
