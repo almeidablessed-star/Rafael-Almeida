@@ -327,7 +327,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
               }}
             >
               <span>{CURRENCY_OPTIONS.find((o) => o.value === currency)?.label}</span>
-              <span style={{ fontSize: '10px', color: '#7A6E80' }}>▼</span>
+              <span style={{ fontSize: '12px', color: '#7A6E80' }}>▼</span>
             </button>
 
             {isCurrencyOpen && (
@@ -523,7 +523,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
             <label
               style={{
                 display: 'block',
-                fontSize: '11px',
+                fontSize: '12px',
                 fontWeight: 700,
                 color: '#7A6E80',
                 marginBottom: '10px',
@@ -561,7 +561,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
             <p
               style={{
                 margin: '6px 0 0',
-                fontSize: '11px',
+                fontSize: '12px',
                 color: '#9A8FA0',
                 fontFamily: "'Manrope', sans-serif",
               }}
@@ -575,7 +575,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
             <label
               style={{
                 display: 'block',
-                fontSize: '11px',
+                fontSize: '12px',
                 fontWeight: 700,
                 color: '#7A6E80',
                 marginBottom: '10px',
@@ -617,7 +617,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
             <label
               style={{
                 display: 'block',
-                fontSize: '11px',
+                fontSize: '12px',
                 fontWeight: 700,
                 color: '#7A6E80',
                 marginBottom: '10px',
@@ -659,7 +659,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
             <label
               style={{
                 display: 'block',
-                fontSize: '11px',
+                fontSize: '12px',
                 fontWeight: 700,
                 color: '#7A6E80',
                 marginBottom: '10px',
@@ -701,7 +701,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
             <label
               style={{
                 display: 'block',
-                fontSize: '11px',
+                fontSize: '12px',
                 fontWeight: 700,
                 color: '#7A6E80',
                 marginBottom: '10px',
@@ -743,7 +743,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onL
             <label
               style={{
                 display: 'block',
-                fontSize: '11px',
+                fontSize: '12px',
                 fontWeight: 700,
                 color: '#7A6E80',
                 marginBottom: '10px',

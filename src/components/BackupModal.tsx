@@ -389,7 +389,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
               <Download className="w-4 h-4" />
               Salvar arquivo
             </button>
-            <span className="text-[11px]" style={{ color: '#7A6E80' }}>
+            <span className="text-[12px]" style={{ color: '#7A6E80' }}>
               Escolha "Salvar em Arquivos", ou envie para o seu WhatsApp ou e-mail.
               Guarde num lugar só seu: o arquivo tem os contatos das suas clientes.
             </span>
@@ -533,7 +533,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
                     ? 'Preparando cópia de segurança...'
                     : 'Fazer Cópia de Segurança (Download Backup)'}
                 </span>
-                <span className="text-[11px] text-neutral-500">
+                <span className="text-[12px] text-neutral-500">
                   {isExporting
                     ? 'Juntando seus dados — pode levar alguns segundos'
                     : 'Salva um arquivo .json com fichas, produtos, clientes, Minha Empresa, lançamentos e fotos'}
@@ -553,7 +553,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
                 <span className="block font-bold text-xs text-neutral-800">
                   Restaurar Backup de Arquivo
                 </span>
-                <span className="text-[11px] text-neutral-500">
+                <span className="text-[12px] text-neutral-500">
                   Trocar seus dados pelos de um arquivo de backup
                 </span>
               </div>
@@ -578,7 +578,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
                 <span className="block font-bold text-xs text-[#B04E5C]">
                   Zerar Todos os Dados (Começar do Zero)
                 </span>
-                <span className="text-[11px] text-[#C4626F] font-normal">
+                <span className="text-[12px] text-[#C4626F] font-normal">
                   Limpa todas as vendas, compras e lançamentos
                 </span>
               </div>

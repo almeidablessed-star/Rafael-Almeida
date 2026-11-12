@@ -1926,38 +1926,35 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       <button
                         type="button"
                         onClick={() => setPaymentStatus('pendente')}
-                        className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition-all text-left flex items-center justify-between ${
+                        className={`py-2.5 px-1 rounded-xl text-[11px] font-bold border transition-all text-center flex items-center justify-center whitespace-nowrap ${
                           paymentStatus === 'pendente'
                             ? 'bg-amber-500 text-white border-amber-500 shadow-card'
                             : 'bg-amber-50 text-amber-900 border-amber-200 hover:bg-amber-100'
                         }`}
                       >
                         <span>⏳ Pendente</span>
-                        {paymentStatus === 'pendente' && <Check className="w-3.5 h-3.5" />}
                       </button>
                       <button
                         type="button"
                         onClick={() => setPaymentStatus('sinal')}
-                        className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition-all text-left flex items-center justify-between ${
+                        className={`py-2.5 px-1 rounded-xl text-[11px] font-bold border transition-all text-center flex items-center justify-center whitespace-nowrap ${
                           paymentStatus === 'sinal'
                             ? 'bg-[#A85E86] text-white border-[#A85E86] shadow-card'
                             : 'bg-[#FBEFF2] text-[#6E3F72] border-[#F5B9C6] hover:bg-[#F8E1E7]'
                         }`}
                       >
                         <span>💰 Sinal pago</span>
-                        {paymentStatus === 'sinal' && <Check className="w-3.5 h-3.5" />}
                       </button>
                       <button
                         type="button"
                         onClick={() => setPaymentStatus('pago')}
-                        className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition-all text-left flex items-center justify-between ${
+                        className={`py-2.5 px-1 rounded-xl text-[11px] font-bold border transition-all text-center flex items-center justify-center whitespace-nowrap ${
                           paymentStatus === 'pago'
                             ? 'bg-emerald-600 text-white border-emerald-600 shadow-card'
                             : 'bg-emerald-50 text-emerald-900 border-emerald-200 hover:bg-emerald-100'
                         }`}
                       >
                         <span>✅ Pago</span>
-                        {paymentStatus === 'pago' && <Check className="w-3.5 h-3.5" />}
                       </button>
                     </div>
                   </div>
