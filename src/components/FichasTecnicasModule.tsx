@@ -2892,8 +2892,8 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                       alignItems: 'center',
                       justifyContent: 'center',
                       gap: '6px',
-                      height: pc ? '44px' : '36px',
-                      fontSize: pc ? '13px' : '11px',
+                      height: '44px',
+                      fontSize: '13px',
                       fontWeight: 700,
                       background: '#3A2350',
                       border: 'none',
@@ -2927,8 +2927,8 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                       alignItems: 'center',
                       justifyContent: 'center',
                       gap: '6px',
-                      height: pc ? '44px' : '36px',
-                      fontSize: pc ? '13px' : '11px',
+                      height: '44px',
+                      fontSize: '13px',
                       fontWeight: 700,
                       background: '#F3E9F3',
                       border: 'none',
@@ -2953,38 +2953,41 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                     </svg>
                     {duplicandoIds.includes(ficha.id) ? 'Duplicando…' : 'Duplicar'}
                   </button>
+                  {/* Excluir: so a lixeira, discreta e afastada. Antes era um
+                      botao do tamanho do "Editar", colado nele — facil de
+                      tocar por engano e com destaque demais para uma acao rara. */}
                   <button
+                    type="button"
                     onClick={() => handleDelete(ficha)}
-                    {...(pc ? { type: 'button' as const, 'aria-label': `Excluir ${ficha.name}` } : {})}
+                    aria-label={`Excluir ${ficha.name}`}
+                    title="Excluir"
                     style={{
-                      flex: 1,
+                      flex: 'none',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      gap: '6px',
-                      height: pc ? '44px' : '36px',
-                      fontSize: pc ? '13px' : '11px',
-                      fontWeight: 700,
-                      background: '#FBECEE',
+                      width: '44px',
+                      height: '44px',
+                      marginLeft: '6px',
+                      background: 'transparent',
                       border: 'none',
-                      borderRadius: '18px 18px 6px 18px',
-                      color: pc ? '#B04E5C' : '#C4626F',
+                      borderRadius: '14px',
+                      color: '#7A6E80',
                       cursor: 'pointer',
-                      transition: 'transform .22s ease, background .22s ease',
+                      transition: 'background .22s ease, color .22s ease',
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-3px)';
-                      e.currentTarget.style.background = '#F7DCE1';
+                      e.currentTarget.style.background = '#FBECEE';
+                      e.currentTarget.style.color = '#C4626F';
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.background = '#FBECEE';
+                      e.currentTarget.style.background = 'transparent';
+                      e.currentTarget.style.color = '#7A6E80';
                     }}
                   >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C4626F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"></path>
                     </svg>
-                    Excluir
                   </button>
                 </div>
               </div>
