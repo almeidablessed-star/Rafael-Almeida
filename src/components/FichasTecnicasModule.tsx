@@ -1093,7 +1093,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
           ...(pc ? { height: '48px' } : {}),
           background: '#FFFFFF',
           borderRadius: '14px',
-          fontSize: pc ? '13px' : '11px',
+          fontSize: pc ? '13px' : '13px',
           color: pc ? '#241B2B' : '#A096A6',
           border: 'none',
           boxShadow: '0 6px 14px rgba(58,35,80,.07)',
@@ -1173,7 +1173,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
               <span className="max-w-full truncate" style={{ fontSize: '13px', fontWeight: 800, color: ativo ? '#FFFFFF' : '#241B2B', whiteSpace: 'nowrap' }}>
                 {t.descricao.trim() || `Tamanho ${i + 1}`}
               </span>
-              <span className="flex items-center justify-center gap-0.5 max-w-full" style={{ fontSize: '10px', fontWeight: 700, whiteSpace: 'nowrap', color: alerta ? (ativo ? '#F5B9C6' : '#C4626F') : (ativo ? 'rgba(255,255,255,.7)' : '#7A6E80') }}>
+              <span className="flex items-center justify-center gap-0.5 max-w-full" style={{ fontSize: '11px', fontWeight: 700, whiteSpace: 'nowrap', color: alerta ? (ativo ? '#F5B9C6' : '#C4626F') : (ativo ? 'rgba(255,255,255,.7)' : '#7A6E80') }}>
                 {alerta && <AlertTriangle className="w-2.5 h-2.5 shrink-0" strokeWidth={2.6} />}
                 {resumo}
               </span>
@@ -1200,7 +1200,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         color: '#3A2350',
         fontFamily: "'Manrope', sans-serif",
         fontWeight: 800,
-        fontSize: pc ? '13px' : '11.5px',
+        fontSize: pc ? '13px' : '13px',
         padding: pc ? '0 22px' : '12px',
         ...(pc ? { height: '48px' } : {}),
         borderRadius: '14px',
@@ -1341,7 +1341,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
               onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.borderColor = 'rgba(58,35,80,0.12)'; }}
             >
               <span>{pc ? cat.label : `${cat.icon} ${cat.label}`}</span>
-              <span style={{ fontSize: pc ? '12px' : '11px', fontWeight: 700, opacity: pc ? 0.7 : 0.65 }}>{count}</span>
+              <span style={{ fontSize: pc ? '12px' : '12px', fontWeight: 700, opacity: pc ? 0.7 : 0.65 }}>{count}</span>
             </button>
           );
         })}
@@ -1410,7 +1410,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   className="flex-1 flex flex-col gap-1.5 cursor-pointer"
                 >
                   <div style={{ height: '3px', borderRadius: '2px', background: formStep >= s.n ? '#F5B9C6' : 'rgba(255,255,255,0.25)' }} />
-                  <span style={{ fontSize: '11px', fontWeight: 600, color: formStep === s.n ? '#fff' : 'rgba(255,255,255,0.6)' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 600, color: formStep === s.n ? '#fff' : 'rgba(255,255,255,0.6)' }}>
                     {s.n} · {s.label}
                   </span>
                 </button>
@@ -1542,11 +1542,11 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                       pratica todos os tamanhos do mesmo bolo rendem na mesma
                       unidade, e tres seletores empilhados comiam o terco. */}
                   <div className="flex items-center gap-2.5">
-                    <span className="flex-1 min-w-0 text-[10px] font-bold uppercase" style={{ color: '#9A8FA0', letterSpacing: '.08em' }}>
+                    <span className="flex-1 min-w-0 text-[11px] font-bold uppercase" style={{ color: '#9A8FA0', letterSpacing: '.08em' }}>
                       Tamanho
                     </span>
                     <div className="flex items-center gap-1.5" style={{ width: '38%' }}>
-                      <span className="text-[10px] font-bold uppercase" style={{ color: '#9A8FA0', letterSpacing: '.08em' }}>
+                      <span className="text-[11px] font-bold uppercase" style={{ color: '#9A8FA0', letterSpacing: '.08em' }}>
                         Rende
                       </span>
                       <CustomSelect
@@ -1623,10 +1623,10 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         esta aberto e quantos insumos tem. */}
                     {tamanhos.length === 1 && (
                     <div className="flex items-center justify-between gap-2">
-                      <span className="whitespace-nowrap" style={{ background: '#3A2350', color: '#F5B9C6', fontSize: '11px', fontWeight: 800, padding: '6px 12px', borderRadius: '999px' }}>
+                      <span className="whitespace-nowrap" style={{ background: '#3A2350', color: '#F5B9C6', fontSize: '12px', fontWeight: 800, padding: '6px 12px', borderRadius: '999px' }}>
                         Tamanho · {tamanho.descricao || '(sem nome)'}
                       </span>
-                      <span style={{ fontSize: '11px', fontWeight: 700, color: '#7A6E80' }}>
+                      <span style={{ fontSize: '12px', fontWeight: 700, color: '#7A6E80' }}>
                         {tamanho.ingredients.length} insumo{tamanho.ingredients.length === 1 ? '' : 's'}
                       </span>
                     </div>
@@ -2099,7 +2099,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                       <div style={{ padding: '14px 16px' }}>
                         <div className="flex items-center justify-between gap-2">
                           <span style={ROTULO_COMANDA}>PREÇO DE VENDA</span>
-                          <span className="whitespace-nowrap truncate" style={{ background: '#F3E9F3', color: '#3A2350', fontSize: '10px', fontWeight: 800, padding: '5px 10px', borderRadius: '999px', maxWidth: '60%' }}>
+                          <span className="whitespace-nowrap truncate" style={{ background: '#F3E9F3', color: '#3A2350', fontSize: '11px', fontWeight: 800, padding: '5px 10px', borderRadius: '999px', maxWidth: '60%' }}>
                             Tamanho · {tamanho.descricao || '(sem nome)'}
                           </span>
                         </div>
@@ -2117,7 +2117,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                           />
                         </label>
                         {!estruturaFinanceira?.valido && (
-                          <p className="mt-2" style={{ fontSize: '11px', fontWeight: 600, color: '#9A8FA0' }}>
+                          <p className="mt-2" style={{ fontSize: '12px', fontWeight: 600, color: '#9A8FA0' }}>
                             Configure as metas em Minha Empresa para calcular custo e investimento automaticamente.
                           </p>
                         )}
@@ -2146,7 +2146,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                             {rotulo}
                             <span aria-hidden="true" className="flex-1" style={{ borderBottom: '1.5px dotted rgba(110,63,114,.25)', transform: 'translateY(-3px)' }} />
                             {esperaPreco ? (
-                              <span style={{ fontSize: '11px', fontWeight: 700, color: '#9A8FA0' }}>digite o preço acima</span>
+                              <span style={{ fontSize: '12px', fontWeight: 700, color: '#9A8FA0' }}>digite o preço acima</span>
                             ) : (
                               <span className="tabular-nums" style={{ fontWeight: 800, color: '#241B2B' }}>{formatMoney(valor)}</span>
                             )}
@@ -2190,7 +2190,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                           </span>
                         </div>
                         {noPrejuizo && (
-                          <p style={{ fontSize: '11px', fontWeight: 600, lineHeight: 1.45, color: '#C4626F' }}>
+                          <p style={{ fontSize: '12px', fontWeight: 600, lineHeight: 1.45, color: '#C4626F' }}>
                             Este tamanho custa mais do que você cobra por ele.
                           </p>
                         )}
@@ -2238,12 +2238,12 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                             )}
                             {preco > 0 && (
                               abaixoDaMeta ? (
-                                <span className="inline-flex items-center gap-1.5 self-start" style={{ fontSize: '11px', fontWeight: 800, padding: '5px 11px', borderRadius: '999px', background: '#FDF4F5', color: '#C4626F', border: '1px solid rgba(196,98,111,.25)' }}>
+                                <span className="inline-flex items-center gap-1.5 self-start" style={{ fontSize: '12px', fontWeight: 800, padding: '5px 11px', borderRadius: '999px', background: '#FDF4F5', color: '#C4626F', border: '1px solid rgba(196,98,111,.25)' }}>
                                   <AlertTriangle className="w-3 h-3 shrink-0" />
                                   Abaixo da meta em {formatMoney(precoCalculado.precoSugerido - preco)}
                                 </span>
                               ) : (
-                                <span className="inline-flex items-center gap-1.5 self-start" style={{ fontSize: '11px', fontWeight: 800, padding: '5px 11px', borderRadius: '999px', background: 'rgba(169,216,184,.28)', color: '#26402F', border: '1px solid rgba(76,115,88,.18)' }}>
+                                <span className="inline-flex items-center gap-1.5 self-start" style={{ fontSize: '12px', fontWeight: 800, padding: '5px 11px', borderRadius: '999px', background: 'rgba(169,216,184,.28)', color: '#26402F', border: '1px solid rgba(76,115,88,.18)' }}>
                                   <Check className="w-3 h-3 shrink-0" strokeWidth={3} />
                                   Esse preço já cobre a meta sugerida
                                 </span>
@@ -2265,12 +2265,12 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                       </p>
                       <ul className="space-y-0.5">
                         {avisosDePreco.map((aviso) => (
-                          <li key={aviso} style={{ fontSize: '11px', lineHeight: 1.5, color: '#7A5310' }}>
+                          <li key={aviso} style={{ fontSize: '12px', lineHeight: 1.5, color: '#7A5310' }}>
                             {aviso}
                           </li>
                         ))}
                       </ul>
-                      <p style={{ fontSize: '11px', marginTop: '6px', color: '#9A7430' }}>
+                      <p style={{ fontSize: '12px', marginTop: '6px', color: '#9A7430' }}>
                         Se for de propósito, pode salvar normalmente.
                       </p>
                     </div>
@@ -2578,7 +2578,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                             display: 'flex',
                             alignItems: 'center',
                             gap: pc ? '4px' : '3px',
-                            fontSize: pc ? '11px' : '9px',
+                            fontSize: pc ? '11px' : '11px',
                             fontWeight: 800,
                             color: pc ? '#8A5A0E' : '#B27A16',
                             background: '#FBF0DD',
@@ -2602,15 +2602,15 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                             onClick={() => setSelectedTamanhoIdByFicha(prev => ({ ...prev, [ficha.id]: tamanho.id }))}
                             {...(pc ? { type: 'button' as const, 'aria-pressed': tamanhoAceso(tamanho.id) } : {})}
                             style={{
-                              fontSize: pc ? '12px' : '8px',
+                              fontSize: pc ? '12px' : '11px',
                               fontWeight: tamanhoAceso(tamanho.id) ? (pc ? 800 : 700) : 600,
                               color: tamanhoAceso(tamanho.id) ? '#FFFFFF' : '#5B4A6B',
                               background: tamanhoAceso(tamanho.id)
                                 ? 'linear-gradient(140deg,#6E3F72,#A85E86)'
                                 : '#F3E9F3',
-                              padding: pc ? '0 12px' : '4px 8px',
+                              padding: pc ? '0 12px' : '7px 11px',
                               ...(pc ? { height: '36px', fontFamily: 'inherit' } : {}),
-                              borderRadius: pc ? '9px' : '6px',
+                              borderRadius: pc ? '9px' : '8px',
                               border: 'none',
                               cursor: 'pointer',
                               transition: 'all .15s ease',
@@ -2634,7 +2634,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                           </button>
                         ))
                       ) : (
-                        <span style={{ fontSize: pc ? '12px' : '9px', color: pc ? '#7A6E80' : '#999' }}>Sem tamanhos</span>
+                        <span style={{ fontSize: pc ? '12px' : '12px', color: pc ? '#7A6E80' : '#999' }}>Sem tamanhos</span>
                       )}
                     </div>
                   </div>
@@ -2682,7 +2682,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                       fontFamily: "'Manrope', sans-serif",
                     }}
                   >
-                    <span style={{ fontSize: pc ? '11px' : '10px', fontWeight: 800, color: '#7A6E80', letterSpacing: '.04em', textTransform: 'uppercase' }}>
+                    <span style={{ fontSize: pc ? '11px' : '11px', fontWeight: 800, color: '#7A6E80', letterSpacing: '.04em', textTransform: 'uppercase' }}>
                       {tamanhoSelecionado.preco ? 'Preço de venda' : 'Sugestão de preço'}
                     </span>
                     {/* Inter com algarismos de largura igual: a fonte de numero
@@ -2764,19 +2764,19 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   {/* LEGENDA */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: pc ? '7px' : '6px', flex: 1, minWidth: 0 }}>
                     {/* Reposição */}
-                    <span style={{ display: 'flex', alignItems: 'center', gap: pc ? '8px' : '7px', fontSize: pc ? '13px' : '10px', color: '#5B4A6B' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: pc ? '8px' : '7px', fontSize: pc ? '13px' : '12px', color: '#5B4A6B' }}>
                       <span style={{ width: pc ? '10px' : '9px', height: pc ? '10px' : '9px', borderRadius: '3px', background: '#6E3F72', flexShrink: 0 }}></span>
                       Reposição
                       <span style={{ color: '#241B2B', marginLeft: 'auto', fontWeight: 400 }}>{formatMoney(repoTotal)}</span>
                     </span>
                     {/* Mão de Obra */}
-                    <span style={{ display: 'flex', alignItems: 'center', gap: pc ? '8px' : '7px', fontSize: pc ? '13px' : '10px', color: '#5B4A6B' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: pc ? '8px' : '7px', fontSize: pc ? '13px' : '12px', color: '#5B4A6B' }}>
                       <span style={{ width: pc ? '10px' : '9px', height: pc ? '10px' : '9px', borderRadius: '3px', background: '#C4626F', flexShrink: 0 }}></span>
                       Mão de Obra
                       <span style={{ color: '#241B2B', marginLeft: 'auto', fontWeight: 400 }}>{formatMoney(maoDeObraTotal)}</span>
                     </span>
                     {/* Custos */}
-                    <span style={{ display: 'flex', alignItems: 'center', gap: pc ? '8px' : '7px', fontSize: pc ? '13px' : '10px', color: '#5B4A6B' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: pc ? '8px' : '7px', fontSize: pc ? '13px' : '12px', color: '#5B4A6B' }}>
                       <span style={{ width: pc ? '10px' : '9px', height: pc ? '10px' : '9px', borderRadius: '3px', background: '#B08D57', flexShrink: 0 }}></span>
                       Custos Op.
                       <span style={{ color: '#241B2B', marginLeft: 'auto', fontWeight: 400 }}>{formatMoney(custosTotal)}</span>
@@ -2785,7 +2785,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                         No computador em negrito, e o prejuizo num vermelho que da
                         leitura em letra pequena (#B04E5C), como no desenho. */}
                     {precoTamanho > 0 && (
-                      <span style={{ display: 'flex', alignItems: 'center', gap: pc ? '8px' : '7px', fontSize: pc ? '13px' : '10px', color: lucroTotal < 0 ? (pc ? '#B04E5C' : '#C4626F') : '#2E7A4A', ...(pc ? { fontWeight: 700 } : {}) }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: pc ? '8px' : '7px', fontSize: pc ? '13px' : '12px', color: lucroTotal < 0 ? (pc ? '#B04E5C' : '#C4626F') : '#2E7A4A', ...(pc ? { fontWeight: 700 } : {}) }}>
                         <span style={{ width: pc ? '10px' : '9px', height: pc ? '10px' : '9px', borderRadius: '3px', background: lucroTotal < 0 ? '#C4626F' : '#3E9B5F', flexShrink: 0 }}></span>
                         {lucroTotal < 0 ? 'Prejuízo' : 'Lucro'}
                         <span style={{ marginLeft: 'auto', fontWeight: pc ? 700 : 400 }}>{formatMoney(lucroTotal)}</span>
@@ -2803,7 +2803,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   style={{
                     background: '#F6F2F5',
                     border: 'none',
-                    fontSize: pc ? '12px' : '10.5px',
+                    fontSize: pc ? '12px' : '12px',
                     fontWeight: 700,
                     color: '#3A2350',
                     cursor: 'pointer',
@@ -2837,7 +2837,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                   <span
                     style={{
                       background: '#F6F2F5',
-                      fontSize: pc ? '12px' : '10.5px',
+                      fontSize: pc ? '12px' : '12px',
                       fontWeight: 700,
                       color: '#3A2350',
                       display: 'flex',
@@ -2861,7 +2861,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                       background: '#FAF7FA',
                       padding: pc ? '10px 14px' : '10px 12px',
                       borderRadius: pc ? '14px' : '12px',
-                      fontSize: pc ? '13px' : '9px',
+                      fontSize: pc ? '13px' : '12px',
                     }}
                   >
                     {ingList.map((ing) => (
