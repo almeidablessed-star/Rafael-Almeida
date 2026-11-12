@@ -1076,11 +1076,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <CampoComAjuda microcopy={microcopySaldos} exemploDinamico={ajudaSaldos} />
           </div>
 
-          {/* Cinco cofrinhos em DINHEIRO (ver `cartoesDeSaldo`). Fila de cima:
-              Reposicao, Mao de obra e Despesas, no tamanho de sempre. Fila de
-              baixo, em versao baixa: Investimento e Lucro. O saldo fica em
-              destaque e, embaixo, quanto entrou naquela parte. */}
-          <div className="flex gap-3 w-full">
+          {/* Cinco cofrinhos em DINHEIRO (ver `cartoesDeSaldo`), dois por linha:
+              com tres por linha o "R$" quebrava para cima do numero em 390px.
+              Reposicao, Mao de obra, Despesas e Investimento no mesmo tamanho;
+              o Lucro embaixo, na largura toda. O saldo fica em destaque e,
+              embaixo, quanto entrou naquela parte. */}
+          <div className="grid grid-cols-2 gap-3 w-full">
             {cartoesDeSaldo.map(({ nome, saldo }) => (
               <CardDeSaldo
                 key={nome}
@@ -1090,15 +1091,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 negativo={saldo.isNegative}
               />
             ))}
-          </div>
-          <div className="flex gap-3 w-full">
             <CardDeSaldo
-              compacto
               nome="INVESTIMENTO"
               saldo={balances.investimento.currentBalance || 0}
               entrou={balances.investimento.accumulatedInflow || 0}
               negativo={balances.investimento.isNegative}
             />
+          </div>
+          <div className="flex w-full">
             <CardDeSaldo
               compacto
               destaque

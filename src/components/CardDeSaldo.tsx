@@ -92,14 +92,16 @@ export const CardDeSaldo: React.FC<{
             que entraram" embaixo (pedido do Rafael, 25/10/2026). Antes o nome
             ficava a esquerda e o valor a direita, na mesma linha. */}
         <div
-          className="text-[9px] uppercase tracking-[0.05em]"
-          style={{ color: destaque && !negativo ? '#3F6B4C' : '#7A6E80', fontWeight: 800 }}
+          className="uppercase tracking-[0.05em]"
+          style={{ fontSize: '11px', color: destaque && !negativo ? '#3F6B4C' : '#5B5062', fontWeight: 800 }}
         >
           {nome}
         </div>
         <div
-          className="text-[15px] mt-0.5"
+          className="mt-0.5"
           style={{
+            fontSize: '20px',
+            fontVariantNumeric: 'tabular-nums',
             color: negativo ? '#C4626F' : destaque ? '#26402F' : '#241B2B',
             fontWeight: 800,
             letterSpacing: '-0.02em',
@@ -108,7 +110,7 @@ export const CardDeSaldo: React.FC<{
         >
           {formatMoney(saldo || 0)}
         </div>
-        <div className="text-[9.5px] mt-0.5" style={{ color: '#9A8FA0' }}>
+        <div className="mt-0.5" style={{ fontSize: '12px', color: destaque && !negativo ? '#3F6B4C' : '#5B5062' }}>
           de {formatMoney(entrou || 0)} que entraram
         </div>
       </div>
@@ -117,13 +119,14 @@ export const CardDeSaldo: React.FC<{
 
   return (
     <div
-      className="flex-1 bg-white rounded-[22px] p-4 text-center transition-all duration-300"
-      style={{ boxShadow: '0 8px 20px rgba(58,35,80,0.08)' }}
+      className="flex-1 min-w-0 bg-white rounded-[22px] text-center transition-all duration-300"
+      style={{ boxShadow: '0 8px 20px rgba(58,35,80,0.08)', padding: '14px 10px' }}
     >
       <div
-        className="text-[9px] uppercase tracking-[0.05em]"
+        className="uppercase tracking-[0.05em]"
         style={{
-          color: '#7A6E80',
+          fontSize: '11px',
+          color: '#5B5062',
           fontFamily: "'Manrope', sans-serif",
           fontWeight: 800,
           minHeight: '24px',
@@ -136,8 +139,11 @@ export const CardDeSaldo: React.FC<{
       </div>
       {/* #C4626F e o vermelho que o app ja usa para "passou do limite". */}
       <div
-        className="text-[19px] mt-1"
+        className="mt-1"
         style={{
+          fontSize: '20px',
+          whiteSpace: 'nowrap',
+          fontVariantNumeric: 'tabular-nums',
           color: negativo ? '#C4626F' : '#241B2B',
           fontFamily: "'Manrope', sans-serif",
           fontWeight: 800,
@@ -146,7 +152,9 @@ export const CardDeSaldo: React.FC<{
       >
         {formatMoney(saldo || 0)}
       </div>
-      <div className="text-[9.5px] mt-1" style={{ color: '#9A8FA0', fontFamily: "'Manrope', sans-serif" }}>
+      {/* textWrap balance: quando nao cabe numa linha, quebra em duas partes
+          parelhas ("de R$ 328,50" / "que entraram") em vez de sobrar uma palavra. */}
+      <div className="mt-1" style={{ fontSize: '12px', lineHeight: 1.35, color: '#5B5062', fontFamily: "'Manrope', sans-serif", textWrap: 'balance' }}>
         de {formatMoney(entrou || 0)} que entraram
       </div>
     </div>
