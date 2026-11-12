@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { situacaoPagamento, faltaReceberDoPedido } from '../utils/situacaoPagamento';
 import { Transaction, TransactionType } from '../types';
 import { formatCurrency, formatDateBr, getTodayIso } from '../utils/formatters';
@@ -15,43 +15,215 @@ import {
   Edit3,
   Trash2,
   Filter,
-  Calendar,
   Users,
   Check,
   Hourglass,
-  User,
-  Coins,
+  MoreHorizontal,
 } from 'lucide-react';
 
 /**
- * Etiqueta e botao de pagamento de cada estado (utils/situacaoPagamento.ts).
- * "Sinal pago": entrou so o sinal, o restante fica para a entrega — rose da
- * marca, para nao confundir com o bege do Pendente nem com o verde do Pago.
+ * Botao de pagamento de cada estado (utils/situacaoPagamento.ts): leva ao
+ * proximo estado — pendente/sinal -> pago, pago -> pendente (este no menu).
  */
-const ETIQUETA = {
-  pendente: { texto: 'Pendente', emoji: '⏳', fundo: '#E4D9C3', cor: '#5B4A2E' },
-  sinal: { texto: 'Sinal pago', emoji: '💰', fundo: '#F5B9C6', cor: '#3A2350' },
-  pago: { texto: 'Pago', emoji: '✅', fundo: '#A9D8B8', cor: '#26402F' },
-} as const;
-
-/** O botao leva ao proximo estado: pendente/sinal -> pago, pago -> pendente. */
 const BOTAO = {
   pendente: {
-    texto: 'Pago', textoCurto: '✅ Pago', fundo: '#A9D8B8', cor: '#26402F',
+    texto: 'Marcar pago',
     title: 'Clique para marcar este pedido como PAGO',
     ariaLabel: (nome: string) => `Marcar o pedido de ${nome} como pago`,
   },
   sinal: {
-    texto: 'Recebi o restante', textoCurto: '✅ Recebi', fundo: '#A9D8B8', cor: '#26402F',
+    texto: 'Recebi o restante',
     title: 'Recebi o restante: marca este pedido como PAGO por inteiro',
     ariaLabel: (nome: string) => `Recebi o restante do pedido de ${nome}: marcar como pago`,
   },
   pago: {
-    texto: 'Pendente', textoCurto: 'Pendente', fundo: '#F0E2C8', cor: '#5B4A2E',
+    texto: 'Voltar para pendente',
     title: 'Clique para alterar este pedido para PENDENTE',
     ariaLabel: (nome: string) => `Mudar o pedido de ${nome} para pendente`,
   },
 } as const;
+
+interface CartaoPedidoProps {
+  tx: Transaction;
+  /** A entrega ja passou e ainda falta receber. */
+  atrasado: boolean;
+  pc: boolean;
+  menuAberto: boolean;
+  formatMoney: (valor: number) => string;
+  onAlternarMenu: () => void;
+  onEditar: () => void;
+  onExcluir: () => void;
+  onPdf: () => void;
+  onPagamento?: () => void;
+}
+
+/**
+ * Card de um pedido, igual no celular e no computador. Sempre branco; a cor
+ * fica na etiqueta do canto (rosa = falta receber, verde = pago) e so o
+ * atrasado ganha o fio vinho na lateral. Excluir mora no menu "mais opcoes",
+ * longe do toque acidental.
+ */
+const CartaoPedido: React.FC<CartaoPedidoProps> = ({
+  tx, atrasado, pc, menuAberto, formatMoney, onAlternarMenu, onEditar, onExcluir, onPdf, onPagamento,
+}) => {
+  const situacao = situacaoPagamento(tx);
+  const nome = tx.customerName || 'cliente';
+  const falta = faltaReceberDoPedido(tx);
+  const sombra = '0 8px 20px rgba(58,35,80,.09)';
+  const botaoBase: React.CSSProperties = {
+    display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+    minHeight: '44px', border: 0, borderRadius: '14px', fontFamily: 'inherit',
+    fontSize: '14px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap',
+  };
+  const leve: React.CSSProperties = { ...botaoBase, background: '#F3EDF4', color: '#3A2350' };
+  const quadrado: React.CSSProperties = { ...leve, width: '44px', flex: 'none', padding: 0 };
+  const itemMenu: React.CSSProperties = {
+    ...botaoBase, width: '100%', justifyContent: 'flex-start', padding: '0 14px',
+    borderRadius: '10px', background: 'transparent', color: '#241B2B', fontWeight: 600,
+  };
+  // No celular, "Recebi o restante" nao cabe ao lado de "PDF" por extenso (360px).
+  const pdfSoIcone = !pc && situacao === 'sinal' && !!onPagamento;
+  const parar = (acao: () => void) => (e: React.MouseEvent) => { e.stopPropagation(); acao(); };
+
+  return (
+    <article
+      className="cartao-pedido"
+      onClick={onEditar}
+      style={{
+        position: 'relative',
+        zIndex: menuAberto ? 5 : undefined,
+        padding: '16px',
+        borderRadius: '22px',
+        background: '#FFFFFF',
+        boxShadow: atrasado ? `inset 4px 0 0 #C4626F, ${sombra}` : sombra,
+        cursor: 'pointer',
+        fontFamily: pc ? 'inherit' : "'Manrope', sans-serif",
+        color: '#241B2B',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '10px' }}>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontSize: '16px', fontWeight: 700, lineHeight: 1.25, overflowWrap: 'anywhere' }}>
+            {tx.customerName || 'Cliente'}
+          </div>
+          <div style={{ marginTop: '3px', fontSize: '13px', color: '#5B5062' }}>
+            Entrega {formatDateBr(tx.date)}
+            {tx.paymentMethod ? <> · <span style={{ textTransform: 'capitalize' }}>{tx.paymentMethod}</span></> : null}
+          </div>
+          {atrasado && (
+            <div style={{ marginTop: '2px', fontSize: '13px', fontWeight: 700, color: '#A32D3D' }}>Atrasado</div>
+          )}
+        </div>
+        <span
+          style={{
+            flex: 'none', padding: '6px 11px', borderRadius: '999px', fontSize: '12px', fontWeight: 700,
+            whiteSpace: 'nowrap',
+            background: situacao === 'pago' ? '#DDF1E3' : '#FBE3E9',
+            color: situacao === 'pago' ? '#26402F' : '#3A2350',
+          }}
+        >
+          {situacao === 'pago' ? 'Pago' : `Falta ${formatMoney(falta)}`}
+        </span>
+      </div>
+
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', gap: '4px 10px', margin: '14px 0' }}>
+        <span style={{ fontSize: '22px', fontWeight: 800, letterSpacing: '-0.01em', fontVariantNumeric: 'tabular-nums' }}>
+          {formatMoney(tx.totalValue)}
+        </span>
+        {!!tx.signalValue && situacao !== 'pago' && (
+          <span style={{ fontSize: '13px', color: '#5B5062' }}>
+            {situacao === 'sinal'
+              ? `sinal de ${formatMoney(tx.signalValue)} já pago`
+              : `sinal combinado de ${formatMoney(tx.signalValue)}`}
+          </span>
+        )}
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        {onPagamento && situacao !== 'pago' && (
+          <button
+            type="button"
+            onClick={parar(onPagamento)}
+            aria-label={BOTAO[situacao].ariaLabel(nome)}
+            title={BOTAO[situacao].title}
+            style={{ ...botaoBase, flex: 1, minWidth: 0, padding: '0 10px', background: '#3A2350', color: '#FFFFFF' }}
+          >
+            {BOTAO[situacao].texto}
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={parar(onPdf)}
+          aria-label={`Gerar orçamento em PDF do pedido de ${nome}`}
+          title="Gerar e Visualizar Orçamento em PDF"
+          style={pdfSoIcone ? quadrado : { ...leve, padding: '0 14px', flex: situacao === 'pago' || !onPagamento ? 1 : 'none' }}
+        >
+          <Printer size={pdfSoIcone ? 17 : 15} strokeWidth={2} aria-hidden="true" />
+          {!pdfSoIcone && 'PDF'}
+        </button>
+        <button type="button" onClick={parar(onEditar)} aria-label={`Editar o pedido de ${nome}`} title="Editar" style={quadrado}>
+          <Edit3 size={17} strokeWidth={2} aria-hidden="true" />
+        </button>
+        <div style={{ position: 'relative', flex: 'none' }}>
+          <button
+            type="button"
+            onClick={parar(onAlternarMenu)}
+            aria-label={`Mais opções do pedido de ${nome}`}
+            aria-haspopup="menu"
+            aria-expanded={menuAberto}
+            title="Mais opções"
+            style={quadrado}
+          >
+            <MoreHorizontal size={18} strokeWidth={2.2} aria-hidden="true" />
+          </button>
+          {/* Com o menu aberto, um toque em qualquer outro lugar so fecha o
+              menu — sem abrir a edicao do card que estava embaixo do dedo. */}
+          {menuAberto && (
+            <div
+              aria-hidden="true"
+              onClick={parar(onAlternarMenu)}
+              style={{ position: 'fixed', inset: 0, zIndex: 9, cursor: 'default' }}
+            />
+          )}
+          {menuAberto && (
+            <div
+              role="menu"
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                position: 'absolute', right: 0, bottom: 'calc(100% + 8px)', zIndex: 10, minWidth: '210px',
+                padding: '6px', borderRadius: '16px', background: '#FFFFFF',
+                boxShadow: '0 14px 34px rgba(58,35,80,.22), 0 0 0 1px rgba(58,35,80,.08)',
+              }}
+            >
+              {onPagamento && situacao === 'pago' && (
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => { onAlternarMenu(); onPagamento(); }}
+                  aria-label={BOTAO.pago.ariaLabel(nome)}
+                  style={itemMenu}
+                >
+                  <Clock size={16} strokeWidth={2} aria-hidden="true" />
+                  {BOTAO.pago.texto}
+                </button>
+              )}
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => { onAlternarMenu(); onExcluir(); }}
+                aria-label={`Excluir o pedido de ${nome}`}
+                style={{ ...itemMenu, color: '#A32D3D' }}
+              >
+                <Trash2 size={16} strokeWidth={2} aria-hidden="true" />
+                Excluir pedido
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </article>
+  );
+};
 
 interface OrdersModuleProps {
   transactions: Transaction[];
@@ -72,6 +244,19 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'todos' | 'pago' | 'sinal' | 'pendente'>('todos');
   const [quoteTx, setQuoteTx] = useState<Transaction | null>(null);
+  // Qual pedido esta com o menu "mais opcoes" aberto; um toque fora ou Esc fecha.
+  const [menuDoPedido, setMenuDoPedido] = useState<string | null>(null);
+  useEffect(() => {
+    if (menuDoPedido == null) return;
+    const fechar = () => setMenuDoPedido(null);
+    const tecla = (e: KeyboardEvent) => { if (e.key === 'Escape') fechar(); };
+    document.addEventListener('click', fechar);
+    document.addEventListener('keydown', tecla);
+    return () => {
+      document.removeEventListener('click', fechar);
+      document.removeEventListener('keydown', tecla);
+    };
+  }, [menuDoPedido]);
 
   const [vista, setVista] = useState<'proximos' | 'historico'>('proximos');
   // Versao computador (docs/design/desktop-redesign, Pedidos.dc.html). Ver o `if (pc)`.
@@ -396,149 +581,21 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
           vazioSemPedidos
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(420px, 1fr))', gap: '20px' }}>
-            {filteredSales.map((tx) => {
-              const isPending = tx.paymentStatus === 'pendente';
-              const situacao = situacaoPagamento(tx);
-              const nome = tx.customerName || 'cliente';
-              return (
-                <article
-                  key={tx.id}
-                  onClick={() => onEditTransaction(tx)}
-                  style={{
-                    position: 'relative',
-                    overflow: 'hidden',
-                    borderRadius: '20px',
-                    background: isPending ? '#FFFCF6' : '#FFFFFF',
-                    boxShadow: '0 8px 20px rgba(58,35,80,0.09)',
-                    cursor: 'pointer',
-                    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-6px)';
-                    e.currentTarget.style.boxShadow = '0 18px 34px rgba(58,35,80,.18)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 8px 20px rgba(58,35,80,0.09)';
-                  }}
-                >
-                  <span aria-hidden="true" style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '6px', background: isPending ? 'linear-gradient(180deg, #E4D9C3, #B08D57)' : 'linear-gradient(180deg, #8F5A9C, #C4626F)' }} />
-                  <span aria-hidden="true" style={{ position: 'absolute', left: '-9px', top: '50%', transform: 'translateY(-50%)', width: '18px', height: '18px', borderRadius: '50%', background: '#F6F2F5' }} />
-                  <span aria-hidden="true" style={{ position: 'absolute', right: '-9px', top: '50%', transform: 'translateY(-50%)', width: '18px', height: '18px', borderRadius: '50%', background: '#F6F2F5' }} />
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '20px 24px 16px 30px' }}>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 11px', borderRadius: '999px', background: '#F3E9F3', color: '#3A2350', fontSize: '11px', fontWeight: 800, letterSpacing: '0.04em' }}>
-                        <User size={12} strokeWidth={2.4} aria-hidden="true" />
-                        CLIENTE: {tx.customerName ? tx.customerName.toUpperCase() : 'CLIENTE'}
-                      </span>
-                      <span
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          padding: '5px 11px',
-                          borderRadius: '999px',
-                          background: ETIQUETA[situacao].fundo,
-                          color: ETIQUETA[situacao].cor,
-                          fontSize: '11px',
-                          fontWeight: 800,
-                        }}
-                      >
-                        {situacao === 'sinal'
-                          ? `Sinal pago · falta ${formatMoney(faltaReceberDoPedido(tx))}`
-                          : ETIQUETA[situacao].texto}
-                      </span>
-                      {/* So acontece em Proximos: a entrega ja passou e o
-                          pedido so continua aqui porque falta receber. */}
-                      {!!tx.date && tx.date < hoje && faltaReceber(tx) && (
-                        <span style={{ display: 'inline-flex', alignItems: 'center', padding: '5px 11px', borderRadius: '999px', background: '#F6D5DA', color: '#7A2E3A', fontSize: '11px', fontWeight: 800 }}>
-                          Atrasado · falta receber
-                        </span>
-                      )}
-                    </div>
-
-                    <p style={{ margin: 0, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#7A6E80' }}>
-                      <Calendar size={14} strokeWidth={2} aria-hidden="true" />
-                      Data: <strong style={{ color: '#241B2B' }}>{formatDateBr(tx.date)}</strong>
-                      <span aria-hidden="true">•</span>
-                      Pgto: <strong style={{ color: '#241B2B' }}>{tx.paymentMethod || 'N/A'}</strong>
-                    </p>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '14px', borderTop: '1px dashed rgba(36,27,43,0.14)' }}>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-                        <span style={{ fontSize: '21px', fontWeight: 800, letterSpacing: '-0.01em', fontVariantNumeric: 'tabular-nums' }}>
-                          {formatMoney(tx.totalValue)}
-                        </span>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <button
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); setQuoteTx(tx); }}
-                            aria-label={`Gerar orçamento em PDF do pedido de ${nome}`}
-                            title="Gerar e Visualizar Orçamento em PDF"
-                            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', height: '44px', padding: '0 16px', border: 0, borderRadius: '999px', background: '#3A2350', color: '#F5B9C6', fontFamily: 'inherit', fontSize: '12px', fontWeight: 800, cursor: 'pointer' }}
-                          >
-                            <Printer size={14} strokeWidth={2} aria-hidden="true" />
-                            PDF
-                          </button>
-                          {onTogglePaymentStatus && (
-                            <button
-                              type="button"
-                              onClick={(e) => { e.stopPropagation(); onTogglePaymentStatus(tx); }}
-                              aria-label={BOTAO[situacao].ariaLabel(nome)}
-                              title={BOTAO[situacao].title}
-                              style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                height: '44px',
-                                minWidth: '96px',
-                                padding: '0 14px',
-                                border: 0,
-                                borderRadius: '999px',
-                                background: BOTAO[situacao].fundo,
-                                color: BOTAO[situacao].cor,
-                                fontFamily: 'inherit',
-                                fontSize: '12px',
-                                fontWeight: 800,
-                                cursor: 'pointer',
-                              }}
-                            >
-                              {BOTAO[situacao].texto}
-                            </button>
-                          )}
-                          <button
-                            type="button"
-                            className="icone-acao-pedido"
-                            onClick={(e) => { e.stopPropagation(); onEditTransaction(tx); }}
-                            aria-label={`Editar o pedido de ${nome}`}
-                            title="Editar"
-                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '44px', height: '44px', border: 0, borderRadius: '50%', background: '#F6F2F5', cursor: 'pointer' }}
-                          >
-                            <Edit3 size={16} strokeWidth={2} color="#7A6E80" aria-hidden="true" />
-                          </button>
-                          <button
-                            type="button"
-                            className="icone-acao-pedido icone-acao-pedido-excluir"
-                            onClick={(e) => { e.stopPropagation(); onDeleteTransaction(tx); }}
-                            aria-label={`Excluir o pedido de ${nome}`}
-                            title="Excluir"
-                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '44px', height: '44px', border: 0, borderRadius: '50%', background: '#F6F2F5', cursor: 'pointer' }}
-                          >
-                            <Trash2 size={16} strokeWidth={2} color="#C4626F" aria-hidden="true" />
-                          </button>
-                        </span>
-                      </div>
-                      {!!tx.signalValue && (
-                        <p style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#7A6E80' }}>
-                          <Coins size={14} strokeWidth={2} aria-hidden="true" />
-                          Sinal: {formatMoney(tx.signalValue)} | Restante: {formatMoney((tx.totalValue || 0) - (tx.signalValue || 0))}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
+            {filteredSales.map((tx) => (
+              <CartaoPedido
+                key={tx.id}
+                tx={tx}
+                atrasado={!!tx.date && tx.date < hoje && faltaReceber(tx)}
+                pc={pc}
+                menuAberto={menuDoPedido === tx.id}
+                formatMoney={formatMoney}
+                onAlternarMenu={() => setMenuDoPedido((id) => (id === tx.id ? null : tx.id))}
+                onEditar={() => onEditTransaction(tx)}
+                onExcluir={() => onDeleteTransaction(tx)}
+                onPdf={() => setQuoteTx(tx)}
+                onPagamento={onTogglePaymentStatus ? () => onTogglePaymentStatus(tx) : undefined}
+              />
+            ))}
           </div>
         )}
 
@@ -852,158 +909,21 @@ export const OrdersModule: React.FC<OrdersModuleProps> = ({
         ) : filteredSales.length === 0 ? (
           vazioSemPedidos
         ) : (
-          filteredSales.map((tx) => {
-            const isPending = tx.paymentStatus === 'pendente';
-            const situacao = situacaoPagamento(tx);
-            // Com sinal o card ganha uma linha a mais; os respiros encolhem o
-            // mesmo tanto para ele ficar da altura de um card sem sinal.
-            const temSinal = !!tx.signalValue;
-
-            return (
-              <div
-                key={tx.id}
-                className="rounded-3xl transition-all duration-300 cursor-pointer relative overflow-hidden"
-                style={{
-                  background: isPending ? '#FFFCF6' : '#FFFFFF',
-                  boxShadow: '0 8px 20px rgba(58,35,80,.09)',
-                }}
-                onClick={() => onEditTransaction(tx)}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-6px)';
-                  e.currentTarget.style.boxShadow = '0 18px 34px rgba(58,35,80,.18)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 8px 20px rgba(58,35,80,.09)';
-                }}
-              >
-                {/* Stripe lateral */}
-                <div
-                  style={{
-                    position: 'absolute',
-                    left: 0,
-                    top: 0,
-                    bottom: 0,
-                    width: '6px',
-                    background: isPending ? 'linear-gradient(180deg, #E4D9C3, #B08D57)' : 'linear-gradient(180deg, #8F5A9C, #C4626F)',
-                  }}
-                />
-
-                {/* Notches circulares laterais */}
-                <div style={{
-                  position: 'absolute',
-                  width: '18px', height: '18px', borderRadius: '50%',
-                  background: 'var(--color-surface)',
-                  left: '-9px', top: '50%', transform: 'translateY(-50%)',
-                }} />
-                <div style={{
-                  position: 'absolute',
-                  width: '18px', height: '18px', borderRadius: '50%',
-                  background: 'var(--color-surface)',
-                  right: '-9px', top: '50%', transform: 'translateY(-50%)',
-                }} />
-
-                {/* Content */}
-                <div
-                  className={`flex flex-col items-start justify-between ${temSinal ? 'gap-[5px]' : 'gap-[9px]'}`}
-                  style={{ padding: temSinal ? '13px 18px 8px 22px' : '16px 18px 16px 22px' }}
-                >
-
-                  <div className="flex-1 min-w-0 space-y-2">
-                    {/* CLIENT CHIP & STATUS */}
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <span className="inline-flex items-center gap-1 rounded-full" style={{ fontSize: '10px', fontWeight: 800, color: '#3A2350', background: '#F3E9F3', padding: '5px 11px', fontFamily: "'Manrope', sans-serif" }}>
-                        👤 CLIENTE: {tx.customerName ? tx.customerName.toUpperCase() : 'CLIENTE'}
-                      </span>
-
-                      <span className="rounded-full flex items-center gap-1" style={{ fontSize: '9px', fontWeight: 800, color: ETIQUETA[situacao].cor, background: ETIQUETA[situacao].fundo, padding: '5px 10px', fontFamily: "'Manrope', sans-serif" }}>
-                        {ETIQUETA[situacao].emoji} {ETIQUETA[situacao].texto}
-                      </span>
-
-                      {/* So acontece em Proximos: a entrega ja passou e o
-                          pedido so continua aqui porque falta receber. */}
-                      {!!tx.date && tx.date < hoje && faltaReceber(tx) && (
-                        <span className="rounded-full flex items-center gap-1" style={{ fontSize: '9px', fontWeight: 800, color: '#7A2E3A', background: '#F6D5DA', padding: '5px 10px', fontFamily: "'Manrope', sans-serif" }}>
-                          Atrasado · falta receber
-                        </span>
-                      )}
-                    </div>
-
-                    <div style={{ fontSize: '10px', color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
-                      📅 Data: <strong style={{ color: '#241B2B' }}>{formatDateBr(tx.date)}</strong> • Pgto: <strong style={{ color: '#241B2B' }}>{tx.paymentMethod || 'N/A'}</strong>
-                    </div>
-                  </div>
-
-                  <div className={`w-full shrink-0 border-t border-dashed border-[rgba(36,27,43,0.14)] ${temSinal ? 'pt-[8px]' : 'pt-[11px]'}`}>
-                  {/* Valor e botoes sempre na mesma linha; o sinal vai para a
-                      linha de baixo, inteira, em vez de espremer ao lado dos
-                      botoes e quebrar em varias linhas. */}
-                  <div className="flex flex-row items-center justify-between w-full gap-3">
-                    <div className="text-left">
-                      <span className="font-black text-[var(--color-ink)]" style={{ fontSize: '17px', fontWeight: 800, color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>
-                        {formatMoney(tx.totalValue)}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-[6px]">
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setQuoteTx(tx); }}
-                      className="rounded-full transition-all flex items-center gap-1 cursor-pointer active:scale-95 hover:translate-y-[-2px]"
-                      style={{ fontSize: '9px', fontWeight: 800, color: '#F5B9C6', background: '#3A2350', padding: '5px 10px', fontFamily: "'Manrope', sans-serif" }}
-                      title="Gerar e Visualizar Orçamento em PDF"
-                    >
-                      <Printer className="w-3 h-3" style={{ stroke: '#F5B9C6', strokeWidth: 2 }} />
-                      <span>PDF</span>
-                    </button>
-
-                    {onTogglePaymentStatus && (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); onTogglePaymentStatus(tx); }}
-                        className="rounded-full transition-all flex items-center gap-1 cursor-pointer active:scale-95 hover:translate-y-[-2px]"
-                        style={{ fontSize: '9px', fontWeight: situacao === 'pago' ? 700 : 800, color: BOTAO[situacao].cor, background: BOTAO[situacao].fundo, minWidth: '53px', padding: '5px 8px', justifyContent: 'center', whiteSpace: 'nowrap', fontFamily: "'Manrope', sans-serif" }}
-                        title={BOTAO[situacao].title}
-                        aria-label={BOTAO[situacao].ariaLabel(tx.customerName || 'cliente')}
-                      >
-                        <span>{BOTAO[situacao].textoCurto}</span>
-                      </button>
-                    )}
-
-                    {onEditTransaction && (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); onEditTransaction(tx); }}
-                        className="rounded-full transition-all cursor-pointer"
-                        style={{ width: '28px', height: '28px', background: '#F6F2F5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                        onMouseEnter={(e) => e.currentTarget.style.background = '#EFE6F0'}
-                        onMouseLeave={(e) => e.currentTarget.style.background = '#F6F2F5'}
-                        title="Editar"
-                      >
-                        <Edit3 className="w-3.5 h-3.5" style={{ stroke: '#7A6E80', strokeWidth: 2 }} />
-                      </button>
-                    )}
-                    {onDeleteTransaction && (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); onDeleteTransaction(tx); }}
-                        className="rounded-full transition-all cursor-pointer"
-                        style={{ width: '28px', height: '28px', background: '#F6F2F5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                        onMouseEnter={(e) => e.currentTarget.style.background = '#FBE9EC'}
-                        onMouseLeave={(e) => e.currentTarget.style.background = '#F6F2F5'}
-                        title="Excluir"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" style={{ stroke: '#C4626F', strokeWidth: 2 }} />
-                      </button>
-                    )}
-                    </div>
-                  </div>
-                  {temSinal && (
-                    <div style={{ fontSize: '10px', lineHeight: '13px', color: '#7A6E80', fontFamily: "'Manrope', sans-serif", marginTop: '5px' }}>
-                      💰 Sinal: {formatMoney(tx.signalValue)} | Restante: {formatMoney((tx.totalValue || 0) - (tx.signalValue || 0))}
-                    </div>
-                  )}
-                  </div>
-                </div>
-              </div>
-            );
-          })
+          filteredSales.map((tx) => (
+            <CartaoPedido
+              key={tx.id}
+              tx={tx}
+              atrasado={!!tx.date && tx.date < hoje && faltaReceber(tx)}
+              pc={pc}
+              menuAberto={menuDoPedido === tx.id}
+              formatMoney={formatMoney}
+              onAlternarMenu={() => setMenuDoPedido((id) => (id === tx.id ? null : tx.id))}
+              onEditar={() => onEditTransaction(tx)}
+              onExcluir={() => onDeleteTransaction(tx)}
+              onPdf={() => setQuoteTx(tx)}
+              onPagamento={onTogglePaymentStatus ? () => onTogglePaymentStatus(tx) : undefined}
+            />
+          ))
         )}
       </div>
 
