@@ -38,12 +38,39 @@ interface OrdersCalendarProps {
   computador?: boolean;
 }
 
+/**
+ * Dia livre fica neutro (antes era verde forte): numa agenda quase toda livre
+ * o verde tomava a tela e o olho ia para o que nao importa. So o dia com
+ * pedido ganha cor.
+ */
+const COR_DIA_LIVRE = '#F6F2F5';
+const COR_TEXTO_DIA_LIVRE = '#5B5062';
+
 /** Legenda que tambem filtra (ver `filtro` abaixo). Igual no celular e no computador. */
 const ITENS_LEGENDA = [
   { id: 'hoje', rotulo: 'Hoje', amostra: { background: 'var(--color-surface)', border: '1.5px solid var(--color-brand-700)' } },
   { id: 'com-pedido', rotulo: 'Com Pedido', amostra: { background: 'linear-gradient(150deg, #8F5A9C, #C4626F)' } },
-  { id: 'livre', rotulo: 'Livre', amostra: { background: '#B4E7B4' } },
+  { id: 'livre', rotulo: 'Livre', amostra: { background: COR_DIA_LIVRE, border: '1px solid #DDD3E0' } },
 ] as const;
+
+/**
+ * Quantos pedidos o dia tem, no cantinho — so a partir de 2: com 1, a cor do
+ * dia ja diz tudo e o numero seria ruido.
+ */
+const SeloDeQuantidade: React.FC<{ quantidade: number }> = ({ quantidade }) =>
+  quantidade < 2 ? null : (
+    <span
+      aria-hidden="true"
+      style={{
+        position: 'absolute', top: '-5px', right: '-4px', minWidth: '18px', height: '18px', padding: '0 4px',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '9px',
+        background: '#F5B9C6', color: '#3A2350', border: '2px solid #FFFFFF',
+        fontSize: '11px', fontWeight: 800, lineHeight: 1,
+      }}
+    >
+      {quantidade}
+    </span>
+  );
 
 export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
   transactions,
@@ -340,7 +367,7 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
               const isToday = dayStr === todayStr;
               const combina =
                 !filtro || (filtro === 'hoje' ? isToday : filtro === 'com-pedido' ? hasOrders : !hasOrders);
-              const sombra = hasOrders ? '0 6px 14px rgba(143,90,156,0.34)' : '0 6px 14px rgba(76,175,80,0.24)';
+              const sombra = hasOrders ? '0 6px 14px rgba(143,90,156,0.34)' : 'none';
 
               return (
                 <button
@@ -355,6 +382,7 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
                     (hasOrders ? `${dayOrders.length} ${dayOrders.length > 1 ? 'pedidos' : 'pedido'}` : 'livre')
                   }
                   style={{
+                    position: 'relative',
                     aspectRatio: '1 / 1',
                     display: 'flex',
                     alignItems: 'center',
@@ -364,12 +392,12 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
                     // Hoje: contorno roxo. O numero NAO muda de cor (no celular
                     // fica roxo, que sobre o degrade nao dava leitura).
                     border: isToday && combina ? '2px solid #3A2350' : 0,
-                    background: !combina ? 'transparent' : hasOrders ? 'linear-gradient(150deg, #8F5A9C, #C4626F)' : '#B4E7B4',
-                    color: !combina ? '#D3C9D6' : hasOrders ? '#FFFFFF' : '#1B5E1B',
+                    background: !combina ? 'transparent' : hasOrders ? 'linear-gradient(150deg, #8F5A9C, #C4626F)' : COR_DIA_LIVRE,
+                    color: !combina ? '#D3C9D6' : hasOrders ? '#FFFFFF' : COR_TEXTO_DIA_LIVRE,
                     boxShadow: !combina ? 'none' : sombra,
                     fontFamily: 'inherit',
                     fontSize: '13px',
-                    fontWeight: 800,
+                    fontWeight: hasOrders || isToday ? 800 : 600,
                     cursor: combina ? 'pointer' : 'default',
                     transition: 'transform 0.2s ease',
                   }}
@@ -381,6 +409,7 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
                   }}
                 >
                   {dayNum}
+                  {combina && <SeloDeQuantidade quantidade={dayOrders.length} />}
                 </button>
               );
             })}
@@ -520,14 +549,17 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
               boxShadowStyle = '0 6px 14px rgba(143,90,156,0.34)';
               fontWeightStyle = 800;
             } else {
-              bgColor = '#B4E7B4';
-              textColor = '#1B5E1B';
-              boxShadowStyle = '0 6px 14px rgba(76,175,80,0.34)';
-              fontWeightStyle = 800;
+              bgColor = COR_DIA_LIVRE;
+              textColor = COR_TEXTO_DIA_LIVRE;
+              boxShadowStyle = 'none';
+              fontWeightStyle = 600;
             }
 
-            if (isToday) {
-              textColor = '#6E3F72';
+            // Hoje livre: numero roxo e forte. Hoje com pedido fica branco —
+            // roxo sobre o degrade nao dava leitura (o contorno ja marca o dia).
+            if (isToday && !hasOrders) {
+              textColor = '#3A2350';
+              fontWeightStyle = 800;
             }
 
             // Fora do filtro: a celula fica apagada no lugar, com a mesma cor
@@ -559,12 +591,16 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
                 key={dayStr}
                 onClick={combinaComFiltro ? handleDayClick : undefined}
                 disabled={!combinaComFiltro}
-                className="aspect-square rounded-[13px] flex items-center justify-center"
+                className="relative aspect-square rounded-[13px] flex items-center justify-center"
+                aria-label={
+                  `${dayNum} de ${monthNames[month].toLowerCase()}${isToday ? ', hoje' : ''}, ` +
+                  (hasOrders ? `${dayOrders.length} ${dayOrders.length > 1 ? 'pedidos' : 'pedido'}` : 'livre')
+                }
                 style={{
                   background: bgColor,
                   color: textColor,
-                  border: isToday && combinaComFiltro ? '1.5px solid #6E3F72' : 'none',
-                  fontSize: '12px',
+                  border: isToday && combinaComFiltro ? '2px solid #3A2350' : 'none',
+                  fontSize: '13px',
                   fontWeight: fontWeightStyle,
                   boxShadow: boxShadowStyle,
                   transition: 'all 0.2s ease',
@@ -579,6 +615,7 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
                 title={`${dayNum} de ${monthNames[month].toLowerCase()}`}
               >
                 {dayNum}
+                {combinaComFiltro && <SeloDeQuantidade quantidade={dayOrders.length} />}
               </button>
             );
           })}
@@ -589,7 +626,7 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
           tipo a vista; clicar de novo mostra todos. Um de cada vez.
           Quando ha filtro ligado, os outros dois desbotam — e o unico sinal
           de estado, sem cor nova: a cor ativa e a do proprio quadradinho. */}
-      <div className="pt-4 border-t flex items-center justify-center gap-6 text-xs uppercase tracking-widest">
+      <div className="pt-4 border-t flex items-center justify-center gap-4 text-xs uppercase tracking-widest">
         {ITENS_LEGENDA.map((item) => (
           <button
             key={item.id}
@@ -607,7 +644,7 @@ export const OrdersCalendar: React.FC<OrdersCalendarProps> = ({
             }}
           >
             <div className="w-3 h-3 rounded" style={item.amostra} />
-            <span style={{ color: 'var(--color-ink-soft)', fontSize: '10px', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
+            <span style={{ color: COR_TEXTO_DIA_LIVRE, fontSize: '11px', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
               {item.rotulo}
             </span>
           </button>
