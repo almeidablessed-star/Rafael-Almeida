@@ -75,15 +75,15 @@ export const ResumoDistribuicaoCard: React.FC<{ estrutura: EstruturaFinanceira; 
         ) : (
           <>
             <div className="text-center">
-              <p className="text-[9px] uppercase tracking-[0.14em] text-white/70" style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>Faturamento necessário</p>
+              <p className="text-[11px] uppercase tracking-[0.14em] text-white/70" style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>Faturamento necessário</p>
               <p className="font-serif-display text-[26px] text-white">{formatCurrency(estrutura.faturamentoNecessario)}</p>
             </div>
             <div className="rounded-xl bg-white/95 overflow-hidden">
               {linhas.map(([nome, pct, valor], i) => (
                 <div key={nome} className={`flex items-center justify-between px-3 py-2 ${i > 0 ? 'border-t border-[#E6E1DB]' : ''}`}>
-                  <span className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>{nome}</span>
-                  <span className="text-[11px]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>{numeroComVirgula(pct, 2)}%</span>
-                  <span className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>{formatCurrency(valor)}</span>
+                  <span className="text-[12px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>{nome}</span>
+                  <span className="text-[12px]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>{numeroComVirgula(pct, 2)}%</span>
+                  <span className="text-[12px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>{formatCurrency(valor)}</span>
                 </div>
               ))}
             </div>

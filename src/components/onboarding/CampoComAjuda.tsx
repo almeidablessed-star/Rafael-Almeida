@@ -127,7 +127,7 @@ export const CampoComAjuda: React.FC<{
         </div>
         {aberto && exemploDinamico && (
           <div
-            className="mt-1.5 p-2.5 rounded-xl border border-[#E6E1DB] bg-white text-[11px]"
+            className="mt-1.5 p-2.5 rounded-xl border border-[#E6E1DB] bg-white text-[12px]"
             style={{ color: '#5A4E46', fontFamily: "'Manrope', sans-serif", boxShadow: '0 8px 20px rgba(58,35,80,0.09)' }}
           >
             {exemploDinamico}
@@ -140,14 +140,14 @@ export const CampoComAjuda: React.FC<{
   return (
     <div className="mt-1.5">
       <div className="flex items-start gap-1.5">
-        <p className="text-[11px] flex-1" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
+        <p className="text-[12px] flex-1" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
           {microcopy}
         </p>
         {exemploDinamico && botaoAjuda}
       </div>
       {aberto && exemploDinamico && (
         <div
-          className="mt-1.5 p-2.5 rounded-xl border border-[#E6E1DB] bg-[#F6F2F5] text-[11px]"
+          className="mt-1.5 p-2.5 rounded-xl border border-[#E6E1DB] bg-[#F6F2F5] text-[12px]"
           style={{ color: '#5A4E46', fontFamily: "'Manrope', sans-serif", boxShadow: '0 8px 20px rgba(58,35,80,0.09)' }}
         >
           {exemploDinamico}

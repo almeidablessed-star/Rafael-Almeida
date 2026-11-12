@@ -48,12 +48,12 @@ const CHECKLIST_PRIMEIROS_PASSOS_HABILITADO = true;
 
 // Rotulo dos botoes do cabecalho da aba Inicio, que antes eram so icones. Usa
 // o mesmo tratamento dos rotulos que ja existem neste cabecalho (caixa alta
-// miuda em rosa claro, tipo "TOTAL EM VENDAS"). O corpo de 7px mantem cada
+// miuda em rosa claro, tipo "TOTAL EM VENDAS"). O corpo pequeno (9px) mantem cada
 // rotulo dentro da largura do seu proprio botao, para o grupo de icones nao
 // crescer e encostar no letreiro "Carula", que flutua centralizado por cima.
 const rotuloBotaoCabecalho: React.CSSProperties = {
   fontFamily: "'Manrope', sans-serif",
-  fontSize: '7px',
+  fontSize: '9px',
   fontWeight: 800,
   textTransform: 'uppercase',
   letterSpacing: '0.04em',
@@ -67,7 +67,7 @@ const rotuloBotaoCabecalho: React.CSSProperties = {
 // da largura do proprio botao (e o espacamento entre os tres continuar igual).
 const rotuloBotaoAcao: React.CSSProperties = {
   ...rotuloBotaoCabecalho,
-  fontSize: '6px',
+  fontSize: '8px',
 };
 
 /**
@@ -307,7 +307,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <h3 className="font-serif-display text-[23px]" style={{ color: '#241B2B' }}>
           {titulo}
         </h3>
-        <p className="text-[11px]" style={{ color: '#7A6E80', marginTop: '2px' }}>
+        <p className="text-[12px]" style={{ color: '#7A6E80', marginTop: '2px' }}>
           {frase}
         </p>
       </div>
@@ -321,12 +321,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const frasesSaldos = (
     <>
       {nadaEntrouNoPeriodo && (
-        <p className="text-[10px]" style={{ color: '#9A8FA0', ...(pc ? { margin: 0, fontSize: '12px', color: '#7A6E80' } : {}) }}>
+        <p className="text-[12px]" style={{ color: '#9A8FA0', ...(pc ? { margin: 0, fontSize: '12px', color: '#7A6E80' } : {}) }}>
           Nenhum pagamento recebido {vocab.nessePeriodo} ainda.
         </p>
       )}
       {!nadaEntrouNoPeriodo && lucroNegativo && (
-        <p className="text-[10px]" style={{ color: '#C4626F', ...(pc ? { margin: 0, fontSize: '12px', color: '#B04E5C' } : {}) }}>
+        <p className="text-[12px]" style={{ color: '#C4626F', ...(pc ? { margin: 0, fontSize: '12px', color: '#B04E5C' } : {}) }}>
           Prejuízo {vocab.daPeriodo}: os pedidos saíram por menos do que custaram.
         </p>
       )}
@@ -346,7 +346,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       <p className="text-[12px] font-bold" style={{ color: '#8A6D1F', ...(pc ? { fontSize: '14px' } : {}) }}>
         Configure sua estrutura financeira
       </p>
-      <p className="text-[11px] mt-1" style={{ color: '#9A8FA0', ...(pc ? { fontSize: '13px', color: '#7A6E80' } : {}) }}>
+      <p className="text-[12px] mt-1" style={{ color: '#9A8FA0', ...(pc ? { fontSize: '13px', color: '#7A6E80' } : {}) }}>
         Recebimento desejado, despesas e metas de CMV/investimento/lucro
         em Minha Empresa. Sem isso não dá para saber quanto você precisa
         vender {vocab.porPeriodo}. Toque para preencher.
@@ -359,7 +359,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
     >
       <div className="flex items-end justify-between gap-3" style={pc ? { flexWrap: 'wrap' } : undefined}>
         <div>
-          <p className="text-[9px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800, ...(pc ? { fontSize: '11px' } : {}) }}>
+          <p className="text-[11px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800, ...(pc ? { fontSize: '11px' } : {}) }}>
             Precisa faturar
           </p>
           {/*
@@ -380,7 +380,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 com ele. A Manrope carrega 400/500/600/700/800 — 500 e peso
                 real, nao negrito sintetizado pelo navegador (que borraria
                 um texto de 11px). */}
-            <span className="text-[11px] ml-1.5" style={{ color: '#9A8FA0', fontWeight: 500, ...(pc ? { fontSize: '12px', color: '#7A6E80' } : {}) }}>
+            <span className="text-[12px] ml-1.5" style={{ color: '#9A8FA0', fontWeight: 500, ...(pc ? { fontSize: '12px', color: '#7A6E80' } : {}) }}>
               {vocab.porPeriodo}
             </span>
           </p>
@@ -393,13 +393,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
             valendo: ali os numeros sao mesmo diferentes.
           */}
           {periodoReset !== 'mensal' && (
-            <p className="text-[10px] mt-0.5" style={{ color: '#9A8FA0', ...(pc ? { fontSize: '12px', color: '#7A6E80' } : {}) }}>
+            <p className="text-[12px] mt-0.5" style={{ color: '#9A8FA0', ...(pc ? { fontSize: '12px', color: '#7A6E80' } : {}) }}>
               {formatMoney(meta.faturamentoNecessarioMensal)}/mês pra bater sua meta completa
             </p>
           )}
         </div>
         <div className="text-right" style={pc ? { textAlign: 'left' } : undefined}>
-          <p className="text-[9px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800, ...(pc ? { fontSize: '11px' } : {}) }}>
+          <p className="text-[11px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800, ...(pc ? { fontSize: '11px' } : {}) }}>
             Já entrou
           </p>
           <p className="text-[18px] leading-tight" style={{ color: meta.metaAtingida ? verdeMetaTexto : '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800, ...(pc ? { fontSize: '19px', fontVariantNumeric: 'tabular-nums' } : {}) }}>
@@ -419,7 +419,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         />
       </div>
 
-      <p className="text-[11px] mt-2" style={{ color: meta.metaAtingida ? verdeMetaTexto : '#7A6E80', fontWeight: meta.metaAtingida ? 700 : 400, ...(pc ? { fontSize: '13px', marginTop: '12px' } : {}) }}>
+      <p className="text-[12px] mt-2" style={{ color: meta.metaAtingida ? verdeMetaTexto : '#7A6E80', fontWeight: meta.metaAtingida ? 700 : 400, ...(pc ? { fontSize: '13px', marginTop: '12px' } : {}) }}>
         {meta.metaAtingida
           ? `✓ Meta completa ${vocab.daPeriodo} batida! O que entrar além disso é resultado extra.`
           : `Faltam ${formatMoney(meta.faltaFaturar)} para cobrir tudo ${vocab.nessePeriodo}.`}
@@ -431,13 +431,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
           mesmo conceito, mesma cor, sem inventar token novo. */}
       <div className="mt-3 pt-3" style={{ borderTop: '1px dashed #EDE6EF', ...(pc ? { marginTop: '14px', paddingTop: '14px' } : {}) }}>
         <p
-          className="text-[9px] uppercase tracking-[0.05em]"
+          className="text-[11px] uppercase tracking-[0.05em]"
           style={{ color: '#7E4F9E', fontFamily: "'Manrope', sans-serif", fontWeight: 800, ...(pc ? { fontSize: '11px', display: 'flex', alignItems: 'center', gap: '6px' } : {}) }}
         >
           {/* No computador os emojis da interface viraram icones, na mesma posicao. */}
           {pc ? <Heart size={13} fill="currentColor" strokeWidth={0} aria-hidden="true" /> : '💜 '}Sua fatia pessoal
         </p>
-        <p className="text-[11px] mt-1" style={{ color: '#7A6E80', lineHeight: 1.4, ...(pc ? { fontSize: '13px', lineHeight: 1.45, marginTop: '8px' } : {}) }}>
+        <p className="text-[12px] mt-1" style={{ color: '#7A6E80', lineHeight: 1.4, ...(pc ? { fontSize: '13px', lineHeight: 1.45, marginTop: '8px' } : {}) }}>
           Disso, <strong style={{ color: '#241B2B' }}>{formatMoney(meta.metaPessoalSemana)}</strong>{' '}
           {vocab.porPeriodo} é seu — o que você decidiu receber pelo seu trabalho.
           Até agora já garantiu <strong style={{ color: '#241B2B' }}>{formatMoney(meta.jaGarantidoPessoal)}</strong>.
@@ -455,7 +455,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
 
         <p
-          className="text-[10.5px] mt-1.5"
+          className="text-[12px] mt-1.5"
           style={{
             color: meta.metaPessoalAtingida ? verdeMetaTexto : '#9A8FA0',
             fontWeight: meta.metaPessoalAtingida ? 700 : 400,
@@ -479,7 +479,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       <p className="text-[12px] font-bold" style={{ color: '#5A3F7F', ...(pc ? { fontSize: '14px' } : {}) }}>
         Ainda não dá pra avaliar
       </p>
-      <p className="text-[11px] mt-1" style={{ color: '#9A8FA0', ...(pc ? { fontSize: '13px', color: '#7A6E80' } : {}) }}>
+      <p className="text-[12px] mt-1" style={{ color: '#9A8FA0', ...(pc ? { fontSize: '13px', color: '#7A6E80' } : {}) }}>
         {!estruturaFinanceira?.valido
           ? 'Configure suas metas em Minha Empresa para ver se seus preços cobrem sua estrutura financeira. Toque para preencher.'
           : 'Cadastre o preço e os insumos de pelo menos um tamanho nas suas fichas técnicas. Toque para abrir Fichas Técnicas.'}
@@ -516,7 +516,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <p className="text-[13px] font-bold" style={{ color: c.texto, fontFamily: "'Manrope', sans-serif", ...(pc ? { fontSize: '14px', fontWeight: 800 } : {}) }}>
                 {c.label}
               </p>
-              <p className="text-[11px]" style={{ color: '#7A6E80', ...(pc ? { fontSize: '13px' } : {}) }}>
+              <p className="text-[12px]" style={{ color: '#7A6E80', ...(pc ? { fontSize: '13px' } : {}) }}>
                 {temItens
                   ? `${saudeFinanceira.comPrejuizo.length} de ${saudeFinanceira.totalAvaliados} produtos vendidos por menos do que custam`
                   : `${saudeFinanceira.totalAvaliados} produto${saudeFinanceira.totalAvaliados === 1 ? '' : 's'} avaliado${saudeFinanceira.totalAvaliados === 1 ? '' : 's'}, nenhum com prejuízo`}
@@ -550,7 +550,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       </p>
                     </div>
                     <span
-                      className="text-[11px] font-bold flex-shrink-0"
+                      className="text-[12px] font-bold flex-shrink-0"
                       style={{ color: '#C4626F', ...(pc ? { fontSize: '13px', fontWeight: 800, whiteSpace: 'nowrap', color: '#B04E5C' } : {}) }}
                     >
                       −{formatMoney(item.prejuizo)}
@@ -926,7 +926,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           {/* Top: Total em Vendas Card */}
           <div>
-            <div className="text-[9px] font-black uppercase tracking-[0.14em]" style={{ color: 'rgba(247,220,225,0.8)', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
+            <div className="text-[11px] font-black uppercase tracking-[0.14em]" style={{ color: 'rgba(247,220,225,0.8)', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
               RECEBIDO NA SEMANA
             </div>
             <div className="text-white" style={{ fontSize: '32px', lineHeight: 1, letterSpacing: '-0.03em', marginTop: '0px', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
@@ -936,21 +936,21 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           {/* Bottom: 3 Small Boxes */}
           <div className="flex gap-2">
-            <div className="flex-1 rounded-[16px] p-3 text-center" style={{ background: 'rgba(255,255,255,0.12)' }}>
-              <div className="text-[9px] text-white/75 uppercase tracking-[0.06em]" style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 700 }}>VENDAS PAGAS</div>
-              <div className="text-white mt-1" style={{ fontSize: '15px', lineHeight: 1, fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
+            <div className="flex-1 min-w-0 rounded-[16px] px-1.5 py-3 text-center" style={{ background: 'rgba(255,255,255,0.12)' }}>
+              <div className="text-[10px] text-white/80 uppercase tracking-[0.04em] whitespace-nowrap" style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 700 }}>VENDAS PAGAS</div>
+              <div className="text-white mt-1" style={{ fontSize: 'clamp(13px, 3.9vw, 15px)', lineHeight: 1, whiteSpace: 'nowrap', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
                 {formatMoney(balances.totalPaidSales || 0)}
               </div>
             </div>
-            <div className="flex-1 rounded-[16px] p-3 text-center" style={{ background: 'rgba(255,255,255,0.12)' }}>
-              <div className="text-[9px] text-white/75 uppercase tracking-[0.06em]" style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 700 }}>SAÍDAS</div>
-              <div className="text-white mt-1" style={{ fontSize: '15px', lineHeight: 1, fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
+            <div className="flex-1 min-w-0 rounded-[16px] px-1.5 py-3 text-center" style={{ background: 'rgba(255,255,255,0.12)' }}>
+              <div className="text-[10px] text-white/80 uppercase tracking-[0.04em] whitespace-nowrap" style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 700 }}>SAÍDAS</div>
+              <div className="text-white mt-1" style={{ fontSize: 'clamp(13px, 3.9vw, 15px)', lineHeight: 1, whiteSpace: 'nowrap', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
                 {formatMoney(balances.totalExpensesAmount || 0)}
               </div>
             </div>
-            <div className="flex-1 rounded-[16px] p-3 text-center" style={{ background: 'rgba(228,217,195,0.28)' }}>
-              <div className="text-[9px] uppercase tracking-[0.06em]" style={{ color: '#F0E2C8', fontFamily: "'Manrope', sans-serif", fontWeight: 700 }}>⏳ A RECEBER</div>
-              <div className="text-white mt-1" style={{ fontSize: '15px', lineHeight: 1, fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
+            <div className="flex-1 min-w-0 rounded-[16px] px-1.5 py-3 text-center" style={{ background: 'rgba(228,217,195,0.28)' }}>
+              <div className="text-[10px] uppercase tracking-[0.04em] whitespace-nowrap" style={{ color: '#F0E2C8', fontFamily: "'Manrope', sans-serif", fontWeight: 700 }}>⏳ A RECEBER</div>
+              <div className="text-white mt-1" style={{ fontSize: 'clamp(13px, 3.9vw, 15px)', lineHeight: 1, whiteSpace: 'nowrap', fontFamily: "'Manrope', sans-serif", fontWeight: 800 }}>
                 {formatMoney(totalAReceberGeral || 0)}
               </div>
             </div>
@@ -959,7 +959,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           {/* Explica o recorte semanal: sem isto, a tela zerada toda
               segunda-feira parecia um bug pra quem abria o app sem saber que
               os totais (exceto "A receber") reiniciam a cada semana. */}
-          <p className="text-[10px] mt-2.5 text-center" style={{ color: 'rgba(255,255,255,0.55)', fontFamily: "'Manrope', sans-serif", lineHeight: 1.4 }}>
+          <p className="text-[12px] mt-2.5 text-center" style={{ color: 'rgba(255,255,255,0.78)', fontFamily: "'Manrope', sans-serif", lineHeight: 1.4 }}>
             {fraseReset}
           </p>
 
@@ -1037,7 +1037,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           <div className="relative flex items-center gap-4">
             <div className="flex-1" style={{ paddingLeft: '6px', borderLeft: '2px dashed rgba(245,185,198,0.5)' }}>
-              <div className="text-[9px] font-black text-white/80 mb-1" style={{ letterSpacing: '0.24em' }}>NOVA COMANDA</div>
+              <div className="text-[11px] font-black text-white/80 mb-1" style={{ letterSpacing: '0.24em' }}>NOVA COMANDA</div>
               <div className="font-serif-display text-white" style={{ fontSize: '29px', lineHeight: 1 }}>Lançar Pedido</div>
             </div>
             <div

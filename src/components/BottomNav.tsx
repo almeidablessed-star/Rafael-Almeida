@@ -124,11 +124,11 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) 
               />
               <span
                 style={{
-                  fontSize: '8px',
+                  fontSize: '10px',
                   fontWeight: isActive ? 800 : 600,
                   color: isActive ? '#F5B9C6' : '#A096A6',
                   textTransform: 'uppercase',
-                  letterSpacing: '0.02em',
+                  letterSpacing: 0,
                   transition: 'color 0.25s ease',
                 }}
               >
