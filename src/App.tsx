@@ -1,5 +1,5 @@
 // v2.1 - Fresh rebuild with latest redesign - force Vercel deployment
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { mensagemDeErro } from './utils/mensagemDeErro';
 import { avisar, perguntar } from './components/AvisoApp';
 import { migrarFotosAntigas } from './utils/migrarFotosAntigas';
@@ -245,6 +245,15 @@ function AppContent() {
   useEffect(() => {
     setIsFormModalOpen(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
+
+  // Toda aba abre no topo. A pagina inteira e quem rola (a janela), e o
+  // navegador mantem a rolagem quando so o conteudo muda: sem isto, sair do
+  // Inicio rolado e tocar em Pedidos caia no fim da lista, sem o total nem os
+  // filtros. useLayoutEffect: sobe ANTES de pintar, para a aba nova nao
+  // aparecer rolada por um instante.
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
   }, [activeTab]);
 
   // Dispara o tour de primeiros passos uma unica vez, na primeira entrada no
