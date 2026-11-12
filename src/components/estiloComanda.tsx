@@ -19,9 +19,9 @@ export const CARD_COMANDA: React.CSSProperties = {
 };
 
 export const ROTULO_COMANDA: React.CSSProperties = {
-  fontSize: '9px',
+  fontSize: '11px',
   fontWeight: 800,
-  letterSpacing: '.14em',
+  letterSpacing: '.08em',
   color: '#7A6E80',
 };
 

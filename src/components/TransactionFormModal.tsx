@@ -1352,7 +1352,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                   style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                 >
                   <div style={{ height: '3px', borderRadius: '2px', background: pedidoFormStep >= s.n ? '#F5B9C6' : 'rgba(255,255,255,0.25)' }} />
-                  <span style={{ fontSize: '11px', fontWeight: 600, color: pedidoFormStep === s.n ? '#fff' : 'rgba(255,255,255,0.6)', textAlign: 'left' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 600, color: pedidoFormStep === s.n ? '#fff' : 'rgba(255,255,255,0.6)', textAlign: 'left' }}>
                     {s.label}
                   </span>
                 </button>
@@ -1471,14 +1471,14 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                                 {c.photoUrl ? (
                                   <img src={c.photoUrl} alt="" className="w-6 h-6 rounded-full object-cover shrink-0" />
                                 ) : (
-                                  <span className="w-6 h-6 rounded-full bg-pink-200 text-pink-900 text-[10px] font-black flex items-center justify-center shrink-0">
+                                  <span className="w-6 h-6 rounded-full bg-pink-200 text-pink-900 text-[12px] font-black flex items-center justify-center shrink-0">
                                     {c.name.charAt(0).toUpperCase()}
                                   </span>
                                 )}
                                 <span className="min-w-0">
                                   <span className="block text-xs font-bold text-neutral-900 truncate">{c.name}</span>
                                   {c.phone && (
-                                    <span className="block text-[10px] text-neutral-600 truncate">{c.phone}</span>
+                                    <span className="block text-[12px] text-neutral-600 truncate">{c.phone}</span>
                                   )}
                                 </span>
                               </button>
@@ -1613,7 +1613,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                   <span style={{ fontSize: '13px', color: '#7A6E80' }}>
                     {orderItems.length === 1 ? '1 item no pedido' : `${orderItems.length} itens no pedido`}
                   </span>
-                  <span style={{ fontSize: '11px', color: '#A096A6' }}>Valores preenchidos automaticamente</span>
+                  <span style={{ fontSize: '12px', color: '#A096A6' }}>Valores preenchidos automaticamente</span>
                 </div>
 
                 {orderItems.map((item, index) => {
@@ -1687,7 +1687,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       {item.productName === 'Outro / Personalizado' ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                           <div>
-                            <label style={{ fontSize: '11px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '4px' }}>
+                            <label style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '4px' }}>
                               Nome / Descrição do item
                             </label>
                             <input
@@ -1705,7 +1705,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                             {invalidFieldId === `pedido-desc-item-${item.id}` && <FieldValidationError />}
                           </div>
                           <div>
-                            <label style={{ fontSize: '11px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '4px' }}>
+                            <label style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '4px' }}>
                               Preço de venda ({currencySymbol})
                             </label>
                             <input
@@ -1769,32 +1769,32 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                           </div>
                         </div>
                         <div style={{ textAlign: 'right' }}>
-                          <span style={{ fontSize: '11px', color: '#7A6E80', display: 'block' }}>Subtotal do item</span>
+                          <span style={{ fontSize: '12px', color: '#7A6E80', display: 'block' }}>Subtotal do item</span>
                           <span style={{ fontSize: '18px', fontWeight: 700, color: '#3A2350' }}>{formatMoney(bd.totalVenda)}</span>
                         </div>
                       </div>
 
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: '8px' }}>
                         <div style={{ background: '#F6F2F5', borderRadius: '10px', padding: '9px 11px' }}>
-                          <span style={{ fontSize: '11px', color: '#7A6E80', display: 'block' }}>Reposição</span>
+                          <span style={{ fontSize: '12px', color: '#7A6E80', display: 'block' }}>Reposição</span>
                           <span style={{ fontSize: '13px', fontWeight: 700 }}>{formatMoney(bd.totalReposicao)}</span>
                         </div>
                         <div style={{ background: '#F6F2F5', borderRadius: '10px', padding: '9px 11px' }}>
-                          <span style={{ fontSize: '11px', color: '#7A6E80', display: 'block' }}>Mão de obra</span>
+                          <span style={{ fontSize: '12px', color: '#7A6E80', display: 'block' }}>Mão de obra</span>
                           <span style={{ fontSize: '13px', fontWeight: 700, color: '#7E4F9E' }}>{formatMoney(bd.totalMaodeobra)}</span>
                         </div>
                         <div style={{ background: '#F6F2F5', borderRadius: '10px', padding: '9px 11px' }}>
-                          <span style={{ fontSize: '11px', color: '#7A6E80', display: 'block' }}>Despesas</span>
+                          <span style={{ fontSize: '12px', color: '#7A6E80', display: 'block' }}>Despesas</span>
                           <span style={{ fontSize: '13px', fontWeight: 700 }}>{formatMoney(bd.totalCusto)}</span>
                         </div>
                         <div style={{ background: '#F6F2F5', borderRadius: '10px', padding: '9px 11px' }}>
-                          <span style={{ fontSize: '11px', color: '#7A6E80', display: 'block' }}>Investimento</span>
+                          <span style={{ fontSize: '12px', color: '#7A6E80', display: 'block' }}>Investimento</span>
                           <span style={{ fontSize: '13px', fontWeight: 700 }}>{formatMoney(bd.totalInvestimento)}</span>
                         </div>
                       </div>
 
                       {item.productName === 'Outro / Personalizado' && !proporcoesDoCatalogo && (
-                        <p className="text-[10px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5">
+                        <p className="text-[12px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5">
                           ⚠️ Sem fichas técnicas cadastradas, não dá para estimar os custos deste item. Os valores acima ficam zerados.
                         </p>
                       )}
@@ -1833,7 +1833,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
 
                   {hasDelivery && (
                     <div style={{ padding: '13px 0', borderBottom: '1px solid rgba(58,35,80,0.07)' }}>
-                      <label style={{ fontSize: '11px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '4px' }}>Taxa de entrega ({currencySymbol})</label>
+                      <label style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '4px' }}>Taxa de entrega ({currencySymbol})</label>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[13px] text-[#7A6E80] font-bold">{currencySymbol}</span>
                         <input
@@ -1873,7 +1873,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                       {addons.map((addon, index) => (
                         <div key={addon.id} style={{ background: '#FAF7FA', border: '1px solid rgba(58,35,80,0.1)', borderRadius: '12px', padding: '10px' }} className="space-y-2">
                           <div className="flex items-center justify-between">
-                            <span style={{ fontSize: '11px', fontWeight: 700, color: '#6E3F72' }}>🌸 Adicional #{index + 1}</span>
+                            <span style={{ fontSize: '12px', fontWeight: 700, color: '#6E3F72' }}>🌸 Adicional #{index + 1}</span>
                             {addons.length > 1 && (
                               <button type="button" onClick={() => handleRemoveAddonItem(addon.id)} className="p-1 text-slate-400 hover:text-rose-600 transition rounded-lg">
                                 <Trash2 className="w-3.5 h-3.5" />
@@ -1882,7 +1882,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                           </div>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             <div>
-                              <label style={{ fontSize: '10px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '3px' }}>Descrição</label>
+                              <label style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '3px' }}>Descrição</label>
                               <input
                                 type="text"
                                 value={addon.description}
@@ -1892,7 +1892,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                               />
                             </div>
                             <div>
-                              <label style={{ fontSize: '10px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '3px' }}>Valor ({currencySymbol})</label>
+                              <label style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '3px' }}>Valor ({currencySymbol})</label>
                               <input
                                 type="text"
                                 inputMode="decimal"
@@ -2006,7 +2006,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                         {/* O limite e o total do pedido. Antes lia `totalValue`, que so os
                             lancamentos que nao sao venda preenchem: no pedido aparecia
                             sempre "-" e a entrada nao tinha limite nenhum. */}
-                        <span style={{ fontSize: '11px', fontWeight: 500, color: '#A096A6' }}>{grandTotalSalePrice > 0 ? `Máx: ${formatMoney(grandTotalSalePrice)}` : '-'}</span>
+                        <span style={{ fontSize: '12px', fontWeight: 500, color: '#A096A6' }}>{grandTotalSalePrice > 0 ? `Máx: ${formatMoney(grandTotalSalePrice)}` : '-'}</span>
                       </label>
                       <div className="relative">
                         {/* Mesmo prefixo da "Taxa de entrega": cinza, 13px, com folga
@@ -2041,7 +2041,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                 <div style={{ background: '#fff', borderRadius: '16px', padding: '18px', display: 'flex', flexDirection: 'column', gap: '14px', boxShadow: '0 8px 20px rgba(58,35,80,0.09)' }}>
                   <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '10px' }}>
                     <div>
-                      <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#7A6E80', display: 'block' }}>
+                      <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#7A6E80', display: 'block' }}>
                         Total do pedido
                       </span>
                       <span style={{ fontFamily: "'Instrument Serif', serif", fontSize: '32px', lineHeight: 1, color: '#3A2350' }}>
@@ -2056,24 +2056,24 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: '8px' }}>
                     <div style={{ background: '#F6F2F5', borderRadius: '10px', padding: '9px 11px' }}>
-                      <span style={{ fontSize: '11px', color: '#7A6E80', display: 'block' }}>Reposição</span>
+                      <span style={{ fontSize: '12px', color: '#7A6E80', display: 'block' }}>Reposição</span>
                       <span style={{ fontSize: '13px', fontWeight: 700, color: '#3A2350' }}>{formatMoney(custoReposicaoDoPedido)}</span>
                     </div>
                     <div style={{ background: '#F6F2F5', borderRadius: '10px', padding: '9px 11px' }}>
-                      <span style={{ fontSize: '11px', color: '#7A6E80', display: 'block' }}>Mão de obra</span>
+                      <span style={{ fontSize: '12px', color: '#7A6E80', display: 'block' }}>Mão de obra</span>
                       <span style={{ fontSize: '13px', fontWeight: 700, color: '#3A2350' }}>{formatMoney(custoMaoDeObraDoPedido)}</span>
                     </div>
                     <div style={{ background: '#F6F2F5', borderRadius: '10px', padding: '9px 11px' }}>
-                      <span style={{ fontSize: '11px', color: '#7A6E80', display: 'block' }}>Despesas</span>
+                      <span style={{ fontSize: '12px', color: '#7A6E80', display: 'block' }}>Despesas</span>
                       <span style={{ fontSize: '13px', fontWeight: 700, color: '#3A2350' }}>{formatMoney(custoOperacionalDoPedido)}</span>
                     </div>
                     <div style={{ background: '#F6F2F5', borderRadius: '10px', padding: '9px 11px' }}>
-                      <span style={{ fontSize: '11px', color: '#7A6E80', display: 'block' }}>Investimento</span>
+                      <span style={{ fontSize: '12px', color: '#7A6E80', display: 'block' }}>Investimento</span>
                       <span style={{ fontSize: '13px', fontWeight: 700, color: '#3A2350' }}>{formatMoney(custoInvestimentoDoPedido)}</span>
                     </div>
                   </div>
                   {custosGravadosDoPedido && (
-                    <div style={{ fontSize: '11px', color: '#7A6E80', marginTop: '8px', lineHeight: 1.4 }}>
+                    <div style={{ fontSize: '12px', color: '#7A6E80', marginTop: '8px', lineHeight: 1.4 }}>
                       Custos do dia em que o pedido foi lançado. Os valores por item acima usam os preços de hoje.
                     </div>
                   )}
@@ -2192,7 +2192,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                   <label className="text-xs font-bold" style={{ color: '#3A2350' }}>
                     Valor Total ({currencySymbol}) <span style={{ color: '#C4626F' }}>*</span>
                   </label>
-                  <span className="text-[11px] font-medium" style={{ color: '#6E3F72' }}>Auto-calculado</span>
+                  <span className="text-[12px] font-medium" style={{ color: '#6E3F72' }}>Auto-calculado</span>
                 </div>
                 <div className="flex items-center gap-2.5" style={{ padding: '14px 16px', borderRadius: '12px', background: '#F3E9F3' }}>
                   <span className="font-serif-display" style={{ fontSize: '18px', fontWeight: 700, color: '#6E3F72' }}>{currencySymbol}</span>
@@ -2303,8 +2303,8 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                         className="text-center transition-all"
                         style={
                           costCategory === item.id
-                            ? { padding: '9px 6px', border: 'none', borderRadius: '8px', fontSize: '11px', fontWeight: 700, background: '#3A2350', color: '#fff', boxShadow: '0 6px 14px rgba(58,35,80,.25)' }
-                            : { padding: '9px 6px', border: 'none', borderRadius: '8px', fontSize: '11px', fontWeight: 700, background: 'transparent', color: '#6E3F72' }
+                            ? { padding: '9px 6px', border: 'none', borderRadius: '8px', fontSize: '12px', fontWeight: 700, background: '#3A2350', color: '#fff', boxShadow: '0 6px 14px rgba(58,35,80,.25)' }
+                            : { padding: '9px 6px', border: 'none', borderRadius: '8px', fontSize: '12px', fontWeight: 700, background: 'transparent', color: '#6E3F72' }
                         }
                       >
                         {item.label}
@@ -2411,7 +2411,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
               <div>
                 <label className="block text-xs font-bold text-neutral-800 mb-1 flex items-center justify-between">
                   <span>Valor Total ({currencySymbol}) *</span>
-                  <span className="text-[11px] font-medium text-neutral-500">Auto-calculado</span>
+                  <span className="text-[12px] font-medium text-neutral-500">Auto-calculado</span>
                 </label>
                 <div className="relative">
                   <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-bold text-pink-600 text-lg">
