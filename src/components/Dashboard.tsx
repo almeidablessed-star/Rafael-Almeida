@@ -358,7 +358,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
       style={{ background: 'white', boxShadow: '0 6px 18px rgba(58,35,80,.08)', border: '1px solid #EDE6EF', ...(pc ? { borderRadius: '20px', padding: '20px' } : {}) }}
     >
       <div className="flex items-end justify-between gap-3" style={pc ? { flexWrap: 'wrap' } : undefined}>
-        <div>
+        {/* minWidth 0 + flex 1: quem cede espaco e este lado; o "Ja entrou"
+            nunca encolhe (em 360px o "R$" dele quebrava para cima do numero). */}
+        <div style={pc ? undefined : { flex: 1, minWidth: 0 }}>
           <p className="text-[11px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800, ...(pc ? { fontSize: '11px' } : {}) }}>
             Precisa faturar
           </p>
@@ -374,13 +376,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
             Cada uma com sua linha, e a unidade grudada em quem ela
             qualifica.
           */}
-          <p className="text-[24px] leading-tight" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800, ...(pc ? { fontVariantNumeric: 'tabular-nums' } : {}) }}>
-            {formatMoney(meta.necessarioPorSemana)}
+          {/* Valor e unidade nunca quebram por dentro: se nao couberem lado a
+              lado, a unidade inteira ("por semana") desce para a linha de
+              baixo — antes ficava "por" em cima e "semana" embaixo. */}
+          <p className="text-[24px] leading-tight" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800, display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', columnGap: '6px', ...(pc ? { fontVariantNumeric: 'tabular-nums' } : {}) }}>
+            <span style={{ whiteSpace: 'nowrap' }}>{formatMoney(meta.necessarioPorSemana)}</span>
             {/* 500: a unidade acompanha o numero grande (800) sem competir
                 com ele. A Manrope carrega 400/500/600/700/800 — 500 e peso
                 real, nao negrito sintetizado pelo navegador (que borraria
                 um texto de 11px). */}
-            <span className="text-[12px] ml-1.5" style={{ color: '#9A8FA0', fontWeight: 500, ...(pc ? { fontSize: '12px', color: '#7A6E80' } : {}) }}>
+            <span className="text-[12px]" style={{ color: '#9A8FA0', fontWeight: 500, whiteSpace: 'nowrap', ...(pc ? { fontSize: '12px', color: '#7A6E80' } : {}) }}>
               {vocab.porPeriodo}
             </span>
           </p>
@@ -398,11 +403,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </p>
           )}
         </div>
-        <div className="text-right" style={pc ? { textAlign: 'left' } : undefined}>
-          <p className="text-[11px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800, ...(pc ? { fontSize: '11px' } : {}) }}>
+        <div className="text-right" style={pc ? { textAlign: 'left' } : { flexShrink: 0 }}>
+          <p className="text-[11px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontFamily: "'Manrope', sans-serif", fontWeight: 800, whiteSpace: 'nowrap', ...(pc ? { fontSize: '11px' } : {}) }}>
             Já entrou
           </p>
-          <p className="text-[18px] leading-tight" style={{ color: meta.metaAtingida ? verdeMetaTexto : '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800, ...(pc ? { fontSize: '19px', fontVariantNumeric: 'tabular-nums' } : {}) }}>
+          <p className="text-[18px] leading-tight" style={{ color: meta.metaAtingida ? verdeMetaTexto : '#241B2B', fontFamily: "'Manrope', sans-serif", fontWeight: 800, whiteSpace: 'nowrap', ...(pc ? { fontSize: '19px', fontVariantNumeric: 'tabular-nums' } : {}) }}>
             {formatMoney(meta.faturadoNaSemana)}
           </p>
         </div>
