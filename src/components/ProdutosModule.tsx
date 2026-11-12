@@ -517,7 +517,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
         da lista do Estoque, que e onde ele importa. */}
     {lowStockCount > 0 && (
       <span
-        className="self-start inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-3 py-1.5 rounded-full whitespace-nowrap"
+        className="self-start inline-flex items-center gap-1 text-[11px] font-extrabold uppercase px-3 py-1.5 rounded-full whitespace-nowrap"
         style={{ background: pc ? '#B04E5C' : '#C4626F', color: '#FFF8F6', ...(pc ? { gap: '6px', padding: '6px 12px', fontSize: '11px', letterSpacing: '0.06em' } : {}) }}
       >
         <AlertTriangle className="w-3 h-3" style={{ strokeWidth: 2.5, ...(pc ? { width: '13px', height: '13px' } : {}) }} />
@@ -581,21 +581,21 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                 {p.categoria && (
                   <span
                     style={{ background: '#F6F2F5', color: pc ? '#6A5F70' : '#7A6E80', ...(pc ? { fontSize: '10px', fontWeight: 800, letterSpacing: '0.04em', padding: '2px 7px' } : {}) }}
-                    className="text-[8.5px] font-bold px-[7px] py-[3px] rounded-md uppercase whitespace-nowrap"
+                    className="text-[10px] font-bold px-[7px] py-[3px] rounded-md uppercase whitespace-nowrap"
                   >
                     {p.categoria}
                   </span>
                 )}
                 <span
                   style={{ background: colors.background, color: tinta, ...(pc ? { fontSize: '10px', fontWeight: 800, letterSpacing: '0.04em', padding: '2px 7px' } : {}) }}
-                  className="text-[8.5px] font-bold px-[7px] py-[3px] rounded-md uppercase whitespace-nowrap"
+                  className="text-[10px] font-bold px-[7px] py-[3px] rounded-md uppercase whitespace-nowrap"
                 >
                   {getStatusLabel(qtdNormalizada, min)}
                 </span>
               </div>
 
-              <div className="flex items-center gap-2 mt-0.5" style={pc ? { marginTop: 0 } : undefined}>
-                <span className="text-[10.5px]" style={{ color: '#7A6E80', ...(pc ? { fontSize: '12px' } : {}) }}>Avisar abaixo de:</span>
+              <div className="flex items-center gap-2 mt-0.5" style={pc ? { marginTop: 0 } : { gap: '4px' }}>
+                <span className="whitespace-nowrap" style={{ color: '#7A6E80', fontSize: pc ? '12px' : 'clamp(11px, 3.1vw, 12px)' }}>Avisar abaixo de:</span>
                 <div className="flex items-center" style={{ background: '#F6F2F5', border: '1px solid rgba(36,27,43,.08)', borderRadius: '10px', padding: '2px' }}>
                   <button
                     onClick={() => handleQuickAdjustThreshold(p, -getThresholdDelta(p.nivelMinimoUnidade || 'g'))}
@@ -603,8 +603,8 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                     className="active:scale-95 transition-transform"
                     style={{ width: pc ? '32px' : '22px', height: pc ? '32px' : '22px', borderRadius: '8px', background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: pc ? '15px' : '12px', fontWeight: 800, color: '#5B4A6B', border: 'none', cursor: 'pointer', boxShadow: pc ? 'none' : '0 2px 5px rgba(58,35,80,.1)' }}
                   >−</button>
-                  <span style={{ padding: pc ? '0 8px' : '0 7px', fontSize: pc ? '13px' : '11px', fontWeight: 800, color: '#241B2B', whiteSpace: 'nowrap' }}>
-                    {formatQuantity(min)} <span style={{ fontSize: pc ? '11px' : '9px', fontWeight: 600, color: pc ? '#7A6E80' : '#8A7E90' }}>{p.nivelMinimoUnidade}</span>
+                  <span style={{ padding: pc ? '0 8px' : '0 7px', fontSize: pc ? '13px' : '12px', fontWeight: 800, color: '#241B2B', whiteSpace: 'nowrap' }}>
+                    {formatQuantity(min)} <span style={{ fontSize: pc ? '11px' : '11px', fontWeight: 600, color: pc ? '#7A6E80' : '#8A7E90' }}>{p.nivelMinimoUnidade}</span>
                   </span>
                   <button
                     onClick={() => handleQuickAdjustThreshold(p, getThresholdDelta(p.nivelMinimoUnidade || 'g'))}
@@ -616,7 +616,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
               </div>
 
               <div className="flex items-center justify-between gap-2 mt-0.5" style={pc ? { marginTop: 0 } : undefined}>
-                <div style={{ fontSize: pc ? '12px' : '11px', fontWeight: 800, color: tinta, background: '#F6F2F5', border: '1px solid rgba(36,27,43,.08)', borderRadius: '12px', padding: pc ? '6px 10px' : '7px 9px', whiteSpace: 'nowrap', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <div style={{ fontSize: pc ? '12px' : '12px', fontWeight: 800, color: tinta, background: '#F6F2F5', border: '1px solid rgba(36,27,43,.08)', borderRadius: '12px', padding: pc ? '6px 10px' : '7px 9px', whiteSpace: 'nowrap', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {fraseDoAviso(qtdNormalizada, min, unidadeDoAviso)}
                 </div>
                 <div className="flex items-center gap-1" style={pc ? { gap: '2px' } : undefined}>
@@ -671,7 +671,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
         <h2 className="text-xs font-extrabold uppercase text-[#241B2B]">
           {tituloHistorico}
         </h2>
-        <p className="text-[10.5px] mt-1" style={{ color: '#7A6E80' }}>
+        <p className="text-[12px] mt-1" style={{ color: '#7A6E80' }}>
           {fraseHistorico}
         </p>
       </div>
@@ -785,7 +785,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                 key={tab.id}
                 onClick={() => { setAba(tab.id as any); setIsAdding(false); }}
                 style={{
-                  flex: 1, padding: '8px', fontSize: '11px', fontWeight: 800, borderRadius: '11px', border: 'none', cursor: 'pointer',
+                  flex: 1, padding: '8px', fontSize: '12px', fontWeight: 800, borderRadius: '11px', border: 'none', cursor: 'pointer',
                   background: aba === tab.id ? '#3A2350' : 'transparent',
                   color: aba === tab.id ? '#F5B9C6' : '#7A6E80',
                   fontFamily: "'Manrope', sans-serif",
@@ -808,13 +808,13 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Buscar produto..."
-                style={{ width: '100%', padding: '11px 12px 11px 34px', background: '#FFFFFF', borderRadius: '14px', fontSize: '11px', color: '#A096A6', border: 'none', boxShadow: '0 6px 14px rgba(58,35,80,.07)', fontFamily: "'Manrope', sans-serif", outline: 'none' }}
+                style={{ width: '100%', padding: '11px 12px 11px 34px', background: '#FFFFFF', borderRadius: '14px', fontSize: '13px', color: '#A096A6', border: 'none', boxShadow: '0 6px 14px rgba(58,35,80,.07)', fontFamily: "'Manrope', sans-serif", outline: 'none' }}
               />
             </div>
             <button
               onClick={handleOpenAdd}
               className="active:scale-95 transition-transform"
-              style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#3A2350', color: '#F5B9C6', fontWeight: 800, fontSize: '11px', padding: '11px 13px', borderRadius: '14px', whiteSpace: 'nowrap', cursor: 'pointer', boxShadow: '0 8px 16px rgba(58,35,80,.28)', border: 'none', fontFamily: "'Manrope', sans-serif" }}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#3A2350', color: '#F5B9C6', fontWeight: 800, fontSize: '12px', padding: '11px 13px', borderRadius: '14px', whiteSpace: 'nowrap', cursor: 'pointer', boxShadow: '0 8px 16px rgba(58,35,80,.28)', border: 'none', fontFamily: "'Manrope', sans-serif" }}
               title="Adicionar novo produto"
             >
               <Plus className="w-3.5 h-3.5" style={{ strokeWidth: 3 }} />
@@ -847,7 +847,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                 className="px-5 flex items-end justify-between gap-3 flex-shrink-0"
               >
                 <div className="flex flex-col gap-1 min-w-0">
-                  <span style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '.2em', color: 'rgba(247,220,225,.8)' }}>PRODUTOS</span>
+                  <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '.2em', color: 'rgba(247,220,225,.8)' }}>PRODUTOS</span>
                   <h3 className="text-white" style={{ fontFamily: "'Instrument Serif', serif", fontSize: '28px', lineHeight: 1.1, fontWeight: 400 }}>
                     {editingId ? 'Editar Produto' : 'Novo Produto'}
                   </h3>
@@ -984,7 +984,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                   <div className="flex items-center justify-between gap-3" style={{ padding: '10px 16px 12px' }}>
                     <div className="flex flex-col">
                       <span style={ROTULO_COMANDA}>CUSTO POR UNIDADE</span>
-                      <span style={{ fontSize: '11px', fontWeight: 600, color: '#7A6E80' }}>calculado automaticamente</span>
+                      <span style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80' }}>calculado automaticamente</span>
                     </div>
                     <span style={{ fontSize: '18px', fontWeight: 800, letterSpacing: '-.02em', color: '#3A2350' }}>
                       {numeroComVirgula(custoPorUnidade({
@@ -1001,7 +1001,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                   <div className="flex items-center gap-3" style={{ padding: '12px 16px 10px' }}>
                     <div className="flex-1 flex flex-col gap-0.5">
                       <span style={{ fontFamily: "'Instrument Serif', serif", fontSize: '20px', lineHeight: 1.15 }}>Controlar estoque deste produto?</span>
-                      <span style={{ fontSize: '11px', fontWeight: 600, lineHeight: 1.45, color: '#7A6E80' }}>Desligue para itens frescos comprados na hora (ex: frutas), que não ficam "em estoque".</span>
+                      <span style={{ fontSize: '12px', fontWeight: 600, lineHeight: 1.45, color: '#7A6E80' }}>Desligue para itens frescos comprados na hora (ex: frutas), que não ficam "em estoque".</span>
                     </div>
                     <button
                       type="button"
@@ -1303,7 +1303,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                       {p.categoria && (
                         <span
                           style={{ background: '#F6F2F5', color: pc ? '#6A5F70' : '#7A6E80', ...(pc ? { fontSize: '10px', fontWeight: 800, letterSpacing: '0.04em', padding: '2px 7px' } : {}) }}
-                          className="text-[8.5px] font-bold px-[7px] py-[3px] rounded-md uppercase whitespace-nowrap"
+                          className="text-[10px] font-bold px-[7px] py-[3px] rounded-md uppercase whitespace-nowrap"
                         >
                           {p.categoria}
                         </span>
@@ -1311,14 +1311,16 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                       {!p.controlaEstoque && (
                         <span
                           style={{ background: '#FFF3E0', color: pc ? '#8A5A0E' : '#B27A16', ...(pc ? { fontSize: '10px', fontWeight: 800, letterSpacing: '0.04em', padding: '2px 7px' } : {}) }}
-                          className="text-[8.5px] font-bold px-[7px] py-[3px] rounded-md uppercase whitespace-nowrap"
+                          className="text-[10px] font-bold px-[7px] py-[3px] rounded-md uppercase whitespace-nowrap"
                         >
                           Sem estoque
                         </span>
                       )}
                     </div>
-                    <p className="text-[11px] mt-1" style={{ color: '#7A6E80', ...(pc ? { fontSize: '12px', marginTop: 0 } : {}) }}>
-                      {formatCurrency(p.precoPago)} / {p.quantidadeEmbalagem} {p.unidadeEmbalagem} · custo unitário {symbol} {numeroComVirgula(custoPorUnidade(p), 4)}/{p.unidadeEmbalagem}
+                    <p className="text-[12px] mt-1" style={{ color: '#7A6E80', ...(pc ? { fontSize: '12px', marginTop: 0 } : {}) }}>
+                      {formatCurrency(p.precoPago)} / {p.quantidadeEmbalagem} {p.unidadeEmbalagem}{pc ? ' · ' : null}
+                      {/* Celular: o custo unitario vai inteiro para a linha de baixo (em 360px o valor quebrava no meio). */}
+                      <span style={{ whiteSpace: 'nowrap', ...(pc ? {} : { display: 'block' }) }}>custo unitário {symbol} {numeroComVirgula(custoPorUnidade(p), 4)}/{p.unidadeEmbalagem}</span>
                     </p>
                   </div>
                   <div className="flex items-center gap-1 flex-shrink-0" style={pc ? { gap: '2px' } : undefined}>

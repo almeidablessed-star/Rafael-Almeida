@@ -84,15 +84,15 @@ const MovementRow: React.FC<{ mov: MovimentoEstoque }> = ({ mov }) => (
         <div className="flex items-start justify-between gap-2">
           <div>
             <p className="text-xs font-bold text-[#241B2B]">{mov.itemNome}</p>
-            <p className="text-[10px] text-[#7A6E80] mt-1">{mov.descricao}</p>
+            <p className="text-[12px] text-[#7A6E80] mt-1">{mov.descricao}</p>
           </div>
-          <span className="text-[10px] font-bold text-[#7A6E80] whitespace-nowrap">
+          <span className="text-[12px] font-bold text-[#7A6E80] whitespace-nowrap">
             {formatarData(mov.createdAt)}
           </span>
         </div>
 
         <div className="flex items-center justify-between mt-2 pt-2 border-t border-current border-opacity-10">
-          <span className="inline-block px-2 py-1 bg-white bg-opacity-50 rounded text-[10px] font-bold text-[#241B2B]">
+          <span className="inline-block px-2 py-1 bg-white bg-opacity-50 rounded text-[12px] font-bold text-[#241B2B]">
             {rotulo(mov.tipo)}
           </span>
           <span className="text-xs font-bold text-[#241B2B]">
@@ -134,10 +134,10 @@ const MovementRowComputador: React.FC<{ mov: MovimentoEstoque }> = ({ mov }) => 
             <span style={{ fontSize: '13px', fontWeight: 700, color: '#241B2B' }}>{mov.itemNome}</span>
             <span style={{ fontSize: '12px', color: '#6A5F70' }}>{mov.descricao}</span>
           </div>
-          <span style={{ fontSize: '11px', fontWeight: 700, color: '#6A5F70', whiteSpace: 'nowrap' }}>{formatarData(mov.createdAt)}</span>
+          <span style={{ fontSize: '12px', fontWeight: 700, color: '#6A5F70', whiteSpace: 'nowrap' }}>{formatarData(mov.createdAt)}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '6px', borderTop: '1px solid rgba(36,27,43,0.08)' }}>
-          <span style={{ padding: '2px 8px', borderRadius: '5px', background: 'rgba(255,255,255,0.7)', fontSize: '11px', fontWeight: 700, color: '#241B2B' }}>
+          <span style={{ padding: '2px 8px', borderRadius: '5px', background: 'rgba(255,255,255,0.7)', fontSize: '12px', fontWeight: 700, color: '#241B2B' }}>
             {rotulo(mov.tipo)}
           </span>
           <span style={{ fontSize: '13px', fontWeight: 700, color: '#241B2B', fontVariantNumeric: 'tabular-nums' }}>

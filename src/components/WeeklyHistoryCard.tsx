@@ -116,7 +116,7 @@ export const WeeklyHistoryCard: React.FC<WeeklyHistoryCardProps> = ({ transactio
         <p
           style={{
             fontFamily: "'Manrope', sans-serif",
-            fontSize: '10px',
+            fontSize: '12px',
             color: '#7A6E80',
             margin: 0,
           }}
@@ -264,7 +264,7 @@ export const WeeklyHistoryCard: React.FC<WeeklyHistoryCardProps> = ({ transactio
                   marginTop: '6px',
                   paddingTop: '6px',
                   borderTop: '1px dashed rgba(36,27,43,.1)',
-                  fontSize: '9px',
+                  fontSize: '11px',
                   color: '#9A8FA0',
                   fontFamily: "'Manrope', sans-serif",
                 }}

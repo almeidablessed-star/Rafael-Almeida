@@ -366,7 +366,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
         ? { flex: '1.4 1 260px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '2px', padding: '4px', fontFamily: "'Manrope', sans-serif" }
         : { fontFamily: "'Manrope', sans-serif" }}
     >
-      <div className="text-[9px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontWeight: 800, ...(pc ? { fontSize: '11px' } : {}) }}>
+      <div className="text-[11px] uppercase tracking-[0.05em]" style={{ color: '#7A6E80', fontWeight: 800, ...(pc ? { fontSize: '11px' } : {}) }}>
         Total disponível
       </div>
       <div
@@ -382,7 +382,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
       >
         {formatMoney(saldoTotalDisponivel)}
       </div>
-      <div className="text-[10px]" style={{ color: pc ? '#7A6E80' : '#9A8FA0', marginTop: pc ? 0 : '3px', ...(pc ? { fontSize: '12px' } : {}) }}>
+      <div className="text-[12px]" style={{ color: pc ? '#7A6E80' : '#9A8FA0', marginTop: pc ? 0 : '3px', ...(pc ? { fontSize: '12px' } : {}) }}>
         O que já chegou das vendas − o que você já gastou {vocab.nessePeriodo}.
       </div>
     </div>
@@ -469,7 +469,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
           <span style={{ fontSize: pc ? '15px' : '13px', fontWeight: 800, color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}>
             Lançar Compra Real / Despesa
           </span>
-          <span style={{ fontSize: pc ? '12px' : '10px', color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
+          <span style={{ fontSize: '12px', color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
             Desconta automaticamente do cofrinho selecionado
           </span>
         </div>
@@ -483,7 +483,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
 
       <form ref={expenseFormRef} onSubmit={handleSaveExpense} noValidate style={{ display: 'flex', flexDirection: 'column', gap: pc ? '16px' : '13px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-          <label style={{ fontSize: pc ? '12px' : '10.5px', fontWeight: 800, color: '#5B4A6B', fontFamily: "'Manrope', sans-serif" }}>
+          <label style={{ fontSize: '12px', fontWeight: 800, color: '#5B4A6B', fontFamily: "'Manrope', sans-serif" }}>
             O que você comprou? (Descrição)
           </label>
           <StockItemAutocomplete
@@ -498,7 +498,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-          <label style={{ fontSize: pc ? '12px' : '10.5px', fontWeight: 800, color: '#5B4A6B', fontFamily: "'Manrope', sans-serif" }}>
+          <label style={{ fontSize: '12px', fontWeight: 800, color: '#5B4A6B', fontFamily: "'Manrope', sans-serif" }}>
             De onde sai o dinheiro
           </label>
           <div style={{ display: 'flex', gap: '8px' }}>
@@ -508,18 +508,20 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
                 type="button"
                 onClick={() => setCategory(c.id)}
                 style={{
-                  flex: 1,
+                  flex: pc ? 1 : '1 1 auto',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '6px',
+                  gap: pc ? '6px' : '4px',
                   padding: pc ? '0 4px' : '10px 4px',
                   ...(pc ? { height: '44px' } : {}),
                   borderRadius: '14px',
                   background: category === c.id ? '#F3E9F3' : '#FAF7FA',
                   border: category === c.id ? '1.5px solid #B892BE' : '1.5px solid rgba(36,27,43,.1)',
                   color: category === c.id ? '#4A3556' : (pc ? '#6A5F70' : '#7A6E80'),
-                  fontSize: pc ? '13px' : '11px',
+                  fontSize: pc ? '13px' : 'clamp(11px, 2.9vw, 12px)',
+                  minWidth: 0,
+                  whiteSpace: 'nowrap',
                   fontWeight: category === c.id ? 800 : 700,
                   cursor: 'pointer',
                   transition: 'transform .2s ease',
@@ -535,11 +537,11 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
 
         <div style={{ display: 'flex', gap: pc ? '10px' : '9px' }}>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
-            <label style={{ fontSize: pc ? '12px' : '10.5px', fontWeight: 800, color: '#5B4A6B', fontFamily: "'Manrope', sans-serif" }}>
+            <label style={{ fontSize: '12px', fontWeight: 800, color: '#5B4A6B', fontFamily: "'Manrope', sans-serif" }}>
               Valor Gasto ({symbol})
             </label>
             <div style={{ position: 'relative' }}>
-              <span style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', fontSize: pc ? '12px' : '11px', fontWeight: 800, color: '#5B4A6B', fontFamily: "'Manrope', sans-serif", pointerEvents: 'none' }}>
+              <span style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', fontSize: '12px', fontWeight: 800, color: '#5B4A6B', fontFamily: "'Manrope', sans-serif", pointerEvents: 'none' }}>
                 {symbol}
               </span>
               <input
@@ -558,7 +560,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
             {invalidFieldId === 'compra-valor' && <FieldValidationError />}
           </div>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
-            <label style={{ fontSize: pc ? '12px' : '10.5px', fontWeight: 800, color: '#5B4A6B', fontFamily: "'Manrope', sans-serif" }}>
+            <label style={{ fontSize: '12px', fontWeight: 800, color: '#5B4A6B', fontFamily: "'Manrope', sans-serif" }}>
               Data da Compra
             </label>
             <CampoData
@@ -570,7 +572,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
               }}
               style={pc
                 ? { height: '46px', boxSizing: 'border-box', padding: '0 14px', background: '#FAF7FA', border: '1px solid rgba(36,27,43,.08)', borderRadius: '14px', fontSize: '14px', color: '#241B2B', fontFamily: "'Manrope', sans-serif" }
-                : { padding: '11px 13px', background: '#FAF7FA', border: '1px solid rgba(36,27,43,.08)', borderRadius: '14px', fontSize: '11px', color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}
+                : { padding: '11px 13px', background: '#FAF7FA', border: '1px solid rgba(36,27,43,.08)', borderRadius: '14px', fontSize: '13px', color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}
               required
             />
             {invalidFieldId === 'compra-data' && <FieldValidationError />}
@@ -582,7 +584,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
             tinha em estoque; e o oposto: e o quanto foi comprado AGORA,
             somado ao estoque existente daquele item. */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: pc ? '6px' : '5px', paddingTop: pc ? '12px' : '8px', borderTop: '1px solid rgba(36,27,43,.08)' }}>
-          <label style={{ fontSize: pc ? '11px' : '9.5px', fontWeight: 800, color: '#5B4A6B', fontFamily: "'Manrope', sans-serif", letterSpacing: '0.05em', ...(pc ? { textTransform: 'uppercase' as const } : {}) }}>
+          <label style={{ fontSize: pc ? '11px' : '11px', fontWeight: 800, color: '#5B4A6B', fontFamily: "'Manrope', sans-serif", letterSpacing: '0.05em', ...(pc ? { textTransform: 'uppercase' as const } : {}) }}>
             {/* No computador o emoji da interface sai (como no desenho). */}
             {pc ? 'Quantidade Comprada (Opcional)' : '📦 Quantidade Comprada (Opcional)'}
           </label>
@@ -593,7 +595,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
               value={itemQuantity}
               onChange={(e) => setItemQuantity(e.target.value)}
               placeholder="Quantidade"
-              style={{ flex: 1, padding: pc ? '0 14px' : '11px 13px', ...(pc ? { height: '46px', minWidth: 0, boxSizing: 'border-box' as const } : {}), background: '#FAF7FA', border: '1px solid rgba(36,27,43,.08)', borderRadius: '14px', fontSize: pc ? '14px' : '11px', color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}
+              style={{ flex: 1, padding: pc ? '0 14px' : '11px 13px', minWidth: 0, ...(pc ? { height: '46px', boxSizing: 'border-box' as const } : {}), background: '#FAF7FA', border: '1px solid rgba(36,27,43,.08)', borderRadius: '14px', fontSize: pc ? '14px' : '11px', color: '#241B2B', fontFamily: "'Manrope', sans-serif" }}
             />
             <CustomSelect
               value={itemUnit}
@@ -619,13 +621,13 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '8px',
-            padding: pc ? '0 13px' : '13px',
+            gap: pc ? '8px' : '5px',
+            padding: pc ? '0 13px' : '13px 6px',
             ...(pc ? { height: '52px' } : {}),
             borderRadius: '16px',
             background: '#3A2350',
             color: '#F5B9C6',
-            fontSize: pc ? '13px' : '11.5px',
+            fontSize: pc ? '13px' : 'clamp(11px, 3vw, 13px)',
             fontWeight: 800,
             cursor: 'pointer',
             border: 'none',
@@ -661,7 +663,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
           <span style={{ fontFamily: "'Instrument Serif', serif", fontSize: pc ? '24px' : '19px', color: '#241B2B', lineHeight: 1.15 }}>
             Histórico de Compras Realizadas ({expenseTransactions.length})
           </span>
-          <span style={{ fontSize: pc ? '12px' : '10px', color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
+          <span style={{ fontSize: '12px', color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
             Ajuste ou remova lançamentos se digitou algo errado
           </span>
         </div>
@@ -672,7 +674,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
             style={{
               flex: 1,
               textAlign: 'center',
-              fontSize: pc ? '12px' : '10.5px',
+              fontSize: pc ? '12px' : 'clamp(10.5px, 2.9vw, 12px)',
               fontWeight: selectedFilter === 'todos' ? 800 : 600,
               color: selectedFilter === 'todos' ? '#FFFFFF' : (pc ? '#5E5266' : '#6B5F71'),
               background: selectedFilter === 'todos' ? '#3A2350' : 'transparent',
@@ -695,7 +697,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
               style={{
                 flex: 1,
                 textAlign: 'center',
-                fontSize: pc ? '12px' : '10.5px',
+                fontSize: pc ? '12px' : 'clamp(10.5px, 2.9vw, 12px)',
                 fontWeight: selectedFilter === c.id ? 800 : 600,
                 color: selectedFilter === c.id ? '#FFFFFF' : (pc ? '#5E5266' : '#6B5F71'),
                 background: selectedFilter === c.id ? '#3A2350' : 'transparent',
@@ -732,7 +734,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
       ) : (
         <div style={{ position: 'relative' }}>
           <Search className="w-4 h-4" style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: '#A096A6' }} />
-          <div style={{ padding: '11px 12px 11px 34px', background: '#FAF7FA', border: '1px solid rgba(36,27,43,.08)', borderRadius: '14px', fontSize: '11px', color: '#A096A6', fontFamily: "'Manrope', sans-serif" }}>
+          <div style={{ padding: '11px 12px 11px 34px', background: '#FAF7FA', border: '1px solid rgba(36,27,43,.08)', borderRadius: '14px', fontSize: '13px', color: '#A096A6', fontFamily: "'Manrope', sans-serif" }}>
             Buscar compra...
           </div>
           <input
@@ -740,7 +742,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Buscar compra..."
-            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'transparent', border: 'none', paddingLeft: '34px', fontSize: '11px', color: '#241B2B', fontFamily: "'Manrope', sans-serif", borderRadius: '14px', outline: 'none' }}
+            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'transparent', border: 'none', paddingLeft: '34px', fontSize: '13px', color: '#241B2B', fontFamily: "'Manrope', sans-serif", borderRadius: '14px', outline: 'none' }}
           />
         </div>
       ))}
@@ -789,7 +791,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
                   <div style={{ display: 'flex', alignItems: 'center', gap: pc ? '8px' : '6px', flexWrap: 'wrap' }}>
                     <span
                       style={{
-                        fontSize: pc ? '11px' : '9px',
+                        fontSize: pc ? '11px' : '11px',
                         fontWeight: 800,
                         color: cofrinho.corSelo,
                         background: cofrinho.fundoSelo,
@@ -805,7 +807,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
                       {tx.description}
                     </span>
                   </div>
-                  <span style={{ fontSize: pc ? '12px' : '10px', color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
+                  <span style={{ fontSize: '12px', color: '#7A6E80', fontFamily: "'Manrope', sans-serif" }}>
                     Data: {formatDateBr(tx.date)}
                   </span>
                 </div>
@@ -938,7 +940,7 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
           {/* Button */}
           <button
             onClick={() => {}}
-            className="px-3 py-2 rounded-xl text-[10px] font-black cursor-pointer transition-all active:scale-95 shrink-0"
+            className="px-3 py-2 rounded-xl text-[12px] font-black cursor-pointer transition-all active:scale-95 shrink-0"
             style={{
               background: '#F5B9C6',
               color: '#3A2350',

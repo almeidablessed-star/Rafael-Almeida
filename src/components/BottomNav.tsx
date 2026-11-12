@@ -99,7 +99,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) 
                 flexDirection: 'column',
                 alignItems: 'center',
                 gap: '4px',
-                padding: '8px 4px',
+                padding: '8px 2px',
                 borderRadius: '14px',
                 background: isActive ? '#3A2350' : 'transparent',
                 border: 'none',
@@ -124,7 +124,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) 
               />
               <span
                 style={{
-                  fontSize: '10px',
+                  fontSize: 'clamp(9px, 2.6vw, 10px)',
                   fontWeight: isActive ? 800 : 600,
                   color: isActive ? '#F5B9C6' : '#A096A6',
                   textTransform: 'uppercase',
