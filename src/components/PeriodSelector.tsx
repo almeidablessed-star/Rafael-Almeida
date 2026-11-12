@@ -60,7 +60,7 @@ export const PeriodSelector: React.FC<PeriodSelectorProps> = ({
       {period === 'personalizado' && (
         <div className="mt-3 pt-3 border-t border-neutral-100 grid grid-cols-2 gap-2 animate-fadeIn">
           <div>
-            <label className="block text-[11px] font-semibold text-neutral-500 mb-1">
+            <label className="block text-[12px] font-semibold text-neutral-500 mb-1">
               Data Inicial:
             </label>
             <CampoData
@@ -70,7 +70,7 @@ export const PeriodSelector: React.FC<PeriodSelectorProps> = ({
             />
           </div>
           <div>
-            <label className="block text-[11px] font-semibold text-neutral-500 mb-1">
+            <label className="block text-[12px] font-semibold text-neutral-500 mb-1">
               Data Final:
             </label>
             <CampoData

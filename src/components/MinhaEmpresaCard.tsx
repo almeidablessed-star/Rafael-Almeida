@@ -275,15 +275,15 @@ export const MinhaEmpresaCard: React.FC<{ computador?: boolean; colunaDireita?: 
         {!editandoRemuneracao ? (
           <div className="grid grid-cols-2 gap-2" style={pc ? { gap: '10px' } : undefined}>
             <div className="bg-white rounded-xl p-3 border border-[#E6E1DB]" style={pc ? caixaPc : undefined}>
-              <p className="text-[9px] uppercase tracking-[0.05em]" style={rotuloCaixa}>Recebimento desejado</p>
+              <p className="text-[11px] uppercase tracking-[0.05em]" style={rotuloCaixa}>Recebimento desejado</p>
               <p className="text-[13px] font-bold mt-1" style={valorCaixa('grande')}>{formatCurrency(monthlyIncomeTarget)}/mês</p>
             </div>
             <div className="bg-white rounded-xl p-3 border border-[#E6E1DB]" style={pc ? caixaPc : undefined}>
-              <p className="text-[9px] uppercase tracking-[0.05em]" style={rotuloCaixa}>Valor da hora</p>
+              <p className="text-[11px] uppercase tracking-[0.05em]" style={rotuloCaixa}>Valor da hora</p>
               <p className="text-[13px] font-bold mt-1" style={valorCaixa('grande')}>{formatCurrency(horaTrabalho)}/hora</p>
             </div>
             <div className="col-span-2 bg-white rounded-xl p-3 border border-[#E6E1DB]" style={pc ? caixaPc : undefined}>
-              <p className="text-[9px] uppercase tracking-[0.05em]" style={rotuloCaixa}>Meta de horas (referência, não obrigação)</p>
+              <p className="text-[11px] uppercase tracking-[0.05em]" style={rotuloCaixa}>Meta de horas (referência, não obrigação)</p>
               <p className="text-[12px] font-bold mt-1" style={valorCaixa('medio')}>
                 {workingDaysPerWeek} dias/semana · {numeroComVirgula(metaHoras.horasPorMes, 1)}h/mês → {numeroComVirgula(metaHoras.horasPorSemana, 1)}h/semana → {numeroComVirgula(metaHoras.horasPorDia, 1)}h/dia
               </p>
@@ -292,17 +292,17 @@ export const MinhaEmpresaCard: React.FC<{ computador?: boolean; colunaDireita?: 
         ) : (
           <div className="space-y-3">
             <div>
-              <label className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", ...(pc ? { fontSize: '13px' } : {}) }}>Quanto você quer receber por mês</label>
+              <label className="text-[12px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", ...(pc ? { fontSize: '13px' } : {}) }}>Quanto você quer receber por mês</label>
               <CampoComAjuda microcopy="É quanto você quer receber pelo seu trabalho — nunca o lucro da empresa. São coisas diferentes." />
               <CampoNumerico className={inputClass} style={pc ? campoEdicaoPc : undefined} value={monthlyIncomeTarget} onChange={setMonthlyIncomeTarget} ariaLabel="Quanto você quer receber por mês" />
             </div>
             <div>
-              <label className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", ...(pc ? { fontSize: '13px' } : {}) }}>Valor da sua hora</label>
+              <label className="text-[12px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", ...(pc ? { fontSize: '13px' } : {}) }}>Valor da sua hora</label>
               <CampoComAjuda microcopy="Multiplicado pelas horas de cada receita, vira a mão de obra daquele produto." />
               <CampoNumerico className={inputClass} style={pc ? campoEdicaoPc : undefined} value={horaTrabalho} onChange={setHoraTrabalho} ariaLabel="Valor da sua hora" />
             </div>
             <div>
-              <label className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", ...(pc ? { fontSize: '13px' } : {}) }}>Dias de trabalho por semana</label>
+              <label className="text-[12px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", ...(pc ? { fontSize: '13px' } : {}) }}>Dias de trabalho por semana</label>
               <CustomSelect
                 value={String(workingDaysPerWeek)}
                 onChange={(v) => setWorkingDaysPerWeek(Number(v))}
@@ -339,7 +339,7 @@ export const MinhaEmpresaCard: React.FC<{ computador?: boolean; colunaDireita?: 
 
         {!editandoPeriodo ? (
           <div className="bg-white rounded-xl p-3 border border-[#E6E1DB]" style={pc ? caixaPc : undefined}>
-            <p className="text-[9px] uppercase tracking-[0.05em]" style={rotuloCaixa}>Suas metas zeram</p>
+            <p className="text-[11px] uppercase tracking-[0.05em]" style={rotuloCaixa}>Suas metas zeram</p>
             <p className="text-[13px] font-bold mt-1" style={valorCaixa('medio')}>
               {PERIODO_DESCRICAO[periodoReset]}
             </p>
@@ -347,7 +347,7 @@ export const MinhaEmpresaCard: React.FC<{ computador?: boolean; colunaDireita?: 
         ) : (
           <div className="space-y-3">
             <div>
-              <label className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", ...(pc ? { fontSize: '13px' } : {}) }}>De quanto em quanto tempo suas metas recomeçam</label>
+              <label className="text-[12px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", ...(pc ? { fontSize: '13px' } : {}) }}>De quanto em quanto tempo suas metas recomeçam</label>
               <CampoComAjuda microcopy="Trocar aqui reagrupa todo o seu histórico no novo período — nenhum valor de venda muda, só o recorte com que você vê. Sua meta de horas continua semanal de qualquer jeito." />
               <CustomSelect
                 value={periodoReset}
@@ -428,7 +428,7 @@ export const MinhaEmpresaCard: React.FC<{ computador?: boolean; colunaDireita?: 
                       className="w-full focus:outline-none focus:ring-2 focus:ring-[#6E3F72] input-mobile-safe" />
                   </div>
                   <div className="flex-shrink-0" style={pc ? { display: 'flex', flexDirection: 'column', alignItems: 'center' } : undefined}>
-                    <span className="text-[10px] font-semibold block mb-1 text-right" style={{ color: pc ? '#94505E' : '#A96A78', letterSpacing: '0.02em', fontFamily: "'Manrope', sans-serif", ...(pc ? { fontSize: '11px', textAlign: 'center' as const } : {}) }}>Excluir</span>
+                    <span className="text-[12px] font-semibold block mb-1 text-right" style={{ color: pc ? '#94505E' : '#A96A78', letterSpacing: '0.02em', fontFamily: "'Manrope', sans-serif", ...(pc ? { fontSize: '11px', textAlign: 'center' as const } : {}) }}>Excluir</span>
                     <button
                       onClick={() => removerDespesa(i)}
                       aria-label={pc ? `Excluir a despesa ${d.nome.trim() || 'sem nome'}` : 'Remover despesa'}
@@ -498,33 +498,33 @@ export const MinhaEmpresaCard: React.FC<{ computador?: boolean; colunaDireita?: 
 
         {!editandoMetas ? (
           <div className="grid grid-cols-3 gap-2">
-            <div className="bg-white rounded-xl p-3 border border-[#E6E1DB] text-center" style={pc ? caixaMetaPc : undefined}>
-              <p className="text-[9px] uppercase tracking-[0.05em]" style={rotuloCaixa}>CMV</p>
+            <div className="bg-white rounded-xl px-1 py-3 border border-[#E6E1DB] text-center" style={pc ? caixaMetaPc : undefined}>
+              <p className="text-[10px] uppercase tracking-[0.02em] whitespace-nowrap" style={rotuloCaixa}>CMV</p>
               <p className="text-[14px] font-bold mt-1" style={valorMeta}>{cmvTargetPercent}%</p>
             </div>
-            <div className="bg-white rounded-xl p-3 border border-[#E6E1DB] text-center" style={pc ? caixaMetaPc : undefined}>
-              <p className="text-[9px] uppercase tracking-[0.05em]" style={rotuloCaixa}>Investimento</p>
+            <div className="bg-white rounded-xl px-1 py-3 border border-[#E6E1DB] text-center" style={pc ? caixaMetaPc : undefined}>
+              <p className="text-[10px] uppercase tracking-[0.02em] whitespace-nowrap" style={rotuloCaixa}>Investimento</p>
               <p className="text-[14px] font-bold mt-1" style={valorMeta}>{investmentTargetPercent}%</p>
             </div>
-            <div className="bg-white rounded-xl p-3 border border-[#E6E1DB] text-center" style={pc ? caixaMetaPc : undefined}>
-              <p className="text-[9px] uppercase tracking-[0.05em]" style={rotuloCaixa}>Lucro</p>
+            <div className="bg-white rounded-xl px-1 py-3 border border-[#E6E1DB] text-center" style={pc ? caixaMetaPc : undefined}>
+              <p className="text-[10px] uppercase tracking-[0.02em] whitespace-nowrap" style={rotuloCaixa}>Lucro</p>
               <p className="text-[14px] font-bold mt-1" style={valorMeta}>{profitTargetPercent}%</p>
             </div>
           </div>
         ) : (
           <div className="space-y-3">
             <div>
-              <label className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", ...(pc ? { fontSize: '13px' } : {}) }}>Meta de CMV (%)</label>
+              <label className="text-[12px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", ...(pc ? { fontSize: '13px' } : {}) }}>Meta de CMV (%)</label>
               <CampoComAjuda microcopy="Quanto do preço do bolo vai embora só com ingredientes e embalagem. Quanto menor, mais sobra pra você." exemploDinamico={exemploCmv} ariaLabelAjuda="Ver exemplo com os números da sua conta" />
               <CampoNumerico className={inputClass} style={pc ? campoEdicaoPc : undefined} value={cmvTargetPercent} onChange={setCmvTargetPercent} ariaLabel="Meta de CMV em porcentagem" />
             </div>
             <div>
-              <label className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", ...(pc ? { fontSize: '13px' } : {}) }}>Meta de investimento (%)</label>
+              <label className="text-[12px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", ...(pc ? { fontSize: '13px' } : {}) }}>Meta de investimento (%)</label>
               <CampoComAjuda microcopy="Uma reserva pra comprar equipamento, fazer curso, crescer o negócio — sem tirar do seu bolso." exemploDinamico={exemploInvestimento} ariaLabelAjuda="Ver exemplo com os números da sua conta" />
               <CampoNumerico className={inputClass} style={pc ? campoEdicaoPc : undefined} value={investmentTargetPercent} onChange={setInvestmentTargetPercent} ariaLabel="Meta de investimento em porcentagem" />
             </div>
             <div>
-              <label className="text-[11px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", ...(pc ? { fontSize: '13px' } : {}) }}>Meta de lucro (%)</label>
+              <label className="text-[12px] font-bold" style={{ color: '#241B2B', fontFamily: "'Manrope', sans-serif", ...(pc ? { fontSize: '13px' } : {}) }}>Meta de lucro (%)</label>
               <CampoComAjuda microcopy="O que sobra pra empresa, além do que você já recebe pelo seu trabalho." exemploDinamico={exemploLucro} ariaLabelAjuda="Ver exemplo com os números da sua conta" />
               <CampoNumerico className={inputClass} style={pc ? campoEdicaoPc : undefined} value={profitTargetPercent} onChange={setProfitTargetPercent} ariaLabel="Meta de lucro em porcentagem" />
             </div>

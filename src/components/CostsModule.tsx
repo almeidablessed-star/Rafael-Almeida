@@ -105,11 +105,11 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
               Gastos avulsos
             </h2>
           ) : (
-            <h4 style={{ fontSize: '11px', fontWeight: 800, color: '#241B2B', margin: '0 0 3px', fontFamily: "'Manrope', sans-serif" }}>
+            <h4 style={{ fontSize: '12px', fontWeight: 800, color: '#241B2B', margin: '0 0 3px', fontFamily: "'Manrope', sans-serif" }}>
               Gastos avulsos
             </h4>
           )}
-          <p style={{ fontSize: pc ? '13px' : '10.5px', color: '#7A6E80', margin: 0, lineHeight: 1.45, fontFamily: "'Manrope', sans-serif" }}>
+          <p style={{ fontSize: pc ? '13px' : '12px', color: '#7A6E80', margin: 0, lineHeight: 1.45, fontFamily: "'Manrope', sans-serif" }}>
             O resumo acima é sua meta planejada. Aqui embaixo você registra o que realmente gastou fora de uma venda — comprou um equipamento (investimento), pagou alguém avulso (mão de obra) ou teve um custo extra. Esse valor é descontado do seu saldo real lá no Início.
           </p>
         </div>
@@ -156,14 +156,14 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
                   borderRadius: '6px',
                   background: '#F3E9F3',
                   color: '#6E3F72',
-                  fontSize: pc ? '13px' : '11px',
+                  fontSize: pc ? '13px' : '12px',
                   fontWeight: 700,
                   fontFamily: "'Instrument Serif', serif",
                 }}>
                   {st.mark}
                 </span>
                 <span style={{
-                  fontSize: pc ? '11px' : '9px',
+                  fontSize: pc ? '11px' : 'clamp(9px, 2.6vw, 11px)',
                   fontWeight: 700,
                   lineHeight: 1.3,
                   letterSpacing: pc ? '0.04em' : '0.06em',
@@ -182,7 +182,7 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
   );
 
   const fraseGastos = (
-        <p style={{ fontSize: pc ? '12px' : '10px', color: pc ? '#7A6E80' : '#9A8FA0', margin: 0 }}>
+        <p style={{ fontSize: pc ? '12px' : '12px', color: pc ? '#7A6E80' : '#9A8FA0', margin: 0 }}>
           Gasto {rotulos(periodoReset).nessePeriodo}, contando pelo dia em que foi lançado — o mesmo valor descontado no Início.
         </p>
   );
@@ -253,7 +253,8 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
                 minWidth: 0,
                 padding: pc ? '0 6px' : '9px 6px',
                 ...(pc ? { height: '38px' } : {}),
-                fontSize: pc ? '12px' : '11px',
+                fontSize: pc ? '12px' : 'clamp(9.5px, 2.75vw, 12px)',
+                whiteSpace: 'nowrap',
                 fontWeight: 700,
                 borderRadius: '8px',
                 border: 'none',
@@ -407,7 +408,7 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
               >
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{
-                    fontSize: '9px',
+                    fontSize: '12px',
                     fontWeight: 'bold',
                     color: 'var(--color-brand-900)',
                     margin: '0 0 3px 0',
@@ -418,7 +419,7 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
                   </p>
                   <div style={{ display: 'flex', gap: '4px' }}>
                     <span style={{
-                      fontSize: '7px',
+                      fontSize: '11px',
                       color: 'var(--color-brand-700)',
                       background: '#F6F2F5',
                       padding: '1px 4px',
@@ -426,13 +427,13 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
                     }}>
                       {getCostCategoryLabel(item.category)}
                     </span>
-                    <span style={{ fontSize: '7px', color: 'var(--color-brand-700)' }}>
+                    <span style={{ fontSize: '11px', color: 'var(--color-brand-700)' }}>
                       {formatDateBr(item.date)}
                     </span>
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '2px', flexShrink: 0 }}>
-                  <span style={{ fontSize: '9px', fontWeight: 'bold', color: 'var(--color-brand-900)' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--color-brand-900)' }}>
                     -{formatMoney(item.totalValue)}
                   </span>
                   <button
