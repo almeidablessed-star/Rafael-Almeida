@@ -7,6 +7,7 @@ import { formatCurrency, formatNumeroParaEdicao, parseNumeroDigitado, quantidade
 import { insumosDeTamanhoOpcao } from '../utils/fichaInsumos';
 import { useCurrency } from '../context/CurrencyContext';
 import { useFichasComCustoAtual } from '../hooks/useFichasComCustoAtual';
+import { avisoParaGravar, contaInteiro, sugestaoDeAviso } from '../utils/avisoDeEstoque';
 import { useProdutos } from '../context/ProdutosContext';
 import { useCosts } from '../context/CostsContext';
 import { calcularEstruturaFinanceira, calcularPrecoSugeridoProduto, somarDespesasEmpresa, fichaDesatualizada } from '../utils/financialEngine';
@@ -756,7 +757,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         quantidadeAtual: novoProdutoControlaEstoque ? qtdAtualNum : null,
         quantidadeReferencia: null,
         nivelMinimo: novoProdutoControlaEstoque
-          ? parseNumeroDigitado(novoProdutoNivelMinimo) || 0
+          ? avisoParaGravar(parseNumeroDigitado(novoProdutoNivelMinimo) || 0, novoProdutoUnidade)
           : null,
         nivelMinimoUnidade: novoProdutoControlaEstoque ? novoProdutoUnidade : null,
       });
@@ -1840,11 +1841,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                                         // quarto do pacote ainda na prateleira.
                                         if (!novoProdutoAlertaTocado) {
                                           const qtd = parseNumeroDigitado(e.target.value);
-                                          setNovoProdutoNivelMinimo(
-                                            Number.isFinite(qtd) && qtd > 0
-                                              ? String(Math.round(qtd * 0.2 * 100) / 100).replace('.', ',')
-                                              : ''
-                                          );
+                                          setNovoProdutoNivelMinimo(sugestaoDeAviso(qtd, novoProdutoUnidade));
                                         }
                                       }}
                                       className="flex-1 w-full min-w-0 bg-transparent outline-none placeholder:text-[#B3A6B8]"
@@ -1921,7 +1918,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                                         aria-label="Alerta mínimo do produto novo"
                                         value={novoProdutoNivelMinimo}
                                         onChange={(e) => {
-                                          setNovoProdutoNivelMinimo(e.target.value);
+                                          setNovoProdutoNivelMinimo(contaInteiro(novoProdutoUnidade) ? e.target.value.replace(/[^0-9]/g, '') : e.target.value);
                                           setNovoProdutoAlertaTocado(true);
                                         }}
                                         className="flex-1 w-full min-w-0 bg-transparent outline-none placeholder:text-[#B3A6B8]"

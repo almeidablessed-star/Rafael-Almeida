@@ -3,6 +3,7 @@ import { mensagemDeErro } from '../utils/mensagemDeErro';
 import { avisar } from './AvisoApp';
 import { createPortal } from 'react-dom';
 import { Produto, Transaction } from '../types';
+import { avisoParaGravar, contaInteiro, sugestaoDeAviso } from '../utils/avisoDeEstoque';
 import { useProdutos } from '../context/ProdutosContext';
 import { formatQuantity, parseNumeroDigitado, numeroComVirgula } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
@@ -141,16 +142,16 @@ const getStatusLabel = (quantity: number, minThreshold: number): string => {
 const arredonda2 = (valor: number): number => Math.round(Math.round(valor * 1000) / 10) / 100;
 
 /**
- * A frase do card: quanto falta para o aviso, na unidade do aviso. Curta de
- * proposito: no celular de 360px ela cabe numa linha so ao lado dos botoes.
+ * O aviso como ele vale na tela. Aviso antigo gravado com fracao em produto
+ * contado (0,4 un, da sugestao de 20% de uma embalagem de 2) sobe para o
+ * inteiro seguinte, sem regravar o banco: abaixo de 0,4 un e abaixo de 1 un
+ * sao a mesma coisa para quem conta latas.
  */
-const fraseDoAviso = (quantity: number, minThreshold: number, unidade: string): string => {
-  if (minThreshold <= 0) return 'Sem aviso de compra';
-  const diferenca = arredonda2(quantity - minThreshold);
-  if (diferenca > 0) return `${formatQuantity(diferenca)} ${unidade} até o aviso`;
-  if (diferenca === 0) return 'Chegou no aviso';
-  return `${formatQuantity(-diferenca)} ${unidade} abaixo`;
+const avisoDoProduto = (p: Pick<Produto, 'nivelMinimo' | 'nivelMinimoUnidade' | 'unidadeEmbalagem'>): number => {
+  const min = p.nivelMinimo || 0;
+  return contaInteiro(p.nivelMinimoUnidade || p.unidadeEmbalagem) ? Math.ceil(min) : min;
 };
+
 
 /**
  * Ordem do Estoque por urgencia, com as mesmas faixas das 3 cores de
@@ -179,11 +180,6 @@ const normalizeToCommonUnit = (value: number, fromUnit: string, toUnit: string):
   return value;
 };
 
-const getThresholdDelta = (unit: string): number => {
-  if (unit === 'kg' || unit === 'L') return 0.5;
-  if (unit === 'g' || unit === 'ml') return 100;
-  return 1;
-};
 
 interface ProdutosModuleProps {
   /** Repassados direto para o BalancesAndExpensesModule embutido na aba Compras. */
@@ -370,7 +366,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
     setControlaEstoque(p.controlaEstoque);
     setQuantidadeAtual(p.quantidadeAtual != null ? String(Math.round(p.quantidadeAtual * 100) / 100).replace('.', ',') : '');
     setQuantidadeAtualUnidade(p.unidadeEmbalagem);
-    setNivelMinimo(p.nivelMinimo != null ? String(p.nivelMinimo).replace('.', ',') : '');
+    setNivelMinimo(p.nivelMinimo != null ? String(avisoDoProduto(p)).replace('.', ',') : '');
     setNivelMinimoUnidade(p.nivelMinimoUnidade || 'g');
     // Editando um produto que ja existe: o alerta dele e uma escolha feita, e
     // a sugestao nao pode reescrever nada — nem se ela mudar a embalagem aqui.
@@ -404,7 +400,8 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
     const qtdGuardada = convertQuantity(qtdAtualDigitada, quantidadeAtualUnidade, unidadeEmbalagem) ?? qtdAtualDigitada;
     // A embalagem ja esta na unidade em que o estoque e gravado.
     const qtdAtualNum = !editingId && acabeiDeComprar ? qtdGuardada + qtdEmbalagemNum : qtdGuardada;
-    const nivelMinNum = parseNumeroDigitado(nivelMinimo) || 0;
+    const nivelMinDigitado = parseNumeroDigitado(nivelMinimo) || 0;
+    const nivelMinNum = avisoParaGravar(nivelMinDigitado, nivelMinimoUnidade);
 
     const data: Omit<Produto, 'id'> = {
       nome: nome.trim(),
@@ -480,11 +477,6 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
     setDeletingProduto(produto);
   };
 
-  const handleQuickAdjustThreshold = async (p: Produto, delta: number) => {
-    const novo = Math.max(0, (p.nivelMinimo || 0) + delta);
-    const fresco = await buscarProdutoFresco(p.id);
-    await updateProduto(p.id, { ...(fresco || p), nivelMinimo: novo });
-  };
 
   const produtosDoEstoque = produtos.filter((p) => p.controlaEstoque);
   const listaBase = aba === 'estoque' ? produtosDoEstoque : produtos;
@@ -496,15 +488,15 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
     ? [...filtrados].sort((a, b) => {
         const normA = normalizeToCommonUnit(a.quantidadeAtual || 0, a.unidadeEmbalagem, a.nivelMinimoUnidade || a.unidadeEmbalagem);
         const normB = normalizeToCommonUnit(b.quantidadeAtual || 0, b.unidadeEmbalagem, b.nivelMinimoUnidade || b.unidadeEmbalagem);
-        const rankA = getCriticalityRank(normA, a.nivelMinimo || 0);
-        const rankB = getCriticalityRank(normB, b.nivelMinimo || 0);
+        const rankA = getCriticalityRank(normA, avisoDoProduto(a));
+        const rankB = getCriticalityRank(normB, avisoDoProduto(b));
         return rankA - rankB || a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' });
       })
     : filtrados;
 
   const lowStockCount = produtosDoEstoque.filter((p) => {
     const norm = normalizeToCommonUnit(p.quantidadeAtual || 0, p.unidadeEmbalagem, p.nivelMinimoUnidade || p.unidadeEmbalagem);
-    return norm <= (p.nivelMinimo || 0);
+    return norm <= avisoDoProduto(p);
   }).length;
 
   // Os tres pedacos da aba Estoque. O celular empilha os tres; o computador
@@ -534,7 +526,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
     >
       {sortedEstoque.map((p) => {
         const qtd = p.quantidadeAtual || 0;
-        const min = p.nivelMinimo || 0;
+        const min = avisoDoProduto(p);
         // Comparacao sempre na unidade do ALERTA, nunca nos numeros crus:
         // quantidade em kg e alerta em g precisam estar na mesma escala
         // antes de decidir critico/alto (ver normalizeToCommonUnit).
@@ -568,9 +560,6 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                 const ate = pontoDoArco(anel.aviso, 37);
                 return <line x1={de.x} y1={de.y} x2={ate.x} y2={ate.y} stroke="#3A2350" strokeWidth="2.5" strokeLinecap="round" />;
               })()}
-              <text x="38" y="58" textAnchor="middle" fontSize={pc ? '10.5' : '11'} fontWeight={pc ? '800' : '900'} fill={pc ? tinta : colors.stroke} fontFamily="'Manrope', sans-serif">
-                {formatQuantity(arredonda2(qtdNormalizada))} {unidadeDoAviso}
-              </text>
             </svg>
 
             <div className="flex-1 min-w-0 flex flex-col gap-1.5" style={pc ? { gap: '8px' } : undefined}>
@@ -594,31 +583,17 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                 </span>
               </div>
 
-              <div className="flex items-center gap-2 mt-0.5" style={pc ? { marginTop: 0 } : { gap: '4px' }}>
-                <span className="whitespace-nowrap" style={{ color: '#7A6E80', fontSize: pc ? '12px' : 'clamp(11px, 3.1vw, 12px)' }}>Avisar abaixo de:</span>
-                <div className="flex items-center" style={{ background: '#F6F2F5', border: '1px solid rgba(36,27,43,.08)', borderRadius: '10px', padding: '2px' }}>
-                  <button
-                    onClick={() => handleQuickAdjustThreshold(p, -getThresholdDelta(p.nivelMinimoUnidade || 'g'))}
-                    {...(pc ? { type: 'button' as const, 'aria-label': `Avisar mais cedo: diminuir o aviso de ${p.nome}` } : {})}
-                    className="active:scale-95 transition-transform"
-                    style={{ width: pc ? '32px' : '22px', height: pc ? '32px' : '22px', borderRadius: '8px', background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: pc ? '15px' : '12px', fontWeight: 800, color: '#5B4A6B', border: 'none', cursor: 'pointer', boxShadow: pc ? 'none' : '0 2px 5px rgba(58,35,80,.1)' }}
-                  >−</button>
-                  <span style={{ padding: pc ? '0 8px' : '0 7px', fontSize: pc ? '13px' : '12px', fontWeight: 800, color: '#241B2B', whiteSpace: 'nowrap' }}>
-                    {formatQuantity(min)} <span style={{ fontSize: pc ? '11px' : '11px', fontWeight: 600, color: pc ? '#7A6E80' : '#8A7E90' }}>{p.nivelMinimoUnidade}</span>
-                  </span>
-                  <button
-                    onClick={() => handleQuickAdjustThreshold(p, getThresholdDelta(p.nivelMinimoUnidade || 'g'))}
-                    {...(pc ? { type: 'button' as const, 'aria-label': `Aumentar o aviso de ${p.nome}` } : {})}
-                    className="active:scale-95 transition-transform"
-                    style={{ width: pc ? '32px' : '22px', height: pc ? '32px' : '22px', borderRadius: '8px', background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: pc ? '15px' : '12px', fontWeight: 800, color: '#5B4A6B', border: 'none', cursor: 'pointer', boxShadow: pc ? 'none' : '0 2px 5px rgba(58,35,80,.1)' }}
-                  >+</button>
-                </div>
-              </div>
+              {/* Um numero so em destaque: quanto tem. A cor e a palavra da
+                  etiqueta dizem se precisa comprar; o aviso fica pequeno
+                  embaixo e muda pelo lapis. */}
+              <p style={{ margin: 0, fontFamily: "'Manrope', sans-serif", fontSize: pc ? '19px' : '18px', fontWeight: 800, lineHeight: 1.2, color: '#241B2B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                Tem {formatQuantity(arredonda2(qtdNormalizada))} {unidadeDoAviso}
+              </p>
 
               <div className="flex items-center justify-between gap-2 mt-0.5" style={pc ? { marginTop: 0 } : undefined}>
-                <div style={{ fontSize: pc ? '12px' : '12px', fontWeight: 800, color: tinta, background: '#F6F2F5', border: '1px solid rgba(36,27,43,.08)', borderRadius: '12px', padding: pc ? '6px 10px' : '7px 9px', whiteSpace: 'nowrap', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {fraseDoAviso(qtdNormalizada, min, unidadeDoAviso)}
-                </div>
+                <span style={{ fontSize: pc ? '13px' : '12.5px', fontWeight: 600, color: '#7A6E80', whiteSpace: 'nowrap', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {min > 0 ? `Avisa em ${formatQuantity(min)} ${unidadeDoAviso}` : 'Sem aviso de compra'}
+                </span>
                 <div className="flex items-center gap-1" style={pc ? { gap: '2px' } : undefined}>
                   <button
                     onClick={() => handleOpenEdit(p)}
@@ -941,11 +916,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                             if (!alertaTocado) {
                               const qtd = parseNumeroDigitado(e.target.value);
                               setNivelMinimoUnidade(unidadeEmbalagem);
-                              setNivelMinimo(
-                                Number.isFinite(qtd) && qtd > 0
-                                  ? String(Math.round(qtd * 0.2 * 100) / 100).replace('.', ',')
-                                  : ''
-                              );
+                              setNivelMinimo(sugestaoDeAviso(qtd, unidadeEmbalagem));
                             }
                           }}
                           className="flex-1 w-full min-w-0 bg-transparent outline-none placeholder:text-[#B3A6B8]"
@@ -959,7 +930,10 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                             // for sugestao: trocar a embalagem para kg e deixar o
                             // alerta em g transformaria "0,2" em 0,2 g — mil vezes
                             // menor do que o pretendido, e silenciosamente.
-                            if (!alertaTocado) setNivelMinimoUnidade(v as any);
+                            if (!alertaTocado) {
+                              setNivelMinimoUnidade(v as any);
+                              setNivelMinimo(sugestaoDeAviso(parseNumeroDigitado(quantidadeEmbalagem), v));
+                            }
                             // O estoque guardado so aceita unidades da mesma
                             // familia da embalagem (g/kg, ml/L); trocou de familia,
                             // volta para a unidade da embalagem.
@@ -1079,14 +1053,14 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
                           </span>
                           <span className="flex items-center gap-2" style={{ ...CAIXA_NUMERO, background: '#FDF4F5', border: '1px solid rgba(196,98,111,.18)', boxShadow: 'none' }}>
                             <input
-                              type="text" inputMode="decimal" placeholder="100" value={nivelMinimo} onChange={(e) => { setNivelMinimo(e.target.value); setAlertaTocado(true); }}
+                              type="text" inputMode="decimal" placeholder="100" value={nivelMinimo} onChange={(e) => { setNivelMinimo(contaInteiro(nivelMinimoUnidade) ? e.target.value.replace(/[^0-9]/g, '') : e.target.value); setAlertaTocado(true); }}
                               aria-label="Alerta mínimo"
                               className="flex-1 w-full min-w-0 bg-transparent outline-none placeholder:text-[#B3A6B8]"
                               style={NUMERO}
                             />
                             <CustomSelect
                               value={nivelMinimoUnidade}
-                              onChange={(v) => { setNivelMinimoUnidade(v as any); setAlertaTocado(true); }}
+                              onChange={(v) => { setNivelMinimoUnidade(v as any); if (contaInteiro(v)) setNivelMinimo((atual) => { const n = parseNumeroDigitado(atual); return Number.isFinite(n) && n > 0 ? String(Math.ceil(n)) : ''; }); setAlertaTocado(true); }}
                               chip
                               ariaLabel="Unidade do nível mínimo"
                               style={CHIP_UNIDADE}
