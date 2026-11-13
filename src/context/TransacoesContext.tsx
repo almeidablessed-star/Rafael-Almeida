@@ -6,6 +6,7 @@ import { useAuth } from './AuthContext';
 import { Transaction, FichaOrderItem, Recebimento } from '../types';
 import { ajustarRecebimentos, recebimentosDoPedido, totalRecebidoDoPedido } from '../utils/recebimentos';
 import { getTodayIso } from '../utils/formatters';
+import { buscarEmPaginas } from '../utils/buscarEmPaginas';
 
 /**
  * Fonte unica das transacoes: pedidos, compras, custos, mao de obra e
@@ -246,14 +247,18 @@ export const TransacoesProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       if (!silencioso) setIsLoading(true);
       setError(null);
 
-      const { data, error: fetchError } = await supabase
-        .from('transacoes')
-        .select(COLUNAS_SEM_FOTO)
-        .eq('usuaria_id', user.id)
-        .order('data', { ascending: false })
-        .order('created_at', { ascending: false });
-
-      if (fetchError) throw fetchError;
+      // De 1000 em 1000: pedida de uma vez, a lista vinha cortada em 1000 e os
+      // lancamentos mais antigos sumiam sem aviso (ver utils/buscarEmPaginas.ts).
+      const data = await buscarEmPaginas((de, ate) =>
+        supabase
+          .from('transacoes')
+          .select(COLUNAS_SEM_FOTO)
+          .eq('usuaria_id', user.id)
+          .order('data', { ascending: false })
+          .order('created_at', { ascending: false })
+          .order('id', { ascending: false })
+          .range(de, ate)
+      );
 
       setTransacoes(comoLinhas(data).map(mapSupabaseToTransaction));
     } catch (err: any) {
@@ -306,15 +311,17 @@ export const TransacoesProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const fetchTransacoesComFotos = async (): Promise<Transaction[]> => {
     if (!user) return [];
 
-    const { data, error } = await supabase
-      .from('transacoes')
-      .select('*')
-      .eq('usuaria_id', user.id)
-      .order('data', { ascending: false })
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-    return (data || []).map(mapSupabaseToTransaction);
+    const data = await buscarEmPaginas((de, ate) =>
+      supabase
+        .from('transacoes')
+        .select('*')
+        .eq('usuaria_id', user.id)
+        .order('data', { ascending: false })
+        .order('created_at', { ascending: false })
+        .order('id', { ascending: false })
+        .range(de, ate)
+    );
+    return data.map(mapSupabaseToTransaction);
   };
 
   const addTransacao = async (txData: Omit<Transaction, 'id' | 'createdAt'>) => {

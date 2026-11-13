@@ -4,6 +4,7 @@ import { abrirFoto, apagarFotoTrocada, ehEnderecoDeposito, guardarFoto } from '.
 import { supabase } from '../lib/supabase';
 import { gerarMiniatura } from '../utils/imageCompression';
 import { useAuth } from './AuthContext';
+import { buscarEmPaginas } from '../utils/buscarEmPaginas';
 import { Customer, CustomerEvent } from '../types';
 
 /**
@@ -143,18 +144,22 @@ export const CustomersProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       if (!silencioso) setIsLoading(true);
       setError(null);
 
-      const { data, error: fetchError } = await supabase
-        .from('clientes')
-        // Sem `photoUrl` (a foto inteira, pesada) mas COM `foto_mini`: a lista
-        // mostra a miniatura. Ate 25/10/2026 a lista vinha sem foto nenhuma, e
-        // a foto so aparecia depois de abrir "Editar" — e sumia ao reabrir.
-        .select('id,usuaria_id,nome,telefone,endereco,city,notes,eventDate,recurringEventTitle,additionalEvents,created_at,foto_mini')
-        .eq('usuaria_id', user.id)
-        .order('created_at', { ascending: false });
+      // De 1000 em 1000: pedida de uma vez, a lista vinha cortada em 1000
+      // (ver utils/buscarEmPaginas.ts).
+      const data = await buscarEmPaginas((de, ate) =>
+        supabase
+          .from('clientes')
+          // Sem `photoUrl` (a foto inteira, pesada) mas COM `foto_mini`: a lista
+          // mostra a miniatura. Ate 25/10/2026 a lista vinha sem foto nenhuma, e
+          // a foto so aparecia depois de abrir "Editar" — e sumia ao reabrir.
+          .select('id,usuaria_id,nome,telefone,endereco,city,notes,eventDate,recurringEventTitle,additionalEvents,created_at,foto_mini')
+          .eq('usuaria_id', user.id)
+          .order('created_at', { ascending: false })
+          .order('id', { ascending: false })
+          .range(de, ate)
+      );
 
-      if (fetchError) throw fetchError;
-
-      setCustomers(data?.map(mapSupabaseToCustomer) || []);
+      setCustomers(data.map(mapSupabaseToCustomer));
       void gerarMiniaturasQueFaltam();
     } catch (err: any) {
       if (!silencioso) setError(err.message || 'Erro ao carregar clientes');
