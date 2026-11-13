@@ -262,7 +262,6 @@ export const CostsModule: React.FC<CostsModuleProps> = ({
                 background: activeTab === tab.id ? '#3A2350' : 'transparent',
                 color: activeTab === tab.id ? '#fff' : '#6E3F72',
                 boxShadow: activeTab === tab.id ? '0 8px 16px rgba(58,35,80,0.3)' : 'none',
-                whiteSpace: 'nowrap',
                 fontFamily: "'Manrope', sans-serif",
                 transition: 'all 0.2s',
               }}

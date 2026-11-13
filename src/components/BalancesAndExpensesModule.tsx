@@ -526,7 +526,6 @@ export const BalancesAndExpensesModule: React.FC<BalancesAndExpensesModuleProps>
                   cursor: 'pointer',
                   transition: 'transform .2s ease',
                   fontFamily: "'Manrope', sans-serif",
-                  whiteSpace: 'nowrap',
                 }}
               >
                 {pc ? c.filtro : c.botao}

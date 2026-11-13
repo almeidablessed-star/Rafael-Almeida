@@ -2,27 +2,27 @@ import React from 'react';
 import { TabType } from '../types';
 
 // SVG Icons matching the reference design exactly
-const IconInicio = (props: { stroke: string; strokeWidth: number }) => (
+const IconInicio = (props: { stroke: string; strokeWidth: number; style?: React.CSSProperties }) => (
   <svg width="19" height="19" viewBox="0 0 24 24" fill="none" {...props} strokeLinecap="round" strokeLinejoin="round">
     <path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>
   </svg>
 );
 
-const IconPedidos = (props: { stroke: string; strokeWidth: number }) => (
+const IconPedidos = (props: { stroke: string; strokeWidth: number; style?: React.CSSProperties }) => (
   <svg width="19" height="19" viewBox="0 0 24 24" fill="none" {...props} strokeLinecap="round" strokeLinejoin="round">
     <path d="M4 7h16l-1.2 13H5.2z"/>
     <path d="M9 7a3 3 0 0 1 6 0"/>
   </svg>
 );
 
-const IconFichas = (props: { stroke: string; strokeWidth: number }) => (
+const IconFichas = (props: { stroke: string; strokeWidth: number; style?: React.CSSProperties }) => (
   <svg width="19" height="19" viewBox="0 0 24 24" fill="none" {...props} strokeLinecap="round" strokeLinejoin="round">
     <path d="M4 4h9a3 3 0 0 1 3 3v13H6a2 2 0 0 1-2-2z"/>
     <path d="M20 5v15"/>
   </svg>
 );
 
-const IconClientes = (props: { stroke: string; strokeWidth: number }) => (
+const IconClientes = (props: { stroke: string; strokeWidth: number; style?: React.CSSProperties }) => (
   <svg width="19" height="19" viewBox="0 0 24 24" fill="none" {...props} strokeLinecap="round" strokeLinejoin="round">
     <circle cx="9" cy="8.5" r="3.2"/>
     <path d="M3.5 20a5.5 5.5 0 0 1 11 0"/>
@@ -30,7 +30,7 @@ const IconClientes = (props: { stroke: string; strokeWidth: number }) => (
   </svg>
 );
 
-const IconProdutos = (props: { stroke: string; strokeWidth: number }) => (
+const IconProdutos = (props: { stroke: string; strokeWidth: number; style?: React.CSSProperties }) => (
   <svg width="19" height="19" viewBox="0 0 24 24" fill="none" {...props} strokeLinecap="round" strokeLinejoin="round">
     <path d="M12 2 3 7v10l9 5 9-5V7z"/>
     <path d="M3 7l9 5 9-5"/>
@@ -38,7 +38,7 @@ const IconProdutos = (props: { stroke: string; strokeWidth: number }) => (
   </svg>
 );
 
-const IconCustos = (props: { stroke: string; strokeWidth: number }) => (
+const IconCustos = (props: { stroke: string; strokeWidth: number; style?: React.CSSProperties }) => (
   <svg width="19" height="19" viewBox="0 0 24 24" fill="none" {...props} strokeLinecap="round" strokeLinejoin="round">
     <path d="M4 8h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/>
     <path d="M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/>

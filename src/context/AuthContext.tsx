@@ -299,7 +299,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       } else {
         // Verificar se o e-mail já existe na lista de usuários
-        const emailExists = existingUsers.users?.some(u => u.email?.toLowerCase() === email.toLowerCase());
+        const emailExists = (existingUsers as { users?: { email?: string }[] }).users?.some((u) => u.email?.toLowerCase() === email.toLowerCase());
 
         if (emailExists) {
           throw new Error('Este e-mail já está cadastrado. Use outro e-mail ou tente fazer login.');
