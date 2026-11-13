@@ -162,8 +162,20 @@ async function hashDoCodigo(codigo: string): Promise<string> {
     .join('');
 }
 
-/** Procura a conta pelo e-mail. Nao ha getUserByEmail no admin do supabase-js. */
+/**
+ * Procura a conta pelo e-mail, numa consulta so: funcao `achar_conta_por_email`
+ * (supabase/migrations/20261113120000_achar_conta_por_email.sql). Antes varria
+ * a lista de contas, ate 20 pedidos por chamada, e desistia em 4000 contas —
+ * num endpoint que qualquer pessoa pode chamar.
+ */
 async function acharUsuaria(email: string): Promise<{ id: string; email: string } | null> {
+  const { data: idDireto, error: erroDireto } = await supabase.rpc('achar_conta_por_email', { p_email: email });
+  // `email` ja chega em minusculas, igual ao que o Auth guarda.
+  if (!erroDireto) return idDireto ? { id: idDireto as string, email } : null;
+
+  // So chega aqui se a funcao do banco nao respondeu (ex.: ainda nao criada):
+  // cai na busca antiga, pagina a pagina.
+  console.error('achar_conta_por_email falhou, usando a busca antiga:', erroDireto.message);
   for (let pagina = 1; pagina <= 20; pagina++) {
     const { data, error } = await supabase.auth.admin.listUsers({ page: pagina, perPage: 200 });
     if (error || !data?.users?.length) return null;

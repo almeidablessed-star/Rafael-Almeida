@@ -138,12 +138,10 @@ async function avisarFalhaDeEmail(
 async function acharUsuariaId(email: string | null) {
   if (!email) return null;
   try {
-    const { data } = await supabase.auth.admin.listUsers();
-    const achada = data?.users?.find(
-      (u: { email?: string | null; id: string }) =>
-        (u.email || '').toLowerCase() === email.toLowerCase()
-    );
-    return achada?.id ?? null;
+    // Consulta direta (supabase/migrations/20261113120000_achar_conta_por_email.sql).
+    // Antes olhava so as 50 primeiras contas da lista.
+    const { data } = await supabase.rpc('achar_conta_por_email', { p_email: email });
+    return (data as string | null) ?? null;
   } catch {
     // Sem vinculo a linha ainda vale: o e-mail que falhou esta gravado.
     return null;

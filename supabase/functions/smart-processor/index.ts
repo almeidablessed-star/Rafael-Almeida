@@ -421,10 +421,16 @@ async function acharUsuariaId(subscriberCode?: string, email?: string): Promise<
 
   if (!email) return null;
 
-  // Nao ha getUserByEmail no admin do supabase-js, e `usuarias` nao guarda
-  // e-mail. Paginar o auth e aceitavel nesta escala; se a base crescer, o certo
-  // e indexar o e-mail numa coluna propria em vez de varrer paginas.
+  // Consulta direta pelo e-mail, na funcao `achar_conta_por_email`
+  // (supabase/migrations/20261113120000_achar_conta_por_email.sql). Antes a
+  // busca varria a lista de contas e desistia em 4000.
   const alvo = email.trim().toLowerCase();
+  const { data: idDireto, error: erroDireto } = await supabase.rpc('achar_conta_por_email', { p_email: alvo });
+  if (!erroDireto) return (idDireto as string | null) ?? null;
+
+  // So chega aqui se a funcao do banco nao respondeu (ex.: ainda nao criada):
+  // cai na busca antiga, pagina a pagina, em vez de perder o evento.
+  console.error('achar_conta_por_email falhou, usando a busca antiga:', erroDireto.message);
   for (let pagina = 1; pagina <= 20; pagina++) {
     const { data, error } = await supabase.auth.admin.listUsers({ page: pagina, perPage: 200 });
     if (error || !data?.users?.length) return null;
