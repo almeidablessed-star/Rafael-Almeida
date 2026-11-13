@@ -400,64 +400,41 @@ export const ProdutosProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
 
     const nomePorFicha = new Map(items.map((i) => [i.ficha.id, i.ficha.name]));
-    const aplicadas: { produtoId: string; quantidadeOriginal: number; movimentoId: string }[] = [];
 
-    try {
-      for (const b of plano.baixas) {
-        const { error: errUpdate } = await supabase
-          .from('produtos')
-          .update({ quantidade_atual: b.quantidadeFinal })
-          .eq('id', parseInt(b.estoqueId))
-          .eq('usuaria_id', user.id);
-        if (errUpdate) throw errUpdate;
+    // Tudo numa gravacao so, dentro do banco: funcao
+    // `aplicar_movimentos_de_estoque`
+    // (supabase/migrations/20261113130000_movimentos_de_estoque_de_uma_vez.sql).
+    // Ou todos os insumos do pedido baixam, ou nenhum — meia baixa aplicada e
+    // pior que baixa nenhuma. E o banco subtrai do saldo que ele tem naquele
+    // instante, nao do que foi lido aqui.
+    const movimentos = plano.baixas
+      .filter((b) => b.quantidade > 0)
+      .map((b) => ({
+        tipo: 'consumo',
+        produto_id: parseInt(b.estoqueId),
+        item_nome: b.itemNome,
+        quantidade: b.quantidade,
+        unidade: b.unidade,
+        transacao_id: transacaoId,
+        ficha_id: b.fichaIds[0] ? parseInt(b.fichaIds[0]) : null,
+        descricao: `Consumo: ${b.fichaIds.map((id) => nomePorFicha.get(id) || 'produto').join(' + ')} (Pedido #${numeroCurto(transacaoId)})`,
+      }));
 
-        const rotulo = b.fichaIds.map((id) => nomePorFicha.get(id) || 'produto').join(' + ');
-        const { data: mov, error: errMov } = await supabase
-          .from('estoque_movimentos')
-          .insert({
-            usuaria_id: user.id,
-            produto_id: parseInt(b.estoqueId),
-            item_nome: b.itemNome,
-            tipo: 'consumo',
-            quantidade: b.quantidade,
-            unidade: b.unidade,
-            transacao_id: transacaoId,
-            ficha_id: b.fichaIds[0] ? parseInt(b.fichaIds[0]) : null,
-            descricao: `Consumo: ${rotulo} (Pedido #${numeroCurto(transacaoId)})`,
-          })
-          .select('id')
-          .single();
-        if (errMov) throw errMov;
-
-        aplicadas.push({
-          produtoId: b.estoqueId,
-          quantidadeOriginal: b.quantidadeFinal + b.quantidade,
-          movimentoId: String(mov.id),
-        });
+    let saldosNovos: Record<string, number> = {};
+    if (movimentos.length > 0) {
+      const { data, error: errBaixa } = await supabase.rpc('aplicar_movimentos_de_estoque', { p_movimentos: movimentos });
+      if (errBaixa) {
+        setError(errBaixa.message || 'Erro ao baixar estoque do pedido');
+        throw errBaixa;
       }
-    } catch (err: any) {
-      // Estorno na ordem inversa, mesma regra do EstoqueContext original.
-      for (const a of [...aplicadas].reverse()) {
-        try {
-          await supabase
-            .from('produtos')
-            .update({ quantidade_atual: a.quantidadeOriginal })
-            .eq('id', parseInt(a.produtoId))
-            .eq('usuaria_id', user.id);
-          await supabase.from('estoque_movimentos').delete().eq('id', parseInt(a.movimentoId));
-        } catch (errEstorno) {
-          console.error('[PRODUTOS] Falha ao estornar baixa parcial:', errEstorno);
-        }
-      }
-      setError(err.message || 'Erro ao baixar estoque do pedido');
-      throw err;
+      saldosNovos = (data as Record<string, number> | null) || {};
     }
 
     await fetchProdutos();
     await fetchMovimentos();
 
     return {
-      baixados: plano.baixas.map((b) => ({ itemNome: b.itemNome, quantidade: b.quantidade, unidade: b.unidade, quantidadeFinal: b.quantidadeFinal })),
+      baixados: plano.baixas.map((b) => ({ itemNome: b.itemNome, quantidade: b.quantidade, unidade: b.unidade, quantidadeFinal: saldosNovos[b.estoqueId] ?? b.quantidadeFinal })),
       problemas: plano.problemas,
     };
   };
@@ -584,94 +561,37 @@ export const ProdutosProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       .map((x) => ({ ...x.mov, quantidade: x.quantidade }));
     if (aDevolver.length === 0) return;
 
-    // Saldo do banco, nao do estado: ver `buscarProdutosFrescos`. Aqui importa
-    // tambem entre uma volta e outra do laco — dois movimentos do mesmo produto
-    // liam o mesmo saldo antigo e a segunda devolucao apagava a primeira.
-    const saldos = new Map((await buscarProdutosFrescos()).map((p) => [p.id, p.quantidadeAtual || 0]));
-
-    // ORDEM DAS DUAS ESCRITAS, e por que o movimento vem primeiro.
+    // Tudo numa gravacao so, dentro do banco: funcao
+    // `aplicar_movimentos_de_estoque`
+    // (supabase/migrations/20261113130000_movimentos_de_estoque_de_uma_vez.sql).
     //
-    // Nenhuma das duas era conferida antes: o resultado era descartado, e com
-    // ele o erro. Reproduzido em laboratorio com o codigo real: o UPDATE do
-    // saldo falhando deixava a linha "devolucao" gravada assim mesmo — o
-    // historico dizia que os 300 g voltaram e o saldo seguia em 700. Pior, a
-    // conta do pendente e `consumo - devolucao`: com a devolucao mentirosa
-    // gravada, o pendente zera e NENHUMA tentativa seguinte conserta. O
-    // insumo fica baixado para sempre.
+    // Antes eram duas gravacoes por insumo, feitas daqui (o movimento e depois
+    // o saldo), com um desfazer manual se a segunda falhasse. Se a internet
+    // caia no meio, parte dos insumos voltava e parte nao; e o saldo novo era
+    // calculado no aparelho, entao dois aparelhos ao mesmo tempo se apagavam.
+    // Agora ou todos os insumos voltam ou nenhum, e o banco soma em cima do
+    // saldo que ele tem naquele instante.
     //
-    // Gravar o movimento primeiro NAO resolve isso sozinho — invertida e sem
-    // conferencia, a falha no saldo produz exatamente aquele estado. O que
-    // fecha o caso e a dupla: movimento primeiro E desfazer o movimento se o
-    // saldo nao for gravado. Assim o pior caso volta a ser "nada aconteceu",
-    // com o pendente intacto e a proxima tentativa funcionando.
-    //
-    // Mesmo padrao do `consumirParaPedido` logo acima: confere cada escrita,
-    // desfaz o que ja aplicou e DEIXA O ERRO SUBIR — quem chama (App.tsx, no
-    // cancelamento e na edicao) ja mostra o aviso e, na exclusao, segura o
-    // pedido para o estorno poder ser refeito.
-    for (const m of aDevolver) {
-      if (m.produto_id) {
-        if (!saldos.has(m.produto_id)) continue; // produto apagado do catalogo: nao ha onde devolver
-        const novoSaldo = (saldos.get(m.produto_id) || 0) + Number(m.quantidade);
+    // Produto apagado do catalogo: a funcao pula (nao ha onde devolver).
+    // Movimento antigo (`estoque_id`, sem `produto_id`): so o historico e
+    // gravado, como sempre foi.
+    const movimentos = aDevolver
+      .filter((m: any) => m.produto_id || m.estoque_id)
+      .map((m: any) => ({
+        tipo: 'devolucao',
+        produto_id: m.produto_id || null,
+        item_nome: m.item_nome,
+        quantidade: Number(m.quantidade),
+        unidade: m.unidade,
+        transacao_id: transacaoId,
+        descricao: `Devolução: ${m.item_nome} (Pedido #${numeroCurto(transacaoId)} ${fimDaDescricao})`,
+      }));
+    if (movimentos.length === 0) return;
 
-        const { data: movGravado, error: errMov } = await supabase
-          .from('estoque_movimentos')
-          .insert({
-            usuaria_id: user.id,
-            produto_id: m.produto_id,
-            item_nome: m.item_nome,
-            tipo: 'devolucao',
-            quantidade: m.quantidade,
-            unidade: m.unidade,
-            transacao_id: transacaoId,
-            descricao: `Devolução: ${m.item_nome} (Pedido #${numeroCurto(transacaoId)} ${fimDaDescricao})`,
-          })
-          .select('id')
-          .single();
-        if (errMov) throw errMov;
-
-        // `.select('id')` nao e enfeite: sem ele, um UPDATE que nao encontra a
-        // linha (id ou usuaria_id que nao casam) volta como SUCESSO com zero
-        // linhas alteradas, e conferir so o erro nao pegaria.
-        const { data: atualizados, error: errSaldo } = await supabase
-          .from('produtos')
-          .update({ quantidade_atual: novoSaldo })
-          .eq('id', m.produto_id)
-          .eq('usuaria_id', user.id)
-          .select('id');
-
-        if (errSaldo || !atualizados || atualizados.length === 0) {
-          // Desfaz o movimento recem-gravado: deixa-lo seria gravar a mentira.
-          const { error: errDesfazer } = await supabase
-            .from('estoque_movimentos')
-            .delete()
-            .eq('id', movGravado.id);
-          if (errDesfazer) {
-            // Nao da para esconder: a linha ficou dizendo que voltou. Fica o
-            // rastro para quem for conferir o estoque depois.
-            console.error(
-              `[PRODUTOS] Devolucao de "${m.item_nome}" gravou o movimento ${movGravado.id} mas nao atualizou o saldo, e o movimento nao pode ser desfeito. O saldo deste produto esta menor do que deveria.`,
-              errDesfazer
-            );
-          }
-          throw errSaldo || new Error(`O saldo de "${m.item_nome}" não pôde ser atualizado.`);
-        }
-
-        saldos.set(m.produto_id, novoSaldo);
-      } else if (m.estoque_id) {
-        // Ramo legado: so historico, nao ha saldo para atualizar.
-        const { error: errMovLegado } = await supabase.from('estoque_movimentos').insert({
-          usuaria_id: user.id,
-          item_nome: m.item_nome,
-          tipo: 'devolucao',
-          quantidade: m.quantidade,
-          unidade: m.unidade,
-          transacao_id: transacaoId,
-          descricao: `Devolução: ${m.item_nome} (Pedido #${numeroCurto(transacaoId)} ${fimDaDescricao})`,
-        });
-        if (errMovLegado) throw errMovLegado;
-      }
-    }
+    // O erro sobe: quem chama (App.tsx, no cancelamento e na edicao) ja mostra
+    // o aviso e, na exclusao, segura o pedido para a devolucao ser refeita.
+    const { error: errDevolucao } = await supabase.rpc('aplicar_movimentos_de_estoque', { p_movimentos: movimentos });
+    if (errDevolucao) throw errDevolucao;
 
     await fetchProdutos();
     await fetchMovimentos();
