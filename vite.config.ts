@@ -6,6 +6,11 @@ import {defineConfig} from 'vite';
 export default defineConfig(() => {
   return {
     plugins: [react(), tailwindcss()],
+    // Versao publicada (codigo do commit, dado pela Vercel), para o
+    // monitoramento de erros dizer em qual publicacao o erro aconteceu.
+    define: {
+      __VERSAO_DO_APP__: JSON.stringify(process.env.VERCEL_GIT_COMMIT_SHA || 'local'),
+    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
