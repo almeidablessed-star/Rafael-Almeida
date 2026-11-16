@@ -2,6 +2,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { mensagemDeErro } from '../utils/mensagemDeErro';
 import { useZoomDaPrevia } from '../hooks/useZoomDaPrevia';
 import { avisar, perguntar } from './AvisoApp';
+import { AppDesatualizadoError, carregarBibliotecasDoPdf, descreverErroDoPdf } from '../utils/carregarPdf';
 import { situacaoPagamento } from '../utils/situacaoPagamento';
 import { createPortal } from 'react-dom';
 import { Transaction } from '../types';
@@ -466,6 +467,35 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
     }
   };
 
+  /**
+   * A tela abriu antes de uma publicacao nova e o arquivo do PDF mudou de nome
+   * (ver utils/carregarPdf.ts). Tentar de novo nao adianta: so recarregar. Sem
+   * internet, recarregar deixaria o app em branco, entao so avisa.
+   *
+   * Pedido ainda nao salvo (o modal tambem abre do formulario) nao oferece o
+   * recarregar: perderia o que foi digitado.
+   */
+  const avisarAppDesatualizado = () => {
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      avisar('Sem internet no momento. Conecte e tente baixar de novo.', { titulo: 'Sem conexão' });
+      return;
+    }
+    const salvo = 'id' in transaction && !!transaction.id;
+    if (!salvo) {
+      avisar(
+        'Saiu uma versão nova do Carula App e esta tela ficou com a antiga, por isso o PDF não baixou.\n\nEste pedido ainda não foi salvo: salve-o primeiro e depois feche e abra o app de novo para baixar o PDF.',
+        { titulo: 'O app foi atualizado' }
+      );
+      return;
+    }
+    void perguntar(
+      'Saiu uma versão nova do Carula App e esta tela ficou com a antiga, por isso o PDF não baixou.\n\nToque em Atualizar e baixe o PDF de novo. O pedido já está salvo.',
+      { titulo: 'O app foi atualizado', confirmar: 'Atualizar', cancelar: 'Agora não' }
+    ).then((atualizar) => {
+      if (atualizar) window.location.reload();
+    });
+  };
+
   const handleDownloadPdf = async () => {
     resetarZoomDaPrevia();
     const docElem = document.getElementById('quote-pdf-document');
@@ -744,10 +774,9 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
         // PDF: no import do topo elas iam no arquivo principal do app e
         // pesavam na primeira abertura de toda usuaria, mesmo de quem nunca
         // gera PDF (auditoria pre-venda, item "arquivo principal grande").
-        const [{ toPng }, { default: jsPDF }] = await Promise.all([
-          import('html-to-image'),
-          import('jspdf'),
-        ]);
+        // Via `carregarBibliotecasDoPdf`: numa aba aberta de antes de uma
+        // publicacao, esses arquivos mudaram de nome e nao carregam.
+        const [{ toPng }, { default: jsPDF }] = await carregarBibliotecasDoPdf();
         const fontEmbedCSS = await getFontEmbedCssCached();
 
         const capturaFolha = {
@@ -842,9 +871,14 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
       }
 
     } catch (err) {
-      console.error('Error generating PDF:', err);
-      avisar('Erro ao gerar PDF. Tente novamente.', { titulo: 'Não deu para gerar o PDF' });
-      restaurarEstilos();
+      console.error('Error generating PDF:', descreverErroDoPdf(err));
+      if (err instanceof AppDesatualizadoError) {
+        restaurarEstilos();
+        avisarAppDesatualizado();
+      } else {
+        avisar('Erro ao gerar PDF. Tente novamente.', { titulo: 'Não deu para gerar o PDF' });
+        restaurarEstilos();
+      }
     } finally {
       setIsGeneratingPdf(false);
     }

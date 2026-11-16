@@ -25,7 +25,9 @@ declare const __VERSAO_DO_APP__: string;
 const DSN = import.meta.env.VITE_SENTRY_DSN as string | undefined;
 
 const RUIDO = [
-  'Failed to fetch',
+  // "Failed to fetch dynamically imported module" NAO e ruido: e a aba velha
+  // pedindo um arquivo que saiu do ar numa publicacao (ver utils/carregarPdf.ts).
+  /Failed to fetch(?! dynamically)/,
   'Load failed',
   'NetworkError when attempting to fetch resource',
   'ResizeObserver loop',
