@@ -181,7 +181,7 @@ const FullHistoryModal: React.FC<{ movimentos: MovimentoEstoque[]; onClose: () =
   );
 };
 
-export const StockMovementsHistory: React.FC<{ computador?: boolean }> = ({ computador = false }) => {
+export const StockMovementsHistory: React.FC<{ computador?: boolean; frase?: string }> = ({ computador = false, frase }) => {
   const { movimentos } = useProdutos();
   const [modalAberto, setModalAberto] = useState(false);
 
@@ -219,6 +219,8 @@ export const StockMovementsHistory: React.FC<{ computador?: boolean }> = ({ comp
   if (visiveis.length === 0) {
     return (
       <div className="bg-white rounded-lg border border-[#EDE6EF] p-8 text-center">
+        {/* Sem movimentos nao ha faixa de titulo: o titulo vem aqui. */}
+        <p className="text-xs font-extrabold uppercase text-[#241B2B] mb-2">Histórico de Movimentações</p>
         <div className="text-[#7A6E80] text-sm">
           Nenhum movimento de estoque registrado ainda.
         </div>
@@ -232,6 +234,11 @@ export const StockMovementsHistory: React.FC<{ computador?: boolean }> = ({ comp
         <p className="text-xs font-bold text-white uppercase tracking-wide">
           Histórico de Movimentações
         </p>
+        {frase && (
+          <p className="text-[12px] mt-1" style={{ color: 'rgba(255,255,255,.82)', lineHeight: 1.35 }}>
+            {frase}
+          </p>
+        )}
       </div>
 
       <div className="divide-y divide-[#EDE6EF]">

@@ -621,7 +621,7 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
   );
 
   const tituloHistorico = 'Histórico de Movimentações';
-  const fraseHistorico = 'Rastreie todas as consumições, devoluções e reposições automáticas de estoque';
+  const fraseHistorico = 'Rastreie todos os consumos, devoluções e reposições automáticas de estoque';
   const historicoMovimentacoes = pc ? (
     // Computador: cartao proprio, na coluna da direita do Estoque.
     <section
@@ -642,15 +642,9 @@ export const ProdutosModule: React.FC<ProdutosModuleProps> = ({
         aqui, junto do estoque REAL (o antigo mostrava um historico
         correto ao lado de quantidades que ninguem mais atualiza). */}
     <div className="mt-2">
-      <div className="mb-3">
-        <h2 className="text-xs font-extrabold uppercase text-[#241B2B]">
-          {tituloHistorico}
-        </h2>
-        <p className="text-[12px] mt-1" style={{ color: '#7A6E80' }}>
-          {fraseHistorico}
-        </p>
-      </div>
-      <StockMovementsHistory />
+      {/* O titulo ja esta na faixa do proprio historico: aqui em cima ele
+          aparecia duas vezes seguidas. A frase vai junto, dentro da faixa. */}
+      <StockMovementsHistory frase={fraseHistorico} />
     </div>
     </>
   );
