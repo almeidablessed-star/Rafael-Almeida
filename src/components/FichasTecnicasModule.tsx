@@ -2235,8 +2235,11 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                             )}
                             {preco > 0 && (
                               abaixoDaMeta ? (
-                                <span className="inline-flex items-center gap-1.5 self-start" style={{ fontSize: '12px', fontWeight: 800, padding: '5px 11px', borderRadius: '999px', background: '#FDF4F5', color: '#C4626F', border: '1px solid rgba(196,98,111,.25)' }}>
-                                  <AlertTriangle className="w-3 h-3 shrink-0" />
+                                <span className="inline-flex items-center gap-1.5 self-start" style={{ fontSize: '12px', fontWeight: 800, padding: '5px 11px', borderRadius: '999px', background: '#FBF6EC', color: '#7A5310', border: '1px solid #F0D2A0' }}>
+                                  {/* Amarelo, igual aos outros avisos da ficha: "abaixo da meta"
+                                      ainda da lucro, so menos que o combinado. O rosa fica so
+                                      para PREJUIZO de verdade, que tem a caixa propria acima. */}
+                                  <AlertTriangle className="w-3 h-3 shrink-0" style={{ color: '#B27A16' }} />
                                   Abaixo da meta em {formatMoney(precoCalculado.precoSugerido - preco)}
                                 </span>
                               ) : (
