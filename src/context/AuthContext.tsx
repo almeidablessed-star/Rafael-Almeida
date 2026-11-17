@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { abrirFoto } from '../utils/fotoDeposito';
 import { User, Session } from '@supabase/supabase-js';
+import { avisar } from '../components/AvisoApp';
 import { supabase } from '../lib/supabase';
 import { useAoVoltarParaOApp } from '../hooks/useAoVoltarParaOApp';
 
@@ -212,7 +213,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsSetupRequired(false);
       }
     } catch (error) {
-      console.error('Error fetching user profile:', error);
+      const e = error as { code?: string; message?: string } | null;
+      if (e?.code === 'PGRST303' || /issued at future/i.test(e?.message ?? '')) {
+        // Relogio do aparelho atrasado: o banco recusa o login por "vir do
+        // futuro". Nao e defeito do app, entao nao vai para o Sentry; a
+        // cliente recebe o aviso do que fazer.
+        void avisar(
+          'A data e a hora do seu aparelho parecem estar erradas. Ligue o ajuste automático de data e hora nas configurações do aparelho e abra o app de novo.',
+          { titulo: 'Data e hora do aparelho' }
+        );
+      } else {
+        // Texto, nao objeto: antes chegava ao Sentry como "[object Object]".
+        console.error(`Error fetching user profile: ${e?.code ?? ''} ${e?.message ?? String(error)}`);
+      }
     } finally {
       setIsValidatingProfile(false);
     }
