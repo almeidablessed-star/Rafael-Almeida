@@ -736,41 +736,55 @@ function AppContent() {
   return (
       <div className="min-h-screen text-[var(--color-ink)] flex flex-col font-sans" style={{ overflow: 'hidden' }}>
 
-      {telaDeComputador ? (
-        // Computador: menu lateral fixo a esquerda e o conteudo num container
-        // de ate 1200px a direita (medidas do README do redesign desktop).
-        <div className="layout-computador">
+      {/* Computador (1024px+): menu lateral fixo a esquerda e o conteudo num
+          container de ate 1200px (medidas do README do redesign desktop).
+          Celular/tablet: conteudo na tela toda e menu embaixo.
+
+          As duas versoes tem a MESMA arvore (div > main > div > conteudo) e so
+          trocam classes e estilos. Antes cada uma tinha a sua; no iPad, girar
+          o aparelho troca de versao, e arvore diferente faz o React desmontar
+          e remontar a aba inteira — uma ficha ou um cliente sendo digitado se
+          perdia. Com a mesma arvore, a aba fica montada e so muda de forma.
+          No celular o div de fora e `display: contents`, para o `flex-1` do
+          main continuar valendo contra o container da pagina. */}
+      <div
+        className={telaDeComputador ? 'layout-computador' : undefined}
+        style={telaDeComputador ? undefined : { display: 'contents' }}
+      >
+        {telaDeComputador && (
           <MenuLateral
             activeTab={activeTab}
             onTabChange={trocarAba}
             onLancarPedido={() => handleOpenAddModal('venda')}
           />
-          <main
-            style={{
-              marginLeft: 'var(--menu-lateral, 248px)',
-              minHeight: '100vh',
-              boxSizing: 'border-box',
-              padding: '30px 40px 56px',
-            }}
-          >
-            <div style={{ maxWidth: '1200px', margin: '0 auto' }}>{conteudoDaAba}</div>
-          </main>
-        </div>
-      ) : (
-        <>
-          {/* Main Screen Container */}
-          <main className="flex-1 max-w-full w-full mx-auto px-0 pb-20 bottom-nav-safe" style={{
-            paddingTop: 'max(0px, env(safe-area-inset-top))',
-            paddingLeft: 'max(0px, env(safe-area-inset-left))',
-            paddingRight: 'max(0px, env(safe-area-inset-right))',
-          }}>
+        )}
+        <main
+          className={telaDeComputador ? undefined : 'flex-1 max-w-full w-full mx-auto px-0 pb-20 bottom-nav-safe'}
+          style={
+            telaDeComputador
+              ? {
+                  marginLeft: 'var(--menu-lateral, 248px)',
+                  minHeight: '100vh',
+                  boxSizing: 'border-box',
+                  // safe-area: hora e bateria do iPad instalado como app. No
+                  // computador vale 0, e fica o mesmo 30px de antes.
+                  padding: 'calc(30px + env(safe-area-inset-top, 0px)) 40px 56px',
+                }
+              : {
+                  paddingTop: 'max(0px, env(safe-area-inset-top))',
+                  paddingLeft: 'max(0px, env(safe-area-inset-left))',
+                  paddingRight: 'max(0px, env(safe-area-inset-right))',
+                }
+          }
+        >
+          <div style={telaDeComputador ? { maxWidth: '1200px', margin: '0 auto' } : { display: 'contents' }}>
             {conteudoDaAba}
-          </main>
+          </div>
+        </main>
 
-          {/* Fixed Bottom Navigation Bar */}
-          <BottomNav activeTab={activeTab} onTabChange={trocarAba} />
-        </>
-      )}
+        {/* Fixed Bottom Navigation Bar */}
+        {!telaDeComputador && <BottomNav activeTab={activeTab} onTabChange={trocarAba} />}
+      </div>
 
       {/* Transaction Form Modal */}
       <TransactionFormModal

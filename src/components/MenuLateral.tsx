@@ -31,7 +31,9 @@ export const MenuLateral: React.FC<MenuLateralProps> = ({ activeTab, onTabChange
       overflowY: 'auto',
       background: '#FFFFFF',
       boxShadow: '1px 0 0 rgba(58,35,80,0.06)',
-      padding: '30px 18px 24px',
+      // safe-area: no iPad instalado como app, a hora e a bateria ficam por
+      // cima do topo. No computador vale 0.
+      padding: 'calc(30px + env(safe-area-inset-top, 0px)) 18px 24px',
       display: 'flex',
       flexDirection: 'column',
       gap: '28px',

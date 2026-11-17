@@ -252,23 +252,28 @@ a:hover {
 
    Pedidos e Fichas viram grade (`.lista-tablet`): um card so ocupando 820px
    ficava com o valor num canto e os botoes no outro. Em pe cabem 2 cards de
-   largura de celular; deitado (1100px+), 3. */
+   largura de celular; deitado (1100px+), 3.
+
+   Desde 17/11/2026 o iPad com 1024px ou mais (deitado) recebe a VERSAO
+   COMPUTADOR abaixo. Por isso cada regra aqui tem
+   `:not(:has(.layout-computador))`: com o menu lateral na tela, quem manda e a
+   versao computador, como num computador sem toque. */
 
 @media (min-width: 640px) {
-  html.tela-de-toque {
+  html.tela-de-toque:not(:has(.layout-computador)) {
     --app-col: 100vw;
   }
 
-  html.tela-de-toque,
-  html.tela-de-toque body {
+  html.tela-de-toque:not(:has(.layout-computador)),
+  html.tela-de-toque:not(:has(.layout-computador)) body {
     background: var(--color-surface, #F6F2F5);
   }
 
-  html.tela-de-toque #root {
+  html.tela-de-toque:not(:has(.layout-computador)) #root {
     box-shadow: none;
   }
 
-  html.tela-de-toque .lista-tablet {
+  html.tela-de-toque:not(:has(.layout-computador)) .lista-tablet {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
@@ -276,7 +281,7 @@ a:hover {
   }
 
   /* `space-y-*` poe margem entre os cards; na grade quem espaca e o `gap`. */
-  html.tela-de-toque .lista-tablet > * {
+  html.tela-de-toque:not(:has(.layout-computador)) .lista-tablet > * {
     margin-top: 0 !important;
     margin-bottom: 0 !important;
   }
@@ -285,36 +290,36 @@ a:hover {
      (categoria, critico) sempre na linha de baixo do nome. Antes um nome
      comprido ("Cakeboard 20 cm") empurrava as etiquetas para baixo so naquele
      card, e ele ficava mais alto que o vizinho. */
-  html.tela-de-toque .lista-tablet.lista-altura-igual {
+  html.tela-de-toque:not(:has(.layout-computador)) .lista-tablet.lista-altura-igual {
     align-items: stretch;
   }
 
-  html.tela-de-toque .estoque-titulo > h4 {
+  html.tela-de-toque:not(:has(.layout-computador)) .estoque-titulo > h4 {
     flex-basis: 100%;
   }
 
   /* O aviso de lista vazia ocupa a linha inteira; um card sozinho nao. */
-  html.tela-de-toque .lista-tablet > .lista-vazia {
+  html.tela-de-toque:not(:has(.layout-computador)) .lista-tablet > .lista-vazia {
     grid-column: 1 / -1;
   }
 }
 
 @media (min-width: 1100px) {
-  html.tela-de-toque .lista-tablet {
+  html.tela-de-toque:not(:has(.layout-computador)) .lista-tablet {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
 /* ================================================================
-   VERSAO COMPUTADOR (a partir de 1024px, so SEM toque)
+   VERSAO COMPUTADOR (a partir de 1024px, com ou sem toque)
    ================================================================
 
    Desenho aprovado em docs/design/desktop-redesign/README.md. Quem liga e o
    hook useTelaDeComputador, que rende `.layout-computador` (menu lateral +
    conteudo) no lugar do menu de baixo. Tudo aqui depende dessa classe na
    tela: o login, a verificacao de codigo e o onboarding nao tem menu e
-   continuam na coluna de celular; o iPad (tela-de-toque) nunca recebe a
-   classe e continua como esta. */
+   continuam na coluna de celular. O iPad deitado tambem recebe a classe
+   (desde 17/11/2026); em pe, abaixo de 1024px, segue no layout de tablet. */
 
 @media (min-width: 1024px) {
   html:has(.layout-computador) {
