@@ -871,11 +871,13 @@ export const QuotePdfModal: React.FC<QuotePdfModalProps> = ({
       }
 
     } catch (err) {
-      console.error('Error generating PDF:', descreverErroDoPdf(err));
       if (err instanceof AppDesatualizadoError) {
+        // Esperado a cada publicacao: a cliente recebe o aviso e atualiza.
+        // Sem console.error, para nao virar e-mail do Sentry.
         restaurarEstilos();
         avisarAppDesatualizado();
       } else {
+        console.error('Error generating PDF:', descreverErroDoPdf(err));
         avisar('Erro ao gerar PDF. Tente novamente.', { titulo: 'Não deu para gerar o PDF' });
         restaurarEstilos();
       }
