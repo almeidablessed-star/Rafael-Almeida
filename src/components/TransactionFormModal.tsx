@@ -49,6 +49,7 @@ import {
   Camera,
   Image as ImageIcon,
   Users,
+  Pencil,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { compressImageFile } from '../utils/imageCompression';
@@ -76,6 +77,12 @@ export interface OrderItemState {
   quantity: number;
   customDescription?: string;
   customUnitValue?: string;
+  /**
+   * Valor a MAIS, por unidade, em cima do preco do tamanho da ficha (o bolo
+   * montado do jeito da cliente: morango, Nutella...). So soma — nunca desconta
+   * — e entra inteiro como reposicao. Ver getItemBreakdown.
+   */
+  acrescimo?: string;
 }
 
 /**
@@ -570,6 +577,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                 productName: ficha.name,
                 selectedTamanhoId: it.tamanhoId || ficha.tamanhos?.[0]?.id || '',
                 quantity: Number(it.quantidade) || 1,
+                acrescimo: Number(it.acrescimo) > 0 ? String(it.acrescimo).replace('.', ',') : '',
               };
             })
           );
@@ -747,7 +755,13 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
         matchingFicha.tamanhos.find((t) => t.id === item.selectedTamanhoId) ||
         matchingFicha.tamanhos[0];
 
-      const unitVenda = tamanho.preco || 0;
+      // Acrescimo: so para cima. O preco da ficha e o piso, porque abaixo dele
+      // o pedido nao cobriria os custos que ela cadastrou. Todo o valor a mais
+      // vai para reposicao (ingrediente extra); mao de obra, despesas e
+      // investimento ficam como na ficha.
+      const unitAcrescimo = Math.max(0, parseNumeroDigitado(item.acrescimo || '0') || 0);
+      const unitVendaFicha = tamanho.preco || 0;
+      const unitVenda = unitVendaFicha + unitAcrescimo;
       const unitMaodeobra = tamanho.maoDeObraCost ?? matchingFicha.maoDeObraCost;
       const unitCusto = tamanho.custoCost ?? matchingFicha.custoCost;
       const unitInvestimento = tamanho.investimentoCost ?? matchingFicha.investimentoCost;
@@ -757,14 +771,15 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       // `matchingFicha.reposicaoCost` aqui lia um campo legado no nivel da
       // ficha que o formulario de Ficha Tecnica em 3 passos parou de
       // atualizar — ficava sempre 0, mesmo com insumos de custo real.
-      const unitReposicao = (tamanho.ingredients || []).reduce(
-        (sum, ing) => sum + (ing.totalCost || 0),
-        0
-      );
+      const unitReposicao =
+        (tamanho.ingredients || []).reduce((sum, ing) => sum + (ing.totalCost || 0), 0) +
+        unitAcrescimo;
 
       return {
         name: matchingFicha.name,
         tamanhoLabel: tamanho.descricao || '',
+        unitVendaFicha,
+        unitAcrescimo,
         unitVenda,
         unitReposicao,
         unitMaodeobra,
@@ -820,6 +835,9 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
           quantidade: item.quantity,
           valorUnitario: bd.unitVenda,
           valorTotal: bd.totalVenda,
+          // Por unidade, ja somado dentro de valorUnitario. Guardado separado
+          // para a edicao reabrir o campo "+ Acrescimo" com o valor certo.
+          acrescimo: 'unitAcrescimo' in bd ? bd.unitAcrescimo : 0,
           personalizado: item.productName === 'Outro / Personalizado',
         };
       });
@@ -844,6 +862,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
           Number(i.quantidade) || 0,
           !!i.personalizado,
           i.personalizado ? Math.round((Number(i.valorUnitario) || 0) * 100) : null,
+          Math.round((Number(i.acrescimo) || 0) * 100),
         ])
       );
     if (assinatura(gravado.itens) !== assinatura(montarItensDoBreakdown())) return null;
@@ -904,6 +923,8 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
           ...item,
           productName: newProductName,
           selectedTamanhoId: matchingFicha?.tamanhos?.[0]?.id || '',
+          // Outro bolo, outra montagem: o acrescimo do anterior nao vale aqui.
+          acrescimo: '',
         };
       })
     );
@@ -926,6 +947,13 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
     setOrderItems((prev) =>
       // Valor nao fica negativo: "-50" no personalizado descontava do pedido.
       prev.map((item) => (item.id === id ? { ...item, [field]: field === 'customUnitValue' ? value.replace(/-/g, '') : value } : item))
+    );
+  };
+
+  // Sinal de menos e descartado: o acrescimo so soma.
+  const handleUpdateItemAcrescimo = (id: string, value: string) => {
+    setOrderItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, acrescimo: value.replace(/-/g, '') } : item))
     );
   };
 
@@ -1747,6 +1775,44 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                         </div>
                       )}
 
+                      {item.productName !== 'Outro / Personalizado' && item.selectedTamanhoId && (
+                        <div>
+                          <label
+                            htmlFor={`pedido-acrescimo-${item.id}`}
+                            style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '4px' }}
+                          >
+                            + Acréscimo <span style={{ fontWeight: 500 }}>(opcional{item.quantity > 1 ? ', por unidade' : ''})</span>
+                          </label>
+                          <div
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              border: '1px solid rgba(58,35,80,0.22)',
+                              borderRadius: '10px',
+                              padding: '0 10px',
+                              background: '#fff',
+                            }}
+                            className="focus-within:ring-2 focus-within:ring-[#3A2350]/25"
+                          >
+                            <span style={{ fontSize: '14px', fontWeight: 700, color: '#3A2350' }}>+ {currencySymbol}</span>
+                            <input
+                              id={`pedido-acrescimo-${item.id}`}
+                              type="text"
+                              inputMode="decimal"
+                              placeholder="0,00"
+                              value={item.acrescimo || ''}
+                              onChange={(e) => handleUpdateItemAcrescimo(item.id, e.target.value)}
+                              style={{ flex: 1, minWidth: 0, border: 'none', outline: 'none', padding: '11px 0', fontSize: '15px', fontWeight: 700, color: '#3A2350', background: 'transparent' }}
+                            />
+                            <Pencil aria-hidden="true" style={{ width: '15px', height: '15px', color: '#7A6E80', flexShrink: 0 }} />
+                          </div>
+                          <p style={{ fontSize: '12px', color: '#7A6E80', marginTop: '5px', lineHeight: 1.4 }}>
+                            Extras da montagem (morango, Nutella…). Só soma ao preço da ficha e entra como reposição.
+                          </p>
+                        </div>
+                      )}
+
                       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '12px', paddingTop: '12px', borderTop: '1px solid rgba(58,35,80,0.08)' }}>
                         <div>
                           <span style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '6px' }}>Quantidade</span>
@@ -1771,6 +1837,12 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                         <div style={{ textAlign: 'right' }}>
                           <span style={{ fontSize: '12px', color: '#7A6E80', display: 'block' }}>Subtotal do item</span>
                           <span style={{ fontSize: '18px', fontWeight: 700, color: '#3A2350' }}>{formatMoney(bd.totalVenda)}</span>
+                          {'unitAcrescimo' in bd && bd.unitAcrescimo > 0 && (
+                            <span style={{ fontSize: '11px', color: '#7A6E80', display: 'block', marginTop: '2px' }}>
+                              ficha {formatMoney(bd.unitVendaFicha)} + {formatMoney(bd.unitAcrescimo)}
+                              {item.quantity > 1 ? ` · ×${item.quantity}` : ''}
+                            </span>
+                          )}
                         </div>
                       </div>
 

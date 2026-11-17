@@ -192,6 +192,8 @@ export interface SaleBreakdownItem {
   quantidade: number;
   valorUnitario: number;
   valorTotal: number;
+  /** Valor a mais por unidade sobre o preco da ficha, ja incluido em valorUnitario. */
+  acrescimo?: number;
   personalizado: boolean;
 }
 
