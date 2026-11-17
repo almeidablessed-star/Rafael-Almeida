@@ -18,6 +18,7 @@ import { CardDeSaldo } from './CardDeSaldo';
 import { AvatarProfile } from './AvatarProfile';
 import { LogoCarulaApp } from './LogoCarulaApp';
 import { TituloDaPagina } from './TituloDaPagina';
+import { CardNovidade } from './CardNovidade';
 import { useTelaDeComputador } from '../hooks/useTelaDeComputador';
 
 import {
@@ -750,6 +751,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </button>
         </div>
 
+        {/* Novidade do app (some no "Entendi"). Ver utils/novidades.ts. */}
+        <CardNovidade pc />
+
         {/* Primeiros passos: so para conta nova, na largura toda. */}
         {checklistPrimeirosPassos}
 
@@ -1062,6 +1066,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
             background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent)',
           }} />
         </button>
+
+        {/* 2a. NOVIDADE DO APP - some no "Entendi". Ver utils/novidades.ts. */}
+        <CardNovidade />
 
         {/* 2b. CHECKLIST DE PRIMEIROS PASSOS - some sozinho quando completo */}
         {checklistPrimeirosPassos}
