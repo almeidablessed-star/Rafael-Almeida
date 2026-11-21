@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
-import { CATEGORIAS_PADRAO, ConfigCategorias, lerConfigCategorias } from '../utils/categoriasFichas';
+import { CATEGORIAS_CONTA_NOVA, CATEGORIAS_PADRAO, ConfigCategorias, lerConfigCategorias } from '../utils/categoriasFichas';
 
 /**
  * Nomes, emojis e regras do "Montar bolo" das abas de Fichas da conta logada
@@ -29,8 +29,32 @@ const carregar = (uid: string) => {
   buscando = (async () => {
     try {
       const { data, error } = await supabase.from('usuarias').select('categorias_fichas').eq('id', uid).single();
+      if (error) {
+        contaCarregada = uid;
+        publicar(CATEGORIAS_PADRAO);
+        return;
+      }
+      if (data?.categorias_fichas) {
+        contaCarregada = uid;
+        publicar(lerConfigCategorias(data.categorias_fichas));
+        return;
+      }
+      // Nada gravado ainda. Conta sem nenhuma ficha comeca com as abas do
+      // Montar bolo (CATEGORIAS_CONTA_NOVA) e isso ja fica gravado — senao, na
+      // primeira ficha cadastrada, as abas voltariam ao padrao antigo. Conta
+      // com fichas, ou se a contagem falhar, fica com o padrao de sempre.
+      const { count, error: erroContagem } = await supabase
+        .from('fichas_tecnicas')
+        .select('id', { count: 'exact', head: true })
+        .eq('usuaria_id', uid);
       contaCarregada = uid;
-      publicar(error ? CATEGORIAS_PADRAO : lerConfigCategorias(data?.categorias_fichas));
+      if (!erroContagem && count === 0) {
+        publicar(CATEGORIAS_CONTA_NOVA);
+        const { error: erroGravar } = await supabase.from('usuarias').update({ categorias_fichas: CATEGORIAS_CONTA_NOVA }).eq('id', uid);
+        if (erroGravar) console.error('Erro ao gravar as abas iniciais das fichas:', erroGravar);
+      } else {
+        publicar(CATEGORIAS_PADRAO);
+      }
     } catch {
       contaCarregada = uid;
       publicar(CATEGORIAS_PADRAO);

@@ -39,6 +39,20 @@ export const CATEGORIAS_PADRAO: ConfigCategorias = {
   kids: { nome: 'Kids Friendly', icone: '🧸', montagem: 0 },
 };
 
+/**
+ * Abas de quem comeca do zero (conta sem nenhuma ficha), combinado em 20/11/2026:
+ * ja prontas para o "Montar bolo". Quem ja tinha fichas continua com
+ * CATEGORIAS_PADRAO — os bolos inteiros dela moram na primeira aba, e chamar
+ * essa aba de "Massas" so confundiria. Ver useCategoriasFichas.
+ */
+export const CATEGORIAS_CONTA_NOVA: ConfigCategorias = {
+  bolos: { nome: 'Massas', icone: '🍰', montagem: 1 },
+  doces: { nome: 'Recheios', icone: '🍫', montagem: 3 },
+  salgados: { nome: 'Coberturas', icone: '🍓', montagem: VARIOS },
+  saudaveis: { nome: 'Salgados & Lanches', icone: '🥟', montagem: 0 },
+  kids: { nome: 'Bolos & Doces', icone: '🧁', montagem: 0 },
+};
+
 export const EMOJIS_DAS_CATEGORIAS = ['🎂', '🍰', '🧁', '🍫', '🍓', '🍒', '🥥', '🍪', '🍮', '🍩', '🥧', '🍬', '🥟', '🥐', '🥗', '🧸', '⭐'];
 
 export const NOME_MAXIMO = 24;

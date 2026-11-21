@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { calcularMontagem, tamanhosDaMontagem } from '../utils/boloMontado';
-import { lerConfigCategorias } from '../utils/categoriasFichas';
+import { CATEGORIAS_CONTA_NOVA, categoriasDeMontagem, lerConfigCategorias } from '../utils/categoriasFichas';
 import { parseNumeroDigitado } from '../utils/formatters';
 
 const ficha = (id: string, category: string, tamanhos: [string, number, number, number][]) => ({
@@ -63,5 +63,11 @@ describe('bolo montado', () => {
     expect(c.doces.montagem).toBe(0);
     expect(c.kids.nome).toBe('Kids Friendly');
     expect(lerConfigCategorias(null).bolos.nome).toBe('Bolos & Massas');
+  });
+
+  it('conta nova ja nasce com Massas, Recheios e Coberturas no Montar bolo', () => {
+    const c = lerConfigCategorias(CATEGORIAS_CONTA_NOVA);
+    expect(c).toEqual(CATEGORIAS_CONTA_NOVA);
+    expect(categoriasDeMontagem(c).map((k) => c[k].nome)).toEqual(['Massas', 'Recheios', 'Coberturas']);
   });
 });
