@@ -29,6 +29,17 @@ import { buildFichaItems, normalizeName } from '../utils/fichaMatcher';
 import { capitalizeFirstLetter } from '../utils/textCase';
 import { calculateProportionalBreakdown, derivarProporcoes, parseSaleDetail } from '../utils/financialEngine';
 import { CaixaDeProduto } from './CaixaDeProduto';
+import { MontarBoloItem } from './MontarBoloItem';
+import { useCategoriasFichas } from '../hooks/useCategoriasFichas';
+import { categoriasDeMontagem } from '../utils/categoriasFichas';
+import {
+  BOLO_MONTADO,
+  MontagemState,
+  calcularMontagem,
+  nomeDoBoloMontado,
+  passosDaMontagem,
+  tamanhosDaMontagem,
+} from '../utils/boloMontado';
 import {
   X,
   Plus,
@@ -50,6 +61,8 @@ import {
   Image as ImageIcon,
   Users,
   Pencil,
+  Cake,
+  Layers,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { compressImageFile } from '../utils/imageCompression';
@@ -83,6 +96,12 @@ export interface OrderItemState {
    * — e entra inteiro como reposicao. Ver getItemBreakdown.
    */
   acrescimo?: string;
+  /**
+   * Bolo montado pela cliente (tamanho + massa + recheios + extras, cada parte
+   * uma ficha). Presente = o item e um bolo montado e `productName` vale
+   * BOLO_MONTADO. Ver utils/boloMontado.ts.
+   */
+  montagem?: MontagemState;
 }
 
 /**
@@ -559,6 +578,40 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
               // Ficha apagada depois do pedido vira item personalizado, com o
               // nome e o valor que ficaram gravados: o item continua na tela e
               // o total do pedido nao muda. Antes ele simplesmente sumia.
+              // Bolo montado: volta com as mesmas partes marcadas. Se alguma
+              // ficha foi apagada, vira personalizado com nome e valor gravados
+              // (mesma regra do item comum logo abaixo).
+              if (it.montado && Array.isArray(it.montado.partes)) {
+                const partesVivas = it.montado.partes
+                  .map((p: any) => fichas.find((f) => String(f.id) === String(p.fichaId)))
+                  .filter(Boolean) as FichaTecnica[];
+                if (partesVivas.length === it.montado.partes.length && partesVivas.length > 0) {
+                  const escolhas: MontagemState['escolhas'] = {};
+                  partesVivas.forEach((f) => {
+                    escolhas[f.category] = [...(escolhas[f.category] || []), f.id];
+                  });
+                  return {
+                    id: String(i + 1),
+                    productName: BOLO_MONTADO,
+                    selectedTamanhoId: '',
+                    quantity: Number(it.quantidade) || 1,
+                    montagem: {
+                      tamanho: it.montado.tamanho || '',
+                      escolhas,
+                      maoDeObra: it.montado.maoDeObraEditada == null ? '' : String(it.montado.maoDeObraEditada).replace('.', ','),
+                    },
+                  };
+                }
+                const nomes = (it.montado.partes || []).map((p: any) => p.nome).join(', ');
+                return {
+                  id: String(i + 1),
+                  productName: 'Outro / Personalizado',
+                  selectedTamanhoId: '',
+                  quantity: Number(it.quantidade) || 1,
+                  customDescription: `${it.nome || BOLO_MONTADO}${nomes ? `: ${nomes}` : ''}`,
+                  customUnitValue: String(it.valorUnitario ?? 0),
+                };
+              }
               const ficha = it.personalizado
                 ? undefined
                 : fichas.find((f) => String(f.id) === String(it.fichaId));
@@ -710,6 +763,9 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   // deixa de ser chamado quando o modal fecha, e o React quebra a renderizacao
   // inteira com "Rendered more hooks than during the previous render".
   const proporcoesDoCatalogo = React.useMemo(() => derivarProporcoes(fichas), [fichas]);
+  // Abas marcadas para o "Montar bolo" (utils/categoriasFichas.ts). Tambem
+  // acima do `return null`, pelo mesmo motivo.
+  const { config: abasFichas } = useCategoriasFichas();
 
   if (!isOpen) return null;
 
@@ -725,6 +781,24 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
 
   // --- Order Items Logic ---
   const getItemBreakdown = (item: OrderItemState) => {
+    if (item.montagem) {
+      const conta = calcularMontagem(item.montagem, fichas, parseNumeroDigitado);
+      return {
+        name: nomeDoBoloMontado(item.montagem.tamanho),
+        tamanhoLabel: '',
+        conta,
+        unitVenda: conta.venda,
+        unitReposicao: conta.reposicao,
+        unitMaodeobra: conta.maoDeObra,
+        unitCusto: conta.custo,
+        unitInvestimento: conta.investimento,
+        totalVenda: conta.venda * item.quantity,
+        totalReposicao: conta.reposicao * item.quantity,
+        totalMaodeobra: conta.maoDeObra * item.quantity,
+        totalCusto: conta.custo * item.quantity,
+        totalInvestimento: conta.investimento * item.quantity,
+      };
+    }
     if (item.productName === 'Outro / Personalizado') {
       const customVenda = parseNumeroDigitado(item.customUnitValue || '0') || 0;
       // Item avulso nao tem ficha; estimamos pela media real do catalogo dela.
@@ -825,7 +899,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       .map((item) => {
         const bd = getItemBreakdown(item);
         const ficha =
-          item.productName === 'Outro / Personalizado'
+          item.productName === 'Outro / Personalizado' || item.montagem
             ? undefined
             : fichas.find((f) => normalizeName(f.name) === normalizeName(item.productName));
         return {
@@ -839,6 +913,23 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
           // para a edicao reabrir o campo "+ Acrescimo" com o valor certo.
           acrescimo: 'unitAcrescimo' in bd ? bd.unitAcrescimo : 0,
           personalizado: item.productName === 'Outro / Personalizado',
+          // Bolo montado: cada parte com o seu tamanho e valor, para a folha
+          // da cliente, a Ficha da Cozinha e a edicao remontarem o bolo.
+          ...(item.montagem && 'conta' in bd && bd.conta
+            ? {
+                montado: {
+                  tamanho: item.montagem.tamanho,
+                  maoDeObraEditada: (item.montagem.maoDeObra || '').trim() ? bd.conta.maoDeObra : null,
+                  partes: bd.conta.partes.map((p) => ({
+                    fichaId: p.fichaId,
+                    nome: p.nome,
+                    categoria: p.categoria,
+                    tamanhoId: p.tamanhoId,
+                    valor: p.venda,
+                  })),
+                },
+              }
+            : {}),
         };
       });
 
@@ -863,6 +954,13 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
           !!i.personalizado,
           i.personalizado ? Math.round((Number(i.valorUnitario) || 0) * 100) : null,
           Math.round((Number(i.acrescimo) || 0) * 100),
+          i.montado
+            ? [
+                i.montado.tamanho,
+                i.montado.maoDeObraEditada == null ? null : Math.round(Number(i.montado.maoDeObraEditada) * 100),
+                (i.montado.partes || []).map((p: any) => `${p.fichaId}:${p.tamanhoId}`),
+              ]
+            : null,
         ])
       );
     if (assinatura(gravado.itens) !== assinatura(montarItensDoBreakdown())) return null;
@@ -914,6 +1012,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
             selectedTamanhoId: '',
             customDescription: '',
             customUnitValue: '',
+            montagem: undefined,
           };
         }
 
@@ -925,6 +1024,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
           selectedTamanhoId: matchingFicha?.tamanhos?.[0]?.id || '',
           // Outro bolo, outra montagem: o acrescimo do anterior nao vale aqui.
           acrescimo: '',
+          montagem: undefined,
         };
       })
     );
@@ -955,6 +1055,29 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
     setOrderItems((prev) =>
       prev.map((item) => (item.id === id ? { ...item, acrescimo: value.replace(/-/g, '') } : item))
     );
+  };
+
+  // "Produto pronto" | "Montar bolo". Trocar de jeito comeca o item do zero:
+  // as escolhas de um nao servem para o outro.
+  const handleModoDoItem = (id: string, modo: 'pronto' | 'montar') => {
+    setOrderItems((prev) =>
+      prev.map((item) => {
+        if (item.id !== id) return item;
+        if (modo === 'pronto') return item.montagem ? { ...criarItemVazio(item.id), quantity: item.quantity } : item;
+        if (item.montagem) return item;
+        const passos = passosDaMontagem(abasFichas);
+        return {
+          ...criarItemVazio(item.id),
+          quantity: item.quantity,
+          productName: BOLO_MONTADO,
+          montagem: { tamanho: tamanhosDaMontagem(fichas, passos)[0] || '', escolhas: {}, maoDeObra: '' },
+        };
+      })
+    );
+  };
+
+  const handleUpdateMontagem = (id: string, montagem: MontagemState) => {
+    setOrderItems((prev) => prev.map((item) => (item.id === id ? { ...item, montagem } : item)));
   };
 
   // Addons Manipulators
@@ -1135,6 +1258,21 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
         return;
       }
 
+      // Bolo montado precisa de ao menos uma parte, todas no tamanho do bolo.
+      const montadoIncompleto = itemsBreakdownList.find((bd, idx) => orderItems[idx].montagem && 'conta' in bd && bd.conta && bd.conta.partes.length === 0);
+      if (montadoIncompleto) {
+        avisar('Escolha as partes do bolo montado antes de gravar.', { titulo: 'Falta montar o bolo' });
+        return;
+      }
+      const montadoSemTamanho = itemsBreakdownList.find((bd, idx) => orderItems[idx].montagem && 'conta' in bd && bd.conta && bd.conta.semOTamanho.length > 0);
+      if (montadoSemTamanho && 'conta' in montadoSemTamanho && montadoSemTamanho.conta) {
+        avisar(
+          `${montadoSemTamanho.conta.semOTamanho.join(', ')} não tem o tamanho escolhido. Troque o tamanho do bolo ou desmarque.`,
+          { titulo: 'Parte sem esse tamanho' }
+        );
+        return;
+      }
+
       if (grandTotalSalePrice <= 0) {
         avisar('Por favor, selecione ao menos um produto válido com valor maior que zero.', { titulo: 'Pedido sem valor' });
         return;
@@ -1144,6 +1282,10 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       const descParts = orderItems.map((item, idx) => {
         const bd = itemsBreakdownList[idx];
         const qtyPrefix = item.quantity > 1 ? `${item.quantity}x ` : '';
+        // "Bolo montado 20 cm: Massa branca, Chocolate, Frutas vermelhas".
+        if (item.montagem && 'conta' in bd && bd.conta) {
+          return `${qtyPrefix}${bd.name}: ${bd.conta.partes.map((p) => p.nome).join(', ')}`;
+        }
         // A descricao do tamanho vem da ficha ("15 fatias", "20 cm"). Antes o
         // sufixo era montado aqui com o numero de fatias e uma unidade chutada
         // pelo nome do produto, o que produzia "(0 cm)" em todo pedido.
@@ -1252,13 +1394,23 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
               custo: a.hasCost ? parseNumeroDigitado((a.costValue || '0')) || 0 : 0,
             })),
           },
+          // Bolo montado baixa o estoque de cada parte, no tamanho do bolo. O
+          // id da ficha vai como nome: findFichaForProduct casa por id primeiro.
           fichaItems: buildFichaItems(
-            orderItems.map(item => ({
-              productName: item.productName,
-              quantity: item.quantity,
-              customDescription: item.customDescription,
-              selectedTamanhoId: item.selectedTamanhoId,
-            })),
+            orderItems.flatMap((item, idx) => {
+              const bd = itemsBreakdownList[idx];
+              if (item.montagem && 'conta' in bd && bd.conta) {
+                return bd.conta.partes
+                  .filter((p) => p.tamanhoId)
+                  .map((p) => ({ productName: p.fichaId, quantity: item.quantity, selectedTamanhoId: p.tamanhoId || '' }));
+              }
+              return [{
+                productName: item.productName,
+                quantity: item.quantity,
+                customDescription: item.customDescription,
+                selectedTamanhoId: item.selectedTamanhoId,
+              }];
+            }),
             fichas
           ),
         },
@@ -1669,6 +1821,44 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                         )}
                       </div>
 
+                      {(item.montagem || categoriasDeMontagem(abasFichas).length > 0) && (
+                        <div role="group" aria-label="Tipo do item" style={{ display: 'flex', background: '#F1ECF2', borderRadius: '11px', padding: '3px' }}>
+                          {(['pronto', 'montar'] as const).map((modo) => {
+                            const ativo = modo === 'montar' ? !!item.montagem : !item.montagem;
+                            return (
+                              <button
+                                key={modo}
+                                type="button"
+                                aria-pressed={ativo}
+                                onClick={() => handleModoDoItem(item.id, modo)}
+                                style={{
+                                  flex: 1, minHeight: '40px', padding: '8px', borderRadius: '9px', fontSize: '13px', fontWeight: 700,
+                                  cursor: 'pointer', border: 'none', background: ativo ? '#3A2350' : 'transparent', color: ativo ? '#fff' : '#7A6E80',
+                                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                                }}
+                              >
+                                {modo === 'pronto' ? <Cake aria-hidden="true" style={{ width: 14, height: 14 }} /> : <Layers aria-hidden="true" style={{ width: 14, height: 14 }} />}
+                                {modo === 'pronto' ? 'Produto pronto' : 'Montar bolo'}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {item.montagem && 'conta' in bd && bd.conta ? (
+                        <MontarBoloItem
+                          itemId={item.id}
+                          montagem={item.montagem}
+                          conta={bd.conta}
+                          fichas={fichas}
+                          config={abasFichas}
+                          quantidade={item.quantity}
+                          formatMoney={formatMoney}
+                          currencySymbol={currencySymbol}
+                          onChange={(m) => handleUpdateMontagem(item.id, m)}
+                        />
+                      ) : (
+                      <>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                         <label style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80' }}>Escolha o produto *</label>
                         {fichas.length === 0 ? (
@@ -1813,6 +2003,9 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                         </div>
                       )}
 
+                      </>
+                      )}
+
                       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '12px', paddingTop: '12px', borderTop: '1px solid rgba(58,35,80,0.08)' }}>
                         <div>
                           <span style={{ fontSize: '12px', fontWeight: 600, color: '#7A6E80', display: 'block', marginBottom: '6px' }}>Quantidade</span>
@@ -1837,6 +2030,12 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
                         <div style={{ textAlign: 'right' }}>
                           <span style={{ fontSize: '12px', color: '#7A6E80', display: 'block' }}>Subtotal do item</span>
                           <span style={{ fontSize: '18px', fontWeight: 700, color: '#3A2350' }}>{formatMoney(bd.totalVenda)}</span>
+                          {item.montagem && 'conta' in bd && bd.conta && bd.conta.partes.length > 0 && (
+                            <span style={{ fontSize: '11px', color: '#7A6E80', display: 'block', marginTop: '2px' }}>
+                              soma de {bd.conta.partes.length === 1 ? '1 parte' : `${bd.conta.partes.length} partes`}
+                              {item.quantity > 1 ? ` · ×${item.quantity}` : ''}
+                            </span>
+                          )}
                           {'unitAcrescimo' in bd && bd.unitAcrescimo > 0 && (
                             <span style={{ fontSize: '11px', color: '#7A6E80', display: 'block', marginTop: '2px' }}>
                               ficha {formatMoney(bd.unitVendaFicha)} + {formatMoney(bd.unitAcrescimo)}

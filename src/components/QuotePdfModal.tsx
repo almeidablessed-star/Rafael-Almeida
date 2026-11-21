@@ -5,7 +5,7 @@ import { avisar, perguntar } from './AvisoApp';
 import { AppDesatualizadoError, carregarBibliotecasDoPdf, descreverErroDoPdf } from '../utils/carregarPdf';
 import { situacaoPagamento } from '../utils/situacaoPagamento';
 import { createPortal } from 'react-dom';
-import { Transaction } from '../types';
+import { FichaTecnica, Transaction } from '../types';
 import { formatDateBr, quantidadeDoInsumo } from '../utils/formatters';
 import { useCurrency } from '../context/CurrencyContext';
 import { insumosDoTamanho } from '../utils/fichaInsumos';
@@ -962,12 +962,15 @@ ${situacaoPagamento(transaction) === 'sinal' ? `✅ *Sinal/Entrada Pago:* ${form
    * texto da descricao, como sempre foi, e saem SEM preco por item: inventar
    * um rateio do total seria mostrar a cliente um numero que ninguem cobrou.
    */
-  const itensDaFolha: { nome: string; quantidade: number; valorTotal: number | null; adicional?: boolean; entrega?: boolean }[] =
+  const itensDaFolha: { nome: string; quantidade: number; valorTotal: number | null; adicional?: boolean; entrega?: boolean; partes?: string[] }[] =
     transaction.breakdown?.itens?.length
       ? transaction.breakdown.itens.map((i) => ({
           nome: i.nome,
           quantidade: Number(i.quantidade) || 1,
           valorTotal: Number(i.valorTotal) || 0,
+          // Bolo montado: uma linha so, com um preco so, e as partes em
+          // etiquetas embaixo do nome (opcao B aprovada em 20/11/2026).
+          partes: i.montado?.partes?.map((p) => p.nome),
         }))
       : itemLines.map((line) => ({ nome: line, quantidade: 1, valorTotal: null }));
 
@@ -1020,23 +1023,44 @@ ${situacaoPagamento(transaction) === 'sinal' ? `✅ *Sinal/Entrada Pago:* ${form
    * em dois itens, e ler `ficha.ingredients` mostrava sempre o primeiro tamanho.
    * Pedido anterior a essa lista continua pelo texto.
    */
+  // Bolo montado vira uma receita por parte ("Bolo montado 20 cm · Massa
+  // branca"), cada uma no tamanho dela — e o que a cozinha precisa fazer.
+  const receitaDoItem = (nomeFicha: string, ficha: FichaTecnica | undefined, tamanhoId: string | null | undefined, quantidade: number, titulo: string) => {
+    const tamanho = ficha?.tamanhos?.find((t) => t.id === tamanhoId);
+    return {
+      titulo,
+      ficha,
+      // O rendimento da ficha espelha o primeiro tamanho: nos outros, seria mentira.
+      rendimento:
+        tamanho?.rendimento?.trim() ||
+        (ficha && (!tamanho || tamanho.id === ficha.tamanhos[0]?.id) ? formatRendimentoParaExibir(ficha) : ''),
+      insumos: ficha ? insumosDoTamanho(ficha, tamanhoId || undefined) : [],
+      quantidade,
+      nomeFicha,
+    };
+  };
   const itensDaCozinha = transaction.breakdown?.itens?.length
-    ? transaction.breakdown.itens.map((item) => {
+    ? transaction.breakdown.itens.flatMap((item) => {
+        const quantidade = Number(item.quantidade) || 1;
+        const prefixo = quantidade > 1 ? `${quantidade}x ` : '';
+        if (item.montado?.partes?.length) {
+          return item.montado.partes.map((parte) =>
+            receitaDoItem(
+              parte.nome,
+              fichas.find((f) => f.id === parte.fichaId),
+              parte.tamanhoId,
+              quantidade,
+              `${prefixo}${item.nome} · ${parte.nome}`,
+            )
+          );
+        }
         const ficha = item.personalizado
           ? fichas.find((f) => normalizeName(f.name) === normalizeName(item.nome))
           : fichas.find((f) => f.id === item.fichaId) || getRecipeDetailsForItem(item.nome);
         const tamanho = ficha?.tamanhos?.find((t) => t.id === item.tamanhoId);
-        const quantidade = Number(item.quantidade) || 1;
-        return {
-          titulo: `${quantidade > 1 ? `${quantidade}x ` : ''}${item.nome}${tamanho?.descricao ? ` (${tamanho.descricao})` : ''}`,
-          ficha,
-          // O rendimento da ficha espelha o primeiro tamanho: nos outros, seria mentira.
-          rendimento:
-            tamanho?.rendimento?.trim() ||
-            (ficha && (!tamanho || tamanho.id === ficha.tamanhos[0]?.id) ? formatRendimentoParaExibir(ficha) : ''),
-          insumos: ficha ? insumosDoTamanho(ficha, item.tamanhoId || undefined) : [],
-          quantidade,
-        };
+        return [
+          receitaDoItem(item.nome, ficha, item.tamanhoId, quantidade, `${prefixo}${item.nome}${tamanho?.descricao ? ` (${tamanho.descricao})` : ''}`),
+        ];
       })
     : recipeItems.map((linha) => {
         const ficha = getRecipeDetailsForItem(linha);
@@ -1435,18 +1459,31 @@ ${situacaoPagamento(transaction) === 'sinal' ? `✅ *Sinal/Entrada Pago:* ${form
                           ? { Icone: Flower2, fundo: '#FCEFF2', cor: '#C4626F' }
                           : { Icone: Cake, fundo: '#3A2350', cor: '#F5B9C6' };
                       return (
-                        <div key={`item-${idx}-${item.nome}`} className="flex items-center gap-2.5" style={{ border: '1px solid #EDE6EF', borderRadius: '16px', padding: '8px 10px' }}>
-                          <div className="w-[30px] h-[30px] shrink-0 flex items-center justify-center" style={{ borderRadius: '10px', background: visual.fundo }}>
-                            <visual.Icone className="w-[15px] h-[15px]" style={{ color: visual.cor }} strokeWidth={2} />
-                          </div>
-                          <span className="flex-1 min-w-0 leading-tight" style={{ fontSize: '13px', fontWeight: 700 }}>
-                            {item.adicional && <span style={{ fontWeight: 600, color: '#7A6E80' }}>Adicional · </span>}
-                            {item.quantidade > 1 && `${item.quantidade}× `}{item.nome}
-                          </span>
-                          {item.valorTotal !== null && (
-                            <span className="shrink-0 tabular-nums" style={{ fontSize: '14px', fontWeight: 800, letterSpacing: '-.02em' }}>
-                              {formatCurrency(item.valorTotal)}
+                        <div key={`item-${idx}-${item.nome}`} style={{ border: '1px solid #EDE6EF', borderRadius: '16px', padding: '8px 10px' }}>
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-[30px] h-[30px] shrink-0 flex items-center justify-center" style={{ borderRadius: '10px', background: visual.fundo }}>
+                              <visual.Icone className="w-[15px] h-[15px]" style={{ color: visual.cor }} strokeWidth={2} />
+                            </div>
+                            <span className="flex-1 min-w-0 leading-tight" style={{ fontSize: '13px', fontWeight: 700 }}>
+                              {item.adicional && <span style={{ fontWeight: 600, color: '#7A6E80' }}>Adicional · </span>}
+                              {item.quantidade > 1 && `${item.quantidade}× `}{item.nome}
                             </span>
+                            {item.valorTotal !== null && (
+                              <span className="shrink-0 tabular-nums" style={{ fontSize: '14px', fontWeight: 800, letterSpacing: '-.02em' }}>
+                                {formatCurrency(item.valorTotal)}
+                              </span>
+                            )}
+                          </div>
+                          {/* Bolo montado: as partes em etiquetas, por baixo da linha
+                              inteira (do icone ate o preco), para caberem lado a lado. */}
+                          {item.partes && item.partes.length > 0 && (
+                            <div className="flex flex-wrap" style={{ gap: '4px', marginTop: '6px', paddingLeft: '40px' }}>
+                              {item.partes.map((parte, pIdx) => (
+                                <span key={`${parte}-${pIdx}`} style={{ fontSize: '10.5px', fontWeight: 700, color: '#6E3F72', background: '#F6F0F7', borderRadius: '999px', padding: '2px 8px', lineHeight: 1.35 }}>
+                                  {parte}
+                                </span>
+                              ))}
+                            </div>
                           )}
                         </div>
                       );

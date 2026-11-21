@@ -195,6 +195,15 @@ export interface SaleBreakdownItem {
   /** Valor a mais por unidade sobre o preco da ficha, ja incluido em valorUnitario. */
   acrescimo?: number;
   personalizado: boolean;
+  /** Bolo montado pela cliente (utils/boloMontado.ts): as partes, cada uma uma ficha. */
+  montado?: SaleBreakdownMontado;
+}
+
+export interface SaleBreakdownMontado {
+  tamanho: string;
+  /** Mao de obra digitada no pedido (por unidade); null = a soma das partes. */
+  maoDeObraEditada: number | null;
+  partes: { fichaId: string; nome: string; categoria: string; tamanhoId: string | null; valor: number }[];
 }
 
 /** Um adicional do pedido, como foi gravado em `breakdown.adicionaisDetalhados`. */

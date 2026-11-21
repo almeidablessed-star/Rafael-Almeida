@@ -29,6 +29,9 @@ import { CustomSelect } from './CustomSelect';
 import { CARD_COMANDA, ROTULO_COMANDA, CAMPO_TINTA, CAIXA_NUMERO, NUMERO, CHIP_UNIDADE, ETIQUETA_VALOR, FuroEtiqueta, Picote } from './estiloComanda';
 import { TituloDaPagina } from './TituloDaPagina';
 import { useTelaDeComputador } from '../hooks/useTelaDeComputador';
+import { useCategoriasFichas } from '../hooks/useCategoriasFichas';
+import { CategoriaFicha, ORDEM_DAS_CATEGORIAS } from '../utils/categoriasFichas';
+import { EditorAbasFichas } from './EditorAbasFichas';
 import {
   RENDIMENTO_UNIDADES,
   comporRendimentoParaGravar,
@@ -58,6 +61,7 @@ import {
   Clock,
   ArrowRight,
   Search,
+  Pencil,
 } from 'lucide-react';
 
 /**
@@ -134,13 +138,8 @@ interface FichasTecnicasModuleProps {
 const quantidadeParaOCampo = (quantidade: unknown) =>
   formatNumeroParaEdicao(quantidadeDoInsumo(quantidade)) as unknown as number;
 
-const CATEGORY_LABELS: Record<string, { label: string; icon: string }> = {
-  bolos: { label: 'Bolos & Massas', icon: '🎂' },
-  doces: { label: 'Doces & Sobremesas', icon: '🧁' },
-  salgados: { label: 'Salgados & Lanches', icon: '🥟' },
-  saudaveis: { label: 'Saudáveis & Fit', icon: '🥗' },
-  kids: { label: 'Kids Friendly', icon: '🧸' },
-};
+// Nome e emoji de cada aba vem da conta (`useCategoriasFichas`): cada
+// confeiteira pode renomear as 5 abas. Ver utils/categoriasFichas.ts.
 
 export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   onAddTransaction,
@@ -192,6 +191,8 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
   // (titulo + "Nova ficha" no topo, cartoes em grade) e as medidas do cartao;
   // formulario, modais e calculos sao os mesmos.
   const pc = useTelaDeComputador();
+  const { config: abasFichas, salvar: salvarAbas } = useCategoriasFichas();
+  const [editandoAbas, setEditandoAbas] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   // PREVIEW do formulario em 3 passos (Identificacao/Insumos/Preco) — ver
   // "Ficha Tecnica - Opcoes.dc.html". Reseta pra 1 sempre que o formulario
@@ -1308,13 +1309,36 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
           negativa devolve os chips ao mesmo lugar de antes. */}
       {/* No computador a fileira quebra linha em vez de rolar (cabe tudo),
           os chips crescem para 44px e os emojis saem. */}
+      {/* As abas sao da conta: nome, emoji e "Montar bolo" (EditorAbasFichas). */}
+      {editandoAbas ? (
+        <EditorAbasFichas
+          config={abasFichas}
+          contagem={Object.fromEntries(ORDEM_DAS_CATEGORIAS.map((c) => [c, fichasVisiveis.filter((f) => f.category === c).length])) as Record<CategoriaFicha, number>}
+          onSalvar={salvarAbas}
+          onFechar={() => setEditandoAbas(false)}
+        />
+      ) : (
+      <>
+      {!pc && (
+        <div className="flex items-center justify-between" style={{ marginBottom: '-8px' }}>
+          <span style={{ fontSize: '13px', fontWeight: 700, color: '#3A2350' }}>Categorias</span>
+          <button
+            type="button"
+            onClick={() => setEditandoAbas(true)}
+            className="flex items-center gap-1.5 cursor-pointer"
+            style={{ fontSize: '13px', fontWeight: 700, color: '#6E3F72', background: 'none', border: 'none', padding: pc ? '0 6px' : '6px 2px', minHeight: pc ? '44px' : undefined, fontFamily: 'inherit' }}
+          >
+            <Pencil className="w-[14px] h-[14px]" strokeWidth={2.2} /> Editar abas
+          </button>
+        </div>
+      )}
       <div
         className={pc ? 'flex flex-wrap' : 'flex gap-2 overflow-x-auto'}
         style={pc ? { gap: '10px' } : { scrollbarWidth: 'none', padding: '6px 18px 26px', margin: '-6px -18px -22px' }}
         {...(pc ? { role: 'group', 'aria-label': 'Categorias' } : {})}
       >
-        {(Object.keys(CATEGORY_LABELS) as Array<keyof typeof CATEGORY_LABELS>).map((key) => {
-          const cat = CATEGORY_LABELS[key];
+        {ORDEM_DAS_CATEGORIAS.map((key) => {
+          const cat = { label: abasFichas[key].nome, icon: abasFichas[key].icone };
           const isActive = !termoBusca && selectedCategory === key;
           const count = fichasVisiveis.filter((f) => f.category === key).length;
           return (
@@ -1346,7 +1370,19 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
             </button>
           );
         })}
+        {pc && (
+          <button
+            type="button"
+            onClick={() => setEditandoAbas(true)}
+            className="flex items-center gap-1.5 cursor-pointer"
+            style={{ fontSize: '13px', fontWeight: 700, color: '#6E3F72', background: 'none', border: 'none', padding: pc ? '0 6px' : '6px 2px', minHeight: pc ? '44px' : undefined, fontFamily: 'inherit' }}
+          >
+            <Pencil className="w-[14px] h-[14px]" strokeWidth={2.2} /> Editar abas
+          </button>
+        )}
       </div>
+      </>
+      )}
 
       {/* "Nova ficha" saiu do cabecalho (o titulo agora fica no centro, como
           nas outras abas) e virou o mesmo botao largo de "Cadastrar Nova(o)
@@ -1450,13 +1486,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
                     <CustomSelect
                       value={category}
                       onChange={(v) => setCategory(v as any)}
-                      options={[
-                        { value: 'bolos', label: '🎂 Bolos & Massas' },
-                        { value: 'doces', label: '🧁 Doces & Sobremesas' },
-                        { value: 'salgados', label: '🥟 Salgados & Lanches' },
-                        { value: 'saudaveis', label: '🥗 Saudáveis & Fit' },
-                        { value: 'kids', label: '🧸 Kids Friendly' },
-                      ]}
+                      options={ORDEM_DAS_CATEGORIAS.map((c) => ({ value: c, label: `${abasFichas[c].icone} ${abasFichas[c].nome}` }))}
                       ariaLabel="Categoria da ficha técnica"
                     />
                   </div>
@@ -2447,7 +2477,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
             <div className="font-serif-display" style={{ fontSize: '22px', color: '#3A2350' }}>
               {termoBusca
                 ? `Nenhuma ficha com “${buscaFicha.trim()}”`
-                : `Nenhuma ficha em ${CATEGORY_LABELS[selectedCategory].label} ainda`}
+                : `Nenhuma ficha em ${abasFichas[selectedCategory].nome} ainda`}
             </div>
             <div className="text-sm" style={{ color: '#7A6E80', maxWidth: '380px' }}>
               {termoBusca
@@ -3003,7 +3033,7 @@ export const FichasTecnicasModule: React.FC<FichasTecnicasModuleProps> = ({
         itemType="ficha"
         itemName={deletingFicha?.name}
         itemDetails={[
-          { label: '📂', value: deletingFicha?.category || 'N/A' },
+          { label: '📂', value: (deletingFicha?.category && abasFichas[deletingFicha.category as CategoriaFicha]?.nome) || 'N/A' },
         ]}
         onClose={() => setDeletingFicha(null)}
         onConfirmDelete={() => {

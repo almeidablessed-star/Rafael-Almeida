@@ -37,7 +37,7 @@ const COLUNAS = {
   estoque_movimentos: 'produto_id,item_nome,tipo,quantidade,unidade,transacao_id,ficha_id,descricao,created_at',
   administrative_costs:
     'agua,aluguel,energia,gas,internet,limpeza,gasolina,hora_trabalho,monthly_income_target,working_days_per_week,cmv_target_percent,investment_target_percent,profit_target_percent,migrado_de_colunas_fixas,periodo_reset',
-  usuarias: 'nome_confeitaria,moeda,telefone,endereco,instagram,foto_url',
+  usuarias: 'nome_confeitaria,moeda,telefone,endereco,instagram,foto_url,categorias_fichas',
 };
 
 /**
