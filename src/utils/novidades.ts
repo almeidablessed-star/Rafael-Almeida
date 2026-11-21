@@ -25,6 +25,19 @@ export const DIAS_DE_VALIDADE = 30;
 
 export const NOVIDADES: Novidade[] = [
   {
+    id: '2026-11-20-montar-bolo',
+    data: '2026-11-20',
+    titulo: 'Montar bolo no pedido',
+    resumo:
+      'Vende o bolo montado pela cliente? Cadastre massas, recheios e coberturas uma vez e monte o bolo no pedido, com o preço somado na hora.',
+    comoUsar: [
+      'Em Fichas, toque em "Editar abas": dê nome às abas (Massas, Recheios, Coberturas…) e escolha quantas de cada a cliente pode pedir.',
+      'Cadastre cada massa, recheio e cobertura como uma ficha, com os mesmos tamanhos em todas (ex.: 15 cm, 20 cm).',
+      'Em Lançar Pedido → Produtos, toque em "Montar bolo", escolha o tamanho e as partes.',
+      'A mão de obra vem somada das partes e pode ser trocada. No PDF, o bolo sai numa linha só, com as partes embaixo.',
+    ],
+  },
+  {
     id: '2026-11-17-acrescimo-pedido',
     data: '2026-11-17',
     titulo: 'Acréscimo no pedido',
